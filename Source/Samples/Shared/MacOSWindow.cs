@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
-namespace VulkanCore.Samples
+namespace SharpGame.Samples
 {
     public class MacOSWindow : IVulkanAppHost
     {
