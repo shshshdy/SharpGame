@@ -1,8 +1,9 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using VulkanCore;
 
-namespace VulkanCore.Samples.TexturedCube
+namespace SharpGame.Samples.TexturedCube
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct WorldViewProjection

@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace VulkanCore.Samples.TexturedCube
+namespace SharpGame.Samples.TexturedCube
 {
     public static class Program
     {

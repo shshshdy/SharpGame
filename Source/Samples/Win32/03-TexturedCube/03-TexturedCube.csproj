@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\..\..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -84,9 +84,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Engine\SharpGame.Graphics.csproj">
-      <Project>{c5f5572f-877f-4a84-a715-f8411db09ea3}</Project>
-      <Name>SharpGame.Graphics</Name>
+    <ProjectReference Include="..\..\..\Engine\SharpGame.Engine.csproj">
+      <Project>{c3223090-9891-4a35-bec9-f382c04774db}</Project>
+      <Name>SharpGame.Engine</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
