@@ -97,7 +97,7 @@ namespace SharpGame.Samples.ComputeParticles
             Interop.Write(ptr, ref global);
             _uniformBuffer.Memory.Unmap();
         }
-
+        /*
         protected override void Draw(Timer timer)
         {
             // Submit compute commands.
@@ -107,7 +107,7 @@ namespace SharpGame.Samples.ComputeParticles
 
             // Submit graphics commands.
             base.Draw(timer);
-        }
+        }*/
 
         protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
         {
@@ -219,7 +219,7 @@ namespace SharpGame.Samples.ComputeParticles
                 // Color attachment.
                 new AttachmentDescription
                 {
-                    Format = Swapchain.Format,
+                    Format = Context.Swapchain.Format,
                     Samples = SampleCounts.Count1,
                     LoadOp = AttachmentLoadOp.Clear,
                     StoreOp = AttachmentStoreOp.Store,
@@ -277,11 +277,11 @@ namespace SharpGame.Samples.ComputeParticles
 
         private ImageView[] CreateImageViews()
         {
-            var imageViews = new ImageView[SwapchainImages.Length];
-            for (int i = 0; i < SwapchainImages.Length; i++)
+            var imageViews = new ImageView[Context.SwapchainImages.Length];
+            for (int i = 0; i < Context.SwapchainImages.Length; i++)
             {
-                imageViews[i] = SwapchainImages[i].CreateView(new ImageViewCreateInfo(
-                    Swapchain.Format,
+                imageViews[i] = Context.SwapchainImages[i].CreateView(new ImageViewCreateInfo(
+                    Context.Swapchain.Format,
                     new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1)));
             }
             return imageViews;
@@ -289,13 +289,13 @@ namespace SharpGame.Samples.ComputeParticles
 
         private Framebuffer[] CreateFramebuffers()
         {
-            var framebuffers = new Framebuffer[SwapchainImages.Length];
-            for (int i = 0; i < SwapchainImages.Length; i++)
+            var framebuffers = new Framebuffer[Context.SwapchainImages.Length];
+            for (int i = 0; i < Context.SwapchainImages.Length; i++)
             {
                 framebuffers[i] = _renderPass.CreateFramebuffer(new FramebufferCreateInfo(
                     new[] { _imageViews[i], _depthStencil.View },
-                    Host.Width,
-                    Host.Height));
+                    Context.Host.Width,
+                    Context.Host.Height));
             }
             return framebuffers;
         }
@@ -344,8 +344,8 @@ namespace SharpGame.Samples.ComputeParticles
             var colorBlendState = new PipelineColorBlendStateCreateInfo(new[] { blendAttachmentState });
             var depthStencilState = new PipelineDepthStencilStateCreateInfo();
             var viewportState = new PipelineViewportStateCreateInfo(
-                new Viewport(0, 0, Host.Width, Host.Height),
-                new Rect2D(0, 0, Host.Width, Host.Height));
+                new Viewport(0, 0, Context.Host.Width, Context.Host.Height),
+                new Rect2D(0, 0, Context.Host.Width, Context.Host.Height));
             var multisampleState = new PipelineMultisampleStateCreateInfo { RasterizationSamples = SampleCounts.Count1 };
 
             var pipelineShaderStages = new[]

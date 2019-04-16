@@ -120,7 +120,7 @@ namespace SharpGame.Samples.TexturedCube
             _wvp.View = Matrix4x4.CreateLookAt(Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
             _wvp.Projection = Matrix4x4.CreatePerspectiveFieldOfView(
                 (float)Math.PI / 4,
-                (float)Host.Width / Host.Height,
+                (float)Context.Host.Width / Context.Host.Height,
                 1.0f, 1000.0f);
         }
 
@@ -177,7 +177,7 @@ namespace SharpGame.Samples.TexturedCube
                 // Color attachment.
                 new AttachmentDescription
                 {
-                    Format = Swapchain.Format,
+                    Format = Context.Swapchain.Format,
                     Samples = SampleCounts.Count1,
                     LoadOp = AttachmentLoadOp.Clear,
                     StoreOp = AttachmentStoreOp.Store,
@@ -235,11 +235,11 @@ namespace SharpGame.Samples.TexturedCube
 
         private ImageView[] CreateImageViews()
         {
-            var imageViews = new ImageView[SwapchainImages.Length];
-            for (int i = 0; i < SwapchainImages.Length; i++)
+            var imageViews = new ImageView[Context.SwapchainImages.Length];
+            for (int i = 0; i < Context.SwapchainImages.Length; i++)
             {
-                imageViews[i] = SwapchainImages[i].CreateView(new ImageViewCreateInfo(
-                    Swapchain.Format,
+                imageViews[i] = Context.SwapchainImages[i].CreateView(new ImageViewCreateInfo(
+                    Context.Swapchain.Format,
                     new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1)));
             }
             return imageViews;
@@ -247,13 +247,13 @@ namespace SharpGame.Samples.TexturedCube
 
         private Framebuffer[] CreateFramebuffers()
         {
-            var framebuffers = new Framebuffer[SwapchainImages.Length];
-            for (int i = 0; i < SwapchainImages.Length; i++)
+            var framebuffers = new Framebuffer[Context.SwapchainImages.Length];
+            for (int i = 0; i < Context.SwapchainImages.Length; i++)
             {
                 framebuffers[i] = _renderPass.CreateFramebuffer(new FramebufferCreateInfo(
                     new[] { _imageViews[i], _depthStencilBuffer.View },
-                    Host.Width,
-                    Host.Height));
+                    Context.Host.Width,
+                    Context.Host.Height));
             }
             return framebuffers;
         }
@@ -282,8 +282,8 @@ namespace SharpGame.Samples.TexturedCube
             );
             var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology.TriangleList);
             var viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
-                new Viewport(0, 0, Host.Width, Host.Height),
-                new Rect2D(0, 0, Host.Width, Host.Height));
+                new Viewport(0, 0, Context.Host.Width, Context.Host.Height),
+                new Rect2D(0, 0, Context.Host.Width, Context.Host.Height));
             var rasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
             {
                 PolygonMode = PolygonMode.Fill,
