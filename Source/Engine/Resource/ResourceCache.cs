@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using VulkanCore;
-using static SharpGame.Loader;
+
 
 namespace SharpGame
 {
-    public class ContentManager : IDisposable
+    public class ResourceCache : IDisposable
     {
         private readonly IPlatform _host;
         private readonly Graphics _ctx;
         private readonly string _contentRoot;
         private readonly Dictionary<string, IDisposable> _cachedContent = new Dictionary<string, IDisposable>();
 
-        public ContentManager(IPlatform host, Graphics ctx, string contentRoot)
+        public ResourceCache(IPlatform host, Graphics ctx, string contentRoot)
         {
             _host = host;
             _ctx = ctx;
@@ -31,13 +31,13 @@ namespace SharpGame
             Type type = typeof(T);
             if (type == typeof(ShaderModule))
             {
-                value = LoadShaderModule(_host, _ctx, path);
+                value = Shader.Load(_host, _ctx, path);
             }
             else if (type == typeof(Texture))
             {
                 if (extension.Equals(".ktx", StringComparison.OrdinalIgnoreCase))
                 {
-                    value = LoadKtxVulkanImage(_host, _ctx, path);
+                    value = Texture.Load(_host, _ctx, path);
                 }
             }
 

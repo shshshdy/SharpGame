@@ -37,7 +37,7 @@ namespace SharpGame
         public Instance Instance { get; private set; }
         protected DebugReportCallbackExt DebugReportCallback { get; private set; }
         public Graphics Context { get; private set; }
-        public ContentManager Content { get; private set; }
+        public ResourceCache Content { get; private set; }
 
         protected SurfaceKhr Surface { get; private set; }
         protected SwapchainKhr Swapchain { get; private set; }
@@ -62,7 +62,7 @@ namespace SharpGame
             DebugReportCallback        = ToDispose(CreateDebugReportCallback(debug));
             Surface                    = ToDispose(CreateSurface());
             Context                    = ToDispose(new Graphics(Instance, Surface, Host.Platform));
-            Content                    = ToDispose(new ContentManager(Host, Context, "Content"));
+            Content                    = ToDispose(new ResourceCache(Host, Context, "Content"));
             ImageAvailableSemaphore    = ToDispose(Context.Device.CreateSemaphore());
             RenderingFinishedSemaphore = ToDispose(Context.Device.CreateSemaphore());
 
