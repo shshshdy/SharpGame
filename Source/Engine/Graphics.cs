@@ -8,9 +8,9 @@ namespace SharpGame
     /// Encapsulates Vulkan <see cref="VulkanCore.PhysicalDevice"/> and <see cref="VulkanCore.Device"/> and exposes queues
     /// and a command pool for rendering tasks.
     /// </summary>
-    public class VulkanContext : IDisposable
+    public class Graphics : IDisposable
     {
-        public VulkanContext(Instance instance, SurfaceKhr surface, Platform platform)
+        public Graphics(Instance instance, SurfaceKhr surface, Platform platform)
         {
             // Find graphics and presentation capable physical device(s) that support
             // the provided surface for platform.

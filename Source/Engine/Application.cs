@@ -15,7 +15,7 @@ namespace SharpGame
         Android, Win32, MacOS
     }
 
-    public interface IVulkanAppHost : IDisposable
+    public interface IPlatform : IDisposable
     {
         IntPtr WindowHandle { get; }
         IntPtr InstanceHandle { get; }
@@ -26,17 +26,17 @@ namespace SharpGame
         Stream Open(string path);
     }
 
-    public abstract class VulkanApp : IDisposable
+    public abstract class Application : IDisposable
     {
         private readonly Stack<IDisposable> _toDisposePermanent = new Stack<IDisposable>();
         private readonly Stack<IDisposable> _toDisposeFrame = new Stack<IDisposable>();
         private bool _initializingPermanent;
 
-        public IVulkanAppHost Host { get; private set; }
+        public IPlatform Host { get; private set; }
 
         public Instance Instance { get; private set; }
         protected DebugReportCallbackExt DebugReportCallback { get; private set; }
-        public VulkanContext Context { get; private set; }
+        public Graphics Context { get; private set; }
         public ContentManager Content { get; private set; }
 
         protected SurfaceKhr Surface { get; private set; }
@@ -48,7 +48,7 @@ namespace SharpGame
         protected Semaphore ImageAvailableSemaphore { get; private set; }
         protected Semaphore RenderingFinishedSemaphore { get; private set; }
 
-        public void Initialize(IVulkanAppHost host)
+        public void Initialize(IPlatform host)
         {
             Host = host;
 #if DEBUG
@@ -61,7 +61,7 @@ namespace SharpGame
             Instance                   = ToDispose(CreateInstance(debug));
             DebugReportCallback        = ToDispose(CreateDebugReportCallback(debug));
             Surface                    = ToDispose(CreateSurface());
-            Context                    = ToDispose(new VulkanContext(Instance, Surface, Host.Platform));
+            Context                    = ToDispose(new Graphics(Instance, Surface, Host.Platform));
             Content                    = ToDispose(new ContentManager(Host, Context, "Content"));
             ImageAvailableSemaphore    = ToDispose(Context.Device.CreateSemaphore());
             RenderingFinishedSemaphore = ToDispose(Context.Device.CreateSemaphore());

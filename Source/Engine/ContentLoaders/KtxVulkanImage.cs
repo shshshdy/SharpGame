@@ -23,7 +23,7 @@ namespace SharpGame
             [32856] = Format.R8G8B8A8UNorm
         };
 
-        public static Texture LoadKtxVulkanImage(IVulkanAppHost host, VulkanContext ctx, string path)
+        public static Texture LoadKtxVulkanImage(IPlatform host, Graphics ctx, string path)
         {
             using (var reader = new BinaryReader(host.Open(path)))
             {

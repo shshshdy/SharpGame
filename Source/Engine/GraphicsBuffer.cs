@@ -26,7 +26,7 @@ namespace SharpGame
 
         public static implicit operator Buffer(GraphicsBuffer value) => value.Buffer;
 
-        public static GraphicsBuffer DynamicUniform<T>(VulkanContext ctx, int count) where T : struct
+        public static GraphicsBuffer DynamicUniform<T>(Graphics ctx, int count) where T : struct
         {
             long size = Interop.SizeOf<T>() * count;
 
@@ -43,7 +43,7 @@ namespace SharpGame
             return new GraphicsBuffer(buffer, memory, count);
         }
 
-        public static GraphicsBuffer Index(VulkanContext ctx, int[] indices)
+        public static GraphicsBuffer Index(Graphics ctx, int[] indices)
         {
             long size = indices.Length * sizeof(int);
 
@@ -88,7 +88,7 @@ namespace SharpGame
             return new GraphicsBuffer(buffer, memory, indices.Length);
         }
 
-        public static GraphicsBuffer Vertex<T>(VulkanContext ctx, T[] vertices) where T : struct
+        public static GraphicsBuffer Vertex<T>(Graphics ctx, T[] vertices) where T : struct
         {
             long size = vertices.Length * Interop.SizeOf<T>();
 
@@ -133,7 +133,7 @@ namespace SharpGame
             return new GraphicsBuffer(buffer, memory, vertices.Length);
         }
 
-        public static GraphicsBuffer Storage<T>(VulkanContext ctx, T[] data) where T : struct
+        public static GraphicsBuffer Storage<T>(Graphics ctx, T[] data) where T : struct
         {
             long size = data.Length * Interop.SizeOf<T>();
 

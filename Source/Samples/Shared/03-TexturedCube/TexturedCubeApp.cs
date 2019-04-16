@@ -13,7 +13,7 @@ namespace SharpGame.Samples.TexturedCube
         public Matrix4x4 Projection;
     }
 
-    public class TexturedCubeApp : VulkanApp
+    public class TexturedCubeApp : Application
     {
         private RenderPass _renderPass;
         private ImageView[] _imageViews;

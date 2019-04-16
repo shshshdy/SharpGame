@@ -8,12 +8,12 @@ namespace SharpGame
 {
     public class ContentManager : IDisposable
     {
-        private readonly IVulkanAppHost _host;
-        private readonly VulkanContext _ctx;
+        private readonly IPlatform _host;
+        private readonly Graphics _ctx;
         private readonly string _contentRoot;
         private readonly Dictionary<string, IDisposable> _cachedContent = new Dictionary<string, IDisposable>();
 
-        public ContentManager(IVulkanAppHost host, VulkanContext ctx, string contentRoot)
+        public ContentManager(IPlatform host, Graphics ctx, string contentRoot)
         {
             _host = host;
             _ctx = ctx;

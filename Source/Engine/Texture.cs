@@ -42,7 +42,7 @@ namespace SharpGame
 
         public static implicit operator Image(Texture value) => value.Image;
 
-        public static Texture DepthStencil(VulkanContext device, int width, int height)
+        public static Texture DepthStencil(Graphics device, int width, int height)
         {
             Format[] validFormats =
             {
@@ -87,7 +87,7 @@ namespace SharpGame
             return new Texture(image, memory, view, format);
         }
 
-        internal static Texture Texture2D(VulkanContext ctx, TextureData tex2D)
+        internal static Texture Texture2D(Graphics ctx, TextureData tex2D)
         {
             Buffer stagingBuffer = ctx.Device.CreateBuffer(
                 new BufferCreateInfo(tex2D.Mipmaps[0].Size, BufferUsages.TransferSrc));

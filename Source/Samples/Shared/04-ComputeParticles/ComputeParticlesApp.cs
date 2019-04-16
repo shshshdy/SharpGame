@@ -22,7 +22,7 @@ namespace SharpGame.Samples.ComputeParticles
         public float Padding;
     }
 
-    public class ComputeParticlesApp : VulkanApp
+    public class ComputeParticlesApp : Application
     {
         private RenderPass _renderPass;
         private ImageView[] _imageViews;

@@ -5,7 +5,7 @@ namespace SharpGame
 {
     internal static partial class Loader
     {
-        public static ShaderModule LoadShaderModule(IVulkanAppHost host, VulkanContext ctx, string path)
+        public static ShaderModule LoadShaderModule(IPlatform host, Graphics ctx, string path)
         {
             const int defaultBufferSize = 4096;
             using (Stream stream = host.Open(path))

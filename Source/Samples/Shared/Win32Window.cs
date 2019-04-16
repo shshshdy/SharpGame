@@ -6,11 +6,11 @@ using System.Windows.Forms;
 
 namespace SharpGame.Samples
 {
-    public class Win32Window : IVulkanAppHost
+    public class Win32Window : IPlatform
     {
         private readonly string _title;
         private readonly Timer _timer = new Timer();
-        private readonly VulkanApp _app;
+        private readonly Application _app;
         private Form _form;
 
         private bool _appPaused; // Is the application paused?
@@ -23,7 +23,7 @@ namespace SharpGame.Samples
         private int _frameCount;
         private float _timeElapsed;
 
-        public Win32Window(string title, VulkanApp app)
+        public Win32Window(string title, Application app)
         {
             _title = title;
             _app = app;
@@ -144,7 +144,7 @@ namespace SharpGame.Samples
             {
                 while (_running)
                 {
-                    Application.DoEvents();
+                    System.Windows.Forms.Application.DoEvents();
                     _timer.Tick();
                     if (!_appPaused)
                     {

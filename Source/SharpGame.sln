@@ -7,13 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "03-TexturedCube", "Samples\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "04-ComputeParticles", "Samples\Win32\04-ComputeParticles\04-ComputeParticles.csproj", "{F0062F92-0F14-4A31-9E93-8E2EA099525D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGame.Engine", "Engine\SharpGame.Engine.csproj", "{C3223090-9891-4A35-BEC9-F382C04774DB}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MacOS", "MacOS", "{EB852AD2-15CC-4AEB-BC20-6F9022CA394D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Windows", "Windows", "{CB8E3520-E176-481B-B63B-84A05A291018}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "03-TexturedCube", "Samples\MacOS\03-TexturedCube\03-TexturedCube.csproj", "{F619EF91-94C6-443F-89C4-0862A942204A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGame.Engine", "Engine\SharpGame.Engine.csproj", "{C3223090-9891-4A35-BEC9-F382C04774DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,20 +27,11 @@ Global
 		{C3223090-9891-4A35-BEC9-F382C04774DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3223090-9891-4A35-BEC9-F382C04774DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3223090-9891-4A35-BEC9-F382C04774DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F619EF91-94C6-443F-89C4-0862A942204A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F619EF91-94C6-443F-89C4-0862A942204A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F619EF91-94C6-443F-89C4-0862A942204A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F619EF91-94C6-443F-89C4-0862A942204A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC0780F6-BD76-45F9-80BA-1CC438DBDDE7}
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{3FC89C99-98A7-4275-BC4E-43335EE47C93} = {CB8E3520-E176-481B-B63B-84A05A291018}
-		{F0062F92-0F14-4A31-9E93-8E2EA099525D} = {CB8E3520-E176-481B-B63B-84A05A291018}
-		{F619EF91-94C6-443F-89C4-0862A942204A} = {EB852AD2-15CC-4AEB-BC20-6F9022CA394D}
 	EndGlobalSection
 EndGlobal
