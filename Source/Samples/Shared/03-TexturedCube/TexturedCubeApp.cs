@@ -24,26 +24,26 @@ namespace SharpGame.Samples.TexturedCube
         private DescriptorPool _descriptorPool;
         private DescriptorSet _descriptorSet;
 
-        private VulkanImage _depthStencilBuffer;
+        private Texture _depthStencilBuffer;
 
         private Sampler _sampler;
-        private VulkanImage _cubeTexture;
+        private Texture _cubeTexture;
 
-        private VulkanBuffer _cubeVertices;
-        private VulkanBuffer _cubeIndices;
+        private GraphicsBuffer _cubeVertices;
+        private GraphicsBuffer _cubeIndices;
 
-        private VulkanBuffer _uniformBuffer;
+        private GraphicsBuffer _uniformBuffer;
         private WorldViewProjection _wvp;
 
         protected override void InitializePermanent()
         {
             var cube = GeometricPrimitive.Box(1.0f, 1.0f, 1.0f);
 
-            _cubeTexture         = Content.Load<VulkanImage>("IndustryForgedDark512.ktx");
-            _cubeVertices        = ToDispose(VulkanBuffer.Vertex(Context, cube.Vertices));
-            _cubeIndices         = ToDispose(VulkanBuffer.Index(Context, cube.Indices));
+            _cubeTexture         = Content.Load<Texture>("IndustryForgedDark512.ktx");
+            _cubeVertices        = ToDispose(GraphicsBuffer.Vertex(Context, cube.Vertices));
+            _cubeIndices         = ToDispose(GraphicsBuffer.Index(Context, cube.Indices));
             _sampler             = ToDispose(CreateSampler());
-            _uniformBuffer       = ToDispose(VulkanBuffer.DynamicUniform<WorldViewProjection>(Context, 1));
+            _uniformBuffer       = ToDispose(GraphicsBuffer.DynamicUniform<WorldViewProjection>(Context, 1));
             _descriptorSetLayout = ToDispose(CreateDescriptorSetLayout());
             _pipelineLayout      = ToDispose(CreatePipelineLayout());
             _descriptorPool      = ToDispose(CreateDescriptorPool());
@@ -52,7 +52,7 @@ namespace SharpGame.Samples.TexturedCube
 
         protected override void InitializeFrame()
         {
-            _depthStencilBuffer = ToDispose(VulkanImage.DepthStencil(Context, Host.Width, Host.Height));
+            _depthStencilBuffer = ToDispose(Texture.DepthStencil(Context, Host.Width, Host.Height));
             _renderPass         = ToDispose(CreateRenderPass());
             _imageViews         = ToDispose(CreateImageViews());
             _framebuffers       = ToDispose(CreateFramebuffers());

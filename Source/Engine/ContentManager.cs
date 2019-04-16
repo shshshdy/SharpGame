@@ -33,7 +33,7 @@ namespace SharpGame
             {
                 value = LoadShaderModule(_host, _ctx, path);
             }
-            else if (type == typeof(VulkanImage))
+            else if (type == typeof(Texture))
             {
                 if (extension.Equals(".ktx", StringComparison.OrdinalIgnoreCase))
                 {

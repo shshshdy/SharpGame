@@ -23,7 +23,7 @@ namespace SharpGame
             [32856] = Format.R8G8B8A8UNorm
         };
 
-        public static VulkanImage LoadKtxVulkanImage(IVulkanAppHost host, VulkanContext ctx, string path)
+        public static Texture LoadKtxVulkanImage(IVulkanAppHost host, VulkanContext ctx, string path)
         {
             using (var reader = new BinaryReader(host.Open(path)))
             {
@@ -92,7 +92,7 @@ namespace SharpGame
                     //}
                 }
 
-                return VulkanImage.Texture2D(ctx, data);
+                return Texture.Texture2D(ctx, data);
             }
         }
     }

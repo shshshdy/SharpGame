@@ -29,18 +29,18 @@ namespace SharpGame.Samples.ComputeParticles
         private Framebuffer[] _framebuffers;
         private DescriptorPool _descriptorPool;
 
-        private VulkanImage _depthStencil;
+        private Texture _depthStencil;
 
         private Sampler _sampler;
-        private VulkanImage _particleDiffuseMap;
+        private Texture _particleDiffuseMap;
 
         private DescriptorSetLayout _graphicsDescriptorSetLayout;
         private PipelineLayout _graphicsPipelineLayout;
         private Pipeline _graphicsPipeline;
         private DescriptorSet _graphicsDescriptorSet;
 
-        private VulkanBuffer _storageBuffer;
-        private VulkanBuffer _uniformBuffer;
+        private GraphicsBuffer _storageBuffer;
+        private GraphicsBuffer _uniformBuffer;
         private DescriptorSetLayout _computeDescriptorSetLayout;
         private PipelineLayout _computePipelineLayout;
         private Pipeline _computePipeline;
@@ -53,13 +53,13 @@ namespace SharpGame.Samples.ComputeParticles
             _descriptorPool              = ToDispose(CreateDescriptorPool());
 
             _sampler                     = ToDispose(CreateSampler());
-            _particleDiffuseMap          = Content.Load<VulkanImage>("ParticleDiffuse.ktx");
+            _particleDiffuseMap          = Content.Load<Texture>("ParticleDiffuse.ktx");
             _graphicsDescriptorSetLayout = ToDispose(CreateGraphicsDescriptorSetLayout());
             _graphicsPipelineLayout      = ToDispose(CreateGraphicsPipelineLayout());
             _graphicsDescriptorSet       = CreateGraphicsDescriptorSet();
 
             _storageBuffer               = ToDispose(CreateStorageBuffer());
-            _uniformBuffer               = ToDispose(VulkanBuffer.DynamicUniform<UniformBufferObject>(Context, 1));
+            _uniformBuffer               = ToDispose(GraphicsBuffer.DynamicUniform<UniformBufferObject>(Context, 1));
             _computeDescriptorSetLayout  = ToDispose(CreateComputeDescriptorSetLayout());
             _computePipelineLayout       = ToDispose(CreateComputePipelineLayout());
             _computeDescriptorSet        = CreateComputeDescriptorSet();
@@ -69,7 +69,7 @@ namespace SharpGame.Samples.ComputeParticles
 
         protected override void InitializeFrame()
         {
-            _depthStencil     = ToDispose(VulkanImage.DepthStencil(Context, Host.Width, Host.Height));
+            _depthStencil     = ToDispose(Texture.DepthStencil(Context, Host.Width, Host.Height));
             _renderPass       = ToDispose(CreateRenderPass());
             _imageViews       = ToDispose(CreateImageViews());
             _framebuffers     = ToDispose(CreateFramebuffers());
@@ -153,7 +153,7 @@ namespace SharpGame.Samples.ComputeParticles
             _computeCmdBuffer.End();
         }
 
-        private VulkanBuffer CreateStorageBuffer()
+        private GraphicsBuffer CreateStorageBuffer()
         {
             var random = new Random();
             
@@ -177,7 +177,7 @@ namespace SharpGame.Samples.ComputeParticles
                 };
             }
 
-            return VulkanBuffer.Storage(Context, particles);
+            return GraphicsBuffer.Storage(Context, particles);
         }
 
         private DescriptorPool CreateDescriptorPool()

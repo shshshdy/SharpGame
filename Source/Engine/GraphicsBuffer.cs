@@ -5,15 +5,15 @@ using Buffer = VulkanCore.Buffer;
 
 namespace SharpGame
 {
-    public class VulkanBuffer : IDisposable
+    public class GraphicsBuffer : IDisposable
     {
-        private VulkanBuffer(Buffer buffer, DeviceMemory memory, int count)
+        private GraphicsBuffer(Buffer buffer, DeviceMemory memory, int count)
         {
             Buffer = buffer;
             Memory = memory;
             Count = count;
         }
-
+        
         public Buffer Buffer { get; }
         public DeviceMemory Memory { get; }
         public int Count { get; }
@@ -24,9 +24,9 @@ namespace SharpGame
             Buffer.Dispose();
         }
 
-        public static implicit operator Buffer(VulkanBuffer value) => value.Buffer;
+        public static implicit operator Buffer(GraphicsBuffer value) => value.Buffer;
 
-        public static VulkanBuffer DynamicUniform<T>(VulkanContext ctx, int count) where T : struct
+        public static GraphicsBuffer DynamicUniform<T>(VulkanContext ctx, int count) where T : struct
         {
             long size = Interop.SizeOf<T>() * count;
 
@@ -40,10 +40,10 @@ namespace SharpGame
             DeviceMemory memory = ctx.Device.AllocateMemory(new MemoryAllocateInfo(memoryRequirements.Size, memoryTypeIndex));
             buffer.BindMemory(memory);
 
-            return new VulkanBuffer(buffer, memory, count);
+            return new GraphicsBuffer(buffer, memory, count);
         }
 
-        public static VulkanBuffer Index(VulkanContext ctx, int[] indices)
+        public static GraphicsBuffer Index(VulkanContext ctx, int[] indices)
         {
             long size = indices.Length * sizeof(int);
 
@@ -85,10 +85,10 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return new VulkanBuffer(buffer, memory, indices.Length);
+            return new GraphicsBuffer(buffer, memory, indices.Length);
         }
 
-        public static VulkanBuffer Vertex<T>(VulkanContext ctx, T[] vertices) where T : struct
+        public static GraphicsBuffer Vertex<T>(VulkanContext ctx, T[] vertices) where T : struct
         {
             long size = vertices.Length * Interop.SizeOf<T>();
 
@@ -130,10 +130,10 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return new VulkanBuffer(buffer, memory, vertices.Length);
+            return new GraphicsBuffer(buffer, memory, vertices.Length);
         }
 
-        public static VulkanBuffer Storage<T>(VulkanContext ctx, T[] data) where T : struct
+        public static GraphicsBuffer Storage<T>(VulkanContext ctx, T[] data) where T : struct
         {
             long size = data.Length * Interop.SizeOf<T>();
 
@@ -175,7 +175,7 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return new VulkanBuffer(buffer, memory, data.Length);
+            return new GraphicsBuffer(buffer, memory, data.Length);
         }
     }
 }

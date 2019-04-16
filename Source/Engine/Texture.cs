@@ -18,9 +18,9 @@ namespace SharpGame
         }
     }
 
-    public class VulkanImage : IDisposable
+    public class Texture : IDisposable
     {
-        private VulkanImage(Image image, DeviceMemory memory, ImageView view, Format format)
+        private Texture(Image image, DeviceMemory memory, ImageView view, Format format)
         {
             Image = image;
             Memory = memory;
@@ -40,9 +40,9 @@ namespace SharpGame
             Image.Dispose();
         }
 
-        public static implicit operator Image(VulkanImage value) => value.Image;
+        public static implicit operator Image(Texture value) => value.Image;
 
-        public static VulkanImage DepthStencil(VulkanContext device, int width, int height)
+        public static Texture DepthStencil(VulkanContext device, int width, int height)
         {
             Format[] validFormats =
             {
@@ -84,10 +84,10 @@ namespace SharpGame
             ImageView view = image.CreateView(new ImageViewCreateInfo(format,
                 new ImageSubresourceRange(ImageAspects.Depth | ImageAspects.Stencil, 0, 1, 0, 1)));
 
-            return new VulkanImage(image, memory, view, format);
+            return new Texture(image, memory, view, format);
         }
 
-        internal static VulkanImage Texture2D(VulkanContext ctx, TextureData tex2D)
+        internal static Texture Texture2D(VulkanContext ctx, TextureData tex2D)
         {
             Buffer stagingBuffer = ctx.Device.CreateBuffer(
                 new BufferCreateInfo(tex2D.Mipmaps[0].Size, BufferUsages.TransferSrc));
@@ -176,7 +176,7 @@ namespace SharpGame
             // Create image view.
             ImageView view = image.CreateView(new ImageViewCreateInfo(tex2D.Format, subresourceRange));
 
-            return new VulkanImage(image, memory, view, tex2D.Format);
+            return new Texture(image, memory, view, tex2D.Format);
         }
     }
 }
