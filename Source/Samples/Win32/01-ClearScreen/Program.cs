@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace VulkanCore.Samples.ClearScreen
+namespace SharpGame.Samples.ClearScreen
 {
     public static class Program
     {

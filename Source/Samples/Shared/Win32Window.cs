@@ -139,21 +139,26 @@ namespace SharpGame.Samples
             _form.Update();
             _timer.Reset();
             
-            while (_running)
+            //void r()
             {
-                System.Windows.Forms.Application.DoEvents();
-                _timer.Tick();
-                if (!_appPaused)
+                while (_running)
                 {
-                    CalculateFrameRateStats();
-                    _app.Tick(_timer);
+                    System.Windows.Forms.Application.DoEvents();
+                    _timer.Tick();
+                    if (!_appPaused)
+                    {
+                        CalculateFrameRateStats();
+                        _app.Tick(_timer);
+                    }
+                    else
+                    {
+                        Thread.Sleep(100);
+                    }
                 }
-                else
-                {
-                    Thread.Sleep(100);
-                }
+
             }
 
+            //new Thread(r).Start();
         }
 
 

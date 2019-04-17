@@ -1,19 +1,20 @@
+using VulkanCore;
 using VulkanCore.Khr;
 
-namespace VulkanCore.Samples.ClearScreen
+namespace SharpGame.Samples.ClearScreen
 {
-    public class ClearScreenApp : VulkanApp
+    public class ClearScreenApp : Application
     {
         protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
         {
             var imageSubresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1);
 
             var barrierFromPresentToClear = new ImageMemoryBarrier(
-                SwapchainImages[imageIndex], imageSubresourceRange,
+                Context.SwapchainImages[imageIndex], imageSubresourceRange,
                 Accesses.None, Accesses.TransferWrite,
                 ImageLayout.Undefined, ImageLayout.TransferDstOptimal);
             var barrierFromClearToPresent = new ImageMemoryBarrier(
-                SwapchainImages[imageIndex], imageSubresourceRange,
+                Context.SwapchainImages[imageIndex], imageSubresourceRange,
                 Accesses.TransferWrite, Accesses.MemoryRead,
                 ImageLayout.TransferDstOptimal, ImageLayout.PresentSrcKhr);
 
@@ -21,7 +22,7 @@ namespace VulkanCore.Samples.ClearScreen
                 PipelineStages.Transfer, PipelineStages.Transfer,
                 imageMemoryBarriers: new[] { barrierFromPresentToClear });
             cmdBuffer.CmdClearColorImage(
-                SwapchainImages[imageIndex], 
+                Context.SwapchainImages[imageIndex], 
                 ImageLayout.TransferDstOptimal,
                 new ClearColorValue(new ColorF4(0.39f, 0.58f, 0.93f, 1.0f)),
                 imageSubresourceRange);
@@ -29,27 +30,27 @@ namespace VulkanCore.Samples.ClearScreen
                 PipelineStages.Transfer, PipelineStages.Transfer,
                 imageMemoryBarriers: new[] { barrierFromClearToPresent });
         }
-
+        /*
         protected override void Draw(Timer timer)
         {
             // Acquire an index of drawing image for this frame.
-            int imageIndex = Swapchain.AcquireNextImage(semaphore: ImageAvailableSemaphore);
+            int imageIndex = Context.Swapchain.AcquireNextImage(semaphore: Context.ImageAvailableSemaphore);
 
             // Use a fence to wait until the command buffer has finished execution before using it again
-            SubmitFences[imageIndex].Wait();
-            SubmitFences[imageIndex].Reset();
+            Context.SubmitFences[imageIndex].Wait();
+            Context.SubmitFences[imageIndex].Reset();
 
             // Submit recorded commands to graphics queue for execution.
             Context.GraphicsQueue.Submit(
-                ImageAvailableSemaphore,
+                Context.ImageAvailableSemaphore,
                 PipelineStages.Transfer,
-                CommandBuffers[imageIndex],
-                RenderingFinishedSemaphore,
-                SubmitFences[imageIndex]
+                Context.CommandBuffers[imageIndex],
+                Context.RenderingFinishedSemaphore,
+                Context.SubmitFences[imageIndex]
             );
 
             // Present the color output to screen.
-            Context.PresentQueue.PresentKhr(RenderingFinishedSemaphore, Swapchain, imageIndex);
-        }
+            Context.PresentQueue.PresentKhr(Context.RenderingFinishedSemaphore, Context.Swapchain, imageIndex);
+        }*/
     }
 }

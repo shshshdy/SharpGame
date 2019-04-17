@@ -28,8 +28,8 @@ namespace SharpGame
         public CommandBuffer[] CommandBuffers { get; private set; }
         public Fence[] SubmitFences { get; private set; }
 
-        protected Semaphore ImageAvailableSemaphore { get; private set; }
-        protected Semaphore RenderingFinishedSemaphore { get; private set; }
+        public Semaphore ImageAvailableSemaphore { get; private set; }
+        public Semaphore RenderingFinishedSemaphore { get; private set; }
 
         public void Initialize(IPlatform host)
         {

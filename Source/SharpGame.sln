@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "04-ComputeParticles", "Samp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGame.Engine", "Engine\SharpGame.Engine.csproj", "{C3223090-9891-4A35-BEC9-F382C04774DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "01-ClearScreen", "Samples\Win32\01-ClearScreen\01-ClearScreen.csproj", "{48EBB243-DCD5-4D2C-B19E-1C4574A78DCE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "02-ColoredTriangle", "Samples\Win32\02-ColoredTriangle\02-ColoredTriangle.csproj", "{7519173C-D98E-4DDB-9F8A-D1051616C61E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{C3223090-9891-4A35-BEC9-F382C04774DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3223090-9891-4A35-BEC9-F382C04774DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3223090-9891-4A35-BEC9-F382C04774DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48EBB243-DCD5-4D2C-B19E-1C4574A78DCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48EBB243-DCD5-4D2C-B19E-1C4574A78DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48EBB243-DCD5-4D2C-B19E-1C4574A78DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48EBB243-DCD5-4D2C-B19E-1C4574A78DCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7519173C-D98E-4DDB-9F8A-D1051616C61E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7519173C-D98E-4DDB-9F8A-D1051616C61E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7519173C-D98E-4DDB-9F8A-D1051616C61E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7519173C-D98E-4DDB-9F8A-D1051616C61E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

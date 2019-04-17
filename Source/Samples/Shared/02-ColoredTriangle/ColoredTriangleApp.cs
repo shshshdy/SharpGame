@@ -1,8 +1,9 @@
 using System.Threading.Tasks;
+using VulkanCore;
 
-namespace VulkanCore.Samples.ColoredTriangle
+namespace SharpGame.Samples.ColoredTriangle
 {
-    public class ColoredTriangleApp : VulkanApp
+    public class ColoredTriangleApp : Application
     {
         private RenderPass _renderPass;
         private ImageView[] _imageViews;
@@ -34,7 +35,7 @@ namespace VulkanCore.Samples.ColoredTriangle
                 new AttachmentDescription
                 {
                     Samples = SampleCounts.Count1,
-                    Format = Swapchain.Format,
+                    Format = Context.Swapchain.Format,
                     InitialLayout = ImageLayout.Undefined,
                     FinalLayout = ImageLayout.PresentSrcKhr,
                     LoadOp = AttachmentLoadOp.Clear,
@@ -50,11 +51,11 @@ namespace VulkanCore.Samples.ColoredTriangle
 
         private ImageView[] CreateImageViews()
         {
-            var imageViews = new ImageView[SwapchainImages.Length];
-            for (int i = 0; i < SwapchainImages.Length; i++)
+            var imageViews = new ImageView[Context.SwapchainImages.Length];
+            for (int i = 0; i < Context.SwapchainImages.Length; i++)
             {
-                imageViews[i] = SwapchainImages[i].CreateView(new ImageViewCreateInfo(
-                    Swapchain.Format,
+                imageViews[i] = Context.SwapchainImages[i].CreateView(new ImageViewCreateInfo(
+                    Context.Swapchain.Format,
                     new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1)));
             }
             return imageViews;
@@ -62,8 +63,8 @@ namespace VulkanCore.Samples.ColoredTriangle
 
         private Framebuffer[] CreateFramebuffers()
         {
-            var framebuffers = new Framebuffer[SwapchainImages.Length];
-            for (int i = 0; i < SwapchainImages.Length; i++)
+            var framebuffers = new Framebuffer[Context.SwapchainImages.Length];
+            for (int i = 0; i < Context.SwapchainImages.Length; i++)
             {
                 framebuffers[i] = _renderPass.CreateFramebuffer(new FramebufferCreateInfo(
                     new[] { _imageViews[i] }, 

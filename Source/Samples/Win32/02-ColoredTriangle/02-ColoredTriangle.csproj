@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\..\..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -71,19 +71,18 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Src\VulkanCore.csproj">
-      <Project>{1772437f-982d-4edf-80e8-11b826219041}</Project>
-      <Name>VulkanCore</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MiniFramework\MiniFramework.csproj">
-      <Project>{9becf614-4e1a-4053-a7a0-3a7b0bca0cf0}</Project>
-      <Name>MiniFramework</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
       <Version>4.5.1</Version>
     </PackageReference>
+    <PackageReference Include="VulkanCore">
+      <Version>1.0.0-alpha40</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Engine\SharpGame.Engine.csproj">
+      <Project>{c3223090-9891-4a35-bec9-f382c04774db}</Project>
+      <Name>SharpGame.Engine</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
