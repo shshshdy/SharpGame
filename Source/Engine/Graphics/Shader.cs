@@ -83,7 +83,7 @@ namespace SharpGame
             }
         }
 
-        public PipelineShaderStageCreateInfo[] GetPipelineShaderStageCreateInfos()
+        public PipelineShaderStageCreateInfo[] GetShaderStageCreateInfos()
         {
             var shaderStageCreateInfo = new PipelineShaderStageCreateInfo[ShaderStageInfo.Length];
             for(int i = 0; i < ShaderStageInfo.Length; i++)

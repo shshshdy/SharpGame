@@ -17,18 +17,7 @@ namespace SharpGame
 
         public Pipeline(Shader shader)
         {
-//            var graphics = Get<Graphics>();
-//             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
-//                 pipelineLayout, renderPass, 0,
-//                 shaderStageCreateInfos,
-//                 inputAssemblyStateCreateInfo,
-//                 vertexInputStateCreateInfo,
-//                 rasterizationStateCreateInfo,
-//                 viewportState: viewportStateCreateInfo,
-//                 multisampleState: multisampleStateCreateInfo,
-//                 colorBlendState: colorBlendStateCreateInfo);
-// 
-//             pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
+            Shader = shader;
 
 
         }
@@ -40,6 +29,19 @@ namespace SharpGame
 
         public VulkanCore.Pipeline GetGraphicsPipeline(View view, RenderPass renderPass)
         {
+            var graphics = Get<Graphics>();
+//             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
+//                 pipelineLayout, renderPass, 0,
+//                 Shader.GetShaderStageCreateInfos(),
+//                 inputAssemblyStateCreateInfo,
+//                 vertexInputStateCreateInfo,
+//                 Shader.RasterizationStateCreateInfo,
+//                 viewportState: viewportStateCreateInfo,
+//                 multisampleState: Shader.MultisampleStateCreateInfo,
+//                 colorBlendState: Shader.ColorBlendStateCreateInfo);
+// 
+//             pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
+
             return null;
         }
 
