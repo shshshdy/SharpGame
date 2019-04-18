@@ -8,7 +8,7 @@ namespace SharpGame
     public class Renderer : Object
     {
         private ImageView[] _imageViews;
-        private Framebuffer[] _framebuffers;
+        public Framebuffer[] _framebuffers;
 
         public Graphics Graphics => Get<Graphics>();
 
@@ -18,9 +18,8 @@ namespace SharpGame
 
         public void Initialize()
         {
-
-            _imageViews = CreateImageViews();
-            _framebuffers = CreateFramebuffers();
+            _imageViews = Graphics.ToDisposeFrame(CreateImageViews());
+            _framebuffers = Graphics.ToDisposeFrame(CreateFramebuffers());
         }
 
 

@@ -7,6 +7,11 @@ namespace SharpGame
 {
     public class Pipeline : DeviceObject
     {
+        public PipelineRasterizationStateCreateInfo RasterizationStateCreateInfo { get; set; }
+        public PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo { get; set; }
+        public PipelineColorBlendStateCreateInfo ColorBlendStateCreateInfo { get; set; }
+        public PipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo { get; set; }
+
         Shader Shader;
         ComputeShader ComputeShader;
 
@@ -14,16 +19,49 @@ namespace SharpGame
         public Pipeline()
         {
         }
-
+               
         public Pipeline(Shader shader)
         {
             Shader = shader;
+        }
 
+        public void SetDefault()
+        {
+            RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
+            {
+                PolygonMode = PolygonMode.Fill,
+                CullMode = CullModes.Back,
+                FrontFace = FrontFace.CounterClockwise,
+                LineWidth = 1.0f
+            };
+
+            MultisampleStateCreateInfo = new PipelineMultisampleStateCreateInfo
+            {
+                RasterizationSamples = SampleCounts.Count1,
+                MinSampleShading = 1.0f
+            };
+
+            ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo(new[]
+            {
+                new PipelineColorBlendAttachmentState
+                {
+                    SrcColorBlendFactor = BlendFactor.One,
+                    DstColorBlendFactor = BlendFactor.Zero,
+                    ColorBlendOp = BlendOp.Add,
+                    SrcAlphaBlendFactor = BlendFactor.One,
+                    DstAlphaBlendFactor = BlendFactor.Zero,
+                    AlphaBlendOp = BlendOp.Add,
+                    ColorWriteMask = ColorComponents.All
+                }
+            });
 
         }
 
+
         public override void Dispose()
         {
+            pipeline.Dispose();
+
             base.Dispose();
         }
 
@@ -113,7 +151,7 @@ namespace SharpGame
                 colorBlendState: colorBlendStateCreateInfo);
 
             var pipeline = new Pipeline { pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo) };
-
+            graphics.ToDisposeFrame(pipeline);
             return pipeline;
         }
     }

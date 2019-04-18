@@ -22,7 +22,6 @@ namespace SharpGame
 
         public Instance Instance { get; private set; }
         protected DebugReportCallbackExt DebugReportCallback { get; private set; }
-
         public SurfaceKhr Surface { get; private set; }
         public SwapchainKhr Swapchain { get; private set; }
         public Image[] SwapchainImages { get; private set; }
@@ -31,17 +30,6 @@ namespace SharpGame
 
         public Semaphore ImageAvailableSemaphore { get; private set; }
         public Semaphore RenderingFinishedSemaphore { get; private set; }
-
-        public PhysicalDevice PhysicalDevice { get; private set; }
-        public Device Device { get; private set; }
-        public PhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
-        public PhysicalDeviceFeatures Features { get; private set; }
-        public PhysicalDeviceProperties Properties { get; private set; }
-        public Queue GraphicsQueue { get; private set; }
-        public Queue ComputeQueue { get; private set; }
-        public Queue PresentQueue { get; private set; }
-        public CommandPool GraphicsCommandPool { get; private set; }
-        public CommandPool ComputeCommandPool { get; private set; }
 
         private RenderPass _renderPass;
         public RenderPass MainRenderPass => _renderPass;
@@ -59,8 +47,7 @@ namespace SharpGame
             Instance = CreateInstance(debug);
             DebugReportCallback = CreateDebugReportCallback(debug);
             Surface = CreateSurface();
-
-            Create(Instance, Surface, host.Platform);
+            CreateContext(Instance, Surface, Host.Platform);
 
             ImageAvailableSemaphore = ToDispose(Device.CreateSemaphore());
             RenderingFinishedSemaphore = ToDispose(Device.CreateSemaphore());
@@ -91,92 +78,6 @@ namespace SharpGame
             _renderPass = CreateRenderPass();
         }
 
-        void Create(Instance instance, SurfaceKhr surface, PlatformType platform)
-        {
-            // Find graphics and presentation capable physical device(s) that support
-            // the provided surface for platform.
-            int graphicsQueueFamilyIndex = -1;
-            int computeQueueFamilyIndex = -1;
-            int presentQueueFamilyIndex = -1;
-            foreach (PhysicalDevice physicalDevice in instance.EnumeratePhysicalDevices())
-            {
-                QueueFamilyProperties[] queueFamilyProperties = physicalDevice.GetQueueFamilyProperties();
-                for (int i = 0; i < queueFamilyProperties.Length; i++)
-                {
-                    if (queueFamilyProperties[i].QueueFlags.HasFlag(Queues.Graphics))
-                    {
-                        if (graphicsQueueFamilyIndex == -1) graphicsQueueFamilyIndex = i;
-                        if (computeQueueFamilyIndex == -1) computeQueueFamilyIndex = i;
-
-                        if (physicalDevice.GetSurfaceSupportKhr(i, surface) &&
-                            GetPresentationSupport(physicalDevice, i))
-                        {
-                            presentQueueFamilyIndex = i;
-                        }
-
-                        if (graphicsQueueFamilyIndex != -1 &&
-                            computeQueueFamilyIndex != -1 &&
-                            presentQueueFamilyIndex != -1)
-                        {
-                            PhysicalDevice = physicalDevice;
-                            break;
-                        }
-                    }
-                }
-                if (PhysicalDevice != null) break;
-            }
-
-            bool GetPresentationSupport(PhysicalDevice physicalDevice, int queueFamilyIndex)
-            {
-                switch (platform)
-                {
-                    case PlatformType.Android:
-                        return true;
-                    case PlatformType.Win32:
-                        return physicalDevice.GetWin32PresentationSupportKhr(queueFamilyIndex);
-                    case PlatformType.MacOS:
-                        return true;
-                    default:
-                        throw new NotImplementedException();
-                }
-            }
-
-            if (PhysicalDevice == null)
-                throw new InvalidOperationException("No suitable physical device found.");
-
-            // Store memory properties of the physical device.
-            MemoryProperties = PhysicalDevice.GetMemoryProperties();
-            Features = PhysicalDevice.GetFeatures();
-            Properties = PhysicalDevice.GetProperties();
-
-            // Create a logical device.
-            bool sameGraphicsAndPresent = graphicsQueueFamilyIndex == presentQueueFamilyIndex;
-            var queueCreateInfos = new DeviceQueueCreateInfo[sameGraphicsAndPresent ? 1 : 2];
-            queueCreateInfos[0] = new DeviceQueueCreateInfo(graphicsQueueFamilyIndex, 1, 1.0f);
-            if (!sameGraphicsAndPresent)
-                queueCreateInfos[1] = new DeviceQueueCreateInfo(presentQueueFamilyIndex, 1, 1.0f);
-
-            var deviceCreateInfo = new DeviceCreateInfo(
-                queueCreateInfos,
-                new[] { Constant.DeviceExtension.KhrSwapchain },
-                Features);
-            Device = PhysicalDevice.CreateDevice(deviceCreateInfo);
-
-            // Get queue(s).
-            GraphicsQueue = Device.GetQueue(graphicsQueueFamilyIndex);
-            ComputeQueue = computeQueueFamilyIndex == graphicsQueueFamilyIndex
-                ? GraphicsQueue
-                : Device.GetQueue(computeQueueFamilyIndex);
-            PresentQueue = presentQueueFamilyIndex == graphicsQueueFamilyIndex
-                ? GraphicsQueue
-                : Device.GetQueue(presentQueueFamilyIndex);
-
-            // Create command pool(s).
-            GraphicsCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex));
-            ComputeCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(computeQueueFamilyIndex));
-        }
-
-
         public RenderPass CreateRenderPass()
         {
             var subpasses = new[]
@@ -200,21 +101,23 @@ namespace SharpGame
 
             var createInfo = new RenderPassCreateInfo(subpasses, attachments);
             var rp = Device.CreateRenderPass(createInfo);
-            _toDisposeFrame.Push(rp);
+            _toDisposePermanent.Push(rp);
             return rp;
         }
 
         public void Resize()
         {
+            Device.WaitIdle();
+
             // Dispose all frame dependent resources.
             while (_toDisposeFrame.Count > 0)
                 _toDisposeFrame.Pop().Dispose();
 
+            //DeviceObject.DisposeAll();
+
             // Reset all the command buffers allocated from the pools.
             GraphicsCommandPool.Reset();
             ComputeCommandPool.Reset();
-
-            Device.WaitIdle();
 
             // Reinitialize frame dependent resources.
             Swapchain = ToDispose(CreateSwapchain());
@@ -224,7 +127,7 @@ namespace SharpGame
 
 
         public virtual void Draw(Timer timer)
-        {
+        {           
             // Acquire an index of drawing image for this frame.
             int imageIndex = Swapchain.AcquireNextImage(semaphore: ImageAvailableSemaphore);
 
@@ -243,6 +146,7 @@ namespace SharpGame
 
             // Present the color output to screen.
             PresentQueue.PresentKhr(RenderingFinishedSemaphore, Swapchain, imageIndex);
+  
         }
 
         private Instance CreateInstance(bool debug)
@@ -352,10 +256,10 @@ namespace SharpGame
             {
                 case IEnumerable<IDisposable> sequence:
                     foreach (var element in sequence)
-                        _toDisposeFrame.Push(element);
+                        _toDisposePermanent.Push(element);
                     break;
                 case IDisposable element:
-                    _toDisposeFrame.Push(element);
+                    _toDisposePermanent.Push(element);
                     break;
             }
 

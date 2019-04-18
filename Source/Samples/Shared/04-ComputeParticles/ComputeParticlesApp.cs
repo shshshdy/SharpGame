@@ -116,7 +116,7 @@ namespace SharpGame.Samples.ComputeParticles
                 new Rect2D(0, 0, Platform.Width, Platform.Height),
                 new ClearColorValue(new ColorF4(0, 0, 0, 0)),
                 new ClearDepthStencilValue(1.0f, 0)));
-            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, _graphicsPipeline);
+            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, _graphicsPipeline.pipeline);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipelineLayout, _graphicsDescriptorSet);
             cmdBuffer.CmdBindVertexBuffer(_storageBuffer);
             cmdBuffer.CmdDraw(_storageBuffer.Count);
@@ -141,7 +141,7 @@ namespace SharpGame.Samples.ComputeParticles
             // before compute starts to write to the buffer.
             _computeCmdBuffer.CmdPipelineBarrier(PipelineStages.VertexInput, PipelineStages.ComputeShader,
                 bufferMemoryBarriers: new[] { graphicsToComputeBarrier });
-            _computeCmdBuffer.CmdBindPipeline(PipelineBindPoint.Compute, _computePipeline);
+            _computeCmdBuffer.CmdBindPipeline(PipelineBindPoint.Compute, _computePipeline.pipeline);
             _computeCmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Compute, _computePipelineLayout, _computeDescriptorSet);
             _computeCmdBuffer.CmdDispatch(_storageBuffer.Count / 256, 1, 1);
             // Add memory barrier to ensure that compute shader has finished writing to the buffer.

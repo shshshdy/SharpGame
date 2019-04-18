@@ -16,45 +16,12 @@ namespace SharpGame
     {
         public ShaderStageInfo[] ShaderStageInfo { get; set; }
 
-        public PipelineRasterizationStateCreateInfo RasterizationStateCreateInfo { get; set; }
-        public PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo { get; set; }
-        public PipelineColorBlendStateCreateInfo ColorBlendStateCreateInfo { get; set; }
-        public PipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo { get; set; }
-
         public Shader()
         {            
         }
 
         public static Shader Default = new Shader
         {
-            RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
-            {
-                PolygonMode = PolygonMode.Fill,
-                CullMode = CullModes.Back,
-                FrontFace = FrontFace.CounterClockwise,
-                LineWidth = 1.0f
-            },
-
-            MultisampleStateCreateInfo = new PipelineMultisampleStateCreateInfo
-            {
-                RasterizationSamples = SampleCounts.Count1,
-                MinSampleShading = 1.0f
-            },
-
-            ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo( new[] 
-            {
-                new PipelineColorBlendAttachmentState
-                {
-                    SrcColorBlendFactor = BlendFactor.One,
-                    DstColorBlendFactor = BlendFactor.Zero,
-                    ColorBlendOp = BlendOp.Add,
-                    SrcAlphaBlendFactor = BlendFactor.One,
-                    DstAlphaBlendFactor = BlendFactor.Zero,
-                    AlphaBlendOp = BlendOp.Add,
-                    ColorWriteMask = ColorComponents.All
-                }
-            }),
-
             ShaderStageInfo = new[]
             {
                 new ShaderStageInfo

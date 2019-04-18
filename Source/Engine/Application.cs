@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using VulkanCore;
 
 
@@ -30,7 +31,8 @@ namespace SharpGame
         public Graphics Graphics { get; private set; }
         public  Renderer Renderer { get; private set; }
         public ResourceCache ResourceCache { get; private set; }
-        
+
+        bool inited = false;
         public Application()
         {
             new Context();
@@ -49,13 +51,21 @@ namespace SharpGame
             Renderer = CreateSubsystem<Renderer>();
             Renderer.Initialize();
 
-            // Allow concrete samples to initialize their resources.
-            InitializePermanent();
-            //_initializingPermanent = false;
-            InitializeFrame();
+            //new Thread(() =>
+            {
 
-            // Record commands for execution by Vulkan.
-            RecordCommandBuffers();
+                // Allow concrete samples to initialize their resources.
+                InitializePermanent();
+                //_initializingPermanent = false;
+                InitializeFrame();
+
+                // Record commands for execution by Vulkan.
+                RecordCommandBuffers();
+
+                inited = true;
+            }
+            //).Start();
+
         }
 
         /// <summary>
@@ -74,6 +84,8 @@ namespace SharpGame
         {
             Graphics.Resize();
 
+            Renderer.Initialize();
+
             InitializeFrame();
 
             // Re-record command buffers.
@@ -83,6 +95,7 @@ namespace SharpGame
         public void Tick(Timer timer)
         {
             Update(timer);
+            //if(inited)
             Graphics.Draw(timer);
         }
 
