@@ -5,6 +5,8 @@ namespace SharpGame
 {
     public class Shader
     {
+        internal ShaderModule[] shaderModules;
+
         public static ShaderModule Load(IPlatform host, Graphics ctx, string path)
         {
             const int defaultBufferSize = 4096;

@@ -10,11 +10,11 @@ namespace SharpGame.Samples.ClearScreen
             var imageSubresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1);
 
             var barrierFromPresentToClear = new ImageMemoryBarrier(
-                Context.SwapchainImages[imageIndex], imageSubresourceRange,
+                Graphics.SwapchainImages[imageIndex], imageSubresourceRange,
                 Accesses.None, Accesses.TransferWrite,
                 ImageLayout.Undefined, ImageLayout.TransferDstOptimal);
             var barrierFromClearToPresent = new ImageMemoryBarrier(
-                Context.SwapchainImages[imageIndex], imageSubresourceRange,
+                Graphics.SwapchainImages[imageIndex], imageSubresourceRange,
                 Accesses.TransferWrite, Accesses.MemoryRead,
                 ImageLayout.TransferDstOptimal, ImageLayout.PresentSrcKhr);
 
@@ -22,7 +22,7 @@ namespace SharpGame.Samples.ClearScreen
                 PipelineStages.Transfer, PipelineStages.Transfer,
                 imageMemoryBarriers: new[] { barrierFromPresentToClear });
             cmdBuffer.CmdClearColorImage(
-                Context.SwapchainImages[imageIndex], 
+                Graphics.SwapchainImages[imageIndex], 
                 ImageLayout.TransferDstOptimal,
                 new ClearColorValue(new ColorF4(0.39f, 0.58f, 0.93f, 1.0f)),
                 imageSubresourceRange);

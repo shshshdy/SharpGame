@@ -7,7 +7,7 @@ using Buffer = VulkanCore.Buffer;
 
 namespace SharpGame
 {
-    internal class TextureData
+    public class TextureData
     {
         public Mipmap[] Mipmaps { get; set; }
         public Format Format { get; set; }
@@ -30,10 +30,11 @@ namespace SharpGame
             Format = format;
         }
 
-        public Format Format { get; }
-        public Image Image { get; }
-        public ImageView View { get; }
-        public DeviceMemory Memory { get; }
+        public Format Format { get; protected set; }
+
+        public Image Image { get; protected set; }
+        public ImageView View { get; protected set; }
+        public DeviceMemory Memory { get; protected set; }
 
         public void Dispose()
         {

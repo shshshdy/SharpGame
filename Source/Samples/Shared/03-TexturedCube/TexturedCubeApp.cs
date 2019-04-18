@@ -39,11 +39,11 @@ namespace SharpGame.Samples.TexturedCube
         {
             var cube = GeometricPrimitive.Box(1.0f, 1.0f, 1.0f);
 
-            _cubeTexture         = Content.Load<Texture>("IndustryForgedDark512.ktx");
-            _cubeVertices        = ToDispose(GraphicsBuffer.Vertex(Context, cube.Vertices));
-            _cubeIndices         = ToDispose(GraphicsBuffer.Index(Context, cube.Indices));
+            _cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx");
+            _cubeVertices        = ToDispose(GraphicsBuffer.Vertex(Graphics, cube.Vertices));
+            _cubeIndices         = ToDispose(GraphicsBuffer.Index(Graphics, cube.Indices));
             _sampler             = ToDispose(CreateSampler());
-            _uniformBuffer       = ToDispose(GraphicsBuffer.DynamicUniform<WorldViewProjection>(Context, 1));
+            _uniformBuffer       = ToDispose(GraphicsBuffer.DynamicUniform<WorldViewProjection>(Graphics, 1));
             _descriptorSetLayout = ToDispose(CreateDescriptorSetLayout());
             _pipelineLayout      = ToDispose(CreatePipelineLayout());
             _descriptorPool      = ToDispose(CreateDescriptorPool());
@@ -52,11 +52,11 @@ namespace SharpGame.Samples.TexturedCube
 
         protected override void InitializeFrame()
         {
-            _depthStencilBuffer = ToDisposeFrame(Texture.DepthStencil(Context, Host.Width, Host.Height));
+            _depthStencilBuffer = ToDisposeFrame(Texture.DepthStencil(Graphics, Platform.Width, Platform.Height));
             _renderPass         = ToDisposeFrame(CreateRenderPass());
             _imageViews         = ToDisposeFrame(CreateImageViews());
             _framebuffers       = ToDisposeFrame(CreateFramebuffers());
-            _pipeline           = ToDisposeFrame(CreateGraphicsPipeline());
+            _pipeline           = CreateGraphicsPipeline();
             SetViewProjection();
         }
 
@@ -79,13 +79,13 @@ namespace SharpGame.Samples.TexturedCube
         {
             var renderPassBeginInfo = new RenderPassBeginInfo(
                 _framebuffers[imageIndex],
-                new Rect2D(0, 0, Host.Width, Host.Height),
+                new Rect2D(0, 0, Platform.Width, Platform.Height),
                 new ClearColorValue(new ColorF4(0.39f, 0.58f, 0.93f, 1.0f)),
                 new ClearDepthStencilValue(1.0f, 0));
 
             cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _pipelineLayout, _descriptorSet);
-            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, _pipeline);
+            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, _pipeline.pipeline);
             cmdBuffer.CmdBindVertexBuffer(_cubeVertices);
             cmdBuffer.CmdBindIndexBuffer(_cubeIndices);
             cmdBuffer.CmdDrawIndexed(_cubeIndices.Count);
@@ -102,16 +102,16 @@ namespace SharpGame.Samples.TexturedCube
             };
             // We also enable anisotropic filtering. Because that feature is optional, it must be
             // checked if it is supported by the device.
-            if (Context.Features.SamplerAnisotropy)
+            if (Graphics.Features.SamplerAnisotropy)
             {
                 createInfo.AnisotropyEnable = true;
-                createInfo.MaxAnisotropy = Context.Properties.Limits.MaxSamplerAnisotropy;
+                createInfo.MaxAnisotropy = Graphics.Properties.Limits.MaxSamplerAnisotropy;
             }
             else
             {
                 createInfo.MaxAnisotropy = 1.0f;
             }
-            return Context.Device.CreateSampler(createInfo);
+            return Graphics.Device.CreateSampler(createInfo);
         }
 
         private void SetViewProjection()
@@ -120,7 +120,7 @@ namespace SharpGame.Samples.TexturedCube
             _wvp.View = Matrix4x4.CreateLookAt(Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
             _wvp.Projection = Matrix4x4.CreatePerspectiveFieldOfView(
                 (float)Math.PI / 4,
-                (float)Context.Host.Width / Context.Host.Height,
+                (float)Graphics.Host.Width / Graphics.Host.Height,
                 1.0f, 1000.0f);
         }
 
@@ -138,7 +138,7 @@ namespace SharpGame.Samples.TexturedCube
                 new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
                 new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 1)
             };
-            return Context.Device.CreateDescriptorPool(
+            return Graphics.Device.CreateDescriptorPool(
                 new DescriptorPoolCreateInfo(descriptorPoolSizes.Length, descriptorPoolSizes));
         }
 
@@ -159,14 +159,14 @@ namespace SharpGame.Samples.TexturedCube
 
         private DescriptorSetLayout CreateDescriptorSetLayout()
         {
-            return Context.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
+            return Graphics.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
                 new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
                 new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)));
         }
 
         private PipelineLayout CreatePipelineLayout()
         {
-            return Context.Device.CreatePipelineLayout(new PipelineLayoutCreateInfo(
+            return Graphics.Device.CreatePipelineLayout(new PipelineLayoutCreateInfo(
                 new[] { _descriptorSetLayout }));
         }
 
@@ -177,7 +177,7 @@ namespace SharpGame.Samples.TexturedCube
                 // Color attachment.
                 new AttachmentDescription
                 {
-                    Format = Context.Swapchain.Format,
+                    Format = Graphics.Swapchain.Format,
                     Samples = SampleCounts.Count1,
                     LoadOp = AttachmentLoadOp.Clear,
                     StoreOp = AttachmentStoreOp.Store,
@@ -230,16 +230,16 @@ namespace SharpGame.Samples.TexturedCube
             };
 
             var createInfo = new RenderPassCreateInfo(subpasses, attachments, dependencies);
-            return Context.Device.CreateRenderPass(createInfo);
+            return Graphics.Device.CreateRenderPass(createInfo);
         }
 
         private ImageView[] CreateImageViews()
         {
-            var imageViews = new ImageView[Context.SwapchainImages.Length];
-            for (int i = 0; i < Context.SwapchainImages.Length; i++)
+            var imageViews = new ImageView[Graphics.SwapchainImages.Length];
+            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
             {
-                imageViews[i] = Context.SwapchainImages[i].CreateView(new ImageViewCreateInfo(
-                    Context.Swapchain.Format,
+                imageViews[i] = Graphics.SwapchainImages[i].CreateView(new ImageViewCreateInfo(
+                    Graphics.Swapchain.Format,
                     new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1)));
             }
             return imageViews;
@@ -247,24 +247,24 @@ namespace SharpGame.Samples.TexturedCube
 
         private Framebuffer[] CreateFramebuffers()
         {
-            var framebuffers = new Framebuffer[Context.SwapchainImages.Length];
-            for (int i = 0; i < Context.SwapchainImages.Length; i++)
+            var framebuffers = new Framebuffer[Graphics.SwapchainImages.Length];
+            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
             {
                 framebuffers[i] = _renderPass.CreateFramebuffer(new FramebufferCreateInfo(
                     new[] { _imageViews[i], _depthStencilBuffer.View },
-                    Context.Host.Width,
-                    Context.Host.Height));
+                    Graphics.Host.Width,
+                    Graphics.Host.Height));
             }
             return framebuffers;
         }
-
+        
         private Pipeline CreateGraphicsPipeline()
         {
             // Create shader modules. Shader modules are one of the objects required to create the
             // graphics pipeline. But after the pipeline is created, we don't need these shader
             // modules anymore, so we dispose them.
-            ShaderModule vertexShader   = Content.Load<ShaderModule>("Shader.vert.spv");
-            ShaderModule fragmentShader = Content.Load<ShaderModule>("Shader.frag.spv");
+            ShaderModule vertexShader   = ResourceCache.Load<ShaderModule>("Shader.vert.spv");
+            ShaderModule fragmentShader = ResourceCache.Load<ShaderModule>("Shader.frag.spv");
             var shaderStageCreateInfos = new[]
             {
                 new PipelineShaderStageCreateInfo(ShaderStages.Vertex, vertexShader, "main"),
@@ -282,8 +282,8 @@ namespace SharpGame.Samples.TexturedCube
             );
             var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology.TriangleList);
             var viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
-                new Viewport(0, 0, Context.Host.Width, Context.Host.Height),
-                new Rect2D(0, 0, Context.Host.Width, Context.Host.Height));
+                new Viewport(0, 0, Graphics.Host.Width, Graphics.Host.Height),
+                new Rect2D(0, 0, Graphics.Host.Width, Graphics.Host.Height));
             var rasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
             {
                 PolygonMode = PolygonMode.Fill,
@@ -337,7 +337,12 @@ namespace SharpGame.Samples.TexturedCube
                 multisampleState: multisampleStateCreateInfo,
                 depthStencilState: depthStencilCreateInfo,
                 colorBlendState: colorBlendStateCreateInfo);
-            return Context.Device.CreateGraphicsPipeline(pipelineCreateInfo);
+            var pipeline = new Pipeline
+            {
+                pipeline = Graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo)
+            };
+            return pipeline;
         }
+
     }
 }

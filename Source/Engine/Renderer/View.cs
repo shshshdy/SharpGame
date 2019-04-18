@@ -1,0 +1,44 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace SharpGame
+{
+    /*
+    public class RenderPass : IDeviceObject
+    {
+        internal VulkanCore.RenderPass renderPass;
+
+        public void Dispose()
+        {
+            renderPass?.Dispose();
+        }
+
+
+        
+        public void Recreate()
+        {
+        }
+    }*/
+    /*
+    public class FrameBuffer : IDeviceObject
+    {
+        internal VulkanCore.Framebuffer framebuffer;
+        internal VulkanCore.ImageView[] imageViews;
+
+        public void Dispose()
+        {
+        }
+
+        public void Recreate()
+        {
+        }
+
+
+    }
+*/
+    public class View
+    {
+
+    }
+}

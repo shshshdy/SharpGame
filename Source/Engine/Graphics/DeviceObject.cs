@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    interface IDeviceObject
+    interface IDeviceObject : IDisposable
     {
         void Recreate();
     }

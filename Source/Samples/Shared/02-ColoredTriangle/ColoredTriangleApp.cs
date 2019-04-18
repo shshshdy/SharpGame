@@ -13,7 +13,7 @@ namespace SharpGame.Samples.ColoredTriangle
 
         protected override void InitializePermanent()
         {
-            _renderPass     = ToDispose(CreateRenderPass());
+            _renderPass     = Graphics.CreateRenderPass();
             _pipelineLayout = ToDispose(CreatePipelineLayout());
         }
 
@@ -21,41 +21,16 @@ namespace SharpGame.Samples.ColoredTriangle
         {
             _imageViews   = ToDispose(CreateImageViews());
             _framebuffers = ToDispose(CreateFramebuffers());
-            _pipeline     = ToDispose(CreateGraphicsPipeline());
-        }
-
-        private RenderPass CreateRenderPass()
-        {
-            var subpasses = new[]
-            {
-                new SubpassDescription(new[] { new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal) })
-            };
-            var attachments = new[]
-            {
-                new AttachmentDescription
-                {
-                    Samples = SampleCounts.Count1,
-                    Format = Context.Swapchain.Format,
-                    InitialLayout = ImageLayout.Undefined,
-                    FinalLayout = ImageLayout.PresentSrcKhr,
-                    LoadOp = AttachmentLoadOp.Clear,
-                    StoreOp = AttachmentStoreOp.Store,
-                    StencilLoadOp = AttachmentLoadOp.DontCare,
-                    StencilStoreOp = AttachmentStoreOp.DontCare
-                }
-            };
-
-            var createInfo = new RenderPassCreateInfo(subpasses, attachments);
-            return Context.Device.CreateRenderPass(createInfo);
+            _pipeline     = Pipeline.Create(_pipelineLayout, _renderPass);
         }
 
         private ImageView[] CreateImageViews()
         {
-            var imageViews = new ImageView[Context.SwapchainImages.Length];
-            for (int i = 0; i < Context.SwapchainImages.Length; i++)
+            var imageViews = new ImageView[Graphics.SwapchainImages.Length];
+            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
             {
-                imageViews[i] = Context.SwapchainImages[i].CreateView(new ImageViewCreateInfo(
-                    Context.Swapchain.Format,
+                imageViews[i] = Graphics.SwapchainImages[i].CreateView(new ImageViewCreateInfo(
+                    Graphics.Swapchain.Format,
                     new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1)));
             }
             return imageViews;
@@ -63,13 +38,13 @@ namespace SharpGame.Samples.ColoredTriangle
 
         private Framebuffer[] CreateFramebuffers()
         {
-            var framebuffers = new Framebuffer[Context.SwapchainImages.Length];
-            for (int i = 0; i < Context.SwapchainImages.Length; i++)
+            var framebuffers = new Framebuffer[Graphics.SwapchainImages.Length];
+            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
             {
                 framebuffers[i] = _renderPass.CreateFramebuffer(new FramebufferCreateInfo(
                     new[] { _imageViews[i] }, 
-                    Host.Width, 
-                    Host.Height));
+                    Platform.Width, 
+                    Platform.Height));
             }
             return framebuffers;
         }
@@ -77,13 +52,13 @@ namespace SharpGame.Samples.ColoredTriangle
         private PipelineLayout CreatePipelineLayout()
         {
             var layoutCreateInfo = new PipelineLayoutCreateInfo();
-            return Context.Device.CreatePipelineLayout(layoutCreateInfo);
+            return Graphics.Device.CreatePipelineLayout(layoutCreateInfo);
         }
-
+        /*
         private Pipeline CreateGraphicsPipeline()
         {
-            ShaderModule vertexShader   = Content.Load<ShaderModule>("Shader.vert.spv");
-            ShaderModule fragmentShader = Content.Load<ShaderModule>("Shader.frag.spv");
+            ShaderModule vertexShader   = ResourceCache.Load<ShaderModule>("Shader.vert.spv");
+            ShaderModule fragmentShader = ResourceCache.Load<ShaderModule>("Shader.frag.spv");
             var shaderStageCreateInfos = new[]
             {
                 new PipelineShaderStageCreateInfo(ShaderStages.Vertex, vertexShader, "main"),
@@ -93,8 +68,8 @@ namespace SharpGame.Samples.ColoredTriangle
             var vertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo();
             var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology.TriangleList);
             var viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
-                new Viewport(0, 0, Host.Width, Host.Height),
-                new Rect2D(0, 0, Host.Width, Host.Height));
+                new Viewport(0, 0, Platform.Width, Platform.Height),
+                new Rect2D(0, 0, Platform.Width, Platform.Height));
             var rasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
             {
                 PolygonMode = PolygonMode.Fill,
@@ -129,18 +104,18 @@ namespace SharpGame.Samples.ColoredTriangle
                 viewportState: viewportStateCreateInfo,
                 multisampleState: multisampleStateCreateInfo,
                 colorBlendState: colorBlendStateCreateInfo);
-            return Context.Device.CreateGraphicsPipeline(pipelineCreateInfo);
+            return Graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
         }
-
+        */
         protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
         {
             var renderPassBeginInfo = new RenderPassBeginInfo(
                 _framebuffers[imageIndex],
-                new Rect2D(Offset2D.Zero, new Extent2D(Host.Width, Host.Height)),
+                new Rect2D(Offset2D.Zero, new Extent2D(Platform.Width, Platform.Height)),
                 new ClearColorValue(new ColorF4(0.39f, 0.58f, 0.93f, 1.0f)));
 
             cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
-            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, _pipeline);
+            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, _pipeline.pipeline);
             cmdBuffer.CmdDraw(3);
             cmdBuffer.CmdEndRenderPass();
         }

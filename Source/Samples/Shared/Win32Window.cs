@@ -33,7 +33,7 @@ namespace SharpGame.Samples
         public IntPtr InstanceHandle => Process.GetCurrentProcess().Handle;
         public int Width { get; private set; } = 1280;
         public int Height { get; private set; } = 720;
-        public Platform Platform => Platform.Win32;
+        public PlatformType Platform => PlatformType.Win32;
 
         public Stream Open(string path) => new FileStream(path, FileMode.Open, FileAccess.Read);
 

@@ -10,7 +10,7 @@ using VulkanCore.Mvk;
 namespace SharpGame
 {
 
-    public partial class Graphics : IDisposable
+    public partial class Graphics : Object
     {
         private readonly Stack<IDisposable> _toDisposePermanent = new Stack<IDisposable>();
         private readonly Stack<IDisposable> _toDisposeFrame = new Stack<IDisposable>();
@@ -18,6 +18,9 @@ namespace SharpGame
         private bool _initializingPermanent;
 
         public IPlatform Host { get; private set; }
+
+        public int Width => Host.Width;
+        public int Height => Host.Height;
 
         public Instance Instance { get; private set; }
         protected DebugReportCallbackExt DebugReportCallback { get; private set; }
@@ -61,7 +64,7 @@ namespace SharpGame
             ImageAvailableSemaphore = ToDispose(Device.CreateSemaphore());
             RenderingFinishedSemaphore = ToDispose(Device.CreateSemaphore());
 
-            if (host.Platform == Platform.MacOS)
+            if (host.Platform == PlatformType.MacOS)
             {
                 //Setup MoltenVK specific device configuration.
                 MVKDeviceConfiguration deviceConfig = Device.GetMVKDeviceConfiguration();
@@ -88,7 +91,7 @@ namespace SharpGame
 
         }
 
-        void Create(Instance instance, SurfaceKhr surface, Platform platform)
+        void Create(Instance instance, SurfaceKhr surface, PlatformType platform)
         {
             // Find graphics and presentation capable physical device(s) that support
             // the provided surface for platform.
@@ -127,11 +130,11 @@ namespace SharpGame
             {
                 switch (platform)
                 {
-                    case Platform.Android:
+                    case PlatformType.Android:
                         return true;
-                    case Platform.Win32:
+                    case PlatformType.Win32:
                         return physicalDevice.GetWin32PresentationSupportKhr(queueFamilyIndex);
-                    case Platform.MacOS:
+                    case PlatformType.MacOS:
                         return true;
                     default:
                         throw new NotImplementedException();
@@ -171,6 +174,34 @@ namespace SharpGame
             // Create command pool(s).
             GraphicsCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex));
             ComputeCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(computeQueueFamilyIndex));
+        }
+
+
+        public RenderPass CreateRenderPass()
+        {
+            var subpasses = new[]
+            {
+                new SubpassDescription(new[] { new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal) })
+            };
+            var attachments = new[]
+            {
+                new AttachmentDescription
+                {
+                    Samples = SampleCounts.Count1,
+                    Format = Swapchain.Format,
+                    InitialLayout = ImageLayout.Undefined,
+                    FinalLayout = ImageLayout.PresentSrcKhr,
+                    LoadOp = AttachmentLoadOp.Clear,
+                    StoreOp = AttachmentStoreOp.Store,
+                    StencilLoadOp = AttachmentLoadOp.DontCare,
+                    StencilStoreOp = AttachmentStoreOp.DontCare
+                }
+            };
+
+            var createInfo = new RenderPassCreateInfo(subpasses, attachments);
+            var rp = Device.CreateRenderPass(createInfo);
+            _toDisposeFrame.Push(rp);
+            return rp;
         }
 
         public void Resize()
@@ -220,13 +251,13 @@ namespace SharpGame
             string surfaceExtension;
             switch (Host.Platform)
             {
-                case Platform.Android:
+                case PlatformType.Android:
                     surfaceExtension = Constant.InstanceExtension.KhrAndroidSurface;
                     break;
-                case Platform.Win32:
+                case PlatformType.Win32:
                     surfaceExtension = Constant.InstanceExtension.KhrWin32Surface;
                     break;
-                case Platform.MacOS:
+                case PlatformType.MacOS:
                     surfaceExtension = Constant.InstanceExtension.MvkMacOSSurface;
                     break;
                 default:
@@ -236,7 +267,7 @@ namespace SharpGame
             var createInfo = new InstanceCreateInfo();
 
             //Currently MoltenVK (used for MacOS) doesn't support the debug layer.
-            if (debug && Host.Platform != Platform.MacOS)
+            if (debug && Host.Platform != PlatformType.MacOS)
             {
                 var availableLayers = Instance.EnumerateLayerProperties();
                 createInfo.EnabledLayerNames = new[] { Constant.InstanceLayer.LunarGStandardValidation }
@@ -263,7 +294,7 @@ namespace SharpGame
         private DebugReportCallbackExt CreateDebugReportCallback(bool debug)
         {
             //Currently MoltenVK (used for MacOS) doesn't support the debug layer.
-            if (!debug || Host.Platform == Platform.MacOS) return null;
+            if (!debug || Host.Platform == PlatformType.MacOS) return null;
 
             // Attach debug callback.
             var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
@@ -282,11 +313,11 @@ namespace SharpGame
             // Create surface.
             switch (Host.Platform)
             {
-                case Platform.Android:
+                case PlatformType.Android:
                     return Instance.CreateAndroidSurfaceKhr(new AndroidSurfaceCreateInfoKhr(Host.WindowHandle));
-                case Platform.Win32:
+                case PlatformType.Win32:
                     return Instance.CreateWin32SurfaceKhr(new Win32SurfaceCreateInfoKhr(Host.InstanceHandle, Host.WindowHandle));
-                case Platform.MacOS:
+                case PlatformType.MacOS:
                     return Instance.CreateMacOSSurfaceMvk(new MacOSSurfaceCreateInfoMvk(Host.WindowHandle));
                 default:
                     throw new NotImplementedException();
@@ -317,38 +348,37 @@ namespace SharpGame
 
         public T ToDispose<T>(T disposable)
         {
-            var toDispose = _initializingPermanent ? _toDisposePermanent : _toDisposeFrame;
             switch (disposable)
             {
                 case IEnumerable<IDisposable> sequence:
                     foreach (var element in sequence)
-                        toDispose.Push(element);
+                        _toDisposeFrame.Push(element);
                     break;
                 case IDisposable element:
-                    toDispose.Push(element);
+                    _toDisposeFrame.Push(element);
                     break;
             }
+
             return disposable;
         }
 
         public T ToDisposeFrame<T>(T disposable)
         {
-            var toDispose = _toDisposeFrame;
             switch (disposable)
             {
                 case IEnumerable<IDisposable> sequence:
                     foreach (var element in sequence)
-                        toDispose.Push(element);
+                        _toDisposeFrame.Push(element);
                     break;
                 case IDisposable element:
-                    toDispose.Push(element);
+                    _toDisposeFrame.Push(element);
                     break;
             }
             return disposable;
         }
 
 
-        public virtual void Dispose()
+        public override void Dispose()
         {
             Device.WaitIdle();
 
