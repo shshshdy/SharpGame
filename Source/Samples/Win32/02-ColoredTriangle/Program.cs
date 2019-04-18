@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace VulkanCore.Samples.ColoredTriangle
+namespace SharpGame.Samples.ColoredTriangle
 {
     public static class Program
     {
