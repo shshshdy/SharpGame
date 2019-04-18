@@ -15,7 +15,7 @@ namespace SharpGame.Samples.ColoredTriangle
 
         protected override void InitializeFrame()
         {
-            _pipeline     = Pipeline.Create(_pipelineLayout);
+            _pipeline     = Renderer.CreateGraphicsPipeline(_pipelineLayout);
         }
 
         private PipelineLayout CreatePipelineLayout()

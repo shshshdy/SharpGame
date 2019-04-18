@@ -20,7 +20,7 @@ namespace SharpGame
         }
     }
 
-    public class Texture : IDisposable
+    public class Texture : Object
     {
         private Texture(Image image, DeviceMemory memory, ImageView view, Format format)
         {
@@ -36,7 +36,7 @@ namespace SharpGame
         public ImageView View { get; protected set; }
         public DeviceMemory Memory { get; protected set; }
 
-        public void Dispose()
+        public override void Dispose()
         {
             View.Dispose();
             Memory.Dispose();
@@ -45,8 +45,10 @@ namespace SharpGame
 
         public static implicit operator Image(Texture value) => value.Image;
 
-        public static Texture DepthStencil(Graphics device, int width, int height)
+        public static Texture DepthStencil(int width, int height)
         {
+            var graphics = Get<Graphics>();
+
             Format[] validFormats =
             {
                 Format.D32SFloatS8UInt,
@@ -59,7 +61,7 @@ namespace SharpGame
             Format? potentialFormat = validFormats.FirstOrDefault(
                 validFormat =>
                 {
-                    FormatProperties formatProps = device.PhysicalDevice.GetFormatProperties(validFormat);
+                    FormatProperties formatProps = graphics.PhysicalDevice.GetFormatProperties(validFormat);
                     return (formatProps.OptimalTilingFeatures & FormatFeatures.DepthStencilAttachment) > 0;
                 });
 
@@ -68,7 +70,7 @@ namespace SharpGame
 
             Format format = potentialFormat.Value;
 
-            Image image = device.Device.CreateImage(new ImageCreateInfo
+            Image image = graphics.Device.CreateImage(new ImageCreateInfo
             {
                 ImageType = ImageType.Image2D,
                 Format = format,
@@ -80,9 +82,9 @@ namespace SharpGame
                 Usage = ImageUsages.DepthStencilAttachment | ImageUsages.TransferSrc
             });
             MemoryRequirements memReq = image.GetMemoryRequirements();
-            int heapIndex = device.MemoryProperties.MemoryTypes.IndexOf(
+            int heapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
                 memReq.MemoryTypeBits, MemoryProperties.DeviceLocal);
-            DeviceMemory memory = device.Device.AllocateMemory(new MemoryAllocateInfo(memReq.Size, heapIndex));
+            DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(memReq.Size, heapIndex));
             image.BindMemory(memory);
             ImageView view = image.CreateView(new ImageViewCreateInfo(format,
                 new ImageSubresourceRange(ImageAspects.Depth | ImageAspects.Stencil, 0, 1, 0, 1)));

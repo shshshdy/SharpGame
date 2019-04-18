@@ -15,16 +15,11 @@ namespace SharpGame.Samples.TexturedCube
 
     public class TexturedCubeApp : Application
     {
-        private RenderPass _renderPass;
-        private ImageView[] _imageViews;
-        private Framebuffer[] _framebuffers;
         private PipelineLayout _pipelineLayout;
         private Pipeline _pipeline;
         private DescriptorSetLayout _descriptorSetLayout;
         private DescriptorPool _descriptorPool;
-        private DescriptorSet _descriptorSet;
-
-        private Texture _depthStencilBuffer;
+        private DescriptorSet _descriptorSet;        
 
         private Sampler _sampler;
         private Texture _cubeTexture;
@@ -52,11 +47,8 @@ namespace SharpGame.Samples.TexturedCube
 
         protected override void InitializeFrame()
         {
-            _depthStencilBuffer = ToDisposeFrame(Texture.DepthStencil(Graphics, Platform.Width, Platform.Height));
-            _renderPass         = ToDisposeFrame(CreateRenderPass());
-            _imageViews         = ToDisposeFrame(CreateImageViews());
-            _framebuffers       = ToDisposeFrame(CreateFramebuffers());
             _pipeline           = CreateGraphicsPipeline();
+
             SetViewProjection();
         }
 
@@ -78,7 +70,7 @@ namespace SharpGame.Samples.TexturedCube
         protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
         {
             var renderPassBeginInfo = new RenderPassBeginInfo(
-                _framebuffers[imageIndex],
+                Renderer._framebuffers[imageIndex],
                 new Rect2D(0, 0, Platform.Width, Platform.Height),
                 new ClearColorValue(new ColorF4(0.39f, 0.58f, 0.93f, 1.0f)),
                 new ClearDepthStencilValue(1.0f, 0));
@@ -170,94 +162,6 @@ namespace SharpGame.Samples.TexturedCube
                 new[] { _descriptorSetLayout }));
         }
 
-        private RenderPass CreateRenderPass()
-        {
-            var attachments = new[]
-            {
-                // Color attachment.
-                new AttachmentDescription
-                {
-                    Format = Graphics.Swapchain.Format,
-                    Samples = SampleCounts.Count1,
-                    LoadOp = AttachmentLoadOp.Clear,
-                    StoreOp = AttachmentStoreOp.Store,
-                    StencilLoadOp = AttachmentLoadOp.DontCare,
-                    StencilStoreOp = AttachmentStoreOp.DontCare,
-                    InitialLayout = ImageLayout.Undefined,
-                    FinalLayout = ImageLayout.PresentSrcKhr
-                },
-                // Depth attachment.
-                new AttachmentDescription
-                {
-                    Format = _depthStencilBuffer.Format,
-                    Samples = SampleCounts.Count1,
-                    LoadOp = AttachmentLoadOp.Clear,
-                    StoreOp = AttachmentStoreOp.DontCare,
-                    StencilLoadOp = AttachmentLoadOp.DontCare,
-                    StencilStoreOp = AttachmentStoreOp.DontCare,
-                    InitialLayout = ImageLayout.Undefined,
-                    FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
-                }
-            };
-            var subpasses = new[]
-            {
-                new SubpassDescription(
-                    new[] { new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal) },
-                    new AttachmentReference(1, ImageLayout.DepthStencilAttachmentOptimal))
-            };
-            var dependencies = new[]
-            {
-                new SubpassDependency
-                {
-                    SrcSubpass = Constant.SubpassExternal,
-                    DstSubpass = 0,
-                    SrcStageMask = PipelineStages.BottomOfPipe,
-                    DstStageMask = PipelineStages.ColorAttachmentOutput,
-                    SrcAccessMask = Accesses.MemoryRead,
-                    DstAccessMask = Accesses.ColorAttachmentRead | Accesses.ColorAttachmentWrite,
-                    DependencyFlags = Dependencies.ByRegion
-                },
-                new SubpassDependency
-                {
-                    SrcSubpass = 0,
-                    DstSubpass = Constant.SubpassExternal,
-                    SrcStageMask = PipelineStages.ColorAttachmentOutput,
-                    DstStageMask = PipelineStages.BottomOfPipe,
-                    SrcAccessMask = Accesses.ColorAttachmentRead | Accesses.ColorAttachmentWrite,
-                    DstAccessMask = Accesses.MemoryRead,
-                    DependencyFlags = Dependencies.ByRegion
-                }
-            };
-
-            var createInfo = new RenderPassCreateInfo(subpasses, attachments, dependencies);
-            return Graphics.Device.CreateRenderPass(createInfo);
-        }
-
-        private ImageView[] CreateImageViews()
-        {
-            var imageViews = new ImageView[Graphics.SwapchainImages.Length];
-            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
-            {
-                imageViews[i] = Graphics.SwapchainImages[i].CreateView(new ImageViewCreateInfo(
-                    Graphics.Swapchain.Format,
-                    new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1)));
-            }
-            return imageViews;
-        }
-
-        private Framebuffer[] CreateFramebuffers()
-        {
-            var framebuffers = new Framebuffer[Graphics.SwapchainImages.Length];
-            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
-            {
-                framebuffers[i] = _renderPass.CreateFramebuffer(new FramebufferCreateInfo(
-                    new[] { _imageViews[i], _depthStencilBuffer.View },
-                    Graphics.Host.Width,
-                    Graphics.Host.Height));
-            }
-            return framebuffers;
-        }
-        
         private Pipeline CreateGraphicsPipeline()
         {
             // Create shader modules. Shader modules are one of the objects required to create the
@@ -328,7 +232,7 @@ namespace SharpGame.Samples.TexturedCube
                 new[] { colorBlendAttachmentState });
 
             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
-                _pipelineLayout, _renderPass, 0,
+                _pipelineLayout, Renderer.MainRenderPass, 0,
                 shaderStageCreateInfos,
                 inputAssemblyStateCreateInfo,
                 vertexInputStateCreateInfo,

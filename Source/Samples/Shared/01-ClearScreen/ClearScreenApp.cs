@@ -30,27 +30,6 @@ namespace SharpGame.Samples.ClearScreen
                 PipelineStages.Transfer, PipelineStages.Transfer,
                 imageMemoryBarriers: new[] { barrierFromClearToPresent });
         }
-        /*
-        protected override void Draw(Timer timer)
-        {
-            // Acquire an index of drawing image for this frame.
-            int imageIndex = Context.Swapchain.AcquireNextImage(semaphore: Context.ImageAvailableSemaphore);
-
-            // Use a fence to wait until the command buffer has finished execution before using it again
-            Context.SubmitFences[imageIndex].Wait();
-            Context.SubmitFences[imageIndex].Reset();
-
-            // Submit recorded commands to graphics queue for execution.
-            Context.GraphicsQueue.Submit(
-                Context.ImageAvailableSemaphore,
-                PipelineStages.Transfer,
-                Context.CommandBuffers[imageIndex],
-                Context.RenderingFinishedSemaphore,
-                Context.SubmitFences[imageIndex]
-            );
-
-            // Present the color output to screen.
-            Context.PresentQueue.PresentKhr(Context.RenderingFinishedSemaphore, Context.Swapchain, imageIndex);
-        }*/
+  
     }
 }

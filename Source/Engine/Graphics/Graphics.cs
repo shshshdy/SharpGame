@@ -70,7 +70,7 @@ namespace SharpGame
             for (int i = 0; i < SubmitFences.Length; i++)
                 ToDispose(SubmitFences[i] = Device.CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled)));
 
-            _renderPass = CreateRenderPass();
+            //_renderPass = CreateRenderPass();
         }
 
         public RenderPass CreateRenderPass()
