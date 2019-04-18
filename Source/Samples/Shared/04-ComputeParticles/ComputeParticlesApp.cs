@@ -93,9 +93,9 @@ namespace SharpGame.Samples.ComputeParticles
                     radius * (float)Math.Sin(timer.TotalTime * rotationSpeed))
             };
 
-            IntPtr ptr = _uniformBuffer.Memory.Map(0, Constant.WholeSize);
+            IntPtr ptr = _uniformBuffer.Map(0, Constant.WholeSize);
             Interop.Write(ptr, ref global);
-            _uniformBuffer.Memory.Unmap();
+            _uniformBuffer.Unmap();
         }
         /*
         protected override void Draw(Timer timer)

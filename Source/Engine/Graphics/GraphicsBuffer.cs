@@ -14,9 +14,12 @@ namespace SharpGame
             Count = count;
         }
         
-        public Buffer Buffer { get; }
-        public DeviceMemory Memory { get; }
+        protected Buffer Buffer { get; }
+        protected DeviceMemory Memory { get; }
         public int Count { get; }
+
+        public IntPtr Map(long offset, long size) => Memory.Map(offset, size);
+        public void Unmap() => Memory.Unmap();
 
         public void Dispose()
         {

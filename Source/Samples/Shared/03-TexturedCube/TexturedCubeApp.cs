@@ -52,11 +52,11 @@ namespace SharpGame.Samples.TexturedCube
 
         protected override void InitializeFrame()
         {
-            _depthStencilBuffer = ToDispose(Texture.DepthStencil(Context, Host.Width, Host.Height));
-            _renderPass         = ToDispose(CreateRenderPass());
-            _imageViews         = ToDispose(CreateImageViews());
-            _framebuffers       = ToDispose(CreateFramebuffers());
-            _pipeline           = ToDispose(CreateGraphicsPipeline());
+            _depthStencilBuffer = ToDisposeFrame(Texture.DepthStencil(Context, Host.Width, Host.Height));
+            _renderPass         = ToDisposeFrame(CreateRenderPass());
+            _imageViews         = ToDisposeFrame(CreateImageViews());
+            _framebuffers       = ToDisposeFrame(CreateFramebuffers());
+            _pipeline           = ToDisposeFrame(CreateGraphicsPipeline());
             SetViewProjection();
         }
 
@@ -126,9 +126,9 @@ namespace SharpGame.Samples.TexturedCube
 
         private void UpdateUniformBuffers()
         {
-            IntPtr ptr = _uniformBuffer.Memory.Map(0, Interop.SizeOf<WorldViewProjection>());
+            IntPtr ptr = _uniformBuffer.Map(0, Interop.SizeOf<WorldViewProjection>());
             Interop.Write(ptr, ref _wvp);
-            _uniformBuffer.Memory.Unmap();
+            _uniformBuffer.Unmap();
         }
 
         private DescriptorPool CreateDescriptorPool()

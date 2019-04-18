@@ -3,7 +3,7 @@ using VulkanCore;
 
 namespace SharpGame
 {
-    internal static partial class Shader
+    public class Shader
     {
         public static ShaderModule Load(IPlatform host, Graphics ctx, string path)
         {

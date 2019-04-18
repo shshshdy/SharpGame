@@ -128,6 +128,7 @@ namespace SharpGame
         protected abstract void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex);
 
         protected T ToDispose<T>(T disposable) => Context.ToDispose(disposable);
+        protected T ToDisposeFrame<T>(T disposable) => Context.ToDisposeFrame(disposable);
 
         public void Dispose()
         {
