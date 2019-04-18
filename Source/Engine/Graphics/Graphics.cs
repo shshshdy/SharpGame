@@ -115,7 +115,7 @@ namespace SharpGame
             ComputeCommandPool.Reset();
 
             // Reinitialize frame dependent resources.
-            Swapchain = ToDispose(CreateSwapchain());
+            Swapchain = ToDisposeFrame(CreateSwapchain());
             SwapchainImages = Swapchain.GetImages();
 
         }
