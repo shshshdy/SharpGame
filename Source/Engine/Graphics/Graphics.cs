@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using VulkanCore;
-using VulkanCore.Ext;
 using VulkanCore.Khr;
 using VulkanCore.Mvk;
 
@@ -20,10 +19,6 @@ namespace SharpGame
         public int Width => Host.Width;
         public int Height => Host.Height;
 
-        public Instance Instance { get; private set; }
-        protected DebugReportCallbackExt DebugReportCallback { get; private set; }
-        public SurfaceKhr Surface { get; private set; }
-        public SwapchainKhr Swapchain { get; private set; }
         public Image[] SwapchainImages { get; private set; }
         public CommandBuffer[] CommandBuffers { get; private set; }
         public Fence[] SubmitFences { get; private set; }
@@ -147,107 +142,6 @@ namespace SharpGame
             // Present the color output to screen.
             PresentQueue.PresentKhr(RenderingFinishedSemaphore, Swapchain, imageIndex);
   
-        }
-
-        private Instance CreateInstance(bool debug)
-        {
-            // Specify standard validation layers.
-            string surfaceExtension;
-            switch (Host.Platform)
-            {
-                case PlatformType.Android:
-                    surfaceExtension = Constant.InstanceExtension.KhrAndroidSurface;
-                    break;
-                case PlatformType.Win32:
-                    surfaceExtension = Constant.InstanceExtension.KhrWin32Surface;
-                    break;
-                case PlatformType.MacOS:
-                    surfaceExtension = Constant.InstanceExtension.MvkMacOSSurface;
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-
-            var createInfo = new InstanceCreateInfo();
-
-            //Currently MoltenVK (used for MacOS) doesn't support the debug layer.
-            if (debug && Host.Platform != PlatformType.MacOS)
-            {
-                var availableLayers = Instance.EnumerateLayerProperties();
-                createInfo.EnabledLayerNames = new[] { Constant.InstanceLayer.LunarGStandardValidation }
-                    .Where(availableLayers.Contains)
-                    .ToArray();
-                createInfo.EnabledExtensionNames = new[]
-                {
-                    Constant.InstanceExtension.KhrSurface,
-                    surfaceExtension,
-                    Constant.InstanceExtension.ExtDebugReport
-                };
-            }
-            else
-            {
-                createInfo.EnabledExtensionNames = new[]
-                {
-                    Constant.InstanceExtension.KhrSurface,
-                    surfaceExtension,
-                };
-            }
-            return new Instance(createInfo);
-        }
-
-        private DebugReportCallbackExt CreateDebugReportCallback(bool debug)
-        {
-            //Currently MoltenVK (used for MacOS) doesn't support the debug layer.
-            if (!debug || Host.Platform == PlatformType.MacOS) return null;
-
-            // Attach debug callback.
-            var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
-                DebugReportFlagsExt.All,
-                args =>
-                {
-                    Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}] {args.Message}");
-                    return args.Flags.HasFlag(DebugReportFlagsExt.Error);
-                }
-            );
-            return Instance.CreateDebugReportCallbackExt(debugReportCreateInfo);
-        }
-
-        private SurfaceKhr CreateSurface()
-        {
-            // Create surface.
-            switch (Host.Platform)
-            {
-                case PlatformType.Android:
-                    return Instance.CreateAndroidSurfaceKhr(new AndroidSurfaceCreateInfoKhr(Host.WindowHandle));
-                case PlatformType.Win32:
-                    return Instance.CreateWin32SurfaceKhr(new Win32SurfaceCreateInfoKhr(Host.InstanceHandle, Host.WindowHandle));
-                case PlatformType.MacOS:
-                    return Instance.CreateMacOSSurfaceMvk(new MacOSSurfaceCreateInfoMvk(Host.WindowHandle));
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        private SwapchainKhr CreateSwapchain()
-        {
-            SurfaceCapabilitiesKhr capabilities = PhysicalDevice.GetSurfaceCapabilitiesKhr(Surface);
-            SurfaceFormatKhr[] formats = PhysicalDevice.GetSurfaceFormatsKhr(Surface);
-            PresentModeKhr[] presentModes = PhysicalDevice.GetSurfacePresentModesKhr(Surface);
-            Format format = formats.Length == 1 && formats[0].Format == Format.Undefined
-                ? Format.B8G8R8A8UNorm
-                : formats[0].Format;
-            PresentModeKhr presentMode =
-                presentModes.Contains(PresentModeKhr.Mailbox) ? PresentModeKhr.Mailbox :
-                presentModes.Contains(PresentModeKhr.FifoRelaxed) ? PresentModeKhr.FifoRelaxed :
-                presentModes.Contains(PresentModeKhr.Fifo) ? PresentModeKhr.Fifo :
-                PresentModeKhr.Immediate;
-
-            return Device.CreateSwapchainKhr(new SwapchainCreateInfoKhr(
-                surface: Surface,
-                imageFormat: format,
-                imageExtent: capabilities.CurrentExtent,
-                preTransform: capabilities.CurrentTransform,
-                presentMode: presentMode));
         }
 
         public T ToDispose<T>(T disposable)
