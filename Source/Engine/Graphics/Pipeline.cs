@@ -5,19 +5,54 @@ using VulkanCore;
 
 namespace SharpGame
 {
-    public class Pipeline : Object, IDeviceObject
+    public class Pipeline : DeviceObject
     {
+        Shader Shader;
+        ComputeShader ComputeShader;
+
         public VulkanCore.Pipeline pipeline;
+        public Pipeline()
+        {
+        }
+
+        public Pipeline(Shader shader)
+        {
+//            var graphics = Get<Graphics>();
+//             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
+//                 pipelineLayout, renderPass, 0,
+//                 shaderStageCreateInfos,
+//                 inputAssemblyStateCreateInfo,
+//                 vertexInputStateCreateInfo,
+//                 rasterizationStateCreateInfo,
+//                 viewportState: viewportStateCreateInfo,
+//                 multisampleState: multisampleStateCreateInfo,
+//                 colorBlendState: colorBlendStateCreateInfo);
+// 
+//             pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
+
+
+        }
+
         public override void Dispose()
         {
-
+            base.Dispose();
         }
 
-        public void Recreate()
+        public VulkanCore.Pipeline GetGraphicsPipeline(View view, RenderPass renderPass)
+        {
+            return null;
+        }
+
+        public VulkanCore.Pipeline GetComputePipeline(View view, RenderPass renderPass)
+        {
+            return null;
+        }
+
+        protected override void Recreate()
         {
         }
 
-        public static Pipeline Create(PipelineLayout pipelineLayout, RenderPass renderPass)
+        public static Pipeline Create(PipelineLayout pipelineLayout, RenderPass renderPass = null)
         {
             var resourceCache = Get<ResourceCache>();
             var graphics = Get<Graphics>();
@@ -59,6 +94,11 @@ namespace SharpGame
             };
             var colorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo(
                 new[] { colorBlendAttachmentState });
+
+            if (renderPass == null)
+            {
+                renderPass = graphics.MainRenderPass;
+            }
 
             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
                 pipelineLayout, renderPass, 0,

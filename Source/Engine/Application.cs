@@ -30,12 +30,10 @@ namespace SharpGame
         public Graphics Graphics { get; private set; }
         public  Renderer Renderer { get; private set; }
         public ResourceCache ResourceCache { get; private set; }
-
-        Context _context;
-
+        
         public Application()
         {
-            _context = new Context();
+            new Context();
         }
 
         public void Initialize(IPlatform host)
@@ -49,6 +47,7 @@ namespace SharpGame
             RegisterSubsystem(ResourceCache);
 
             Renderer = CreateSubsystem<Renderer>();
+            Renderer.Initialize();
 
             // Allow concrete samples to initialize their resources.
             InitializePermanent();

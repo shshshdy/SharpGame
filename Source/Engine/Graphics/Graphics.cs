@@ -14,9 +14,7 @@ namespace SharpGame
     {
         private readonly Stack<IDisposable> _toDisposePermanent = new Stack<IDisposable>();
         private readonly Stack<IDisposable> _toDisposeFrame = new Stack<IDisposable>();
-
-        private bool _initializingPermanent;
-
+        
         public IPlatform Host { get; private set; }
 
         public int Width => Host.Width;
@@ -45,6 +43,9 @@ namespace SharpGame
         public CommandPool GraphicsCommandPool { get; private set; }
         public CommandPool ComputeCommandPool { get; private set; }
 
+        private RenderPass _renderPass;
+        public RenderPass MainRenderPass => _renderPass;
+
         public void Initialize(IPlatform host)
         {
             Host = host;
@@ -53,7 +54,7 @@ namespace SharpGame
 #else
             const bool debug = false;
 #endif
-            _initializingPermanent = true;
+
             // Calling ToDispose here registers the resource to be automatically disposed on exit.
             Instance = CreateInstance(debug);
             DebugReportCallback = CreateDebugReportCallback(debug);
@@ -74,7 +75,6 @@ namespace SharpGame
                 Device.SetMVKDeviceConfiguration(deviceConfig);
             }
 
-            _initializingPermanent = false;
             // Calling ToDispose here registers the resource to be automatically disposed on events
             // such as window resize.
             Swapchain = ToDisposeFrame(CreateSwapchain());
@@ -84,11 +84,11 @@ namespace SharpGame
             CommandBuffers = GraphicsCommandPool.AllocateBuffers(
                 new CommandBufferAllocateInfo(CommandBufferLevel.Primary, SwapchainImages.Length));
             // Create a fence for each commandbuffer so that we can wait before using it again
-            _initializingPermanent = true; //We need our fences to be there permanently
             SubmitFences = new Fence[SwapchainImages.Length];
             for (int i = 0; i < SubmitFences.Length; i++)
                 ToDispose(SubmitFences[i] = Device.CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled)));
 
+            _renderPass = CreateRenderPass();
         }
 
         void Create(Instance instance, SurfaceKhr surface, PlatformType platform)

@@ -5,48 +5,17 @@ namespace SharpGame.Samples.ColoredTriangle
 {
     public class ColoredTriangleApp : Application
     {
-        private RenderPass _renderPass;
-        private ImageView[] _imageViews;
-        private Framebuffer[] _framebuffers;
         private PipelineLayout _pipelineLayout;
         private Pipeline _pipeline;
 
         protected override void InitializePermanent()
         {
-            _renderPass     = Graphics.CreateRenderPass();
             _pipelineLayout = ToDispose(CreatePipelineLayout());
         }
 
         protected override void InitializeFrame()
         {
-            _imageViews   = ToDispose(CreateImageViews());
-            _framebuffers = ToDispose(CreateFramebuffers());
-            _pipeline     = Pipeline.Create(_pipelineLayout, _renderPass);
-        }
-
-        private ImageView[] CreateImageViews()
-        {
-            var imageViews = new ImageView[Graphics.SwapchainImages.Length];
-            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
-            {
-                imageViews[i] = Graphics.SwapchainImages[i].CreateView(new ImageViewCreateInfo(
-                    Graphics.Swapchain.Format,
-                    new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1)));
-            }
-            return imageViews;
-        }
-
-        private Framebuffer[] CreateFramebuffers()
-        {
-            var framebuffers = new Framebuffer[Graphics.SwapchainImages.Length];
-            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
-            {
-                framebuffers[i] = _renderPass.CreateFramebuffer(new FramebufferCreateInfo(
-                    new[] { _imageViews[i] }, 
-                    Platform.Width, 
-                    Platform.Height));
-            }
-            return framebuffers;
+            _pipeline     = Pipeline.Create(_pipelineLayout);
         }
 
         private PipelineLayout CreatePipelineLayout()
