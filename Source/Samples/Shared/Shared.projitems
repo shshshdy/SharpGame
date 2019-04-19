@@ -54,7 +54,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Content\Shader.frag">
+      <Generator>
+      </Generator>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CustomToolNamespace>
+      </CustomToolNamespace>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Content\Shader.frag.spv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -65,8 +69,5 @@
     <None Include="$(MSBuildThisFileDirectory)Content\Shader.vert.spv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\" />
   </ItemGroup>
 </Project>

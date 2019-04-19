@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading.Tasks;
 using VulkanCore;
 
 namespace SharpGame
@@ -49,6 +50,17 @@ namespace SharpGame
             using (var ms = new MemoryStream())
             {
                 stream.CopyTo(ms, defaultBufferSize);
+                return ctx.Device.CreateShaderModule(new ShaderModuleCreateInfo(ms.ToArray()));
+            }
+        }
+
+        public static async Task<ShaderModule> LoadShaderModuleAsync(IPlatform host, Graphics ctx, string path)
+        {
+            const int defaultBufferSize = 4096;
+            using (Stream stream = host.Open(path))
+            using (var ms = new MemoryStream())
+            {
+                await stream.CopyToAsync(ms, defaultBufferSize);
                 return ctx.Device.CreateShaderModule(new ShaderModuleCreateInfo(ms.ToArray()));
             }
         }
