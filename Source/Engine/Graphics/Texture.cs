@@ -200,9 +200,11 @@ namespace SharpGame
             [32856] = Format.R8G8B8A8UNorm
         };
 
-        public static Texture Load(IPlatform host, Graphics ctx, string path)
+        public static Texture Load(string path)
         {
-            using (var reader = new BinaryReader(host.Open(path)))
+            var graphics = Get<Graphics>();
+            var fileSystem = Get<FileSystem>();
+            using (var reader = new BinaryReader(fileSystem.Open(path)))
             {
                 byte[] identifier = reader.ReadBytes(12);
 
@@ -269,7 +271,7 @@ namespace SharpGame
                     //}
                 }
 
-                return Texture.Texture2D(ctx, data);
+                return Texture.Texture2D(graphics, data);
             }
         }
     }

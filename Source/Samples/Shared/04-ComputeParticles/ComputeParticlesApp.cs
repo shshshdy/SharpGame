@@ -53,7 +53,7 @@ namespace SharpGame.Samples.ComputeParticles
             _graphicsDescriptorSet       = CreateGraphicsDescriptorSet();
 
             _storageBuffer               = ToDispose(CreateStorageBuffer());
-            _uniformBuffer               = ToDispose(GraphicsBuffer.DynamicUniform<UniformBufferObject>(Graphics, 1));
+            _uniformBuffer               = ToDispose(GraphicsBuffer.DynamicUniform<UniformBufferObject>(1));
             _computeDescriptorSetLayout  = ToDispose(CreateComputeDescriptorSetLayout());
             _computePipelineLayout       = ToDispose(CreateComputePipelineLayout());
             _computeDescriptorSet        = CreateComputeDescriptorSet();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using VulkanCore;
 
 namespace SharpGame
 {
@@ -37,8 +38,8 @@ namespace SharpGame
 
     }
 */
-    public class View
+    public class View : Object
     {
-
+        internal PipelineViewportStateCreateInfo viewportStateCreateInfo;
     }
 }

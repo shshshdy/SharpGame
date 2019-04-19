@@ -28,6 +28,7 @@ namespace SharpGame
     public abstract class Application : Object
     {
         public IPlatform Platform { get; set; }
+        public FileSystem FileSystem { get; private set; }
         public Graphics Graphics { get; private set; }
         public  Renderer Renderer { get; private set; }
         public ResourceCache ResourceCache { get; private set; }
@@ -42,8 +43,9 @@ namespace SharpGame
         {
             Platform = host;
 
+            FileSystem = CreateSubsystem<FileSystem>(Platform);
             Graphics = CreateSubsystem<Graphics>(Platform);
-            ResourceCache = CreateSubsystem<ResourceCache>(Platform, "Content");
+            ResourceCache = CreateSubsystem<ResourceCache>("Content");
             Renderer = CreateSubsystem<Renderer>();
 
             //new Thread(() =>

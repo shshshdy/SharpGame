@@ -8,14 +8,12 @@ namespace SharpGame
 {
     public class ResourceCache : Object
     {
-        private readonly IPlatform _host;
-        private readonly string _contentRoot;
+        public static string ContentRoot { get; set; }
         private readonly Dictionary<string, IDisposable> _cachedContent = new Dictionary<string, IDisposable>();
 
-        public ResourceCache(IPlatform host, string contentRoot)
+        public ResourceCache(string contentRoot)
         {
-            _host = host;
-            _contentRoot = contentRoot;
+            ContentRoot = contentRoot;
         }
 
         public T Load<T>(string contentName)
@@ -23,20 +21,20 @@ namespace SharpGame
             if (_cachedContent.TryGetValue(contentName, out IDisposable value))
                 return (T)value;
 
-            string path = Path.Combine(_contentRoot, contentName);
+            string path = Path.Combine(ContentRoot, contentName);
             string extension = Path.GetExtension(path);
 
             Graphics _ctx = Get<Graphics>();
             Type type = typeof(T);
             if (type == typeof(ShaderModule))
             {
-                value = Shader.LoadShaderModule(_host, _ctx, path);
+                value = Shader.LoadShaderModule(path);
             }
             else if (type == typeof(Texture))
             {
                 if (extension.Equals(".ktx", StringComparison.OrdinalIgnoreCase))
                 {
-                    value = Texture.Load(_host, _ctx, path);
+                    value = Texture.Load(path);
                 }
             }
 

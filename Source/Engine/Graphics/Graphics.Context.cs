@@ -7,12 +7,7 @@ using VulkanCore.Khr;
 using VulkanCore.Mvk;
 
 namespace SharpGame
-{
-
-    /// <summary>
-    /// Encapsulates Vulkan <see cref="VulkanCore.PhysicalDevice"/> and <see cref="VulkanCore.Device"/> and exposes queues
-    /// and a command pool for rendering tasks.
-    /// </summary>
+{    
     public partial class Graphics
     {
         public Instance Instance { get; private set; }

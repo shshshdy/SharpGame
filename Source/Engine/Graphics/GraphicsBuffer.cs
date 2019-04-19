@@ -5,7 +5,7 @@ using Buffer = VulkanCore.Buffer;
 
 namespace SharpGame
 {
-    public class GraphicsBuffer : IDisposable
+    public class GraphicsBuffer : Object
     {
         private GraphicsBuffer(Buffer buffer, DeviceMemory memory, int count)
         {
@@ -21,7 +21,7 @@ namespace SharpGame
         public IntPtr Map(long offset, long size) => Memory.Map(offset, size);
         public void Unmap() => Memory.Unmap();
 
-        public void Dispose()
+        public override void Dispose()
         {
             Memory.Dispose();
             Buffer.Dispose();
@@ -29,57 +29,61 @@ namespace SharpGame
 
         public static implicit operator Buffer(GraphicsBuffer value) => value.Buffer;
 
-        public static GraphicsBuffer DynamicUniform<T>(Graphics ctx, int count) where T : struct
+        public static GraphicsBuffer DynamicUniform<T>(int count) where T : struct
         {
+            var graphics = Get<Graphics>();
+
             long size = Interop.SizeOf<T>() * count;
 
-            Buffer buffer = ctx.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.UniformBuffer));
+            Buffer buffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.UniformBuffer));
             MemoryRequirements memoryRequirements = buffer.GetMemoryRequirements();
             // We require host visible memory so we can map it and write to it directly.
             // We require host coherent memory so that writes are visible to the GPU right after unmapping it.
-            int memoryTypeIndex = ctx.MemoryProperties.MemoryTypes.IndexOf(
+            int memoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
                 memoryRequirements.MemoryTypeBits,
                 MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
-            DeviceMemory memory = ctx.Device.AllocateMemory(new MemoryAllocateInfo(memoryRequirements.Size, memoryTypeIndex));
+            DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(memoryRequirements.Size, memoryTypeIndex));
             buffer.BindMemory(memory);
 
             return new GraphicsBuffer(buffer, memory, count);
         }
 
-        public static GraphicsBuffer Index(Graphics ctx, int[] indices)
+        public static GraphicsBuffer Index(int[] indices)
         {
+            var graphics = Get<Graphics>();
+
             long size = indices.Length * sizeof(int);
 
             // Create staging buffer.
-            Buffer stagingBuffer = ctx.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
+            Buffer stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
             MemoryRequirements stagingReq = stagingBuffer.GetMemoryRequirements();
-            int stagingMemoryTypeIndex = ctx.MemoryProperties.MemoryTypes.IndexOf(
+            int stagingMemoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
                 stagingReq.MemoryTypeBits,
                 MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
-            DeviceMemory stagingMemory = ctx.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
+            DeviceMemory stagingMemory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
             IntPtr indexPtr = stagingMemory.Map(0, stagingReq.Size);
             Interop.Write(indexPtr, indices);
             stagingMemory.Unmap();
             stagingBuffer.BindMemory(stagingMemory);
 
             // Create a device local buffer.
-            Buffer buffer = ctx.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.IndexBuffer | BufferUsages.TransferDst));
+            Buffer buffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.IndexBuffer | BufferUsages.TransferDst));
             MemoryRequirements req = buffer.GetMemoryRequirements();
-            int memoryTypeIndex = ctx.MemoryProperties.MemoryTypes.IndexOf(
+            int memoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
                 req.MemoryTypeBits,
                 MemoryProperties.DeviceLocal);
-            DeviceMemory memory = ctx.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
+            DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
             buffer.BindMemory(memory);
 
             // Copy the data from staging buffer to device local buffer.
-            CommandBuffer cmdBuffer = ctx.GraphicsCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
+            CommandBuffer cmdBuffer = graphics.GraphicsCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit));
             cmdBuffer.CmdCopyBuffer(stagingBuffer, buffer, new BufferCopy(size));
             cmdBuffer.End();
 
             // Submit.
-            Fence fence = ctx.Device.CreateFence();
-            ctx.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
+            Fence fence = graphics.Device.CreateFence();
+            graphics.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
             fence.Wait();
 
             // Cleanup.
@@ -91,40 +95,42 @@ namespace SharpGame
             return new GraphicsBuffer(buffer, memory, indices.Length);
         }
 
-        public static GraphicsBuffer Vertex<T>(Graphics ctx, T[] vertices) where T : struct
+        public static GraphicsBuffer Vertex<T>(T[] vertices) where T : struct
         {
+            var graphics = Get<Graphics>();
+
             long size = vertices.Length * Interop.SizeOf<T>();
 
             // Create a staging buffer that is writable by host.
-            Buffer stagingBuffer = ctx.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
+            Buffer stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
             MemoryRequirements stagingReq = stagingBuffer.GetMemoryRequirements();
-            int stagingMemoryTypeIndex = ctx.MemoryProperties.MemoryTypes.IndexOf(
+            int stagingMemoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
                 stagingReq.MemoryTypeBits,
                 MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
-            DeviceMemory stagingMemory = ctx.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
+            DeviceMemory stagingMemory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
             IntPtr vertexPtr = stagingMemory.Map(0, stagingReq.Size);
             Interop.Write(vertexPtr, vertices);
             stagingMemory.Unmap();
             stagingBuffer.BindMemory(stagingMemory);
 
             // Create a device local buffer where the vertex data will be copied and which will be used for rendering.
-            Buffer buffer = ctx.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.TransferDst));
+            Buffer buffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.TransferDst));
             MemoryRequirements req = buffer.GetMemoryRequirements();
-            int memoryTypeIndex = ctx.MemoryProperties.MemoryTypes.IndexOf(
+            int memoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
                 req.MemoryTypeBits,
                 MemoryProperties.DeviceLocal);
-            DeviceMemory memory = ctx.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
+            DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
             buffer.BindMemory(memory);
 
             // Copy the data from staging buffers to device local buffers.
-            CommandBuffer cmdBuffer = ctx.GraphicsCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
+            CommandBuffer cmdBuffer = graphics.GraphicsCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit));
             cmdBuffer.CmdCopyBuffer(stagingBuffer, buffer, new BufferCopy(size));
             cmdBuffer.End();
 
             // Submit.
-            Fence fence = ctx.Device.CreateFence();
-            ctx.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
+            Fence fence = graphics.Device.CreateFence();
+            graphics.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
             fence.Wait();
 
             // Cleanup.

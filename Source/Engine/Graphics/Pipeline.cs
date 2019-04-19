@@ -7,9 +7,13 @@ namespace SharpGame
 {
     public class Pipeline : DeviceObject
     {
-
         public PipelineRasterizationStateCreateInfo RasterizationStateCreateInfo { get; set; }
-        public PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo { get; set; }
+        public PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo { get; set; } = new PipelineMultisampleStateCreateInfo
+        {
+            RasterizationSamples = SampleCounts.Count1,
+            MinSampleShading = 1.0f
+        };
+
         public PipelineColorBlendStateCreateInfo ColorBlendStateCreateInfo { get; set; }
         public PipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo { get; set; }
 

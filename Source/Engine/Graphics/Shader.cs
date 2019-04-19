@@ -13,7 +13,7 @@ namespace SharpGame
         public ShaderModule ShaderModule;
     }
 
-    public class Shader : Object
+    public class Shader : Resource
     {
         public ShaderStageInfo[] ShaderStageInfo { get; set; }
 
@@ -21,7 +21,7 @@ namespace SharpGame
         {            
         }
 
-        public void Load()
+        public async override void Load()
         {
             var resourceCache = Get<ResourceCache>();
             var graphics = Get<Graphics>();
@@ -43,25 +43,31 @@ namespace SharpGame
             return shaderStageCreateInfo;
         }
         
-        public static ShaderModule LoadShaderModule(IPlatform host, Graphics ctx, string path)
+        public static ShaderModule LoadShaderModule(string path)
         {
+            var graphics = Get<Graphics>();
+            var fileSystem = Get<FileSystem>();
             const int defaultBufferSize = 4096;
-            using (Stream stream = host.Open(path))
+            
+            using (Stream stream = fileSystem.Open(path))
             using (var ms = new MemoryStream())
             {
                 stream.CopyTo(ms, defaultBufferSize);
-                return ctx.Device.CreateShaderModule(new ShaderModuleCreateInfo(ms.ToArray()));
+                return graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(ms.ToArray()));
             }
         }
 
-        public static async Task<ShaderModule> LoadShaderModuleAsync(IPlatform host, Graphics ctx, string path)
+        public static async Task<ShaderModule> LoadShaderModuleAsync(string path)
         {
+            var graphics = Get<Graphics>();
+            var fileSystem = Get<FileSystem>();
             const int defaultBufferSize = 4096;
-            using (Stream stream = host.Open(path))
+            path = Path.Combine(ResourceCache.ContentRoot, path);
+            using (Stream stream = fileSystem.Open(path))
             using (var ms = new MemoryStream())
             {
                 await stream.CopyToAsync(ms, defaultBufferSize);
-                return ctx.Device.CreateShaderModule(new ShaderModuleCreateInfo(ms.ToArray()));
+                return graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(ms.ToArray()));
             }
         }
     }

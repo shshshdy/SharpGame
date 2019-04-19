@@ -37,10 +37,10 @@ namespace SharpGame.Samples.TexturedCube
             var cube = GeometricPrimitive.Box(1.0f, 1.0f, 1.0f);
 
             _cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx");
-            _cubeVertices        = ToDispose(GraphicsBuffer.Vertex(Graphics, cube.Vertices));
-            _cubeIndices         = ToDispose(GraphicsBuffer.Index(Graphics, cube.Indices));
+            _cubeVertices        = ToDispose(GraphicsBuffer.Vertex(cube.Vertices));
+            _cubeIndices         = ToDispose(GraphicsBuffer.Index(cube.Indices));
             _sampler             = ToDispose(CreateSampler());
-            _uniformBuffer       = ToDispose(GraphicsBuffer.DynamicUniform<WorldViewProjection>(Graphics, 1));
+            _uniformBuffer       = ToDispose(GraphicsBuffer.DynamicUniform<WorldViewProjection>(1));
             _descriptorSetLayout = ToDispose(CreateDescriptorSetLayout());
             _descriptorPool      = ToDispose(CreateDescriptorPool());
             _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
@@ -88,12 +88,6 @@ namespace SharpGame.Samples.TexturedCube
                     CullMode = CullModes.Back,
                     FrontFace = FrontFace.CounterClockwise,
                     LineWidth = 1.0f
-                },
-
-                MultisampleStateCreateInfo = new PipelineMultisampleStateCreateInfo
-                {
-                    RasterizationSamples = SampleCounts.Count1,
-                    MinSampleShading = 1.0f
                 },
 
                 DepthStencilStateCreateInfo = new PipelineDepthStencilStateCreateInfo
