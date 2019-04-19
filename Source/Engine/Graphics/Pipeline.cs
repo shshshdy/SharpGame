@@ -15,8 +15,12 @@ namespace SharpGame
 
         public PrimitiveTopology PrimitiveTopology { get; set; }
 
-        PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo;
+        public PipelineVertexInputStateCreateInfo VertexInputStateCreateInfo { get; set; }
         PipelineViewportStateCreateInfo viewportStateCreateInfo;
+
+        public PipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
+
+        public PipelineLayout pipelineLayout;
 
         public Shader Shader { get; set; }
 
@@ -30,12 +34,11 @@ namespace SharpGame
         public Pipeline(Shader shader)
         {
             Shader = shader;
-            SetDefault();
         }
 
         public void SetDefault()
         {
-            vertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo();
+            VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo();
 
             RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
             {
@@ -101,7 +104,8 @@ namespace SharpGame
             }
 
             var graphics = Get<Graphics>();
-            var pipelineLayout = Shader.pipelineLayout;
+
+            pipelineLayout = graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
 
             viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
             new Viewport(0, 0, graphics.Width, graphics.Height),
@@ -113,7 +117,7 @@ namespace SharpGame
                 pipelineLayout, renderPass, 0,
                 Shader.GetShaderStageCreateInfos(),
                 inputAssemblyStateCreateInfo,
-                vertexInputStateCreateInfo,
+                VertexInputStateCreateInfo,
                 RasterizationStateCreateInfo,
                 viewportState: viewportStateCreateInfo,
                 multisampleState: MultisampleStateCreateInfo,

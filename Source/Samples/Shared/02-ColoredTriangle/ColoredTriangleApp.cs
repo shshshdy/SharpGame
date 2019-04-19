@@ -7,7 +7,7 @@ namespace SharpGame.Samples.ColoredTriangle
     {
         private PipelineLayout _pipelineLayout;
         private Pipeline _pipeline;
-        Shader _shader;
+        private Shader _shader;
         protected override void InitializePermanent()
         {
             _pipelineLayout = ToDispose(CreatePipelineLayout());
@@ -19,14 +19,14 @@ namespace SharpGame.Samples.ColoredTriangle
                     new ShaderStageInfo
                     {
                         Stage = ShaderStages.Vertex,
-                        FileName = "Shader.vert.spv",
+                        FileName = "Test.vert.spv",
                         FuncName = "main"
                     },
 
                     new ShaderStageInfo
                     {
                         Stage = ShaderStages.Fragment,
-                        FileName = "Shader.frag.spv",
+                        FileName = "Test.frag.spv",
                         FuncName = "main"
                     }
                 }
@@ -36,10 +36,55 @@ namespace SharpGame.Samples.ColoredTriangle
 
         protected override void InitializeFrame()
         {
-           // _pipeline     = Renderer.CreateGraphicsPipeline(_pipelineLayout);
             _pipeline = new Pipeline(_shader)
             {
 
+                RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
+                {
+                    PolygonMode = PolygonMode.Fill,
+                    CullMode = CullModes.Back,
+                    FrontFace = FrontFace.CounterClockwise,
+                    LineWidth = 1.0f
+                },
+
+                MultisampleStateCreateInfo = new PipelineMultisampleStateCreateInfo
+                {
+                    RasterizationSamples = SampleCounts.Count1,
+                    MinSampleShading = 1.0f
+                },
+
+                DepthStencilStateCreateInfo = new PipelineDepthStencilStateCreateInfo
+                {
+                    DepthTestEnable = true,
+                    DepthWriteEnable = true,
+                    DepthCompareOp = CompareOp.LessOrEqual,
+                    Back = new StencilOpState
+                    {
+                        FailOp = StencilOp.Keep,
+                        PassOp = StencilOp.Keep,
+                        CompareOp = CompareOp.Always
+                    },
+                    Front = new StencilOpState
+                    {
+                        FailOp = StencilOp.Keep,
+                        PassOp = StencilOp.Keep,
+                        CompareOp = CompareOp.Always
+                    }
+                },
+
+                ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo(new[]
+                {
+                    new PipelineColorBlendAttachmentState
+                    {
+                        SrcColorBlendFactor = BlendFactor.One,
+                        DstColorBlendFactor = BlendFactor.Zero,
+                        ColorBlendOp = BlendOp.Add,
+                        SrcAlphaBlendFactor = BlendFactor.One,
+                        DstAlphaBlendFactor = BlendFactor.Zero,
+                        AlphaBlendOp = BlendOp.Add,
+                        ColorWriteMask = ColorComponents.All
+                    }
+                })
             };
 
         }

@@ -38,9 +38,6 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Shared\01-ClearScreen\ClearScreenApp.cs">
-      <Link>ClearScreenApp.cs</Link>
-    </Compile>
     <Compile Include="..\..\Shared\Win32Window.cs">
       <Link>Win32Window.cs</Link>
     </Compile>
@@ -83,5 +80,6 @@
       <Version>1.0.0-alpha40</Version>
     </PackageReference>
   </ItemGroup>
+  <Import Project="..\..\Shared\Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

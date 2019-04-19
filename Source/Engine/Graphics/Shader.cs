@@ -16,34 +16,9 @@ namespace SharpGame
     {
         public ShaderStageInfo[] ShaderStageInfo { get; set; }
 
-        public PipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
-
-        public PipelineLayout pipelineLayout;
-
         public Shader()
         {            
         }
-
-        public static Shader Default = new Shader
-        {
-            ShaderStageInfo = new[]
-            {
-                new ShaderStageInfo
-                {
-                    Stage = ShaderStages.Vertex,
-                    FileName = "Shader.vert.spv",
-                    FuncName = "main"
-                },
-
-                new ShaderStageInfo
-                {
-                    Stage = ShaderStages.Fragment,
-                    FileName = "Shader.frag.spv",
-                    FuncName = "main"
-                }
-            }
-        };
-
 
         public void Load()
         {
@@ -54,7 +29,6 @@ namespace SharpGame
                 ShaderStageInfo[i].ShaderModule = resourceCache.Load<ShaderModule>(ShaderStageInfo[i].FileName);
             }
 
-            pipelineLayout = graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
         }
 
         public PipelineShaderStageCreateInfo[] GetShaderStageCreateInfos()

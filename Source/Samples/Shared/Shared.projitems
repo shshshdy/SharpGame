@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>d9a8db97-79f9-4ed0-9601-3d107873fc67</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)01-ClearScreen\ClearScreenApp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)02-ColoredTriangle\ColoredTriangleApp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)03-TexturedCube\TexturedCubeApp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)04-ComputeParticles\ComputeParticlesApp.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)02-ColoredTriangle\Content\CompileShaders.bat" />
+    <None Include="$(MSBuildThisFileDirectory)Content\Test.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Test.frag.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Test.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Test.vert.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\CompileShaders.bat" />
+    <None Include="$(MSBuildThisFileDirectory)Content\IndustryForgedDark512.ktx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Textured.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Textured.frag.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Textured.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Textured.vert.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\CompileShaders.bat" />
+    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\ParticleDiffuse.ktx" />
+    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.comp" />
+    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.comp.spv" />
+    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.frag" />
+    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.frag.spv" />
+    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.vert" />
+    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.vert.spv" />
+  </ItemGroup>
+</Project>

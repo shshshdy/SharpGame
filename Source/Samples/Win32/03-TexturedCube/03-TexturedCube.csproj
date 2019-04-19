@@ -41,9 +41,6 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Shared\03-TexturedCube\TexturedCubeApp.cs">
-      <Link>TexturedCubeApp.cs</Link>
-    </Compile>
     <Compile Include="..\..\Shared\Win32Window.cs">
       <Link>Win32Window.cs</Link>
     </Compile>
@@ -51,23 +48,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Shared\03-TexturedCube\Content\CompileShaders.bat">
-      <Link>Content\CompileShaders.bat</Link>
-    </None>
-    <None Include="..\..\Shared\03-TexturedCube\Content\Shader.frag">
-      <Link>Content\Shader.frag</Link>
-    </None>
-    <None Include="..\..\Shared\03-TexturedCube\Content\Shader.frag.spv">
-      <Link>Content\Shader.frag.spv</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\Shared\03-TexturedCube\Content\Shader.vert">
-      <Link>Content\Shader.vert</Link>
-    </None>
-    <None Include="..\..\Shared\03-TexturedCube\Content\Shader.vert.spv">
-      <Link>Content\Shader.vert.spv</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
@@ -79,16 +59,11 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\Shared\03-TexturedCube\Content\IndustryForgedDark512.ktx">
-      <Link>Content\IndustryForgedDark512.ktx</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\..\Engine\SharpGame.Engine.csproj">
       <Project>{c3223090-9891-4a35-bec9-f382c04774db}</Project>
       <Name>SharpGame.Engine</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="..\..\Shared\Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

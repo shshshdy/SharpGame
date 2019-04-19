@@ -13,7 +13,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "01-ClearScreen", "Samples\W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "02-ColoredTriangle", "Samples\Win32\02-ColoredTriangle\02-ColoredTriangle.csproj", "{7519173C-D98E-4DDB-9F8A-D1051616C61E}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Samples.Shared", "Samples\Shared\Samples.Shared.shproj", "{D9A8DB97-79F9-4ED0-9601-3D107873FC67}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Samples\Shared\Shared.projitems*{3fc89c99-98a7-4275-bc4e-43335ee47c93}*SharedItemsImports = 4
+		Samples\Shared\Shared.projitems*{48ebb243-dcd5-4d2c-b19e-1c4574a78dce}*SharedItemsImports = 4
+		Samples\Shared\Shared.projitems*{7519173c-d98e-4ddb-9f8a-d1051616c61e}*SharedItemsImports = 4
+		Samples\Shared\Shared.projitems*{d9a8db97-79f9-4ed0-9601-3d107873fc67}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
