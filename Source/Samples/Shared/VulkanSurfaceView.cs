@@ -29,7 +29,7 @@ namespace VulkanCore.Samples
 
         public IntPtr WindowHandle { get; private set; }
         public IntPtr InstanceHandle => Handle;
-        public Platform Platform => Platform.Android;
+        public PlatformType Platform => PlatformType.Android;
 
         public Stream Open(string path) => Context.Assets.Open(path);
 

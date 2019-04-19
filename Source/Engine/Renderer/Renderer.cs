@@ -19,17 +19,16 @@ namespace SharpGame
 
         public Renderer()
         {
+            Recreate();
         }
 
-        public void Initialize()
+        public void Recreate()
         {
             _depthStencilBuffer = Graphics.ToDisposeFrame(Texture.DepthStencil(Graphics.Width, Graphics.Height));
             _renderPass = Graphics.ToDisposeFrame(CreateRenderPass());
             _imageViews = Graphics.ToDisposeFrame(CreateImageViews());
             _framebuffers = Graphics.ToDisposeFrame(CreateFramebuffers());
-           
         }
-
 
         private RenderPass CreateRenderPass()
         {

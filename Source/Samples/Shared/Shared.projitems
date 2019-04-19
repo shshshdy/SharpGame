@@ -44,13 +44,29 @@
     <None Include="$(MSBuildThisFileDirectory)Content\Textured.vert.spv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\CompileShaders.bat" />
-    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\ParticleDiffuse.ktx" />
-    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.comp" />
-    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.comp.spv" />
-    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.frag" />
-    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.frag.spv" />
-    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.vert" />
-    <None Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\Shader.vert.spv" />
+    <None Include="$(MSBuildThisFileDirectory)Content\ParticleDiffuse.ktx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Shader.comp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Shader.comp.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Shader.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Shader.frag.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Shader.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Content\Shader.vert.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)04-ComputeParticles\Content\" />
   </ItemGroup>
 </Project>

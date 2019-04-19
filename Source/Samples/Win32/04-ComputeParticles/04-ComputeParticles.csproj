@@ -40,9 +40,6 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Shared\04-ComputeParticles\ComputeParticlesApp.cs">
-      <Link>ComputeParticlesApp.cs</Link>
-    </Compile>
     <Compile Include="..\..\Shared\Win32Window.cs">
       <Link>Win32Window.cs</Link>
     </Compile>
@@ -50,37 +47,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Shared\04-ComputeParticles\Content\CompileShaders.bat">
-      <Link>Content\CompileShaders.bat</Link>
-    </None>
-    <None Include="..\..\Shared\04-ComputeParticles\Content\Shader.comp">
-      <Link>Content\Shader.comp</Link>
-    </None>
-    <None Include="..\..\Shared\04-ComputeParticles\Content\Shader.comp.spv">
-      <Link>Content\Shader.comp.spv</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\Shared\04-ComputeParticles\Content\Shader.frag">
-      <Link>Content\Shader.frag</Link>
-    </None>
-    <None Include="..\..\Shared\04-ComputeParticles\Content\Shader.frag.spv">
-      <Link>Content\Shader.frag.spv</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\Shared\04-ComputeParticles\Content\Shader.vert">
-      <Link>Content\Shader.vert</Link>
-    </None>
-    <None Include="..\..\Shared\04-ComputeParticles\Content\Shader.vert.spv">
-      <Link>Content\Shader.vert.spv</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\..\Shared\04-ComputeParticles\Content\ParticleDiffuse.ktx">
-      <Link>Content\ParticleDiffuse.ktx</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Numerics.Vectors">
@@ -96,5 +63,6 @@
       <Name>SharpGame.Engine</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="..\..\Shared\Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

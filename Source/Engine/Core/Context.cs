@@ -21,6 +21,12 @@ namespace SharpGame
             return RegisterSubsystem(InstanceHoler<T>._inst);
         }
 
+        public T CreateSubsystem<T>(params object[] param) where T : Object
+        {
+            InstanceHoler<T>._inst = Activator.CreateInstance(typeof(T), param) as T;
+            return RegisterSubsystem(InstanceHoler<T>._inst);
+        }
+
         public T RegisterSubsystem<T>(T sub) where T : Object
         {
             InstanceHoler<T>._inst = sub;

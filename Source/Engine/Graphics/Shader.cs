@@ -42,7 +42,7 @@ namespace SharpGame
             return shaderStageCreateInfo;
         }
         
-        public static ShaderModule Load(IPlatform host, Graphics ctx, string path)
+        public static ShaderModule LoadShaderModule(IPlatform host, Graphics ctx, string path)
         {
             const int defaultBufferSize = 4096;
             using (Stream stream = host.Open(path))

@@ -30,7 +30,7 @@ namespace SharpGame
             Type type = typeof(T);
             if (type == typeof(ShaderModule))
             {
-                value = Shader.Load(_host, _ctx, path);
+                value = Shader.LoadShaderModule(_host, _ctx, path);
             }
             else if (type == typeof(Texture))
             {

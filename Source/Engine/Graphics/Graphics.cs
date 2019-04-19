@@ -29,7 +29,7 @@ namespace SharpGame
         private RenderPass _renderPass;
         public RenderPass MainRenderPass => _renderPass;
 
-        public void Initialize(IPlatform host)
+        public Graphics(IPlatform host)
         {
             Host = host;
 #if DEBUG

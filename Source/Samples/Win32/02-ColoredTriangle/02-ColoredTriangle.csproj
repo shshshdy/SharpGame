@@ -48,9 +48,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Shared\02-ColoredTriangle\Content\CompileShaders.bat">
-      <Link>Content\CompileShaders.bat</Link>
-    </None>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>

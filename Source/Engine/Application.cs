@@ -42,14 +42,9 @@ namespace SharpGame
         {
             Platform = host;
 
-            Graphics = CreateSubsystem<Graphics>();
-            Graphics.Initialize(Platform);
-
-            ResourceCache = new ResourceCache(Platform, "Content");
-            RegisterSubsystem(ResourceCache);
-
+            Graphics = CreateSubsystem<Graphics>(Platform);
+            ResourceCache = CreateSubsystem<ResourceCache>(Platform, "Content");
             Renderer = CreateSubsystem<Renderer>();
-            Renderer.Initialize();
 
             //new Thread(() =>
             {
@@ -84,7 +79,7 @@ namespace SharpGame
         {
             Graphics.Resize();
 
-            Renderer.Initialize();
+            Renderer.Recreate();
 
             InitializeFrame();
 

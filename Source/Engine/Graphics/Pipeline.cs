@@ -30,7 +30,7 @@ namespace SharpGame
         public Pipeline()
         {
         }
-               
+
         public Pipeline(Shader shader)
         {
             Shader = shader;
