@@ -16,6 +16,10 @@ namespace SharpGame
     {
         public ShaderStageInfo[] ShaderStageInfo { get; set; }
 
+        public PipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
+
+        public PipelineLayout pipelineLayout;
+
         public Shader()
         {            
         }
@@ -44,10 +48,13 @@ namespace SharpGame
         public void Load()
         {
             var resourceCache = Get<ResourceCache>();
-            for(int i = 0; i < ShaderStageInfo.Length; i++)
+            var graphics = Get<Graphics>();
+            for (int i = 0; i < ShaderStageInfo.Length; i++)
             {
                 ShaderStageInfo[i].ShaderModule = resourceCache.Load<ShaderModule>(ShaderStageInfo[i].FileName);
             }
+
+            pipelineLayout = graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
         }
 
         public PipelineShaderStageCreateInfo[] GetShaderStageCreateInfos()

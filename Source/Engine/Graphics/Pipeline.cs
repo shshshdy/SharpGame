@@ -7,12 +7,19 @@ namespace SharpGame
 {
     public class Pipeline : DeviceObject
     {
+
         public PipelineRasterizationStateCreateInfo RasterizationStateCreateInfo { get; set; }
         public PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo { get; set; }
         public PipelineColorBlendStateCreateInfo ColorBlendStateCreateInfo { get; set; }
         public PipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo { get; set; }
 
-        Shader Shader;
+        public PrimitiveTopology PrimitiveTopology { get; set; }
+
+        PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo;
+        PipelineViewportStateCreateInfo viewportStateCreateInfo;
+
+        public Shader Shader { get; set; }
+
         ComputeShader ComputeShader;
 
         public VulkanCore.Pipeline pipeline;
@@ -23,10 +30,13 @@ namespace SharpGame
         public Pipeline(Shader shader)
         {
             Shader = shader;
+            SetDefault();
         }
 
         public void SetDefault()
         {
+            vertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo();
+
             RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
             {
                 PolygonMode = PolygonMode.Fill,
@@ -39,6 +49,25 @@ namespace SharpGame
             {
                 RasterizationSamples = SampleCounts.Count1,
                 MinSampleShading = 1.0f
+            };
+
+            DepthStencilStateCreateInfo = new PipelineDepthStencilStateCreateInfo
+            {
+                DepthTestEnable = true,
+                DepthWriteEnable = true,
+                DepthCompareOp = CompareOp.LessOrEqual,
+                Back = new StencilOpState
+                {
+                    FailOp = StencilOp.Keep,
+                    PassOp = StencilOp.Keep,
+                    CompareOp = CompareOp.Always
+                },
+                Front = new StencilOpState
+                {
+                    FailOp = StencilOp.Keep,
+                    PassOp = StencilOp.Keep,
+                    CompareOp = CompareOp.Always
+                }
             };
 
             ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo(new[]
@@ -57,7 +86,6 @@ namespace SharpGame
 
         }
 
-
         public override void Dispose()
         {
             pipeline.Dispose();
@@ -65,22 +93,36 @@ namespace SharpGame
             base.Dispose();
         }
 
-        public VulkanCore.Pipeline GetGraphicsPipeline(View view, RenderPass renderPass)
+        public VulkanCore.Pipeline GetGraphicsPipeline(RenderPass renderPass)
         {
-            var graphics = Get<Graphics>();
-//             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
-//                 pipelineLayout, renderPass, 0,
-//                 Shader.GetShaderStageCreateInfos(),
-//                 inputAssemblyStateCreateInfo,
-//                 vertexInputStateCreateInfo,
-//                 Shader.RasterizationStateCreateInfo,
-//                 viewportState: viewportStateCreateInfo,
-//                 multisampleState: Shader.MultisampleStateCreateInfo,
-//                 colorBlendState: Shader.ColorBlendStateCreateInfo);
-// 
-//             pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
+            if(pipeline != null)
+            {
+                return pipeline;
+            }
 
-            return null;
+            var graphics = Get<Graphics>();
+            var pipelineLayout = Shader.pipelineLayout;
+
+            viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
+            new Viewport(0, 0, graphics.Width, graphics.Height),
+            new Rect2D(0, 0, graphics.Width, graphics.Height));
+
+            var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology.TriangleList);
+
+            var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
+                pipelineLayout, renderPass, 0,
+                Shader.GetShaderStageCreateInfos(),
+                inputAssemblyStateCreateInfo,
+                vertexInputStateCreateInfo,
+                RasterizationStateCreateInfo,
+                viewportState: viewportStateCreateInfo,
+                multisampleState: MultisampleStateCreateInfo,
+                depthStencilState: DepthStencilStateCreateInfo,
+                colorBlendState: ColorBlendStateCreateInfo);
+
+            pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
+            graphics.ToDisposeFrame(pipeline);
+            return pipeline;
         }
 
         public VulkanCore.Pipeline GetComputePipeline(View view, RenderPass renderPass)
