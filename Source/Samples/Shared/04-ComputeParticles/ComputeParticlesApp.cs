@@ -30,9 +30,9 @@ namespace SharpGame.Samples.ComputeParticles
         private Texture _particleDiffuseMap;
 
         private DescriptorSetLayout _graphicsDescriptorSetLayout;
-        private PipelineLayout _graphicsPipelineLayout;
-        private Pipeline _graphicsPipeline;
         private DescriptorSet _graphicsDescriptorSet;
+        private Pipeline _graphicsPipeline;
+        private Shader _shader;
 
         private GraphicsBuffer _storageBuffer;
         private GraphicsBuffer _uniformBuffer;
@@ -50,7 +50,6 @@ namespace SharpGame.Samples.ComputeParticles
             _sampler                     = ToDispose(CreateSampler());
             _particleDiffuseMap          = ResourceCache.Load<Texture>("ParticleDiffuse.ktx");
             _graphicsDescriptorSetLayout = ToDispose(CreateGraphicsDescriptorSetLayout());
-            _graphicsPipelineLayout      = ToDispose(CreateGraphicsPipelineLayout());
             _graphicsDescriptorSet       = CreateGraphicsDescriptorSet();
 
             _storageBuffer               = ToDispose(CreateStorageBuffer());
@@ -60,12 +59,82 @@ namespace SharpGame.Samples.ComputeParticles
             _computeDescriptorSet        = CreateComputeDescriptorSet();
             _computeCmdBuffer            = Graphics.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             _computeFence                = ToDispose(Graphics.Device.CreateFence());
+
+            _shader = new Shader
+            {
+                ShaderStageInfo = new[]
+                {
+                    new ShaderStageInfo
+                    {
+                        Stage = ShaderStages.Vertex,
+                        FileName = "Shader.vert.spv",
+                        FuncName = "main"
+                    },
+
+                    new ShaderStageInfo
+                    {
+                        Stage = ShaderStages.Fragment,
+                        FileName = "Shader.frag.spv",
+                        FuncName = "main"
+                    }
+                }
+            };
+
+            _shader.Load();
         }
 
         protected override void InitializeFrame()
         {
-            _graphicsPipeline = ToDispose(CreateGraphicsPipeline());
             _computePipeline  = ToDispose(CreateComputePipeline());
+            
+            _graphicsPipeline = new Pipeline(_shader)
+            {
+                PrimitiveTopology = PrimitiveTopology.PointList,
+
+                VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo
+                (
+                    new[] { new VertexInputBindingDescription(0, Interop.SizeOf<VertexParticle>(), VertexInputRate.Vertex) },
+                    new[]
+                    {
+                        new VertexInputAttributeDescription(0, 0, Format.R32G32SFloat, 0),
+                        new VertexInputAttributeDescription(1, 0, Format.R32G32SFloat, 8),
+                        new VertexInputAttributeDescription(2, 0, Format.R32G32B32SFloat, 16)
+                    }
+                ),
+
+                RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
+                {
+                    PolygonMode = PolygonMode.Fill,
+                    CullMode = CullModes.None,
+                    FrontFace = FrontFace.CounterClockwise,
+                    LineWidth = 1.0f
+                },
+
+                MultisampleStateCreateInfo = new PipelineMultisampleStateCreateInfo
+                {
+                    RasterizationSamples = SampleCounts.Count1,
+                    MinSampleShading = 1.0f
+                },
+
+                DepthStencilStateCreateInfo = new PipelineDepthStencilStateCreateInfo(),
+
+                ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo(new[]
+                {
+                    new PipelineColorBlendAttachmentState
+                    {
+                        BlendEnable = true,
+                        ColorWriteMask = ColorComponents.All,
+                        ColorBlendOp = BlendOp.Add,
+                        SrcColorBlendFactor = BlendFactor.One,
+                        DstColorBlendFactor = BlendFactor.One,
+                        AlphaBlendOp = BlendOp.Add,
+                        SrcAlphaBlendFactor = BlendFactor.SrcAlpha,
+                        DstAlphaBlendFactor = BlendFactor.DstAlpha
+                    }
+                }),
+
+                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _graphicsDescriptorSetLayout })
+            };
 
             RecordComputeCommandBuffer();
         }
@@ -106,8 +175,10 @@ namespace SharpGame.Samples.ComputeParticles
                 new Rect2D(0, 0, Platform.Width, Platform.Height),
                 new ClearColorValue(new ColorF4(0, 0, 0, 0)),
                 new ClearDepthStencilValue(1.0f, 0)));
-            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, _graphicsPipeline.pipeline);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipelineLayout, _graphicsDescriptorSet);
+
+            var pipeline = _graphicsPipeline.GetGraphicsPipeline(Renderer.MainRenderPass);
+            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
+            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet);
             cmdBuffer.CmdBindVertexBuffer(_storageBuffer);
             cmdBuffer.CmdDraw(_storageBuffer.Count);
             cmdBuffer.CmdEndRenderPass();
@@ -207,72 +278,6 @@ namespace SharpGame.Samples.ComputeParticles
             return Graphics.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
                 new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)));
         }
-
-        private PipelineLayout CreateGraphicsPipelineLayout()
-        {
-            return Graphics.Device.CreatePipelineLayout(new PipelineLayoutCreateInfo(new[] { _graphicsDescriptorSetLayout }));
-        }
-
-        private Pipeline CreateGraphicsPipeline()
-        {
-            var inputAssemblyState = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology.PointList);
-            var vertexInputState = new PipelineVertexInputStateCreateInfo(
-                new[] { new VertexInputBindingDescription(0, Interop.SizeOf<VertexParticle>(), VertexInputRate.Vertex) },
-                new[]
-                {
-                    new VertexInputAttributeDescription(0, 0, Format.R32G32SFloat, 0),
-                    new VertexInputAttributeDescription(1, 0, Format.R32G32SFloat, 8),
-                    new VertexInputAttributeDescription(2, 0, Format.R32G32B32SFloat, 16)
-                });
-            var rasterizationState = new PipelineRasterizationStateCreateInfo
-            {
-                PolygonMode = PolygonMode.Fill,
-                CullMode = CullModes.None,
-                FrontFace = FrontFace.CounterClockwise,
-                LineWidth = 1.0f
-            };
-            // Additive blending.
-            var blendAttachmentState = new PipelineColorBlendAttachmentState
-            {
-                BlendEnable = true,
-                ColorWriteMask = ColorComponents.All,
-                ColorBlendOp = BlendOp.Add,
-                SrcColorBlendFactor = BlendFactor.One,
-                DstColorBlendFactor = BlendFactor.One,
-                AlphaBlendOp = BlendOp.Add,
-                SrcAlphaBlendFactor = BlendFactor.SrcAlpha,
-                DstAlphaBlendFactor = BlendFactor.DstAlpha
-            };
-            var colorBlendState = new PipelineColorBlendStateCreateInfo(new[] { blendAttachmentState });
-            var depthStencilState = new PipelineDepthStencilStateCreateInfo();
-            var viewportState = new PipelineViewportStateCreateInfo(
-                new Viewport(0, 0, Graphics.Host.Width, Graphics.Host.Height),
-                new Rect2D(0, 0, Graphics.Host.Width, Graphics.Host.Height));
-            var multisampleState = new PipelineMultisampleStateCreateInfo { RasterizationSamples = SampleCounts.Count1 };
-
-            var pipelineShaderStages = new[]
-            {
-                new PipelineShaderStageCreateInfo(ShaderStages.Vertex, ResourceCache.Load<ShaderModule>("shader.vert.spv"), "main"),
-                new PipelineShaderStageCreateInfo(ShaderStages.Fragment, ResourceCache.Load<ShaderModule>("shader.frag.spv"), "main"),
-            };
-
-            var pipelineCreateInfo = new GraphicsPipelineCreateInfo(_graphicsPipelineLayout, Renderer.MainRenderPass, 0,
-                pipelineShaderStages, 
-                inputAssemblyState,
-                vertexInputState,
-                rasterizationState,
-                viewportState: viewportState,
-                multisampleState: multisampleState,
-                depthStencilState: depthStencilState,
-                colorBlendState: colorBlendState);
-
-            var pipeline = new Pipeline
-            {
-                pipeline = Graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo)
-            };
-
-            return pipeline;
-    }
 
         private DescriptorSet CreateGraphicsDescriptorSet()
         {

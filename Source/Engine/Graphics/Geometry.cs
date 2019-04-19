@@ -4,11 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Resource : Object
+    public class Geometry : Resource
     {
-        public async virtual void Load()
-        {
-
-        }
     }
 }

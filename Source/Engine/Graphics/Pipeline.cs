@@ -13,7 +13,7 @@ namespace SharpGame
         public PipelineColorBlendStateCreateInfo ColorBlendStateCreateInfo { get; set; }
         public PipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo { get; set; }
 
-        public PrimitiveTopology PrimitiveTopology { get; set; }
+        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
 
         public PipelineVertexInputStateCreateInfo VertexInputStateCreateInfo { get; set; }
         PipelineViewportStateCreateInfo viewportStateCreateInfo;
@@ -111,7 +111,7 @@ namespace SharpGame
             new Viewport(0, 0, graphics.Width, graphics.Height),
             new Rect2D(0, 0, graphics.Width, graphics.Height));
 
-            var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology.TriangleList);
+            var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology);
 
             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
                 pipelineLayout, renderPass, 0,

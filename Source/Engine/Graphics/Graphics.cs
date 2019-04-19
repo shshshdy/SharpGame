@@ -25,10 +25,7 @@ namespace SharpGame
 
         public Semaphore ImageAvailableSemaphore { get; private set; }
         public Semaphore RenderingFinishedSemaphore { get; private set; }
-
-        private RenderPass _renderPass;
-        public RenderPass MainRenderPass => _renderPass;
-
+        
         public Graphics(IPlatform host)
         {
             Host = host;
@@ -69,8 +66,7 @@ namespace SharpGame
             SubmitFences = new Fence[SwapchainImages.Length];
             for (int i = 0; i < SubmitFences.Length; i++)
                 ToDispose(SubmitFences[i] = Device.CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled)));
-
-            //_renderPass = CreateRenderPass();
+            
         }
 
         public RenderPass CreateRenderPass()
