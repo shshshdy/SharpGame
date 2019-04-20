@@ -14,25 +14,6 @@
       <Link>TexturedCubeApp.cs</Link>
     </Compile>
 
-    <None Include="..\..\Shared\03-TexturedCube\Content\Shader.frag">
-      <Link>Content\Shader.frag</Link>
-    </None>
-    <None Include="..\..\Shared\03-TexturedCube\Content\Shader.frag.spv">
-      <Link>Content\Shader.frag.spv</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\Shared\03-TexturedCube\Content\Shader.vert">
-      <Link>Content\Shader.vert</Link>
-    </None>
-    <None Include="..\..\Shared\03-TexturedCube\Content\Shader.vert.spv">
-      <Link>Content\Shader.vert.spv</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  <Content Include="..\..\Shared\03-TexturedCube\Content\IndustryForgedDark512.ktx">
-      <Link>Content\IndustryForgedDark512.ktx</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-
     <Compile Include="..\..\Shared\MacOSWindow.cs">
       <Link>MacOSWindow.cs</Link>
     </Compile>
@@ -42,8 +23,6 @@
     </Reference>
 
     <None Include="..\..\Shared\NativeMacOS\libmacwindow.dylib" CopyToOutputDirectory="PreserveNewest" />
-
-    <None Include="..\..\Shared\03-TexturedCube\Content\CompileShaders.bat" Link="Content\CompileShaders.bat" />
 
     <ProjectReference Include="..\..\..\Engine\SharpGame.Engine.csproj" />
   </ItemGroup>

@@ -5,11 +5,11 @@ using System.Threading;
 
 namespace SharpGame.Samples
 {
-    public class MacOSWindow : IVulkanAppHost
+    public class MacOSWindow : IPlatform
     {
         private readonly string _title;
         private readonly Timer _timer = new Timer();
-        private readonly VulkanApp _app;
+        private readonly Application _app;
 
         private NativeMacOS.NativeApp _nativeApp;
         private NativeMacOS.NativeWindow _nativeWindow;
@@ -21,7 +21,7 @@ namespace SharpGame.Samples
         private int _frameCount;
         private float _timeElapsed;
 
-        public MacOSWindow(string title, VulkanApp app)
+        public MacOSWindow(string title, Application app)
         {
             _title = title;
             _app = app;
@@ -31,7 +31,7 @@ namespace SharpGame.Samples
         public IntPtr InstanceHandle => Process.GetCurrentProcess().Handle;
         public int Width { get; private set; } = 1280;
         public int Height { get; private set; } = 720;
-        public Platform Platform => Platform.MacOS;
+        public PlatformType Platform => PlatformType.MacOS;
 
         public Stream Open(string path) => new FileStream(Path.Combine("bin", path), FileMode.Open, FileAccess.Read);
 

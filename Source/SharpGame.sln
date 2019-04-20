@@ -17,6 +17,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Samples.Shared", "Samples\S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Windows", "Windows", "{5E027892-E59A-485E-9F5F-DF0B24BFFC3E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MacOS", "MacOS", "{9C52B7F1-9E8E-4AB5-B2EC-3269A1FDF3AF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "03-TexturedCube", "Samples\MacOS\03-TexturedCube\03-TexturedCube.csproj", "{53875B1D-BA37-4788-8E90-A526042EB3E4}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Samples\Shared\Shared.projitems*{3fc89c99-98a7-4275-bc4e-43335ee47c93}*SharedItemsImports = 4
@@ -50,6 +54,10 @@ Global
 		{7519173C-D98E-4DDB-9F8A-D1051616C61E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7519173C-D98E-4DDB-9F8A-D1051616C61E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7519173C-D98E-4DDB-9F8A-D1051616C61E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53875B1D-BA37-4788-8E90-A526042EB3E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53875B1D-BA37-4788-8E90-A526042EB3E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53875B1D-BA37-4788-8E90-A526042EB3E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53875B1D-BA37-4788-8E90-A526042EB3E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,6 +67,7 @@ Global
 		{F0062F92-0F14-4A31-9E93-8E2EA099525D} = {5E027892-E59A-485E-9F5F-DF0B24BFFC3E}
 		{48EBB243-DCD5-4D2C-B19E-1C4574A78DCE} = {5E027892-E59A-485E-9F5F-DF0B24BFFC3E}
 		{7519173C-D98E-4DDB-9F8A-D1051616C61E} = {5E027892-E59A-485E-9F5F-DF0B24BFFC3E}
+		{53875B1D-BA37-4788-8E90-A526042EB3E4} = {9C52B7F1-9E8E-4AB5-B2EC-3269A1FDF3AF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC0780F6-BD76-45F9-80BA-1CC438DBDDE7}
