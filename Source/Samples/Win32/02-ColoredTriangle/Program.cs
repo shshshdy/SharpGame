@@ -15,7 +15,6 @@ namespace SharpGame.Samples.ColoredTriangle
                 Assembly.GetExecutingAssembly().GetName().Name,
                 new ColoredTriangleApp()))
             {
-                window.Initialize();
                 window.Run();
             }
         }

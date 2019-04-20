@@ -15,7 +15,6 @@ namespace SharpGame.Samples.ComputeParticles
                 Assembly.GetExecutingAssembly().GetName().Name,
                 new ComputeParticlesApp()))
             {
-                window.Initialize();
                 window.Run();
             }
         }

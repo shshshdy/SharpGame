@@ -15,7 +15,6 @@ namespace SharpGame.Samples.ClearScreen
                 Assembly.GetExecutingAssembly().GetName().Name,
                 new ClearScreenApp()))
             {
-                window.Initialize();
                 window.Run();
             }
         }
