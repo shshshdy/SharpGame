@@ -5,13 +5,10 @@ namespace SharpGame.Samples.ColoredTriangle
 {
     public class ColoredTriangleApp : Application
     {
-        private PipelineLayout _pipelineLayout;
         private Pipeline _pipeline;
         private Shader _shader;
         protected override void InitializePermanent()
         {
-            _pipelineLayout = ToDispose(CreatePipelineLayout());
-
             _shader = new Shader
             {
                 ShaderStageInfo = new[]
@@ -31,12 +28,13 @@ namespace SharpGame.Samples.ColoredTriangle
                     }
                 }
             };
+
             _shader.Load();
         }
 
         protected override void InitializeFrame()
         {
-            _pipeline = new Pipeline(_shader)
+            _pipeline = new Pipeline
             {
 
                 RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
@@ -88,12 +86,6 @@ namespace SharpGame.Samples.ColoredTriangle
             };
 
         }
-
-        private PipelineLayout CreatePipelineLayout()
-        {
-            var layoutCreateInfo = new PipelineLayoutCreateInfo();
-            return Graphics.Device.CreatePipelineLayout(layoutCreateInfo);
-        }
         
         protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
         {
@@ -104,7 +96,7 @@ namespace SharpGame.Samples.ColoredTriangle
                 new ClearDepthStencilValue(1.0f, 0));
 
             cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
-            var pipeline = _pipeline.GetGraphicsPipeline(Renderer.MainRenderPass);
+            var pipeline = _pipeline.GetGraphicsPipeline(Renderer.MainRenderPass, _shader);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdDraw(3);
             cmdBuffer.CmdEndRenderPass();

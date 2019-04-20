@@ -15,7 +15,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)04-ComputeParticles\ComputeParticlesApp.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)02-ColoredTriangle\Content\CompileShaders.bat" />
     <None Include="$(MSBuildThisFileDirectory)Content\Test.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

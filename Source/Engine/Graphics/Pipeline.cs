@@ -5,7 +5,7 @@ using VulkanCore;
 
 namespace SharpGame
 {
-    public class Pipeline : DeviceObject
+    public class Pipeline : Resource
     {
         public PipelineRasterizationStateCreateInfo RasterizationStateCreateInfo { get; set; }
         public PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo { get; set; } = new PipelineMultisampleStateCreateInfo
@@ -25,21 +25,15 @@ namespace SharpGame
         public PipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
 
         public PipelineLayout pipelineLayout;
-
-        public Shader Shader { get; set; }
-
-        ComputeShader ComputeShader;
+        
+        public ComputeShader ComputeShader;
 
         public VulkanCore.Pipeline pipeline;
+
         public Pipeline()
         {
         }
-
-        public Pipeline(Shader shader)
-        {
-            Shader = shader;
-        }
-
+        
         public void SetDefault()
         {
             VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo();
@@ -100,7 +94,7 @@ namespace SharpGame
             base.Dispose();
         }
 
-        public VulkanCore.Pipeline GetGraphicsPipeline(RenderPass renderPass)
+        public VulkanCore.Pipeline GetGraphicsPipeline(RenderPass renderPass, Shader shader)
         {
             if(pipeline != null)
             {
@@ -110,6 +104,7 @@ namespace SharpGame
             var graphics = Get<Graphics>();
 
             pipelineLayout = graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
+            var shaderStageCreateInfos = shader.GetShaderStageCreateInfos();
 
             viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
             new Viewport(0, 0, graphics.Width, graphics.Height),
@@ -119,7 +114,7 @@ namespace SharpGame
 
             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
                 pipelineLayout, renderPass, 0,
-                Shader.GetShaderStageCreateInfos(),
+                shaderStageCreateInfos,
                 inputAssemblyStateCreateInfo,
                 VertexInputStateCreateInfo,
                 RasterizationStateCreateInfo,
@@ -137,10 +132,6 @@ namespace SharpGame
         {
             return null;
         }
-
-        protected override void Recreate()
-        {
-        }
-
+        
     }
 }

@@ -38,8 +38,11 @@ namespace SharpGame
 
     }
 */
+
     public class View : Object
     {
+        public Scene scene;
+        public Camera camera;
         internal PipelineViewportStateCreateInfo viewportStateCreateInfo;
     }
 }

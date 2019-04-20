@@ -87,7 +87,7 @@ namespace SharpGame.Samples.ComputeParticles
         {
             _computePipeline  = ToDispose(CreateComputePipeline());
             
-            _graphicsPipeline = new Pipeline(_shader)
+            _graphicsPipeline = new Pipeline
             {
                 PrimitiveTopology = PrimitiveTopology.PointList,
 
@@ -176,7 +176,7 @@ namespace SharpGame.Samples.ComputeParticles
                 new ClearColorValue(new ColorF4(0, 0, 0, 0)),
                 new ClearDepthStencilValue(1.0f, 0)));
 
-            var pipeline = _graphicsPipeline.GetGraphicsPipeline(Renderer.MainRenderPass);
+            var pipeline = _graphicsPipeline.GetGraphicsPipeline(Renderer.MainRenderPass, _shader);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet);
             cmdBuffer.CmdBindVertexBuffer(_storageBuffer);

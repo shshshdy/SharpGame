@@ -9,8 +9,6 @@ namespace SharpGame
     {
         public PrimitiveTopology PrimitiveTopology { get; set; }
         public List<GraphicsBuffer> VertexBuffer { get; set; }
-        public GraphicsBuffer IndexBuffer { get; set; }
-
-        public PipelineVertexInputStateCreateInfo VertexInputStateCreateInfo;
+        public GraphicsBuffer IndexBuffer { get; set; }        
     }
 }

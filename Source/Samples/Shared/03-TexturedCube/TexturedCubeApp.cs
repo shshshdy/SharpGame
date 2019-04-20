@@ -71,7 +71,7 @@ namespace SharpGame.Samples.TexturedCube
 
         protected override void InitializeFrame()
         {
-            _pipeline = new Pipeline(_shader)
+            _pipeline = new Pipeline
             {
                 VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo(
                 new[] { new VertexInputBindingDescription(0, Interop.SizeOf<Vertex>(), VertexInputRate.Vertex) },
@@ -156,7 +156,7 @@ namespace SharpGame.Samples.TexturedCube
 
             cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
 
-            var pipeline = _pipeline.GetGraphicsPipeline(Renderer.MainRenderPass);
+            var pipeline = _pipeline.GetGraphicsPipeline(Renderer.MainRenderPass, _shader);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _pipeline.pipelineLayout, _descriptorSet);
 
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
