@@ -8,7 +8,6 @@ namespace SharpGame.Samples
     public class MacOSWindow : IPlatform
     {
         private readonly string _title;
-        private readonly Timer _timer = new Timer();
         private readonly Application _app;
 
         private NativeMacOS.NativeApp _nativeApp;
@@ -16,10 +15,6 @@ namespace SharpGame.Samples
         private NativeMacOS.NativeMetalView _nativeMetalView;
 
         private bool _appPaused;
-        private bool _running;
-
-        private int _frameCount;
-        private float _timeElapsed;
 
         public MacOSWindow(string title, Application app)
         {
@@ -33,6 +28,9 @@ namespace SharpGame.Samples
         public int Height { get; private set; } = 720;
         public PlatformType Platform => PlatformType.MacOS;
 
+        public string Tittle { get => _nativeWindow.Title; set => _nativeWindow.Title = value; }
+
+        public void ProcessEvents() => _nativeApp.ProcessEvents();
         public Stream Open(string path) => new FileStream(Path.Combine("bin", path), FileMode.Open, FileAccess.Read);
 
         public void Initialize()
@@ -44,12 +42,12 @@ namespace SharpGame.Samples
             _nativeWindow.BeginResizing += () =>
             {
                 _appPaused = true;
-                _timer.Stop();
+                //_timer.Stop();
             };
             _nativeWindow.EndResizing += () =>
             {
                 _appPaused = false;
-                _timer.Start();
+                //_timer.Start();
                 _app.Resize();
             };
             _nativeWindow.Resized += size =>
@@ -59,33 +57,20 @@ namespace SharpGame.Samples
             };
             _nativeWindow.CloseRequested += () =>
             {
-                _running = false;
+                _app.Quit();
             };
             _nativeMetalView = new NativeMacOS.NativeMetalView(_nativeWindow);
 
             _app.Initialize(this);
-            _running = true;
-            _timer.Start();
+            //_running = true;
+            //_timer.Start();
         }
 
         public void Run()
         {
-            _running = true;
-            _timer.Reset();
-            while (_running)
-            {
-                _nativeApp.ProcessEvents();
-                _timer.Tick();
-                if (!_appPaused)
-                {
-                    CalculateFrameRateStats();
-                    _app.Tick(_timer);
-                }
-                else
-                {
-                    Thread.Sleep(100);
-                }
-            }
+            Initialize();
+
+            _app.Run();
         }
 
         public void Dispose()
@@ -94,22 +79,6 @@ namespace SharpGame.Samples
             _nativeWindow.Dispose();
             _nativeApp.Dispose();
         }
-
-        private void CalculateFrameRateStats()
-        {
-            _frameCount++;
-
-            if (_timer.TotalTime - _timeElapsed >= 1.0f)
-            {
-                float fps = _frameCount;
-                float mspf = 1000.0f / fps;
-
-                _nativeWindow.Title = $"{_title}    Fps: {fps}    Mspf: {mspf}";
-
-                // Reset for next average.
-                _frameCount = 0;
-                _timeElapsed += 1.0f;
-            }
-        }
+        
     }
 }

@@ -20,13 +20,16 @@ namespace SharpGame
         IntPtr InstanceHandle { get; }
         int Width { get; }
         int Height { get; }
-        PlatformType Platform { get; }
+        string Tittle { get; set; }
 
+        PlatformType Platform { get; }
+        void ProcessEvents();
         Stream Open(string path);
     }
 
     public abstract class Application : Object
     {
+        public string Name { get; set; }
         public IPlatform Platform { get; set; }
         public FileSystem FileSystem { get; private set; }
         public Graphics Graphics { get; private set; }
@@ -34,6 +37,12 @@ namespace SharpGame
         public ResourceCache ResourceCache { get; private set; }
 
         bool inited = false;
+
+        private Timer _timer;
+        private bool _running;   // Is the application running?
+        private int _frameCount;
+        private float _timeElapsed;
+
         public Application()
         {
             new Context();
@@ -41,9 +50,11 @@ namespace SharpGame
 
         public void Initialize(IPlatform host)
         {
+            Name = host.Tittle;
             Platform = host;
 
             FileSystem = CreateSubsystem<FileSystem>(Platform);
+            _timer = CreateSubsystem<Timer>();
             Graphics = CreateSubsystem<Graphics>(Platform);
             ResourceCache = CreateSubsystem<ResourceCache>("Content");
             Renderer = CreateSubsystem<Renderer>();
@@ -87,6 +98,57 @@ namespace SharpGame
 
             // Re-record command buffers.
             RecordCommandBuffers();
+        }
+
+        public void Quit()
+        {
+            _running = false;
+        }
+
+        public void Run()
+        {
+            _running = true;
+            _timer.Reset();
+
+            //void r()
+            {
+                while (_running)
+                {
+                    Platform.ProcessEvents();
+
+                    _timer.Tick();
+
+                    //if (!_appPaused)
+                    {
+                        CalculateFrameRateStats();
+                        Tick(_timer);
+                    }
+                    //else
+                    //{
+                    //    Thread.Sleep(100);
+                    //}
+                }
+
+            }
+
+            //new Thread(r).Start();
+        }
+
+        private void CalculateFrameRateStats()
+        {
+            _frameCount++;
+
+            if (_timer.TotalTime - _timeElapsed >= 1.0f)
+            {
+                float fps = _frameCount;
+                float mspf = 1000.0f / fps;
+
+                Platform.Tittle = $"{Name}    Fps: {fps}    Mspf: {mspf}";
+
+                // Reset for next average.
+                _frameCount = 0;
+                _timeElapsed += 1.0f;
+            }
         }
 
         public void Tick(Timer timer)

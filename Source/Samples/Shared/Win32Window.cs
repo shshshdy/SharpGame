@@ -9,7 +9,6 @@ namespace SharpGame.Samples
     public class Win32Window : IPlatform
     {
         private readonly string _title;
-        private readonly Timer _timer = new Timer();
         private readonly Application _app;
         private Form _form;
 
@@ -17,11 +16,8 @@ namespace SharpGame.Samples
         private bool _minimized; // Is the application minimized?
         private bool _maximized; // Is the application maximized?
         private bool _resizing;  // Are the resize bars being dragged?
-        private bool _running;   // Is the application running?
-        private FormWindowState _lastWindowState = FormWindowState.Normal;
 
-        private int _frameCount;
-        private float _timeElapsed;
+        private FormWindowState _lastWindowState = FormWindowState.Normal;
 
         public Win32Window(string title, Application app)
         {
@@ -35,6 +31,9 @@ namespace SharpGame.Samples
         public int Height { get; private set; } = 720;
         public PlatformType Platform => PlatformType.Win32;
 
+        public string Tittle { get => _form.Text; set => _form.Text = value; }
+
+        public void ProcessEvents() => System.Windows.Forms.Application.DoEvents();
         public Stream Open(string path) => new FileStream(path, FileMode.Open, FileAccess.Read);
 
         public void Initialize()
@@ -52,26 +51,26 @@ namespace SharpGame.Samples
             {
                 _appPaused = true;
                 _resizing = true;
-                _timer.Stop();
+                //_timer.Stop();
             };
             _form.ResizeEnd += (sender, e) =>
             {
                 _appPaused = false;
                 _resizing = false;
-                _timer.Start();
+                //_timer.Start();
                 _app.Resize();
             };
             _form.Activated += (sender, e) =>
             {
                 _appPaused = _form.WindowState == FormWindowState.Minimized;
-                _timer.Start();
+               // _timer.Start();
             };
             _form.Deactivate += (sender, e) =>
             {
                 _appPaused = true;
-                _timer.Stop();
+               // _timer.Stop();
             };
-            _form.HandleDestroyed += (sender, e) => _running = false;
+            _form.HandleDestroyed += (sender, e) => _app.Quit();
             _form.Resize += (sender, e) =>
             {
                 Width = _form.ClientSize.Width;
@@ -134,31 +133,14 @@ namespace SharpGame.Samples
 
         public void Run()
         {
-            _running = true;
+            Initialize();
+
             _form.Show();
             _form.Update();
-            _timer.Reset();
-            
-            //void r()
-            {
-                while (_running)
-                {
-                    System.Windows.Forms.Application.DoEvents();
-                    _timer.Tick();
-                    if (!_appPaused)
-                    {
-                        CalculateFrameRateStats();
-                        _app.Tick(_timer);
-                    }
-                    else
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
 
-            }
 
-            //new Thread(r).Start();
+            _app.Run();
+
         }
 
 
@@ -168,21 +150,5 @@ namespace SharpGame.Samples
             _app.Dispose();
         }
 
-        private void CalculateFrameRateStats()
-        {
-            _frameCount++;
-
-            if (_timer.TotalTime - _timeElapsed >= 1.0f)
-            {
-                float fps = _frameCount;
-                float mspf = 1000.0f / fps;
-
-                _form.Text = $"{_title}    Fps: {fps}    Mspf: {mspf}";
-
-                // Reset for next average.
-                _frameCount = 0;
-                _timeElapsed += 1.0f;
-            }
-        }
     }
 }

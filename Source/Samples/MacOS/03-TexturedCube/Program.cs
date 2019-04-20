@@ -15,7 +15,6 @@ namespace SharpGame.Samples.TexturedCube
                 Assembly.GetExecutingAssembly().GetName().Name,
                 new TexturedCubeApp()))
             {
-                window.Initialize();
                 window.Run();
             }
         }
