@@ -17,7 +17,7 @@ namespace SharpGame
 
         public RenderPass MainRenderPass => _renderPass;
 
-        List<Viewport> viewports_;
+        private List<View> views_ = new List<View>();
 
         public Renderer()
         {
@@ -30,6 +30,11 @@ namespace SharpGame
             _renderPass = Graphics.ToDisposeFrame(CreateRenderPass());
             _imageViews = Graphics.ToDisposeFrame(CreateImageViews());
             _framebuffers = Graphics.ToDisposeFrame(CreateFramebuffers());
+        }
+
+        public void Update()
+        {
+
         }
 
         private RenderPass CreateRenderPass()

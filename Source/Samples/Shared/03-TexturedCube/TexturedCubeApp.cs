@@ -67,10 +67,7 @@ namespace SharpGame.Samples.TexturedCube
             };
 
             _shader.Load();
-        }
 
-        protected override void InitializeFrame()
-        {
             _pipeline = new Pipeline
             {
                 VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo(
@@ -82,7 +79,7 @@ namespace SharpGame.Samples.TexturedCube
                     new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
                 }
             ),
-            RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
+                RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
                 {
                     PolygonMode = PolygonMode.Fill,
                     CullMode = CullModes.Back,
@@ -128,6 +125,10 @@ namespace SharpGame.Samples.TexturedCube
                     )
             };
 
+        }
+
+        protected override void InitializeFrame()
+        {
             SetViewProjection();
         }
 

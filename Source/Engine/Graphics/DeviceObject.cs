@@ -16,17 +16,14 @@ namespace SharpGame
             }
         }          
         
-        public static void DisposeAll()
-        {
-            foreach (var obj in deviceObjects)
-            {
-                obj.Dispose();
-            }
-        }
-
         public DeviceObject()
         {
             deviceObjects.Add(this);
+        }
+
+        public override void Dispose()
+        {
+            deviceObjects.Remove(this);
         }
 
         protected abstract void Recreate();

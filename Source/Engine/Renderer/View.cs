@@ -6,22 +6,6 @@ using VulkanCore;
 namespace SharpGame
 {
     /*
-    public class RenderPass : IDeviceObject
-    {
-        internal VulkanCore.RenderPass renderPass;
-
-        public void Dispose()
-        {
-            renderPass?.Dispose();
-        }
-
-
-        
-        public void Recreate()
-        {
-        }
-    }*/
-    /*
     public class FrameBuffer : IDeviceObject
     {
         internal VulkanCore.Framebuffer framebuffer;

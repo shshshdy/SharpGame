@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace SharpGame
 {
-    public class Timer
+    public class Timer : Object
     {
         private readonly double _secondsPerCount;
         private double _deltaTime;

@@ -30,10 +30,7 @@ namespace SharpGame.Samples.ColoredTriangle
             };
 
             _shader.Load();
-        }
 
-        protected override void InitializeFrame()
-        {
             _pipeline = new Pipeline
             {
 
@@ -84,6 +81,11 @@ namespace SharpGame.Samples.ColoredTriangle
                     }
                 })
             };
+        }
+
+        protected override void InitializeFrame()
+        {
+           
 
         }
         

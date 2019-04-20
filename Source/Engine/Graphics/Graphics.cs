@@ -68,34 +68,7 @@ namespace SharpGame
                 ToDispose(SubmitFences[i] = Device.CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled)));
             
         }
-
-        public RenderPass CreateRenderPass()
-        {
-            var subpasses = new[]
-            {
-                new SubpassDescription(new[] { new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal) })
-            };
-            var attachments = new[]
-            {
-                new AttachmentDescription
-                {
-                    Samples = SampleCounts.Count1,
-                    Format = Swapchain.Format,
-                    InitialLayout = ImageLayout.Undefined,
-                    FinalLayout = ImageLayout.PresentSrcKhr,
-                    LoadOp = AttachmentLoadOp.Clear,
-                    StoreOp = AttachmentStoreOp.Store,
-                    StencilLoadOp = AttachmentLoadOp.DontCare,
-                    StencilStoreOp = AttachmentStoreOp.DontCare
-                }
-            };
-
-            var createInfo = new RenderPassCreateInfo(subpasses, attachments);
-            var rp = Device.CreateRenderPass(createInfo);
-            _toDisposePermanent.Push(rp);
-            return rp;
-        }
-
+        
         public void Resize()
         {
             Device.WaitIdle();
@@ -104,7 +77,7 @@ namespace SharpGame
             while (_toDisposeFrame.Count > 0)
                 _toDisposeFrame.Pop().Dispose();
 
-            //DeviceObject.DisposeAll();
+            DeviceObject.RecreateAll();
 
             // Reset all the command buffers allocated from the pools.
             GraphicsCommandPool.Reset();
