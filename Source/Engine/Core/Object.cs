@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SharpGame
 {
-    public class Object : IDisposable
+    public class Object : Observer
     {
         internal static Context _context;
 
@@ -17,7 +18,14 @@ namespace SharpGame
         public static T RegisterSubsystem<T>(T sub) where T : Object
             => _context.RegisterSubsystem(sub);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>() => _context.Get<T>();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator bool(Object obj)
+        {
+            return obj != null;
+        }
 
         public virtual void Dispose()
         {

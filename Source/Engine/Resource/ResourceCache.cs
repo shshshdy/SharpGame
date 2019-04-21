@@ -9,16 +9,16 @@ namespace SharpGame
     public class ResourceCache : Object
     {
         public static string ContentRoot { get; set; }
-        private readonly Dictionary<string, IDisposable> _cachedContent = new Dictionary<string, IDisposable>();
+        private readonly Dictionary<string, Resource> _cachedContent = new Dictionary<string, Resource>();
 
         public ResourceCache(string contentRoot)
         {
             ContentRoot = contentRoot;
         }
 
-        public T Load<T>(string contentName)
+        public T Load<T>(string contentName) where T : Resource
         {
-            if (_cachedContent.TryGetValue(contentName, out IDisposable value))
+            if (_cachedContent.TryGetValue(contentName, out Resource value))
                 return (T)value;
 
             string path = Path.Combine(ContentRoot, contentName);
@@ -28,7 +28,7 @@ namespace SharpGame
             Type type = typeof(T);
             if (type == typeof(ShaderModule))
             {
-                value = Shader.LoadShaderModule(path);
+                value = ShaderModule.Load(path);
             }
             else if (type == typeof(Texture))
             {

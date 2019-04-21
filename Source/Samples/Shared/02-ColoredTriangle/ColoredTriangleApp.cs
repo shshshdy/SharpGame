@@ -82,13 +82,7 @@ namespace SharpGame.Samples.ColoredTriangle
                 })
             };
         }
-
-        protected override void InitializeFrame()
-        {
-           
-
-        }
-        
+                
         protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
         {
             var renderPassBeginInfo = new RenderPassBeginInfo(

@@ -127,11 +127,6 @@ namespace SharpGame.Samples.TexturedCube
 
         }
 
-        protected override void InitializeFrame()
-        {
-            SetViewProjection();
-        }
-
         protected override void Update(Timer timer)
         {
             const float twoPi      = (float)Math.PI * 2.0f;
@@ -143,6 +138,8 @@ namespace SharpGame.Samples.TexturedCube
                 timer.TotalTime * yawSpeed % twoPi,
                 timer.TotalTime * pitchSpeed % twoPi,
                 timer.TotalTime * rollSpeed % twoPi);
+
+            SetViewProjection();
 
             UpdateUniformBuffers();
         }

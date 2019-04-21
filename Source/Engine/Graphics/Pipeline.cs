@@ -5,7 +5,7 @@ using VulkanCore;
 
 namespace SharpGame
 {
-    public class Pipeline : DeviceObject
+    public class Pipeline : GPUObject
     {
         public PipelineRasterizationStateCreateInfo RasterizationStateCreateInfo { get; set; }
         public PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo { get; set; } = new PipelineMultisampleStateCreateInfo
@@ -133,9 +133,18 @@ namespace SharpGame
             return pipeline;
         }
 
-        public VulkanCore.Pipeline GetComputePipeline(View view, RenderPass renderPass)
+        public VulkanCore.Pipeline GetComputePipeline(RenderPass renderPass, ComputeShader shader)
         {
-            return null;
+            var graphics = Get<Graphics>();
+
+            pipelineLayout = graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
+
+            var pipelineCreateInfo = new ComputePipelineCreateInfo(
+                shader.GetShaderStageCreateInfo(), pipelineLayout);
+
+            pipeline = graphics.Device.CreateComputePipeline(pipelineCreateInfo);
+            graphics.ToDisposeFrame(pipeline);
+            return pipeline;
         }
         
     }

@@ -179,7 +179,9 @@ namespace SharpGame
         public void Tick(Timer timer)
         {
             Update(timer);
-            //if(inited)
+
+            Renderer.Update();
+            
             Graphics.Draw(timer);
         }
 

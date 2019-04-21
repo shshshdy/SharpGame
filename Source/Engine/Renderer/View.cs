@@ -27,6 +27,9 @@ namespace SharpGame
     {
         public Scene scene;
         public Camera camera;
+
+        public RenderPath renderPath;
+
         internal PipelineViewportStateCreateInfo viewportStateCreateInfo;
     }
 }

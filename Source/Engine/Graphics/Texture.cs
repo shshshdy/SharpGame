@@ -20,8 +20,13 @@ namespace SharpGame
         }
     }
 
-    public class Texture : Object
+    public class Texture : Resource
     {
+        public Texture()
+        {
+
+        }
+
         private Texture(Image image, DeviceMemory memory, ImageView view, Format format)
         {
             Image = image;
@@ -42,8 +47,6 @@ namespace SharpGame
             Memory.Dispose();
             Image.Dispose();
         }
-
-        public static implicit operator Image(Texture value) => value.Image;
 
         public static Texture DepthStencil(int width, int height)
         {

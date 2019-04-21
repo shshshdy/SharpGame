@@ -77,7 +77,7 @@ namespace SharpGame
             while (_toDisposeFrame.Count > 0)
                 _toDisposeFrame.Pop().Dispose();
 
-            DeviceObject.RecreateAll();
+            GPUObject.RecreateAll();
 
             // Reset all the command buffers allocated from the pools.
             GraphicsCommandPool.Reset();
@@ -154,6 +154,8 @@ namespace SharpGame
 
             while (_toDisposePermanent.Count > 0)
                 _toDisposePermanent.Pop().Dispose();
+
+            GPUObject.DisposeAll();
 
             ComputeCommandPool.Dispose();
             GraphicsCommandPool.Dispose();

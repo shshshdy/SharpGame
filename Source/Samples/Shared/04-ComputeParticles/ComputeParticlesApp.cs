@@ -28,17 +28,19 @@ namespace SharpGame.Samples.ComputeParticles
 
         private Sampler _sampler;
         private Texture _particleDiffuseMap;
-
         private DescriptorSetLayout _graphicsDescriptorSetLayout;
         private DescriptorSet _graphicsDescriptorSet;
+
         private Pipeline _graphicsPipeline;
         private Shader _shader;
 
         private GraphicsBuffer _storageBuffer;
         private GraphicsBuffer _uniformBuffer;
         private DescriptorSetLayout _computeDescriptorSetLayout;
-        private PipelineLayout _computePipelineLayout;
+
         private Pipeline _computePipeline;
+        private ComputeShader _computeShader;
+
         private DescriptorSet _computeDescriptorSet;
         private CommandBuffer _computeCmdBuffer;
         private Fence _computeFence;
@@ -55,7 +57,6 @@ namespace SharpGame.Samples.ComputeParticles
             _storageBuffer               = ToDispose(CreateStorageBuffer());
             _uniformBuffer               = ToDispose(GraphicsBuffer.DynamicUniform<UniformBufferObject>(1));
             _computeDescriptorSetLayout  = ToDispose(CreateComputeDescriptorSetLayout());
-            _computePipelineLayout       = ToDispose(CreateComputePipelineLayout());
             _computeDescriptorSet        = CreateComputeDescriptorSet();
             _computeCmdBuffer            = Graphics.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             _computeFence                = ToDispose(Graphics.Device.CreateFence());
@@ -81,11 +82,23 @@ namespace SharpGame.Samples.ComputeParticles
             };
 
             _shader.Load();
+
+            _computeShader = new ComputeShader
+            {
+                Stage = ShaderStages.Compute,
+                FileName = "shader.comp.spv",
+                FuncName = "main"
+            };
+
+            _computeShader.Load();
         }
 
         protected override void InitializeFrame()
         {
-            _computePipeline  = ToDispose(CreateComputePipeline());
+            _computePipeline = new Pipeline
+            {
+                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _computeDescriptorSetLayout })               
+            };
             
             _graphicsPipeline = new Pipeline
             {
@@ -187,7 +200,6 @@ namespace SharpGame.Samples.ComputeParticles
         private void RecordComputeCommandBuffer()
         {
             // Record particle movements.
-
             var graphicsToComputeBarrier = new BufferMemoryBarrier(_storageBuffer,
                 Accesses.VertexAttributeRead, Accesses.ShaderWrite,
                 Graphics.GraphicsQueue.FamilyIndex, Graphics.ComputeQueue.FamilyIndex);
@@ -202,8 +214,9 @@ namespace SharpGame.Samples.ComputeParticles
             // before compute starts to write to the buffer.
             _computeCmdBuffer.CmdPipelineBarrier(PipelineStages.VertexInput, PipelineStages.ComputeShader,
                 bufferMemoryBarriers: new[] { graphicsToComputeBarrier });
-            _computeCmdBuffer.CmdBindPipeline(PipelineBindPoint.Compute, _computePipeline.pipeline);
-            _computeCmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Compute, _computePipelineLayout, _computeDescriptorSet);
+            var pipeline = _computePipeline.GetComputePipeline(Renderer.MainRenderPass, _computeShader);
+                _computeCmdBuffer.CmdBindPipeline(PipelineBindPoint.Compute, pipeline);
+            _computeCmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Compute, _computePipeline.pipelineLayout, _computeDescriptorSet);
             _computeCmdBuffer.CmdDispatch(_storageBuffer.Count / 256, 1, 1);
             // Add memory barrier to ensure that compute shader has finished writing to the buffer.
             // Without this the (rendering) vertex shader may display incomplete results (partial
@@ -296,25 +309,6 @@ namespace SharpGame.Samples.ComputeParticles
             return Graphics.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
                 new DescriptorSetLayoutBinding(0, DescriptorType.StorageBuffer, 1, ShaderStages.Compute),
                 new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, 1, ShaderStages.Compute)));
-        }
-
-        private PipelineLayout CreateComputePipelineLayout()
-        {
-            return Graphics.Device.CreatePipelineLayout(new PipelineLayoutCreateInfo(new[] { _computeDescriptorSetLayout }));
-        }
-
-        private Pipeline CreateComputePipeline()
-        {
-            var pipelineCreateInfo = new ComputePipelineCreateInfo(
-                new PipelineShaderStageCreateInfo(ShaderStages.Compute, ResourceCache.Load<ShaderModule>("shader.comp.spv"), "main"),
-                _computePipelineLayout);
-
-            var pipeline = new Pipeline
-            {
-                pipeline = Graphics.Device.CreateComputePipeline(pipelineCreateInfo)
-            };
-
-            return pipeline;
         }
 
         private DescriptorSet CreateComputeDescriptorSet()
