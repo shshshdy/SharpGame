@@ -74,6 +74,12 @@ namespace SharpGame
         {
         }
 
+        public ComputeShader(string fileName, string funcName = "main")
+        {
+            FileName = fileName;
+            FuncName = funcName;
+        }
+
         public async override void Build()
         {
             var resourceCache = Get<ResourceCache>();

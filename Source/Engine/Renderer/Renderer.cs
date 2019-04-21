@@ -20,13 +20,7 @@ namespace SharpGame
 
             MainRenderPass = new RenderPass();
         }
-
-        public void RecordCommandBuffer()
-        {
-            
-
-        }
-
+        
         public View CreateViewport()
         {
             var view = new View();
@@ -44,6 +38,8 @@ namespace SharpGame
 
         public void Render()
         {
+            SendGlobalEvent(new RenderBegin());
+
             // Acquire an index of drawing image for this frame.
             int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
 
@@ -100,9 +96,12 @@ namespace SharpGame
 
             // Present the color output to screen.
             Graphics.PresentQueue.PresentKhr(Graphics.RenderingFinishedSemaphore, Graphics.Swapchain, imageIndex);
-            
 
-           // Graphics.Draw();
+
+            // Graphics.Draw();
+
+
+            SendGlobalEvent(new RenderEnd());
         }
 
     }

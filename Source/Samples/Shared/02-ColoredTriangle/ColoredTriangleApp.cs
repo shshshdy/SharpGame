@@ -87,7 +87,7 @@ namespace SharpGame.Samples.ColoredTriangle
         {
             var cmdBuffer = e.commandBuffer;
 
-            var pipeline = pipeline_.GetGraphicsPipeline(Renderer.MainRenderPass, shader_);
+            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, shader_, null);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdDraw(3);
         }

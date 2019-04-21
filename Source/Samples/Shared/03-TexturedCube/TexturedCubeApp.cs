@@ -15,6 +15,8 @@ namespace SharpGame.Samples.TexturedCube
 
     public class TexturedCubeApp : Application
     {
+        private Geometry geometry_;
+
         private Pipeline pipeline_;
         private Shader shader_;
 
@@ -25,23 +27,25 @@ namespace SharpGame.Samples.TexturedCube
         private Sampler _sampler;
         private Texture _cubeTexture;
 
-        private GraphicsBuffer _cubeVertices;
-        private GraphicsBuffer _cubeIndices;
-
         private GraphicsBuffer _uniformBuffer;
         private WorldViewProjection _wvp;
 
 
         protected override void OnInit()
         {
-            this.SubscribeToEvent<RenderPassBegin>(Handle);
-
+            SubscribeToEvent<RenderPassBegin>(Handle);
 
             var cube = GeometricPrimitive.Box(1.0f, 1.0f, 1.0f);
 
+            geometry_ = new Geometry
+            {
+                VertexBuffers = new[] { GraphicsBuffer.Vertex(cube.Vertices) },
+                IndexBuffer = GraphicsBuffer.Index(cube.Indices)
+            };
+
+            geometry_.SetDrawRange(PrimitiveTopology.TriangleList, 0, cube.Indices.Length);
+            
             _cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx");
-            _cubeVertices        = ToDispose(GraphicsBuffer.Vertex(cube.Vertices));
-            _cubeIndices         = ToDispose(GraphicsBuffer.Index(cube.Indices));
             _sampler             = ToDispose(CreateSampler());
             _uniformBuffer       = ToDispose(GraphicsBuffer.DynamicUniform<WorldViewProjection>(1));
             _descriptorSetLayout = ToDispose(CreateDescriptorSetLayout());
@@ -102,29 +106,31 @@ namespace SharpGame.Samples.TexturedCube
                     }
                 },
 
-                ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo(new[]
-                {
-                    new PipelineColorBlendAttachmentState
+                ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo
+                (
+                    new[]
                     {
-                        SrcColorBlendFactor = BlendFactor.One,
-                        DstColorBlendFactor = BlendFactor.Zero,
-                        ColorBlendOp = BlendOp.Add,
-                        SrcAlphaBlendFactor = BlendFactor.One,
-                        DstAlphaBlendFactor = BlendFactor.Zero,
-                        AlphaBlendOp = BlendOp.Add,
-                        ColorWriteMask = ColorComponents.All
+                        new PipelineColorBlendAttachmentState
+                        {
+                            SrcColorBlendFactor = BlendFactor.One,
+                            DstColorBlendFactor = BlendFactor.Zero,
+                            ColorBlendOp = BlendOp.Add,
+                            SrcAlphaBlendFactor = BlendFactor.One,
+                            DstAlphaBlendFactor = BlendFactor.Zero,
+                            AlphaBlendOp = BlendOp.Add,
+                            ColorWriteMask = ColorComponents.All
+                        }
                     }
-                }),
+                ),
 
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(
-                    new[] { _descriptorSetLayout }
-                    )
+                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout })
             };
 
         }
 
         public override void Dispose()
         {
+            geometry_.Dispose();
             shader_.Dispose();
             pipeline_.Dispose();
 
@@ -152,13 +158,10 @@ namespace SharpGame.Samples.TexturedCube
         {
             var cmdBuffer = e.commandBuffer;
 
-            var pipeline = pipeline_.GetGraphicsPipeline(Renderer.MainRenderPass, shader_);
+            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, shader_, null);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
-
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
-            cmdBuffer.CmdBindVertexBuffer(_cubeVertices);
-            cmdBuffer.CmdBindIndexBuffer(_cubeIndices);
-            cmdBuffer.CmdDrawIndexed(_cubeIndices.Count);
+            geometry_.Draw(cmdBuffer);
         }
 
         private Sampler CreateSampler()

@@ -98,7 +98,7 @@ namespace SharpGame
             pipeline = null;
         }
 
-        public VulkanCore.Pipeline GetGraphicsPipeline(RenderPass renderPass, Shader shader)
+        public VulkanCore.Pipeline GetGraphicsPipeline(RenderPass renderPass, Shader shader, Geometry geometry)
         {
             if(pipeline != null)
             {

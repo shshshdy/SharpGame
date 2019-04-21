@@ -108,13 +108,13 @@ namespace SharpGame
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
                 framebuffer_[imageIndex], new Rect2D(Offset2D.Zero, new Extent2D(Graphics.Width, Graphics.Height)),
-                new ClearColorValue(new ColorF4(0.39f, 0.58f, 0.93f, 1.0f)),
+                new ClearColorValue(new ColorF4(0.0f, 0.0f, 0.0f, 1.0f)),
                 new ClearDepthStencilValue(1.0f, 0)
             );
 
             cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
 
-            SendGlobalEvent(new RenderPassBegin { commandBuffer = cmdBuffer, imageIndex = imageIndex });
+            SendGlobalEvent(new RenderPassBegin { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
         }
 
         public void Draw(CommandBuffer cmdBuffer, int imageIndex)
@@ -132,7 +132,7 @@ namespace SharpGame
         public void End(CommandBuffer cmdBuffer, int imageIndex)
         {
             cmdBuffer.CmdEndRenderPass();
-            SendGlobalEvent(new RenderPassEnd { commandBuffer = cmdBuffer, imageIndex = imageIndex });
+            SendGlobalEvent(new RenderPassEnd { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
         }
     }
 }

@@ -5,23 +5,6 @@ using VulkanCore;
 
 namespace SharpGame
 {
-    /*
-    public class FrameBuffer : IDeviceObject
-    {
-        internal VulkanCore.Framebuffer framebuffer;
-        internal VulkanCore.ImageView[] imageViews;
-
-        public void Dispose()
-        {
-        }
-
-        public void Recreate()
-        {
-        }
-
-
-    }
-*/
 
     public class View : Object
     {
