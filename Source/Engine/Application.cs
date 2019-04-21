@@ -42,6 +42,7 @@ namespace SharpGame
         private bool _running;   // Is the application running?
         private int _frameCount;
         private float _timeElapsed;
+        private bool _appPaused = false;
 
         public Application()
         {
@@ -100,6 +101,30 @@ namespace SharpGame
             RecordCommandBuffers();
         }
 
+        public void Activate()
+        {
+            _appPaused = false;
+            _timer.Start();
+        }
+
+        public void Deactivate()
+        {
+            _appPaused = true;
+            _timer.Stop();
+        }
+
+        public void Pause()
+        {
+            _appPaused = true;
+            _timer.Stop();
+        }
+
+        public void Resume()
+        {
+            _appPaused = false;
+            _timer.Start();
+        }
+
         public void Quit()
         {
             _running = false;
@@ -118,15 +143,15 @@ namespace SharpGame
 
                     _timer.Tick();
 
-                    //if (!_appPaused)
+                    if (!_appPaused)
                     {
                         CalculateFrameRateStats();
                         Tick(_timer);
                     }
-                    //else
-                    //{
-                    //    Thread.Sleep(100);
-                    //}
+                    else
+                    {
+                        Thread.Sleep(100);
+                    }
                 }
 
             }

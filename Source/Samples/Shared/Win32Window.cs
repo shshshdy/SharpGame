@@ -12,7 +12,6 @@ namespace SharpGame.Samples
         private readonly Application _app;
         private Form _form;
 
-        private bool _appPaused; // Is the application paused?
         private bool _minimized; // Is the application minimized?
         private bool _maximized; // Is the application maximized?
         private bool _resizing;  // Are the resize bars being dragged?
@@ -49,27 +48,26 @@ namespace SharpGame.Samples
             };
             _form.ResizeBegin += (sender, e) =>
             {
-                _appPaused = true;
+                _app.Pause();
                 _resizing = true;
-                //_timer.Stop();
+                
             };
             _form.ResizeEnd += (sender, e) =>
             {
-                _appPaused = false;
-                _resizing = false;
-                //_timer.Start();
+                _app.Resume();
+                _resizing = false;                
                 _app.Resize();
             };
             _form.Activated += (sender, e) =>
             {
-                _appPaused = _form.WindowState == FormWindowState.Minimized;
-               // _timer.Start();
+                //_appPaused = _form.WindowState == FormWindowState.Minimized;
+                _app.Activate();
             };
             _form.Deactivate += (sender, e) =>
             {
-                _appPaused = true;
-               // _timer.Stop();
+                _app.Deactivate();
             };
+
             _form.HandleDestroyed += (sender, e) => _app.Quit();
             _form.Resize += (sender, e) =>
             {
@@ -81,14 +79,14 @@ namespace SharpGame.Samples
                     _lastWindowState = _form.WindowState;
                     if (_form.WindowState == FormWindowState.Maximized)
                     {
-                        _appPaused = false;
+                        //_appPaused = false;
                         _minimized = false;
                         _maximized = true;
                         _app.Resize();
                     }
                     else if (_form.WindowState == FormWindowState.Minimized)
                     {
-                        _appPaused = true;
+                        //_appPaused = true;
                         _minimized = true;
                         _maximized = false;
                     }
@@ -96,13 +94,13 @@ namespace SharpGame.Samples
                     {
                         if (_minimized) // Restoring from minimized state?
                         {
-                            _appPaused = false;
+                            //_appPaused = false;
                             _minimized = false;
                             _app.Resize();
                         }
                         else if (_maximized) // Restoring from maximized state?
                         {
-                            _appPaused = false;
+                            //_appPaused = false;
                             _maximized = false;
                             _app.Resize();
                         }
@@ -137,7 +135,6 @@ namespace SharpGame.Samples
 
             _form.Show();
             _form.Update();
-
 
             _app.Run();
 

@@ -14,7 +14,6 @@ namespace SharpGame.Samples
         private NativeMacOS.NativeWindow _nativeWindow;
         private NativeMacOS.NativeMetalView _nativeMetalView;
 
-        private bool _appPaused;
 
         public MacOSWindow(string title, Application app)
         {
@@ -41,13 +40,11 @@ namespace SharpGame.Samples
             _nativeWindow.Title = _title;
             _nativeWindow.BeginResizing += () =>
             {
-                _appPaused = true;
-                //_timer.Stop();
+                _app.Pause();
             };
             _nativeWindow.EndResizing += () =>
             {
-                _appPaused = false;
-                //_timer.Start();
+                _app.Resume();
                 _app.Resize();
             };
             _nativeWindow.Resized += size =>
@@ -62,8 +59,7 @@ namespace SharpGame.Samples
             _nativeMetalView = new NativeMacOS.NativeMetalView(_nativeWindow);
 
             _app.Initialize(this);
-            //_running = true;
-            //_timer.Start();
+            
         }
 
         public void Run()
