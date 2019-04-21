@@ -8,6 +8,8 @@ namespace SharpGame
 {
     public class ShaderModule : Resource
     {
+        public byte[] Code { get; set; }
+
         internal VulkanCore.ShaderModule shaderModule;
         public async override void Load(Stream stream)
         {
@@ -16,17 +18,20 @@ namespace SharpGame
             using (var ms = new MemoryStream())
             {
                 await stream.CopyToAsync(ms, defaultBufferSize);
-                shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(ms.ToArray()));
+                Code = ms.ToArray();
             }
         }
 
         public async override void Build()
         {
+            var graphics = Get<Graphics>();
+            shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
         }
 
         public override void Dispose()
         {
             shaderModule?.Dispose();
+            Code = null;
 
             base.Dispose();
         }
@@ -48,19 +53,6 @@ namespace SharpGame
                 };
             }
         }
-        /*
-        public static async Task<ShaderModule> LoadShaderModuleAsync(string path)
-        {
-            var graphics = Get<Graphics>();
-            var fileSystem = Get<FileSystem>();
-            const int defaultBufferSize = 4096;
-            path = Path.Combine(ResourceCache.ContentRoot, path);
-            using (Stream stream = fileSystem.Open(path))
-            using (var ms = new MemoryStream())
-            {
-                await stream.CopyToAsync(ms, defaultBufferSize);
-                return graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(ms.ToArray()));
-            }
-        }*/
+
     }
 }

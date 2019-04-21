@@ -6,5 +6,6 @@ namespace SharpGame
 {
     public class Model : Resource
     {
+        public List<Geometry> geometries_;
     }
 }
