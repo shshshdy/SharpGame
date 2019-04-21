@@ -21,11 +21,13 @@ namespace SharpGame
 
         public Image[] SwapchainImages { get; private set; }
         public ImageView[] SwapchainImageViews { get; private set; }
-        public CommandBuffer[] CommandBuffers { get; private set; }
+        public CommandBuffer[] PrimaryCmdBuffers { get; private set; }
         public Fence[] SubmitFences { get; private set; }
 
         public Semaphore ImageAvailableSemaphore { get; private set; }
         public Semaphore RenderingFinishedSemaphore { get; private set; }
+
+        private System.Threading.Semaphore mainSem_;
         
         public Graphics(IPlatform host)
         {
@@ -57,10 +59,8 @@ namespace SharpGame
 
             CreateSwapchainImages();
 
-            //VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT
-
             // Create a command buffer for each swapchain image.
-            CommandBuffers = GraphicsCommandPool.AllocateBuffers(
+            PrimaryCmdBuffers = GraphicsCommandPool.AllocateBuffers(
                 new CommandBufferAllocateInfo(CommandBufferLevel.Primary, SwapchainImages.Length));
             // Create a fence for each commandbuffer so that we can wait before using it again
             SubmitFences = new Fence[SwapchainImages.Length];
@@ -122,7 +122,7 @@ namespace SharpGame
             GraphicsQueue.Submit(
                 ImageAvailableSemaphore,
                 PipelineStages.ColorAttachmentOutput,
-                CommandBuffers[imageIndex],
+                PrimaryCmdBuffers[imageIndex],
                 RenderingFinishedSemaphore,
                 SubmitFences[imageIndex]
             );

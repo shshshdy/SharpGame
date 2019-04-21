@@ -25,6 +25,7 @@ namespace SharpGame
         public Queue PresentQueue { get; private set; }
         public CommandPool GraphicsCommandPool { get; private set; }
         public CommandPool ComputeCommandPool { get; private set; }
+        public CommandPool[] SecondCommandPool { get; private set; }
 
         private Instance CreateInstance(bool debug)
         {
@@ -209,7 +210,7 @@ namespace SharpGame
 
             // Create command pool(s).
             GraphicsCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer| CommandPoolCreateFlags.Transient));
-            ComputeCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(computeQueueFamilyIndex));
+            ComputeCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(computeQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer | CommandPoolCreateFlags.Transient));
         }
 
     }

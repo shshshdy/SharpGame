@@ -53,7 +53,7 @@ namespace SharpGame
 
             var subresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1);
 
-            CommandBuffer cmdBuffer = Graphics.CommandBuffers[imageIndex];
+            CommandBuffer cmdBuffer = Graphics.PrimaryCmdBuffers[imageIndex];
 
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
 
@@ -93,7 +93,7 @@ namespace SharpGame
             Graphics.GraphicsQueue.Submit(
                 Graphics.ImageAvailableSemaphore,
                 PipelineStages.ColorAttachmentOutput,
-                Graphics.CommandBuffers[imageIndex],
+                Graphics.PrimaryCmdBuffers[imageIndex],
                 Graphics.RenderingFinishedSemaphore,
                 Graphics.SubmitFences[imageIndex]
             );
