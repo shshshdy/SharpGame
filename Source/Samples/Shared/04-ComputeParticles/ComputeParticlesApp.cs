@@ -91,10 +91,7 @@ namespace SharpGame.Samples.ComputeParticles
             };
 
             _computeShader.Load();
-        }
 
-        protected override void InitializeFrame()
-        {
             _computePipeline = new Pipeline
             {
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _computeDescriptorSetLayout })               
@@ -149,7 +146,7 @@ namespace SharpGame.Samples.ComputeParticles
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _graphicsDescriptorSetLayout })
             };
 
-            RecordComputeCommandBuffer();
+            //RecordComputeCommandBuffer();
         }
 
         protected override void Update(Timer timer)
@@ -182,7 +179,7 @@ namespace SharpGame.Samples.ComputeParticles
         }*/
 
         protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
-        {
+        {/*
             cmdBuffer.CmdBeginRenderPass(new RenderPassBeginInfo(
                 Renderer._framebuffers[imageIndex],
                 new Rect2D(0, 0, Platform.Width, Platform.Height),
@@ -194,7 +191,7 @@ namespace SharpGame.Samples.ComputeParticles
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet);
             cmdBuffer.CmdBindVertexBuffer(_storageBuffer);
             cmdBuffer.CmdDraw(_storageBuffer.Count);
-            cmdBuffer.CmdEndRenderPass();
+            cmdBuffer.CmdEndRenderPass();*/
         }
 
         private void RecordComputeCommandBuffer()

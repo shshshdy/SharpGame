@@ -9,8 +9,16 @@ namespace SharpGame
     public class ShaderModule : Resource
     {
         internal VulkanCore.ShaderModule shaderModule;
+
         public async override void Load()
         {
+        }
+
+        public override void Dispose()
+        {
+            shaderModule?.Dispose();
+
+            base.Dispose();
         }
 
         public static ShaderModule Load(string path)

@@ -33,7 +33,6 @@ namespace SharpGame.Samples.ColoredTriangle
 
             _pipeline = new Pipeline
             {
-
                 RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
                 {
                     PolygonMode = PolygonMode.Fill,
@@ -82,9 +81,17 @@ namespace SharpGame.Samples.ColoredTriangle
                 })
             };
         }
-                
-        protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
+
+        public override void Dispose()
         {
+            _shader.Dispose();
+            _pipeline.Dispose();
+
+            base.Dispose();
+        }
+
+        protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
+        {/*
             var renderPassBeginInfo = new RenderPassBeginInfo(
                 Renderer._framebuffers[imageIndex],
                 new Rect2D(Offset2D.Zero, new Extent2D(Platform.Width, Platform.Height)),
@@ -95,7 +102,7 @@ namespace SharpGame.Samples.ColoredTriangle
             var pipeline = _pipeline.GetGraphicsPipeline(Renderer.MainRenderPass, _shader);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdDraw(3);
-            cmdBuffer.CmdEndRenderPass();
+            cmdBuffer.CmdEndRenderPass();*/
         }
     }
 }

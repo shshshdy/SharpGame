@@ -6,11 +6,25 @@ namespace SharpGame
 {
     public abstract class GPUObject : Object
     {
+        public Graphics Graphics => Get<Graphics>();
+
+        public GPUObject()
+        {
+            GPUObjects_.Add(this);
+        }
+
+        public override void Dispose()
+        {
+            GPUObjects_.Remove(this);
+        }
+
+        protected abstract void Recreate();
+
         static List<GPUObject> GPUObjects_ = new List<GPUObject>();
 
         public static void RecreateAll()
         {
-            foreach(var obj in GPUObjects_)
+            foreach (var obj in GPUObjects_)
             {
                 obj.Recreate();
             }
@@ -24,18 +38,6 @@ namespace SharpGame
                 obj.Dispose();
             }
         }
-
-        public GPUObject()
-        {
-            GPUObjects_.Add(this);
-        }
-
-        public override void Dispose()
-        {
-            GPUObjects_.Remove(this);
-        }
-
-        protected abstract void Recreate();
 
     }
 }

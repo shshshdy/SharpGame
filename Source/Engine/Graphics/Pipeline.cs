@@ -89,7 +89,8 @@ namespace SharpGame
 
         public override void Dispose()
         {
-            pipeline.Dispose();
+            pipeline?.Dispose();
+            pipeline = null;
 
             base.Dispose();
         }
@@ -118,7 +119,7 @@ namespace SharpGame
             var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology);
 
             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
-                pipelineLayout, renderPass, 0,
+                pipelineLayout, renderPass.renderPass, 0,
                 shaderStageCreateInfos,
                 inputAssemblyStateCreateInfo,
                 VertexInputStateCreateInfo,

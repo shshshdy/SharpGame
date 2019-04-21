@@ -127,6 +127,14 @@ namespace SharpGame.Samples.TexturedCube
 
         }
 
+        public override void Dispose()
+        {
+            _shader.Dispose();
+            _pipeline.Dispose();
+
+            base.Dispose();
+        }
+
         protected override void Update(Timer timer)
         {
             const float twoPi      = (float)Math.PI * 2.0f;
@@ -145,7 +153,7 @@ namespace SharpGame.Samples.TexturedCube
         }
 
         protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
-        {
+        {/*
             var renderPassBeginInfo = new RenderPassBeginInfo(
                 Renderer._framebuffers[imageIndex],
                 new Rect2D(0, 0, Platform.Width, Platform.Height),
@@ -161,7 +169,7 @@ namespace SharpGame.Samples.TexturedCube
             cmdBuffer.CmdBindVertexBuffer(_cubeVertices);
             cmdBuffer.CmdBindIndexBuffer(_cubeIndices);
             cmdBuffer.CmdDrawIndexed(_cubeIndices.Count);
-            cmdBuffer.CmdEndRenderPass();
+            cmdBuffer.CmdEndRenderPass();*/
         }
 
         private Sampler CreateSampler()
@@ -192,7 +200,7 @@ namespace SharpGame.Samples.TexturedCube
             _wvp.View = Matrix4x4.CreateLookAt(Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
             _wvp.Projection = Matrix4x4.CreatePerspectiveFieldOfView(
                 (float)Math.PI / 4,
-                (float)Graphics.Host.Width / Graphics.Host.Height,
+                (float)Graphics.Platform.Width / Graphics.Platform.Height,
                 1.0f, 1000.0f);
         }
 

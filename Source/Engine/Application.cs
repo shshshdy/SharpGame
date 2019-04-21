@@ -36,8 +36,6 @@ namespace SharpGame
         public  Renderer Renderer { get; private set; }
         public ResourceCache ResourceCache { get; private set; }
 
-        bool inited = false;
-
         private Timer _timer;
         private bool _running;   // Is the application running?
         private int _frameCount;
@@ -58,23 +56,7 @@ namespace SharpGame
             _timer = CreateSubsystem<Timer>();
             Graphics = CreateSubsystem<Graphics>(Platform);
             ResourceCache = CreateSubsystem<ResourceCache>("Content");
-            Renderer = CreateSubsystem<Renderer>();
-
-            //new Thread(() =>
-            {
-
-                // Allow concrete samples to initialize their resources.
-                InitializePermanent();
-                //_initializingPermanent = false;
-                InitializeFrame();
-
-                // Record commands for execution by Vulkan.
-                RecordCommandBuffers();
-
-                inited = true;
-            }
-            //).Start();
-
+            Renderer = CreateSubsystem<Renderer>();               
         }
 
         /// <summary>
@@ -83,19 +65,12 @@ namespace SharpGame
         /// </summary>
         protected virtual void InitializePermanent() { }
 
-        /// <summary>
-        /// Allows derived classes to initializes resources that need to be recreated on events such
-        /// as window resize.
-        /// </summary>
-        protected virtual void InitializeFrame() { }
 
         public void Resize()
         {
             Graphics.Resize();
 
-            Renderer.Recreate();
-
-            InitializeFrame();
+            Renderer.RecordCommandBuffer();
 
             // Re-record command buffers.
             RecordCommandBuffers();
@@ -132,6 +107,11 @@ namespace SharpGame
 
         public void Run()
         {
+            // Allow concrete samples to initialize their resources.
+            InitializePermanent();
+
+            Renderer.RecordCommandBuffer();
+
             _running = true;
             _timer.Reset();
 
@@ -180,53 +160,16 @@ namespace SharpGame
         {
             Update(timer);
 
-            Renderer.Update();
+            Renderer.Render();
             
-            Graphics.Draw(timer);
         }
 
         protected virtual void Update(Timer timer) { }
 
         void RecordCommandBuffers()
         {
-            var subresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1);
-            for (int i = 0; i < Graphics.CommandBuffers.Length; i++)
-            {
-                CommandBuffer cmdBuffer = Graphics.CommandBuffers[i];
-                cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
-
-                if (Graphics.PresentQueue != Graphics.GraphicsQueue)
-                {
-                    var barrierFromPresentToDraw = new ImageMemoryBarrier(
-                        Graphics.SwapchainImages[i], subresourceRange,
-                        Accesses.MemoryRead, Accesses.ColorAttachmentWrite,
-                        ImageLayout.Undefined, ImageLayout.PresentSrcKhr,
-                        Graphics.PresentQueue.FamilyIndex, Graphics.GraphicsQueue.FamilyIndex);
-
-                    cmdBuffer.CmdPipelineBarrier(
-                        PipelineStages.ColorAttachmentOutput,
-                        PipelineStages.ColorAttachmentOutput,
-                        imageMemoryBarriers: new[] { barrierFromPresentToDraw });
-                }
-
-                RecordCommandBuffer(cmdBuffer, i);
-
-                if (Graphics.PresentQueue != Graphics.GraphicsQueue)
-                {
-                    var barrierFromDrawToPresent = new ImageMemoryBarrier(
-                        Graphics.SwapchainImages[i], subresourceRange,
-                        Accesses.ColorAttachmentWrite, Accesses.MemoryRead,
-                        ImageLayout.PresentSrcKhr, ImageLayout.PresentSrcKhr,
-                        Graphics.GraphicsQueue.FamilyIndex, Graphics.PresentQueue.FamilyIndex);
-
-                    cmdBuffer.CmdPipelineBarrier(
-                        PipelineStages.ColorAttachmentOutput,
-                        PipelineStages.BottomOfPipe,
-                        imageMemoryBarriers: new[] { barrierFromDrawToPresent });
-                }
-
-                cmdBuffer.End();
-            }
+            return;
+            
         }
 
 
@@ -237,7 +180,7 @@ namespace SharpGame
 
         public override void Dispose()
         {
-            Graphics.Dispose();
+            _context.Dispose();
         }
     }
 

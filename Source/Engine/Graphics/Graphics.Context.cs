@@ -30,7 +30,7 @@ namespace SharpGame
         {
             // Specify standard validation layers.
             string surfaceExtension;
-            switch (Host.Platform)
+            switch (Platform.Platform)
             {
                 case PlatformType.Android:
                     surfaceExtension = Constant.InstanceExtension.KhrAndroidSurface;
@@ -48,7 +48,7 @@ namespace SharpGame
             var createInfo = new InstanceCreateInfo();
 
             //Currently MoltenVK (used for MacOS) doesn't support the debug layer.
-            if (debug && Host.Platform != PlatformType.MacOS)
+            if (debug && Platform.Platform != PlatformType.MacOS)
             {
                 var availableLayers = Instance.EnumerateLayerProperties();
                 createInfo.EnabledLayerNames = new[] { Constant.InstanceLayer.LunarGStandardValidation }
@@ -75,7 +75,7 @@ namespace SharpGame
         private DebugReportCallbackExt CreateDebugReportCallback(bool debug)
         {
             //Currently MoltenVK (used for MacOS) doesn't support the debug layer.
-            if (!debug || Host.Platform == PlatformType.MacOS) return null;
+            if (!debug || Platform.Platform == PlatformType.MacOS) return null;
 
             // Attach debug callback.
             var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
@@ -92,14 +92,14 @@ namespace SharpGame
         private SurfaceKhr CreateSurface()
         {
             // Create surface.
-            switch (Host.Platform)
+            switch (Platform.Platform)
             {
                 case PlatformType.Android:
-                    return Instance.CreateAndroidSurfaceKhr(new AndroidSurfaceCreateInfoKhr(Host.WindowHandle));
+                    return Instance.CreateAndroidSurfaceKhr(new AndroidSurfaceCreateInfoKhr(Platform.WindowHandle));
                 case PlatformType.Win32:
-                    return Instance.CreateWin32SurfaceKhr(new Win32SurfaceCreateInfoKhr(Host.InstanceHandle, Host.WindowHandle));
+                    return Instance.CreateWin32SurfaceKhr(new Win32SurfaceCreateInfoKhr(Platform.InstanceHandle, Platform.WindowHandle));
                 case PlatformType.MacOS:
-                    return Instance.CreateMacOSSurfaceMvk(new MacOSSurfaceCreateInfoMvk(Host.WindowHandle));
+                    return Instance.CreateMacOSSurfaceMvk(new MacOSSurfaceCreateInfoMvk(Platform.WindowHandle));
                 default:
                     throw new NotImplementedException();
             }

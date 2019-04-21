@@ -30,6 +30,13 @@ namespace SharpGame
 
         public RenderPath renderPath;
 
+        private List<RenderPass> renderPasses = new List<RenderPass>();
+
         internal PipelineViewportStateCreateInfo viewportStateCreateInfo;
+
+        public void Update()
+        {
+
+        }
     }
 }

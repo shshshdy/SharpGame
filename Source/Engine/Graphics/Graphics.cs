@@ -14,12 +14,13 @@ namespace SharpGame
         private readonly Stack<IDisposable> _toDisposePermanent = new Stack<IDisposable>();
         private readonly Stack<IDisposable> _toDisposeFrame = new Stack<IDisposable>();
         
-        public IPlatform Host { get; private set; }
+        public IPlatform Platform { get; private set; }
 
-        public int Width => Host.Width;
-        public int Height => Host.Height;
+        public int Width => Platform.Width;
+        public int Height => Platform.Height;
 
         public Image[] SwapchainImages { get; private set; }
+        public ImageView[] SwapchainImageViews { get; private set; }
         public CommandBuffer[] CommandBuffers { get; private set; }
         public Fence[] SubmitFences { get; private set; }
 
@@ -28,7 +29,7 @@ namespace SharpGame
         
         public Graphics(IPlatform host)
         {
-            Host = host;
+            Platform = host;
 #if DEBUG
             const bool debug = true;
 #else
@@ -39,7 +40,7 @@ namespace SharpGame
             Instance = CreateInstance(debug);
             DebugReportCallback = CreateDebugReportCallback(debug);
             Surface = CreateSurface();
-            CreateContext(Instance, Surface, Host.Platform);
+            CreateContext(Instance, Surface, Platform.Platform);
 
             ImageAvailableSemaphore = ToDispose(Device.CreateSemaphore());
             RenderingFinishedSemaphore = ToDispose(Device.CreateSemaphore());
@@ -54,11 +55,8 @@ namespace SharpGame
                 Device.SetMVKDeviceConfiguration(deviceConfig);
             }
 
-            // Calling ToDispose here registers the resource to be automatically disposed on events
-            // such as window resize.
-            Swapchain = ToDisposeFrame(CreateSwapchain());
-            // Acquire underlying images of the freshly created swapchain.
-            SwapchainImages = Swapchain.GetImages();
+            CreateSwapchainImages();
+
             // Create a command buffer for each swapchain image.
             CommandBuffers = GraphicsCommandPool.AllocateBuffers(
                 new CommandBufferAllocateInfo(CommandBufferLevel.Primary, SwapchainImages.Length));
@@ -68,7 +66,27 @@ namespace SharpGame
                 ToDispose(SubmitFences[i] = Device.CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled)));
             
         }
-        
+
+        private void CreateSwapchainImages()
+        {
+            Swapchain = ToDisposeFrame(CreateSwapchain());
+            SwapchainImages = Swapchain.GetImages();
+            SwapchainImageViews = ToDisposeFrame(CreateImageViews());
+        }
+
+        private ImageView[] CreateImageViews()
+        {
+            var imageViews = new ImageView[SwapchainImages.Length];
+            for (int i = 0; i < SwapchainImages.Length; i++)
+            {
+                imageViews[i] = SwapchainImages[i].CreateView(new ImageViewCreateInfo(
+                    Swapchain.Format,
+                    new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1)));
+            }
+
+            return imageViews;
+        }
+
         public void Resize()
         {
             Device.WaitIdle();
@@ -77,20 +95,19 @@ namespace SharpGame
             while (_toDisposeFrame.Count > 0)
                 _toDisposeFrame.Pop().Dispose();
 
-            GPUObject.RecreateAll();
-
             // Reset all the command buffers allocated from the pools.
             GraphicsCommandPool.Reset();
             ComputeCommandPool.Reset();
 
-            // Reinitialize frame dependent resources.
-            Swapchain = ToDisposeFrame(CreateSwapchain());
-            SwapchainImages = Swapchain.GetImages();
+            CreateSwapchainImages();
+
+            GPUObject.RecreateAll();
+
 
         }
 
 
-        public virtual void Draw(Timer timer)
+        public virtual void Draw()
         {           
             // Acquire an index of drawing image for this frame.
             int imageIndex = Swapchain.AcquireNextImage(semaphore: ImageAvailableSemaphore);

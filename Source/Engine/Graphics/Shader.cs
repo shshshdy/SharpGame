@@ -32,6 +32,16 @@ namespace SharpGame
 
         }
 
+        public override void Dispose()
+        {
+            foreach(var stage in ShaderStageInfo)
+            {
+                stage.ShaderModule?.Dispose();
+            }
+
+            base.Dispose();
+        }
+
         public PipelineShaderStageCreateInfo[] GetShaderStageCreateInfos()
         {
             var shaderStageCreateInfo = new PipelineShaderStageCreateInfo[ShaderStageInfo.Length];
