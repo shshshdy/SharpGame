@@ -45,8 +45,10 @@ namespace SharpGame.Samples.ComputeParticles
         private CommandBuffer _computeCmdBuffer;
         private Fence _computeFence;
 
-        protected override void InitializePermanent()
+        protected override void OnInit()
         {
+            SubscribeToEvent<RenderPassBegin>(Handle);
+
             _descriptorPool              = ToDispose(CreateDescriptorPool());
 
             _sampler                     = ToDispose(CreateSampler());
@@ -65,32 +67,20 @@ namespace SharpGame.Samples.ComputeParticles
             {
                 ShaderStageInfo = new[]
                 {
-                    new ShaderStageInfo
-                    {
-                        Stage = ShaderStages.Vertex,
-                        FileName = "Shader.vert.spv",
-                        FuncName = "main"
-                    },
-
-                    new ShaderStageInfo
-                    {
-                        Stage = ShaderStages.Fragment,
-                        FileName = "Shader.frag.spv",
-                        FuncName = "main"
-                    }
+                    new ShaderStageInfo(ShaderStages.Vertex,"Shader.vert.spv"),
+                    new ShaderStageInfo(ShaderStages.Fragment,"Shader.frag.spv"),
                 }
             };
 
-            _shader.Load();
+            _shader.Build();
 
             _computeShader = new ComputeShader
             {
-                Stage = ShaderStages.Compute,
                 FileName = "shader.comp.spv",
                 FuncName = "main"
             };
 
-            _computeShader.Load();
+            _computeShader.Build();
 
             _computePipeline = new Pipeline
             {
@@ -146,7 +136,6 @@ namespace SharpGame.Samples.ComputeParticles
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _graphicsDescriptorSetLayout })
             };
 
-            //RecordComputeCommandBuffer();
         }
 
         protected override void Update(Timer timer)
@@ -178,21 +167,32 @@ namespace SharpGame.Samples.ComputeParticles
             base.Draw(timer);
         }*/
 
-        protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
-        {/*
-            cmdBuffer.CmdBeginRenderPass(new RenderPassBeginInfo(
-                Renderer._framebuffers[imageIndex],
-                new Rect2D(0, 0, Platform.Width, Platform.Height),
-                new ClearColorValue(new ColorF4(0, 0, 0, 0)),
-                new ClearDepthStencilValue(1.0f, 0)));
 
+        void Handle(RenderPassBegin e)
+        {
+            var cmdBuffer = e.commandBuffer;
             var pipeline = _graphicsPipeline.GetGraphicsPipeline(Renderer.MainRenderPass, _shader);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet);
             cmdBuffer.CmdBindVertexBuffer(_storageBuffer);
             cmdBuffer.CmdDraw(_storageBuffer.Count);
-            cmdBuffer.CmdEndRenderPass();*/
         }
+        /*
+                protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
+                {
+                    cmdBuffer.CmdBeginRenderPass(new RenderPassBeginInfo(
+                        Renderer._framebuffers[imageIndex],
+                        new Rect2D(0, 0, Platform.Width, Platform.Height),
+                        new ClearColorValue(new ColorF4(0, 0, 0, 0)),
+                        new ClearDepthStencilValue(1.0f, 0)));
+
+                    var pipeline = _graphicsPipeline.GetGraphicsPipeline(Renderer.MainRenderPass, _shader);
+                    cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
+                    cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet);
+                    cmdBuffer.CmdBindVertexBuffer(_storageBuffer);
+                    cmdBuffer.CmdDraw(_storageBuffer.Count);
+                    cmdBuffer.CmdEndRenderPass();
+                }*/
 
         private void RecordComputeCommandBuffer()
         {

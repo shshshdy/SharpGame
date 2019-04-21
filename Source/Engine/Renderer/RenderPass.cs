@@ -10,59 +10,55 @@ namespace SharpGame
         public AttachmentDescription[] attachments { get; set; }
         public SubpassDescription[] subpasses { get; set; }
 
-        private Texture _depthStencilBuffer;
-        private Framebuffer[] _framebuffer;
+        private Texture depthStencilBuffer_;
+        private Framebuffer[] framebuffer_;
 
-        internal VulkanCore.RenderPass renderPass;
+        internal VulkanCore.RenderPass renderPass_;
 
         public RenderPass()
         {
             Recreate();
         }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-        }
-
         protected override void Recreate()
         {
-            _depthStencilBuffer = Graphics.ToDisposeFrame(Texture.DepthStencil(Graphics.Width, Graphics.Height));
+            depthStencilBuffer_ = Graphics.ToDisposeFrame(Texture.DepthStencil(Graphics.Width, Graphics.Height));
 
+            attachments = new[]
+            {
+                // Color attachment.
+                new AttachmentDescription
+                {
+                    Format = Graphics.Swapchain.Format,
+                    Samples = SampleCounts.Count1,
+                    LoadOp = AttachmentLoadOp.Clear,
+                    StoreOp = AttachmentStoreOp.Store,
+                    StencilLoadOp = AttachmentLoadOp.DontCare,
+                    StencilStoreOp = AttachmentStoreOp.DontCare,
+                    InitialLayout = ImageLayout.Undefined,
+                    FinalLayout = ImageLayout.PresentSrcKhr
+                },
+                // Depth attachment.
+                new AttachmentDescription
+                {
+                    Format = depthStencilBuffer_.Format,
+                    Samples = SampleCounts.Count1,
+                    LoadOp = AttachmentLoadOp.Clear,
+                    StoreOp = AttachmentStoreOp.DontCare,
+                    StencilLoadOp = AttachmentLoadOp.DontCare,
+                    StencilStoreOp = AttachmentStoreOp.DontCare,
+                    InitialLayout = ImageLayout.Undefined,
+                    FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
+                }
+            };
 
-            var attachments = new[]
-                {
-                    // Color attachment.
-                    new AttachmentDescription
-                    {
-                        Format = Graphics.Swapchain.Format,
-                        Samples = SampleCounts.Count1,
-                        LoadOp = AttachmentLoadOp.Clear,
-                        StoreOp = AttachmentStoreOp.Store,
-                        StencilLoadOp = AttachmentLoadOp.DontCare,
-                        StencilStoreOp = AttachmentStoreOp.DontCare,
-                        InitialLayout = ImageLayout.Undefined,
-                        FinalLayout = ImageLayout.PresentSrcKhr
-                    },
-                    // Depth attachment.
-                    new AttachmentDescription
-                    {
-                        Format = _depthStencilBuffer.Format,
-                        Samples = SampleCounts.Count1,
-                        LoadOp = AttachmentLoadOp.Clear,
-                        StoreOp = AttachmentStoreOp.DontCare,
-                        StencilLoadOp = AttachmentLoadOp.DontCare,
-                        StencilStoreOp = AttachmentStoreOp.DontCare,
-                        InitialLayout = ImageLayout.Undefined,
-                        FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
-                    }
-                };
-              var  subpasses = new[]
-                {
-                    new SubpassDescription(
-                        new[] { new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal) },
-                        new AttachmentReference(1, ImageLayout.DepthStencilAttachmentOptimal))
-                };
+            subpasses = new[]
+            {
+                new SubpassDescription(
+                    new[] { new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal) },
+                    new AttachmentReference(1, ImageLayout.DepthStencilAttachmentOptimal))
+            };
+
             var dependencies = new[]
             {
                 new SubpassDependency
@@ -88,10 +84,9 @@ namespace SharpGame
             };
 
             var createInfo = new RenderPassCreateInfo(subpasses, attachments, dependencies);
-            renderPass = Graphics.ToDisposeFrame(Graphics.Device.CreateRenderPass(createInfo));
+            renderPass_ = Graphics.ToDisposeFrame(Graphics.Device.CreateRenderPass(createInfo));
 
-            _framebuffer = Graphics.ToDisposeFrame(CreateFramebuffers());
-
+            framebuffer_ = Graphics.ToDisposeFrame(CreateFramebuffers());
 
         }
 
@@ -100,8 +95,8 @@ namespace SharpGame
             var framebuffers = new Framebuffer[Graphics.SwapchainImages.Length];
             for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
             {
-                framebuffers[i] = renderPass.CreateFramebuffer(new FramebufferCreateInfo(
-                    new[] { Graphics.SwapchainImageViews[i], _depthStencilBuffer.View },
+                framebuffers[i] = renderPass_.CreateFramebuffer(new FramebufferCreateInfo(
+                    new[] { Graphics.SwapchainImageViews[i], depthStencilBuffer_.View },
                     Graphics.Width,
                     Graphics.Height));
             }
@@ -112,17 +107,32 @@ namespace SharpGame
         {
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
-                _framebuffer[imageIndex], new Rect2D(Offset2D.Zero, new Extent2D(Graphics.Width, Graphics.Height)),
+                framebuffer_[imageIndex], new Rect2D(Offset2D.Zero, new Extent2D(Graphics.Width, Graphics.Height)),
                 new ClearColorValue(new ColorF4(0.39f, 0.58f, 0.93f, 1.0f)),
                 new ClearDepthStencilValue(1.0f, 0)
             );
 
             cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
+
+            SendGlobalEvent(new RenderPassBegin { commandBuffer = cmdBuffer, imageIndex = imageIndex });
         }
 
-        public void End(CommandBuffer cmdBuffer)
+        public void Draw(CommandBuffer cmdBuffer, int imageIndex)
+        {
+            Begin(cmdBuffer, imageIndex);
+            OnDraw(cmdBuffer, imageIndex);
+            End(cmdBuffer, imageIndex);
+        }
+
+        protected virtual void OnDraw(CommandBuffer cmdBuffer, int imageIndex)
+        {
+
+        }
+
+        public void End(CommandBuffer cmdBuffer, int imageIndex)
         {
             cmdBuffer.CmdEndRenderPass();
+            SendGlobalEvent(new RenderPassEnd { commandBuffer = cmdBuffer, imageIndex = imageIndex });
         }
     }
 }

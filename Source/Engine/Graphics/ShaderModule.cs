@@ -9,8 +9,18 @@ namespace SharpGame
     public class ShaderModule : Resource
     {
         internal VulkanCore.ShaderModule shaderModule;
+        public async override void Load(Stream stream)
+        {
+            var graphics = Get<Graphics>();
+            const int defaultBufferSize = 4096;
+            using (var ms = new MemoryStream())
+            {
+                await stream.CopyToAsync(ms, defaultBufferSize);
+                shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(ms.ToArray()));
+            }
+        }
 
-        public async override void Load()
+        public async override void Build()
         {
         }
 

@@ -25,9 +25,6 @@ namespace SharpGame
         public PipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
 
         public PipelineLayout pipelineLayout;
-        
-        public ComputeShader ComputeShader;
-
         public VulkanCore.Pipeline pipeline;
 
         public Pipeline()
@@ -119,7 +116,7 @@ namespace SharpGame
             var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology);
 
             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
-                pipelineLayout, renderPass.renderPass, 0,
+                pipelineLayout, renderPass.renderPass_, 0,
                 shaderStageCreateInfos,
                 inputAssemblyStateCreateInfo,
                 VertexInputStateCreateInfo,

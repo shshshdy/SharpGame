@@ -57,6 +57,8 @@ namespace SharpGame
 
             CreateSwapchainImages();
 
+            //VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT
+
             // Create a command buffer for each swapchain image.
             CommandBuffers = GraphicsCommandPool.AllocateBuffers(
                 new CommandBufferAllocateInfo(CommandBufferLevel.Primary, SwapchainImages.Length));
@@ -124,10 +126,10 @@ namespace SharpGame
                 RenderingFinishedSemaphore,
                 SubmitFences[imageIndex]
             );
-
+  
             // Present the color output to screen.
             PresentQueue.PresentKhr(RenderingFinishedSemaphore, Swapchain, imageIndex);
-  
+          
         }
 
         public T ToDispose<T>(T disposable)

@@ -5,33 +5,25 @@ namespace SharpGame.Samples.ColoredTriangle
 {
     public class ColoredTriangleApp : Application
     {
-        private Pipeline _pipeline;
-        private Shader _shader;
-        protected override void InitializePermanent()
+        private Pipeline pipeline_;
+        private Shader shader_;
+
+        protected override void OnInit()
         {
-            _shader = new Shader
+            SubscribeToEvent<RenderPassBegin>(Handle);
+
+            shader_ = new Shader
             {
                 ShaderStageInfo = new[]
                 {
-                    new ShaderStageInfo
-                    {
-                        Stage = ShaderStages.Vertex,
-                        FileName = "Test.vert.spv",
-                        FuncName = "main"
-                    },
-
-                    new ShaderStageInfo
-                    {
-                        Stage = ShaderStages.Fragment,
-                        FileName = "Test.frag.spv",
-                        FuncName = "main"
-                    }
+                    new ShaderStageInfo(ShaderStages.Vertex,"Test.vert.spv"),
+                    new ShaderStageInfo(ShaderStages.Fragment,"Test.frag.spv"),
                 }
             };
 
-            _shader.Load();
+            shader_.Build();
 
-            _pipeline = new Pipeline
+            pipeline_ = new Pipeline
             {
                 RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
                 {
@@ -84,25 +76,20 @@ namespace SharpGame.Samples.ColoredTriangle
 
         public override void Dispose()
         {
-            _shader.Dispose();
-            _pipeline.Dispose();
+            shader_.Dispose();
+            pipeline_.Dispose();
 
             base.Dispose();
         }
 
-        protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
-        {/*
-            var renderPassBeginInfo = new RenderPassBeginInfo(
-                Renderer._framebuffers[imageIndex],
-                new Rect2D(Offset2D.Zero, new Extent2D(Platform.Width, Platform.Height)),
-                new ClearColorValue(new ColorF4(0.39f, 0.58f, 0.93f, 1.0f)),
-                new ClearDepthStencilValue(1.0f, 0));
 
-            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
-            var pipeline = _pipeline.GetGraphicsPipeline(Renderer.MainRenderPass, _shader);
+        void Handle(RenderPassBegin e)
+        {
+            var cmdBuffer = e.commandBuffer;
+
+            var pipeline = pipeline_.GetGraphicsPipeline(Renderer.MainRenderPass, shader_);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdDraw(3);
-            cmdBuffer.CmdEndRenderPass();*/
         }
     }
 }

@@ -56,24 +56,18 @@ namespace SharpGame
             _timer = CreateSubsystem<Timer>();
             Graphics = CreateSubsystem<Graphics>(Platform);
             ResourceCache = CreateSubsystem<ResourceCache>("Content");
-            Renderer = CreateSubsystem<Renderer>();               
+            Renderer = CreateSubsystem<Renderer>();
+
+            OnInit();
         }
 
-        /// <summary>
-        /// Allows derived classes to initializes resources the will stay alive for the duration of
-        /// the application.
-        /// </summary>
-        protected virtual void InitializePermanent() { }
+        protected virtual void OnInit() { }
 
+        protected virtual void OnStart() { }
 
         public void Resize()
         {
             Graphics.Resize();
-
-            Renderer.RecordCommandBuffer();
-
-            // Re-record command buffers.
-            RecordCommandBuffers();
         }
 
         public void Activate()
@@ -108,10 +102,8 @@ namespace SharpGame
         public void Run()
         {
             // Allow concrete samples to initialize their resources.
-            InitializePermanent();
-
-            Renderer.RecordCommandBuffer();
-
+            OnStart();
+            
             _running = true;
             _timer.Reset();
 
@@ -160,23 +152,15 @@ namespace SharpGame
         {
             Update(timer);
 
+            Renderer.Update();
+
             Renderer.Render();
             
         }
 
         protected virtual void Update(Timer timer) { }
-
-        void RecordCommandBuffers()
-        {
-            return;
-            
-        }
-
-
-        protected abstract void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex);
-
+        
         protected T ToDispose<T>(T disposable) => Graphics.ToDispose(disposable);
-        protected T ToDisposeFrame<T>(T disposable) => Graphics.ToDisposeFrame(disposable);
 
         public override void Dispose()
         {

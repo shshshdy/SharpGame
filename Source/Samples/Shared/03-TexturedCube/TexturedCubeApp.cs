@@ -15,8 +15,8 @@ namespace SharpGame.Samples.TexturedCube
 
     public class TexturedCubeApp : Application
     {
-        private Pipeline _pipeline;
-        private Shader _shader;
+        private Pipeline pipeline_;
+        private Shader shader_;
 
         private DescriptorSetLayout _descriptorSetLayout;
         private DescriptorPool _descriptorPool;
@@ -32,8 +32,11 @@ namespace SharpGame.Samples.TexturedCube
         private WorldViewProjection _wvp;
 
 
-        protected override void InitializePermanent()
+        protected override void OnInit()
         {
+            this.SubscribeToEvent<RenderPassBegin>(Handle);
+
+
             var cube = GeometricPrimitive.Box(1.0f, 1.0f, 1.0f);
 
             _cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx");
@@ -45,40 +48,33 @@ namespace SharpGame.Samples.TexturedCube
             _descriptorPool      = ToDispose(CreateDescriptorPool());
             _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
 
-
-            _shader = new Shader
+            shader_ = new Shader
             {
                 ShaderStageInfo = new[]
                 {
-                    new ShaderStageInfo
-                    {
-                        Stage = ShaderStages.Vertex,
-                        FileName = "Textured.vert.spv",
-                        FuncName = "main"
-                    },
-
-                    new ShaderStageInfo
-                    {
-                        Stage = ShaderStages.Fragment,
-                        FileName = "Textured.frag.spv",
-                        FuncName = "main"
-                    }
+                    new ShaderStageInfo(ShaderStages.Vertex,"Textured.vert.spv"),
+                    new ShaderStageInfo(ShaderStages.Fragment,"Textured.frag.spv"),
                 }
             };
 
-            _shader.Load();
+            shader_.Build();
 
-            _pipeline = new Pipeline
+            pipeline_ = new Pipeline
             {
-                VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo(
-                new[] { new VertexInputBindingDescription(0, Interop.SizeOf<Vertex>(), VertexInputRate.Vertex) },
-                new[]
-                {
-                    new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),  // Position.
-                    new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12), // Normal.
-                    new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
-                }
-            ),
+                VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo
+                (
+                    new[] 
+                    {
+                        new VertexInputBindingDescription(0, Interop.SizeOf<Vertex>(), VertexInputRate.Vertex)
+                    },
+                    new[]
+                    {
+                        new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),  // Position.
+                        new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12), // Normal.
+                        new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
+                    }
+                ),
+
                 RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
                 {
                     PolygonMode = PolygonMode.Fill,
@@ -129,8 +125,8 @@ namespace SharpGame.Samples.TexturedCube
 
         public override void Dispose()
         {
-            _shader.Dispose();
-            _pipeline.Dispose();
+            shader_.Dispose();
+            pipeline_.Dispose();
 
             base.Dispose();
         }
@@ -152,24 +148,17 @@ namespace SharpGame.Samples.TexturedCube
             UpdateUniformBuffers();
         }
 
-        protected override void RecordCommandBuffer(CommandBuffer cmdBuffer, int imageIndex)
-        {/*
-            var renderPassBeginInfo = new RenderPassBeginInfo(
-                Renderer._framebuffers[imageIndex],
-                new Rect2D(0, 0, Platform.Width, Platform.Height),
-                new ClearColorValue(new ColorF4(0.39f, 0.58f, 0.93f, 1.0f)),
-                new ClearDepthStencilValue(1.0f, 0));
+        void Handle(RenderPassBegin e)
+        {
+            var cmdBuffer = e.commandBuffer;
 
-            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
-
-            var pipeline = _pipeline.GetGraphicsPipeline(Renderer.MainRenderPass, _shader);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _pipeline.pipelineLayout, _descriptorSet);
+            var pipeline = pipeline_.GetGraphicsPipeline(Renderer.MainRenderPass, shader_);
+            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
 
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdBindVertexBuffer(_cubeVertices);
             cmdBuffer.CmdBindIndexBuffer(_cubeIndices);
             cmdBuffer.CmdDrawIndexed(_cubeIndices.Count);
-            cmdBuffer.CmdEndRenderPass();*/
         }
 
         private Sampler CreateSampler()

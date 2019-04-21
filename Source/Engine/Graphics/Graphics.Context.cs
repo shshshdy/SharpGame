@@ -208,7 +208,7 @@ namespace SharpGame
                 : Device.GetQueue(presentQueueFamilyIndex);
 
             // Create command pool(s).
-            GraphicsCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex));
+            GraphicsCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer| CommandPoolCreateFlags.Transient));
             ComputeCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(computeQueueFamilyIndex));
         }
 
