@@ -42,6 +42,9 @@ namespace SharpGame
         private float _timeElapsed;
         private bool _appPaused = false;
 
+        SynchronizationContext synchronizationContext;
+        int unityThreadId;
+
         public Application()
         {
             new Context();
@@ -57,6 +60,9 @@ namespace SharpGame
             Graphics = CreateSubsystem<Graphics>(Platform);
             ResourceCache = CreateSubsystem<ResourceCache>("Content");
             Renderer = CreateSubsystem<Renderer>();
+
+            synchronizationContext = SynchronizationContext.Current;
+            unityThreadId = Thread.CurrentThread.ManagedThreadId;
 
             OnInit();
         }

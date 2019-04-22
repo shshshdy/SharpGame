@@ -22,6 +22,7 @@ namespace SharpGame
         public Image[] SwapchainImages { get; private set; }
         public ImageView[] SwapchainImageViews { get; private set; }
         public CommandBuffer[] PrimaryCmdBuffers { get; private set; }
+        public CommandBuffer[] SecondaryCmdBuffers { get; private set; }
         public Fence[] SubmitFences { get; private set; }
 
         public Semaphore ImageAvailableSemaphore { get; private set; }
@@ -66,7 +67,9 @@ namespace SharpGame
             SubmitFences = new Fence[SwapchainImages.Length];
             for (int i = 0; i < SubmitFences.Length; i++)
                 ToDispose(SubmitFences[i] = Device.CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled)));
-            
+
+            SecondaryCmdBuffers = GraphicsCommandPool.AllocateBuffers(
+                new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2));
         }
 
         private void CreateSwapchainImages()
@@ -104,8 +107,6 @@ namespace SharpGame
             CreateSwapchainImages();
 
             GPUObject.RecreateAll();
-
-
         }
 
 
