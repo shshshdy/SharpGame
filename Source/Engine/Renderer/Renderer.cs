@@ -38,6 +38,9 @@ namespace SharpGame
 
         public void Render()
         {
+            Graphics.BeginRender();
+
+
             SendGlobalEvent(new RenderBegin());
 
             // Acquire an index of drawing image for this frame.
@@ -102,6 +105,8 @@ namespace SharpGame
 
 
             SendGlobalEvent(new RenderEnd());
+
+            Graphics.EndRender();
         }
 
     }

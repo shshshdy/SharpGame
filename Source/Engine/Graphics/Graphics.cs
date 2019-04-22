@@ -27,9 +27,7 @@ namespace SharpGame
 
         public Semaphore ImageAvailableSemaphore { get; private set; }
         public Semaphore RenderingFinishedSemaphore { get; private set; }
-
-        private System.Threading.Semaphore mainSem_;
-        
+                
         public Graphics(IPlatform host)
         {
             Platform = host;
@@ -38,7 +36,6 @@ namespace SharpGame
 #else
             const bool debug = false;
 #endif
-
             // Calling ToDispose here registers the resource to be automatically disposed on exit.
             Instance = CreateInstance(debug);
             DebugReportCallback = CreateDebugReportCallback(debug);
@@ -70,6 +67,64 @@ namespace SharpGame
 
             SecondaryCmdBuffers = GraphicsCommandPool.AllocateBuffers(
                 new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2));
+
+            SetRenderThread();
+
+        }
+
+
+        public T ToDispose<T>(T disposable)
+        {
+            switch (disposable)
+            {
+                case IEnumerable<IDisposable> sequence:
+                    foreach (var element in sequence)
+                        _toDisposePermanent.Push(element);
+                    break;
+                case IDisposable element:
+                    _toDisposePermanent.Push(element);
+                    break;
+            }
+
+            return disposable;
+        }
+
+        public T ToDisposeFrame<T>(T disposable)
+        {
+            switch (disposable)
+            {
+                case IEnumerable<IDisposable> sequence:
+                    foreach (var element in sequence)
+                        _toDisposeFrame.Push(element);
+                    break;
+                case IDisposable element:
+                    _toDisposeFrame.Push(element);
+                    break;
+            }
+            return disposable;
+        }
+
+
+        public override void Dispose()
+        {
+            Device.WaitIdle();
+
+            while (_toDisposeFrame.Count > 0)
+                _toDisposeFrame.Pop().Dispose();
+
+            while (_toDisposePermanent.Count > 0)
+                _toDisposePermanent.Pop().Dispose();
+
+            GPUObject.DisposeAll();
+
+            ComputeCommandPool.Dispose();
+            GraphicsCommandPool.Dispose();
+            Device.Dispose();
+
+            DebugReportCallback.Dispose();
+            Surface.Dispose();
+
+            Instance.Dispose();
         }
 
         private void CreateSwapchainImages()
@@ -133,59 +188,130 @@ namespace SharpGame
           
         }
 
-        public T ToDispose<T>(T disposable)
+        static int currentContext_;
+        public static int RenderContext => 1 - currentContext_;
+
+        static int currentFrame_;
+
+        static int renderThreadID;
+        static bool singleThreaded_ = false;
+        static System.Threading.Semaphore renderSem_ = new System.Threading.Semaphore(0, 1);
+        static System.Threading.Semaphore mainSem_ = new System.Threading.Semaphore(0, 1);
+        static long waitSubmit_;
+        static long waitRender_;
+
+        public void Frame()
         {
-            switch (disposable)
+            RenderSemWait();
+
+            FrameNoRenderWait();
+        }
+
+        public bool IsRenderThread()
+        {
+            return renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
+        }
+
+        void SetRenderThread()
+        {
+            renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+        }
+
+        public void Close()
+        {
+            MainSemWait(-1);
+            RenderSemPost();
+        }
+
+        List<Action> commands_ = new List<Action>();
+
+        public void Post(Action action) { commands_.Add(action); }
+
+        public bool BeginRender()
+        {
+            if (MainSemWait(-1))
             {
-                case IEnumerable<IDisposable> sequence:
-                    foreach (var element in sequence)
-                        _toDisposePermanent.Push(element);
-                    break;
-                case IDisposable element:
-                    _toDisposePermanent.Push(element);
-                    break;
+                if(commands_.Count > 0)
+                {
+                    foreach (var cmd in commands_)
+                    {
+                        cmd.Invoke();
+                    }
+
+                    commands_.Clear();
+                }
+
+                return true;
             }
 
-            return disposable;
+            return false;
         }
 
-        public T ToDisposeFrame<T>(T disposable)
+        public void EndRender()
         {
-            switch (disposable)
             {
-                case IEnumerable<IDisposable> sequence:
-                    foreach (var element in sequence)
-                        _toDisposeFrame.Push(element);
-                    break;
-                case IDisposable element:
-                    _toDisposeFrame.Push(element);
-                    break;
+             //   ExecuteCommands(postComands_);
             }
-            return disposable;
+
+            RenderSemPost();
         }
 
-
-        public override void Dispose()
+        void SwapContext()
         {
-            Device.WaitIdle();
-
-            while (_toDisposeFrame.Count > 0)
-                _toDisposeFrame.Pop().Dispose();
-
-            while (_toDisposePermanent.Count > 0)
-                _toDisposePermanent.Pop().Dispose();
-
-            GPUObject.DisposeAll();
-
-            ComputeCommandPool.Dispose();
-            GraphicsCommandPool.Dispose();
-            Device.Dispose();
-
-            DebugReportCallback.Dispose();
-            Surface.Dispose();
-
-            Instance.Dispose();
+            currentFrame_++;
+            currentContext_ = 1 - currentContext_;
+            //Console.WriteLine("===============SwapContext : {0}", currentContext_);
         }
 
+        public void FrameNoRenderWait()
+        {
+            SwapContext();
+            // release render thread
+            MainSemPost();
+        }
+
+        public void MainSemPost()
+        {
+            if (!singleThreaded_)
+            {
+                mainSem_.Release();
+            }
+        }
+
+        bool MainSemWait(int _msecs)
+        {
+            if (singleThreaded_)
+            {
+                return true;
+            }
+
+            long curTime = Stopwatch.GetTimestamp();
+            bool ok = mainSem_.WaitOne(_msecs);
+            if (ok)
+            {
+                waitSubmit_ = Stopwatch.GetTimestamp() - curTime;
+                return true;
+            }
+
+            return false;
+        }
+
+        void RenderSemPost()
+        {
+            if (!singleThreaded_)
+            {
+                renderSem_.Release();
+            }
+        }
+
+        void RenderSemWait()
+        {
+            if (!singleThreaded_)
+            {
+                long curTime = Stopwatch.GetTimestamp();
+                bool ok = renderSem_.WaitOne();                
+                waitRender_ = Stopwatch.GetTimestamp() - curTime;
+            }
+        }
     }
 }

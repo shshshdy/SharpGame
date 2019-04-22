@@ -67,9 +67,14 @@ namespace SharpGame
             OnInit();
         }
 
-        protected virtual void OnInit() { }
+        protected virtual void OnInit()
+        {
+        }
 
-        protected virtual void OnStart() { }
+        protected virtual void OnStart()
+        {
+
+        }
 
         public void Resize()
         {
@@ -115,28 +120,47 @@ namespace SharpGame
             _running = true;
             _timer.Reset();
 
-            //void r()
+            new Thread(LogicThread).Start();
+            
+            while (_running)
             {
-                while (_running)
+                Platform.ProcessEvents();
+                    
+                if (!_appPaused)
                 {
-                    Platform.ProcessEvents();
+                 //   Update(_timer);
 
-                    _timer.Tick();
-
-                    if (!_appPaused)
-                    {
-                        CalculateFrameRateStats();
-                        Tick(_timer);
-                    }
-                    else
-                    {
-                        Thread.Sleep(100);
-                    }
+                    Renderer.Render();
                 }
-
+                else
+                {
+                    Thread.Sleep(100);
+                }
             }
 
-            //new Thread(r).Start();
+            Graphics.Close();
+        }
+
+        void LogicThread()
+        {
+            
+            Graphics.FrameNoRenderWait();
+
+            Graphics.Frame();
+
+            while (_running)
+            {
+                Platform.ProcessEvents();
+                
+                _timer.Tick();
+
+                CalculateFrameRateStats();
+
+                Update(_timer);       
+
+                Graphics.Frame();
+            }
+
         }
 
         private void CalculateFrameRateStats()
@@ -148,7 +172,10 @@ namespace SharpGame
                 float fps = _frameCount;
                 float mspf = 1000.0f / fps;
 
-                Platform.Tittle = $"{Name}    Fps: {fps}    Mspf: {mspf}";
+                Graphics.Post(() =>
+                {
+                    Platform.Tittle = $"{Name}    Fps: {fps}    Mspf: {mspf}";
+                });
 
                 // Reset for next average.
                 _frameCount = 0;
