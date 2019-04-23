@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define USE_WORK_THREAD
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VulkanCore;
@@ -28,9 +29,19 @@ namespace SharpGame
             return view;
         }
 
-        public void Update()
+        public void RenderUpdate()
         {
-            foreach(var view in views_)
+#if USE_WORK_THREAD
+
+            SendGlobalEvent(new BeginRender());
+
+            CommandBuffer cmdBuffer = Graphics.WorkingCmdBuffer;
+            
+            MainRenderPass.Draw(cmdBuffer, 0);
+
+            SendGlobalEvent(new RenderEnd());
+#endif
+            foreach (var view in views_)
             {
                 view.Update();
             }
@@ -40,6 +51,12 @@ namespace SharpGame
         {
             Graphics.BeginRender();
 
+#if USE_WORK_THREAD
+
+            if (Graphics.currentFrame_ > 4)
+                Graphics.Draw();
+
+#else
 
             SendGlobalEvent(new BeginRender());
 
@@ -101,11 +118,9 @@ namespace SharpGame
             Graphics.PresentQueue.PresentKhr(Graphics.RenderingFinishedSemaphore, Graphics.Swapchain, imageIndex);
 
 
-            // Graphics.Draw();
-
 
             SendGlobalEvent(new RenderEnd());
-
+#endif
             Graphics.EndRender();
         }
 

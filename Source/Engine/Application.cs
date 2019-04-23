@@ -42,8 +42,8 @@ namespace SharpGame
         private float _timeElapsed;
         private bool _appPaused = false;
 
-        SynchronizationContext synchronizationContext_;
-        int mainThreadId_;
+        SynchronizationContext workThreadSyncContext_;
+        int workThreadId_;
 
         public Application()
         {
@@ -136,30 +136,30 @@ namespace SharpGame
 
         void LogicThread()
         {
-            synchronizationContext_ = SynchronizationContext.Current;
-            mainThreadId_ = Thread.CurrentThread.ManagedThreadId;
+            workThreadSyncContext_ = SynchronizationContext.Current;
+            workThreadId_ = Thread.CurrentThread.ManagedThreadId;
 
             timer_.Reset();
 
             OnInit();
-
+            
             graphics_.FrameNoRenderWait();
-
             graphics_.Frame();
+
 
             while (_running)
             {                
                 timer_.Tick();
 
-                SendGlobalEvent(new BeginFrame { frameNum_ = frameNumber_, timeDelta_ = timer_.DeltaTime });
+                SendGlobalEvent(new BeginFrame { frameNum_ = frameNumber_, timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
 
-                SendGlobalEvent(new Update { timeDelta_ = timer_.DeltaTime });
+                SendGlobalEvent(new Update { timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
 
-                SendGlobalEvent(new PostUpdate { timeDelta_ = timer_.DeltaTime });
+                Update(timer_);  
 
-                renderer_.Update();
+                SendGlobalEvent(new PostUpdate { timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
 
-                Update(timer_);       
+                renderer_.RenderUpdate();     
 
                 graphics_.Frame();
 

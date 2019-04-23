@@ -23,6 +23,8 @@ namespace SharpGame
         public ImageView[] SwapchainImageViews { get; private set; }
         public CommandBuffer[] PrimaryCmdBuffers { get; private set; }
         public CommandBuffer[] SecondaryCmdBuffers { get; private set; }
+        public CommandBuffer WorkingCmdBuffer => SecondaryCmdBuffers[currentContext_];
+
         public Fence[] SubmitFences { get; private set; }
 
         public Semaphore ImageAvailableSemaphore { get; private set; }
@@ -65,7 +67,7 @@ namespace SharpGame
             for (int i = 0; i < SubmitFences.Length; i++)
                 ToDispose(SubmitFences[i] = Device.CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled)));
 
-            SecondaryCmdBuffers = GraphicsCommandPool.AllocateBuffers(
+            SecondaryCmdBuffers = SecondaryCommandPool[0].AllocateBuffers(
                 new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2));
 
             renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
@@ -173,6 +175,11 @@ namespace SharpGame
             SubmitFences[imageIndex].Wait();
             SubmitFences[imageIndex].Reset();
 
+            CommandBuffer cmdBuffer = PrimaryCmdBuffers[imageIndex];
+            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
+            cmdBuffer.CmdExecuteCommand(SecondaryCmdBuffers[RenderContext]);
+            cmdBuffer.End();
+
             // Submit recorded commands to graphics queue for execution.
             GraphicsQueue.Submit(
                 ImageAvailableSemaphore,
@@ -190,7 +197,7 @@ namespace SharpGame
         static int currentContext_;
         public static int RenderContext => 1 - currentContext_;
 
-        static int currentFrame_;
+        public static int currentFrame_;
 
         static int renderThreadID;
         static bool singleThreaded_ = false;

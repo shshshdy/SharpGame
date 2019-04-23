@@ -58,7 +58,7 @@ namespace SharpGame.Samples.TexturedCube
 
             geometry_.SetDrawRange(PrimitiveTopology.TriangleList, 0, cube.Indices.Length);
             
-            _cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx");
+            _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx");
             _sampler             = ToDispose(CreateSampler());
             _uniformBuffer       = ToDispose(GraphicsBuffer.DynamicUniform<WorldViewProjection>(1));
             _descriptorSetLayout = ToDispose(CreateDescriptorSetLayout());
