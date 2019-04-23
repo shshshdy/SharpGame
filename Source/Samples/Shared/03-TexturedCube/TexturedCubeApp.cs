@@ -33,7 +33,7 @@ namespace SharpGame.Samples.TexturedCube
 
         protected override void OnInit()
         {
-            SubscribeToEvent<RenderPassBegin>(Handle);
+            SubscribeToEvent<BeginRenderPass>(Handle);
 
             var cube = GeometricPrimitive.Box(1.0f, 1.0f, 1.0f);
 
@@ -153,7 +153,7 @@ namespace SharpGame.Samples.TexturedCube
             UpdateUniformBuffers();
         }
 
-        void Handle(RenderPassBegin e)
+        void Handle(BeginRenderPass e)
         {
             var cmdBuffer = e.commandBuffer;
 
@@ -173,16 +173,16 @@ namespace SharpGame.Samples.TexturedCube
             };
             // We also enable anisotropic filtering. Because that feature is optional, it must be
             // checked if it is supported by the device.
-            if (Graphics.Features.SamplerAnisotropy)
+            if (graphics_.Features.SamplerAnisotropy)
             {
                 createInfo.AnisotropyEnable = true;
-                createInfo.MaxAnisotropy = Graphics.Properties.Limits.MaxSamplerAnisotropy;
+                createInfo.MaxAnisotropy = graphics_.Properties.Limits.MaxSamplerAnisotropy;
             }
             else
             {
                 createInfo.MaxAnisotropy = 1.0f;
             }
-            return Graphics.Device.CreateSampler(createInfo);
+            return graphics_.Device.CreateSampler(createInfo);
         }
 
         private void SetViewProjection()
@@ -191,7 +191,7 @@ namespace SharpGame.Samples.TexturedCube
             _wvp.View = Matrix4x4.CreateLookAt(Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
             _wvp.Projection = Matrix4x4.CreatePerspectiveFieldOfView(
                 (float)Math.PI / 4,
-                (float)Graphics.Platform.Width / Graphics.Platform.Height,
+                (float)graphics_.Platform.Width / graphics_.Platform.Height,
                 1.0f, 1000.0f);
         }
 
@@ -209,7 +209,7 @@ namespace SharpGame.Samples.TexturedCube
                 new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
                 new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 1)
             };
-            return Graphics.Device.CreateDescriptorPool(
+            return graphics_.Device.CreateDescriptorPool(
                 new DescriptorPoolCreateInfo(descriptorPoolSizes.Length, descriptorPoolSizes));
         }
 
@@ -230,7 +230,7 @@ namespace SharpGame.Samples.TexturedCube
 
         private DescriptorSetLayout CreateDescriptorSetLayout()
         {
-            return Graphics.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
+            return graphics_.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
                 new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
                 new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)));
         }

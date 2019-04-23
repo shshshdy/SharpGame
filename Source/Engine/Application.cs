@@ -30,55 +30,54 @@ namespace SharpGame
     public abstract class Application : Object
     {
         public string Name { get; set; }
-        public IPlatform Platform { get; set; }
-        public FileSystem FileSystem { get; private set; }
-        public Graphics Graphics { get; private set; }
-        public  Renderer Renderer { get; private set; }
-        public ResourceCache ResourceCache { get; private set; }
+        protected IPlatform platform_;
+        protected FileSystem fileSystem_;
+        protected Graphics graphics_;
+        protected Renderer renderer_;
+        protected ResourceCache resourceCache_;
 
-        private Timer _timer;
+        private Timer timer_;
         private bool _running;   // Is the application running?
-        private int _frameCount;
+        private int frameNumber_;
         private float _timeElapsed;
         private bool _appPaused = false;
 
-        SynchronizationContext synchronizationContext;
-        int unityThreadId;
+        SynchronizationContext synchronizationContext_;
+        int mainThreadId_;
 
         public Application()
         {
             new Context();
         }
 
+        public override void Dispose()
+        {
+            _context.Dispose();
+        }
+
         public void Initialize(IPlatform host)
         {
             Name = host.Tittle;
-            Platform = host;
+            platform_ = host;
 
-            FileSystem = CreateSubsystem<FileSystem>(Platform);
-            _timer = CreateSubsystem<Timer>();
-            Graphics = CreateSubsystem<Graphics>(Platform);
-            ResourceCache = CreateSubsystem<ResourceCache>("Content");
-            Renderer = CreateSubsystem<Renderer>();
-
-            synchronizationContext = SynchronizationContext.Current;
-            unityThreadId = Thread.CurrentThread.ManagedThreadId;
-
-            OnInit();
+            timer_ = CreateSubsystem<Timer>();
+            fileSystem_ = CreateSubsystem<FileSystem>(platform_);            
+            graphics_ = CreateSubsystem<Graphics>(platform_);
+            resourceCache_ = CreateSubsystem<ResourceCache>("Content");
+            renderer_ = CreateSubsystem<Renderer>();
         }
 
         protected virtual void OnInit()
         {
         }
-
-        protected virtual void OnStart()
+        
+        protected virtual void Update(Timer timer)
         {
-
         }
 
         public void Resize()
         {
-            Graphics.Resize();
+            graphics_.Resize();
 
             SendGlobalEvent(new Resizing());
         }
@@ -86,25 +85,25 @@ namespace SharpGame
         public void Activate()
         {
             _appPaused = false;
-            _timer.Start();
+            timer_.Start();
         }
 
         public void Deactivate()
         {
             _appPaused = true;
-            _timer.Stop();
+            timer_.Stop();
         }
 
         public void Pause()
         {
             _appPaused = true;
-            _timer.Stop();
+            timer_.Stop();
         }
 
         public void Resume()
         {
             _appPaused = false;
-            _timer.Start();
+            timer_.Start();
         }
 
         public void Quit()
@@ -114,23 +113,17 @@ namespace SharpGame
 
         public void Run()
         {
-            // Allow concrete samples to initialize their resources.
-            OnStart();
-            
             _running = true;
-            _timer.Reset();
 
             new Thread(LogicThread).Start();
             
             while (_running)
             {
-                Platform.ProcessEvents();
+                platform_.ProcessEvents();
                     
                 if (!_appPaused)
                 {
-                 //   Update(_timer);
-
-                    Renderer.Render();
+                    renderer_.Render();
                 }
                 else
                 {
@@ -138,69 +131,68 @@ namespace SharpGame
                 }
             }
 
-            Graphics.Close();
+            graphics_.Close();
         }
 
         void LogicThread()
         {
-            
-            Graphics.FrameNoRenderWait();
+            synchronizationContext_ = SynchronizationContext.Current;
+            mainThreadId_ = Thread.CurrentThread.ManagedThreadId;
 
-            Graphics.Frame();
+            timer_.Reset();
+
+            OnInit();
+
+            graphics_.FrameNoRenderWait();
+
+            graphics_.Frame();
 
             while (_running)
-            {
-                Platform.ProcessEvents();
-                
-                _timer.Tick();
+            {                
+                timer_.Tick();
+
+                SendGlobalEvent(new BeginFrame { frameNum_ = frameNumber_, timeDelta_ = timer_.DeltaTime });
+
+                SendGlobalEvent(new Update { timeDelta_ = timer_.DeltaTime });
+
+                SendGlobalEvent(new PostUpdate { timeDelta_ = timer_.DeltaTime });
+
+                renderer_.Update();
+
+                Update(timer_);       
+
+                graphics_.Frame();
+
+                SendGlobalEvent(new EndFrame {});
+
 
                 CalculateFrameRateStats();
-
-                Update(_timer);       
-
-                Graphics.Frame();
             }
 
         }
 
         private void CalculateFrameRateStats()
         {
-            _frameCount++;
+            frameNumber_++;
 
-            if (_timer.TotalTime - _timeElapsed >= 1.0f)
+            if (timer_.TotalTime - _timeElapsed >= 1.0f)
             {
-                float fps = _frameCount;
+                float fps = frameNumber_;
                 float mspf = 1000.0f / fps;
 
-                Graphics.Post(() =>
+                graphics_.Post(() =>
                 {
-                    Platform.Tittle = $"{Name}    Fps: {fps}    Mspf: {mspf}";
+                    platform_.Tittle = $"{Name}    Fps: {fps}    Mspf: {mspf}";
                 });
 
                 // Reset for next average.
-                _frameCount = 0;
+                frameNumber_ = 0;
                 _timeElapsed += 1.0f;
             }
         }
 
-        public void Tick(Timer timer)
-        {
-            Update(timer);
+        protected T ToDispose<T>(T disposable) => graphics_.ToDispose(disposable);
 
-            Renderer.Update();
-
-            Renderer.Render();
-            
-        }
-
-        protected virtual void Update(Timer timer) { }
-        
-        protected T ToDispose<T>(T disposable) => Graphics.ToDispose(disposable);
-
-        public override void Dispose()
-        {
-            _context.Dispose();
-        }
     }
 
 }

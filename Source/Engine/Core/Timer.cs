@@ -4,23 +4,30 @@ namespace SharpGame
 {
     public class Timer : Object
     {
-        private readonly double _secondsPerCount;
-        private double _deltaTime;
+        public static double SecondsPerCount { get; }
+        public static double MilliSecondsPerCount { get; }
 
+        private double _deltaTime;
         private long _baseTime;
         private long _pausedTime;
         private long _stopTime;
         private long _prevTime;
         private long _currTime;
-
         private bool _stopped;
+
+        static Timer()
+        {
+            SecondsPerCount = 0.0;
+            long countsPerSec = Stopwatch.Frequency;
+            SecondsPerCount = 1.0 / countsPerSec;
+            MilliSecondsPerCount = 1000.0f / countsPerSec;
+        }
 
         public Timer()
         {
             Debug.Assert(Stopwatch.IsHighResolution,
                 "System does not support high-resolution performance counter.");
 
-            _secondsPerCount = 0.0;
             _deltaTime = -1.0;
             _baseTime = 0;
             _pausedTime = 0;
@@ -28,8 +35,6 @@ namespace SharpGame
             _currTime = 0;
             _stopped = false;
 
-            long countsPerSec = Stopwatch.Frequency;
-            _secondsPerCount = 1.0 / countsPerSec;
         }
 
         public float TotalTime
@@ -37,9 +42,9 @@ namespace SharpGame
             get
             {
                 if (_stopped)
-                    return (float)((_stopTime - _pausedTime - _baseTime) * _secondsPerCount);
+                    return (float)((_stopTime - _pausedTime - _baseTime) * SecondsPerCount);
 
-                return (float)((_currTime - _pausedTime - _baseTime) * _secondsPerCount);
+                return (float)((_currTime - _pausedTime - _baseTime) * SecondsPerCount);
             }
         }
 
@@ -86,7 +91,7 @@ namespace SharpGame
 
             long curTime = Stopwatch.GetTimestamp();
             _currTime = curTime;
-            _deltaTime = (_currTime - _prevTime) * _secondsPerCount;
+            _deltaTime = (_currTime - _prevTime) * SecondsPerCount;
 
             _prevTime = _currTime;
             if (_deltaTime < 0.0)

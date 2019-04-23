@@ -49,14 +49,14 @@ namespace SharpGame.Samples.ComputeParticles
         {
             SubscribeToEvent((Resizing e) => RecordComputeCommandBuffer());
 
-            SubscribeToEvent<RenderBegin>(Handle);
+            SubscribeToEvent<BeginRender>(Handle);
 
-            SubscribeToEvent<RenderPassBegin>(Handle);
+            SubscribeToEvent<BeginRenderPass>(Handle);
 
             _descriptorPool              = ToDispose(CreateDescriptorPool());
 
             _sampler                     = ToDispose(CreateSampler());
-            _particleDiffuseMap          = ResourceCache.Load<Texture>("ParticleDiffuse.ktx");
+            _particleDiffuseMap          = resourceCache_.Load<Texture>("ParticleDiffuse.ktx");
             _graphicsDescriptorSetLayout = ToDispose(CreateGraphicsDescriptorSetLayout());
             _graphicsDescriptorSet       = CreateGraphicsDescriptorSet();
 
@@ -64,8 +64,8 @@ namespace SharpGame.Samples.ComputeParticles
             _uniformBuffer               = ToDispose(GraphicsBuffer.DynamicUniform<UniformBufferObject>(1));
             _computeDescriptorSetLayout  = ToDispose(CreateComputeDescriptorSetLayout());
             _computeDescriptorSet        = CreateComputeDescriptorSet();
-            _computeCmdBuffer            = Graphics.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
-            _computeFence                = ToDispose(Graphics.Device.CreateFence());
+            _computeCmdBuffer            = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
+            _computeFence                = ToDispose(graphics_.Device.CreateFence());
 
             _shader = new Shader
             {
@@ -157,16 +157,16 @@ namespace SharpGame.Samples.ComputeParticles
             _uniformBuffer.Unmap();
         }
 
-        void Handle(RenderBegin e)
+        void Handle(BeginRender e)
         {
             // Submit compute commands.
-            Graphics.ComputeQueue.Submit(new SubmitInfo(commandBuffers: new[] { _computeCmdBuffer }), _computeFence);
+            graphics_.ComputeQueue.Submit(new SubmitInfo(commandBuffers: new[] { _computeCmdBuffer }), _computeFence);
             _computeFence.Wait();
             _computeFence.Reset();            
         }
 
 
-        void Handle(RenderPassBegin e)
+        void Handle(BeginRenderPass e)
         {
             var cmdBuffer = e.commandBuffer;
             var pipeline = _graphicsPipeline.GetGraphicsPipeline(e.renderPass, _shader, null);
@@ -181,11 +181,11 @@ namespace SharpGame.Samples.ComputeParticles
             // Record particle movements.
             var graphicsToComputeBarrier = new BufferMemoryBarrier(_storageBuffer,
                 Accesses.VertexAttributeRead, Accesses.ShaderWrite,
-                Graphics.GraphicsQueue.FamilyIndex, Graphics.ComputeQueue.FamilyIndex);
+                graphics_.GraphicsQueue.FamilyIndex, graphics_.ComputeQueue.FamilyIndex);
 
             var computeToGraphicsBarrier = new BufferMemoryBarrier(_storageBuffer,
                 Accesses.ShaderWrite, Accesses.VertexAttributeRead,
-                Graphics.ComputeQueue.FamilyIndex, Graphics.GraphicsQueue.FamilyIndex);
+                graphics_.ComputeQueue.FamilyIndex, graphics_.GraphicsQueue.FamilyIndex);
 
             _computeCmdBuffer.Begin();
 
@@ -193,7 +193,7 @@ namespace SharpGame.Samples.ComputeParticles
             // before compute starts to write to the buffer.
             _computeCmdBuffer.CmdPipelineBarrier(PipelineStages.VertexInput, PipelineStages.ComputeShader,
                 bufferMemoryBarriers: new[] { graphicsToComputeBarrier });
-            var pipeline = _computePipeline.GetComputePipeline(Renderer.MainRenderPass, _computeShader);
+            var pipeline = _computePipeline.GetComputePipeline(renderer_.MainRenderPass, _computeShader);
                 _computeCmdBuffer.CmdBindPipeline(PipelineBindPoint.Compute, pipeline);
             _computeCmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Compute, _computePipeline.pipelineLayout, _computeDescriptorSet);
             _computeCmdBuffer.CmdDispatch(_storageBuffer.Count / 256, 1, 1);
@@ -210,7 +210,7 @@ namespace SharpGame.Samples.ComputeParticles
         {
             var random = new Random();
             
-            int numParticles = Platform.Platform == PlatformType.Android
+            int numParticles = platform_.Platform == PlatformType.Android
                 ? 256 * 1024
                 : 256 * 2048; // ~500k particles.
 
@@ -230,12 +230,12 @@ namespace SharpGame.Samples.ComputeParticles
                 };
             }
 
-            return GraphicsBuffer.Storage(Graphics, particles);
+            return GraphicsBuffer.Storage(graphics_, particles);
         }
 
         private DescriptorPool CreateDescriptorPool()
         {
-            return Graphics.Device.CreateDescriptorPool(new DescriptorPoolCreateInfo(3, new[]
+            return graphics_.Device.CreateDescriptorPool(new DescriptorPoolCreateInfo(3, new[]
             {
                 new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
                 new DescriptorPoolSize(DescriptorType.StorageBuffer, 1),
@@ -253,21 +253,21 @@ namespace SharpGame.Samples.ComputeParticles
             };
             // We also enable anisotropic filtering. Because that feature is optional, it must be
             // checked if it is supported by the device.
-            if (Graphics.Features.SamplerAnisotropy)
+            if (graphics_.Features.SamplerAnisotropy)
             {
                 createInfo.AnisotropyEnable = true;
-                createInfo.MaxAnisotropy = Graphics.Properties.Limits.MaxSamplerAnisotropy;
+                createInfo.MaxAnisotropy = graphics_.Properties.Limits.MaxSamplerAnisotropy;
             }
             else
             {
                 createInfo.MaxAnisotropy = 1.0f;
             }
-            return Graphics.Device.CreateSampler(createInfo);
+            return graphics_.Device.CreateSampler(createInfo);
         }        
             
         private DescriptorSetLayout CreateGraphicsDescriptorSetLayout()
         {
-            return Graphics.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
+            return graphics_.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
                 new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)));
         }
 
@@ -285,7 +285,7 @@ namespace SharpGame.Samples.ComputeParticles
 
         private DescriptorSetLayout CreateComputeDescriptorSetLayout()
         {
-            return Graphics.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
+            return graphics_.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
                 new DescriptorSetLayoutBinding(0, DescriptorType.StorageBuffer, 1, ShaderStages.Compute),
                 new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, 1, ShaderStages.Compute)));
         }

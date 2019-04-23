@@ -8,7 +8,7 @@ namespace SharpGame
     {
     }
 
-    public struct RenderBegin
+    public struct BeginRender
     {
     }
 
@@ -16,7 +16,7 @@ namespace SharpGame
     {
     }
 
-    public struct RenderPassBegin
+    public struct BeginRenderPass
     {
         public RenderPass renderPass;
         public VulkanCore.CommandBuffer commandBuffer;

@@ -114,7 +114,7 @@ namespace SharpGame
 
             cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
 
-            SendGlobalEvent(new RenderPassBegin { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
+            SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
         }
 
         public void Draw(CommandBuffer cmdBuffer, int imageIndex)

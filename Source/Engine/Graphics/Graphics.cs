@@ -68,7 +68,7 @@ namespace SharpGame
             SecondaryCmdBuffers = GraphicsCommandPool.AllocateBuffers(
                 new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2));
 
-            SetRenderThread();
+            renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
 
         }
 
@@ -164,7 +164,6 @@ namespace SharpGame
             GPUObject.RecreateAll();
         }
 
-
         public virtual void Draw()
         {           
             // Acquire an index of drawing image for this frame.
@@ -187,7 +186,7 @@ namespace SharpGame
             PresentQueue.PresentKhr(RenderingFinishedSemaphore, Swapchain, imageIndex);
           
         }
-
+        #region MULTITHREAD
         static int currentContext_;
         public static int RenderContext => 1 - currentContext_;
 
@@ -200,36 +199,26 @@ namespace SharpGame
         static long waitSubmit_;
         static long waitRender_;
 
+        public bool IsRenderThread => renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
+
+        List<Action> commands_ = new List<Action>();
+        public void Post(Action action) { commands_.Add(action); }
+
         public void Frame()
         {
             RenderSemWait();
-
             FrameNoRenderWait();
-        }
-
-        public bool IsRenderThread()
-        {
-            return renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
-        }
-
-        void SetRenderThread()
-        {
-            renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
         }
 
         public void Close()
         {
-            MainSemWait(-1);
+            MainSemWait();
             RenderSemPost();
         }
 
-        List<Action> commands_ = new List<Action>();
-
-        public void Post(Action action) { commands_.Add(action); }
-
         public bool BeginRender()
         {
-            if (MainSemWait(-1))
+            if (MainSemWait())
             {
                 if(commands_.Count > 0)
                 {
@@ -249,10 +238,6 @@ namespace SharpGame
 
         public void EndRender()
         {
-            {
-             //   ExecuteCommands(postComands_);
-            }
-
             RenderSemPost();
         }
 
@@ -278,7 +263,7 @@ namespace SharpGame
             }
         }
 
-        bool MainSemWait(int _msecs)
+        bool MainSemWait()
         {
             if (singleThreaded_)
             {
@@ -286,10 +271,10 @@ namespace SharpGame
             }
 
             long curTime = Stopwatch.GetTimestamp();
-            bool ok = mainSem_.WaitOne(_msecs);
+            bool ok = mainSem_.WaitOne(-1);
             if (ok)
             {
-                waitSubmit_ = Stopwatch.GetTimestamp() - curTime;
+                waitSubmit_ = (long)((Stopwatch.GetTimestamp() - curTime) * Timer.MilliSecondsPerCount);
                 return true;
             }
 
@@ -310,8 +295,9 @@ namespace SharpGame
             {
                 long curTime = Stopwatch.GetTimestamp();
                 bool ok = renderSem_.WaitOne();                
-                waitRender_ = Stopwatch.GetTimestamp() - curTime;
+                waitRender_ = (long)((Stopwatch.GetTimestamp() - curTime) * Timer.MilliSecondsPerCount);
             }
         }
+        #endregion
     }
 }

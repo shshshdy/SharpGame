@@ -41,7 +41,7 @@ namespace SharpGame
             Graphics.BeginRender();
 
 
-            SendGlobalEvent(new RenderBegin());
+            SendGlobalEvent(new BeginRender());
 
             // Acquire an index of drawing image for this frame.
             int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);

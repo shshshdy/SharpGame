@@ -10,7 +10,7 @@ namespace SharpGame.Samples.ColoredTriangle
 
         protected override void OnInit()
         {
-            SubscribeToEvent<RenderPassBegin>(Handle);
+            SubscribeToEvent<BeginRenderPass>(Handle);
 
             shader_ = new Shader
             {
@@ -83,7 +83,7 @@ namespace SharpGame.Samples.ColoredTriangle
         }
 
 
-        void Handle(RenderPassBegin e)
+        void Handle(BeginRenderPass e)
         {
             var cmdBuffer = e.commandBuffer;
 
