@@ -70,6 +70,9 @@ namespace SharpGame
             SecondaryCmdBuffers = SecondaryCommandPool[0].AllocateBuffers(
                 new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2));
 
+            //SecondaryCmdBuffers = GraphicsCommandPool.AllocateBuffers(
+            //    new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 2));
+
             renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
 
         }
@@ -160,7 +163,7 @@ namespace SharpGame
             // Reset all the command buffers allocated from the pools.
             GraphicsCommandPool.Reset();
             ComputeCommandPool.Reset();
-
+            SecondaryCommandPool[0].Reset();
             CreateSwapchainImages();
 
             GPUObject.RecreateAll();
@@ -174,11 +177,10 @@ namespace SharpGame
             // Use a fence to wait until the command buffer has finished execution before using it again
             SubmitFences[imageIndex].Wait();
             SubmitFences[imageIndex].Reset();
-
-            CommandBuffer cmdBuffer = PrimaryCmdBuffers[imageIndex];
-            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
-            cmdBuffer.CmdExecuteCommand(SecondaryCmdBuffers[RenderContext]);
-            cmdBuffer.End();
+           
+            CommandBuffer cmdBuffer = SecondaryCmdBuffers[RenderContext];
+            SecondaryCmdBuffers[RenderContext] = PrimaryCmdBuffers[imageIndex];
+            PrimaryCmdBuffers[imageIndex] = cmdBuffer;
 
             // Submit recorded commands to graphics queue for execution.
             GraphicsQueue.Submit(
@@ -193,18 +195,19 @@ namespace SharpGame
             PresentQueue.PresentKhr(RenderingFinishedSemaphore, Swapchain, imageIndex);
           
         }
+
         #region MULTITHREAD
-        static int currentContext_;
-        public static int RenderContext => 1 - currentContext_;
+        int currentContext_;
+        public int RenderContext => 1 - currentContext_;
 
-        public static int currentFrame_;
+        public int currentFrame_;
 
-        static int renderThreadID;
-        static bool singleThreaded_ = false;
-        static System.Threading.Semaphore renderSem_ = new System.Threading.Semaphore(0, 1);
-        static System.Threading.Semaphore mainSem_ = new System.Threading.Semaphore(0, 1);
-        static long waitSubmit_;
-        static long waitRender_;
+        int renderThreadID;
+        bool singleThreaded_ = false;
+        System.Threading.Semaphore renderSem_ = new System.Threading.Semaphore(0, 1);
+        System.Threading.Semaphore mainSem_ = new System.Threading.Semaphore(0, 1);
+        long waitSubmit_;
+        long waitRender_;
 
         public bool IsRenderThread => renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
 

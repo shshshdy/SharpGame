@@ -11,7 +11,7 @@ namespace SharpGame
         public SubpassDescription[] subpasses { get; set; }
 
         private Texture depthStencilBuffer_;
-        private Framebuffer[] framebuffer_;
+        public Framebuffer[] framebuffer_;
 
         internal VulkanCore.RenderPass renderPass_;
 
@@ -104,7 +104,7 @@ namespace SharpGame
         }
 
         public void Begin(CommandBuffer cmdBuffer, int imageIndex)
-        {
+        {/*
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
                 framebuffer_[imageIndex], new Rect2D(Offset2D.Zero, new Extent2D(Graphics.Width, Graphics.Height)),
@@ -112,7 +112,7 @@ namespace SharpGame
                 new ClearDepthStencilValue(1.0f, 0)
             );
 
-            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
+            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);*/
 
             SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
         }
@@ -131,7 +131,8 @@ namespace SharpGame
 
         public void End(CommandBuffer cmdBuffer, int imageIndex)
         {
-            cmdBuffer.CmdEndRenderPass();
+            /*
+            cmdBuffer.CmdEndRenderPass();*/
             SendGlobalEvent(new RenderPassEnd { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
         }
     }
