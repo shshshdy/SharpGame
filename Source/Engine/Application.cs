@@ -148,7 +148,7 @@ namespace SharpGame
 
 
             while (_running)
-            {                
+            { 
                 timer_.Tick();
 
                 SendGlobalEvent(new BeginFrame { frameNum_ = frameNumber_, timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
