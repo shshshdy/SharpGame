@@ -63,19 +63,7 @@ namespace SharpGame
             CommandBuffer cmdBuffer = Graphics.PrimaryCmdBuffers[imageIndex];
 
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
-            var renderPassBeginInfo = new RenderPassBeginInfo
-            (
-                MainRenderPass.framebuffer_[imageIndex], new Rect2D(Offset2D.Zero, new Extent2D(Graphics.Width, Graphics.Height)),
-                new ClearColorValue(new ColorF4(0.0f, 0.0f, 0.0f, 1.0f)),
-                new ClearDepthStencilValue(1.0f, 0)
-            );
-
-            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
-
-            cmdBuffer.CmdExecuteCommand(Graphics.SecondaryCmdBuffers[Graphics.RenderContext]);
-
-            cmdBuffer.CmdEndRenderPass();
-
+            MainRenderPass.Summit(imageIndex);
             cmdBuffer.End();
             
             // Submit recorded commands to graphics queue for execution.
@@ -121,7 +109,9 @@ namespace SharpGame
                     imageMemoryBarriers: new[] { barrierFromPresentToDraw });
             }
 
+            MainRenderPass.Begin(cmdBuffer, imageIndex);
             MainRenderPass.Draw(cmdBuffer, imageIndex);
+            MainRenderPass.End(cmdBuffer, imageIndex);
 
             if (Graphics.PresentQueue != Graphics.GraphicsQueue)
             {

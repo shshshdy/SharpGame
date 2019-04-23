@@ -104,7 +104,7 @@ namespace SharpGame
         }
 
         public void Begin(CommandBuffer cmdBuffer, int imageIndex)
-        {/*
+        {
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
                 framebuffer_[imageIndex], new Rect2D(Offset2D.Zero, new Extent2D(Graphics.Width, Graphics.Height)),
@@ -112,28 +112,44 @@ namespace SharpGame
                 new ClearDepthStencilValue(1.0f, 0)
             );
 
-            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);*/
-
-            SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
+            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
         }
 
         public void Draw(CommandBuffer cmdBuffer, int imageIndex)
         {
-            Begin(cmdBuffer, imageIndex);
+            SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
+
             OnDraw(cmdBuffer, imageIndex);
-            End(cmdBuffer, imageIndex);
+
+            SendGlobalEvent(new RenderPassEnd { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
         }
 
         protected virtual void OnDraw(CommandBuffer cmdBuffer, int imageIndex)
         {
-
         }
 
         public void End(CommandBuffer cmdBuffer, int imageIndex)
         {
-            /*
-            cmdBuffer.CmdEndRenderPass();*/
-            SendGlobalEvent(new RenderPassEnd { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
+            cmdBuffer.CmdEndRenderPass();
+        }
+
+        public void Summit(int imageIndex)
+        {
+            CommandBuffer cmdBuffer = Graphics.PrimaryCmdBuffers[imageIndex];
+            
+            var renderPassBeginInfo = new RenderPassBeginInfo
+            (
+                framebuffer_[imageIndex], new Rect2D(Offset2D.Zero, new Extent2D(Graphics.Width, Graphics.Height)),
+                new ClearColorValue(new ColorF4(0.0f, 0.0f, 0.0f, 1.0f)),
+                new ClearDepthStencilValue(1.0f, 0)
+            );
+
+            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
+
+            cmdBuffer.CmdExecuteCommand(Graphics.SecondaryCmdBuffers[Graphics.RenderContext]);
+
+            cmdBuffer.CmdEndRenderPass();
+            
         }
     }
 }
