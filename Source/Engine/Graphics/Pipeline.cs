@@ -104,6 +104,7 @@ namespace SharpGame
             {
                 return pipeline;
             }
+
             var graphics = Get<Graphics>();
 
             pipelineLayout = graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
@@ -113,13 +114,14 @@ namespace SharpGame
             new Viewport(0, 0, graphics.Width, graphics.Height),
             new Rect2D(0, 0, graphics.Width, graphics.Height));
 
-            var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(PrimitiveTopology);
+            var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(
+                geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
 
             var pipelineCreateInfo = new GraphicsPipelineCreateInfo(
                 pipelineLayout, renderPass.renderPass_, 0,
                 shaderStageCreateInfos,
                 inputAssemblyStateCreateInfo,
-                VertexInputStateCreateInfo,
+                geometry ? geometry.VertexInputStateCreateInfo : VertexInputStateCreateInfo,
                 RasterizationStateCreateInfo,
                 viewportState: viewportStateCreateInfo,
                 multisampleState: MultisampleStateCreateInfo,

@@ -40,7 +40,20 @@ namespace SharpGame.Samples.TexturedCube
             geometry_ = new Geometry
             {
                 VertexBuffers = new[] { GraphicsBuffer.Vertex(cube.Vertices) },
-                IndexBuffer = GraphicsBuffer.Index(cube.Indices)
+                IndexBuffer = GraphicsBuffer.Index(cube.Indices),
+                VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo
+                (
+                    new[]
+                    {
+                        new VertexInputBindingDescription(0, Interop.SizeOf<Vertex>(), VertexInputRate.Vertex)
+                    },
+                    new[]
+                    {
+                        new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),  // Position.
+                        new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12), // Normal.
+                        new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
+                    }
+                )
             };
 
             geometry_.SetDrawRange(PrimitiveTopology.TriangleList, 0, cube.Indices.Length);
@@ -64,21 +77,7 @@ namespace SharpGame.Samples.TexturedCube
             shader_.Build();
 
             pipeline_ = new Pipeline
-            {
-                VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo
-                (
-                    new[] 
-                    {
-                        new VertexInputBindingDescription(0, Interop.SizeOf<Vertex>(), VertexInputRate.Vertex)
-                    },
-                    new[]
-                    {
-                        new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),  // Position.
-                        new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12), // Normal.
-                        new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
-                    }
-                ),
-
+            {                
                 RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
                 {
                     PolygonMode = PolygonMode.Fill,
@@ -158,7 +157,7 @@ namespace SharpGame.Samples.TexturedCube
         {
             var cmdBuffer = e.commandBuffer;
 
-            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, shader_, null);
+            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, shader_, geometry_);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             geometry_.Draw(cmdBuffer);

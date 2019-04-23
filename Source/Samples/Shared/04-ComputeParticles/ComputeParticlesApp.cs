@@ -79,7 +79,6 @@ namespace SharpGame.Samples.ComputeParticles
             _shader.Build();
 
             _computeShader = new ComputeShader("shader.comp.spv");
-
             _computeShader.Build();
 
             _computePipeline = new Pipeline
