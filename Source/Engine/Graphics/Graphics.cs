@@ -178,19 +178,18 @@ namespace SharpGame
             SubmitFences[imageIndex].Wait();
             SubmitFences[imageIndex].Reset();
            
-            CommandBuffer cmdBuffer = SecondaryCmdBuffers[RenderContext];
-            SecondaryCmdBuffers[RenderContext] = PrimaryCmdBuffers[imageIndex];
-            PrimaryCmdBuffers[imageIndex] = cmdBuffer;
+            CommandBuffer cmdBuffer = PrimaryCmdBuffers[RenderContext];     
 
             // Submit recorded commands to graphics queue for execution.
             GraphicsQueue.Submit(
                 ImageAvailableSemaphore,
                 PipelineStages.ColorAttachmentOutput,
-                PrimaryCmdBuffers[imageIndex],
+                cmdBuffer,
                 RenderingFinishedSemaphore,
                 SubmitFences[imageIndex]
             );
-  
+       
+
             // Present the color output to screen.
             PresentQueue.PresentKhr(RenderingFinishedSemaphore, Swapchain, imageIndex);
           
@@ -198,6 +197,7 @@ namespace SharpGame
 
         #region MULTITHREAD
         int currentContext_;
+        public int WorkContext => currentContext_;
         public int RenderContext => 1 - currentContext_;
 
         public int currentFrame_;

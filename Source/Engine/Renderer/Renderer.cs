@@ -1,4 +1,7 @@
 ﻿#define USE_WORK_THREAD
+#define USE_PRIMARY
+
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -31,7 +34,22 @@ namespace SharpGame
 
         public void RenderUpdate()
         {
-#if USE_WORK_THREAD
+
+#if USE_PRIMARY
+            SendGlobalEvent(new BeginRender());
+            
+            CommandBuffer cmdBuffer = Graphics.PrimaryCmdBuffers[ Graphics.WorkContext]; ;
+            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
+
+            MainRenderPass.Begin(cmdBuffer,  Graphics.WorkContext);
+            MainRenderPass.Draw(cmdBuffer,  Graphics.WorkContext);
+            MainRenderPass.End(cmdBuffer,  Graphics.WorkContext);
+
+            cmdBuffer.End();
+            SendGlobalEvent(new RenderEnd());
+
+
+#elif USE_WORK_THREAD
 
             SendGlobalEvent(new BeginRender());
 
@@ -57,10 +75,44 @@ namespace SharpGame
 
         public void Render()
         {
+
+#if USE_PRIMARY
+
+
+            // Acquire an index of drawing image for this frame.
+            int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
+
             Graphics.BeginRender();
 
-#if USE_WORK_THREAD
+            if (Graphics.currentFrame_ > 4)
+            { 
 
+                // Use a fence to wait until the command buffer has finished execution before using it again
+                Graphics.SubmitFences[imageIndex].Wait();
+            Graphics.SubmitFences[imageIndex].Reset();
+
+            var subresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1);
+
+            CommandBuffer cmdBuffer = Graphics.PrimaryCmdBuffers[imageIndex];
+
+            // Submit recorded commands to graphics queue for execution.
+            Graphics.GraphicsQueue.Submit(
+                Graphics.ImageAvailableSemaphore,
+                PipelineStages.ColorAttachmentOutput,
+                Graphics.PrimaryCmdBuffers[imageIndex],
+                Graphics.RenderingFinishedSemaphore,
+                Graphics.SubmitFences[imageIndex]
+            );
+        }
+
+            // Present the color output to screen.
+            Graphics.PresentQueue.PresentKhr(Graphics.RenderingFinishedSemaphore, Graphics.Swapchain, imageIndex);
+
+            Graphics.EndRender();
+
+#elif USE_WORK_THREAD
+
+            Graphics.BeginRender();
             // Acquire an index of drawing image for this frame.
             int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
 
@@ -85,7 +137,8 @@ namespace SharpGame
 
             // Present the color output to screen.
             Graphics.PresentQueue.PresentKhr(Graphics.RenderingFinishedSemaphore, Graphics.Swapchain, imageIndex);
-
+            
+            Graphics.EndRender();
 #else
 
             SendGlobalEvent(new BeginRender());
@@ -151,7 +204,7 @@ namespace SharpGame
 
             SendGlobalEvent(new RenderEnd());
 #endif
-            Graphics.EndRender();
+
         }
 
     }
