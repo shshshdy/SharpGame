@@ -35,8 +35,16 @@ namespace SharpGame
 
             SendGlobalEvent(new BeginRender());
 
+            CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
+            {
+                Framebuffer = MainRenderPass.framebuffer_[1-Graphics.RenderContext],
+                RenderPass = MainRenderPass.renderPass_
+            };
+
             CommandBuffer cmdBuffer = Graphics.WorkingCmdBuffer;
-            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
+            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue | CommandBufferUsages.SimultaneousUse
+                ,inherit
+                ));
             MainRenderPass.Draw(cmdBuffer, 0);
             cmdBuffer.End();
             SendGlobalEvent(new RenderEnd());

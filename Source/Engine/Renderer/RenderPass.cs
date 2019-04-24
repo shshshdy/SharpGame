@@ -144,7 +144,7 @@ namespace SharpGame
                 new ClearDepthStencilValue(1.0f, 0)
             );
 
-            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
+            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
 
             cmdBuffer.CmdExecuteCommand(Graphics.SecondaryCmdBuffers[Graphics.RenderContext]);
 
