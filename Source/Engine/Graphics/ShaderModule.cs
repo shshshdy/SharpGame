@@ -30,12 +30,8 @@ namespace SharpGame
         public async override void Load(Stream stream)
         {
             var graphics = Get<Graphics>();
-            const int defaultBufferSize = 4096;
-            using (var ms = new MemoryStream())
-            {
-                await stream.CopyToAsync(ms, defaultBufferSize);
-                Code = ms.ToArray();
-            }
+            Code = stream.ReadAllBytes();
+            shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
         }
 
         public async override void Build()
