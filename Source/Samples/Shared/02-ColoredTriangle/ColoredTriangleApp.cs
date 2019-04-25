@@ -14,11 +14,8 @@ namespace SharpGame.Samples.ColoredTriangle
 
             shader_ = new Shader
             {
-                ShaderStageInfo = new[]
-                {
-                    new ShaderStageInfo(ShaderStages.Vertex,"Test.vert.spv"),
-                    new ShaderStageInfo(ShaderStages.Fragment,"Test.frag.spv"),
-                }
+                VertexShader = new ShaderModule(ShaderStages.Vertex, "Test.vert.spv"),
+                PixelShader = new ShaderModule(ShaderStages.Fragment, "Test.frag.spv"),
             };
 
             shader_.Build();

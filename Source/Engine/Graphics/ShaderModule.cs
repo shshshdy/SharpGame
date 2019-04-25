@@ -8,9 +8,25 @@ namespace SharpGame
 {
     public class ShaderModule : Resource
     {
+        public ShaderStages Stage { get; set; }
+        public string FileName { get; set; }
+        public string FuncName { get; set; }
         public byte[] Code { get; set; }
 
         internal VulkanCore.ShaderModule shaderModule;
+
+        public ShaderModule()
+        {
+        }
+
+        public ShaderModule(ShaderStages shaderStages, string fileName, string funcName = "main")
+        {
+            Stage = shaderStages;
+            FileName = fileName;
+            FuncName = funcName;
+            shaderModule = null;
+        }
+
         public async override void Load(Stream stream)
         {
             var graphics = Get<Graphics>();
@@ -25,7 +41,14 @@ namespace SharpGame
         public async override void Build()
         {
             var graphics = Get<Graphics>();
-            shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
+            var fileSystem = Get<FileSystem>();
+
+            string path = Path.Combine(ResourceCache.ContentRoot, FileName);
+            using (Stream stream = fileSystem.Open(path))
+            {
+                Code = stream.ReadAllBytes();
+                shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
+            }
         }
 
         public override void Dispose()

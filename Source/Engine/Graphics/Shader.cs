@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using VulkanCore;
 
@@ -23,26 +25,56 @@ namespace SharpGame
 
     public class Shader : Resource
     {
-        public ShaderStageInfo[] ShaderStageInfo { get; set; }
+        public ShaderModule VertexShader { get; set; }
+        public ShaderModule GeometryShader { get; set; }
+        public ShaderModule PixelShader { get; set; }
+        public ShaderModule HullShader { get; set; }
+        public ShaderModule DomainShader { get; set; }
+        public ShaderModule ComputeShader { get; set; }
+
+        [IgnoreDataMember]
+        public DescriptorSetLayout DescriptorSetLayout { get; set; }
+        [IgnoreDataMember]
+        public DescriptorPool DescriptorPool { get; set; }
+        [IgnoreDataMember]
+        public DescriptorSet DescriptorSet { get; set; }
+
+        [IgnoreDataMember]
+        public bool IsComputeShader => ComputeShader != null;
 
         public Shader()
         {            
         }
 
+        public Shader(string fileName, string funcName = "main")
+        {
+            ComputeShader = new ShaderModule(ShaderStages.Compute, fileName, funcName);
+        }
+
+        public IEnumerable<ShaderModule> GetShaderModules()
+        {
+            yield return VertexShader;
+            yield return GeometryShader;
+            yield return PixelShader;
+            yield return HullShader;
+            yield return DomainShader;
+            yield return ComputeShader;
+        }
+
+
         public async override void Build()
         {
-            var resourceCache = Get<ResourceCache>();
-            var graphics = Get<Graphics>();
-            for (int i = 0; i < ShaderStageInfo.Length; i++)
-            {
-                ShaderStageInfo[i].shaderModule = resourceCache.Load<ShaderModule>(ShaderStageInfo[i].FileName);
-            }
-
+            VertexShader?.Build();
+            GeometryShader?.Build();
+            PixelShader?.Build();
+            HullShader?.Build();
+            DomainShader?.Build();
+            ComputeShader?.Build();
         }
 
         public override void Dispose()
         {
-            foreach(var stage in ShaderStageInfo)
+            foreach(var stage in this.GetShaderModules())
             {
                 stage.shaderModule?.Dispose();
             }
@@ -52,44 +84,29 @@ namespace SharpGame
 
         public PipelineShaderStageCreateInfo[] GetShaderStageCreateInfos()
         {
-            var shaderStageCreateInfo = new PipelineShaderStageCreateInfo[ShaderStageInfo.Length];
-            for(int i = 0; i < ShaderStageInfo.Length; i++)
+            var shaderStageCreateInfo = new List<PipelineShaderStageCreateInfo>();
+            foreach(var sm in GetShaderModules())
             {
-                shaderStageCreateInfo[i] = new PipelineShaderStageCreateInfo(ShaderStageInfo[i].Stage,
-                    ShaderStageInfo[i].shaderModule.shaderModule, ShaderStageInfo[i].FuncName);
+                if(sm != null)
+                {
+                    var shaderStage = new PipelineShaderStageCreateInfo(sm.Stage,
+                        sm.shaderModule, sm.FuncName);
+                    shaderStageCreateInfo.Add(shaderStage);
+                }
             }
-            return shaderStageCreateInfo;
+            return shaderStageCreateInfo.ToArray();
         }
-        
+
+        public PipelineShaderStageCreateInfo GetComputeStageCreateInfo()
+        {
+            if(ComputeShader != null)
+            {
+                return new PipelineShaderStageCreateInfo(ShaderStages.Compute, ComputeShader.shaderModule, ComputeShader.FuncName);
+            }
+
+            return default;
+        }
     }
 
-    public class ComputeShader : Resource
-    {
-        public string FileName;
-        public string FuncName;
 
-        internal ShaderModule shaderModule;
-
-        public ComputeShader()
-        {
-        }
-
-        public ComputeShader(string fileName, string funcName = "main")
-        {
-            FileName = fileName;
-            FuncName = funcName;
-        }
-
-        public async override void Build()
-        {
-            var resourceCache = Get<ResourceCache>();
-            var graphics = Get<Graphics>();
-            shaderModule = resourceCache.Load<ShaderModule>(FileName);
-        }
-
-        public PipelineShaderStageCreateInfo GetShaderStageCreateInfo()
-        {
-            return new PipelineShaderStageCreateInfo(ShaderStages.Compute, shaderModule.shaderModule, FuncName);
-        }
-    }
 }

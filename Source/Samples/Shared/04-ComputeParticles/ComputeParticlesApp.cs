@@ -39,7 +39,7 @@ namespace SharpGame.Samples.ComputeParticles
         private DescriptorSetLayout _computeDescriptorSetLayout;
 
         private Pipeline _computePipeline;
-        private ComputeShader _computeShader;
+        private Shader _computeShader;
 
         private DescriptorSet _computeDescriptorSet;
         private CommandBuffer _computeCmdBuffer;
@@ -69,16 +69,13 @@ namespace SharpGame.Samples.ComputeParticles
 
             _shader = new Shader
             {
-                ShaderStageInfo = new[]
-                {
-                    new ShaderStageInfo(ShaderStages.Vertex,"Shader.vert.spv"),
-                    new ShaderStageInfo(ShaderStages.Fragment,"Shader.frag.spv"),
-                }
+                VertexShader = new ShaderModule(ShaderStages.Vertex, "Shader.vert.spv"),
+                PixelShader = new ShaderModule(ShaderStages.Fragment, "Shader.frag.spv")                
             };
 
             _shader.Build();
 
-            _computeShader = new ComputeShader("shader.comp.spv");
+            _computeShader = new Shader("shader.comp.spv");
             _computeShader.Build();
 
             _computePipeline = new Pipeline

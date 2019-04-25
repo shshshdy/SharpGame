@@ -133,14 +133,19 @@ namespace SharpGame
             return pipeline;
         }
 
-        public VulkanCore.Pipeline GetComputePipeline(RenderPass renderPass, ComputeShader shader)
+        public VulkanCore.Pipeline GetComputePipeline(RenderPass renderPass, Shader shader)
         {
+            if(!shader.IsComputeShader)
+            {
+                return null;
+            }
+
             var graphics = Get<Graphics>();
 
             pipelineLayout = graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
 
             var pipelineCreateInfo = new ComputePipelineCreateInfo(
-                shader.GetShaderStageCreateInfo(), pipelineLayout);
+                shader.GetComputeStageCreateInfo(), pipelineLayout);
 
             pipeline = graphics.Device.CreateComputePipeline(pipelineCreateInfo);
             graphics.ToDisposeFrame(pipeline);

@@ -67,11 +67,8 @@ namespace SharpGame.Samples.TexturedCube
 
             shader_ = new Shader
             {
-                ShaderStageInfo = new[]
-                {
-                    new ShaderStageInfo(ShaderStages.Vertex,"Textured.vert.spv"),
-                    new ShaderStageInfo(ShaderStages.Fragment,"Textured.frag.spv"),
-                }
+                VertexShader = new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
+                PixelShader = new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
             };
 
             shader_.Build();
