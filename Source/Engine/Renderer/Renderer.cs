@@ -29,20 +29,12 @@ namespace SharpGame
             return view;
         }
 
-        int lastIndex = -1;
         public void RenderUpdate()
         {
 #if USE_WORK_THREAD
 
-            int index = Graphics.WorkContext;// 1 - imageIndex;
-            while (lastIndex == index)
-            {
-                System.Threading.Thread.Sleep(0);
-               // index = 1 - imageIndex;
-            }
-
-            lastIndex = index;
-
+            int index = Graphics.WorkContext;
+            
             SendGlobalEvent(new BeginRender());
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
@@ -55,8 +47,10 @@ namespace SharpGame
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue | CommandBufferUsages.SimultaneousUse
                 ,inherit
                 ));
+
             MainRenderPass.Draw(cmdBuffer, index);
             cmdBuffer.End();
+
             SendGlobalEvent(new RenderEnd());
 #endif
             foreach (var view in views_)
@@ -65,12 +59,11 @@ namespace SharpGame
             }
         }
 
-        int imageIndex;
         public void Render()
         {
 #if USE_WORK_THREAD
             // Acquire an index of drawing image for this frame.
-            imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
+            int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
 
             Graphics.BeginRender();
             // Use a fence to wait until the command buffer has finished execution before using it again

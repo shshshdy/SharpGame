@@ -22,10 +22,7 @@ namespace SharpGame
         public ImageView[] SwapchainImageViews { get; private set; }
         public CommandBuffer[] PrimaryCmdBuffers { get; private set; }
         public CommandBufferPool[] SecondaryCmdBuffers { get; private set; }
-        //public CommandBuffer WorkingCmdBuffer => SecondaryCmdBuffers[currentContext_];
-
         public Fence[] SubmitFences { get; private set; }
-
         public Semaphore ImageAvailableSemaphore { get; private set; }
         public Semaphore RenderingFinishedSemaphore { get; private set; }
                 
@@ -74,7 +71,7 @@ namespace SharpGame
             SecondaryCmdBuffers[1] = new CommandBufferPool(
                 SecondaryCommandPool[1].AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2)));
 
-            renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            renderThreadID_ = System.Threading.Thread.CurrentThread.ManagedThreadId;
 
         }
 
@@ -171,32 +168,6 @@ namespace SharpGame
             GPUObject.RecreateAll();
         }
 
-        public virtual void Draw()
-        {           
-            // Acquire an index of drawing image for this frame.
-            int imageIndex = Swapchain.AcquireNextImage(semaphore: ImageAvailableSemaphore);
-
-            // Use a fence to wait until the command buffer has finished execution before using it again
-            SubmitFences[imageIndex].Wait();
-            SubmitFences[imageIndex].Reset();
-           
-            CommandBuffer cmdBuffer = PrimaryCmdBuffers[RenderContext];     
-
-            // Submit recorded commands to graphics queue for execution.
-            GraphicsQueue.Submit(
-                ImageAvailableSemaphore,
-                PipelineStages.ColorAttachmentOutput,
-                cmdBuffer,
-                RenderingFinishedSemaphore,
-                SubmitFences[imageIndex]
-            );
-       
-
-            // Present the color output to screen.
-            PresentQueue.PresentKhr(RenderingFinishedSemaphore, Swapchain, imageIndex);
-          
-        }
-
         #region MULTITHREAD
         int currentContext_;
         public int WorkContext => currentContext_;
@@ -204,14 +175,15 @@ namespace SharpGame
 
         public int currentFrame_;
 
-        int renderThreadID;
-        bool singleThreaded_ = false;
+        int renderThreadID_;
+
         System.Threading.Semaphore renderSem_ = new System.Threading.Semaphore(0, 1);
         System.Threading.Semaphore mainSem_ = new System.Threading.Semaphore(0, 1);
         long waitSubmit_;
         long waitRender_;
 
-        public bool IsRenderThread => renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
+        public bool SingleThreaded { get; set; }
+        public bool IsRenderThread => renderThreadID_ == System.Threading.Thread.CurrentThread.ManagedThreadId;
 
         List<Action> commands_ = new List<Action>();
         public void Post(Action action) { commands_.Add(action); }
@@ -269,7 +241,7 @@ namespace SharpGame
 
         public void MainSemPost()
         {
-            if (!singleThreaded_)
+            if (!SingleThreaded)
             {
                 mainSem_.Release();
             }
@@ -277,7 +249,7 @@ namespace SharpGame
 
         bool MainSemWait()
         {
-            if (singleThreaded_)
+            if (SingleThreaded)
             {
                 return true;
             }
@@ -295,7 +267,7 @@ namespace SharpGame
 
         void RenderSemPost()
         {
-            if (!singleThreaded_)
+            if (!SingleThreaded)
             {
                 renderSem_.Release();
             }
@@ -303,7 +275,7 @@ namespace SharpGame
 
         void RenderSemWait()
         {
-            if (!singleThreaded_)
+            if (!SingleThreaded)
             {
                 long curTime = Stopwatch.GetTimestamp();
                 bool ok = renderSem_.WaitOne();                

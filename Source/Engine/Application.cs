@@ -115,14 +115,49 @@ namespace SharpGame
         {
             _running = true;
 
-            new Thread(LogicThread).Start();
-            
+            if(graphics_.SingleThreaded)
+            {
+                RunSingleThread();
+            }
+            else
+            {
+                new Thread(SimulateThread).Start();
+
+                while (_running)
+                {
+                    platform_.ProcessEvents();
+
+                    if (!_appPaused)
+                    {
+                        renderer_.Render();
+                    }
+                    else
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
+            }
+
+            graphics_.Close();
+        }
+
+        void RunSingleThread()
+        {
+            workThreadSyncContext_ = SynchronizationContext.Current;
+            workThreadId_ = Thread.CurrentThread.ManagedThreadId;
+
+            timer_.Reset();
+
+            OnInit();
+
             while (_running)
             {
                 platform_.ProcessEvents();
-                    
+
                 if (!_appPaused)
                 {
+                    UpdateFrame();
+
                     renderer_.Render();
                 }
                 else
@@ -131,10 +166,10 @@ namespace SharpGame
                 }
             }
 
-            graphics_.Close();
+
         }
 
-        void LogicThread()
+        void SimulateThread()
         {
             workThreadSyncContext_ = SynchronizationContext.Current;
             workThreadId_ = Thread.CurrentThread.ManagedThreadId;
@@ -146,28 +181,33 @@ namespace SharpGame
             graphics_.FrameNoRenderWait();
             graphics_.Frame();
 
-
             while (_running)
             { 
-                timer_.Tick();
-
-                SendGlobalEvent(new BeginFrame { frameNum_ = frameNumber_, timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
-
-                SendGlobalEvent(new Update { timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
-
-                Update(timer_);  
-
-                SendGlobalEvent(new PostUpdate { timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
-
-                renderer_.RenderUpdate();     
+                UpdateFrame();
 
                 graphics_.Frame();
-
-                SendGlobalEvent(new EndFrame {});
-
-
-                CalculateFrameRateStats();
             }
+
+        }
+
+        void UpdateFrame()
+        {
+            timer_.Tick();
+
+            SendGlobalEvent(new BeginFrame { frameNum_ = frameNumber_, timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
+
+            SendGlobalEvent(new Update { timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
+
+            Update(timer_);
+
+            SendGlobalEvent(new PostUpdate { timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
+
+            renderer_.RenderUpdate();
+
+
+            SendGlobalEvent(new EndFrame { }); 
+
+            CalculateFrameRateStats();
 
         }
 
