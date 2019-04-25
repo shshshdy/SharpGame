@@ -1,5 +1,4 @@
-﻿#define USE_WORK_THREAD
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using VulkanCore;
@@ -11,15 +10,15 @@ namespace SharpGame
     {
         public Graphics Graphics => Get<Graphics>();
 
-        public RenderPass MainRenderPass { get; }
+        public RenderPass MainRenderPass => MainView.RenderPass;
+
+        public View MainView { get; }
 
         private List<View> views_ = new List<View>();
 
         public Renderer()
         {
-            CreateViewport();
-
-            MainRenderPass = new RenderPass();
+            MainView = CreateViewport();            
         }
         
         public View CreateViewport()
@@ -31,37 +30,19 @@ namespace SharpGame
 
         public void RenderUpdate()
         {
-#if USE_WORK_THREAD
-
-            int index = Graphics.WorkContext;
-            
             SendGlobalEvent(new BeginRender());
 
-            CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
-            {
-                Framebuffer = MainRenderPass.framebuffer_[index],
-                RenderPass = MainRenderPass.renderPass_
-            };
 
-            CommandBuffer cmdBuffer = Graphics.SecondaryCmdBuffers[index].Get();
-            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue | CommandBufferUsages.SimultaneousUse
-                ,inherit
-                ));
-
-            MainRenderPass.Draw(cmdBuffer, index);
-            cmdBuffer.End();
-
-            SendGlobalEvent(new RenderEnd());
-#endif
             foreach (var view in views_)
             {
                 view.Update();
             }
+
+            SendGlobalEvent(new RenderEnd());
         }
 
         public void Render()
         {
-#if USE_WORK_THREAD
             // Acquire an index of drawing image for this frame.
             int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
 
@@ -71,39 +52,7 @@ namespace SharpGame
             Graphics.SubmitFences[imageIndex].Reset();
 
             CommandBuffer cmdBuffer = Graphics.PrimaryCmdBuffers[imageIndex];
-
-            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
-            MainRenderPass.Summit(imageIndex);
-            cmdBuffer.End();
-
-            // Submit recorded commands to graphics queue for execution.
-            Graphics.GraphicsQueue.Submit(
-                Graphics.ImageAvailableSemaphore,
-                PipelineStages.ColorAttachmentOutput,
-                Graphics.PrimaryCmdBuffers[imageIndex],
-                Graphics.RenderingFinishedSemaphore,
-                Graphics.SubmitFences[imageIndex]
-            );
-
-
-            Graphics.EndRender();
-            // Present the color output to screen.
-            Graphics.PresentQueue.PresentKhr(Graphics.RenderingFinishedSemaphore, Graphics.Swapchain, imageIndex);
-
-#else
-
-            SendGlobalEvent(new BeginRender());
-
-            // Acquire an index of drawing image for this frame.
-            int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
-
-            // Use a fence to wait until the command buffer has finished execution before using it again
-            Graphics.SubmitFences[imageIndex].Wait();
-            Graphics.SubmitFences[imageIndex].Reset();
-
             var subresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1);
-
-            CommandBuffer cmdBuffer = Graphics.PrimaryCmdBuffers[imageIndex];
 
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
 
@@ -121,11 +70,11 @@ namespace SharpGame
                     imageMemoryBarriers: new[] { barrierFromPresentToDraw });
             }
 
-            MainRenderPass.Begin(cmdBuffer, imageIndex);
-            MainRenderPass.Draw(cmdBuffer, imageIndex);
-            MainRenderPass.End(cmdBuffer, imageIndex);
-            cmdBuffer.CmdEndRenderPass();
-
+            foreach (var view in views_)
+            {
+                view.Summit(imageIndex);
+            }
+            
             if (Graphics.PresentQueue != Graphics.GraphicsQueue)
             {
                 var barrierFromDrawToPresent = new ImageMemoryBarrier(
@@ -140,8 +89,8 @@ namespace SharpGame
                     imageMemoryBarriers: new[] { barrierFromDrawToPresent });
             }
 
-            cmdBuffer.End();       
-   
+            cmdBuffer.End();
+
             // Submit recorded commands to graphics queue for execution.
             Graphics.GraphicsQueue.Submit(
                 Graphics.ImageAvailableSemaphore,
@@ -151,11 +100,11 @@ namespace SharpGame
                 Graphics.SubmitFences[imageIndex]
             );
 
+            Graphics.EndRender();
+
             // Present the color output to screen.
             Graphics.PresentQueue.PresentKhr(Graphics.RenderingFinishedSemaphore, Graphics.Swapchain, imageIndex);
 
-            SendGlobalEvent(new RenderEnd());
-#endif
 
         }
 
