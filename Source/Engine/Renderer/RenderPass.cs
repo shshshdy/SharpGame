@@ -103,20 +103,26 @@ namespace SharpGame
             return framebuffers;
         }
 
+        CommandBuffer []cmdBuffers_ = new CommandBuffer[2];
+
         public void Begin(CommandBuffer cmdBuffer, int imageIndex)
         {
             var renderPassBeginInfo = new RenderPassBeginInfo
-            (
-                framebuffer_[imageIndex], new Rect2D(Offset2D.Zero, new Extent2D(Graphics.Width, Graphics.Height)),
-                new ClearColorValue(new ColorF4(0.0f, 0.0f, 0.0f, 1.0f)),
-                new ClearDepthStencilValue(1.0f, 0)
-            );
+               (
+                   framebuffer_[imageIndex], new Rect2D(Offset2D.Zero, new Extent2D(Graphics.Width, Graphics.Height)),
+                   new ClearColorValue(new ColorF4(0.0f, 0.0f, 0.0f, 1.0f)),
+                   new ClearDepthStencilValue(1.0f, 0)
+               );
 
-            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo);
+            cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
+
         }
 
         public void Draw(CommandBuffer cmdBuffer, int imageIndex)
         {
+            System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
+
+            cmdBuffers_[imageIndex] = cmdBuffer;
             SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
 
             OnDraw(cmdBuffer, imageIndex);
@@ -145,11 +151,11 @@ namespace SharpGame
             );
 
             cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-
-            cmdBuffer.CmdExecuteCommand(Graphics.SecondaryCmdBuffers[Graphics.RenderContext]);
+            if(cmdBuffers_[imageIndex] != null)
+            cmdBuffer.CmdExecuteCommand(cmdBuffers_[imageIndex]);
 
             cmdBuffer.CmdEndRenderPass();
-            
+            cmdBuffers_[imageIndex] = null;
         }
     }
 }

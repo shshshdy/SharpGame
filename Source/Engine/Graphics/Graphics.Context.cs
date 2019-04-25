@@ -213,6 +213,7 @@ namespace SharpGame
             ComputeCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(computeQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer | CommandPoolCreateFlags.Transient));
             SecondaryCommandPool = new CommandPool[2];
             SecondaryCommandPool[0] = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer | CommandPoolCreateFlags.Transient));
+            SecondaryCommandPool[1] = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer | CommandPoolCreateFlags.Transient));
         }
 
     }
