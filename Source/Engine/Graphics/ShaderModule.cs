@@ -6,12 +6,43 @@ using VulkanCore;
 
 namespace SharpGame
 {
+    public struct BlockMember
+    {
+        public string name;
+        public uint size;
+        public uint offset;
+    }
+
+    public struct InputBlock
+    {
+        public string name;
+        public uint size;
+        public List<BlockMember> members;
+        public uint set;
+        public uint binding;
+        public bool isTextureBlock;
+    }
+
     public class ShaderModule : Resource
     {
         public ShaderStages Stage { get; set; }
         public string FileName { get; set; }
         public string FuncName { get; set; }
         public byte[] Code { get; set; }
+
+        public InputBlock pushConstants;
+        public List<InputBlock> descriptorSets;
+
+        public List<uint> dynamicSets;
+        public List<uint> globalSets;
+        public List<uint> staticSets;
+
+        public uint dynamicSetSize;
+        public uint staticSetSize;
+        public uint numDynamicUniforms;
+        public uint numDynamicTextures;
+        public uint numStaticUniforms;
+        public uint numStaticTextures;
 
         internal VulkanCore.ShaderModule shaderModule;
 
