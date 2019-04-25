@@ -7,15 +7,16 @@ namespace SharpGame
 {
     public class Resource : Object
     {
+        public string FileName { get; set; }
+
         protected FileSystem FileSystem => Get<FileSystem>();
 
         public async virtual void Load(Stream stream)
         {
         }
 
-        public async virtual void Build()
+        public virtual void Build()
         {
-
         }
     }
 }

@@ -6,25 +6,15 @@ using VulkanCore;
 
 namespace SharpGame
 {
-    public struct ShaderStageInfo
+    public class Pass
     {
-        public ShaderStages Stage;
-        public string FileName;
-        public string FuncName;
 
-        public ShaderStageInfo(ShaderStages shaderStages, string fileName, string funcName = "main")
-        {
-            Stage = shaderStages;
-            FileName = fileName;
-            FuncName = funcName;
-            shaderModule = null;
-        }
-
-        internal ShaderModule shaderModule;
     }
 
     public class Shader : Resource
     {
+        public string Name { get; set; }
+
         public ShaderModule VertexShader { get; set; }
         public ShaderModule GeometryShader { get; set; }
         public ShaderModule PixelShader { get; set; }
@@ -61,8 +51,7 @@ namespace SharpGame
             yield return ComputeShader;
         }
 
-
-        public async override void Build()
+        public override void Build()
         {
             VertexShader?.Build();
             GeometryShader?.Build();
@@ -76,7 +65,7 @@ namespace SharpGame
         {
             foreach(var stage in this.GetShaderModules())
             {
-                stage.shaderModule?.Dispose();
+                stage?.Dispose();
             }
 
             base.Dispose();
