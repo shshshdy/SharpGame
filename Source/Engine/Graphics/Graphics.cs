@@ -8,7 +8,6 @@ using VulkanCore.Mvk;
 
 namespace SharpGame
 {
-
     public partial class Graphics : Object
     {
         private readonly Stack<IDisposable> _toDisposePermanent = new Stack<IDisposable>();
@@ -22,8 +21,8 @@ namespace SharpGame
         public Image[] SwapchainImages { get; private set; }
         public ImageView[] SwapchainImageViews { get; private set; }
         public CommandBuffer[] PrimaryCmdBuffers { get; private set; }
-        public CommandBuffer[] SecondaryCmdBuffers { get; private set; }
-        public CommandBuffer WorkingCmdBuffer => SecondaryCmdBuffers[currentContext_];
+        public CommandBufferPool[] SecondaryCmdBuffers { get; private set; }
+        //public CommandBuffer WorkingCmdBuffer => SecondaryCmdBuffers[currentContext_];
 
         public Fence[] SubmitFences { get; private set; }
 
@@ -67,11 +66,13 @@ namespace SharpGame
             for (int i = 0; i < SubmitFences.Length; i++)
                 ToDispose(SubmitFences[i] = Device.CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled)));
 
-            SecondaryCmdBuffers = SecondaryCommandPool[0].AllocateBuffers(
-                new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2));
+            SecondaryCmdBuffers = new CommandBufferPool[2];
 
-            //SecondaryCmdBuffers = GraphicsCommandPool.AllocateBuffers(
-            //    new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 2));
+            SecondaryCmdBuffers[0] = new CommandBufferPool(
+                SecondaryCommandPool[0].AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2)));
+
+            SecondaryCmdBuffers[1] = new CommandBufferPool(
+                SecondaryCommandPool[1].AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2)));
 
             renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
 
@@ -164,6 +165,7 @@ namespace SharpGame
             GraphicsCommandPool.Reset();
             ComputeCommandPool.Reset();
             SecondaryCommandPool[0].Reset();
+            SecondaryCommandPool[1].Reset();
             CreateSwapchainImages();
 
             GPUObject.RecreateAll();

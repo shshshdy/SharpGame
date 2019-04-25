@@ -7,7 +7,23 @@ using VulkanCore.Khr;
 using VulkanCore.Mvk;
 
 namespace SharpGame
-{    
+{
+    public class CommandBufferPool
+    {
+        CommandBuffer[] commandBuffers_;
+        int currentIndex_;
+        public CommandBufferPool(CommandBuffer[] commandBuffers)
+        {
+            commandBuffers_ = commandBuffers;
+        }
+
+        public CommandBuffer Get()
+        {
+            int idx = currentIndex_++;
+            return commandBuffers_[idx % commandBuffers_.Length];
+        }
+    }
+
     public partial class Graphics
     {
         public Instance Instance { get; private set; }

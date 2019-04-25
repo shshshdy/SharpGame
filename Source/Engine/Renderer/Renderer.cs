@@ -34,28 +34,28 @@ namespace SharpGame
         {
 #if USE_WORK_THREAD
 
-            while (lastIndex == 1 - imageIndex)
+            int index = Graphics.WorkContext;// 1 - imageIndex;
+            while (lastIndex == index)
             {
                 System.Threading.Thread.Sleep(0);
+               // index = 1 - imageIndex;
             }
 
-            lastIndex = 1 - imageIndex;
+            lastIndex = index;
 
             SendGlobalEvent(new BeginRender());
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                Framebuffer = MainRenderPass.framebuffer_[1 - imageIndex],
+                Framebuffer = MainRenderPass.framebuffer_[index],
                 RenderPass = MainRenderPass.renderPass_
             };
 
-            CommandBuffer cmdBuffer = Graphics.SecondaryCommandPool[1 - imageIndex]
-                .AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 1))[0];
-            //Graphics.SecondaryCmdBuffers[1 - imageIndex];// Graphics.WorkingCmdBuffer;
+            CommandBuffer cmdBuffer = Graphics.SecondaryCmdBuffers[index].Get();
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue | CommandBufferUsages.SimultaneousUse
                 ,inherit
                 ));
-            MainRenderPass.Draw(cmdBuffer, 1 - imageIndex);
+            MainRenderPass.Draw(cmdBuffer, index);
             cmdBuffer.End();
             SendGlobalEvent(new RenderEnd());
 #endif
@@ -69,11 +69,10 @@ namespace SharpGame
         public void Render()
         {
 #if USE_WORK_THREAD
-            Graphics.BeginRender();
             // Acquire an index of drawing image for this frame.
             imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
 
-
+            Graphics.BeginRender();
             // Use a fence to wait until the command buffer has finished execution before using it again
             Graphics.SubmitFences[imageIndex].Wait();
             Graphics.SubmitFences[imageIndex].Reset();
@@ -83,7 +82,7 @@ namespace SharpGame
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.SimultaneousUse));
             MainRenderPass.Summit(imageIndex);
             cmdBuffer.End();
-            
+
             // Submit recorded commands to graphics queue for execution.
             Graphics.GraphicsQueue.Submit(
                 Graphics.ImageAvailableSemaphore,
@@ -93,10 +92,11 @@ namespace SharpGame
                 Graphics.SubmitFences[imageIndex]
             );
 
+
+            Graphics.EndRender();
             // Present the color output to screen.
             Graphics.PresentQueue.PresentKhr(Graphics.RenderingFinishedSemaphore, Graphics.Swapchain, imageIndex);
-            
-            Graphics.EndRender();
+
 #else
 
             SendGlobalEvent(new BeginRender());

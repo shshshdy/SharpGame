@@ -120,7 +120,7 @@ namespace SharpGame
 
         public void Draw(CommandBuffer cmdBuffer, int imageIndex)
         {
-            System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
+            //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
 
             cmdBuffers_[imageIndex] = cmdBuffer;
             SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
@@ -152,10 +152,12 @@ namespace SharpGame
 
             cmdBuffer.CmdBeginRenderPass(renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
             if(cmdBuffers_[imageIndex] != null)
-            cmdBuffer.CmdExecuteCommand(cmdBuffers_[imageIndex]);
+            {
+                cmdBuffer.CmdExecuteCommand(cmdBuffers_[imageIndex]);
+                cmdBuffers_[imageIndex] = null;
+            }
 
             cmdBuffer.CmdEndRenderPass();
-            cmdBuffers_[imageIndex] = null;
         }
     }
 }
