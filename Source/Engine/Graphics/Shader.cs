@@ -16,7 +16,7 @@ namespace SharpGame
         {
         }
 
-        public Shader(Pass[] passes)
+        public Shader(string name, Pass[] passes)
         {
             foreach(var pass in passes)
             {
@@ -77,6 +77,20 @@ namespace SharpGame
         public Pass(string fileName, string funcName = "main")
         {
             ComputeShader = new ShaderModule(ShaderStages.Compute, fileName, funcName);
+        }
+
+        public Pass(string name, ShaderModule vertexShader, ShaderModule pixelShader, ShaderModule geometryShader = null,
+            ShaderModule hullShader = null, ShaderModule domainShader = null, ShaderModule computeShader = null)
+        {
+
+            Name = name;
+            VertexShader = vertexShader;
+            PixelShader = pixelShader;
+            GeometryShader = geometryShader;
+            HullShader = hullShader;
+            DomainShader = domainShader;
+            ComputeShader = computeShader;
+            
         }
 
         public Pass(ShaderModule[] shaderModules)
@@ -165,26 +179,6 @@ namespace SharpGame
 
     public static class ShaderHelper
     {
-        public static Shader Shader(string name, params Pass[] passes)
-        {
-            return new Shader(passes) { Name = name };
-        }
-
-        public static Pass Pass(string name, ShaderModule vertexShader, ShaderModule pixelShader, ShaderModule geometryShader = null,
-            ShaderModule hullShader = null, ShaderModule domainShader = null, ShaderModule computeShader = null)
-        {
-            return new Pass
-            {
-                Name = name,
-                VertexShader = vertexShader,
-                PixelShader = pixelShader,
-                GeometryShader = geometryShader,
-                HullShader = hullShader,
-                DomainShader = domainShader,
-                ComputeShader = computeShader,
-            };
-        }
-
         public static Pass Pass(string name, ShaderModule[] shaderModules)
         {
             return new Pass(shaderModules)

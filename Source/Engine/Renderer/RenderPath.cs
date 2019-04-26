@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
+using VulkanCore;
 
 namespace SharpGame
 {
-    public struct RenderPassDesc
-    {
-
-    }
-
     public class RenderPath : Resource
     {
-        public List<RenderPassDesc> renderPasses_ = new List<RenderPassDesc>();
+        public List<RenderPass> RenderPasses { get; set; } = new List<RenderPass>();
 
-    }
-
-    public static class RenderPassHelper
-    {
-        public static RenderPath RenderPath()
+        public RenderPath()
         {
-            return new RenderPath();
         }
+
+        public RenderPath(params RenderPass[] renderPasss)
+        {
+            RenderPasses.AddRange(renderPasss);
+        }
+
     }
+
 }

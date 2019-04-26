@@ -21,7 +21,7 @@ namespace SharpGame
 
         public View()
         {
-            RenderPass = new RenderPass();
+            RenderPass = new ScenePass();
         }
 
         public void Update()

@@ -61,16 +61,16 @@ namespace SharpGame.Samples.TexturedCube
             geometry_.SetDrawRange(PrimitiveTopology.TriangleList, 0, cube.Indices.Length);
             
             _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx");
-            _sampler             = ToDispose(CreateSampler());
+            _sampler             = graphics_.CreateSampler();
             _uniformBuffer       = ToDispose(GraphicsBuffer.DynamicUniform<WorldViewProjection>(1));
-            _descriptorSetLayout = ToDispose(CreateDescriptorSetLayout());
-            _descriptorPool      = ToDispose(CreateDescriptorPool());
+            _descriptorSetLayout = CreateDescriptorSetLayout();
+            _descriptorPool      = CreateDescriptorPool();
             _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
 
-            pass_ = Pass(
-                "main",                
-                VertexShader("Textured.vert.spv"),
-                PixelShader("Textured.frag.spv")
+            pass_ = new Pass(
+                name : "main",                
+                vertexShader : new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
+                pixelShader : new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
             );
 
             pass_.Build();
@@ -161,29 +161,7 @@ namespace SharpGame.Samples.TexturedCube
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             geometry_.Draw(cmdBuffer);
         }
-
-        private Sampler CreateSampler()
-        {
-            var createInfo = new SamplerCreateInfo
-            {
-                MagFilter = Filter.Linear,
-                MinFilter = Filter.Linear,
-                MipmapMode = SamplerMipmapMode.Linear
-            };
-            // We also enable anisotropic filtering. Because that feature is optional, it must be
-            // checked if it is supported by the device.
-            if (graphics_.Features.SamplerAnisotropy)
-            {
-                createInfo.AnisotropyEnable = true;
-                createInfo.MaxAnisotropy = graphics_.Properties.Limits.MaxSamplerAnisotropy;
-            }
-            else
-            {
-                createInfo.MaxAnisotropy = 1.0f;
-            }
-            return graphics_.Device.CreateSampler(createInfo);
-        }
-
+        
         private void SetViewProjection()
         {
             const float cameraDistance = 2.5f;
@@ -208,8 +186,7 @@ namespace SharpGame.Samples.TexturedCube
                 new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
                 new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 1)
             };
-            return graphics_.Device.CreateDescriptorPool(
-                new DescriptorPoolCreateInfo(descriptorPoolSizes.Length, descriptorPoolSizes));
+            return graphics_.CreateDescriptorPool(descriptorPoolSizes);
         }
 
         private DescriptorSet CreateDescriptorSet()
@@ -229,9 +206,9 @@ namespace SharpGame.Samples.TexturedCube
 
         private DescriptorSetLayout CreateDescriptorSetLayout()
         {
-            return graphics_.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
+            return graphics_.CreateDescriptorSetLayout(
                 new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
-                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)));
+                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
         }
 
     }

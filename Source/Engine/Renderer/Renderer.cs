@@ -12,13 +12,21 @@ namespace SharpGame
 
         public RenderPass MainRenderPass => MainView.RenderPass;
 
-        public View MainView { get; }
+        public View MainView { get; private set; }
 
         private List<View> views_ = new List<View>();
 
+        public Texture DepthStencilBuffer => depthStencilBuffer_;
+        private Texture depthStencilBuffer_;
+
         public Renderer()
         {
-            MainView = CreateViewport();            
+        }
+
+        public void Inialize()
+        {
+            depthStencilBuffer_ = Graphics.ToDisposeFrame(Texture.CreateDepthStencil(Graphics.Width, Graphics.Height));
+            MainView = CreateViewport();
         }
         
         public View CreateViewport()
@@ -38,7 +46,7 @@ namespace SharpGame
                 view.Update();
             }
 
-            SendGlobalEvent(new RenderEnd());
+            SendGlobalEvent(new EndRender());
         }
 
         public void Render()

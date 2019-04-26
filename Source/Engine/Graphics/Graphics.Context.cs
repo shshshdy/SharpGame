@@ -26,16 +26,17 @@ namespace SharpGame
 
     public partial class Graphics
     {
-        public Instance Instance { get; private set; }
+        internal Instance Instance { get; private set; }
         protected DebugReportCallbackExt DebugReportCallback { get; private set; }
-        public SurfaceKhr Surface { get; private set; }
-        public SwapchainKhr Swapchain { get; private set; }
+        internal SurfaceKhr Surface { get; private set; }
+        internal SwapchainKhr Swapchain { get; private set; }
 
-        public PhysicalDevice PhysicalDevice { get; private set; }
-        public Device Device { get; private set; }
-        public PhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
-        public PhysicalDeviceFeatures Features { get; private set; }
-        public PhysicalDeviceProperties Properties { get; private set; }
+        internal PhysicalDevice PhysicalDevice { get; private set; }
+        internal Device Device { get; private set; }
+        internal PhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
+        internal PhysicalDeviceFeatures Features { get; private set; }
+        internal PhysicalDeviceProperties Properties { get; private set; }
+
         public Queue GraphicsQueue { get; private set; }
         public Queue ComputeQueue { get; private set; }
         public Queue PresentQueue { get; private set; }
@@ -122,29 +123,8 @@ namespace SharpGame
             }
         }
 
-        private SwapchainKhr CreateSwapchain()
-        {
-            SurfaceCapabilitiesKhr capabilities = PhysicalDevice.GetSurfaceCapabilitiesKhr(Surface);
-            SurfaceFormatKhr[] formats = PhysicalDevice.GetSurfaceFormatsKhr(Surface);
-            PresentModeKhr[] presentModes = PhysicalDevice.GetSurfacePresentModesKhr(Surface);
-            Format format = formats.Length == 1 && formats[0].Format == Format.Undefined
-                ? Format.B8G8R8A8UNorm
-                : formats[0].Format;
-            PresentModeKhr presentMode =
-                presentModes.Contains(PresentModeKhr.Mailbox) ? PresentModeKhr.Mailbox :
-                presentModes.Contains(PresentModeKhr.FifoRelaxed) ? PresentModeKhr.FifoRelaxed :
-                presentModes.Contains(PresentModeKhr.Fifo) ? PresentModeKhr.Fifo :
-                PresentModeKhr.Immediate;
 
-            return Device.CreateSwapchainKhr(new SwapchainCreateInfoKhr(
-                surface: Surface,
-                imageFormat: format,
-                imageExtent: capabilities.CurrentExtent,
-                preTransform: capabilities.CurrentTransform,
-                presentMode: presentMode));
-        }
-
-        public void CreateContext(Instance instance, SurfaceKhr surface, PlatformType platform)
+        public void CreateDevice(Instance instance, SurfaceKhr surface, PlatformType platform)
         {
             // Find graphics and presentation capable physical device(s) that support
             // the provided surface for platform.
@@ -215,7 +195,7 @@ namespace SharpGame
                 Features);
             Device = PhysicalDevice.CreateDevice(deviceCreateInfo);
 
-            // Get queue(s).
+
             GraphicsQueue = Device.GetQueue(graphicsQueueFamilyIndex);
             ComputeQueue = computeQueueFamilyIndex == graphicsQueueFamilyIndex
                 ? GraphicsQueue
@@ -225,11 +205,12 @@ namespace SharpGame
                 : Device.GetQueue(presentQueueFamilyIndex);
 
             // Create command pool(s).
-            GraphicsCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer| CommandPoolCreateFlags.Transient));
+            GraphicsCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer | CommandPoolCreateFlags.Transient));
             ComputeCommandPool = Device.CreateCommandPool(new CommandPoolCreateInfo(computeQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer | CommandPoolCreateFlags.Transient));
             SecondaryCommandPool = new CommandPool[2];
             SecondaryCommandPool[0] = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer | CommandPoolCreateFlags.Transient));
             SecondaryCommandPool[1] = Device.CreateCommandPool(new CommandPoolCreateInfo(graphicsQueueFamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer | CommandPoolCreateFlags.Transient));
+
         }
 
     }

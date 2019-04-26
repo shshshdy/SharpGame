@@ -55,7 +55,7 @@ namespace SharpGame.Samples.ComputeParticles
 
             _descriptorPool = ToDispose(CreateDescriptorPool());
 
-            _sampler = ToDispose(CreateSampler());
+            _sampler = graphics_.CreateSampler();
             _particleDiffuseMap = resourceCache_.Load<Texture>("ParticleDiffuse.ktx");
             _graphicsDescriptorSetLayout = ToDispose(CreateGraphicsDescriptorSetLayout());
             _graphicsDescriptorSet = CreateGraphicsDescriptorSet();
@@ -65,7 +65,7 @@ namespace SharpGame.Samples.ComputeParticles
             _computeDescriptorSetLayout = ToDispose(CreateComputeDescriptorSetLayout());
             _computeDescriptorSet = CreateComputeDescriptorSet();
             _computeCmdBuffer = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
-            _computeFence = ToDispose(graphics_.Device.CreateFence());
+            _computeFence = graphics_.CreateFence();
 
             _pass = new Pass
             {
@@ -232,40 +232,17 @@ namespace SharpGame.Samples.ComputeParticles
 
         private DescriptorPool CreateDescriptorPool()
         {
-            return graphics_.Device.CreateDescriptorPool(new DescriptorPoolCreateInfo(3, new[]
+            return graphics_.CreateDescriptorPool(new[]
             {
                 new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
                 new DescriptorPoolSize(DescriptorType.StorageBuffer, 1),
                 new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 1)
-            }));
+            });
         }
-
-        private Sampler CreateSampler()
-        {
-            var createInfo = new SamplerCreateInfo
-            {
-                MagFilter = Filter.Linear,
-                MinFilter = Filter.Linear,
-                MipmapMode = SamplerMipmapMode.Linear
-            };
-            // We also enable anisotropic filtering. Because that feature is optional, it must be
-            // checked if it is supported by the device.
-            if (graphics_.Features.SamplerAnisotropy)
-            {
-                createInfo.AnisotropyEnable = true;
-                createInfo.MaxAnisotropy = graphics_.Properties.Limits.MaxSamplerAnisotropy;
-            }
-            else
-            {
-                createInfo.MaxAnisotropy = 1.0f;
-            }
-            return graphics_.Device.CreateSampler(createInfo);
-        }        
             
         private DescriptorSetLayout CreateGraphicsDescriptorSetLayout()
         {
-            return graphics_.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
-                new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)));
+            return graphics_.CreateDescriptorSetLayout(new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
         }
 
         private DescriptorSet CreateGraphicsDescriptorSet()
@@ -282,9 +259,9 @@ namespace SharpGame.Samples.ComputeParticles
 
         private DescriptorSetLayout CreateComputeDescriptorSetLayout()
         {
-            return graphics_.Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(
+            return graphics_.CreateDescriptorSetLayout(
                 new DescriptorSetLayoutBinding(0, DescriptorType.StorageBuffer, 1, ShaderStages.Compute),
-                new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, 1, ShaderStages.Compute)));
+                new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, 1, ShaderStages.Compute));
         }
 
         private DescriptorSet CreateComputeDescriptorSet()

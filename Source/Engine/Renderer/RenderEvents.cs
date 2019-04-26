@@ -12,7 +12,15 @@ namespace SharpGame
     {
     }
 
-    public struct RenderEnd
+    public struct EndRender
+    {
+    }
+
+    public struct BeginView
+    {
+    }
+
+    public struct EndView
     {
     }
 
@@ -23,7 +31,7 @@ namespace SharpGame
         public int imageIndex;
     }
 
-    public struct RenderPassEnd
+    public struct EndRenderPass
     {
         public RenderPass renderPass;
         public VulkanCore.CommandBuffer commandBuffer;

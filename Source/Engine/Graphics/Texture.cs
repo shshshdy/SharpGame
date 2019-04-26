@@ -24,7 +24,6 @@ namespace SharpGame
     {
         public Texture()
         {
-
         }
 
         private Texture(Image image, DeviceMemory memory, ImageView view, Format format)
@@ -36,7 +35,6 @@ namespace SharpGame
         }
 
         public Format Format { get; protected set; }
-
         public Image Image { get; protected set; }
         public ImageView View { get; protected set; }
         public DeviceMemory Memory { get; protected set; }
@@ -48,7 +46,7 @@ namespace SharpGame
             Image.Dispose();
         }
 
-        public static Texture DepthStencil(int width, int height)
+        public static Texture CreateDepthStencil(int width, int height)
         {
             var graphics = Get<Graphics>();
 
@@ -95,7 +93,7 @@ namespace SharpGame
             return new Texture(image, memory, view, format);
         }
 
-        internal static Texture Texture2D(Graphics ctx, TextureData tex2D)
+        public static Texture Create2D(Graphics ctx, TextureData tex2D)
         {
             Buffer stagingBuffer = ctx.Device.CreateBuffer(
                 new BufferCreateInfo(tex2D.Mipmaps[0].Size, BufferUsages.TransferSrc));
@@ -274,7 +272,7 @@ namespace SharpGame
                     //}
                 }
 
-                return Texture.Texture2D(graphics, data);
+                return Texture.Create2D(graphics, data);
             }
         }
     }

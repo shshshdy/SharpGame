@@ -65,6 +65,7 @@ namespace SharpGame
             graphics_ = CreateSubsystem<Graphics>(platform_);
             resourceCache_ = CreateSubsystem<ResourceCache>("Content");
             renderer_ = CreateSubsystem<Renderer>();
+            renderer_.Inialize();
         }
 
         protected virtual void OnInit()

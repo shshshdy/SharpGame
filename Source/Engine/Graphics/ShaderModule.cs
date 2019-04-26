@@ -50,9 +50,9 @@ namespace SharpGame
         {
         }
 
-        public ShaderModule(ShaderStages shaderStages, string fileName, string funcName = "main")
+        public ShaderModule(ShaderStages stage, string fileName, string funcName = "main")
         {
-            Stage = shaderStages;
+            Stage = stage;
             File = fileName;
             FuncName = funcName;
             shaderModule = null;

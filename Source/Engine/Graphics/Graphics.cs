@@ -25,7 +25,8 @@ namespace SharpGame
         public Fence[] SubmitFences { get; private set; }
         public Semaphore ImageAvailableSemaphore { get; private set; }
         public Semaphore RenderingFinishedSemaphore { get; private set; }
-                
+
+
         public Graphics(IPlatform host)
         {
             Platform = host;
@@ -38,7 +39,7 @@ namespace SharpGame
             Instance = CreateInstance(debug);
             DebugReportCallback = CreateDebugReportCallback(debug);
             Surface = CreateSurface();
-            CreateContext(Instance, Surface, Platform.Platform);
+            CreateDevice(Instance, Surface, Platform.Platform);
 
             ImageAvailableSemaphore = ToDispose(Device.CreateSemaphore());
             RenderingFinishedSemaphore = ToDispose(Device.CreateSemaphore());
@@ -72,6 +73,7 @@ namespace SharpGame
                 SecondaryCommandPool[1].AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2)));
 
             renderThreadID_ = System.Threading.Thread.CurrentThread.ManagedThreadId;
+
 
         }
 
@@ -130,6 +132,28 @@ namespace SharpGame
             Instance.Dispose();
         }
 
+        private SwapchainKhr CreateSwapchain()
+        {
+            SurfaceCapabilitiesKhr capabilities = PhysicalDevice.GetSurfaceCapabilitiesKhr(Surface);
+            SurfaceFormatKhr[] formats = PhysicalDevice.GetSurfaceFormatsKhr(Surface);
+            PresentModeKhr[] presentModes = PhysicalDevice.GetSurfacePresentModesKhr(Surface);
+            Format format = formats.Length == 1 && formats[0].Format == Format.Undefined
+                ? Format.B8G8R8A8UNorm
+                : formats[0].Format;
+            PresentModeKhr presentMode =
+                presentModes.Contains(PresentModeKhr.Mailbox) ? PresentModeKhr.Mailbox :
+                presentModes.Contains(PresentModeKhr.FifoRelaxed) ? PresentModeKhr.FifoRelaxed :
+                presentModes.Contains(PresentModeKhr.Fifo) ? PresentModeKhr.Fifo :
+                PresentModeKhr.Immediate;
+
+            return Device.CreateSwapchainKhr(new SwapchainCreateInfoKhr(
+                surface: Surface,
+                imageFormat: format,
+                imageExtent: capabilities.CurrentExtent,
+                preTransform: capabilities.CurrentTransform,
+                presentMode: presentMode));
+        }
+
         private void CreateSwapchainImages()
         {
             Swapchain = ToDisposeFrame(CreateSwapchain());
@@ -150,6 +174,45 @@ namespace SharpGame
             return imageViews;
         }
 
+        public Sampler CreateSampler()
+        {
+            var createInfo = new SamplerCreateInfo
+            {
+                MagFilter = Filter.Linear,
+                MinFilter = Filter.Linear,
+                MipmapMode = SamplerMipmapMode.Linear
+            };
+            // We also enable anisotropic filtering. Because that feature is optional, it must be
+            // checked if it is supported by the device.
+            if (Features.SamplerAnisotropy)
+            {
+                createInfo.AnisotropyEnable = true;
+                createInfo.MaxAnisotropy = Properties.Limits.MaxSamplerAnisotropy;
+            }
+            else
+            {
+                createInfo.MaxAnisotropy = 1.0f;
+            }
+            return ToDispose(Device.CreateSampler(createInfo));
+        }
+
+        public Fence CreateFence()
+        {
+            return ToDispose(Device.CreateFence());
+        }
+
+        public DescriptorPool CreateDescriptorPool(DescriptorPoolSize[] descriptorPoolSizes, DescriptorPoolCreateFlags flags = DescriptorPoolCreateFlags.None)
+        {
+            return ToDispose(Device.CreateDescriptorPool(
+                new DescriptorPoolCreateInfo(descriptorPoolSizes.Length, descriptorPoolSizes, flags)
+                ));
+        }
+
+        public DescriptorSetLayout CreateDescriptorSetLayout(params DescriptorSetLayoutBinding[] bindings)
+        {
+            return ToDispose(Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(bindings)));
+        }
+
         public void Resize()
         {
             Device.WaitIdle();
@@ -168,24 +231,27 @@ namespace SharpGame
             GPUObject.RecreateAll();
         }
 
-        #region MULTITHREAD
-        int currentContext_;
+        #region MULTITHREADED
+
+        private int currentContext_;
         public int WorkContext => currentContext_;
         public int RenderContext => 1 - currentContext_;
 
-        public int currentFrame_;
+        private int currentFrame_;
+        public int CurrentFrame => currentFrame_;
 
-        int renderThreadID_;
-
-        System.Threading.Semaphore renderSem_ = new System.Threading.Semaphore(0, 1);
-        System.Threading.Semaphore mainSem_ = new System.Threading.Semaphore(0, 1);
-        long waitSubmit_;
-        long waitRender_;
-
-        public bool SingleThreaded { get; set; }
+        private int renderThreadID_;
         public bool IsRenderThread => renderThreadID_ == System.Threading.Thread.CurrentThread.ManagedThreadId;
 
-        List<Action> commands_ = new List<Action>();
+        private System.Threading.Semaphore renderSem_ = new System.Threading.Semaphore(0, 1);
+        private System.Threading.Semaphore mainSem_ = new System.Threading.Semaphore(0, 1);
+        private long waitSubmit_;
+        private long waitRender_;
+
+        public bool SingleThreaded { get; set; }
+
+        private List<Action> commands_ = new List<Action>();
+
         public void Post(Action action) { commands_.Add(action); }
 
         public void Frame()
