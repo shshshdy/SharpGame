@@ -18,7 +18,7 @@ namespace SharpGame.Samples.TexturedCube
         private Geometry geometry_;
 
         private Pipeline pipeline_;
-        private Shader shader_;
+        private Pass pass_;
 
         private DescriptorSetLayout _descriptorSetLayout;
         private DescriptorPool _descriptorPool;
@@ -65,13 +65,13 @@ namespace SharpGame.Samples.TexturedCube
             _descriptorPool      = ToDispose(CreateDescriptorPool());
             _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
 
-            shader_ = new Shader
+            pass_ = new Pass
             {
                 VertexShader = new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
                 PixelShader = new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
             };
 
-            shader_.Build();
+            pass_.Build();
 
             pipeline_ = new Pipeline
             {                
@@ -127,7 +127,7 @@ namespace SharpGame.Samples.TexturedCube
         public override void Dispose()
         {
             geometry_.Dispose();
-            shader_.Dispose();
+            pass_.Dispose();
             pipeline_.Dispose();
 
             base.Dispose();
@@ -154,7 +154,7 @@ namespace SharpGame.Samples.TexturedCube
         {
             var cmdBuffer = e.commandBuffer;
 
-            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, shader_, geometry_);
+            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, pass_, geometry_);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             geometry_.Draw(cmdBuffer);

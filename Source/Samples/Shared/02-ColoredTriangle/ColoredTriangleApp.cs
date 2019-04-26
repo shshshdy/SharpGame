@@ -6,19 +6,19 @@ namespace SharpGame.Samples.ColoredTriangle
     public class ColoredTriangleApp : Application
     {
         private Pipeline pipeline_;
-        private Shader shader_;
+        private Pass pass_;
 
         protected override void OnInit()
         {
             SubscribeToEvent<BeginRenderPass>(Handle);
 
-            shader_ = new Shader
+            pass_ = new Pass
             {
                 VertexShader = new ShaderModule(ShaderStages.Vertex, "Test.vert.spv"),
                 PixelShader = new ShaderModule(ShaderStages.Fragment, "Test.frag.spv"),
             };
 
-            shader_.Build();
+            pass_.Build();
 
             pipeline_ = new Pipeline
             {
@@ -73,7 +73,7 @@ namespace SharpGame.Samples.ColoredTriangle
 
         public override void Dispose()
         {
-            shader_.Dispose();
+            pass_.Dispose();
             pipeline_.Dispose();
 
             base.Dispose();
@@ -84,7 +84,7 @@ namespace SharpGame.Samples.ColoredTriangle
         {
             var cmdBuffer = e.commandBuffer;
 
-            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, shader_, null);
+            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, pass_, null);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdDraw(3);
         }

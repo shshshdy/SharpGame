@@ -98,7 +98,7 @@ namespace SharpGame
             pipeline = null;
         }
 
-        public VulkanCore.Pipeline GetGraphicsPipeline(RenderPass renderPass, Shader shader, Geometry geometry)
+        public VulkanCore.Pipeline GetGraphicsPipeline(RenderPass renderPass, Pass shader, Geometry geometry)
         {
             if(pipeline != null)
             {
@@ -111,7 +111,7 @@ namespace SharpGame
             var shaderStageCreateInfos = shader.GetShaderStageCreateInfos();
 
             viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
-            new Viewport(0, 0, graphics.Width, graphics.Height),
+            new VulkanCore.Viewport(0, 0, graphics.Width, graphics.Height),
             new Rect2D(0, 0, graphics.Width, graphics.Height));
 
             var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(
@@ -133,7 +133,7 @@ namespace SharpGame
             return pipeline;
         }
 
-        public VulkanCore.Pipeline GetComputePipeline(RenderPass renderPass, Shader shader)
+        public VulkanCore.Pipeline GetComputePipeline(RenderPass renderPass, Pass shader)
         {
             if(!shader.IsComputeShader)
             {

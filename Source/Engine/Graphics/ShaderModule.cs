@@ -9,24 +9,24 @@ namespace SharpGame
     public struct BlockMember
     {
         public string name;
-        public uint size;
-        public uint offset;
+        public int size;
+        public int offset;
     }
 
     public struct InputBlock
     {
         public string name;
-        public uint size;
+        public int size;
         public List<BlockMember> members;
-        public uint set;
-        public uint binding;
+        public int set;
+        public int binding;
         public bool isTextureBlock;
     }
 
     public class ShaderModule : Resource
     {
         public ShaderStages Stage { get; set; }
-        public string FileName { get; set; }
+        public string File { get; set; }
         public string FuncName { get; set; }
         public byte[] Code { get; set; }
 
@@ -65,7 +65,7 @@ namespace SharpGame
             shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
         }
 
-        public async override void Build()
+        public override void Build()
         {
             var graphics = Get<Graphics>();
             var fileSystem = Get<FileSystem>();

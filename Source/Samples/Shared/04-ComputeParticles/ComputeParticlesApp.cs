@@ -32,14 +32,14 @@ namespace SharpGame.Samples.ComputeParticles
         private DescriptorSet _graphicsDescriptorSet;
 
         private Pipeline _graphicsPipeline;
-        private Shader _shader;
+        private Pass _pass;
 
         private GraphicsBuffer _storageBuffer;
         private GraphicsBuffer _uniformBuffer;
         private DescriptorSetLayout _computeDescriptorSetLayout;
 
         private Pipeline _computePipeline;
-        private Shader _computeShader;
+        private Pass _computePass;
 
         private DescriptorSet _computeDescriptorSet;
         private CommandBuffer _computeCmdBuffer;
@@ -53,30 +53,30 @@ namespace SharpGame.Samples.ComputeParticles
 
             SubscribeToEvent<BeginRenderPass>(Handle);
 
-            _descriptorPool              = ToDispose(CreateDescriptorPool());
+            _descriptorPool = ToDispose(CreateDescriptorPool());
 
-            _sampler                     = ToDispose(CreateSampler());
-            _particleDiffuseMap          = resourceCache_.Load<Texture>("ParticleDiffuse.ktx");
+            _sampler = ToDispose(CreateSampler());
+            _particleDiffuseMap = resourceCache_.Load<Texture>("ParticleDiffuse.ktx");
             _graphicsDescriptorSetLayout = ToDispose(CreateGraphicsDescriptorSetLayout());
-            _graphicsDescriptorSet       = CreateGraphicsDescriptorSet();
+            _graphicsDescriptorSet = CreateGraphicsDescriptorSet();
 
-            _storageBuffer               = ToDispose(CreateStorageBuffer());
-            _uniformBuffer               = ToDispose(GraphicsBuffer.DynamicUniform<UniformBufferObject>(1));
-            _computeDescriptorSetLayout  = ToDispose(CreateComputeDescriptorSetLayout());
-            _computeDescriptorSet        = CreateComputeDescriptorSet();
-            _computeCmdBuffer            = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
-            _computeFence                = ToDispose(graphics_.Device.CreateFence());
+            _storageBuffer = ToDispose(CreateStorageBuffer());
+            _uniformBuffer = ToDispose(GraphicsBuffer.DynamicUniform<UniformBufferObject>(1));
+            _computeDescriptorSetLayout = ToDispose(CreateComputeDescriptorSetLayout());
+            _computeDescriptorSet = CreateComputeDescriptorSet();
+            _computeCmdBuffer = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
+            _computeFence = ToDispose(graphics_.Device.CreateFence());
 
-            _shader = new Shader
+            _pass = new Pass
             {
                 VertexShader = new ShaderModule(ShaderStages.Vertex, "Shader.vert.spv"),
-                PixelShader = new ShaderModule(ShaderStages.Fragment, "Shader.frag.spv")                
+                PixelShader = new ShaderModule(ShaderStages.Fragment, "Shader.frag.spv")
             };
 
-            _shader.Build();
+            _pass.Build();
 
-            _computeShader = new Shader("shader.comp.spv");
-            _computeShader.Build();
+            _computePass = new Pass("shader.comp.spv");
+            _computePass.Build();
 
             _computePipeline = new Pipeline
             {
@@ -166,7 +166,7 @@ namespace SharpGame.Samples.ComputeParticles
         void Handle(BeginRenderPass e)
         {
             var cmdBuffer = e.commandBuffer;
-            var pipeline = _graphicsPipeline.GetGraphicsPipeline(e.renderPass, _shader, null);
+            var pipeline = _graphicsPipeline.GetGraphicsPipeline(e.renderPass, _pass, null);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet);
             cmdBuffer.CmdBindVertexBuffer(_storageBuffer);
@@ -190,7 +190,7 @@ namespace SharpGame.Samples.ComputeParticles
             // before compute starts to write to the buffer.
             _computeCmdBuffer.CmdPipelineBarrier(PipelineStages.VertexInput, PipelineStages.ComputeShader,
                 bufferMemoryBarriers: new[] { graphicsToComputeBarrier });
-            var pipeline = _computePipeline.GetComputePipeline(renderer_.MainRenderPass, _computeShader);
+            var pipeline = _computePipeline.GetComputePipeline(renderer_.MainRenderPass, _computePass);
                 _computeCmdBuffer.CmdBindPipeline(PipelineBindPoint.Compute, pipeline);
             _computeCmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Compute, _computePipeline.pipelineLayout, _computeDescriptorSet);
             _computeCmdBuffer.CmdDispatch(_storageBuffer.Count / 256, 1, 1);

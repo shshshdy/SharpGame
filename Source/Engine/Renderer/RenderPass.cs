@@ -7,6 +7,8 @@ namespace SharpGame
 {
     public class RenderPass : GPUObject
     {
+        public string Name { get; set; }
+
         public AttachmentDescription[] attachments { get; set; }
         public SubpassDescription[] subpasses { get; set; }
 

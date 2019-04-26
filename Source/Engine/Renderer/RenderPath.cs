@@ -14,4 +14,12 @@ namespace SharpGame
         public List<RenderPassDesc> renderPasses_ = new List<RenderPassDesc>();
 
     }
+
+    public static class RenderPassHelper
+    {
+        public static RenderPath RenderPath()
+        {
+            return new RenderPath();
+        }
+    }
 }

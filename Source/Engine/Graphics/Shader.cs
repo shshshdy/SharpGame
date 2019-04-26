@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
@@ -6,12 +7,49 @@ using VulkanCore;
 
 namespace SharpGame
 {
-    public class Pass
+    public class Shader : Resource
     {
+        public string Name { get; set; }
+        public Dictionary<string, Pass> Shaders { get; set; }
 
+        public Shader()
+        {
+        }
+
+        public Shader(Pass[] passes)
+        {
+            foreach(var pass in passes)
+            {
+                Shaders.Add(pass.Name, pass);
+            }
+        }
+
+
+        public override void Build()
+        {
+            var it = Shaders.GetEnumerator();
+            while(it.MoveNext())
+            {
+                it.Current.Value.Build();
+            }
+
+        }
+
+        public override void Dispose()
+        {
+            var it = Shaders.GetEnumerator();
+            while (it.MoveNext())
+            {
+                it.Current.Value.Dispose();
+            }
+
+            Shaders.Clear();
+
+            base.Dispose();
+        }
     }
 
-    public class Shader : Resource
+    public class Pass : IDisposable
     {
         public string Name { get; set; }
 
@@ -32,11 +70,11 @@ namespace SharpGame
         [IgnoreDataMember]
         public bool IsComputeShader => ComputeShader != null;
 
-        public Shader()
+        public Pass()
         {            
         }
 
-        public Shader(string fileName, string funcName = "main")
+        public Pass(string fileName, string funcName = "main")
         {
             ComputeShader = new ShaderModule(ShaderStages.Compute, fileName, funcName);
         }
@@ -51,7 +89,7 @@ namespace SharpGame
             yield return ComputeShader;
         }
 
-        public override void Build()
+        public void Build()
         {
             VertexShader?.Build();
             GeometryShader?.Build();
@@ -61,14 +99,13 @@ namespace SharpGame
             ComputeShader?.Build();
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             foreach(var stage in this.GetShaderModules())
             {
                 stage?.Dispose();
             }
 
-            base.Dispose();
         }
 
         public PipelineShaderStageCreateInfo[] GetShaderStageCreateInfos()
