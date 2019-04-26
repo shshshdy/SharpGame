@@ -3,6 +3,8 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using VulkanCore;
 
+using static SharpGame.ShaderHelper;
+
 namespace SharpGame.Samples.TexturedCube
 {
     [StructLayout(LayoutKind.Sequential)]
@@ -65,11 +67,11 @@ namespace SharpGame.Samples.TexturedCube
             _descriptorPool      = ToDispose(CreateDescriptorPool());
             _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
 
-            pass_ = new Pass
-            {
-                VertexShader = new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
-                PixelShader = new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
-            };
+            pass_ = Pass(
+                "main",                
+                VertexShader("Textured.vert.spv"),
+                PixelShader("Textured.frag.spv")
+            );
 
             pass_.Build();
 

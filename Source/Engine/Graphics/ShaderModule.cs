@@ -53,7 +53,7 @@ namespace SharpGame
         public ShaderModule(ShaderStages shaderStages, string fileName, string funcName = "main")
         {
             Stage = shaderStages;
-            FileName = fileName;
+            File = fileName;
             FuncName = funcName;
             shaderModule = null;
         }
@@ -70,7 +70,7 @@ namespace SharpGame
             var graphics = Get<Graphics>();
             var fileSystem = Get<FileSystem>();
 
-            string path = Path.Combine(ResourceCache.ContentRoot, FileName);
+            string path = Path.Combine(ResourceCache.ContentRoot, File);
             using (Stream stream = fileSystem.Open(path))
             {
                 Code = stream.ReadAllBytes();

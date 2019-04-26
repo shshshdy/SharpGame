@@ -79,6 +79,35 @@ namespace SharpGame
             ComputeShader = new ShaderModule(ShaderStages.Compute, fileName, funcName);
         }
 
+        public Pass(ShaderModule[] shaderModules)
+        {
+            foreach(var sm in shaderModules)
+            {
+                switch (sm.Stage)
+                {
+                    case ShaderStages.Vertex:
+                        VertexShader = sm;
+                        break;
+                    case ShaderStages.Fragment:
+                        PixelShader = sm;
+                        break;
+                    case ShaderStages.Geometry:
+                        GeometryShader = sm;
+                        break;
+                    case ShaderStages.TessellationControl:
+                        HullShader = sm;
+                        break;
+                    case ShaderStages.TessellationEvaluation:
+                        DomainShader = sm;
+                        break;
+                    case ShaderStages.Compute:
+                        ComputeShader = sm;
+                        break;
+
+                }
+            }
+        }
+
         public IEnumerable<ShaderModule> GetShaderModules()
         {
             yield return VertexShader;
@@ -134,5 +163,45 @@ namespace SharpGame
         }
     }
 
+    public static class ShaderHelper
+    {
+        public static Shader Shader(string name, params Pass[] passes)
+        {
+            return new Shader(passes) { Name = name };
+        }
+
+        public static Pass Pass(string name, ShaderModule vertexShader, ShaderModule pixelShader, ShaderModule geometryShader = null,
+            ShaderModule hullShader = null, ShaderModule domainShader = null, ShaderModule computeShader = null)
+        {
+            return new Pass
+            {
+                Name = name,
+                VertexShader = vertexShader,
+                PixelShader = pixelShader,
+                GeometryShader = geometryShader,
+                HullShader = hullShader,
+                DomainShader = domainShader,
+                ComputeShader = computeShader,
+            };
+        }
+
+        public static Pass Pass(string name, ShaderModule[] shaderModules)
+        {
+            return new Pass(shaderModules)
+            {
+                Name = name
+            };
+        }
+
+        public static ShaderModule VertexShader(string name, string entry = "main")
+        {
+            return new ShaderModule { Stage = ShaderStages.Vertex, File = name, FuncName = entry };
+        }
+
+        public static ShaderModule PixelShader(string name, string entry = "main")
+        {
+            return new ShaderModule { Stage = ShaderStages.Fragment, File = name, FuncName = entry };
+        }
+    }
 
 }
