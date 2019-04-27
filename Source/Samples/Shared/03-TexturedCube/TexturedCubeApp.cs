@@ -3,16 +3,14 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using VulkanCore;
 
-using static SharpGame.ShaderHelper;
-
 namespace SharpGame.Samples.TexturedCube
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct WorldViewProjection
     {
-        public Matrix4x4 World;
-        public Matrix4x4 View;
-        public Matrix4x4 Projection;
+        public Matrix World;
+        public Matrix View;
+        public Matrix Projection;
     }
 
     public class TexturedCubeApp : Application
@@ -62,22 +60,20 @@ namespace SharpGame.Samples.TexturedCube
             
             _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx");
             _sampler             = graphics_.CreateSampler();
-            _uniformBuffer       = ToDispose(GraphicsBuffer.DynamicUniform<WorldViewProjection>(1));
+            _uniformBuffer       = GraphicsBuffer.DynamicUniform<WorldViewProjection>(1);
             _descriptorSetLayout = CreateDescriptorSetLayout();
             _descriptorPool      = CreateDescriptorPool();
             _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
 
             pass_ = new Pass(
-                name : "main",                
-                vertexShader : new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
-                pixelShader : new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
+                "main",                
+                new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
+                new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
             );
-
-            pass_.Build();
-
+            
             pipeline_ = new Pipeline
             {                
-                RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
+                RasterizationState = new PipelineRasterizationStateCreateInfo
                 {
                     PolygonMode = PolygonMode.Fill,
                     CullMode = CullModes.Back,
@@ -85,7 +81,7 @@ namespace SharpGame.Samples.TexturedCube
                     LineWidth = 1.0f
                 },
 
-                DepthStencilStateCreateInfo = new PipelineDepthStencilStateCreateInfo
+                DepthStencilState = new PipelineDepthStencilStateCreateInfo
                 {
                     DepthTestEnable = true,
                     DepthWriteEnable = true,
@@ -104,7 +100,7 @@ namespace SharpGame.Samples.TexturedCube
                     }
                 },
 
-                ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo
+                ColorBlendState = new PipelineColorBlendStateCreateInfo
                 (
                     new[]
                     {
@@ -142,11 +138,13 @@ namespace SharpGame.Samples.TexturedCube
             const float pitchSpeed = 0.0f;
             const float rollSpeed  = twoPi / 4.0f;
 
-            _wvp.World = Matrix4x4.CreateFromYawPitchRoll(
+            _wvp.World = Matrix.RotationYawPitchRoll(
                 timer.TotalTime * yawSpeed % twoPi,
                 timer.TotalTime * pitchSpeed % twoPi,
                 timer.TotalTime * rollSpeed % twoPi);
 
+            _wvp.World = Matrix.RotationY(timer.TotalTime * yawSpeed % twoPi);
+            //_wvp.World.Transpose();
             SetViewProjection();
 
             UpdateUniformBuffers();
@@ -165,11 +163,14 @@ namespace SharpGame.Samples.TexturedCube
         private void SetViewProjection()
         {
             const float cameraDistance = 2.5f;
-            _wvp.View = Matrix4x4.CreateLookAt(Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
-            _wvp.Projection = Matrix4x4.CreatePerspectiveFieldOfView(
+            _wvp.View = Matrix.LookAtLH(-Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
+            _wvp.Projection =
+                
+                Matrix.PerspectiveFovLH(
                 (float)Math.PI / 4,
                 (float)graphics_.Platform.Width / graphics_.Platform.Height,
                 1.0f, 1000.0f);
+            
         }
 
         private void UpdateUniformBuffers()

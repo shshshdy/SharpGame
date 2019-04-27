@@ -7,19 +7,20 @@ namespace SharpGame
 {
     public class Pipeline : GPUObject
     {
-        public PipelineRasterizationStateCreateInfo RasterizationStateCreateInfo { get; set; }
-        public PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo { get; set; } = new PipelineMultisampleStateCreateInfo
+        public PipelineRasterizationStateCreateInfo RasterizationState { get; set; }
+        public PipelineMultisampleStateCreateInfo MultisampleState { get; set; } = new PipelineMultisampleStateCreateInfo
         {
             RasterizationSamples = SampleCounts.Count1,
             MinSampleShading = 1.0f
         };
 
-        public PipelineColorBlendStateCreateInfo ColorBlendStateCreateInfo { get; set; }
-        public PipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo { get; set; }
+        public PipelineColorBlendStateCreateInfo ColorBlendState { get; set; }
+        public PipelineDepthStencilStateCreateInfo DepthStencilState { get; set; }
 
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
 
-        public PipelineVertexInputStateCreateInfo VertexInputStateCreateInfo { get; set; }
+        public PipelineVertexInputStateCreateInfo VertexInputState { get; set; }
+
         PipelineViewportStateCreateInfo viewportStateCreateInfo;
 
         public PipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
@@ -33,9 +34,9 @@ namespace SharpGame
         
         public void SetDefault()
         {
-            VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo();
+            VertexInputState = new PipelineVertexInputStateCreateInfo();
 
-            RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
+            RasterizationState = new PipelineRasterizationStateCreateInfo
             {
                 PolygonMode = PolygonMode.Fill,
                 CullMode = CullModes.Back,
@@ -43,13 +44,13 @@ namespace SharpGame
                 LineWidth = 1.0f
             };
 
-            MultisampleStateCreateInfo = new PipelineMultisampleStateCreateInfo
+            MultisampleState = new PipelineMultisampleStateCreateInfo
             {
                 RasterizationSamples = SampleCounts.Count1,
                 MinSampleShading = 1.0f
             };
 
-            DepthStencilStateCreateInfo = new PipelineDepthStencilStateCreateInfo
+            DepthStencilState = new PipelineDepthStencilStateCreateInfo
             {
                 DepthTestEnable = true,
                 DepthWriteEnable = true,
@@ -68,7 +69,7 @@ namespace SharpGame
                 }
             };
 
-            ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo(new[]
+            ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
             {
                 new PipelineColorBlendAttachmentState
                 {
@@ -121,12 +122,12 @@ namespace SharpGame
                 pipelineLayout, renderPass.renderPass_, 0,
                 shaderStageCreateInfos,
                 inputAssemblyStateCreateInfo,
-                geometry ? geometry.VertexInputStateCreateInfo : VertexInputStateCreateInfo,
-                RasterizationStateCreateInfo,
+                geometry ? geometry.VertexInputStateCreateInfo : VertexInputState,
+                RasterizationState,
                 viewportState: viewportStateCreateInfo,
-                multisampleState: MultisampleStateCreateInfo,
-                depthStencilState: DepthStencilStateCreateInfo,
-                colorBlendState: ColorBlendStateCreateInfo);
+                multisampleState: MultisampleState,
+                depthStencilState: DepthStencilState,
+                colorBlendState: ColorBlendState);
 
             pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
             graphics.ToDisposeFrame(pipeline);

@@ -57,26 +57,24 @@ namespace SharpGame.Samples.ComputeParticles
 
             _sampler = graphics_.CreateSampler();
             _particleDiffuseMap = resourceCache_.Load<Texture>("ParticleDiffuse.ktx");
-            _graphicsDescriptorSetLayout = ToDispose(CreateGraphicsDescriptorSetLayout());
+            _graphicsDescriptorSetLayout = CreateGraphicsDescriptorSetLayout();
             _graphicsDescriptorSet = CreateGraphicsDescriptorSet();
 
-            _storageBuffer = ToDispose(CreateStorageBuffer());
-            _uniformBuffer = ToDispose(GraphicsBuffer.DynamicUniform<UniformBufferObject>(1));
-            _computeDescriptorSetLayout = ToDispose(CreateComputeDescriptorSetLayout());
+            _storageBuffer = CreateStorageBuffer();
+            _uniformBuffer = GraphicsBuffer.DynamicUniform<UniformBufferObject>(1);
+            _computeDescriptorSetLayout = CreateComputeDescriptorSetLayout();
             _computeDescriptorSet = CreateComputeDescriptorSet();
             _computeCmdBuffer = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             _computeFence = graphics_.CreateFence();
 
             _pass = new Pass
-            {
-                VertexShader = new ShaderModule(ShaderStages.Vertex, "Shader.vert.spv"),
-                PixelShader = new ShaderModule(ShaderStages.Fragment, "Shader.frag.spv")
-            };
-
-            _pass.Build();
-
+            (
+                "main",
+                new ShaderModule(ShaderStages.Vertex, "Shader.vert.spv"),
+                new ShaderModule(ShaderStages.Fragment, "Shader.frag.spv")
+            );
+            
             _computePass = new Pass("shader.comp.spv");
-            _computePass.Build();
 
             _computePipeline = new Pipeline
             {
@@ -87,7 +85,7 @@ namespace SharpGame.Samples.ComputeParticles
             {
                 PrimitiveTopology = PrimitiveTopology.PointList,
 
-                VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo
+                VertexInputState = new PipelineVertexInputStateCreateInfo
                 (
                     new[] { new VertexInputBindingDescription(0, Interop.SizeOf<VertexParticle>(), VertexInputRate.Vertex) },
                     new[]
@@ -98,7 +96,7 @@ namespace SharpGame.Samples.ComputeParticles
                     }
                 ),
 
-                RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
+                RasterizationState = new PipelineRasterizationStateCreateInfo
                 {
                     PolygonMode = PolygonMode.Fill,
                     CullMode = CullModes.None,
@@ -106,15 +104,15 @@ namespace SharpGame.Samples.ComputeParticles
                     LineWidth = 1.0f
                 },
 
-                MultisampleStateCreateInfo = new PipelineMultisampleStateCreateInfo
+                MultisampleState = new PipelineMultisampleStateCreateInfo
                 {
                     RasterizationSamples = SampleCounts.Count1,
                     MinSampleShading = 1.0f
                 },
 
-                DepthStencilStateCreateInfo = new PipelineDepthStencilStateCreateInfo(),
+                DepthStencilState = new PipelineDepthStencilStateCreateInfo(),
 
-                ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo(new[]
+                ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
                 {
                     new PipelineColorBlendAttachmentState
                     {

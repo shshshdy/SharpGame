@@ -26,7 +26,6 @@ namespace SharpGame
     public class ShaderModule : Resource
     {
         public ShaderStages Stage { get; set; }
-        public string File { get; set; }
         public string FuncName { get; set; }
         public byte[] Code { get; set; }
 
@@ -53,29 +52,44 @@ namespace SharpGame
         public ShaderModule(ShaderStages stage, string fileName, string funcName = "main")
         {
             Stage = stage;
-            File = fileName;
+            FileName = fileName;
             FuncName = funcName;
             shaderModule = null;
-        }
 
+            var fileSystem = Get<FileSystem>();
+
+            string path = Path.Combine(ResourceCache.ContentRoot, FileName);
+            using (Stream stream = fileSystem.Open(path))
+            {
+                Code = stream.ReadAllBytes();
+            }
+
+            Build();
+        }
+        
         public async override void Load(Stream stream)
         {
             var graphics = Get<Graphics>();
             Code = stream.ReadAllBytes();
-            shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
+
+            Build();
         }
 
-        public override void Build()
+        protected override void OnBuild()
         {
             var graphics = Get<Graphics>();
             var fileSystem = Get<FileSystem>();
 
-            string path = Path.Combine(ResourceCache.ContentRoot, File);
-            using (Stream stream = fileSystem.Open(path))
+            if (Code == null)
             {
-                Code = stream.ReadAllBytes();
-                shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
+                string path = Path.Combine(ResourceCache.ContentRoot, FileName);
+                using (Stream stream = fileSystem.Open(path))
+                {
+                    Code = stream.ReadAllBytes();
+                }
             }
+
+            shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
         }
 
         public override void Dispose()

@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace SharpGame
 {
     public class Resource : Object
     {
+        [IgnoreDataMember]
         public string FileName { get; set; }
 
         protected FileSystem FileSystem => Get<FileSystem>();
+
+        protected bool builded_ = false;
 
         public async virtual void Load(Stream stream)
         {
@@ -17,6 +21,17 @@ namespace SharpGame
 
         public virtual void Build()
         {
+            if(!builded_)
+            {
+                builded_ = true;
+            }
+
+            OnBuild();
+        }
+        
+        protected virtual void OnBuild()
+        {
+
         }
     }
 }

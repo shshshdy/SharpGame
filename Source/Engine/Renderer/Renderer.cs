@@ -10,14 +10,18 @@ namespace SharpGame
     {
         public Graphics Graphics => Get<Graphics>();
 
-        public RenderPass MainRenderPass => MainView.RenderPass;
+        public RenderPass MainRenderPass => MainViewport.view.RenderPass;
 
-        public View MainView { get; private set; }
+        public Viewport MainViewport { get; private set; }
 
-        private List<View> views_ = new List<View>();
+        private List<Viewport> viewports_ = new List<Viewport>();
 
         public Texture DepthStencilBuffer => depthStencilBuffer_;
         private Texture depthStencilBuffer_;
+
+        private RenderPath defaultRenderPath_;
+
+        private List<View> views_ = new List<View>();
 
         public Renderer()
         {
@@ -26,13 +30,18 @@ namespace SharpGame
         public void Inialize()
         {
             depthStencilBuffer_ = Graphics.ToDisposeFrame(Texture.CreateDepthStencil(Graphics.Width, Graphics.Height));
-            MainView = CreateViewport();
+
+            defaultRenderPath_ = new RenderPath(
+                new ScenePass()
+            );
+
+            MainViewport = CreateViewport();
         }
         
-        public View CreateViewport()
+        public Viewport CreateViewport()
         {
-            var view = new View();
-            views_.Add(view);
+            var view = new Viewport();
+            viewports_.Add(view);
             return view;
         }
 
@@ -40,10 +49,16 @@ namespace SharpGame
         {
             SendGlobalEvent(new BeginRender());
 
+            views_.Clear();
 
-            foreach (var view in views_)
+            foreach (var viewport in viewports_)
             {
-                view.Update();
+                if(!viewport.view)
+                {
+                    viewport.view = new View();
+                }
+
+                viewport.view.Update();
             }
 
             SendGlobalEvent(new EndRender());
@@ -78,11 +93,16 @@ namespace SharpGame
                     imageMemoryBarriers: new[] { barrierFromPresentToDraw });
             }
 
-            foreach (var view in views_)
+            foreach (var viewport in viewports_)
             {
-                view.Summit(imageIndex);
+                if (!viewport.view)
+                {
+                    viewport.view = new View();
+                }
+
+                viewport.view.Summit(imageIndex);
             }
-            
+                        
             if (Graphics.PresentQueue != Graphics.GraphicsQueue)
             {
                 var barrierFromDrawToPresent = new ImageMemoryBarrier(

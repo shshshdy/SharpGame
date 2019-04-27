@@ -22,7 +22,7 @@ namespace SharpGame.Samples.ColoredTriangle
 
             pipeline_ = new Pipeline
             {
-                RasterizationStateCreateInfo = new PipelineRasterizationStateCreateInfo
+                RasterizationState = new PipelineRasterizationStateCreateInfo
                 {
                     PolygonMode = PolygonMode.Fill,
                     CullMode = CullModes.Back,
@@ -30,13 +30,13 @@ namespace SharpGame.Samples.ColoredTriangle
                     LineWidth = 1.0f
                 },
 
-                MultisampleStateCreateInfo = new PipelineMultisampleStateCreateInfo
+                MultisampleState = new PipelineMultisampleStateCreateInfo
                 {
                     RasterizationSamples = SampleCounts.Count1,
                     MinSampleShading = 1.0f
                 },
 
-                DepthStencilStateCreateInfo = new PipelineDepthStencilStateCreateInfo
+                DepthStencilState = new PipelineDepthStencilStateCreateInfo
                 {
                     DepthTestEnable = true,
                     DepthWriteEnable = true,
@@ -55,7 +55,7 @@ namespace SharpGame.Samples.ColoredTriangle
                     }
                 },
 
-                ColorBlendStateCreateInfo = new PipelineColorBlendStateCreateInfo(new[]
+                ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
                 {
                     new PipelineColorBlendAttachmentState
                     {

@@ -47,7 +47,7 @@ namespace SharpGame
             DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(memoryRequirements.Size, memoryTypeIndex));
             buffer.BindMemory(memory);
 
-            return new GraphicsBuffer(buffer, memory, count);
+            return graphics.ToDispose(new GraphicsBuffer(buffer, memory, count));
         }
 
         public static GraphicsBuffer Index(int[] indices)
@@ -186,7 +186,7 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return new GraphicsBuffer(buffer, memory, data.Length);
+            return ctx.ToDispose(new GraphicsBuffer(buffer, memory, data.Length));
         }
     }
 }

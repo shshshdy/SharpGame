@@ -25,7 +25,7 @@ namespace SharpGame
         }
 
 
-        public override void Build()
+        protected override void OnBuild()
         {
             var it = Shaders.GetEnumerator();
             while(it.MoveNext())
@@ -69,6 +69,7 @@ namespace SharpGame
 
         [IgnoreDataMember]
         public bool IsComputeShader => ComputeShader != null;
+        private bool builded_ = false;
 
         public Pass()
         {            
@@ -77,12 +78,12 @@ namespace SharpGame
         public Pass(string fileName, string funcName = "main")
         {
             ComputeShader = new ShaderModule(ShaderStages.Compute, fileName, funcName);
+            Build();
         }
 
         public Pass(string name, ShaderModule vertexShader, ShaderModule pixelShader, ShaderModule geometryShader = null,
             ShaderModule hullShader = null, ShaderModule domainShader = null, ShaderModule computeShader = null)
         {
-
             Name = name;
             VertexShader = vertexShader;
             PixelShader = pixelShader;
@@ -90,10 +91,11 @@ namespace SharpGame
             HullShader = hullShader;
             DomainShader = domainShader;
             ComputeShader = computeShader;
-            
+
+            Build();
         }
 
-        public Pass(ShaderModule[] shaderModules)
+        public Pass(string name, params ShaderModule[] shaderModules)
         {
             foreach(var sm in shaderModules)
             {
@@ -120,6 +122,8 @@ namespace SharpGame
 
                 }
             }
+
+            Build();
         }
 
         public IEnumerable<ShaderModule> GetShaderModules()
@@ -134,6 +138,8 @@ namespace SharpGame
 
         public void Build()
         {
+            builded_ = true;
+
             VertexShader?.Build();
             GeometryShader?.Build();
             PixelShader?.Build();
@@ -176,26 +182,6 @@ namespace SharpGame
             return default;
         }
     }
-
-    public static class ShaderHelper
-    {
-        public static Pass Pass(string name, ShaderModule[] shaderModules)
-        {
-            return new Pass(shaderModules)
-            {
-                Name = name
-            };
-        }
-
-        public static ShaderModule VertexShader(string name, string entry = "main")
-        {
-            return new ShaderModule { Stage = ShaderStages.Vertex, File = name, FuncName = entry };
-        }
-
-        public static ShaderModule PixelShader(string name, string entry = "main")
-        {
-            return new ShaderModule { Stage = ShaderStages.Fragment, File = name, FuncName = entry };
-        }
-    }
+    
 
 }
