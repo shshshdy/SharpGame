@@ -142,9 +142,7 @@ namespace SharpGame.Samples.TexturedCube
                 timer.TotalTime * yawSpeed % twoPi,
                 timer.TotalTime * pitchSpeed % twoPi,
                 timer.TotalTime * rollSpeed % twoPi);
-
-            _wvp.World = Matrix.RotationY(timer.TotalTime * yawSpeed % twoPi);
-            //_wvp.World.Transpose();
+            
             SetViewProjection();
 
             UpdateUniformBuffers();
@@ -163,14 +161,11 @@ namespace SharpGame.Samples.TexturedCube
         private void SetViewProjection()
         {
             const float cameraDistance = 2.5f;
-            _wvp.View = Matrix.LookAtLH(-Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
-            _wvp.Projection =
-                
-                Matrix.PerspectiveFovLH(
-                (float)Math.PI / 4,
-                (float)graphics_.Platform.Width / graphics_.Platform.Height,
-                1.0f, 1000.0f);
-            
+            _wvp.View = Matrix.LookAtRH(Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
+            _wvp.Projection = Matrix.PerspectiveFovRH(
+            (float)Math.PI / 4,
+            (float)graphics_.Platform.Width / graphics_.Platform.Height,
+            1.0f, 1000.0f);            
         }
 
         private void UpdateUniformBuffers()
