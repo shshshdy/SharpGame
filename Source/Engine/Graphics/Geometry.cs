@@ -30,6 +30,7 @@ namespace SharpGame
         public int VertexCount { get; set; }
         public int IndexStart { get; set; }
         public int IndexCount { get; set; }
+        public float LodDistance { get; set; }
 
         public PipelineVertexInputStateCreateInfo VertexInputState { get; set; }
 

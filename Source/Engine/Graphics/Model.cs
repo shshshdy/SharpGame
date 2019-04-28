@@ -104,19 +104,7 @@ namespace SharpGame
         }
 
         public ModelMorph? GetMorph(int index) => (index < morphs_.Length) ? (ModelMorph?)morphs_[index] : null;
-
-        /*
-        const ModelMorph* GetMorph(StringID nameHash)
-        {
-            for (Vector<ModelMorph>::ConstIterator i = morphs_.Begin(); i != morphs_.End(); ++i)
-            {
-                if (i->nameHash_ == nameHash)
-                    return &(* i);
-            }
-
-            return 0;
-        }*/
-
+        
         public int GetMorphRangeStart(int bufferIndex)
         {
             return bufferIndex < vertexBuffers_.Length ? morphRangeStarts_[bufferIndex] : 0;
@@ -177,9 +165,26 @@ namespace SharpGame
         List<GeometryDesc[]> loadGeometries_;
 
         static PrimitiveTopology[] primitiveType2Topology = new[]
-            {
+        {
             PrimitiveTopology.TriangleList, PrimitiveTopology.TriangleStrip, PrimitiveTopology.LineList, PrimitiveTopology.LineStrip, PrimitiveTopology.PointList
-            };
+        };
+
+        const uint MASK_NONE = 0x0;
+        const uint MASK_POSITION = 0x1;
+        const uint MASK_NORMAL = 0x2;
+        const uint MASK_COLOR = 0x4;
+        const uint MASK_TEXCOORD1 = 0x8;
+        const uint MASK_TEXCOORD2 = 0x10;
+        const uint MASK_CUBETEXCOORD1 = 0x20;
+        const uint MASK_CUBETEXCOORD2 = 0x40;
+        const uint MASK_TANGENT = 0x80;
+        const uint MASK_BLENDWEIGHTS = 0x100;
+        const uint MASK_BLENDINDICES = 0x200;
+        const uint MASK_INSTANCEMATRIX4 = 0x400;
+        const uint MASK_INSTANCEMATRIX3 = 0x800;
+        const uint MASK_INSTANCEMATRIX2 = 0x1000;
+        const uint MASK_INSTANCEMATRIX1 = 0x2000;
+
         public async override Task<bool> Load(Stream source)
         {
             String fileID = source.ReadFileID();
@@ -298,7 +303,7 @@ namespace SharpGame
                     }
 
                     Geometry geometry = new Geometry();
-                    //geometry.LodDistance = distance;
+                    geometry.LodDistance = distance;
 
                     // Prepare geometry to be defined during EndLoad()
                     deoDesc[j].type_ = type;
@@ -338,20 +343,19 @@ namespace SharpGame
                     // Add size of individual elements
                     unsafe
                     {
-                        /*
-                        if ((newBuffer.elementMask_ & VertexElement.MASK_POSITION) != 0)
+                        if ((newBuffer.elementMask_ & MASK_POSITION) != 0)
                             vertexSize += sizeof(Vector3);
-                        if ((newBuffer.elementMask_ & VertexElement.MASK_NORMAL) != 0)
+                        if ((newBuffer.elementMask_ & MASK_NORMAL) != 0)
                             vertexSize += sizeof(Vector3);
-                        if ((newBuffer.elementMask_ & VertexElement.MASK_TANGENT) != 0)
+                        if ((newBuffer.elementMask_ & MASK_TANGENT) != 0)
                             vertexSize += sizeof(Vector3);
-                        */
-                }
+                   
+                    }
 
-                newBuffer.dataSize_ = newBuffer.vertexCount_ * (int)vertexSize;
-                    newBuffer.morphData_ = source.ReadArray<byte>((int)newBuffer.dataSize_);
-                    morphs_[i].buffers_[bufferIndex] = newBuffer;
-                    memoryUse += Unsafe.SizeOf<VertexBufferMorph>() + newBuffer.vertexCount_ * vertexSize;
+                    newBuffer.dataSize_ = newBuffer.vertexCount_ * (int)vertexSize;
+                        newBuffer.morphData_ = source.ReadArray<byte>((int)newBuffer.dataSize_);
+                        morphs_[i].buffers_[bufferIndex] = newBuffer;
+                        memoryUse += Unsafe.SizeOf<VertexBufferMorph>() + newBuffer.vertexCount_ * vertexSize;
                 }
 
                 memoryUse += Unsafe.SizeOf<ModelMorph>();
