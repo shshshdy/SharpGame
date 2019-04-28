@@ -1066,7 +1066,7 @@ namespace SharpGame
 
         /* This implementation is wrong
         /// <summary>
-        /// Determines whether there is an intersection between a <see cref="Unique.BoundingBox"/> and a triangle.
+        /// Determines whether there is an intersection between a <see cref="SharpGame.BoundingBox"/> and a triangle.
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <param name="vertex1">The first vertex of the triangle to test.</param>
@@ -1181,7 +1181,7 @@ namespace SharpGame
 
         /* This implementation is wrong
         /// <summary>
-        /// Determines whether a <see cref="Unique.BoundingBox"/> contains a triangle.
+        /// Determines whether a <see cref="SharpGame.BoundingBox"/> contains a triangle.
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <param name="vertex1">The first vertex of the triangle to test.</param>

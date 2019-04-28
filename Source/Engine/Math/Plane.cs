@@ -92,7 +92,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Plane" /> class.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Plane" /> class.
         /// </summary>
         /// <param name="point">Any point that lies along the plane.</param>
         /// <param name="normal">The normal vector to the plane.</param>

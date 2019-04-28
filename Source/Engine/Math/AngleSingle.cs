@@ -96,7 +96,7 @@ namespace SharpGame
         private int radiansInt;
 
         /// <summary>
-        /// Initializes a new instance of the Unique.AngleSingle structure with the
+        /// Initializes a new instance of the SharpGame.AngleSingle structure with the
         /// given unit dependant angle and unit type.
         /// </summary>
         /// <param name="angle">A unit dependant measure of the angle.</param>
@@ -129,7 +129,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the Unique.AngleSingle structure using the
+        /// Initializes a new instance of the SharpGame.AngleSingle structure using the
         /// arc length formula (θ = s/r).
         /// </summary>
         /// <param name="arcLength">The measure of the arc.</param>
@@ -141,7 +141,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Wraps this Unique.AngleSingle to be in the range [π, -π].
+        /// Wraps this SharpGame.AngleSingle to be in the range [π, -π].
         /// </summary>
         public void Wrap()
         {
@@ -156,7 +156,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Wraps this Unique.AngleSingle to be in the range [0, 2π).
+        /// Wraps this SharpGame.AngleSingle to be in the range [0, 2π).
         /// </summary>
         public void WrapPositive()
         {
@@ -169,7 +169,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets or sets the total number of revolutions this Unique.AngleSingle represents.
+        /// Gets or sets the total number of revolutions this SharpGame.AngleSingle represents.
         /// </summary>
         public float Revolutions
         {
@@ -178,7 +178,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets or sets the total number of degrees this Unique.AngleSingle represents.
+        /// Gets or sets the total number of degrees this SharpGame.AngleSingle represents.
         /// </summary>
         public float Degrees
         {
@@ -187,7 +187,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets or sets the minutes component of the degrees this Unique.AngleSingle represents.
+        /// Gets or sets the minutes component of the degrees this SharpGame.AngleSingle represents.
         /// When setting the minutes, if the value is in the range (-60, 60) the whole degrees are
         /// not changed; otherwise, the whole degrees may be changed. Fractional values may set
         /// the seconds component.
@@ -220,7 +220,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets or sets the seconds of the degrees this Unique.AngleSingle represents.
+        /// Gets or sets the seconds of the degrees this SharpGame.AngleSingle represents.
         /// When setting the seconds, if the value is in the range (-60, 60) the whole minutes
         /// or whole degrees are not changed; otherwise, the whole minutes or whole degrees
         /// may be changed.
@@ -265,7 +265,7 @@ namespace SharpGame
         }
         
         /// <summary>
-        /// Gets or sets the total number of radians this Unique.AngleSingle represents.
+        /// Gets or sets the total number of radians this SharpGame.AngleSingle represents.
         /// </summary>
         public float Radians
         {
@@ -274,7 +274,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets or sets the total number of milliradians this Unique.AngleSingle represents.
+        /// Gets or sets the total number of milliradians this SharpGame.AngleSingle represents.
         /// One milliradian is equal to 1/(2000π).
         /// </summary>
         public float Milliradians
@@ -284,7 +284,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets or sets the total number of gradians this Unique.AngleSingle represents.
+        /// Gets or sets the total number of gradians this SharpGame.AngleSingle represents.
         /// </summary>
         public float Gradians
         {
@@ -293,7 +293,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a System.Boolean that determines whether this Unique.Angle
+        /// Gets a System.Boolean that determines whether this SharpGame.Angle
         /// is a right angle (i.e. 90° or π/2).
         /// </summary>
         public bool IsRight
@@ -302,7 +302,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a System.Boolean that determines whether this Unique.Angle
+        /// Gets a System.Boolean that determines whether this SharpGame.Angle
         /// is a straight angle (i.e. 180° or π).
         /// </summary>
         public bool IsStraight
@@ -311,7 +311,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a System.Boolean that determines whether this Unique.Angle
+        /// Gets a System.Boolean that determines whether this SharpGame.Angle
         /// is a full rotation angle (i.e. 360° or 2π).
         /// </summary>
         public bool IsFullRotation
@@ -320,7 +320,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a System.Boolean that determines whether this Unique.Angle
+        /// Gets a System.Boolean that determines whether this SharpGame.Angle
         /// is an oblique angle (i.e. is not 90° or a multiple of 90°).
         /// </summary>
         public bool IsOblique
@@ -329,7 +329,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a System.Boolean that determines whether this Unique.Angle
+        /// Gets a System.Boolean that determines whether this SharpGame.Angle
         /// is an acute angle (i.e. less than 90° but greater than 0°).
         /// </summary>
         public bool IsAcute
@@ -338,7 +338,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a System.Boolean that determines whether this Unique.Angle
+        /// Gets a System.Boolean that determines whether this SharpGame.Angle
         /// is an obtuse angle (i.e. greater than 90° but less than 180°).
         /// </summary>
         public bool IsObtuse
@@ -347,7 +347,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a System.Boolean that determines whether this Unique.Angle
+        /// Gets a System.Boolean that determines whether this SharpGame.Angle
         /// is a reflex angle (i.e. greater than 180° but less than 360°).
         /// </summary>
         public bool IsReflex
@@ -356,7 +356,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a Unique.AngleSingle instance that complements this angle (i.e. the two angles add to 90°).
+        /// Gets a SharpGame.AngleSingle instance that complements this angle (i.e. the two angles add to 90°).
         /// </summary>
         public AngleSingle Complement
         {
@@ -364,7 +364,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a Unique.AngleSingle instance that supplements this angle (i.e. the two angles add to 180°).
+        /// Gets a SharpGame.AngleSingle instance that supplements this angle (i.e. the two angles add to 180°).
         /// </summary>
         public AngleSingle Supplement
         {
@@ -372,10 +372,10 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Wraps the Unique.AngleSingle given in the value argument to be in the range [π, -π].
+        /// Wraps the SharpGame.AngleSingle given in the value argument to be in the range [π, -π].
         /// </summary>
-        /// <param name="value">A Unique.AngleSingle to wrap.</param>
-        /// <returns>The Unique.AngleSingle that is wrapped.</returns>
+        /// <param name="value">A SharpGame.AngleSingle to wrap.</param>
+        /// <returns>The SharpGame.AngleSingle that is wrapped.</returns>
         public static AngleSingle Wrap(AngleSingle value)
         {
             value.Wrap();
@@ -383,10 +383,10 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Wraps the Unique.AngleSingle given in the value argument to be in the range [0, 2π).
+        /// Wraps the SharpGame.AngleSingle given in the value argument to be in the range [0, 2π).
         /// </summary>
-        /// <param name="value">A Unique.AngleSingle to wrap.</param>
-        /// <returns>The Unique.AngleSingle that is wrapped.</returns>
+        /// <param name="value">A SharpGame.AngleSingle to wrap.</param>
+        /// <returns>The SharpGame.AngleSingle that is wrapped.</returns>
         public static AngleSingle WrapPositive(AngleSingle value)
         {
             value.WrapPositive();
@@ -394,11 +394,11 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Compares two Unique.AngleSingle instances and returns the smaller angle.
+        /// Compares two SharpGame.AngleSingle instances and returns the smaller angle.
         /// </summary>
-        /// <param name="left">The first Unique.AngleSingle instance to compare.</param>
-        /// <param name="right">The second Unique.AngleSingle instance to compare.</param>
-        /// <returns>The smaller of the two given Unique.AngleSingle instances.</returns>
+        /// <param name="left">The first SharpGame.AngleSingle instance to compare.</param>
+        /// <param name="right">The second SharpGame.AngleSingle instance to compare.</param>
+        /// <returns>The smaller of the two given SharpGame.AngleSingle instances.</returns>
         public static AngleSingle Min(AngleSingle left, AngleSingle right)
         {
             if (left.radians < right.radians)
@@ -408,11 +408,11 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Compares two Unique.AngleSingle instances and returns the greater angle.
+        /// Compares two SharpGame.AngleSingle instances and returns the greater angle.
         /// </summary>
-        /// <param name="left">The first Unique.AngleSingle instance to compare.</param>
-        /// <param name="right">The second Unique.AngleSingle instance to compare.</param>
-        /// <returns>The greater of the two given Unique.AngleSingle instances.</returns>
+        /// <param name="left">The first SharpGame.AngleSingle instance to compare.</param>
+        /// <param name="right">The second SharpGame.AngleSingle instance to compare.</param>
+        /// <returns>The greater of the two given SharpGame.AngleSingle instances.</returns>
         public static AngleSingle Max(AngleSingle left, AngleSingle right)
         {
             if (left.radians > right.radians)
@@ -422,7 +422,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Adds two Unique.AngleSingle objects and returns the result.
+        /// Adds two SharpGame.AngleSingle objects and returns the result.
         /// </summary>
         /// <param name="left">The first object to add.</param>
         /// <param name="right">The second object to add.</param>
@@ -433,7 +433,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Subtracts two Unique.AngleSingle objects and returns the result.
+        /// Subtracts two SharpGame.AngleSingle objects and returns the result.
         /// </summary>
         /// <param name="left">The first object to subtract.</param>
         /// <param name="right">The second object to subtract.</param>
@@ -444,7 +444,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Multiplies two Unique.AngleSingle objects and returns the result.
+        /// Multiplies two SharpGame.AngleSingle objects and returns the result.
         /// </summary>
         /// <param name="left">The first object to multiply.</param>
         /// <param name="right">The second object to multiply.</param>
@@ -455,7 +455,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Divides two Unique.AngleSingle objects and returns the result.
+        /// Divides two SharpGame.AngleSingle objects and returns the result.
         /// </summary>
         /// <param name="left">The numerator object.</param>
         /// <param name="right">The denominator object.</param>
@@ -466,7 +466,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a new Unique.AngleSingle instance that represents the zero angle (i.e. 0°).
+        /// Gets a new SharpGame.AngleSingle instance that represents the zero angle (i.e. 0°).
         /// </summary>
         public static AngleSingle ZeroAngle
         {
@@ -474,7 +474,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a new Unique.AngleSingle instance that represents the right angle (i.e. 90° or π/2).
+        /// Gets a new SharpGame.AngleSingle instance that represents the right angle (i.e. 90° or π/2).
         /// </summary>
         public static AngleSingle RightAngle
         {
@@ -482,7 +482,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a new Unique.AngleSingle instance that represents the straight angle (i.e. 180° or π).
+        /// Gets a new SharpGame.AngleSingle instance that represents the straight angle (i.e. 180° or π).
         /// </summary>
         public static AngleSingle StraightAngle
         {
@@ -490,7 +490,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets a new Unique.AngleSingle instance that represents the full rotation angle (i.e. 360° or 2π).
+        /// Gets a new SharpGame.AngleSingle instance that represents the full rotation angle (i.e. 360° or 2π).
         /// </summary>
         public static AngleSingle FullRotationAngle
         {
@@ -498,7 +498,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Returns a System.Boolean that indicates whether the values of two Unique.Angle
+        /// Returns a System.Boolean that indicates whether the values of two SharpGame.Angle
         /// objects are equal.
         /// </summary>
         /// <param name="left">The first object to compare.</param>
@@ -510,7 +510,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Returns a System.Boolean that indicates whether the values of two Unique.Angle
+        /// Returns a System.Boolean that indicates whether the values of two SharpGame.Angle
         /// objects are not equal.
         /// </summary>
         /// <param name="left">The first object to compare.</param>
@@ -522,8 +522,8 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Returns a System.Boolean that indicates whether a Unique.Angle
-        /// object is less than another Unique.AngleSingle object.
+        /// Returns a System.Boolean that indicates whether a SharpGame.Angle
+        /// object is less than another SharpGame.AngleSingle object.
         /// </summary>
         /// <param name="left">The first object to compare.</param>
         /// <param name="right">The second object to compare.</param>
@@ -534,8 +534,8 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Returns a System.Boolean that indicates whether a Unique.Angle
-        /// object is greater than another Unique.AngleSingle object.
+        /// Returns a System.Boolean that indicates whether a SharpGame.Angle
+        /// object is greater than another SharpGame.AngleSingle object.
         /// </summary>
         /// <param name="left">The first object to compare.</param>
         /// <param name="right">The second object to compare.</param>
@@ -546,8 +546,8 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Returns a System.Boolean that indicates whether a Unique.Angle
-        /// object is less than or equal to another Unique.AngleSingle object.
+        /// Returns a System.Boolean that indicates whether a SharpGame.Angle
+        /// object is less than or equal to another SharpGame.AngleSingle object.
         /// </summary>
         /// <param name="left">The first object to compare.</param>
         /// <param name="right">The second object to compare.</param>
@@ -558,8 +558,8 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Returns a System.Boolean that indicates whether a Unique.Angle
-        /// object is greater than or equal to another Unique.AngleSingle object.
+        /// Returns a System.Boolean that indicates whether a SharpGame.Angle
+        /// object is greater than or equal to another SharpGame.AngleSingle object.
         /// </summary>
         /// <param name="left">The first object to compare.</param>
         /// <param name="right">The second object to compare.</param>
@@ -570,10 +570,10 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Returns the value of the Unique.AngleSingle operand. (The sign of
+        /// Returns the value of the SharpGame.AngleSingle operand. (The sign of
         /// the operand is unchanged.)
         /// </summary>
-        /// <param name="value">A Unique.AngleSingle object.</param>
+        /// <param name="value">A SharpGame.AngleSingle object.</param>
         /// <returns>The value of the value parameter.</returns>
         public static AngleSingle operator +(AngleSingle value)
         {
@@ -581,9 +581,9 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Returns the the negated value of the Unique.AngleSingle operand.
+        /// Returns the the negated value of the SharpGame.AngleSingle operand.
         /// </summary>
-        /// <param name="value">A Unique.AngleSingle object.</param>
+        /// <param name="value">A SharpGame.AngleSingle object.</param>
         /// <returns>The negated value of the value parameter.</returns>
         public static AngleSingle operator -(AngleSingle value)
         {
@@ -591,7 +591,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Adds two Unique.AngleSingle objects and returns the result.
+        /// Adds two SharpGame.AngleSingle objects and returns the result.
         /// </summary>
         /// <param name="left">The first object to add.</param>
         /// <param name="right">The second object to add.</param>
@@ -602,7 +602,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Subtracts two Unique.AngleSingle objects and returns the result.
+        /// Subtracts two SharpGame.AngleSingle objects and returns the result.
         /// </summary>
         /// <param name="left">The first object to subtract</param>
         /// <param name="right">The second object to subtract.</param>
@@ -613,7 +613,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Multiplies two Unique.AngleSingle objects and returns the result.
+        /// Multiplies two SharpGame.AngleSingle objects and returns the result.
         /// </summary>
         /// <param name="left">The first object to multiply.</param>
         /// <param name="right">The second object to multiply.</param>
@@ -624,7 +624,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Divides two Unique.AngleSingle objects and returns the result.
+        /// Divides two SharpGame.AngleSingle objects and returns the result.
         /// </summary>
         /// <param name="left">The numerator object.</param>
         /// <param name="right">The denominator object.</param>
@@ -667,7 +667,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Compares this instance to a second Unique.AngleSingle and returns
+        /// Compares this instance to a second SharpGame.AngleSingle and returns
         /// an integer that indicates whether the value of this instance is less than,
         /// equal to, or greater than the value of the specified object.
         /// </summary>
@@ -692,11 +692,11 @@ namespace SharpGame
 
         /// <summary>
         /// Returns a value that indicates whether the current instance and a specified
-        /// Unique.AngleSingle object have the same value.
+        /// SharpGame.AngleSingle object have the same value.
         /// </summary>
         /// <param name="other">The object to compare.</param>
         /// <returns>
-        /// Returns true if this Unique.AngleSingle object and another have the same value;
+        /// Returns true if this SharpGame.AngleSingle object and another have the same value;
         /// otherwise, false.
         /// </returns>
         public bool Equals(AngleSingle other)
@@ -759,7 +759,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Returns a hash code for this Unique.AngleSingle instance.
+        /// Returns a hash code for this SharpGame.AngleSingle instance.
         /// </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
@@ -773,9 +773,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="obj">The object to compare.</param>
         /// <returns>
-        /// Returns true if the obj parameter is a Unique.AngleSingle object or a type
-        /// capable of implicit conversion to a Unique.AngleSingle value, and
-        /// its value is equal to the value of the current Unique.Angle
+        /// Returns true if the obj parameter is a SharpGame.AngleSingle object or a type
+        /// capable of implicit conversion to a SharpGame.AngleSingle value, and
+        /// its value is equal to the value of the current SharpGame.Angle
         /// object; otherwise, false.
         /// </returns>
         public override bool Equals(object obj)

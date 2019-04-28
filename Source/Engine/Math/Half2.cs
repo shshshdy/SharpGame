@@ -42,7 +42,7 @@ namespace SharpGame
         public Half Y;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Half2" /> structure.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Half2" /> structure.
         /// </summary>
         /// <param name="x">The X component.</param>
         /// <param name="y">The Y component.</param>
@@ -53,7 +53,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Half2" /> structure.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Half2" /> structure.
         /// </summary>
         /// <param name="x">The X component.</param>
         /// <param name="y">The Y component.</param>
@@ -64,7 +64,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Half2" /> structure.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Half2" /> structure.
         /// </summary>
         /// <param name="x">The X component.</param>
         /// <param name="y">The Y component.</param>
@@ -75,7 +75,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Half2" /> structure.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Half2" /> structure.
         /// </summary>
         /// <param name="value">The value to set for both the X and Y components.</param>
         public Half2(Half value)
@@ -85,7 +85,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Half2" /> structure.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Half2" /> structure.
         /// </summary>
         /// <param name="value">Value to initialize X and Y components with.</param>
         public Half2(float value)

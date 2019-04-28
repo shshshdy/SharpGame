@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using VulkanCore;
 
 namespace SharpGame
@@ -67,12 +68,14 @@ namespace SharpGame
             Build();
         }
         
-        public async override void Load(Stream stream)
+        public async override Task<bool> Load(Stream stream)
         {
             var graphics = Get<Graphics>();
             Code = stream.ReadAllBytes();
 
             Build();
+
+            return true;
         }
 
         protected override void OnBuild()

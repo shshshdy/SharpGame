@@ -47,7 +47,7 @@ namespace SharpGame
         public Half Z;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Half3" /> structure.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Half3" /> structure.
         /// </summary>
         /// <param name="x">The X component.</param>
         /// <param name="y">The Y component.</param>
@@ -60,7 +60,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Half3" /> structure.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Half3" /> structure.
         /// </summary>
         /// <param name="x">The X component.</param>
         /// <param name="y">The Y component.</param>
@@ -73,7 +73,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Half3" /> structure.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Half3" /> structure.
         /// </summary>
         /// <param name="x">The X component.</param>
         /// <param name="y">The Y component.</param>
@@ -86,7 +86,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Unique.Half3" /> structure.
+        /// Initializes a new instance of the <see cref="T:SharpGame.Half3" /> structure.
         /// </summary>
         /// <param name="value">The value to set for the X, Y, and Z components.</param>
         public Half3(Half value)

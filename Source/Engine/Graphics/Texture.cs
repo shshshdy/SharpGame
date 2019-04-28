@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using VulkanCore;
 using Buffer = VulkanCore.Buffer;
 
@@ -61,7 +62,7 @@ namespace SharpGame
             Image.Dispose();
         }
 
-        public async override void Load(Stream stream)
+        public async override Task<bool> Load(Stream stream)
         {
             var graphics = Get<Graphics>();
             var fileSystem = Get<FileSystem>();
@@ -135,6 +136,8 @@ namespace SharpGame
                 SetTextureData(data);
                 Sampler = graphics.CreateSampler();
             }
+
+            return true;
         }
 
         public void SetTextureData(TextureData tex2D)

@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Utf8Json;
-using Utf8Json.Resolvers;
+//using Utf8Json;
+//using Utf8Json.Resolvers;
 using VulkanCore;
 
 namespace SharpGame.Samples.TexturedCube
@@ -122,7 +122,7 @@ namespace SharpGame.Samples.TexturedCube
 
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout })
             };
-
+            /*
             JsonSerializer.SetDefaultResolver(StandardResolver.ExcludeNullSnakeCase);
             {
                 byte[] bytes = Utf8Json.JsonSerializer.Serialize(texturedShader_);
@@ -136,7 +136,7 @@ namespace SharpGame.Samples.TexturedCube
                 var json = Utf8Json.JsonSerializer.PrettyPrint(bytes);
 
                 File.WriteAllText("test_geom.json", json);
-            }
+            }*/
 
 
         }

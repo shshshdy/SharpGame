@@ -89,7 +89,7 @@ namespace SharpGame
 
 
         /// <summary>
-        /// Initializes a new instance of the <see cref = "T:Unique.Half" /> structure.
+        /// Initializes a new instance of the <see cref = "T:SharpGame.Half" /> structure.
         /// </summary>
         /// <param name = "value">The floating point value that should be stored in 16 bit format.</param>
         public Half(float value)
@@ -98,7 +98,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref = "T:Unique.Half" /> structure.
+        /// Initializes a new instance of the <see cref = "T:SharpGame.Half" /> structure.
         /// </summary>
         /// <param name = "rawvalue">The floating point value that should be stored in 16 bit format.</param>
         public Half(ushort rawvalue)
@@ -142,7 +142,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref = "T:System.Single" /> to <see cref = "T:Unique.Half" />.
+        /// Performs an explicit conversion from <see cref = "T:System.Single" /> to <see cref = "T:SharpGame.Half" />.
         /// </summary>
         /// <param name = "value">The value to be converted.</param>
         /// <returns>The converted value.</returns>
@@ -152,7 +152,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref = "T:Unique.Half" /> to <see cref = "T:System.Single" />.
+        /// Performs an implicit conversion from <see cref = "T:SharpGame.Half" /> to <see cref = "T:System.Single" />.
         /// </summary>
         /// <param name = "value">The value to be converted.</param>
         /// <returns>The converted value.</returns>

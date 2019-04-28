@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SharpGame
 {
@@ -15,8 +16,9 @@ namespace SharpGame
 
         protected bool builded_ = false;
 
-        public async virtual void Load(Stream stream)
+        public async virtual Task<bool> Load(Stream stream)
         {
+            return false;
         }
 
         public virtual void Build()

@@ -303,10 +303,10 @@ namespace SharpGame
         }
 
         ///// <summary>
-        ///// Checks, if specified <see cref="Unique.Vector2"/> is inside <see cref="Unique.Rectangle"/>.
+        ///// Checks, if specified <see cref="SharpGame.Vector2"/> is inside <see cref="SharpGame.Rectangle"/>.
         ///// </summary>
-        ///// <param name="vector2D">Coordinate <see cref="Unique.Vector2"/>.</param>
-        ///// <returns><c>true</c> if <see cref="Unique.Vector2"/> is inside <see cref="Unique.Rectangle"/>, otherwise <c>false</c>.</returns>
+        ///// <param name="vector2D">Coordinate <see cref="SharpGame.Vector2"/>.</param>
+        ///// <returns><c>true</c> if <see cref="SharpGame.Vector2"/> is inside <see cref="SharpGame.Rectangle"/>, otherwise <c>false</c>.</returns>
         //public bool Contains(Vector2 vector2D)
         //{
         //    return Contains(vector2D.X, vector2D.Y);
