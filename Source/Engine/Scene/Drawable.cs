@@ -226,12 +226,6 @@ namespace SharpGame
             if(scene != null)
             {
                 scene.InsertDrawable(this);
-                /*
-                Octree* octree = scene->GetComponent<Octree>();
-                if(octree)
-                    octree->InsertDrawable(this);
-                else
-                    URHO3D_LOGERROR("No Octree component in scene, drawable will not render");*/
             }
             else
             {
