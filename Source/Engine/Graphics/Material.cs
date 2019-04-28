@@ -27,12 +27,15 @@ namespace SharpGame
     {
         public string Name { get; set; }
 
-        public Dictionary<string, MaterialParam> uniformData;
-        public Dictionary<string, Texture> textureData;
+        public Dictionary<string, MaterialParam> UniformData = new Dictionary<string, MaterialParam>();
+        public Dictionary<string, Texture> TextureData = new Dictionary<string, Texture>();
 
         public Material()
         {
-            
         }
+
+
+
+
     }
 }
