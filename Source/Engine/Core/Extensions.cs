@@ -48,5 +48,15 @@ namespace SharpGame
                 source.Position = originalPosition;
             }
         }
+
+        public static string ReadString(this Stream source)
+        {
+            return "";
+        }
+
+        public static void WriteString(this Stream stream, string str)
+        {
+
+        }
     }
 }

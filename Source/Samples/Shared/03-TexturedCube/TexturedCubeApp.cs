@@ -1,6 +1,9 @@
 using System;
+using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Utf8Json;
+using Utf8Json.Resolvers;
 using VulkanCore;
 
 namespace SharpGame.Samples.TexturedCube
@@ -18,7 +21,7 @@ namespace SharpGame.Samples.TexturedCube
         private Geometry geometry_;
 
         private Pipeline pipeline_;
-        private Pass pass_;
+        private Shader texturedShader_;
 
         private DescriptorSetLayout _descriptorSetLayout;
         private DescriptorPool _descriptorPool;
@@ -41,7 +44,7 @@ namespace SharpGame.Samples.TexturedCube
             {
                 VertexBuffers = new[] { GraphicsBuffer.Vertex(cube.Vertices) },
                 IndexBuffer = GraphicsBuffer.Index(cube.Indices),
-                VertexInputStateCreateInfo = new PipelineVertexInputStateCreateInfo
+                VertexInputState = new PipelineVertexInputStateCreateInfo
                 (
                     new[]
                     {
@@ -65,10 +68,11 @@ namespace SharpGame.Samples.TexturedCube
             _descriptorPool      = CreateDescriptorPool();
             _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
 
-            pass_ = new Pass(
-                "main",                
-                new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
-                new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
+            texturedShader_ = new Shader("Textured",                
+                new Pass("main",
+                    new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
+                    new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
+                )
             );
             
             pipeline_ = new Pipeline
@@ -120,12 +124,28 @@ namespace SharpGame.Samples.TexturedCube
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout })
             };
 
+            JsonSerializer.SetDefaultResolver(StandardResolver.ExcludeNullSnakeCase);
+            {
+                byte[] bytes = Utf8Json.JsonSerializer.Serialize(texturedShader_);
+                var json = Utf8Json.JsonSerializer.PrettyPrint(bytes);
+
+                File.WriteAllText("test_shader.json", json);
+            }
+
+            {
+                byte[] bytes = Utf8Json.JsonSerializer.Serialize(geometry_);
+                var json = Utf8Json.JsonSerializer.PrettyPrint(bytes);
+
+                File.WriteAllText("test_geom.json", json);
+            }
+
+
         }
 
         public override void Dispose()
         {
             geometry_.Dispose();
-            pass_.Dispose();
+            texturedShader_.Dispose();
             pipeline_.Dispose();
 
             base.Dispose();
@@ -152,7 +172,7 @@ namespace SharpGame.Samples.TexturedCube
         {
             var cmdBuffer = e.commandBuffer;
 
-            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, pass_, geometry_);
+            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, texturedShader_, geometry_);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             geometry_.Draw(cmdBuffer);

@@ -79,11 +79,11 @@ namespace SharpGame
         {
             var graphics = Get<Graphics>();
             var fileSystem = Get<FileSystem>();
+            var resourceCache = Get<ResourceCache>();
 
             if (Code == null)
             {
-                string path = Path.Combine(ResourceCache.ContentRoot, FileName);
-                using (Stream stream = fileSystem.Open(path))
+                using (Stream stream = resourceCache.Open(FileName))
                 {
                     Code = stream.ReadAllBytes();
                 }

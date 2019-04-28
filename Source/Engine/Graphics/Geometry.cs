@@ -25,13 +25,13 @@ namespace SharpGame
         }
 
         public GraphicsBuffer IndexBuffer { get; set; }
-        public PrimitiveTopology PrimitiveTopology { get; set; }
+        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
         public int VertexStart { get; set; }
         public int VertexCount { get; set; }
         public int IndexStart { get; set; }
         public int IndexCount { get; set; }
 
-        public PipelineVertexInputStateCreateInfo VertexInputStateCreateInfo { get; set; }
+        public PipelineVertexInputStateCreateInfo VertexInputState { get; set; }
 
         VulkanCore.Buffer[] buffers_;
         long[] offsets_;

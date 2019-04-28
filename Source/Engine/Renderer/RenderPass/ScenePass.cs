@@ -11,8 +11,9 @@ namespace SharpGame
         public AttachmentDescription[] attachments { get; set; }
         public SubpassDescription[] subpasses { get; set; }
 
-        public ScenePass()
+        public ScenePass(string name = "main")
         {
+            Name = string.Intern(name);
             Recreate();
         }
 
@@ -82,6 +83,23 @@ namespace SharpGame
             renderPass_ = Graphics.ToDisposeFrame(Graphics.Device.CreateRenderPass(createInfo));
             framebuffer_ = Graphics.ToDisposeFrame(CreateFramebuffers());
 
+        }
+
+        protected Framebuffer[] CreateFramebuffers()
+        {
+            var framebuffers = new Framebuffer[Graphics.SwapchainImages.Length];
+            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
+            {
+                framebuffers[i] = CreateFramebuffer(
+                    new[] {
+                        Graphics.SwapchainImageViews[i], Renderer.DepthStencilBuffer.View
+                    },
+
+                    Graphics.Width, Graphics.Height
+                );
+            }
+
+            return framebuffers;
         }
 
         public override void Draw(CommandBuffer cmdBuffer, int imageIndex)

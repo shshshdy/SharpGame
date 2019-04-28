@@ -6,7 +6,6 @@ using VulkanCore;
 
 namespace SharpGame
 {
-
     public class RenderPass : GPUObject
     {
         public string Name { get; set; }
@@ -17,35 +16,21 @@ namespace SharpGame
         [IgnoreDataMember]
         public Framebuffer[] framebuffer_;
 
+        public Renderer Renderer => Get<Renderer>();
+
         protected CommandBuffer[] cmdBuffers_ = new CommandBuffer[2];
 
-        public Renderer Renderer => Get<Renderer>();
         internal VulkanCore.RenderPass renderPass_;
 
         protected override void Recreate()
         {
         }
 
-
-        protected Framebuffer[] CreateFramebuffers()
+        public Framebuffer CreateFramebuffer(ImageView[] attachments, int width, int height, int layers = 1)
         {
-            var framebuffers = new Framebuffer[Graphics.SwapchainImages.Length];
-            for (int i = 0; i < Graphics.SwapchainImages.Length; i++)
-            {
-                framebuffers[i] = renderPass_.CreateFramebuffer(
-                    new FramebufferCreateInfo(
-                        new[] {
-                            Graphics.SwapchainImageViews[i],
-                            Renderer.DepthStencilBuffer.View
-                        },
-
-                        Graphics.Width,
-                        Graphics.Height
-                    )
+            return renderPass_.CreateFramebuffer(
+                    new FramebufferCreateInfo(attachments, width, height)
                 );
-            }
-
-            return framebuffers;
         }
 
         public virtual void Draw(CommandBuffer cmdBuffer, int imageIndex)

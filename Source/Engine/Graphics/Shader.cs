@@ -10,24 +10,39 @@ namespace SharpGame
     public class Shader : Resource
     {
         public string Name { get; set; }
-        public Dictionary<string, Pass> Shaders { get; set; }
+        public Dictionary<string, Pass> Passes { get; set; } = new Dictionary<string, Pass>();
 
         public Shader()
         {
         }
 
-        public Shader(string name, Pass[] passes)
+        public Shader(string name, params Pass[] passes)
         {
             foreach(var pass in passes)
             {
-                Shaders.Add(pass.Name, pass);
+                AddPass(pass);
             }
+        }
+
+        public void AddPass(Pass pass)
+        {
+            Passes.Add(pass.Name, pass);
+        }
+
+        public Pass GetPass(string name)
+        {
+            if(Passes.TryGetValue(name, out Pass pass))
+            {
+                return pass;
+            }
+
+            return null;
         }
 
 
         protected override void OnBuild()
         {
-            var it = Shaders.GetEnumerator();
+            var it = Passes.GetEnumerator();
             while(it.MoveNext())
             {
                 it.Current.Value.Build();
@@ -37,13 +52,13 @@ namespace SharpGame
 
         public override void Dispose()
         {
-            var it = Shaders.GetEnumerator();
+            var it = Passes.GetEnumerator();
             while (it.MoveNext())
             {
                 it.Current.Value.Dispose();
             }
 
-            Shaders.Clear();
+            Passes.Clear();
 
             base.Dispose();
         }
@@ -51,6 +66,7 @@ namespace SharpGame
 
     public class Pass : IDisposable
     {
+        [IgnoreDataMember]
         public string Name { get; set; }
 
         public ShaderModule VertexShader { get; set; }

@@ -32,7 +32,7 @@ namespace SharpGame.Samples.ComputeParticles
         private DescriptorSet _graphicsDescriptorSet;
 
         private Pipeline _graphicsPipeline;
-        private Pass _pass;
+        private Shader _shader;
 
         private GraphicsBuffer _storageBuffer;
         private GraphicsBuffer _uniformBuffer;
@@ -67,11 +67,12 @@ namespace SharpGame.Samples.ComputeParticles
             _computeCmdBuffer = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             _computeFence = graphics_.CreateFence();
 
-            _pass = new Pass
-            (
-                "main",
-                new ShaderModule(ShaderStages.Vertex, "Shader.vert.spv"),
-                new ShaderModule(ShaderStages.Fragment, "Shader.frag.spv")
+            _shader = new Shader("Shader",
+                new Pass(
+                    "main",
+                    new ShaderModule(ShaderStages.Vertex, "Shader.vert.spv"),
+                    new ShaderModule(ShaderStages.Fragment, "Shader.frag.spv")
+                )
             );
             
             _computePass = new Pass("shader.comp.spv");
@@ -164,7 +165,7 @@ namespace SharpGame.Samples.ComputeParticles
         void Handle(BeginRenderPass e)
         {
             var cmdBuffer = e.commandBuffer;
-            var pipeline = _graphicsPipeline.GetGraphicsPipeline(e.renderPass, _pass, null);
+            var pipeline = _graphicsPipeline.GetGraphicsPipeline(e.renderPass, _shader, null);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet);
             cmdBuffer.CmdBindVertexBuffer(_storageBuffer);
