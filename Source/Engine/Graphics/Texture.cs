@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using VulkanCore;
 using Buffer = VulkanCore.Buffer;
 
@@ -22,10 +23,19 @@ namespace SharpGame
 
     public class Texture : Resource
     {
-        public Format Format { get; protected set; }
+        public Format Format { get; set; }
+
+        [IgnoreDataMember]
         public Image Image { get; protected set; }
+
+        [IgnoreDataMember]
         public ImageView View { get; protected set; }
+
+        [IgnoreDataMember]
         public DeviceMemory Memory { get; protected set; }
+
+        [IgnoreDataMember]
+        public Sampler Sampler { get; set; }
 
         public Texture()
         {
@@ -39,9 +49,9 @@ namespace SharpGame
             Format = format;
         }
 
-        private Texture(TextureData textureData)
+        public Texture(TextureData textureData)
         {
-            SetData(textureData);
+            SetTextureData(textureData);
         }
 
         public override void Dispose()
@@ -122,19 +132,20 @@ namespace SharpGame
                     //}
                 }
 
-                SetData(data);
+                SetTextureData(data);
+                Sampler = graphics.CreateSampler();
             }
         }
 
-        private void SetData(TextureData tex2D)
+        public void SetTextureData(TextureData tex2D)
         {
-            Graphics ctx = Get<Graphics>();
-            Buffer stagingBuffer = ctx.Device.CreateBuffer(
+            var graphics = Get<Graphics>();
+            Buffer stagingBuffer = graphics.Device.CreateBuffer(
                 new BufferCreateInfo(tex2D.Mipmaps[0].Size, BufferUsages.TransferSrc));
             MemoryRequirements stagingMemReq = stagingBuffer.GetMemoryRequirements();
-            int heapIndex = ctx.MemoryProperties.MemoryTypes.IndexOf(
+            int heapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
                 stagingMemReq.MemoryTypeBits, MemoryProperties.HostVisible);
-            DeviceMemory stagingMemory = ctx.Device.AllocateMemory(
+            DeviceMemory stagingMemory = graphics.Device.AllocateMemory(
                 new MemoryAllocateInfo(stagingMemReq.Size, heapIndex));
             stagingBuffer.BindMemory(stagingMemory);
 
@@ -160,7 +171,7 @@ namespace SharpGame
             }
 
             // Create optimal tiled target image.
-            var image = ctx.Device.CreateImage(new ImageCreateInfo
+            var image = graphics.Device.CreateImage(new ImageCreateInfo
             {
                 ImageType = ImageType.Image2D,
                 Format = tex2D.Format,
@@ -175,16 +186,16 @@ namespace SharpGame
             });
 
             MemoryRequirements imageMemReq = image.GetMemoryRequirements();
-            int imageHeapIndex = ctx.MemoryProperties.MemoryTypes.IndexOf(
+            int imageHeapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
                 imageMemReq.MemoryTypeBits, MemoryProperties.DeviceLocal);
 
-            var memory = ctx.Device.AllocateMemory(new MemoryAllocateInfo(imageMemReq.Size, imageHeapIndex));
+            var memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(imageMemReq.Size, imageHeapIndex));
             image.BindMemory(memory);
 
             var subresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, tex2D.Mipmaps.Length, 0, 1);
 
             // Copy the data from staging buffers to device local buffers.
-            CommandBuffer cmdBuffer = ctx.GraphicsCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
+            CommandBuffer cmdBuffer = graphics.GraphicsCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit));
             cmdBuffer.CmdPipelineBarrier(PipelineStages.TopOfPipe, PipelineStages.Transfer,
                 imageMemoryBarriers: new[]
@@ -206,8 +217,8 @@ namespace SharpGame
             cmdBuffer.End();
 
             // Submit.
-            Fence fence = ctx.Device.CreateFence();
-            ctx.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
+            Fence fence = graphics.Device.CreateFence();
+            graphics.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
             fence.Wait();
 
             // Cleanup staging resources.
@@ -245,7 +256,6 @@ namespace SharpGame
                 throw new InvalidOperationException("Required depth stencil format not supported.");
 
             Format format = potentialFormat.Value;
-
             Image image = graphics.Device.CreateImage(new ImageCreateInfo
             {
                 ImageType = ImageType.Image2D,
@@ -257,25 +267,26 @@ namespace SharpGame
                 Tiling = ImageTiling.Optimal,
                 Usage = ImageUsages.DepthStencilAttachment | ImageUsages.TransferSrc
             });
+
             MemoryRequirements memReq = image.GetMemoryRequirements();
+
             int heapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
                 memReq.MemoryTypeBits, MemoryProperties.DeviceLocal);
             DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(memReq.Size, heapIndex));
             image.BindMemory(memory);
+
             ImageView view = image.CreateView(new ImageViewCreateInfo(format,
                 new ImageSubresourceRange(ImageAspects.Depth | ImageAspects.Stencil, 0, 1, 0, 1)));
 
             return new Texture(image, memory, view, format);
         }
 
-        public static Texture Create2D(Graphics ctx, TextureData tex2D)
+        public static Texture Create2D(TextureData tex2D)
         {            
             return new Texture(tex2D);
         }
 
-
         // Ktx spec: https://www.khronos.org/opengles/sdk/tools/KTX/file_format_spec/
-
         private static readonly byte[] KtxIdentifier =
         {
             0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A

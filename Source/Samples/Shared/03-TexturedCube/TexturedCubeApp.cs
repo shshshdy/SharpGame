@@ -19,7 +19,6 @@ namespace SharpGame.Samples.TexturedCube
     public class TexturedCubeApp : Application
     {
         private Geometry geometry_;
-
         private Pipeline pipeline_;
         private Shader texturedShader_;
 
@@ -27,7 +26,6 @@ namespace SharpGame.Samples.TexturedCube
         private DescriptorPool _descriptorPool;
         private DescriptorSet _descriptorSet;        
 
-        private Sampler _sampler;
         private Texture _cubeTexture;
 
         private GraphicsBuffer _uniformBuffer;
@@ -60,20 +58,21 @@ namespace SharpGame.Samples.TexturedCube
             };
 
             geometry_.SetDrawRange(PrimitiveTopology.TriangleList, 0, cube.Indices.Length);
-            
-            _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx");
-            _sampler             = graphics_.CreateSampler();
-            _uniformBuffer       = GraphicsBuffer.DynamicUniform<WorldViewProjection>(1);
-            _descriptorSetLayout = CreateDescriptorSetLayout();
-            _descriptorPool      = CreateDescriptorPool();
-            _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
 
-            texturedShader_ = new Shader("Textured",                
+            texturedShader_ = new Shader("Textured",
                 new Pass("main",
                     new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
                     new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
                 )
             );
+
+            _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx");
+            _uniformBuffer       = GraphicsBuffer.DynamicUniform<WorldViewProjection>(1);
+
+            _descriptorSetLayout = CreateDescriptorSetLayout();
+            _descriptorPool      = CreateDescriptorPool();
+            _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
+
             
             pipeline_ = new Pipeline
             {                
@@ -214,7 +213,7 @@ namespace SharpGame.Samples.TexturedCube
                 new WriteDescriptorSet(descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
                     bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
                 new WriteDescriptorSet(descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
-                    imageInfo: new[] { new DescriptorImageInfo(_sampler, _cubeTexture.View, ImageLayout.General) })
+                    imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
             };
             _descriptorPool.UpdateSets(writeDescriptorSets);
             return descriptorSet;

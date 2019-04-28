@@ -7,7 +7,7 @@ namespace SharpGame
 {
     public class Model : Resource
     {
-        public List<Geometry> geometries_;
+        public List<List<Geometry>> geometries_ = new List<List<Geometry>>();
 
 
         public async override void Load(Stream stream)
