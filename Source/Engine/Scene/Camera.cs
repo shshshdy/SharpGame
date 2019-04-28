@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Camera : Object
+    public class Camera : Component
     {
     }
 }

@@ -18,7 +18,7 @@ namespace SharpGame
         public static ResourceCache Instance => Get<ResourceCache>();
 
         public static string ContentRoot { get; set; }
-        private readonly Dictionary<string, Resource> _cachedContent = new Dictionary<string, Resource>();
+        private readonly Dictionary<string, Resource> cachedContent_ = new Dictionary<string, Resource>();
 
         public ResourceCache(string contentRoot)
         {
@@ -37,40 +37,24 @@ namespace SharpGame
             return new StreamReader(stream);
         }
 
-        public T Load<T>(string contentName) where T : Resource
+        public T Load<T>(string contentName) where T : Resource, new()
         {
-            if (_cachedContent.TryGetValue(contentName, out Resource value))
+            if (cachedContent_.TryGetValue(contentName, out Resource value))
                 return (T)value;
 
-            string path = Path.Combine(ContentRoot, contentName);
-            string extension = Path.GetExtension(path);
+            Stream stream = Open(contentName);
+            var res = new T();
+            res.Load(stream);
+            cachedContent_.Add(contentName, res);
 
-            Graphics _ctx = Get<Graphics>();
-            Type type = typeof(T);
-            if (type == typeof(ShaderModule))
-            {
-                value = ShaderModule.Load(path);
-            }
-            else if (type == typeof(Texture))
-            {
-                if (extension.Equals(".ktx", StringComparison.OrdinalIgnoreCase))
-                {
-                    value = Texture.Load(path);
-                }
-            }
-
-            if (value == null)
-                throw new NotImplementedException("Content type or extension not implemented.");
-
-            _cachedContent.Add(contentName, value);
-            return (T)value;
+            return res;
         }
 
         public override void Dispose()
         {
-            foreach (IDisposable value in _cachedContent.Values)
+            foreach (IDisposable value in cachedContent_.Values)
                 value.Dispose();
-            _cachedContent.Clear();
+            cachedContent_.Clear();
         }
     }
 }

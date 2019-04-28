@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using VulkanCore;
 
 using Buffer = VulkanCore.Buffer;
@@ -7,18 +8,21 @@ namespace SharpGame
 {
     public class GraphicsBuffer : Object
     {
-        private GraphicsBuffer(Buffer buffer, DeviceMemory memory, int count)
+        public byte[] Data { get; set; }
+        public int Count { get; set; }
+        public int Stride { get; set; }
+        [IgnoreDataMember]
+        public int Size => Count * Stride;
+        internal Buffer Buffer { get; }
+        protected DeviceMemory Memory { get; }
+
+        private GraphicsBuffer(Buffer buffer, DeviceMemory memory, int stride, int count)
         {
             Buffer = buffer;
             Memory = memory;
+            Stride = stride;
             Count = count;
         }
-        
-        internal Buffer Buffer { get; }
-        protected DeviceMemory Memory { get; }
-        public int Count { get; set; }
-        public int Stride { get; set; }
-        public int Size => Count * Stride;
 
         public IntPtr Map(long offset, long size) => Memory.Map(offset, size);
         public void Unmap() => Memory.Unmap();
@@ -34,8 +38,8 @@ namespace SharpGame
         public static GraphicsBuffer DynamicUniform<T>(int count) where T : struct
         {
             var graphics = Get<Graphics>();
-
-            long size = Interop.SizeOf<T>() * count;
+            int stride = Interop.SizeOf<T>();
+            long size = stride * count;
 
             Buffer buffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.UniformBuffer));
             MemoryRequirements memoryRequirements = buffer.GetMemoryRequirements();
@@ -47,14 +51,15 @@ namespace SharpGame
             DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(memoryRequirements.Size, memoryTypeIndex));
             buffer.BindMemory(memory);
 
-            return graphics.ToDispose(new GraphicsBuffer(buffer, memory, count));
+            return graphics.ToDispose(new GraphicsBuffer(buffer, memory, stride, count));
         }
 
         public static GraphicsBuffer Index(int[] indices)
         {
             var graphics = Get<Graphics>();
 
-            long size = indices.Length * sizeof(int);
+            int stride = sizeof(int);
+            long size = indices.Length * stride;
 
             // Create staging buffer.
             Buffer stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
@@ -94,14 +99,14 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return new GraphicsBuffer(buffer, memory, indices.Length);
+            return new GraphicsBuffer(buffer, memory, stride, indices.Length);
         }
 
         public static GraphicsBuffer Vertex<T>(T[] vertices) where T : struct
         {
             var graphics = Get<Graphics>();
-
-            long size = vertices.Length * Interop.SizeOf<T>();
+            int stride = Interop.SizeOf<T>();
+            long size = vertices.Length * stride;
 
             // Create a staging buffer that is writable by host.
             Buffer stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
@@ -141,12 +146,14 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return new GraphicsBuffer(buffer, memory, vertices.Length);
+            return new GraphicsBuffer(buffer, memory, stride, vertices.Length);
         }
 
-        public static GraphicsBuffer Storage<T>(Graphics ctx, T[] data) where T : struct
+        public static GraphicsBuffer Storage<T>( T[] data) where T : struct
         {
-            long size = data.Length * Interop.SizeOf<T>();
+            Graphics ctx = Get<Graphics>();
+            int stride = Interop.SizeOf<T>();
+            long size = data.Length * stride;
 
             // Create a staging buffer that is writable by host.
             Buffer stagingBuffer = ctx.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
@@ -186,7 +193,7 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return ctx.ToDispose(new GraphicsBuffer(buffer, memory, data.Length));
+            return ctx.ToDispose(new GraphicsBuffer(buffer, memory, stride, data.Length));
         }
     }
 }

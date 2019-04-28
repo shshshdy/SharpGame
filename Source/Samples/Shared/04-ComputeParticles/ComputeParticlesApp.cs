@@ -226,7 +226,7 @@ namespace SharpGame.Samples.ComputeParticles
                 };
             }
 
-            return GraphicsBuffer.Storage(graphics_, particles);
+            return GraphicsBuffer.Storage(particles);
         }
 
         private DescriptorPool CreateDescriptorPool()
