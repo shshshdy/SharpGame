@@ -7,6 +7,9 @@ namespace SharpGame
 {
     public class Model : Resource
     {
+        public Graphics[] VertexBuffers { get; set; }
+        public Graphics[] IndexBuffers { get; set; }
+
         public List<List<Geometry>> geometries_ = new List<List<Geometry>>();
 
 

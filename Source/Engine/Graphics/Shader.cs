@@ -18,6 +18,8 @@ namespace SharpGame
 
         public Shader(string name, params Pass[] passes)
         {
+            Name = name;
+
             foreach(var pass in passes)
             {
                 AddPass(pass);
@@ -38,7 +40,6 @@ namespace SharpGame
 
             return null;
         }
-
 
         protected override void OnBuild()
         {
@@ -66,8 +67,9 @@ namespace SharpGame
 
     public class Pass : IDisposable
     {
+        private string name_;
         [IgnoreDataMember]
-        public string Name { get; set; }
+        public string Name { get => name_; set => name_ = string.Intern(value); }
 
         public ShaderModule VertexShader { get; set; }
         public ShaderModule GeometryShader { get; set; }
@@ -87,6 +89,11 @@ namespace SharpGame
         public bool IsComputeShader => ComputeShader != null;
         private bool builded_ = false;
 
+        public static readonly string shadow = string.Intern("shadow");
+        public static readonly string depth = string.Intern("depth");
+        public static readonly string clear = string.Intern("clear");
+        public static readonly string main = string.Intern("main");
+        
         public Pass()
         {            
         }

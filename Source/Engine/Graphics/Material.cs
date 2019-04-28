@@ -25,7 +25,14 @@ namespace SharpGame
 
     public class Material : Resource
     {
+        public string Name { get; set; }
+
         public Dictionary<string, MaterialParam> uniformData;
         public Dictionary<string, Texture> textureData;
+
+        public Material()
+        {
+            
+        }
     }
 }
