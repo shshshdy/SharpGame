@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using VulkanCore;
 
@@ -15,6 +16,10 @@ namespace SharpGame
         public int Size => Count * Stride;
         internal Buffer Buffer { get; }
         protected DeviceMemory Memory { get; }
+
+        public GraphicsBuffer()
+        {
+        }
 
         private GraphicsBuffer(Buffer buffer, DeviceMemory memory, int stride, int count)
         {
@@ -102,11 +107,18 @@ namespace SharpGame
             return new GraphicsBuffer(buffer, memory, stride, indices.Length);
         }
 
-        public static GraphicsBuffer Vertex<T>(T[] vertices) where T : struct
+        public unsafe static GraphicsBuffer Vertex<T>(T[] vertices) where T : struct
         {
             var graphics = Get<Graphics>();
             int stride = Interop.SizeOf<T>();
             long size = vertices.Length * stride;
+            return Vertex((IntPtr)Unsafe.AsPointer(ref vertices[0]), stride, vertices.Length);
+        }
+
+        public unsafe static GraphicsBuffer Vertex(IntPtr vertices, int stride, int len)
+        {
+            var graphics = Get<Graphics>();
+            long size = len * stride;
 
             // Create a staging buffer that is writable by host.
             Buffer stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
@@ -116,7 +128,8 @@ namespace SharpGame
                 MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
             DeviceMemory stagingMemory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
             IntPtr vertexPtr = stagingMemory.Map(0, stagingReq.Size);
-            Interop.Write(vertexPtr, vertices);
+            //Interop.Write(vertexPtr, vertices);
+            Unsafe.CopyBlock((void*)vertexPtr, (void*)vertices, (uint)size);
             stagingMemory.Unmap();
             stagingBuffer.BindMemory(stagingMemory);
 
@@ -146,7 +159,7 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return new GraphicsBuffer(buffer, memory, stride, vertices.Length);
+            return new GraphicsBuffer(buffer, memory, stride, len);
         }
 
         public static GraphicsBuffer Storage<T>( T[] data) where T : struct

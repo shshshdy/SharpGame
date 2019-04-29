@@ -185,6 +185,66 @@ namespace SharpGame
         const uint MASK_INSTANCEMATRIX2 = 0x1000;
         const uint MASK_INSTANCEMATRIX1 = 0x2000;
 
+        static PipelineVertexInputStateCreateInfo CreateVertexInputStateCreateInfo(uint mask)
+        {
+            List<VertexInputBindingDescription> vertexInputBinding = new List<VertexInputBindingDescription>();
+            List<VertexInputAttributeDescription> vertexInputAttributes = new List<VertexInputAttributeDescription>();
+            int stride = 0;
+            int location = 0;
+            if ((mask & MASK_POSITION) != 0)
+            {
+                vertexInputAttributes.Add(new VertexInputAttributeDescription(location, 0, Format.R32G32B32SFloat, stride));
+                stride += 12;
+                location++;
+            }
+            if ((mask & MASK_NORMAL) != 0)
+            {
+                vertexInputAttributes.Add(new VertexInputAttributeDescription(location, 0, Format.R32G32B32SFloat, stride));
+                stride += 12;
+                location++;
+            }
+            if ((mask & MASK_COLOR) != 0)
+            {
+                vertexInputAttributes.Add(new VertexInputAttributeDescription(location, 0, Format.R8G8B8A8UNorm, stride));
+                stride += 4;
+                location++;
+            }
+            if ((mask & MASK_TEXCOORD1) != 0)
+            {
+                vertexInputAttributes.Add(new VertexInputAttributeDescription(location, 0, Format.R32G32SFloat, stride));
+                stride += 8;
+                location++;
+            }
+            if ((mask & MASK_TEXCOORD2) != 0)
+            {
+                vertexInputAttributes.Add(new VertexInputAttributeDescription(location, 0, Format.R32G32SFloat, stride));
+                stride += 8;
+                location++;
+            }
+            if ((mask & MASK_TANGENT) != 0)
+            {
+                vertexInputAttributes.Add(new VertexInputAttributeDescription(location, 0, Format.R32G32B32A32SFloat, stride));
+                stride += 16;
+                location++;
+            }
+            if ((mask & MASK_BLENDWEIGHTS) != 0)
+            {
+                vertexInputAttributes.Add(new VertexInputAttributeDescription(location, 0, Format.R32G32B32A32SFloat, stride));
+                stride += 16;
+                location++;
+            }
+            if ((mask & MASK_BLENDINDICES) != 0)
+            {
+                vertexInputAttributes.Add(new VertexInputAttributeDescription(location, 0, Format.R8G8B8A8UInt, stride));
+                stride += 4;
+                location++;
+            }
+
+            vertexInputBinding.Add(new VertexInputBindingDescription(0, stride, VertexInputRate.Vertex));
+            //todo:
+            return new PipelineVertexInputStateCreateInfo(vertexInputBinding.ToArray(), vertexInputAttributes.ToArray());
+        }
+
         public async override Task<bool> Load(Stream source)
         {
             String fileID = source.ReadFileID();
@@ -214,7 +274,7 @@ namespace SharpGame
                 if (!hasVertexDeclarations)
                 {
                     uint elementMask = source.Read<uint>();
-                //todo    desc.layout = VertexLayout.FromElementMask(elementMask);
+                    loadVBData_[i].layout = CreateVertexInputStateCreateInfo(elementMask);
                 }
                 else
                 {
@@ -377,21 +437,21 @@ namespace SharpGame
             //MemoryUse = memoryUse;
             return true;
         }
-        /*
-        public override bool EndLoad()
+    
+        protected override void OnBuild()
         {
             // Upload vertex buffer data
             for (int i = 0; i < vertexBuffers_.Length; ++i)
             {
-                ref VertexBuffer buffer = ref vertexBuffers_[i];
+                ref GraphicsBuffer buffer = ref vertexBuffers_[i];
                 ref VertexBufferDesc desc = ref loadVBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = new VertexBuffer(BufferUsage.Static);
-                    buffer.Create(MemoryBlock.MakeRef(desc.data_), desc.layout);
+                    //buffer = new GraphicsBuffer();
+                    //buffer.Create(MemoryBlock.MakeRef(desc.data_), desc.layout);
                 }
             }
-
+            /*
             // Upload index buffer data
             for (int i = 0; i < indexBuffers_.Length; ++i)
             {
@@ -417,13 +477,12 @@ namespace SharpGame
                     geometry.SetPrimitive(desc.indexStart_, desc.indexCount_, 0, -1);
                 }
             }
-
+*/
             loadVBData_ = null;
             loadIBData_ = null;
             loadGeometries_ = null;
 
-            return true;
-        }*/
+        }
     }
 
 }
