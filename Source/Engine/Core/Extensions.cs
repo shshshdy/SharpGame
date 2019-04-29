@@ -48,7 +48,7 @@ namespace SharpGame
                 Array.Clear(arr, 0, arr.Length);
             }
         }
-
+        /*
         public static bool IsEof(this Stream stream)
         {
             return stream.Position >= stream.Length;
@@ -181,6 +181,6 @@ namespace SharpGame
             }
 
             return readSize;
-        }
+        }*/
     }
 }

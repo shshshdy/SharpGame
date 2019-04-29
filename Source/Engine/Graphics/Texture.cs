@@ -62,11 +62,11 @@ namespace SharpGame
             Image.Dispose();
         }
 
-        public async override Task<bool> Load(Stream stream)
+        public async override Task<bool> Load(File stream)
         {
             var graphics = Get<Graphics>();
             var fileSystem = Get<FileSystem>();
-            using (var reader = new BinaryReader(stream))
+            using (var reader = new BinaryReader(stream.Stream))
             {
                 byte[] identifier = reader.ReadBytes(12);
 

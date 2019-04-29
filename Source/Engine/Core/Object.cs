@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Object : Observer, IDisposable
+    public class Object : Observable, IDisposable
     {
         internal static Context _context;
 

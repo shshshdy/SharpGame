@@ -21,8 +21,9 @@ namespace SharpGame.Samples.ColoredTriangle
         private Shader testShader_;
 
         Node node_;
-        Node cameraNode_;
         Model model_;
+        Node cameraNode_;
+        Camera camera_;
 
 
 
@@ -56,7 +57,22 @@ namespace SharpGame.Samples.ColoredTriangle
             pipeline_ = new Pipeline
             {
                 //   FrontFace = FrontFace.CounterClockwise
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout })
+                CullMode = CullModes.None,
+                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout }),
+                           
+                VertexInputState = new PipelineVertexInputStateCreateInfo
+                (
+                    new[]
+                    {
+                        new VertexInputBindingDescription(0, Interop.SizeOf<Vertex>(), VertexInputRate.Vertex)
+                    },
+                    new[]
+                    {
+                        new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),  // Position.
+                        new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12), // Normal.
+                        new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
+                    }
+                )
             };
 
             node_ = new Node
@@ -69,10 +85,12 @@ namespace SharpGame.Samples.ColoredTriangle
                 Position = new Vector3(0, 0, -3)
             };
 
-            var cam = node_.AddComponent<Camera>();
             cameraNode_.LookAt(Vector3.Zero);
 
-            model_ = resourceCache_.Load<Model>("Models/Plane.mdl").Result;
+            camera_ = cameraNode_.AddComponent<Camera>();
+            camera_.AspectRatio = (float)graphics_.Platform.Width / graphics_.Platform.Height;
+
+             model_ = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
 
             geometry_ = GeometricPrimitive.Create(1.0f, 1.0f, 1.0f);
         }
@@ -92,11 +110,13 @@ namespace SharpGame.Samples.ColoredTriangle
             const float yawSpeed = twoPi / 4.0f;
             const float pitchSpeed = 0.0f;
             const float rollSpeed = twoPi / 4.0f;
-
+            /*
             _wvp.World = Matrix.RotationYawPitchRoll(
                 timer.TotalTime * yawSpeed % twoPi,
                 timer.TotalTime * pitchSpeed % twoPi,
-                timer.TotalTime * rollSpeed % twoPi);
+                timer.TotalTime * rollSpeed % twoPi);*/
+
+            _wvp.World = Matrix.Identity;
 
             SetViewProjection();
 
@@ -105,12 +125,8 @@ namespace SharpGame.Samples.ColoredTriangle
 
         private void SetViewProjection()
         {
-            const float cameraDistance = 2.5f;
-            _wvp.View = Matrix.LookAtLH(-Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
-            _wvp.Projection = Matrix.PerspectiveFovLH(
-            (float)System.Math.PI / 4,
-            (float)graphics_.Platform.Width / graphics_.Platform.Height,
-            1.0f, 1000.0f);
+            _wvp.View = camera_.View;
+            _wvp.Projection = camera_.Projection;
             _wvp.ViewProj = _wvp.View * _wvp.Projection;
             _wvp.WorldViewProj = _wvp.World * _wvp.View * _wvp.Projection;
         }
@@ -127,9 +143,6 @@ namespace SharpGame.Samples.ColoredTriangle
             var cmdBuffer = e.commandBuffer;
             var geo = model_.GetGeometry(0, 0);
             var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, testShader_, geo);
-            //cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
-            //cmdBuffer.CmdDraw(3);
-
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             geo.Draw(cmdBuffer);

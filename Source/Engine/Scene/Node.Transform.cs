@@ -25,8 +25,9 @@ namespace SharpGame
                 MarkDirty();
             }
         }
-        //[IgnoreDataMember]
-        //public ref Vector3 PositionRef => ref position_;
+
+        [IgnoreDataMember]
+        public ref Vector3 PositionRef => ref position_;
         protected Vector3 position_ = Vector3.Zero;
 
         [DataMember(Order = 9)]

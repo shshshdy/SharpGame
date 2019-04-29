@@ -26,15 +26,16 @@ namespace SharpGame
             ContentRoot = contentRoot;
         }
 
-        public Stream Open(string file)
+        public File Open(string file)
         {
             string filePath = Path.Combine(ContentRoot, file);
-            return FileSystem.Open(filePath);
+            return new File(FileSystem.Open(filePath));
         }
 
         public StreamReader OpenText(string file)
         {
-            var stream = Open(file);
+            string filePath = Path.Combine(ContentRoot, file);
+            var stream = FileSystem.Open(filePath);
             return new StreamReader(stream);
         }
 
@@ -43,7 +44,7 @@ namespace SharpGame
             if (cachedContent_.TryGetValue(contentName, out Resource value))
                 return (T)value;
 
-            Stream stream = Open(contentName);
+            File stream = Open(contentName);
 
             var res = new T();
 

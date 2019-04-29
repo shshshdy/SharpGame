@@ -246,7 +246,7 @@ namespace SharpGame
             return new PipelineVertexInputStateCreateInfo(vertexInputBinding.ToArray(), vertexInputAttributes.ToArray());
         }
 
-        public async override Task<bool> Load(Stream source)
+        public async override Task<bool> Load(File source)
         {
             String fileID = source.ReadFileID();
             if (fileID != "UMDL" && fileID != "UMD2")
@@ -430,7 +430,7 @@ namespace SharpGame
             boundingBox_ = source.Read<BoundingBox>();
 
             // Read geometry centers
-            for (int i = 0; i < geometries_.Length && !source.IsEof(); ++i)
+            for (int i = 0; i < geometries_.Length && !source.IsEof; ++i)
                 GeometryCenters.Add(source.Read<Vector3>());
             while (GeometryCenters.Count < geometries_.Length)
                 GeometryCenters.Add(Vector3.Zero);

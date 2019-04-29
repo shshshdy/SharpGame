@@ -99,11 +99,11 @@ namespace SharpGame
             return null;
         }
 
-        public bool Load(Stream source)
+        public bool Load(File source)
         {
             ClearBones();
 
-            if (source.IsEof())
+            if (source.IsEof)
                 return false;
 
             uint bones = source.Read<uint>();

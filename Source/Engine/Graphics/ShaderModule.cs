@@ -57,10 +57,9 @@ namespace SharpGame
             FuncName = funcName;
             shaderModule = null;
 
-            var fileSystem = Get<FileSystem>();
-
-            string path = Path.Combine(ResourceCache.ContentRoot, FileName);
-            using (Stream stream = fileSystem.Open(path))
+            var res = Get<ResourceCache>();
+            
+            using (File stream = res.Open(fileName))
             {
                 Code = stream.ReadAllBytes();
             }
@@ -68,7 +67,7 @@ namespace SharpGame
             Build();
         }
         
-        public async override Task<bool> Load(Stream stream)
+        public async override Task<bool> Load(File stream)
         {
             var graphics = Get<Graphics>();
             Code = stream.ReadAllBytes();
@@ -86,7 +85,7 @@ namespace SharpGame
 
             if (Code == null)
             {
-                using (Stream stream = resourceCache.Open(FileName))
+                using (File stream = resourceCache.Open(FileName))
                 {
                     Code = stream.ReadAllBytes();
                 }
