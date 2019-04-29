@@ -4,7 +4,6 @@ using VulkanCore;
 
 namespace SharpGame
 {
-
     public class GeometricPrimitive
     {
         public PosNormTex[] Vertices { get; }
@@ -16,7 +15,7 @@ namespace SharpGame
             Indices = indices;
         }
 
-        public static Geometry Create(float width, float height, float depth)
+        public static Geometry CreateCube(float width, float height, float depth)
         {
             float w2 = 0.5f * width;
             float h2 = 0.5f * height;

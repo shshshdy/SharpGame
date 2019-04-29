@@ -38,7 +38,7 @@ namespace SharpGame.Samples.TexturedCube
         {
             SubscribeToEvent<BeginRenderPass>(Handle);
 
-            geometry_ = GeometricPrimitive.Create(1.0f, 1.0f, 1.0f);
+            geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
 
             texturedShader_ = new Shader
             {
@@ -51,13 +51,15 @@ namespace SharpGame.Samples.TexturedCube
 
             _descriptorSetLayout = CreateDescriptorSetLayout();
             _descriptorPool      = CreateDescriptorPool();
-            _descriptorSet       = CreateDescriptorSet(); 
+            _descriptorSet       = CreateDescriptorSet();
 
-            
+
             pipeline_ = new Pipeline
-            { 
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout })
+            {
+                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout }),
+                VertexInputState = PosNormTex.Layout
             };
+
             /*
             JsonSerializer.SetDefaultResolver(StandardResolver.ExcludeNullSnakeCase);
             {

@@ -64,7 +64,7 @@ namespace SharpGame.Samples.ColoredTriangle
                 (
                     new[]
                     {
-                        new VertexInputBindingDescription(0, Interop.SizeOf<Vertex>(), VertexInputRate.Vertex)
+                        new VertexInputBindingDescription(0, Interop.SizeOf<PosNormTex>(), VertexInputRate.Vertex)
                     },
                     new[]
                     {
@@ -90,9 +90,9 @@ namespace SharpGame.Samples.ColoredTriangle
             camera_ = cameraNode_.AddComponent<Camera>();
             camera_.AspectRatio = (float)graphics_.Platform.Width / graphics_.Platform.Height;
 
-             model_ = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
-
-            geometry_ = GeometricPrimitive.Create(1.0f, 1.0f, 1.0f);
+            model_ = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
+           // geometry_ = model_.GetGeometry(0, 0);
+            geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
         }
 
         public override void Dispose()
@@ -141,11 +141,10 @@ namespace SharpGame.Samples.ColoredTriangle
         void Handle(BeginRenderPass e)
         {
             var cmdBuffer = e.commandBuffer;
-            var geo = model_.GetGeometry(0, 0);
-            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, testShader_, geo);
+            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, testShader_, geometry_);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
-            geo.Draw(cmdBuffer);
+            geometry_.Draw(cmdBuffer);
         }
 
 
