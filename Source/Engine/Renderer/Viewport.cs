@@ -11,5 +11,9 @@ namespace SharpGame
         public Camera camera;
         public RenderPath renderPath;
         public View view;
+        public Viewport()
+        {
+            view = new View();
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using VulkanCore;
 
 
@@ -37,14 +38,14 @@ namespace SharpGame
             return new StreamReader(stream);
         }
 
-        public T Load<T>(string contentName) where T : Resource, new()
+        public async Task<T> Load<T>(string contentName) where T : Resource, new()
         {
             if (cachedContent_.TryGetValue(contentName, out Resource value))
                 return (T)value;
 
             Stream stream = Open(contentName);
             var res = new T();
-            res.Load(stream);
+            await res.Load(stream);
             cachedContent_.Add(contentName, res);
 
             return res;

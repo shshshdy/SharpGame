@@ -26,6 +26,10 @@ namespace SharpGame
         public Semaphore ImageAvailableSemaphore { get; private set; }
         public Semaphore RenderingFinishedSemaphore { get; private set; }
 
+        public Texture DepthStencilBuffer => depthStencilBuffer_;
+        private Texture depthStencilBuffer_;
+
+        public bool LeftHand { get; set; } = true;
 
         public Graphics(IPlatform host)
         {
@@ -74,7 +78,6 @@ namespace SharpGame
 
             renderThreadID_ = System.Threading.Thread.CurrentThread.ManagedThreadId;
 
-
         }
 
 
@@ -108,7 +111,6 @@ namespace SharpGame
             }
             return disposable;
         }
-
 
         public override void Dispose()
         {
@@ -159,6 +161,9 @@ namespace SharpGame
             Swapchain = ToDisposeFrame(CreateSwapchain());
             SwapchainImages = Swapchain.GetImages();
             SwapchainImageViews = ToDisposeFrame(CreateImageViews());
+
+            depthStencilBuffer_ = CreateDepthStencil(Width, Height);
+
         }
 
         private ImageView[] CreateImageViews()
@@ -172,6 +177,53 @@ namespace SharpGame
             }
 
             return imageViews;
+        }
+
+        public Texture CreateDepthStencil(int width, int height)
+        {
+            Format[] validFormats =
+            {
+                Format.D32SFloatS8UInt,
+                Format.D32SFloat,
+                Format.D24UNormS8UInt,
+                Format.D16UNormS8UInt,
+                Format.D16UNorm
+            };
+
+            Format? potentialFormat = validFormats.FirstOrDefault(
+                validFormat =>
+                {
+                    FormatProperties formatProps = PhysicalDevice.GetFormatProperties(validFormat);
+                    return (formatProps.OptimalTilingFeatures & FormatFeatures.DepthStencilAttachment) > 0;
+                });
+
+            if (!potentialFormat.HasValue)
+                throw new InvalidOperationException("Required depth stencil format not supported.");
+
+            Format format = potentialFormat.Value;
+            Image image = Device.CreateImage(new ImageCreateInfo
+            {
+                ImageType = ImageType.Image2D,
+                Format = format,
+                Extent = new Extent3D(width, height, 1),
+                MipLevels = 1,
+                ArrayLayers = 1,
+                Samples = SampleCounts.Count1,
+                Tiling = ImageTiling.Optimal,
+                Usage = ImageUsages.DepthStencilAttachment | ImageUsages.TransferSrc
+            });
+
+            MemoryRequirements memReq = image.GetMemoryRequirements();
+
+            int heapIndex = MemoryProperties.MemoryTypes.IndexOf(
+                memReq.MemoryTypeBits, VulkanCore.MemoryProperties.DeviceLocal);
+            DeviceMemory memory = Device.AllocateMemory(new MemoryAllocateInfo(memReq.Size, heapIndex));
+            image.BindMemory(memory);
+
+            ImageView view = image.CreateView(new ImageViewCreateInfo(format,
+                new ImageSubresourceRange(ImageAspects.Depth | ImageAspects.Stencil, 0, 1, 0, 1)));
+
+            return ToDisposeFrame(new Texture(image, memory, view, format));
         }
 
         public Sampler CreateSampler()
@@ -226,7 +278,10 @@ namespace SharpGame
             ComputeCommandPool.Reset();
             SecondaryCommandPool[0].Reset();
             SecondaryCommandPool[1].Reset();
+
             CreateSwapchainImages();
+
+            depthStencilBuffer_ = CreateDepthStencil(Width, Height);
 
             GPUObject.RecreateAll();
         }

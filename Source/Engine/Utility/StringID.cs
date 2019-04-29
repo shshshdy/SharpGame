@@ -19,6 +19,8 @@ namespace SharpGame
             InternID = string.Intern(id);
         }
 
+        public bool IsNullOrEmpty => string.IsNullOrEmpty(InternID);
+
         public static implicit operator StringID(string value)
         {
             return new StringID(value);

@@ -120,6 +120,7 @@ namespace SharpGame
         {
             /// Vertex count.
             public int vertexCount_;
+            public int vertexSize_;
             /// Vertex declaration.
             //public List<VertexElement> vertexElements_;
             public PipelineVertexInputStateCreateInfo layout;
@@ -185,11 +186,11 @@ namespace SharpGame
         const uint MASK_INSTANCEMATRIX2 = 0x1000;
         const uint MASK_INSTANCEMATRIX1 = 0x2000;
 
-        static PipelineVertexInputStateCreateInfo CreateVertexInputStateCreateInfo(uint mask)
+        static PipelineVertexInputStateCreateInfo CreateVertexInputStateCreateInfo(uint mask, out int stride)
         {
             List<VertexInputBindingDescription> vertexInputBinding = new List<VertexInputBindingDescription>();
             List<VertexInputAttributeDescription> vertexInputAttributes = new List<VertexInputAttributeDescription>();
-            int stride = 0;
+            stride = 0;
             int location = 0;
             if ((mask & MASK_POSITION) != 0)
             {
@@ -271,10 +272,11 @@ namespace SharpGame
             {
                 //ref VertexBufferDesc desc = ref loadVBData_[i];
                 loadVBData_[i].vertexCount_ = source.Read<int>();
+                int vertexSize = 0;
                 if (!hasVertexDeclarations)
                 {
                     uint elementMask = source.Read<uint>();
-                    loadVBData_[i].layout = CreateVertexInputStateCreateInfo(elementMask);
+                    loadVBData_[i].layout = CreateVertexInputStateCreateInfo(elementMask, out vertexSize);
                 }
                 else
                 {
@@ -283,8 +285,7 @@ namespace SharpGame
 
                 morphRangeStarts_[i] = source.Read<int>();
                 morphRangeCounts_[i] = source.Read<int>();
-
-                int vertexSize = 0;// desc.layout.Stride;
+                loadVBData_[i].vertexSize_ = vertexSize;
                 loadVBData_[i].dataSize_ = loadVBData_[i].vertexCount_ * vertexSize;
                 loadVBData_[i].data_ = source.ReadArray<byte>(loadVBData_[i].dataSize_);
             }
@@ -447,20 +448,18 @@ namespace SharpGame
                 ref VertexBufferDesc desc = ref loadVBData_[i];
                 if (desc.data_ != null)
                 {
-                    //buffer = new GraphicsBuffer();
-                    //buffer.Create(MemoryBlock.MakeRef(desc.data_), desc.layout);
+                    buffer = GraphicsBuffer.Vertex(Utilities.AsPointer(ref desc.data_[0]), desc.vertexSize_, desc.vertexCount_);
                 }
             }
-            /*
+           
             // Upload index buffer data
             for (int i = 0; i < indexBuffers_.Length; ++i)
             {
-                ref IndexBuffer buffer = ref indexBuffers_[i];
+                ref GraphicsBuffer buffer = ref indexBuffers_[i];
                 ref IndexBufferDesc desc = ref loadIBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = new IndexBuffer(BufferUsage.Static);
-                    buffer.Create(MemoryBlock.MakeRef(desc.data_));
+                    buffer = GraphicsBuffer.Index(Utilities.AsPointer(ref desc.data_[0]), desc.indexSize_, desc.indexCount_);
                 }
             }
 
@@ -472,12 +471,12 @@ namespace SharpGame
                     Geometry geometry = geometries_[i][j];
                     ref GeometryDesc desc = ref loadGeometries_[i][j];
                     geometry.VertexBuffers[0] = vertexBuffers_[desc.vbRef_];
+                    geometry.VertexInputState = loadVBData_[desc.vbRef_].layout;
                     geometry.IndexBuffer = indexBuffers_[desc.ibRef_];
-                    geometry.PrimitiveType = desc.type_;
-                    geometry.SetPrimitive(desc.indexStart_, desc.indexCount_, 0, -1);
+                    geometry.SetDrawRange(desc.type_, desc.indexStart_, desc.indexCount_, 0, -1);
                 }
             }
-*/
+
             loadVBData_ = null;
             loadIBData_ = null;
             loadGeometries_ = null;

@@ -5,18 +5,28 @@ using VulkanCore;
 
 namespace SharpGame
 {
+    public enum BlendMode
+    {
+        Replace = 0,
+        Add,
+        MultiplY,
+        Alpha,
+        AddAlpha,
+        PremulAlpha,
+        InvdestAlpha,
+        Subtract,
+        SubtractAlpha,
+    }
+
     public class Pipeline : GPUObject
     {
-        public PipelineRasterizationStateCreateInfo RasterizationState { get; set; }
-        public PipelineMultisampleStateCreateInfo MultisampleState { get; set; } = new PipelineMultisampleStateCreateInfo
-        {
-            RasterizationSamples = SampleCounts.Count1,
-            MinSampleShading = 1.0f
-        };
+        private PipelineRasterizationStateCreateInfo rasterizationState_;
+        public PipelineRasterizationStateCreateInfo RasterizationState { get => rasterizationState_; set => rasterizationState_ = value; }
 
+        public PipelineMultisampleStateCreateInfo MultisampleState { get; set; }
+        PipelineDepthStencilStateCreateInfo depthStencilState_;
+        public PipelineDepthStencilStateCreateInfo DepthStencilState { get => depthStencilState_; set => depthStencilState_ = value; }
         public PipelineColorBlendStateCreateInfo ColorBlendState { get; set; }
-        public PipelineDepthStencilStateCreateInfo DepthStencilState { get; set; }
-
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
 
         public PipelineVertexInputStateCreateInfo VertexInputState { get; set; }
@@ -25,14 +35,24 @@ namespace SharpGame
 
         public PipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
 
+        public PolygonMode FillMode { get => rasterizationState_.PolygonMode; set => rasterizationState_.PolygonMode = value; }
+        public CullModes CullMode { get => rasterizationState_.CullMode; set => rasterizationState_.CullMode = value; }
+        public FrontFace FrontFace { get => rasterizationState_.FrontFace; set => rasterizationState_.FrontFace = value; }
+
+        public bool DepthTestEnable { get => depthStencilState_.DepthTestEnable; set => depthStencilState_.DepthTestEnable = value; }
+        public bool DepthWriteEnable { get => depthStencilState_.DepthWriteEnable; set => depthStencilState_.DepthWriteEnable = value; }
+        public BlendMode BlendMode { get; set; }
+
         public PipelineLayout pipelineLayout;
+
         public VulkanCore.Pipeline pipeline;
 
         public Pipeline()
         {
+            Init();
         }
         
-        public void SetDefault()
+        public void Init()
         {
             VertexInputState = new PipelineVertexInputStateCreateInfo();
 
@@ -40,7 +60,7 @@ namespace SharpGame
             {
                 PolygonMode = PolygonMode.Fill,
                 CullMode = CullModes.Back,
-                FrontFace = FrontFace.CounterClockwise,
+                FrontFace = FrontFace.Clockwise,
                 LineWidth = 1.0f
             };
 

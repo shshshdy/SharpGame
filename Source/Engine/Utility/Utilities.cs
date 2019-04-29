@@ -19,6 +19,14 @@ namespace SharpGame
             return array == null ? 0 : array.Length * Unsafe.SizeOf<T>();
         }
 
+        public static IntPtr AsPointer<T>(ref T source) where T : struct
+        {
+            unsafe
+            {
+                return (IntPtr)Unsafe.AsPointer(ref source);
+            }
+        }
+
         /// <summary>
         /// Pins the specified source and call an action with the pinned pointer.
         /// </summary>

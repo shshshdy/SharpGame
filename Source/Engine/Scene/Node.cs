@@ -384,6 +384,13 @@ namespace SharpGame
             return null;
         }
 
+        public T AddComponent<T>() where T : Component, new()
+        {
+            var c = new T();
+            AddComponent(c);
+            return c;
+        }
+
         public void AddComponent(Component component)
         {
             components_.Add(component);

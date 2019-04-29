@@ -66,7 +66,7 @@ namespace SharpGame
         /// <summary>
         /// A <see cref="Vector3"/> with all of its components set to zero.
         /// </summary>
-        public static readonly Vector3 Zero = new Vector3();
+        public static readonly Vector3 Zero = new Vector3(0, 0, 0);
 
         /// <summary>
         /// The X unit <see cref="Vector3"/> (1, 0, 0).

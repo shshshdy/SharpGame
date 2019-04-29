@@ -65,7 +65,22 @@ namespace SharpGame
 
             int stride = sizeof(int);
             long size = indices.Length * stride;
+            return Index(Utilities.AsPointer(ref indices[0]), stride, indices.Length);
+        }
 
+        public static GraphicsBuffer Index(short[] indices)
+        {
+            var graphics = Get<Graphics>();
+
+            int stride = sizeof(short);
+            long size = indices.Length * stride;
+            return Index(Utilities.AsPointer(ref indices[0]), stride, indices.Length);
+        }
+
+        public unsafe static GraphicsBuffer Index(IntPtr indices, int stride, int count)
+        {
+            var graphics = Get<Graphics>();
+            long size = count * stride;
             // Create staging buffer.
             Buffer stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
             MemoryRequirements stagingReq = stagingBuffer.GetMemoryRequirements();
@@ -74,7 +89,7 @@ namespace SharpGame
                 MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
             DeviceMemory stagingMemory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
             IntPtr indexPtr = stagingMemory.Map(0, stagingReq.Size);
-            Interop.Write(indexPtr, indices);
+            //Interop.Write(indexPtr, indices);
             stagingMemory.Unmap();
             stagingBuffer.BindMemory(stagingMemory);
 
@@ -104,7 +119,7 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return new GraphicsBuffer(buffer, memory, stride, indices.Length);
+            return new GraphicsBuffer(buffer, memory, stride, count);
         }
 
         public unsafe static GraphicsBuffer Vertex<T>(T[] vertices) where T : struct
@@ -115,10 +130,10 @@ namespace SharpGame
             return Vertex((IntPtr)Unsafe.AsPointer(ref vertices[0]), stride, vertices.Length);
         }
 
-        public unsafe static GraphicsBuffer Vertex(IntPtr vertices, int stride, int len)
+        public unsafe static GraphicsBuffer Vertex(IntPtr vertices, int stride, int count)
         {
             var graphics = Get<Graphics>();
-            long size = len * stride;
+            long size = count * stride;
 
             // Create a staging buffer that is writable by host.
             Buffer stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
@@ -159,7 +174,7 @@ namespace SharpGame
             stagingBuffer.Dispose();
             stagingMemory.Dispose();
 
-            return new GraphicsBuffer(buffer, memory, stride, len);
+            return new GraphicsBuffer(buffer, memory, stride, count);
         }
 
         public static GraphicsBuffer Storage<T>( T[] data) where T : struct

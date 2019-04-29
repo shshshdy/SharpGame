@@ -63,7 +63,7 @@ namespace SharpGame
             timer_ = CreateSubsystem<Timer>();
             fileSystem_ = CreateSubsystem<FileSystem>(platform_);            
             graphics_ = CreateSubsystem<Graphics>(platform_);
-            resourceCache_ = CreateSubsystem<ResourceCache>("Content");
+            resourceCache_ = CreateSubsystem<ResourceCache>("../Content");
             renderer_ = CreateSubsystem<Renderer>();
             renderer_.Inialize();
         }
@@ -79,7 +79,7 @@ namespace SharpGame
         public void Resize()
         {
             graphics_.Resize();
-
+            renderer_.Recreate();
             SendGlobalEvent(new Resizing());
         }
 

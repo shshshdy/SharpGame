@@ -16,8 +16,6 @@ namespace SharpGame
 
         private List<Viewport> viewports_ = new List<Viewport>();
 
-        public Texture DepthStencilBuffer => depthStencilBuffer_;
-        private Texture depthStencilBuffer_;
 
         private RenderPath defaultRenderPath_;
 
@@ -29,15 +27,17 @@ namespace SharpGame
 
         public void Inialize()
         {
-            depthStencilBuffer_ = Graphics.ToDisposeFrame(Texture.CreateDepthStencil(Graphics.Width, Graphics.Height));
-
             defaultRenderPath_ = new RenderPath(
                 new ScenePass()
             );
 
             MainViewport = CreateViewport();
         }
-        
+
+        public void Recreate()
+        {
+        }
+
         public Viewport CreateViewport()
         {
             var view = new Viewport();

@@ -9,26 +9,49 @@ namespace SharpGame
 {
     public class Shader : Resource
     {
-        public string Name { get; set; }
-        public Dictionary<string, Pass> Passes { get; set; } = new Dictionary<string, Pass>();
+        public StringID Name { get; set; }
+        public Dictionary<StringID, Pass> Passes { get; set; } = new Dictionary<StringID, Pass>();
 
         public Shader()
         {
         }
 
-        public Shader(string name, params Pass[] passes)
+        public Shader(string name, Pass pass)
         {
             Name = name;
 
-            foreach(var pass in passes)
-            {
-                AddPass(pass);
-            }
+            AddPass(pass);
         }
 
         public void AddPass(Pass pass)
         {
+            if(pass.Name.IsNullOrEmpty)
+            {
+                pass.Name = Pass.main;
+            }
+
             Passes.Add(pass.Name, pass);
+        }
+
+        public Pass this[StringID pass]
+        {
+            get
+            {
+                return Passes[pass];
+            }
+
+            set
+            {
+                Passes[pass] = value;
+            }
+        }
+
+        public Pass Main
+        {
+            get
+            {
+                return GetPass(Pass.main);
+            }
         }
 
         public Pass GetPass(string name)
@@ -67,9 +90,9 @@ namespace SharpGame
 
     public class Pass : IDisposable
     {
-        private string name_;
+        private StringID name_;
         [IgnoreDataMember]
-        public string Name { get => name_; set => name_ = string.Intern(value); }
+        public StringID Name { get => name_; set => name_ = value; }
 
         public ShaderModule VertexShader { get; set; }
         public ShaderModule GeometryShader { get; set; }
@@ -89,35 +112,44 @@ namespace SharpGame
         public bool IsComputeShader => ComputeShader != null;
         private bool builded_ = false;
 
-        public static readonly string shadow = string.Intern("shadow");
-        public static readonly string depth = string.Intern("depth");
-        public static readonly string clear = string.Intern("clear");
-        public static readonly string main = string.Intern("main");
+        public static readonly StringID shadow = "shadow";
+        public static readonly StringID depth = "depth";
+        public static readonly StringID clear = "clear";
+        public static readonly StringID main = "main";
         
         public Pass()
         {            
         }
 
-        public Pass(string fileName, string funcName = "main")
+        public Pass(string vertexShader, string pixelShader, string geometryShader = null,
+            string hullShader = null, string domainShader = null, string computeShader = null)
         {
-            ComputeShader = new ShaderModule(ShaderStages.Compute, fileName, funcName);
+            VertexShader = new ShaderModule(ShaderStages.Vertex, vertexShader);
+            PixelShader = new ShaderModule(ShaderStages.Fragment, pixelShader);
+
+            if (!string.IsNullOrEmpty(geometryShader))
+            {
+                GeometryShader = new ShaderModule(ShaderStages.Geometry, geometryShader);
+            }
+
+            if (!string.IsNullOrEmpty(hullShader))
+            {
+                HullShader = new ShaderModule(ShaderStages.TessellationControl, hullShader);
+            }
+
+            if (!string.IsNullOrEmpty(domainShader))
+            {
+                DomainShader = new ShaderModule(ShaderStages.TessellationEvaluation, domainShader);
+            }
+
+            if (!string.IsNullOrEmpty(computeShader))
+            {
+                ComputeShader = new ShaderModule(ShaderStages.Compute, computeShader);
+            }
+
             Build();
         }
-
-        public Pass(string name, ShaderModule vertexShader, ShaderModule pixelShader, ShaderModule geometryShader = null,
-            ShaderModule hullShader = null, ShaderModule domainShader = null, ShaderModule computeShader = null)
-        {
-            Name = name;
-            VertexShader = vertexShader;
-            PixelShader = pixelShader;
-            GeometryShader = geometryShader;
-            HullShader = hullShader;
-            DomainShader = domainShader;
-            ComputeShader = computeShader;
-
-            Build();
-        }
-
+        
         public Pass(string name, params ShaderModule[] shaderModules)
         {
             foreach(var sm in shaderModules)
@@ -161,6 +193,11 @@ namespace SharpGame
 
         public void Build()
         {
+            if(builded_)
+            {
+                return;
+            }
+
             builded_ = true;
 
             VertexShader?.Build();

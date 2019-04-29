@@ -53,10 +53,10 @@ namespace SharpGame.Samples.ComputeParticles
 
             SubscribeToEvent<BeginRenderPass>(Handle);
 
-            _descriptorPool = ToDispose(CreateDescriptorPool());
+            _descriptorPool = CreateDescriptorPool();
 
             _sampler = graphics_.CreateSampler();
-            _particleDiffuseMap = resourceCache_.Load<Texture>("ParticleDiffuse.ktx");
+            _particleDiffuseMap = resourceCache_.Load<Texture>("ParticleDiffuse.ktx").Result;
             _graphicsDescriptorSetLayout = CreateGraphicsDescriptorSetLayout();
             _graphicsDescriptorSet = CreateGraphicsDescriptorSet();
 
@@ -67,13 +67,11 @@ namespace SharpGame.Samples.ComputeParticles
             _computeCmdBuffer = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             _computeFence = graphics_.CreateFence();
 
-            _shader = new Shader("Shader",
-                new Pass(
-                    "main",
-                    new ShaderModule(ShaderStages.Vertex, "Shader.vert.spv"),
-                    new ShaderModule(ShaderStages.Fragment, "Shader.frag.spv")
-                )
-            );
+            _shader = new Shader
+            {
+                Name = "Shader",
+                ["main"] = new Pass("Shader.vert.spv", "Shader.frag.spv")
+            };
             
             _computePass = new Pass("shader.comp.spv");
 
@@ -97,19 +95,7 @@ namespace SharpGame.Samples.ComputeParticles
                     }
                 ),
 
-                RasterizationState = new PipelineRasterizationStateCreateInfo
-                {
-                    PolygonMode = PolygonMode.Fill,
-                    CullMode = CullModes.None,
-                    FrontFace = FrontFace.CounterClockwise,
-                    LineWidth = 1.0f
-                },
-
-                MultisampleState = new PipelineMultisampleStateCreateInfo
-                {
-                    RasterizationSamples = SampleCounts.Count1,
-                    MinSampleShading = 1.0f
-                },
+                CullMode = CullModes.None,
 
                 DepthStencilState = new PipelineDepthStencilStateCreateInfo(),
 
@@ -160,7 +146,6 @@ namespace SharpGame.Samples.ComputeParticles
             _computeFence.Wait();
             _computeFence.Reset();            
         }
-
 
         void Handle(BeginRenderPass e)
         {
@@ -251,7 +236,7 @@ namespace SharpGame.Samples.ComputeParticles
             {
                 // Particle diffuse map.
                 new WriteDescriptorSet(descriptorSet, 0, 0, 1, DescriptorType.CombinedImageSampler,
-                    new[] { new DescriptorImageInfo(_sampler, _particleDiffuseMap.View, ImageLayout.ColorAttachmentOptimal) })
+                    new[] { new DescriptorImageInfo(_sampler, _particleDiffuseMap.View, ImageLayout.General/*ColorAttachmentOptimal*/) })
             });
             return descriptorSet;
         }

@@ -42,7 +42,7 @@ namespace SharpGame
         {
         }
 
-        private Texture(Image image, DeviceMemory memory, ImageView view, Format format)
+        internal Texture(Image image, DeviceMemory memory, ImageView view, Format format)
         {
             Image = image;
             Memory = memory;
@@ -235,54 +235,6 @@ namespace SharpGame
             Format = tex2D.Format;
         }
 
-        public static Texture CreateDepthStencil(int width, int height)
-        {
-            var graphics = Get<Graphics>();
-
-            Format[] validFormats =
-            {
-                Format.D32SFloatS8UInt,
-                Format.D32SFloat,
-                Format.D24UNormS8UInt,
-                Format.D16UNormS8UInt,
-                Format.D16UNorm
-            };
-
-            Format? potentialFormat = validFormats.FirstOrDefault(
-                validFormat =>
-                {
-                    FormatProperties formatProps = graphics.PhysicalDevice.GetFormatProperties(validFormat);
-                    return (formatProps.OptimalTilingFeatures & FormatFeatures.DepthStencilAttachment) > 0;
-                });
-
-            if (!potentialFormat.HasValue)
-                throw new InvalidOperationException("Required depth stencil format not supported.");
-
-            Format format = potentialFormat.Value;
-            Image image = graphics.Device.CreateImage(new ImageCreateInfo
-            {
-                ImageType = ImageType.Image2D,
-                Format = format,
-                Extent = new Extent3D(width, height, 1),
-                MipLevels = 1,
-                ArrayLayers = 1,
-                Samples = SampleCounts.Count1,
-                Tiling = ImageTiling.Optimal,
-                Usage = ImageUsages.DepthStencilAttachment | ImageUsages.TransferSrc
-            });
-
-            MemoryRequirements memReq = image.GetMemoryRequirements();
-
-            int heapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
-                memReq.MemoryTypeBits, MemoryProperties.DeviceLocal);
-            DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(memReq.Size, heapIndex));
-            image.BindMemory(memory);
-
-            ImageView view = image.CreateView(new ImageViewCreateInfo(format,
-                new ImageSubresourceRange(ImageAspects.Depth | ImageAspects.Stencil, 0, 1, 0, 1)));
-
-            return new Texture(image, memory, view, format);
-        }
 
         public static Texture Create2D(TextureData tex2D)
         {            

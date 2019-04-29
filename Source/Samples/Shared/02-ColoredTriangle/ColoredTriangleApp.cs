@@ -8,68 +8,38 @@ namespace SharpGame.Samples.ColoredTriangle
         private Pipeline pipeline_;
         private Shader testShader_;
 
+        Node node_;
+        Node cameraNode_;
+
         protected override void OnInit()
         {
             SubscribeToEvent<BeginRenderPass>(Handle);
 
-            testShader_ = new Shader("Test",
-                new Pass(
-                    "main",
-                    new ShaderModule(ShaderStages.Vertex, "Test.vert.spv"),
-                    new ShaderModule(ShaderStages.Fragment, "Test.frag.spv")
-                )
-            );
-
+            testShader_ = new Shader
+            {
+                Name = "Test",
+                ["main"] = new Pass("Test.vert.spv", "Test.frag.spv")
+            };
 
             pipeline_ = new Pipeline
             {
-                RasterizationState = new PipelineRasterizationStateCreateInfo
-                {
-                    PolygonMode = PolygonMode.Fill,
-                    CullMode = CullModes.Back,
-                    FrontFace = FrontFace.CounterClockwise,
-                    LineWidth = 1.0f
-                },
-
-                MultisampleState = new PipelineMultisampleStateCreateInfo
-                {
-                    RasterizationSamples = SampleCounts.Count1,
-                    MinSampleShading = 1.0f
-                },
-
-                DepthStencilState = new PipelineDepthStencilStateCreateInfo
-                {
-                    DepthTestEnable = true,
-                    DepthWriteEnable = true,
-                    DepthCompareOp = CompareOp.LessOrEqual,
-                    Back = new StencilOpState
-                    {
-                        FailOp = StencilOp.Keep,
-                        PassOp = StencilOp.Keep,
-                        CompareOp = CompareOp.Always
-                    },
-                    Front = new StencilOpState
-                    {
-                        FailOp = StencilOp.Keep,
-                        PassOp = StencilOp.Keep,
-                        CompareOp = CompareOp.Always
-                    }
-                },
-
-                ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
-                {
-                    new PipelineColorBlendAttachmentState
-                    {
-                        SrcColorBlendFactor = BlendFactor.One,
-                        DstColorBlendFactor = BlendFactor.Zero,
-                        ColorBlendOp = BlendOp.Add,
-                        SrcAlphaBlendFactor = BlendFactor.One,
-                        DstAlphaBlendFactor = BlendFactor.Zero,
-                        AlphaBlendOp = BlendOp.Add,
-                        ColorWriteMask = ColorComponents.All
-                    }
-                })
+                FrontFace = FrontFace.CounterClockwise
             };
+
+            node_ = new Node
+            {
+                Position = new Vector3(0, 0, 0)
+            };
+
+            cameraNode_ = new Node
+            {
+                Position = new Vector3(0, 0, -3)
+            };
+
+            var cam = node_.AddComponent<Camera>();
+            cameraNode_.LookAt(Vector3.Zero);
+
+            Model model = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
         }
 
         public override void Dispose()

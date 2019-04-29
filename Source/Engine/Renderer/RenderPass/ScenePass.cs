@@ -37,7 +37,7 @@ namespace SharpGame
                 // Depth attachment.
                 new AttachmentDescription
                 {
-                    Format = renderer.DepthStencilBuffer.Format,
+                    Format = Graphics.DepthStencilBuffer.Format,
                     Samples = SampleCounts.Count1,
                     LoadOp = AttachmentLoadOp.Clear,
                     StoreOp = AttachmentStoreOp.DontCare,
@@ -92,7 +92,7 @@ namespace SharpGame
             {
                 framebuffers[i] = CreateFramebuffer(
                     new[] {
-                        Graphics.SwapchainImageViews[i], Renderer.DepthStencilBuffer.View
+                        Graphics.SwapchainImageViews[i], Graphics.DepthStencilBuffer.View
                     },
 
                     Graphics.Width, Graphics.Height

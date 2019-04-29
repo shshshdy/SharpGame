@@ -61,14 +61,13 @@ namespace SharpGame.Samples.TexturedCube
 
             geometry_.SetDrawRange(PrimitiveTopology.TriangleList, 0, cube.Indices.Length);
 
-            texturedShader_ = new Shader("Textured",
-                new Pass("main",
-                    new ShaderModule(ShaderStages.Vertex, "Textured.vert.spv"),
-                    new ShaderModule(ShaderStages.Fragment, "Textured.frag.spv")
-                )
-            );
+            texturedShader_ = new Shader
+            {
+                Name = "Textured",
+                ["main"] = new Pass("Textured.vert.spv", "Textured.frag.spv")
+            };
 
-            _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx");
+            _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer       = GraphicsBuffer.DynamicUniform<WorldViewProjection>(1);
 
             _descriptorSetLayout = CreateDescriptorSetLayout();
@@ -77,51 +76,7 @@ namespace SharpGame.Samples.TexturedCube
 
             
             pipeline_ = new Pipeline
-            {                
-                RasterizationState = new PipelineRasterizationStateCreateInfo
-                {
-                    PolygonMode = PolygonMode.Fill,
-                    CullMode = CullModes.Back,
-                    FrontFace = FrontFace.Clockwise,//CounterClockwise,
-                    LineWidth = 1.0f
-                },
-
-                DepthStencilState = new PipelineDepthStencilStateCreateInfo
-                {
-                    DepthTestEnable = true,
-                    DepthWriteEnable = true,
-                    DepthCompareOp = CompareOp.LessOrEqual,
-                    Back = new StencilOpState
-                    {
-                        FailOp = StencilOp.Keep,
-                        PassOp = StencilOp.Keep,
-                        CompareOp = CompareOp.Always
-                    },
-                    Front = new StencilOpState
-                    {
-                        FailOp = StencilOp.Keep,
-                        PassOp = StencilOp.Keep,
-                        CompareOp = CompareOp.Always
-                    }
-                },
-
-                ColorBlendState = new PipelineColorBlendStateCreateInfo
-                (
-                    new[]
-                    {
-                        new PipelineColorBlendAttachmentState
-                        {
-                            SrcColorBlendFactor = BlendFactor.One,
-                            DstColorBlendFactor = BlendFactor.Zero,
-                            ColorBlendOp = BlendOp.Add,
-                            SrcAlphaBlendFactor = BlendFactor.One,
-                            DstAlphaBlendFactor = BlendFactor.Zero,
-                            AlphaBlendOp = BlendOp.Add,
-                            ColorWriteMask = ColorComponents.All
-                        }
-                    }
-                ),
-
+            { 
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout })
             };
             /*
