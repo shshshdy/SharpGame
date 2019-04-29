@@ -14,6 +14,8 @@ namespace SharpGame.Samples.TexturedCube
         public Matrix World;
         public Matrix View;
         public Matrix Projection;
+        public Matrix ViewProj;
+        public Matrix WorldViewProj;
     }
 
     public class TexturedCubeApp : Application
@@ -80,7 +82,7 @@ namespace SharpGame.Samples.TexturedCube
                 {
                     PolygonMode = PolygonMode.Fill,
                     CullMode = CullModes.Back,
-                    FrontFace = FrontFace.CounterClockwise,
+                    FrontFace = FrontFace.Clockwise,//CounterClockwise,
                     LineWidth = 1.0f
                 },
 
@@ -180,11 +182,13 @@ namespace SharpGame.Samples.TexturedCube
         private void SetViewProjection()
         {
             const float cameraDistance = 2.5f;
-            _wvp.View = Matrix.LookAtRH(Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
-            _wvp.Projection = Matrix.PerspectiveFovRH(
+            _wvp.View = Matrix.LookAtLH(-Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
+            _wvp.Projection = Matrix.PerspectiveFovLH(
             (float)Math.PI / 4,
             (float)graphics_.Platform.Width / graphics_.Platform.Height,
-            1.0f, 1000.0f);            
+            1.0f, 1000.0f);
+            _wvp.ViewProj = _wvp.View * _wvp.Projection;
+            _wvp.WorldViewProj = _wvp.World * _wvp.View * _wvp.Projection;
         }
 
         private void UpdateUniformBuffers()

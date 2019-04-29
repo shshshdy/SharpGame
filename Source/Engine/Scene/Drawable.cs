@@ -66,7 +66,6 @@ namespace SharpGame
         public Material material;
         public Geometry geometry;
         public IntPtr mtx;
-
     }
 
     public unsafe abstract class Drawable : Component
