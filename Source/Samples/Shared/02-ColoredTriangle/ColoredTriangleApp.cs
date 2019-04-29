@@ -72,7 +72,7 @@ namespace SharpGame.Samples.ColoredTriangle
             var cam = node_.AddComponent<Camera>();
             cameraNode_.LookAt(Vector3.Zero);
 
-            model_ = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
+            model_ = resourceCache_.Load<Model>("Models/Plane.mdl").Result;
 
             geometry_ = GeometricPrimitive.Create(1.0f, 1.0f, 1.0f);
         }
