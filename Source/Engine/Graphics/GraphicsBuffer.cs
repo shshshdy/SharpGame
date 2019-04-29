@@ -89,6 +89,7 @@ namespace SharpGame
                 MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
             DeviceMemory stagingMemory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
             IntPtr indexPtr = stagingMemory.Map(0, stagingReq.Size);
+            Utilities.CopyMemory(indexPtr, indices, (int)size);
             //Interop.Write(indexPtr, indices);
             stagingMemory.Unmap();
             stagingBuffer.BindMemory(stagingMemory);

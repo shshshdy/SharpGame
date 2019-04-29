@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
+using VulkanCore;
 
 namespace SharpGame
 {
@@ -37,6 +38,33 @@ namespace SharpGame
         {
             Vertices = vertices;
             Indices = indices;
+        }
+
+        public static Geometry Create(float width, float height, float depth)
+        {
+            var cube = Box(width, height, depth);
+
+            var geom = new Geometry
+            {
+                VertexBuffers = new[] { GraphicsBuffer.Vertex(cube.Vertices) },
+                IndexBuffer = GraphicsBuffer.Index(cube.Indices),
+                VertexInputState = new PipelineVertexInputStateCreateInfo
+                (
+                    new[]
+                    {
+                        new VertexInputBindingDescription(0, Interop.SizeOf<Vertex>(), VertexInputRate.Vertex)
+                    },
+                    new[]
+                    {
+                        new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),  // Position.
+                        new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12), // Normal.
+                        new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
+                    }
+                )
+            };
+
+            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, cube.Indices.Length);
+            return geom;
         }
 
         public static GeometricPrimitive Box(float width, float height, float depth)

@@ -9,7 +9,7 @@ using VulkanCore;
 namespace SharpGame.Samples.TexturedCube
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct WorldViewProjection
+    public struct WorldViewProjection
     {
         public Matrix World;
         public Matrix View;
@@ -38,28 +38,7 @@ namespace SharpGame.Samples.TexturedCube
         {
             SubscribeToEvent<BeginRenderPass>(Handle);
 
-            var cube = GeometricPrimitive.Box(1.0f, 1.0f, 1.0f);
-
-            geometry_ = new Geometry
-            {
-                VertexBuffers = new[] { GraphicsBuffer.Vertex(cube.Vertices) },
-                IndexBuffer = GraphicsBuffer.Index(cube.Indices),
-                VertexInputState = new PipelineVertexInputStateCreateInfo
-                (
-                    new[]
-                    {
-                        new VertexInputBindingDescription(0, Interop.SizeOf<Vertex>(), VertexInputRate.Vertex)
-                    },
-                    new[]
-                    {
-                        new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),  // Position.
-                        new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12), // Normal.
-                        new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
-                    }
-                )
-            };
-
-            geometry_.SetDrawRange(PrimitiveTopology.TriangleList, 0, cube.Indices.Length);
+            geometry_ = GeometricPrimitive.Create(1.0f, 1.0f, 1.0f);
 
             texturedShader_ = new Shader
             {
@@ -72,7 +51,7 @@ namespace SharpGame.Samples.TexturedCube
 
             _descriptorSetLayout = CreateDescriptorSetLayout();
             _descriptorPool      = CreateDescriptorPool();
-            _descriptorSet       = CreateDescriptorSet(); // Will be freed when pool is destroyed.
+            _descriptorSet       = CreateDescriptorSet(); 
 
             
             pipeline_ = new Pipeline

@@ -44,8 +44,14 @@ namespace SharpGame
                 return (T)value;
 
             Stream stream = Open(contentName);
+
             var res = new T();
-            await res.Load(stream);
+
+            if(await res.Load(stream))
+            {
+                res.Build();
+            }
+
             cachedContent_.Add(contentName, res);
 
             return res;
