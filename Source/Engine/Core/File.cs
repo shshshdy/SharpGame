@@ -100,16 +100,13 @@ namespace SharpGame
         public unsafe T[] ReadArray<T>(int count) where T : struct
         {
             var result = new T[count];
-            var asBytes = Unsafe.As<byte[]>(result);
 
-            fixed (void* dest = asBytes)
-            {
-                int byteCount = count * Unsafe.SizeOf<T>();            
-                int currentReadSize = Read((IntPtr)dest, byteCount);
-                if(currentReadSize != byteCount)
-                    throw new InvalidOperationException("Reached end of stream.");
-            }
-
+            IntPtr dest = Utilities.AsPointer(ref result[0]);            
+            int byteCount = count * Unsafe.SizeOf<T>();            
+            int currentReadSize = Read(dest, byteCount);
+            if(currentReadSize != byteCount)
+                throw new InvalidOperationException("Reached end of stream.");
+            
             return result;
         }
         
@@ -153,15 +150,11 @@ namespace SharpGame
 
         public unsafe void WriteArray<T>(T[] val) where T : struct
         {
-            var asBytes = Unsafe.As<byte[]>(val);
-
-            fixed (void* dest = asBytes)
-            {
-                int byteCount = val.Length * Unsafe.SizeOf<T>();
-                Write((IntPtr)dest, byteCount);
-            }
-            
+            IntPtr dest = Utilities.AsPointer(ref val[0]);            
+            int byteCount = val.Length * Unsafe.SizeOf<T>();
+            Write(dest, byteCount);   
         }
+
         /// <summary>
         /// Writes a block of bytes to this stream using data from a buffer.
         /// </summary>
