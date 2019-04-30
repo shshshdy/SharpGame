@@ -8,10 +8,10 @@ namespace SharpGame
 {
     public class RenderPass : GPUObject
     {
-        public string Name { get; set; }
+        public StringID Name { get; set; }
 
         [IgnoreDataMember]
-        public RenderPath RenderPath { get; private set; }
+        public RenderPath RenderPath { get; set; }
 
         [IgnoreDataMember]
         public Framebuffer[] framebuffer_;
@@ -21,6 +21,10 @@ namespace SharpGame
         protected CommandBuffer[] cmdBuffers_ = new CommandBuffer[2];
 
         internal VulkanCore.RenderPass renderPass_;
+
+        public RenderPass()
+        {
+        }
 
         protected override void Recreate()
         {
@@ -33,7 +37,47 @@ namespace SharpGame
                 );
         }
 
-        public virtual void Draw(CommandBuffer cmdBuffer, int imageIndex)
+        protected virtual CommandBuffer BeginDraw()
+        {
+            int imageIndex = Graphics.WorkContext;
+
+            CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
+            {
+                Framebuffer = framebuffer_[imageIndex],
+                RenderPass = renderPass_
+            };
+
+            CommandBuffer cmdBuffer = Graphics.SecondaryCmdBuffers[imageIndex].Get();
+            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue
+                | CommandBufferUsages.SimultaneousUse, inherit));
+
+            SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
+
+            //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
+            cmdBuffers_[imageIndex] = cmdBuffer;
+
+            return cmdBuffer;
+        }
+
+        public void Draw()
+        {
+            int imageIndex = Graphics.WorkContext;
+
+            CommandBuffer cmdBuffer = BeginDraw();
+
+            OnDraw(cmdBuffer, imageIndex);
+
+            EndDraw(cmdBuffer);
+        }
+
+        protected virtual void EndDraw(CommandBuffer cmdBuffer)
+        {
+            SendGlobalEvent(new EndRenderPass { renderPass = this, commandBuffer = cmdBuffer });
+
+            cmdBuffer.End();
+        }
+
+        protected virtual void OnDraw(CommandBuffer cmdBuffer, int imageIndex)
         {
         }
 

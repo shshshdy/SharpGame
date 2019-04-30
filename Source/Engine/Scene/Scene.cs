@@ -258,11 +258,11 @@ namespace SharpGame
         {
 
         }
-        /*
-        protected override void Destroy()
+        
+        public override void Dispose()
         {
             RemoveAllComponents();
             RemoveAllChildren();            
-        }*/
+        }
     }
 }

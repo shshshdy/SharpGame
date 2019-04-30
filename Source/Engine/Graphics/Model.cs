@@ -270,7 +270,6 @@ namespace SharpGame
 
             for (int i = 0; i < numVertexBuffers; ++i)
             {
-                //ref VertexBufferDesc desc = ref loadVBData_[i];
                 loadVBData_[i].vertexCount_ = source.Read<int>();
                 int vertexSize = 0;
                 if (!hasVertexDeclarations)
@@ -435,7 +434,7 @@ namespace SharpGame
             while (GeometryCenters.Count < geometries_.Length)
                 GeometryCenters.Add(Vector3.Zero);
 
-            //MemoryUse = memoryUse;
+            MemoryUse = memoryUse;
             return true;
         }
     

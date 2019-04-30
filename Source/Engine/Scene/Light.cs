@@ -5,34 +5,21 @@ using System.Text;
 
 namespace SharpGame
 {
-    enum LightType
+    public enum LightType
     {
-        LIGHT_DIRECTIONAL = 0,
-        LIGHT_SPOT,
-        LIGHT_POINT
+        Directional = 0,
+        Point,
+        Spot
     };
 
     [DataContract]
     public class Light : Component
     {  
-        /// Light type.
-        LightType lightType_;
-        /// Color.
-        Color color_;
+        public LightType LightType { get; set; }
 
         [DataMember(Order = 1)]
-        public Color Color
-        {
-            get
-            {
-                return color_;
-            }
+        public Color Color { get; set; }
 
-            set
-            {
-                color_ = value;
-            }
-        }
 
         public virtual void DrawDebugGeometry(DebugRenderer debug, bool depthTest)
         {

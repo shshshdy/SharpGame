@@ -65,7 +65,6 @@ namespace SharpGame
             graphics_ = CreateSubsystem<Graphics>(platform_);
             resourceCache_ = CreateSubsystem<ResourceCache>("../../Content");
             renderer_ = CreateSubsystem<Renderer>();
-            renderer_.Inialize();
         }
 
         protected virtual void OnInit()
@@ -79,7 +78,7 @@ namespace SharpGame
         public void Resize()
         {
             graphics_.Resize();
-            renderer_.Recreate();
+
             SendGlobalEvent(new Resizing());
         }
 

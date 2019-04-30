@@ -13,7 +13,7 @@ namespace SharpGame
 
         public ScenePass(string name = "main")
         {
-            Name = string.Intern(name);
+            Name = name;
             Recreate();
         }
 
@@ -102,22 +102,6 @@ namespace SharpGame
             return framebuffers;
         }
 
-        public override void Draw(CommandBuffer cmdBuffer, int imageIndex)
-        {
-            //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
-
-            SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
-
-            cmdBuffers_[imageIndex] = cmdBuffer;
-
-            OnDraw(cmdBuffer, imageIndex);
-
-            SendGlobalEvent(new EndRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
-        }
-
-        protected virtual void OnDraw(CommandBuffer cmdBuffer, int imageIndex)
-        {
-        }
 
     }
 }

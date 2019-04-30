@@ -12,6 +12,9 @@ namespace SharpGame
         [IgnoreDataMember]
         public string FileName { get; set; }
 
+        [IgnoreDataMember]
+        public int MemoryUse { get; protected set; }
+
         protected FileSystem FileSystem => Get<FileSystem>();
 
         protected bool builded_ = false;

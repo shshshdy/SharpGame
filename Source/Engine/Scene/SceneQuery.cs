@@ -11,16 +11,37 @@ namespace SharpGame
         void TestDrawables(Span<Drawable> start, bool inside);
     }
 
-    public class QuadtreeQuery : ISceneQuery
+    public struct OctreeQuery : ISceneQuery
     {
         public void TestDrawables(Span<Drawable> start, bool inside)
         {
-            throw new NotImplementedException();
         }
 
         public Intersection TestOctant(ref BoundingBox box, bool inside)
         {
-            throw new NotImplementedException();
+            return Intersection.InSide;
+        }
+
+    }
+
+    public  struct FrustumOctreeQuery : ISceneQuery
+    {
+        /// Frustum.
+        public Camera camera;
+        public View view;
+        public uint viewMask;
+        public uint drawableFlags;
+
+        public void TestDrawables(Span<Drawable> start, bool inside)
+        {
+        }
+
+        public Intersection TestOctant(ref BoundingBox box, bool inside)
+        {
+            if (inside)
+                return Intersection.InSide;
+            else
+                return camera.Frustum.Contains(ref box);
         }
     }
 

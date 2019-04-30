@@ -174,7 +174,7 @@ namespace SharpGame.Samples.ComputeParticles
             // before compute starts to write to the buffer.
             _computeCmdBuffer.CmdPipelineBarrier(PipelineStages.VertexInput, PipelineStages.ComputeShader,
                 bufferMemoryBarriers: new[] { graphicsToComputeBarrier });
-            var pipeline = _computePipeline.GetComputePipeline(renderer_.MainRenderPass, _computePass);
+            var pipeline = _computePipeline.GetComputePipeline(_computePass);
                 _computeCmdBuffer.CmdBindPipeline(PipelineBindPoint.Compute, pipeline);
             _computeCmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Compute, _computePipeline.pipelineLayout, _computeDescriptorSet);
             _computeCmdBuffer.CmdDispatch(_storageBuffer.Count / 256, 1, 1);

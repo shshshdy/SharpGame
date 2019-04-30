@@ -160,7 +160,7 @@ namespace SharpGame
             return pipeline;
         }
 
-        public VulkanCore.Pipeline GetComputePipeline(RenderPass renderPass, Pass shader)
+        public VulkanCore.Pipeline GetComputePipeline(Pass shader)
         {
             if(!shader.IsComputeShader)
             {

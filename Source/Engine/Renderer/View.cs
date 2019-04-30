@@ -8,47 +8,55 @@ namespace SharpGame
 
     public class View : Object
     {
+        public uint ViewMask { get; set; }
+
         public Scene scene;
         public Camera camera;
-        public RenderPath renderPath;
-
-        private List<RenderPass> renderPasses = new List<RenderPass>();
-
-        internal PipelineViewportStateCreateInfo viewportStateCreateInfo = new PipelineViewportStateCreateInfo();
-        public RenderPass RenderPass { get; }
+        public RenderPath RenderPath { get; set; }
 
         public Graphics Graphics => Get<Graphics>();
+        public Renderer Renderer => Get<Renderer>();
 
-        public View()
+        FastList<Drawable> drawables_ = new FastList<Drawable>();
+        FastList<Light> lights_ = new FastList<Light>();
+
+        public View(RenderPath renderPath = null)
         {
-            RenderPass = new ScenePass();
+            RenderPath = renderPath;
+
+            if(RenderPath == null)
+            {
+                RenderPath = new RenderPath();
+                RenderPath.AddRenderPass(new ScenePass());
+            }
         }
 
         public void Update()
         {
-            int index = Graphics.WorkContext;
+            GetDrawables();
 
-            CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
+            RenderPath.Draw(this);
+        }
+
+        private void GetDrawables()
+        {
+
+            if (scene && camera)
             {
-                Framebuffer = RenderPass.framebuffer_[index],
-                RenderPass = RenderPass.renderPass_
-            };
+                FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery
+                {
+                    view = this,
+                    camera = camera
+                };
 
-            CommandBuffer cmdBuffer = Graphics.SecondaryCmdBuffers[index].Get();
-            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue | CommandBufferUsages.SimultaneousUse
-                , inherit
-                ));
-
-            RenderPass.Draw(cmdBuffer, index);
-
-            cmdBuffer.End();
+                scene.GetDrawables(frustumOctreeQuery, drawables_);
+            }
 
         }
 
-        public void Summit(int imageIndex)
+        public void Render(int imageIndex)
         {
-
-            RenderPass.Summit(imageIndex);
+            RenderPath?.Summit(imageIndex);
         }
     }
 }

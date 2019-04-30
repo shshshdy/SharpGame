@@ -10,32 +10,14 @@ namespace SharpGame
     {
         public Graphics Graphics => Get<Graphics>();
 
-        public RenderPass MainRenderPass => MainViewport.view.RenderPass;
-
         public Viewport MainViewport { get; private set; }
 
         private List<Viewport> viewports_ = new List<Viewport>();
-
-
-        private RenderPath defaultRenderPath_;
-
         private List<View> views_ = new List<View>();
 
         public Renderer()
         {
-        }
-
-        public void Inialize()
-        {
-            defaultRenderPath_ = new RenderPath(
-                new ScenePass()
-            );
-
             MainViewport = CreateViewport();
-        }
-
-        public void Recreate()
-        {
         }
 
         public Viewport CreateViewport()
@@ -53,11 +35,6 @@ namespace SharpGame
 
             foreach (var viewport in viewports_)
             {
-                if(!viewport.view)
-                {
-                    viewport.view = new View();
-                }
-
                 viewport.view.Update();
             }
 
@@ -100,7 +77,7 @@ namespace SharpGame
                     viewport.view = new View();
                 }
 
-                viewport.view.Summit(imageIndex);
+                viewport.view.Render(imageIndex);
             }
                         
             if (Graphics.PresentQueue != Graphics.GraphicsQueue)

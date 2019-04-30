@@ -66,15 +66,15 @@ namespace SharpGame
             // Create a fence for each commandbuffer so that we can wait before using it again
             SubmitFences = new Fence[SwapchainImages.Length];
             for (int i = 0; i < SubmitFences.Length; i++)
-                ToDispose(SubmitFences[i] = Device.CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled)));
+                SubmitFences[i] = CreateFence(new FenceCreateInfo(FenceCreateFlags.Signaled));
 
             SecondaryCmdBuffers = new CommandBufferPool[2];
 
             SecondaryCmdBuffers[0] = new CommandBufferPool(
-                SecondaryCommandPool[0].AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2)));
+                SecondaryCommandPool[0].AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 10)));
 
             SecondaryCmdBuffers[1] = new CommandBufferPool(
-                SecondaryCommandPool[1].AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 2)));
+                SecondaryCommandPool[1].AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 10)));
 
             renderThreadID_ = System.Threading.Thread.CurrentThread.ManagedThreadId;
 
@@ -132,6 +132,27 @@ namespace SharpGame
             Surface.Dispose();
 
             Instance.Dispose();
+        }
+
+        public void Resize()
+        {
+            Device.WaitIdle();
+
+            // Dispose all frame dependent resources.
+            while (_toDisposeFrame.Count > 0)
+                _toDisposeFrame.Pop().Dispose();
+
+            // Reset all the command buffers allocated from the pools.
+            GraphicsCommandPool.Reset();
+            ComputeCommandPool.Reset();
+            SecondaryCommandPool[0].Reset();
+            SecondaryCommandPool[1].Reset();
+
+            CreateSwapchainImages();
+
+            depthStencilBuffer_ = CreateDepthStencil(Width, Height);
+
+            GPUObject.RecreateAll();
         }
 
         private SwapchainKhr CreateSwapchain()
@@ -248,9 +269,9 @@ namespace SharpGame
             return ToDispose(Device.CreateSampler(createInfo));
         }
 
-        public Fence CreateFence()
+        public Fence CreateFence(FenceCreateInfo createInfo = default)
         {
-            return ToDispose(Device.CreateFence());
+            return ToDispose(Device.CreateFence(createInfo));
         }
 
         public DescriptorPool CreateDescriptorPool(DescriptorPoolSize[] descriptorPoolSizes, DescriptorPoolCreateFlags flags = DescriptorPoolCreateFlags.None)
@@ -265,26 +286,6 @@ namespace SharpGame
             return ToDispose(Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(bindings)));
         }
 
-        public void Resize()
-        {
-            Device.WaitIdle();
-
-            // Dispose all frame dependent resources.
-            while (_toDisposeFrame.Count > 0)
-                _toDisposeFrame.Pop().Dispose();
-
-            // Reset all the command buffers allocated from the pools.
-            GraphicsCommandPool.Reset();
-            ComputeCommandPool.Reset();
-            SecondaryCommandPool[0].Reset();
-            SecondaryCommandPool[1].Reset();
-
-            CreateSwapchainImages();
-
-            depthStencilBuffer_ = CreateDepthStencil(Width, Height);
-
-            GPUObject.RecreateAll();
-        }
 
         #region MULTITHREADED
 

@@ -62,121 +62,37 @@ namespace SharpGame
 
         public static GraphicsBuffer Index(int[] indices)
         {
-            var graphics = Get<Graphics>();
-
-            int stride = sizeof(int);
-            long size = indices.Length * stride;
-            return Index(Utilities.AsPointer(ref indices[0]), stride, indices.Length);
+            var ib = new IndexBuffer();
+            ib.SetData(indices);
+            return ib;
         }
 
         public static GraphicsBuffer Index(short[] indices)
         {
-            var graphics = Get<Graphics>();
-
-            int stride = sizeof(short);
-            long size = indices.Length * stride;
-            return Index(Utilities.AsPointer(ref indices[0]), stride, indices.Length);
+            var ib = new IndexBuffer();
+            ib.SetData(indices);
+            return ib;
         }
 
         public unsafe static GraphicsBuffer Index(IntPtr indices, int stride, int count)
         {
-            var graphics = Get<Graphics>();
-            long size = count * stride;
-            // Create staging buffer.
-            Buffer stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
-            MemoryRequirements stagingReq = stagingBuffer.GetMemoryRequirements();
-            int stagingMemoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
-                stagingReq.MemoryTypeBits,
-                MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
-            DeviceMemory stagingMemory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
-            IntPtr indexPtr = stagingMemory.Map(0, stagingReq.Size);
-            Utilities.CopyMemory(indexPtr, indices, (int)size);
-            //Interop.Write(indexPtr, indices);
-            stagingMemory.Unmap();
-            stagingBuffer.BindMemory(stagingMemory);
-
-            // Create a device local buffer.
-            Buffer buffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.IndexBuffer | BufferUsages.TransferDst));
-            MemoryRequirements req = buffer.GetMemoryRequirements();
-            int memoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
-                req.MemoryTypeBits,
-                MemoryProperties.DeviceLocal);
-            DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
-            buffer.BindMemory(memory);
-
-            // Copy the data from staging buffer to device local buffer.
-            CommandBuffer cmdBuffer = graphics.GraphicsCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
-            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit));
-            cmdBuffer.CmdCopyBuffer(stagingBuffer, buffer, new BufferCopy(size));
-            cmdBuffer.End();
-
-            // Submit.
-            Fence fence = graphics.Device.CreateFence();
-            graphics.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
-            fence.Wait();
-
-            // Cleanup.
-            fence.Dispose();
-            cmdBuffer.Dispose();
-            stagingBuffer.Dispose();
-            stagingMemory.Dispose();
-
-            return new GraphicsBuffer(buffer, memory, stride, count);
+            var ib = new IndexBuffer();
+            ib.SetData(indices, stride, count);
+            return ib;
         }
 
         public unsafe static GraphicsBuffer Vertex<T>(T[] vertices) where T : struct
         {
-            var graphics = Get<Graphics>();
-            int stride = Interop.SizeOf<T>();
-            long size = vertices.Length * stride;
-            return Vertex((IntPtr)Unsafe.AsPointer(ref vertices[0]), stride, vertices.Length);
+            VertexBuffer vb = new VertexBuffer();
+            vb.SetData(vertices);
+            return vb;
         }
 
         public unsafe static GraphicsBuffer Vertex(IntPtr vertices, int stride, int count)
         {
-            var graphics = Get<Graphics>();
-            long size = count * stride;
-
-            // Create a staging buffer that is writable by host.
-            Buffer stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
-            MemoryRequirements stagingReq = stagingBuffer.GetMemoryRequirements();
-            int stagingMemoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
-                stagingReq.MemoryTypeBits,
-                MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
-            DeviceMemory stagingMemory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
-            IntPtr vertexPtr = stagingMemory.Map(0, stagingReq.Size);
-            //Interop.Write(vertexPtr, vertices);
-            Unsafe.CopyBlock((void*)vertexPtr, (void*)vertices, (uint)size);
-            stagingMemory.Unmap();
-            stagingBuffer.BindMemory(stagingMemory);
-
-            // Create a device local buffer where the vertex data will be copied and which will be used for rendering.
-            Buffer buffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.TransferDst));
-            MemoryRequirements req = buffer.GetMemoryRequirements();
-            int memoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
-                req.MemoryTypeBits,
-                MemoryProperties.DeviceLocal);
-            DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
-            buffer.BindMemory(memory);
-
-            // Copy the data from staging buffers to device local buffers.
-            CommandBuffer cmdBuffer = graphics.GraphicsCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
-            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit));
-            cmdBuffer.CmdCopyBuffer(stagingBuffer, buffer, new BufferCopy(size));
-            cmdBuffer.End();
-
-            // Submit.
-            Fence fence = graphics.Device.CreateFence();
-            graphics.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
-            fence.Wait();
-
-            // Cleanup.
-            fence.Dispose();
-            cmdBuffer.Dispose();
-            stagingBuffer.Dispose();
-            stagingMemory.Dispose();
-
-            return new GraphicsBuffer(buffer, memory, stride, count);
+            VertexBuffer vb = new VertexBuffer();
+            vb.SetData(vertices, stride, count);
+            return vb;
         }
 
         public static GraphicsBuffer Storage<T>( T[] data) where T : struct

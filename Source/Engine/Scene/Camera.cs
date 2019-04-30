@@ -116,16 +116,6 @@ namespace SharpGame
                     UpdateProjection();
 
                 return new BoundingFrustum(projection_);
-
-                /*
-                BoundingFrustum ret;
-
-    if (!orthographic_)
-        ret.Define(fov_, aspectRatio_, zoom_, NearClip, FarClip);
-    else
-        ret.DefineOrtho(orthoSize_, aspectRatio_, zoom_, NearClip, FarClip);
-
-return ret;*/
             }
 
         }
