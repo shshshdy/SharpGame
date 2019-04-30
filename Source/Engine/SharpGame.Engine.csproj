@@ -26,6 +26,7 @@
 
 
   <ItemGroup>
+    <Folder Include="Graphics\Textures\" />
     <Folder Include="Utility\" />
   </ItemGroup>
 

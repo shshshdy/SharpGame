@@ -5,39 +5,48 @@ using System.Text;
 
 namespace SharpGame
 {
-    [StructLayout(LayoutKind.Explicit, Size = 16)]
-    public struct ShaderParameter
-    {
-        [FieldOffset(0)]
-        public float floatValue;
-        [FieldOffset(0)]
-        public Vector2 vec2Value;
-        [FieldOffset(0)]
-        public Vector3 vec3Value;
-        [FieldOffset(0)]
-        public Vector4 vec4Value;
-        [FieldOffset(0)]
-        public Matrix matValue;
-        [FieldOffset(0)]
-        public Texture texture;
-        [FieldOffset(0)]
-        public GraphicsBuffer buffer;
-    }
-
+    
 
     public class Material : Resource
     {
         public string Name { get; set; }
         public string Shader { get; set; }
 
-        public Dictionary<string, ShaderParameter> UniformData = new Dictionary<string, ShaderParameter>();
-        public Dictionary<string, Texture> TextureData = new Dictionary<string, Texture>();
-
+        public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
+        public FastList<TextureParameter> TextureParameters { get; set; } = new FastList<TextureParameter>();
+        
         public Material()
         {
         }
+        /*
+        public ref ShaderParameter GetShaderParameter(StringID name)
+        {
+            for(int i = 0; i < UniformData.Count; i++)
+            {
+                ref ShaderParameter uniform = ref UniformData.At(i);
+                if(uniform.name == name)
+                {
+                    return ref uniform;
+                }
+            }
 
+            //return default;
+        }*/
 
+        public void SetShaderParameter(StringID name, Vector2 vec2)
+        {
+            for (int i = 0; i < ShaderParameters.Count; i++)
+            {
+                ref ShaderParameter uniform = ref ShaderParameters.At(i);
+                if (uniform.name == name)
+                {
+                    uniform.data.vec2Value = vec2;
+                }
+            }
+
+            ShaderParameters.Add(new ShaderParameter { name = name, data = new UnifromData { vec2Value = vec2 } });
+
+        }
 
 
     }

@@ -55,7 +55,7 @@ namespace SharpGame.Samples.ColoredTriangle
                 //   FrontFace = FrontFace.CounterClockwise
                 CullMode = CullModes.None,
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout }),
-                           
+                           /*
                 VertexInputState = new PipelineVertexInputStateCreateInfo
                 (
                     new[]
@@ -68,7 +68,7 @@ namespace SharpGame.Samples.ColoredTriangle
                         new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12), // Normal.
                         new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
                     }
-                )
+                )*/
             };
 
             node_ = new Node
@@ -91,8 +91,8 @@ namespace SharpGame.Samples.ColoredTriangle
             var staticModel = node_.AddComponent<StaticModel>();
             staticModel.SetModel(model_);
 
-           // geometry_ = model_.GetGeometry(0, 0);
-            geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
+            geometry_ = model_.GetGeometry(0, 0);
+           // geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
         }
 
         public override void Dispose()

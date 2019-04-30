@@ -17,6 +17,11 @@ namespace SharpGame
         public AttachmentDescription[] attachments { get; set; }
         public SubpassDescription[] subpasses { get; set; }
 
+        private Pipeline pipeline_;
+        private DescriptorSetLayout _descriptorSetLayout;
+        private DescriptorPool _descriptorPool;
+        private DescriptorSet _descriptorSet;
+
         public ScenePass(string name = "main")
         {
             Name = name;

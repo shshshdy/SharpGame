@@ -121,7 +121,7 @@ namespace SharpGame
 
             if(IndexBuffer != null && IndexCount > 0)
             {
-                cmdBuffer.CmdBindIndexBuffer(IndexBuffer);
+                cmdBuffer.CmdBindIndexBuffer(IndexBuffer, 0, IndexBuffer.Stride == 2 ?  IndexType.UInt16 : IndexType.UInt32);
                 cmdBuffer.CmdDrawIndexed(IndexCount, 1, IndexStart, VertexStart);
             }
             else
