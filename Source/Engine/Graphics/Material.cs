@@ -6,7 +6,7 @@ using System.Text;
 namespace SharpGame
 {
     [StructLayout(LayoutKind.Explicit, Size = 16)]
-    public struct MaterialParam
+    public struct ShaderParameter
     {
         [FieldOffset(0)]
         public float floatValue;
@@ -20,14 +20,17 @@ namespace SharpGame
         public Matrix matValue;
         [FieldOffset(0)]
         public Texture texture;
+        [FieldOffset(0)]
+        public GraphicsBuffer buffer;
     }
 
 
     public class Material : Resource
     {
         public string Name { get; set; }
+        public string Shader { get; set; }
 
-        public Dictionary<string, MaterialParam> UniformData = new Dictionary<string, MaterialParam>();
+        public Dictionary<string, ShaderParameter> UniformData = new Dictionary<string, ShaderParameter>();
         public Dictionary<string, Texture> TextureData = new Dictionary<string, Texture>();
 
         public Material()

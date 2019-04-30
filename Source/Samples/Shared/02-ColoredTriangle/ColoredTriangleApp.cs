@@ -91,6 +91,10 @@ namespace SharpGame.Samples.ColoredTriangle
             camera_.AspectRatio = (float)graphics_.Platform.Width / graphics_.Platform.Height;
 
             model_ = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
+
+            var staticModel = node_.AddComponent<StaticModel>();
+            staticModel.SetModel(model_);
+
            // geometry_ = model_.GetGeometry(0, 0);
             geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
         }
