@@ -55,20 +55,6 @@ namespace SharpGame.Samples.ColoredTriangle
                 //   FrontFace = FrontFace.CounterClockwise
                 CullMode = CullModes.None,
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout }),
-                           /*
-                VertexInputState = new PipelineVertexInputStateCreateInfo
-                (
-                    new[]
-                    {
-                        new VertexInputBindingDescription(0, Interop.SizeOf<PosNormTex>(), VertexInputRate.Vertex)
-                    },
-                    new[]
-                    {
-                        new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),  // Position.
-                        new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12), // Normal.
-                        new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)     // TexCoord.
-                    }
-                )*/
             };
 
             node_ = new Node
@@ -91,8 +77,8 @@ namespace SharpGame.Samples.ColoredTriangle
             var staticModel = node_.AddComponent<StaticModel>();
             staticModel.SetModel(model_);
 
-            geometry_ = model_.GetGeometry(0, 0);
-           // geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
+            //geometry_ = model_.GetGeometry(0, 0);
+            geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
         }
 
         public override void Dispose()
@@ -128,7 +114,6 @@ namespace SharpGame.Samples.ColoredTriangle
             _wvp.View = camera_.View;
             _wvp.Projection = camera_.Projection;
             _wvp.ViewProj = _wvp.View * _wvp.Projection;
-            _wvp.WorldViewProj = _wvp.World * _wvp.View * _wvp.Projection;
         }
 
         private void UpdateUniformBuffers()
