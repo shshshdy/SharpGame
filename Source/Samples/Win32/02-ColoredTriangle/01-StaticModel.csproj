@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7519173C-D98E-4DDB-9F8A-D1051616C61E}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>VulkanCore.Samples.ColoredTriangle</RootNamespace>
-    <AssemblyName>ColoredTriangle</AssemblyName>
+    <RootNamespace>VulkanCore.Samples</RootNamespace>
+    <AssemblyName>StaticModel</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

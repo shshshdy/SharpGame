@@ -8,9 +8,8 @@ layout (binding = 0) uniform PerFrame
 {
     mat4 World;
     mat4 View;
-    mat4 Projection;
+    mat4 ViewInv;
     mat4 ViewProj;
-    mat4 WorldViewProj;
 };
 
 layout (location = 0) out vec2 out_TexCoord;

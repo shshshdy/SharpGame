@@ -3,19 +3,18 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using VulkanCore;
 
-namespace SharpGame.Samples.ColoredTriangle
+namespace SharpGame.Samples
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct WorldViewProjection
     {
         public Matrix World;
         public Matrix View;
-        public Matrix Projection;
+        public Matrix ViewInv;
         public Matrix ViewProj;
-        public Matrix WorldViewProj;
     }
 
-    public class ColoredTriangleApp : Application
+    public class StaticModelApp : Application
     {
         private Pipeline pipeline_;
         private Shader testShader_;
@@ -110,8 +109,8 @@ namespace SharpGame.Samples.ColoredTriangle
         private void SetViewProjection()
         {
             _wvp.View = camera_.View;
-            _wvp.Projection = camera_.Projection;
-            _wvp.ViewProj = _wvp.View * _wvp.Projection;
+            Matrix.Invert(ref _wvp.View, out _wvp.ViewInv);
+            _wvp.ViewProj = _wvp.View * camera_.Projection;
         }
 
         private void UpdateUniformBuffers()

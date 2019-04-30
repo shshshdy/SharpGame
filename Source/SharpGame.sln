@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "04-ComputeParticles", "Samp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGame.Engine", "Engine\SharpGame.Engine.csproj", "{C3223090-9891-4A35-BEC9-F382C04774DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "02-ColoredTriangle", "Samples\Win32\02-ColoredTriangle\02-ColoredTriangle.csproj", "{7519173C-D98E-4DDB-9F8A-D1051616C61E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "01-StaticModel", "Samples\Win32\02-ColoredTriangle\01-StaticModel.csproj", "{7519173C-D98E-4DDB-9F8A-D1051616C61E}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Samples.Shared", "Samples\Shared\Samples.Shared.shproj", "{D9A8DB97-79F9-4ED0-9601-3D107873FC67}"
 EndProject

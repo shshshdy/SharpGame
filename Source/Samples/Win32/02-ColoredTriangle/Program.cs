@@ -13,7 +13,7 @@ namespace SharpGame.Samples.ColoredTriangle
         {
             using (var window = new Win32Window(
                 Assembly.GetExecutingAssembly().GetName().Name,
-                new ColoredTriangleApp()))
+                new StaticModelApp()))
             {
                 window.Run();
             }
