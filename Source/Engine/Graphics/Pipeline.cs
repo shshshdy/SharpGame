@@ -156,7 +156,7 @@ namespace SharpGame
                 colorBlendState: ColorBlendState);
 
             pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
-            graphics.ToDisposeFrame(pipeline);
+            Graphics.ToDisposeFrame(pipeline);
             return pipeline;
         }
 
@@ -175,7 +175,7 @@ namespace SharpGame
                 shader.GetComputeStageCreateInfo(), pipelineLayout);
 
             pipeline = graphics.Device.CreateComputePipeline(pipelineCreateInfo);
-            graphics.ToDisposeFrame(pipeline);
+            Graphics.ToDisposeFrame(pipeline);
             return pipeline;
         }
         

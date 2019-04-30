@@ -10,8 +10,8 @@ namespace SharpGame
 {
     public partial class Graphics : Object
     {
-        private readonly Stack<IDisposable> _toDisposePermanent = new Stack<IDisposable>();
-        private readonly Stack<IDisposable> _toDisposeFrame = new Stack<IDisposable>();
+        private readonly static Stack<IDisposable> _toDisposePermanent = new Stack<IDisposable>();
+        private readonly static Stack<IDisposable> _toDisposeFrame = new Stack<IDisposable>();
         
         public IPlatform Platform { get; private set; }
 
@@ -81,7 +81,7 @@ namespace SharpGame
         }
 
 
-        public T ToDispose<T>(T disposable)
+        public static T ToDispose<T>(T disposable)
         {
             switch (disposable)
             {
@@ -97,7 +97,7 @@ namespace SharpGame
             return disposable;
         }
 
-        public T ToDisposeFrame<T>(T disposable)
+        public static T ToDisposeFrame<T>(T disposable)
         {
             switch (disposable)
             {
@@ -285,8 +285,7 @@ namespace SharpGame
         {
             return ToDispose(Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(bindings)));
         }
-
-
+        
         #region MULTITHREADED
 
         private int currentContext_;

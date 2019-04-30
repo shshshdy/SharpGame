@@ -440,6 +440,8 @@ namespace SharpGame
     
         protected override void OnBuild()
         {
+            var graphics = Get<Graphics>();
+
             // Upload vertex buffer data
             for (int i = 0; i < vertexBuffers_.Length; ++i)
             {
@@ -447,7 +449,7 @@ namespace SharpGame
                 ref VertexBufferDesc desc = ref loadVBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = GraphicsBuffer.Vertex(Utilities.AsPointer(ref desc.data_[0]), desc.vertexSize_, desc.vertexCount_);
+                    buffer = VertexBuffer.Create(Utilities.AsPointer(ref desc.data_[0]), desc.vertexSize_, desc.vertexCount_);
                 }
             }
            
@@ -458,7 +460,7 @@ namespace SharpGame
                 ref IndexBufferDesc desc = ref loadIBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = GraphicsBuffer.Index(Utilities.AsPointer(ref desc.data_[0]), desc.indexSize_, desc.indexCount_);
+                    buffer = IndexBuffer.Create(Utilities.AsPointer(ref desc.data_[0]), desc.indexSize_, desc.indexCount_);
                 }
             }
 

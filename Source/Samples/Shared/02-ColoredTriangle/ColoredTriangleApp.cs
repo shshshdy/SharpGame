@@ -20,29 +20,25 @@ namespace SharpGame.Samples.ColoredTriangle
         private Pipeline pipeline_;
         private Shader testShader_;
 
-        Node node_;
-        Model model_;
-        Node cameraNode_;
-        Camera camera_;
-
-
+        private Node node_;
+        private Model model_;
+        private Node cameraNode_;
+        private Camera camera_;
 
         private DescriptorSetLayout _descriptorSetLayout;
         private DescriptorPool _descriptorPool;
         private DescriptorSet _descriptorSet;
-
         private Texture _cubeTexture;
-
         private GraphicsBuffer _uniformBuffer;
         private WorldViewProjection _wvp;
-        Geometry geometry_;
+        private Geometry geometry_;
 
         protected override void OnInit()
         {
             SubscribeToEvent<BeginRenderPass>(Handle);
 
             _cubeTexture = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
-            _uniformBuffer = GraphicsBuffer.DynamicUniform<WorldViewProjection>(1);
+            _uniformBuffer = UniformBuffer.Create<WorldViewProjection>(1);
 
             _descriptorSetLayout = CreateDescriptorSetLayout();
             _descriptorPool = CreateDescriptorPool();
@@ -114,13 +110,13 @@ namespace SharpGame.Samples.ColoredTriangle
             const float yawSpeed = twoPi / 4.0f;
             const float pitchSpeed = 0.0f;
             const float rollSpeed = twoPi / 4.0f;
-            /*
+         
             _wvp.World = Matrix.RotationYawPitchRoll(
                 timer.TotalTime * yawSpeed % twoPi,
                 timer.TotalTime * pitchSpeed % twoPi,
-                timer.TotalTime * rollSpeed % twoPi);*/
+                timer.TotalTime * rollSpeed % twoPi);
 
-            _wvp.World = Matrix.Identity;
+           // _wvp.World = Matrix.Identity;
 
             SetViewProjection();
 

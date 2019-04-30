@@ -47,7 +47,7 @@ namespace SharpGame.Samples.TexturedCube
             };
 
             _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
-            _uniformBuffer       = GraphicsBuffer.DynamicUniform<WorldViewProjection>(1);
+            _uniformBuffer       = UniformBuffer.Create<WorldViewProjection>(1);
 
             _descriptorSetLayout = CreateDescriptorSetLayout();
             _descriptorPool      = CreateDescriptorPool();

@@ -10,7 +10,7 @@ namespace SharpGame
         public IndexBuffer()
         {
         }
-
+        
         public void SetData<T>(T[] indices) where T : struct
         {
             var graphics = Get<Graphics>();
@@ -68,6 +68,27 @@ namespace SharpGame
             Stride = stride;
             Count = count;
 
+        }
+
+        public static IndexBuffer Create(int[] indices)
+        {
+            var ib = new IndexBuffer();
+            ib.SetData(indices);
+            return Graphics.ToDispose(ib);
+        }
+
+        public static IndexBuffer Create(short[] indices)
+        {
+            var ib = new IndexBuffer();
+            ib.SetData(indices);
+            return Graphics.ToDispose(ib);
+        }
+
+        public static IndexBuffer Create(IntPtr indices, int stride, int count)
+        {
+            var ib = new IndexBuffer();
+            ib.SetData(indices, stride, count);
+            return Graphics.ToDispose(ib);
         }
 
     }

@@ -61,7 +61,7 @@ namespace SharpGame.Samples.ComputeParticles
             _graphicsDescriptorSet = CreateGraphicsDescriptorSet();
 
             _storageBuffer = CreateStorageBuffer();
-            _uniformBuffer = GraphicsBuffer.DynamicUniform<UniformBufferObject>(1);
+            _uniformBuffer = UniformBuffer.Create<UniformBufferObject>(1);
             _computeDescriptorSetLayout = CreateComputeDescriptorSetLayout();
             _computeDescriptorSet = CreateComputeDescriptorSet();
             _computeCmdBuffer = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
@@ -211,7 +211,7 @@ namespace SharpGame.Samples.ComputeParticles
                 };
             }
 
-            return GraphicsBuffer.Storage(particles);
+            return StorageBuffer.Create(particles);
         }
 
         private DescriptorPool CreateDescriptorPool()

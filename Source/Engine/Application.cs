@@ -231,7 +231,7 @@ namespace SharpGame
             }
         }
 
-        protected T ToDispose<T>(T disposable) => graphics_.ToDispose(disposable);
+
 
     }
 

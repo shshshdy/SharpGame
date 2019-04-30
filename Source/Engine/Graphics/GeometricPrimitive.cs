@@ -73,8 +73,8 @@ namespace SharpGame
 
             var geom = new Geometry
             {
-                VertexBuffers = new[] { GraphicsBuffer.Vertex(vertices) },
-                IndexBuffer = GraphicsBuffer.Index(indices),
+                VertexBuffers = new[] { VertexBuffer.Create(vertices) },
+                IndexBuffer = IndexBuffer.Create(indices),
             };
 
             geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, indices.Length);

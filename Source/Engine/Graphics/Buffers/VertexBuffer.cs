@@ -70,5 +70,19 @@ namespace SharpGame
             this.Count = count;
         }
 
+        public static VertexBuffer Create<T>(T[] vertices) where T : struct
+        {
+            VertexBuffer vb = new VertexBuffer();
+            vb.SetData(vertices);
+            return Graphics.ToDispose(vb);
+        }
+
+        public static GraphicsBuffer Create(IntPtr vertices, int stride, int count)
+        {
+            VertexBuffer vb = new VertexBuffer();
+            vb.SetData(vertices, stride, count);
+            return Graphics.ToDispose(vb);
+        }
+
     }
 }
