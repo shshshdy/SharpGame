@@ -39,33 +39,31 @@ namespace SharpGame
 
         protected virtual CommandBuffer BeginDraw()
         {
-            int imageIndex = Graphics.WorkContext;
+            int workContext = Graphics.WorkContext;
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                Framebuffer = framebuffer_[imageIndex],
+                Framebuffer = framebuffer_[workContext],
                 RenderPass = renderPass_
             };
 
-            CommandBuffer cmdBuffer = Graphics.SecondaryCmdBuffers[imageIndex].Get();
+            CommandBuffer cmdBuffer = Graphics.SecondaryCmdBuffers[workContext].Get();
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue
                 | CommandBufferUsages.SimultaneousUse, inherit));
 
-            SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer, imageIndex = imageIndex });
+            SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer });
 
             //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
-            cmdBuffers_[imageIndex] = cmdBuffer;
+            cmdBuffers_[workContext] = cmdBuffer;
 
             return cmdBuffer;
         }
 
-        public void Draw()
+        public void Draw(View view)
         {
-            int imageIndex = Graphics.WorkContext;
-
             CommandBuffer cmdBuffer = BeginDraw();
 
-            OnDraw(cmdBuffer, imageIndex);
+            OnDraw(view, cmdBuffer);
 
             EndDraw(cmdBuffer);
         }
@@ -77,7 +75,7 @@ namespace SharpGame
             cmdBuffer.End();
         }
 
-        protected virtual void OnDraw(CommandBuffer cmdBuffer, int imageIndex)
+        protected virtual void OnDraw(View view, CommandBuffer cmdBuffer)
         {
         }
 

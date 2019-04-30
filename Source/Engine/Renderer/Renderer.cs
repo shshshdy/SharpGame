@@ -33,9 +33,17 @@ namespace SharpGame
 
             views_.Clear();
 
+            var timer = Get<Timer>();
+
+            FrameInfo frameInfo = new FrameInfo
+            {
+                timeStep_ = timer.DeltaTime,
+                frameNumber_ = timer.FrameNum
+            };
+
             foreach (var viewport in viewports_)
             {
-                viewport.view.Update();
+                viewport.view.Update(ref frameInfo);
             }
 
             SendGlobalEvent(new EndRender());

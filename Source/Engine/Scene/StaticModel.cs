@@ -131,29 +131,6 @@ namespace SharpGame
             }
         }
 
-        public override void UpdateGeometry(ref FrameInfo frameInfo)
-        {
-            unsafe
-            {/*
-                for (int i = 0; i < GeometryInstances.Length; i++)
-                {
-                    GeometryInstance* geoInst = (GeometryInstance*)GeometryInstances[i];               
-                    geoInst->SetGeometry(batches_[i].geometry_);
-                    geoInst->mtx = batches_[i].worldTransform_;
-                    geoInst->mtx_num = (ushort)batches_[i].numWorldTransforms_;
-                    Material mat = GetMaterial(i);
-                    if (mat)
-                    {
-                        geoInst->state = RenderState.Default;
-                        geoInst->cmd_buf = mat.CommandBuffer;
-                        geoInst->program = mat.GetShaderInstance(0, 0).Prog;
-                    }
-                }*/
-            }
-
-
-        }
-
         public override Geometry GetLodGeometry(int batchIndex, int level)
         {
             if (batchIndex >= geometries_.Length)

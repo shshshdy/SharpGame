@@ -14,6 +14,7 @@ namespace SharpGame
         private long _prevTime;
         private long _currTime;
         private bool _stopped;
+        private int frameNum_ = 0;
 
         static Timer()
         {
@@ -50,6 +51,8 @@ namespace SharpGame
 
         public float DeltaTime => (float)_deltaTime;
 
+        public int FrameNum => frameNum_;
+
         public void Reset()
         {
             long curTime = Stopwatch.GetTimestamp();
@@ -57,6 +60,7 @@ namespace SharpGame
             _prevTime = curTime;
             _stopTime = 0;
             _stopped = false;
+            frameNum_ = 0;
         }
 
         public void Start()
@@ -96,6 +100,8 @@ namespace SharpGame
             _prevTime = _currTime;
             if (_deltaTime < 0.0)
                 _deltaTime = 0.0;
+
+            frameNum_ ++;
         }
     }
 }

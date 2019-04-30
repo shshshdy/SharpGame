@@ -20,6 +20,8 @@ namespace SharpGame
         FastList<Drawable> drawables_ = new FastList<Drawable>();
         FastList<Light> lights_ = new FastList<Light>();
 
+        FrameInfo frame_;
+
         public View(RenderPath renderPath = null)
         {
             RenderPath = renderPath;
@@ -31,16 +33,19 @@ namespace SharpGame
             }
         }
 
-        public void Update()
+        public void Update(ref FrameInfo frameInfo)
         {
-            GetDrawables();
+            frame_ = frameInfo;
+            frame_.camera_ = camera;
+            //frame_.viewSize_ = View
+
+            UpdateDrawables();
 
             RenderPath.Draw(this);
         }
 
-        private void GetDrawables()
+        private void UpdateDrawables()
         {
-
             if (scene && camera)
             {
                 FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery
@@ -52,6 +57,16 @@ namespace SharpGame
                 scene.GetDrawables(frustumOctreeQuery, drawables_);
             }
 
+            //todo:multi thread
+            foreach(var drawable in drawables_)
+            {
+                drawable.UpdateGeometry(ref frame_);
+            }
+
+            foreach (var drawable in drawables_)
+            {
+                drawable.UpdateBatches(ref frame_);
+            }
         }
 
         public void Render(int imageIndex)

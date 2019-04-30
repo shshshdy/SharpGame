@@ -77,10 +77,6 @@ namespace SharpGame
         public const uint DRAWABLE_ANY = 0xff;
 
         [IgnoreDataMember]
-        public IntPtr[] GeometryInstances => geoInstances_;
-        protected IntPtr[] geoInstances_ = new IntPtr[0];
-
-        [IgnoreDataMember]
         public int Index { get; set; } = -1;
 
         /// World-space bounding box.
@@ -127,49 +123,12 @@ namespace SharpGame
         /// Last visible frame number.
         protected int viewFrameNumber_;
 
-        protected IntPtr Create()
+        public Drawable()
         {
-            IntPtr inst = Utilities.AllocateAndClear(Unsafe.SizeOf<GeometryInstance>());
-            //GeometryInstance * geoInst = (GeometryInstance*)inst;
-            //geoInst->mtx = node_.worldTransform_;
-            //geoInst->mtx_num = 1;
-           // geoInst->state = RenderState.Default;
-            return inst;
         }
-        
+
         protected virtual void SetNumGeometries(int num)
-        {
-            if(num == GeometryInstances.Length || num < 0)
-            {
-                return;
-            }
-            
-            if(num > 64)
-            {
-                Log.Warn("Too much Geometries");
-            }
-
-            if(num < GeometryInstances.Length)
-            {
-                for(int i = GeometryInstances.Length - 1; i >= num; i--)
-                {
-                    Utilities.Free(GeometryInstances[i]);
-                }
-
-                Array.Resize(ref geoInstances_, num);
-            }
-            else
-            {
-                int oldLen = GeometryInstances.Length;
-
-                Array.Resize(ref geoInstances_, num);
-
-                for(int i = oldLen; i < num; i++)
-                {
-                    geoInstances_[i] = (IntPtr)Create();
-                }
-            }
-
+        {            
             Array.Resize(ref batches_, num);
         }
 

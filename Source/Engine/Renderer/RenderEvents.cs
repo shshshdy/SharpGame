@@ -28,13 +28,11 @@ namespace SharpGame
     {
         public RenderPass renderPass;
         public VulkanCore.CommandBuffer commandBuffer;
-        public int imageIndex;
     }
 
     public struct EndRenderPass
     {
         public RenderPass renderPass;
         public VulkanCore.CommandBuffer commandBuffer;
-        public int imageIndex;
     }
 }

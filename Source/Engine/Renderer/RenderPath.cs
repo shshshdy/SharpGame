@@ -27,7 +27,7 @@ namespace SharpGame
 
             foreach (var renderPass in RenderPasses)
             {
-                renderPass.Draw();
+                renderPass.Draw(view);
             }
             
         }
