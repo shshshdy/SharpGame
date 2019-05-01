@@ -6,6 +6,12 @@ using VulkanCore;
 
 namespace SharpGame
 {
+    public struct Batch
+    {
+        public Material material;
+        public Geometry geometry;
+    }
+
     public class RenderPass : GPUObject
     {
         public StringID Name { get; set; }

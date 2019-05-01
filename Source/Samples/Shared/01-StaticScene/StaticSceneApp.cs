@@ -77,6 +77,10 @@ namespace SharpGame.Samples.StaticScene
             staticModel.SetModel(model_);
             geometry_ = model_.GetGeometry(0, 0);
 
+            var mat = new Material();
+            mat.SetTexture("sampler_Color", _cubeTexture);
+            staticModel.SetMaterial(0, mat);
+
             //geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
             /*
             MessagePackSerializer.SetDefaultResolver(MessagePack.Resolvers.ContractlessStandardResolver.Instance);

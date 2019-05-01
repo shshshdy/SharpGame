@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using VulkanCore;
 
 namespace SharpGame
 {
@@ -9,13 +10,16 @@ namespace SharpGame
     public class Material : Resource
     {
         public string Name { get; set; }
-        public string Shader { get; set; }
+        public string ShaderName { get; set; }
 
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
         public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
 
         private Shader shader_;
-        
+        public Shader Shader => shader_;
+
+        private DescriptorSet descriptorSet_;
+
         public Material()
         {
         }
@@ -34,16 +38,16 @@ namespace SharpGame
             return ref ShaderParameter.Null;
         }
 
-        public void SetShaderParameter<T>(StringID name, T vec2)
+        public void SetShaderParameter<T>(StringID name, T val)
         {
             ref ShaderParameter param = ref GetShaderParameter(name);
             if (!param.IsNull)
             {
-                param.data = vec2;
+                param.data = val;
             }
             else
             {
-                ShaderParameters.Add(new ShaderParameter { name = name, data = vec2 });
+                ShaderParameters.Add(new ShaderParameter { name = name, data = val });
             }
         }
 
@@ -61,7 +65,7 @@ namespace SharpGame
             return ref TexureParameter.Null;
         }
 
-        public void SetTexture<T>(StringID name, Texture tex)
+        public void SetTexture(StringID name, Texture tex)
         {
             for (int i = 0; i < TextureParameters.Count; i++)
             {
