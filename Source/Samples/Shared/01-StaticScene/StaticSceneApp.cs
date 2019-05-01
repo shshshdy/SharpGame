@@ -1,9 +1,10 @@
+//using MessagePack;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using VulkanCore;
 
-namespace SharpGame.Samples
+namespace SharpGame.Samples.StaticScene
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct WorldViewProjection
@@ -14,7 +15,7 @@ namespace SharpGame.Samples
         public Matrix ViewProj;
     }
 
-    public class StaticModelApp : Application
+    public class StaticSceneApp : Application
     {
         private Pipeline pipeline_;
         private Shader testShader_;
@@ -75,7 +76,25 @@ namespace SharpGame.Samples
             var staticModel = node_.AddComponent<StaticModel>();
             staticModel.SetModel(model_);
             geometry_ = model_.GetGeometry(0, 0);
+
             //geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
+            /*
+            MessagePackSerializer.SetDefaultResolver(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
+
+            byte[] bytes = MessagePackSerializer.Serialize(testShader_);
+
+            System.IO.File.WriteAllText("test_shader.json", MessagePackSerializer.ToJson(bytes));
+            */
+            //Shader newObj = MessagePackSerializer.Deserialize(System.IO.File.ReadAllBytes(path));
+            /*
+            JsonSerializer.SetDefaultResolver(StandardResolver.ExcludeNullSnakeCase);
+            {
+                byte[] bytes = Utf8Json.JsonSerializer.Serialize(testShader_);
+                var json = Utf8Json.JsonSerializer.PrettyPrint(bytes);
+
+                System.IO.File.WriteAllText("test_shader.json", json);
+            }*/
+
         }
 
         public override void Dispose()

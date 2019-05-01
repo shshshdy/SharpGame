@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
+    public struct ResourceRef
+    {
+        public Guid guid;
+        public Resource resource;
+    }
+
     public class Resource : Object
     {
         [IgnoreDataMember]

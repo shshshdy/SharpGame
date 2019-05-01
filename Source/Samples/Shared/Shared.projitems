@@ -9,7 +9,7 @@
     <Import_RootNamespace>Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)01-StaticModel\StaticModelApp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)01-StaticScene\StaticSceneApp.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)03-TexturedCube\TexturedCubeApp.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)04-ComputeParticles\ComputeParticlesApp.cs" />
   </ItemGroup>

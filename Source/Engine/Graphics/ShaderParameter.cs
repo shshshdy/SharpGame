@@ -1,43 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace SharpGame
 {
+
     public enum UniformType
     {
+        Bool,
+        Int,
+        Float,
+        Vec2,
+        Vec3,
+        Vec4,
+        Color,
+        Mat3,
+        Mat4
 
-    }
-
-    [StructLayout(LayoutKind.Explicit, Size = 16)]
-    public struct UnifromData
-    {
-        [FieldOffset(0)]
-        public float floatValue;
-        [FieldOffset(0)]
-        public Vector2 vec2Value;
-        [FieldOffset(0)]
-        public Vector3 vec3Value;
-        [FieldOffset(0)]
-        public Vector4 vec4Value;
-        [FieldOffset(0)]
-        public Matrix matValue;
-        [FieldOffset(0)]
-        public Texture texture;
-        [FieldOffset(0)]
-        public GraphicsBuffer buffer;
     }
 
     public struct ShaderParameter
     {
         public StringID name;
-        public UnifromData data;
+        public object data;
+        
+        public bool IsNull => name.IsNullOrEmpty;
+
+        public static ShaderParameter Null = new ShaderParameter();
     }
 
-    public struct TextureParameter
+    public struct TexureParameter
     {
         public StringID name;
         public Texture texture;
+        public Vector4 uvOffset;
+
+        public bool IsNull => name.IsNullOrEmpty;
+
+        public static TexureParameter Null = new TexureParameter();
     }
+
 }

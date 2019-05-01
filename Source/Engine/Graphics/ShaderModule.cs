@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using VulkanCore;
@@ -24,12 +25,8 @@ namespace SharpGame
         public bool isTextureBlock;
     }
 
-    public class ShaderModule : Resource
+    public class ShaderReflection
     {
-        public ShaderStages Stage { get; set; }
-        public string FuncName { get; set; }
-        public byte[] Code { get; set; }
-
         public InputBlock pushConstants;
         public List<InputBlock> descriptorSets;
 
@@ -43,6 +40,19 @@ namespace SharpGame
         public uint numDynamicTextures;
         public uint numStaticUniforms;
         public uint numStaticTextures;
+    }
+
+    public class ShaderModule : Resource
+    {
+        [DataMember]
+        public ShaderStages Stage { get; set; }
+        [DataMember]
+        public string FuncName { get; set; }
+        [DataMember]
+        public byte[] Code { get; set; }
+
+        [DataMember]
+        public ShaderReflection ShaderReflection { get; set; }
 
         internal VulkanCore.ShaderModule shaderModule;
 

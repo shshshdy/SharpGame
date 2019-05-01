@@ -5,7 +5,6 @@ using System.Text;
 
 namespace SharpGame
 {
-    
 
     public class Material : Resource
     {
@@ -13,41 +12,69 @@ namespace SharpGame
         public string Shader { get; set; }
 
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
-        public FastList<TextureParameter> TextureParameters { get; set; } = new FastList<TextureParameter>();
+        public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
+
+        private Shader shader_;
         
         public Material()
         {
         }
-        /*
+        
         public ref ShaderParameter GetShaderParameter(StringID name)
         {
-            for(int i = 0; i < UniformData.Count; i++)
+            for(int i = 0; i < ShaderParameters.Count; i++)
             {
-                ref ShaderParameter uniform = ref UniformData.At(i);
-                if(uniform.name == name)
+                ref ShaderParameter param = ref ShaderParameters.At(i);
+                if(param.name == name)
                 {
-                    return ref uniform;
+                    return ref param;
                 }
             }
 
-            //return default;
-        }*/
+            return ref ShaderParameter.Null;
+        }
 
-        public void SetShaderParameter(StringID name, Vector2 vec2)
+        public void SetShaderParameter<T>(StringID name, T vec2)
+        {
+            ref ShaderParameter param = ref GetShaderParameter(name);
+            if (!param.IsNull)
+            {
+                param.data = vec2;
+            }
+            else
+            {
+                ShaderParameters.Add(new ShaderParameter { name = name, data = vec2 });
+            }
+        }
+
+        public ref TexureParameter GetTextureParameter(StringID name)
         {
             for (int i = 0; i < ShaderParameters.Count; i++)
             {
-                ref ShaderParameter uniform = ref ShaderParameters.At(i);
-                if (uniform.name == name)
+                ref TexureParameter param = ref TextureParameters.At(i);
+                if (param.name == name)
                 {
-                    uniform.data.vec2Value = vec2;
+                    return ref param;
                 }
             }
 
-            ShaderParameters.Add(new ShaderParameter { name = name, data = new UnifromData { vec2Value = vec2 } });
-
+            return ref TexureParameter.Null;
         }
 
+        public void SetTexture<T>(StringID name, Texture tex)
+        {
+            for (int i = 0; i < TextureParameters.Count; i++)
+            {
+                ref TexureParameter param = ref TextureParameters.At(i);
+                if (param.name == name)
+                {
+                    param.texture = tex;
+                }
+            }
+
+            TextureParameters.Add(new TexureParameter { name = name, texture = tex });
+
+        }
 
     }
 }

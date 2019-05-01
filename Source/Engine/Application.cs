@@ -77,9 +77,9 @@ namespace SharpGame
 
         public void Resize()
         {
-            graphics_.Resize();
+            //graphics_.Resize();
 
-            SendGlobalEvent(new Resizing());
+           // SendGlobalEvent(new Resizing());
         }
 
         public void Activate()

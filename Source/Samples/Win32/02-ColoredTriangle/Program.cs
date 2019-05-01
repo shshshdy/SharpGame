@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace SharpGame.Samples.ColoredTriangle
+namespace SharpGame.Samples.StaticScene
 {
     public static class Program
     {
@@ -13,7 +13,7 @@ namespace SharpGame.Samples.ColoredTriangle
         {
             using (var window = new Win32Window(
                 Assembly.GetExecutingAssembly().GetName().Name,
-                new StaticModelApp()))
+                new StaticSceneApp()))
             {
                 window.Run();
             }

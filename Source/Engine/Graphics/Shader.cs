@@ -7,9 +7,12 @@ using VulkanCore;
 
 namespace SharpGame
 {
+    [DataContract]
     public class Shader : Resource
     {
+        [DataMember]
         public StringID Name { get; set; }
+        [DataMember]
         public Dictionary<StringID, Pass> Passes { get; set; } = new Dictionary<StringID, Pass>();
 
         public Shader()
@@ -46,6 +49,7 @@ namespace SharpGame
             }
         }
 
+        [IgnoreDataMember]
         public Pass Main
         {
             get
@@ -94,11 +98,17 @@ namespace SharpGame
         [IgnoreDataMember]
         public StringID Name { get => name_; set => name_ = value; }
 
+        [DataMember]
         public ShaderModule VertexShader { get; set; }
+        [DataMember]
         public ShaderModule GeometryShader { get; set; }
+        [DataMember]
         public ShaderModule PixelShader { get; set; }
+        [DataMember]
         public ShaderModule HullShader { get; set; }
+        [DataMember]
         public ShaderModule DomainShader { get; set; }
+        [DataMember]
         public ShaderModule ComputeShader { get; set; }
 
         [IgnoreDataMember]
