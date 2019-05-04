@@ -6,14 +6,6 @@ using VulkanCore;
 
 namespace SharpGame.Samples.StaticScene
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct WorldViewProjection
-    {
-        public Matrix World;
-        public Matrix View;
-        public Matrix ViewInv;
-        public Matrix ViewProj;
-    }
 
     public class StaticSceneApp : Application
     {

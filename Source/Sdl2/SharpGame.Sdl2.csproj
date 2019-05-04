@@ -13,20 +13,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\DLL\SDL2\win7-x64\SDL2.dll" Link="SDL2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="..\..\External\SDL2\win7-x64\SDL2.dll" Link="SDL2.dll" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NativeLibraryLoader" Version="1.0.1" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
-    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
-    <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
+    <PackageReference Include="NativeLibraryLoader" Version="1.0.12" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.6.0-preview4.19212.13" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UniqueSharp\UniqueSharp.csproj" />
+    <ProjectReference Include="..\Engine\SharpGame.Engine.csproj" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)PackageInfo.props" />

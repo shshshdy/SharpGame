@@ -1,4 +1,4 @@
-﻿namespace Unique.Sdl2
+﻿namespace SharpGame.Sdl2
 {
     public static unsafe partial class Sdl2Native
     {

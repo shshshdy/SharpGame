@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Unique.Sdl2
+namespace SharpGame.Sdl2
 {
     public enum SDL_Keycode
     {

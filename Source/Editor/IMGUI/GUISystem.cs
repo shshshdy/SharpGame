@@ -15,7 +15,7 @@ namespace UniqueEditor
 
     }
 
-    public class GUISystem : Subsystem
+    public class GUISystem : Object
     {
         Shader uiShader_;
         ShaderInstance uiShaderInstance_;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Unique.Sdl2
+namespace SharpGame.Sdl2
 {
     /// <summary>
     /// A transparent wrapper over a pointer representing an SDL Window object.

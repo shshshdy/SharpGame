@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Unique.Sdl2
+namespace SharpGame.Sdl2
 {
 
     /// <summary>

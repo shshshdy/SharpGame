@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Folder Include="Utility\" />
+    <Folder Include="Input\" />
   </ItemGroup>
 
 </Project>

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Text;
 
-using static Unique.Sdl2.Sdl2Native;
+using static SharpGame.Sdl2.Sdl2Native;
 using System.ComponentModel;
-using Unique;
 using System.Collections.Concurrent;
+using SharpGame;
 
-namespace Unique.Sdl2
+namespace SharpGame.Sdl2
 {
     public unsafe class SdlGameWindow : GameWindow
     {
@@ -152,12 +152,12 @@ namespace Unique.Sdl2
             switch(ev.type)
             {
                 case SDL_EventType.Quit:
-                Application.Quit();
+                //Application.Quit();
                 //Close();
                 break;
                 case SDL_EventType.Terminating:
                 //Close();
-                Application.Quit();
+                //Application.Quit();
                 break;
                 case SDL_EventType.WindowEvent:
                 SDL_WindowEvent windowEvent = Unsafe.Read<SDL_WindowEvent>(&ev);
@@ -296,7 +296,7 @@ namespace Unique.Sdl2
             {
             }
 
-            Input input = GetSubsystem<Input>();
+            Input input = Get<Input>();
 
             if (byteCount > 1)
             {
@@ -314,14 +314,14 @@ namespace Unique.Sdl2
 
         private void HandleMouseWheelEvent(SDL_MouseWheelEvent mouseWheelEvent)
         {
-            Input input = GetSubsystem<Input>();
+            Input input = Get<Input>();
             input.WheelDelta += mouseWheelEvent.y;
             input.InjectMouseWheel(new MouseWheelEvent(GetCurrentMouseState(), (float)mouseWheelEvent.y));
         }
 
         private void HandleMouseButtonEvent(SDL_MouseButtonEvent mouseButtonEvent)
         {
-            Input input = GetSubsystem<Input>();
+            Input input = Get<Input>();
             MouseButton button = MapMouseButton(mouseButtonEvent.button);
             bool down = mouseButtonEvent.state == 1;
 
@@ -364,7 +364,7 @@ namespace Unique.Sdl2
             _currentMouseX = (int)mousePos.X;
             _currentMouseY = (int)mousePos.Y;
 
-            Input input = GetSubsystem<Input>();
+            Input input = Get<Input>();
             input.InjectMouseMove(new MouseMoveEvent(GetCurrentMouseState(), mousePos));
         }
 
@@ -372,7 +372,7 @@ namespace Unique.Sdl2
         {
             KeyEvent keyEvent = new KeyEvent(MapKey(keyboardEvent.keysym), keyboardEvent.state == 1, MapModifierKeys(keyboardEvent.keysym.mod));
 
-            Input input = GetSubsystem<Input>();
+            Input input = Get<Input>();
             if (keyboardEvent.state == 1)
             {
                 input.InjectKeyDown(keyEvent);
