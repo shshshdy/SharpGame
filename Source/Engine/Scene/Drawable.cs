@@ -57,17 +57,6 @@ namespace SharpGame
         public GeometryType geometryType_;
     };
 
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public unsafe struct GeometryInstance
-    {
-        public fixed byte type[4];
-        public ushort mask;
-        public ushort mtx_num;
-        public Material material;
-        public Geometry geometry;
-        public IntPtr mtx;
-    }
-
     public unsafe abstract class Drawable : Component
     {
         public const uint DRAWABLE_GEOMETRY = 0x1;

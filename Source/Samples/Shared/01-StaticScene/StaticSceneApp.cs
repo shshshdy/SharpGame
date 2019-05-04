@@ -17,32 +17,23 @@ namespace SharpGame.Samples.StaticScene
 
     public class StaticSceneApp : Application
     {
-        private Pipeline pipeline_;
-        private Shader testShader_;
-
+        private Scene scene_;
         private Node node_;
         private Model model_;
         private Node cameraNode_;
         private Camera camera_;
 
-        private DescriptorSetLayout _descriptorSetLayout;
-        private DescriptorPool _descriptorPool;
-        private DescriptorSet _descriptorSet;
+        private Shader testShader_;
         private Texture _cubeTexture;
-        private GraphicsBuffer _uniformBuffer;
-        private WorldViewProjection _wvp;
+
+
+
         private Geometry geometry_;
 
         protected override void OnInit()
         {
             SubscribeToEvent<BeginRenderPass>(Handle);
-
-            _cubeTexture = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
-            _uniformBuffer = UniformBuffer.Create<WorldViewProjection>(1);
-
-            _descriptorSetLayout = CreateDescriptorSetLayout();
-            _descriptorPool = CreateDescriptorPool();
-            _descriptorSet = CreateDescriptorSet();
+            
 
             testShader_ = new Shader
             {
@@ -50,16 +41,14 @@ namespace SharpGame.Samples.StaticScene
                 ["main"] = new Pass("Textured.vert.spv", "Textured.frag.spv")
             };
 
-            pipeline_ = new Pipeline
-            {
-                CullMode = CullModes.None,
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout }),
-            };
+            scene_ = new Scene();
 
             node_ = new Node
             {
                 Position = new Vector3(0, 0, 0)
             };
+
+            scene_.AddChild(node_);
 
             cameraNode_ = new Node
             {
@@ -77,9 +66,15 @@ namespace SharpGame.Samples.StaticScene
             staticModel.SetModel(model_);
             geometry_ = model_.GetGeometry(0, 0);
 
+            //_cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
+
             var mat = new Material();
+            mat.Shader = testShader_;
             mat.SetTexture("sampler_Color", _cubeTexture);
             staticModel.SetMaterial(0, mat);
+
+            renderer_.MainView.scene = scene_;
+            renderer_.MainView.camera = camera_;
 
             //geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
             /*
@@ -104,7 +99,6 @@ namespace SharpGame.Samples.StaticScene
         public override void Dispose()
         {
             testShader_.Dispose();
-            pipeline_.Dispose();
 
             base.Dispose();
         }
@@ -112,6 +106,7 @@ namespace SharpGame.Samples.StaticScene
 
         protected override void Update(Timer timer)
         {
+            /*
             const float twoPi = (float)System.Math.PI * 2.0f;
             const float yawSpeed = twoPi / 4.0f;
             const float pitchSpeed = 0.0f;
@@ -126,63 +121,17 @@ namespace SharpGame.Samples.StaticScene
 
             SetViewProjection();
 
-            UpdateUniformBuffers();
-        }
-
-        private void SetViewProjection()
-        {
-            _wvp.View = camera_.View;
-            Matrix.Invert(ref _wvp.View, out _wvp.ViewInv);
-            _wvp.ViewProj = _wvp.View * camera_.Projection;
-        }
-
-        private void UpdateUniformBuffers()
-        {
-            IntPtr ptr = _uniformBuffer.Map(0, Interop.SizeOf<WorldViewProjection>());
-            Interop.Write(ptr, ref _wvp);
-            _uniformBuffer.Unmap();
+            UpdateUniformBuffers();*/
         }
 
         void Handle(BeginRenderPass e)
-        {
+        {/*
             var cmdBuffer = e.commandBuffer;
             var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, testShader_, geometry_);
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
-            geometry_.Draw(cmdBuffer);
+            geometry_.Draw(cmdBuffer);*/
         }
-
-
-        private DescriptorPool CreateDescriptorPool()
-        {
-            var descriptorPoolSizes = new[]
-            {
-                new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
-                new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 1)
-            };
-            return graphics_.CreateDescriptorPool(descriptorPoolSizes);
-        }
-
-        private DescriptorSet CreateDescriptorSet()
-        {
-            DescriptorSet descriptorSet = _descriptorPool.AllocateSets(new DescriptorSetAllocateInfo(1, _descriptorSetLayout))[0];
-            // Update the descriptor set for the shader binding point.
-            var writeDescriptorSets = new[]
-            {
-                new WriteDescriptorSet(descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
-                    bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
-                new WriteDescriptorSet(descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
-                    imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
-            };
-            _descriptorPool.UpdateSets(writeDescriptorSets);
-            return descriptorSet;
-        }
-
-        private DescriptorSetLayout CreateDescriptorSetLayout()
-        {
-            return graphics_.CreateDescriptorSetLayout(
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
-                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
-        }
+        
     }
 }

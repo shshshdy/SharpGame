@@ -16,14 +16,21 @@ namespace SharpGame
         public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
 
         private Shader shader_;
-        public Shader Shader => shader_;
+        public Shader Shader { get => shader_; set => shader_ = value; }
 
         private DescriptorSet descriptorSet_;
 
         public Material()
         {
         }
-        
+
+        protected override void OnBuild()
+        {
+            base.OnBuild();
+
+            //shader_ = ResourceCache.Instance.Load<>
+        }
+
         public ref ShaderParameter GetShaderParameter(StringID name)
         {
             for(int i = 0; i < ShaderParameters.Count; i++)

@@ -10,29 +10,26 @@ namespace SharpGame
     {
         public Graphics Graphics => Get<Graphics>();
 
-        public Viewport MainViewport { get; private set; }
+        public View MainView { get; private set; }
 
-        private List<Viewport> viewports_ = new List<Viewport>();
         private List<View> views_ = new List<View>();
 
         public Renderer()
         {
-            MainViewport = CreateViewport();
+            MainView = CreateView();
         }
 
-        public Viewport CreateViewport()
+        public View CreateView()
         {
-            var view = new Viewport();
-            viewports_.Add(view);
+            var view = new View();
+            views_.Add(view);
             return view;
         }
 
         public void RenderUpdate()
         {
             SendGlobalEvent(new BeginRender());
-
-            views_.Clear();
-
+            
             var timer = Get<Timer>();
 
             FrameInfo frameInfo = new FrameInfo
@@ -41,9 +38,9 @@ namespace SharpGame
                 frameNumber_ = timer.FrameNum
             };
 
-            foreach (var viewport in viewports_)
+            foreach (var viewport in views_)
             {
-                viewport.view.Update(ref frameInfo);
+                viewport.Update(ref frameInfo);
             }
 
             SendGlobalEvent(new EndRender());
@@ -78,14 +75,9 @@ namespace SharpGame
                     imageMemoryBarriers: new[] { barrierFromPresentToDraw });
             }
 
-            foreach (var viewport in viewports_)
+            foreach (var viewport in views_)
             {
-                if (!viewport.view)
-                {
-                    viewport.view = new View();
-                }
-
-                viewport.view.Render(imageIndex);
+                viewport.Render(imageIndex);
             }
                         
             if (Graphics.PresentQueue != Graphics.GraphicsQueue)

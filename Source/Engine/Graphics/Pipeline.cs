@@ -47,6 +47,8 @@ namespace SharpGame
 
         public VulkanCore.Pipeline pipeline;
 
+        Dictionary<Pass, VulkanCore.Pipeline> cachedPipeline_ = new Dictionary<Pass, VulkanCore.Pipeline>();
+
         public Pipeline()
         {
             Init();

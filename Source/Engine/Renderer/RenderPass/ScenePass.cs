@@ -12,20 +12,47 @@ namespace SharpGame
     using vec4 = Vector4;
     using mat4 = Matrix;
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct WorldViewProjection
+    {
+        public Matrix World;
+        public Matrix View;
+        public Matrix ViewInv;
+        public Matrix ViewProj;
+    }
+
     public class ScenePass : RenderPass
     {
         public AttachmentDescription[] attachments { get; set; }
         public SubpassDescription[] subpasses { get; set; }
 
-        private Pipeline pipeline_;
-        private DescriptorSetLayout _descriptorSetLayout;
-        private DescriptorPool _descriptorPool;
-        private DescriptorSet _descriptorSet;
 
+        private DescriptorSetLayout descriptorSetLayout_;
+        private DescriptorPool descriptorPool_;
+        private DescriptorSet descriptorSet_;
+
+        private Texture _cubeTexture;
+        private GraphicsBuffer _uniformBuffer;
+        private WorldViewProjection _wvp;
         public ScenePass(string name = "main")
         {
             Name = name;
+
             Recreate();
+
+            _cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
+            _uniformBuffer = UniformBuffer.Create<WorldViewProjection>(1);
+
+            descriptorSetLayout_ = CreateDescriptorSetLayout();
+            descriptorPool_ = CreateDescriptorPool();
+            descriptorSet_ = CreateDescriptorSet();
+
+            pipeline_ = new Pipeline
+            {
+                CullMode = CullModes.None,
+                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { descriptorSetLayout_ }),
+            };
+
         }
 
         protected override void Recreate()
@@ -113,7 +140,58 @@ namespace SharpGame
             return framebuffers;
         }
 
+        private DescriptorPool CreateDescriptorPool()
+        {
+            var descriptorPoolSizes = new[]
+            {
+                new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
+                new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 1)
+            };
+            return Graphics.CreateDescriptorPool(descriptorPoolSizes);
+        }
 
+        private DescriptorSet CreateDescriptorSet()
+        {
+            DescriptorSet descriptorSet = descriptorPool_.AllocateSets(new DescriptorSetAllocateInfo(1, descriptorSetLayout_))[0];
+            // Update the descriptor set for the shader binding point.
+            var writeDescriptorSets = new[]
+            {
+                new WriteDescriptorSet(descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
+                    bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
+                new WriteDescriptorSet(descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
+                    imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
+            };
+            descriptorPool_.UpdateSets(writeDescriptorSets);
+            return descriptorSet;
+        }
+
+        private DescriptorSetLayout CreateDescriptorSetLayout()
+        {
+            return Graphics.CreateDescriptorSetLayout(
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
+                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
+        }
+
+        protected override void OnDraw(View view, CommandBuffer cmdBuffer)
+        {
+            _wvp.World = Matrix.Identity;
+            _wvp.View = Matrix.LookAtLH(-Vector3.UnitZ * 3, Vector3.Zero, Vector3.UnitY); //view.camera.View;
+            Matrix.Invert(ref _wvp.View, out _wvp.ViewInv);
+            _wvp.ViewProj = _wvp.View * view.camera.Projection;
+
+            IntPtr ptr = _uniformBuffer.Map(0, Interop.SizeOf<WorldViewProjection>());
+            Interop.Write(ptr, ref _wvp);
+            _uniformBuffer.Unmap();
+
+            foreach (var drawable in view.drawables_)
+            {
+                for(int i = 0; i < drawable.Batches.Length; i++)
+                {
+                    ref SourceBatch batch = ref drawable.Batches[i];
+                    this.DrawBatch(cmdBuffer, ref batch, descriptorSet_);
+                }
+            }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

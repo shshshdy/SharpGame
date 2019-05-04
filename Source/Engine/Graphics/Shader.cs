@@ -58,7 +58,7 @@ namespace SharpGame
             }
         }
 
-        public Pass GetPass(string name)
+        public Pass GetPass(StringID name)
         {
             if(Passes.TryGetValue(name, out Pass pass))
             {

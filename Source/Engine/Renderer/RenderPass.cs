@@ -23,10 +23,14 @@ namespace SharpGame
         public Framebuffer[] framebuffer_;
 
         public Renderer Renderer => Get<Renderer>();
+        public ResourceCache ResourceCache => Get<ResourceCache>();
 
         protected CommandBuffer[] cmdBuffers_ = new CommandBuffer[2];
 
         internal VulkanCore.RenderPass renderPass_;
+
+        protected Pipeline pipeline_;
+
 
         public RenderPass()
         {
@@ -41,6 +45,16 @@ namespace SharpGame
             return renderPass_.CreateFramebuffer(
                     new FramebufferCreateInfo(attachments, width, height)
                 );
+        }
+
+
+        public void DrawBatch(CommandBuffer cmdBuffer, ref SourceBatch batch, DescriptorSet descriptorSet)
+        {
+            var shader = batch.material_.Shader;
+            var pipeline = pipeline_.GetGraphicsPipeline(this, shader, batch.geometry_);
+            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, descriptorSet);
+            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
+            batch.geometry_.Draw(cmdBuffer);
         }
 
         protected virtual CommandBuffer BeginDraw()

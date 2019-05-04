@@ -17,8 +17,8 @@ namespace SharpGame
         public Graphics Graphics => Get<Graphics>();
         public Renderer Renderer => Get<Renderer>();
 
-        FastList<Drawable> drawables_ = new FastList<Drawable>();
-        FastList<Light> lights_ = new FastList<Light>();
+        internal FastList<Drawable> drawables_ = new FastList<Drawable>();
+        internal FastList<Light> lights_ = new FastList<Light>();
 
         FrameInfo frame_;
 

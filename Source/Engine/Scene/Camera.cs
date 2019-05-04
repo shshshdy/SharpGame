@@ -73,6 +73,7 @@ namespace SharpGame
                         Vector3 worldPosition = node_.WorldPosition;
                         view_ = Matrix.Transformation(ref worldPosition, ref node_.WorldRotation);
                         view_.Invert();
+                        
                     }
                     else
                     {
