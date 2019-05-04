@@ -18,10 +18,12 @@ namespace SharpGame
 
     public struct BeginView
     {
+        public RenderView view;
     }
 
     public struct EndView
     {
+        public RenderView view;
     }
 
     public struct BeginRenderPass

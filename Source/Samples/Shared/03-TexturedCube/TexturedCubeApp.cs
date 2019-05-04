@@ -56,7 +56,8 @@ namespace SharpGame.Samples.TexturedCube
             pipeline_ = new Pipeline
             {
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout }),
-                VertexInputState = PosNormTex.Layout
+                VertexInputState = PosNormTex.Layout,
+                FrontFace = FrontFace.CounterClockwise
             };
 
             /*

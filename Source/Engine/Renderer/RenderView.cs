@@ -6,13 +6,13 @@ using VulkanCore;
 namespace SharpGame
 {
 
-    public class View : Object
+    public class RenderView : Object
     {
-        public uint ViewMask { get; set; }
-
-        public Scene scene;
-        public Camera camera;
+        public Scene Scene { get; set; }
+        public Camera Camera { get; set; }
         public RenderPath RenderPath { get; set; }
+        public VulkanCore.Viewport Viewport { get; set; }
+        public uint ViewMask { get; set; }
 
         public Graphics Graphics => Get<Graphics>();
         public Renderer Renderer => Get<Renderer>();
@@ -20,42 +20,49 @@ namespace SharpGame
         internal FastList<Drawable> drawables_ = new FastList<Drawable>();
         internal FastList<Light> lights_ = new FastList<Light>();
 
-        FrameInfo frame_;
+        private FrameInfo frame_;
 
-        public View(RenderPath renderPath = null)
+        public RenderView()
         {
-            RenderPath = renderPath;
-
-            if(RenderPath == null)
-            {
-                RenderPath = new RenderPath();
-                RenderPath.AddRenderPass(new ScenePass());
-            }
         }
 
         public void Update(ref FrameInfo frameInfo)
         {
             frame_ = frameInfo;
-            frame_.camera_ = camera;
-            //frame_.viewSize_ = View
+            frame_.camera_ = Camera;
+            frame_.viewSize_ = new Int2(Graphics.Width, Graphics.Height);
+
+            SendGlobalEvent(new BeginView { view = this });
+
+            if (RenderPath == null)
+            {
+                RenderPath = new RenderPath();
+                RenderPath.AddRenderPass(new ScenePass());
+            }
+
+            CommandBuffer cmdBuffer = Graphics.WorkCmdBuffer;
 
             UpdateDrawables();
 
             RenderPath.Draw(this);
+
+            SendGlobalEvent(new EndView { view = this });
         }
 
         private void UpdateDrawables()
         {
-            if (scene && camera)
+            if (Scene == null || Camera == null)
             {
-                FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery
-                {
-                    view = this,
-                    camera = camera
-                };
-
-                scene.GetDrawables(frustumOctreeQuery, drawables_);
+                return;
             }
+
+            FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery
+            {
+                view = this,
+                camera = Camera
+            };
+
+            Scene.GetDrawables(frustumOctreeQuery, drawables_);
 
             //todo:multi thread
             foreach(var drawable in drawables_)
@@ -67,6 +74,8 @@ namespace SharpGame
             {
                 drawable.UpdateBatches(ref frame_);
             }
+           
+
         }
 
         public void Render(int imageIndex)

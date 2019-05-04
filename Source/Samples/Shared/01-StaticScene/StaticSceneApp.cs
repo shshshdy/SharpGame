@@ -26,14 +26,10 @@ namespace SharpGame.Samples.StaticScene
         private Shader testShader_;
         private Texture _cubeTexture;
 
-
-
         private Geometry geometry_;
 
         protected override void OnInit()
         {
-            SubscribeToEvent<BeginRenderPass>(Handle);
-            
 
             testShader_ = new Shader
             {
@@ -66,15 +62,15 @@ namespace SharpGame.Samples.StaticScene
             staticModel.SetModel(model_);
             geometry_ = model_.GetGeometry(0, 0);
 
-            //_cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
+            _cubeTexture = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
 
             var mat = new Material();
             mat.Shader = testShader_;
             mat.SetTexture("sampler_Color", _cubeTexture);
             staticModel.SetMaterial(0, mat);
 
-            renderer_.MainView.scene = scene_;
-            renderer_.MainView.camera = camera_;
+            renderer_.MainView.Scene = scene_;
+            renderer_.MainView.Camera = camera_;
 
             //geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
             /*
@@ -119,18 +115,7 @@ namespace SharpGame.Samples.StaticScene
 
            // _wvp.World = Matrix.Identity;
 
-            SetViewProjection();
-
-            UpdateUniformBuffers();*/
-        }
-
-        void Handle(BeginRenderPass e)
-        {/*
-            var cmdBuffer = e.commandBuffer;
-            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, testShader_, geometry_);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
-            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
-            geometry_.Draw(cmdBuffer);*/
+ */
         }
         
     }

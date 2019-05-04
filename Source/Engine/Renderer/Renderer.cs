@@ -10,18 +10,23 @@ namespace SharpGame
     {
         public Graphics Graphics => Get<Graphics>();
 
-        public View MainView { get; private set; }
+        public RenderView MainView { get; private set; }
 
-        private List<View> views_ = new List<View>();
+        private List<RenderView> views_ = new List<RenderView>();
 
         public Renderer()
         {
-            MainView = CreateView();
+            MainView = CreateRenderView();
         }
 
-        public View CreateView()
+        public RenderView CreateRenderView(Scene scene = null, Camera camera = null, RenderPath renderPath = null)
         {
-            var view = new View();
+            var view = new RenderView
+            {
+                Scene = scene,
+                Camera = camera,
+                RenderPath = renderPath
+            };
             views_.Add(view);
             return view;
         }

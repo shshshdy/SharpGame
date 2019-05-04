@@ -62,7 +62,7 @@ namespace SharpGame
             {
                 PolygonMode = PolygonMode.Fill,
                 CullMode = CullModes.Back,
-                FrontFace = FrontFace.Clockwise,
+                FrontFace = FrontFace.CounterClockwise,
                 LineWidth = 1.0f
             };
 

@@ -21,7 +21,7 @@ namespace SharpGame
             RenderPasses.Add(renderPass);
         }
 
-        public void Draw(View view)
+        public void Draw(RenderView view)
         {
             var graphics = Get<Graphics>();
 

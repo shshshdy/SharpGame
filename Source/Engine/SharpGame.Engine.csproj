@@ -15,7 +15,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.69.0" />
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
@@ -24,7 +23,6 @@
 
 
   <ItemGroup>
-    <Folder Include="Graphics\Textures\" />
     <Folder Include="Utility\" />
   </ItemGroup>
 

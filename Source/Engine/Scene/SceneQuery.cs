@@ -28,7 +28,7 @@ namespace SharpGame
     {
         /// Frustum.
         public Camera camera;
-        public View view;
+        public RenderView view;
         public uint viewMask;
         public uint drawableFlags;
 

@@ -21,6 +21,7 @@ namespace SharpGame
         public Image[] SwapchainImages { get; private set; }
         public ImageView[] SwapchainImageViews { get; private set; }
         public CommandBuffer[] PrimaryCmdBuffers { get; private set; }
+        public CommandBuffer WorkCmdBuffer => PrimaryCmdBuffers[WorkContext];
         public CommandBufferPool[] SecondaryCmdBuffers { get; private set; }
         public Fence[] SubmitFences { get; private set; }
         public Semaphore ImageAvailableSemaphore { get; private set; }
