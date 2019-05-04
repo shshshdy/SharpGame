@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using Newtonsoft.Json;
-using Unique;
 using System.Collections.Concurrent;
 
-namespace UniqueEditor
+namespace SharpGame.Editor
 {
-    public class AssetDatabase : Subsystem
+    public class AssetDatabase : Object
     {
         ConcurrentQueue<FileSystemEventArgs> changeFiles_ = new ConcurrentQueue<FileSystemEventArgs>();
-        public override void Init()
+        public AssetDatabase()
         {
             AssetImporter.Init();
 
@@ -21,10 +19,7 @@ namespace UniqueEditor
             SubscribeToEvent<BeginFrame>(HandleBeginFrame);
 
         }
-
-        public override void Deinit()
-        {
-        }
+        
 
         private void WatcherStart(string path, string filter)
         {
@@ -93,7 +88,7 @@ namespace UniqueEditor
                 path = path.Substring(0, idx) + ".shader";
             }
 
-            ResourceCache cache = GetSubsystem<ResourceCache>();
+            ResourceCache cache = Get<ResourceCache>();
             Resource obj = cache.GetExistingResource(null, path);
             if(obj)
                 obj.Modify();

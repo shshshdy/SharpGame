@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Unique;
 
-namespace UniqueEditor
+
+namespace SharpGame.Editor
 {
     public class EditorWindow : DisposeBase
     {

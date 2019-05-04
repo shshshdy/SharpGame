@@ -104,4 +104,10 @@ namespace SharpGame
             frameNum_ ++;
         }
     }
+
+    public class Time
+    {
+        public static float Delta => Object.Get<Timer>().DeltaTime;
+        public static float Total => Object.Get<Timer>().TotalTime;
+    }
 }

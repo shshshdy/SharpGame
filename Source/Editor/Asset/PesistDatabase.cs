@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace UniqueEditor
+namespace SharpGame.Editor
 {
     [DataContract]
     public enum AssetType

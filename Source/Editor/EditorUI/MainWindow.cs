@@ -6,7 +6,7 @@ using ImGuiNET;
 using ImVec2 = System.Numerics.Vector2;
 using ImVec3 = System.Numerics.Vector3;
 
-namespace UniqueEditor
+namespace SharpGame.Editor
 {
     internal class MainWindow : EditorWindow
     {
@@ -31,7 +31,7 @@ namespace UniqueEditor
 
                 ImGui.EndMenu();
             }
-
+            /*
             if(ImGui.BeginMenu("Style"))
             {
                 for(ImGuiStyle i = 0; i < ImGuiStyle.Count; i++)
@@ -44,16 +44,16 @@ namespace UniqueEditor
 
                 ImGui.EndMenu();
             }
-
+            */
             ImGui.EndMainMenuBar();
 
             ImGui.SetNextWindowPos(
                   new ImVec2(10.0f, 50.0f)
-                , SetCondition.FirstUseEver
+                , ImGuiCond.FirstUseEver
                 );
 
-            ImGui.BeginWindow("test1", ref opened, new ImVec2(1024, 768)
-                , WindowFlags.AlwaysAutoResize
+            ImGui.Begin("test1", ref opened//, new ImVec2(1024, 768)
+                , ImGuiWindowFlags.AlwaysAutoResize
                 );
 
             if(ImGui.Button(" Restart"))
@@ -62,10 +62,10 @@ namespace UniqueEditor
             }
 
             ImGui.Text("Test text, 测试文字");
-
+            /*
             unsafe
             {
-                if(ImGui.InputText("Input:", textBuffer, 1024, InputTextFlags.Default, TextEditCallback))
+                if(ImGui.InputText("Input:", textBuffer, 1024, ImGuiInputTextFlags.None, TextEditCallback))
                 {
 
                 }
@@ -73,23 +73,23 @@ namespace UniqueEditor
 
             }
 
-            Style style = ImGui.GetStyle();
+            ImGuiStylePtr style = ImGui.GetStyle();
             for(ColorTarget i = 0; i < ColorTarget.Count; i++)
             {
-                ImVec4 c = style.GetColor(i);
+                ImVec4 c = style.Colors[i];
                 if(ImGui.ColorEdit4(i.ToString(), ref c, true))
                     style.SetColor(i, c);
             }
+            */
 
-
-            ImGui.EndWindow();
+            ImGui.End();
         }
+        /*
 
-
-        unsafe int TextEditCallback(TextEditCallbackData* data)
+        unsafe int TextEditCallback(ImGuiTextEditCallbackDataPtr data)
         {
             return 0;
-        }
+        }*/
 
     }
 }

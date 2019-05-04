@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UniqueEditor
+namespace SharpGame.Editor
 {
     public class AssetProcessor
     {

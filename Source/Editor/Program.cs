@@ -2,7 +2,7 @@
 using Unique;
 using Unique.Sdl2;
 
-namespace UniqueEditor
+namespace SharpGame.Editor
 {
     class Program
     {

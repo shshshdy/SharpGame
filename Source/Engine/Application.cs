@@ -65,6 +65,12 @@ namespace SharpGame
             graphics_ = CreateSubsystem<Graphics>(platform_);
             resourceCache_ = CreateSubsystem<ResourceCache>("../../Content");
             renderer_ = CreateSubsystem<Renderer>();
+
+            Setup();
+        }
+
+        protected virtual void Setup()
+        {
         }
 
         protected virtual void OnInit()
@@ -72,6 +78,10 @@ namespace SharpGame
         }
         
         protected virtual void Update(Timer timer)
+        {
+        }
+
+        protected virtual void OnShutdown()
         {
         }
 
@@ -166,6 +176,7 @@ namespace SharpGame
                 }
             }
 
+            OnShutdown();
 
         }
 

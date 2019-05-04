@@ -1,8 +1,6 @@
-﻿using Unique;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using System.Collections.Generic;
 
-namespace UniqueEditor
+namespace SharpGame.Editor
 {
     public class EditorApplication : Application
     {
@@ -19,9 +17,9 @@ namespace UniqueEditor
         {
             base.Setup();
 
-            RegisterSubsystem<AssetDatabase>();
+            CreateSubsystem<AssetDatabase>();
 
-            GUISystem guiSys = RegisterSubsystem<GUISystem>();
+            GUISystem guiSys = CreateSubsystem<GUISystem>();
 
             EditorWindow.GetWindow<MainWindow>();
 
@@ -31,9 +29,9 @@ namespace UniqueEditor
 
         }
 
-        protected override void Init()
+        protected override void OnInit()
         {
-            base.Init();
+            base.OnInit();
 
             scene_ = new Scene();
             camera_ = scene_.CreateChild("Camera").CreateComponent<Camera>();
@@ -76,12 +74,12 @@ namespace UniqueEditor
 
                     material_ = new Material
                     {
-                        Shader = "shaders/solid.shader",
-                        ShaderDefines = "SKINNED"
-                    }
-                    .SetUniform("MatDiffColor", Color.White)
-                    .SetUniform("UVOffset", new Vector4(1, 1, 0, 0))
-                    .SetTexture("DiffMap", diffTex_);
+                        ShaderName = "shaders/solid.shader",
+                    };
+
+                    material_.SetUniform("MatDiffColor", Color.White);
+                    material_.SetUniform("UVOffset", new Vector4(1, 1, 0, 0));
+                    material_.SetTexture("DiffMap", diffTex_);
 
                     modelObject.SetMaterial(0, material_);
 
@@ -96,18 +94,14 @@ namespace UniqueEditor
             camera_.Node.Position = new Vector3(0, 4.0f, -20.0f);
             camera_.Node.LookAt(Vector3.Zero);
 
-            Renderer renderer = GetSubsystem<Renderer>();
-            View view = renderer.CreateView(camera_, scene_);
+            Renderer renderer = Get<Renderer>();
+            RenderView view = renderer.CreateRenderView(camera_, scene_);
 
-            //IOTest.Test(); 
-            //System.IO.File.WriteAllText("test_scene.json", JsonConvert.SerializeObject(scene_, Formatting.Indented));
-            //MessagePack.MessagePackSerializer.Serialize(scene_);
-            //SerializeUtil.SaveJson("test_scene.json", scene_);
         }
 
-        protected override void Shutdown()
+        protected override void OnShutdown()
         {
-            scene_.Release();
+            scene_.Dispose();
         }
 
         Vector2 mousePos_ = Vector2.Zero;
@@ -120,7 +114,7 @@ namespace UniqueEditor
 
         private void HandleUpdate(ref Update e)
         {
-            Input input = GetSubsystem<Input>();
+            Input input = Get<Input>();
 
             if (mousePos_ == Vector2.Zero)
                 mousePos_ = input.MousePosition;

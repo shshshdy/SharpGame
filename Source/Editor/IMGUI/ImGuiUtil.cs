@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using ImVec2 = System.Numerics.Vector2;
-using ImVec3 = System.Numerics.Vector3;
+#if false
 
-namespace UniqueEditor
+using ImVec2 = SharpGame.Vector2;
+using ImVec3 = SharpGame.Vector3;
+
+namespace SharpGame.Editor
 {
     public enum ImGuiStyle
     {
@@ -50,15 +52,15 @@ namespace UniqueEditor
                 ImGuiUtil.ColorConvertHSVtoRGB(H, S, V, ref col.X, ref col.Y, ref col.Z);
             }
         }
-        static void InvertStyleColors(Style style) { ChangeStyleColors(style, .1f, 0.0f); }
-        static void ChangeStyleColorsHue(Style style, float shiftHue = 0.0f) { ChangeStyleColors(style, 0.0f, shiftHue); }
+        static void InvertStyleColors(ImGuiStyle style) { ChangeStyleColors(style, .1f, 0.0f); }
+        static void ChangeStyleColorsHue(ImGuiStyle style, float shiftHue = 0.0f) { ChangeStyleColors(style, 0.0f, shiftHue); }
         static ImVec4 ConvertTitleBgColFromPrevVersion(ImVec4 win_bg_col, ImVec4 title_bg_col)
         {
             float new_a = 1.0f - ((1.0f - win_bg_col.W) * (1.0f - title_bg_col.W)), k = title_bg_col.W / new_a;
             return new_ImVec4((win_bg_col.X* win_bg_col.W + title_bg_col.X) * k, (win_bg_col.Y* win_bg_col.W + title_bg_col.Y) * k, (win_bg_col.Z* win_bg_col.W + title_bg_col.Z) * k, new_a);
         }
 
-        public static bool ResetStyle(ImGuiStyle styleEnum, Style style)
+        public static bool ResetStyle(ImGuiStyle styleEnum, ImGuiStyle style)
         {
             if (styleEnum < 0 || styleEnum >= ImGuiStyle.Count) return false;
            // style = ImGuiStyle();
@@ -677,3 +679,5 @@ namespace UniqueEditor
         }
     }
 }
+
+#endif

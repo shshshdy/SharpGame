@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UniqueEditor.Asset
+namespace SharpGame.Editor.Asset
 {
     [FileExtension(".shader")]
     public class ShaderImporter : AssetImporter

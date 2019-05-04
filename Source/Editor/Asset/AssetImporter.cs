@@ -1,16 +1,14 @@
 ﻿//#define USE_JSON
 
 using MessagePack;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
-using Unique;
 
-namespace UniqueEditor
+namespace SharpGame.Editor
 {
     [DataContract]
     public class AssetImporter

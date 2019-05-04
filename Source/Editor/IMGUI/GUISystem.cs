@@ -1,14 +1,13 @@
 ﻿using ImGuiNET;
-using Unique;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ImVec2 = System.Numerics.Vector2;
 
-namespace UniqueEditor
+namespace SharpGame.Editor
 {
-    public struct GUIEvent : IEvent
+    public struct GUIEvent
     {
         static GUIEvent ref_;
         public static ref GUIEvent Ref => ref ref_;
@@ -18,20 +17,21 @@ namespace UniqueEditor
     public class GUISystem : Object
     {
         Shader uiShader_;
-        ShaderInstance uiShaderInstance_;
-        RenderState renderState_ = RenderState.Default;
+
+        //ShaderInstance uiShaderInstance_;
+        //RenderState renderState_ = RenderState.Default;
         Texture fontTex_;
         byte viewId_ = 255;
         
-        public override void Init()
+        public GUISystem()
         {
             //ImGui.GetIO().FontAtlas.AddDefaultFont();
             ImGui.GetIO().FontAtlas.AddFontFromFileTTF("Data/font/arial.ttf", 16);
 
-            ResourceCache cache = GetSubsystem<ResourceCache>();
+            ResourceCache cache = Get<ResourceCache>();
             uiShader_ = cache.GetResource<Shader>("shaders/ui.shader");
 
-            uiShaderInstance_ = uiShader_.GetInstance(0, "");
+            //uiShaderInstance_ = uiShader_.GetInstance(0, "");
             //uiShaderInstance_.Create();
 
             RecreateFontDeviceTexture();
@@ -50,14 +50,12 @@ namespace UniqueEditor
             SubscribeToEvent((ref PostRender e) => RenderGUI());
 
         }
-
-        public override void Deinit()
-        {
-        }
+        
 
         private unsafe void RecreateFontDeviceTexture()
         {
             var io = ImGui.GetIO();
+            /*
             // Build
             var textureData = io.FontAtlas.GetTexDataAsRGBA32();
             MemoryBlock mem = new MemoryBlock((IntPtr)textureData.Pixels, textureData.BytesPerPixel * textureData.Width * textureData.Height);
@@ -65,37 +63,37 @@ namespace UniqueEditor
 
             // Store our identifier
             io.FontAtlas.SetTexID(fontTex_.Handle);
-            io.FontAtlas.ClearTexData();
+            io.FontAtlas.ClearTexData();*/
         }
 
         private static unsafe void SetOpenTKKeyMappings()
         {
-            IO io = ImGui.GetIO();
-            io.KeyMap[GuiKey.Tab] = (int)Key.Tab;
-            io.KeyMap[GuiKey.LeftArrow] = (int)Key.Left;
-            io.KeyMap[GuiKey.RightArrow] = (int)Key.Right;
-            io.KeyMap[GuiKey.UpArrow] = (int)Key.Up;
-            io.KeyMap[GuiKey.DownArrow] = (int)Key.Down;
-            io.KeyMap[GuiKey.PageUp] = (int)Key.PageUp;
-            io.KeyMap[GuiKey.PageDown] = (int)Key.PageDown;
-            io.KeyMap[GuiKey.Home] = (int)Key.Home;
-            io.KeyMap[GuiKey.End] = (int)Key.End;
-            io.KeyMap[GuiKey.Delete] = (int)Key.Delete;
-            io.KeyMap[GuiKey.Backspace] = (int)Key.BackSpace;
-            io.KeyMap[GuiKey.Enter] = (int)Key.Enter;
-            io.KeyMap[GuiKey.Escape] = (int)Key.Escape;
-            io.KeyMap[GuiKey.A] = (int)Key.A;
-            io.KeyMap[GuiKey.C] = (int)Key.C;
-            io.KeyMap[GuiKey.V] = (int)Key.V;
-            io.KeyMap[GuiKey.X] = (int)Key.X;
-            io.KeyMap[GuiKey.Y] = (int)Key.Y;
-            io.KeyMap[GuiKey.Z] = (int)Key.Z;
+            ImGuiIOPtr io = ImGui.GetIO();
+            io.KeyMap[(int)ImGuiKey.Tab] = (int)Key.Tab;
+            io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Key.Left;
+            io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Key.Right;
+            io.KeyMap[(int)ImGuiKey.UpArrow] = (int)Key.Up;
+            io.KeyMap[(int)ImGuiKey.DownArrow] = (int)Key.Down;
+            io.KeyMap[(int)ImGuiKey.PageUp] = (int)Key.PageUp;
+            io.KeyMap[(int)ImGuiKey.PageDown] = (int)Key.PageDown;
+            io.KeyMap[(int)ImGuiKey.Home] = (int)Key.Home;
+            io.KeyMap[(int)ImGuiKey.End] = (int)Key.End;
+            io.KeyMap[(int)ImGuiKey.Delete] = (int)Key.Delete;
+            io.KeyMap[(int)ImGuiKey.Backspace] = (int)Key.BackSpace;
+            io.KeyMap[(int)ImGuiKey.Enter] = (int)Key.Enter;
+            io.KeyMap[(int)ImGuiKey.Escape] = (int)Key.Escape;
+            io.KeyMap[(int)ImGuiKey.A] = (int)Key.A;
+            io.KeyMap[(int)ImGuiKey.C] = (int)Key.C;
+            io.KeyMap[(int)ImGuiKey.V] = (int)Key.V;
+            io.KeyMap[(int)ImGuiKey.X] = (int)Key.X;
+            io.KeyMap[(int)ImGuiKey.Y] = (int)Key.Y;
+            io.KeyMap[(int)ImGuiKey.Z] = (int)Key.Z;
         }
 
         private unsafe void SetPerFrameImGuiData(float deltaSeconds)
         {
-            Graphics graphics = GetSubsystem<Graphics>();
-            IO io = ImGui.GetIO();
+            Graphics graphics = Get<Graphics>();
+            ImGuiIOPtr io = ImGui.GetIO();
             io.DisplaySize = new ImVec2(
                 graphics.Width,
                 graphics.Height);
@@ -120,12 +118,12 @@ namespace UniqueEditor
             RenderImDrawData(ImGui.GetDrawData());
         }
 
-        private unsafe void RenderImDrawData(DrawData* draw_data)
-        {
+        private unsafe void RenderImDrawData(ImDrawDataPtr draw_data)
+        {/*
             IO io = ImGui.GetIO();
             float width = io.DisplaySize.X;
             float height = io.DisplaySize.Y;
-            Graphics graphics = GetSubsystem<Graphics>();
+            Graphics graphics = Get<Graphics>();
             Capabilities caps = Bgfx.GetCaps();
             Matrix ortho = Matrix.OrthoOffCenterLH(0.0f, width, height, 0.0f, -1.0f, 1.0f, caps.HomogeneousDepth);
             Matrix view = Matrix.Identity;
@@ -140,9 +138,9 @@ namespace UniqueEditor
                 DrawGUICmdList(cmd_list);
             }
 
-            Bgfx.SetScissor(0, 0, 0, 0);            
+            Bgfx.SetScissor(0, 0, 0, 0);        */    
         }
-
+        /*
         unsafe void DrawGUICmdList(NativeDrawList* cmd_list)
         {
             int num_indices = cmd_list->IdxBuffer.Size;
@@ -156,7 +154,7 @@ namespace UniqueEditor
             if(TransientVertexBuffer.GetAvailableSpace(num_vertices, decl) < num_vertices)
                 return;
 
-            Graphics graphics = GetSubsystem<Graphics>();
+            Graphics graphics = Get<Graphics>();
             TransientVertexBuffer vertex_buffer = new TransientVertexBuffer(num_vertices, decl);
             TransientIndexBuffer index_buffer = new TransientIndexBuffer(num_indices);
        
@@ -213,12 +211,12 @@ namespace UniqueEditor
             }
 
         }
-
+        */
         private unsafe void UpdateImGuiInput()
         {
             IO io = ImGui.GetIO();
 
-            Input input = GetSubsystem<Input>();
+            Input input = Get<Input>();
 
             ImVec2 mousePosition = EditorUtil.Convert(input.MousePosition);
 

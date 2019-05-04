@@ -23,14 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="ImGui.NET" Version="1.69.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ThirdParty\ImGui.NET\ImGui.NET.csproj" />
-    <ProjectReference Include="..\Unique.Sdl2\Unique.Sdl2.csproj" />
-    <ProjectReference Include="..\UniqueCore\UniqueCore.csproj" />
-    <ProjectReference Include="..\UniqueSharp\UniqueSharp.csproj" />
+    <ProjectReference Include="..\Engine\SharpGame.Engine.csproj" />
   </ItemGroup>
 
 </Project>

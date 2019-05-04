@@ -4,26 +4,31 @@ using System.Text;
 
 namespace SharpGame
 {
-    struct BeginFrame
+    public struct BeginFrame
     {
         public int frameNum_;
         public float timeTotal_;
         public float timeDelta_;
     }
 
-    struct Update
+    public struct Update
     {
         public float timeTotal_;
         public float timeDelta_;
     }
 
-    struct PostUpdate
+    public struct PostUpdate
     {
         public float timeTotal_;
         public float timeDelta_;
     }
 
-    struct EndFrame
+    public struct PostRenderUpdate
+    {
+
+    }
+
+    public struct EndFrame
     {
     }
 
