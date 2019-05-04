@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <PackageId>Unique.Sdl2</PackageId>
+    <PackageVersion>$(AssemblyVersion)</PackageVersion>
+    <Authors>Eric Mellino</Authors>
+    <Description>Raw SDL2 bindings for .NET.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Copyright>Copyright 2017 (c) Eric Mellino. All rights reserved.</Copyright>
+    <PackageTags>SDL2 Game Graphics Window Input Video</PackageTags>
+    <ProjectUrl>https://github.com/mellinoe/veldrid.sdl2</ProjectUrl>
+    <RepositoryUrl>https://github.com/mellinoe/veldrid.sdl2</RepositoryUrl>
+  </PropertyGroup>
+</Project>

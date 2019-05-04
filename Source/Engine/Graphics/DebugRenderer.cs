@@ -69,7 +69,8 @@ namespace SharpGame
         bool lineAntiAlias_;
 
         Shader uiShader_;
-        //RenderState renderState_ = RenderState.Default;
+
+        Pipeline renderState_ ;
         public DebugRenderer()
         {
             ResourceCache cache = Get<ResourceCache>();
