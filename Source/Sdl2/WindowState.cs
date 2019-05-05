@@ -1,5 +1,5 @@
 ﻿namespace SharpGame
-{/*
+{
     public enum WindowState
     {
         Normal,
@@ -8,5 +8,5 @@
         Minimized,
         BorderlessFullScreen,
         Hidden,
-    }*/
+    }
 }

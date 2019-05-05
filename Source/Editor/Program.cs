@@ -13,7 +13,7 @@ namespace SharpGame.Editor
            // Console.ReadLine();
 
             var app = new EditorApplication();
-            app.Run(new SdlGameWindow("UniqueStudio", 100, 100, 1280, 720, SDL_WindowFlags.Resizable));
+            app.Run(new Sdl2Window("SharpGame", 100, 100, 1280, 720, SDL_WindowFlags.Resizable, true));
         }
     }
 }

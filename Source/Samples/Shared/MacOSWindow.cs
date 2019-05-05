@@ -30,6 +30,8 @@ namespace SharpGame.Samples
         public string Title { get => _nativeWindow.Title; set => _nativeWindow.Title = value; }
 
         public void ProcessEvents() => _nativeApp.ProcessEvents();
+        public void PumpEvents(InputSnapshot inputSnapshot) { }
+
         public Stream Open(string path) => new FileStream(Path.Combine("bin", path), FileMode.Open, FileAccess.Read);
 
         public void Initialize()

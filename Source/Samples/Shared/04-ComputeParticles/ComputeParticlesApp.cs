@@ -191,7 +191,7 @@ namespace SharpGame.Samples.ComputeParticles
         {
             var random = new Random();
             
-            int numParticles = platform_.Platform == PlatformType.Android
+            int numParticles = gameWindow_.Platform == PlatformType.Android
                 ? 256 * 1024
                 : 256 * 2048; // ~500k particles.
 

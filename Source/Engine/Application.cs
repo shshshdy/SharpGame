@@ -23,19 +23,20 @@ namespace SharpGame
         string Title { get; set; }
 
         PlatformType Platform { get; }
-        void RunMessageLoop();
         void ProcessEvents();
+        void PumpEvents(InputSnapshot inputSnapshot);       
         Stream Open(string path);
     }
 
     public abstract class Application : Object
     {
         public string Name { get; set; }
-        protected IGameWindow platform_;
+        protected IGameWindow gameWindow_;
         protected FileSystem fileSystem_;
         protected Graphics graphics_;
         protected Renderer renderer_;
         protected ResourceCache resourceCache_;
+        protected Input input_;
 
         private Timer timer_;
         private int frameNumber_;
@@ -57,17 +58,17 @@ namespace SharpGame
             _context.Dispose();
         }
 
-        public void Initialize(IGameWindow host)
+        public void Initialize(IGameWindow gameWindow)
         {
-            //Name = host.Title;
-            platform_ = host;
+            gameWindow_ = gameWindow;
 
             timer_ = CreateSubsystem<Timer>();
-            fileSystem_ = CreateSubsystem<FileSystem>(platform_);            
-            graphics_ = CreateSubsystem<Graphics>(platform_);
+            fileSystem_ = CreateSubsystem<FileSystem>(gameWindow_);            
+            graphics_ = CreateSubsystem<Graphics>(gameWindow_);
             resourceCache_ = CreateSubsystem<ResourceCache>("../Content");
             renderer_ = CreateSubsystem<Renderer>();
-            CreateSubsystem<Input>();
+            input_ = CreateSubsystem<Input>();
+
             Setup();
         }
 
@@ -143,7 +144,7 @@ namespace SharpGame
 
                 while (_running)
                 {
-                    platform_.RunMessageLoop();
+                    gameWindow_.ProcessEvents();
 
                     if (!_appPaused)
                     {
@@ -170,8 +171,8 @@ namespace SharpGame
 
             while (_running)
             {
-                platform_.RunMessageLoop();
-                platform_.ProcessEvents();
+                gameWindow_.ProcessEvents();
+                gameWindow_.PumpEvents(input_.InputSnapshot);
 
                 if (!_appPaused)
                 {
@@ -203,7 +204,8 @@ namespace SharpGame
 
             while (_running)
             {
-                platform_.ProcessEvents();
+                gameWindow_.PumpEvents(input_.InputSnapshot);
+                //platform_.ProcessEvents();
 
                 UpdateFrame();
 
@@ -262,10 +264,10 @@ namespace SharpGame
                 float fps = frameNumber_;
                 float mspf = 1000.0f / fps;
 
-                graphics_.Post(() =>
-                {
-                    platform_.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
-                });
+                //graphics_.Post(() =>
+                //{
+                    gameWindow_.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
+                //});
 
                 // Reset for next average.
                 frameNumber_ = 0;

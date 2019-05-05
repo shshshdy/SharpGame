@@ -33,6 +33,8 @@ namespace SharpGame.Samples
         public string Title { get => _form.Text; set => _form.Text = value; }
 
         public void ProcessEvents() => System.Windows.Forms.Application.DoEvents();
+        public void PumpEvents(InputSnapshot inputSnapshot) { }
+
         public Stream Open(string path) => new FileStream(path, FileMode.Open, FileAccess.Read);
 
         public void Initialize()
@@ -149,7 +151,7 @@ namespace SharpGame.Samples
 
         public void RunMessageLoop()
         {
-            throw new NotImplementedException();
+
         }
     }
 }

@@ -138,9 +138,12 @@ namespace SharpGame
             Instance.Dispose();
         }
 
-        public void Resize()
+        public void Resize(int w, int h)
         {
             Device.WaitIdle();
+
+            Width = w;
+            Height = h;
 
             // Dispose all frame dependent resources.
             while (_toDisposeFrame.Count > 0)
@@ -328,7 +331,7 @@ namespace SharpGame
         public bool BeginRender()
         {
             if (MainSemWait())
-            {
+            {/*
                 if(commands_.Count > 0)
                 {
                     foreach (var cmd in commands_)
@@ -337,7 +340,7 @@ namespace SharpGame
                     }
 
                     commands_.Clear();
-                }
+                }*/
 
                 return true;
             }

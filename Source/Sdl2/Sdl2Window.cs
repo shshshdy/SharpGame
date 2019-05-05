@@ -21,9 +21,9 @@ namespace SharpGame.Sdl2
         internal uint WindowID { get; private set; }
         private bool _exists;
 
-        private SimpleInputSnapshot _publicSnapshot = new SimpleInputSnapshot();
-        private SimpleInputSnapshot _privateSnapshot = new SimpleInputSnapshot();
-        private SimpleInputSnapshot _privateBackbuffer = new SimpleInputSnapshot();
+        private InputSnapshot _publicSnapshot = new InputSnapshot();
+        private InputSnapshot _privateSnapshot = new InputSnapshot();
+        private InputSnapshot _privateBackbuffer = new InputSnapshot();
 
         // Threaded Sdl2Window flags
         private readonly bool _threadedProcessing;
@@ -106,17 +106,60 @@ namespace SharpGame.Sdl2
         public int X { get => _cachedPosition.Value.X; set => SetWindowPosition(value, Y); }
         public int Y { get => _cachedPosition.Value.Y; set => SetWindowPosition(X, value); }
 
-        public int Width { get => GetWindowSize().X; set => SetWindowSize(value, Height); }
-        public int Height { get => GetWindowSize().Y; set => SetWindowSize(Width, value); }
+        public int Width { get => GetWindowSize().X; protected set => SetWindowSize(value, Height); }
+        public int Height { get => GetWindowSize().Y; protected set => SetWindowSize(Width, value); }
 
         public IntPtr Handle => GetUnderlyingWindowHandle();
 
         public IntPtr WindowHandle => GetUnderlyingWindowHandle();
+        public IntPtr InstanceHandle
+        {
+            get
+            {
+                SDL_SysWMinfo wmInfo;
+                SDL_GetVersion(&wmInfo.version);
+                SDL_GetWMWindowInfo(_window, &wmInfo);
+                if (wmInfo.subsystem == SysWMType.Windows)
+                {
+                    Win32WindowInfo win32Info = Unsafe.Read<Win32WindowInfo>(&wmInfo.info);
+                    return win32Info.hinstance;
+                }
+                else if (wmInfo.subsystem == SysWMType.X11)
+                {
 
-        public IntPtr InstanceHandle => throw new NotImplementedException();
+                }
+                else if (wmInfo.subsystem == SysWMType.Cocoa)
+                {
+
+                }
+
+                return IntPtr.Zero;
+            }
+        }
+
         public string Title { get => _cachedWindowTitle; set => SetWindowTitle(value); }
 
-        public PlatformType Platform => throw new NotImplementedException();
+        public PlatformType Platform
+        {
+            get
+            {
+                SDL_SysWMinfo wmInfo;
+                SDL_GetWMWindowInfo(_window, &wmInfo);
+                if (wmInfo.subsystem == SysWMType.Windows)
+                {
+                    return PlatformType.Win32;
+                }
+                else if (wmInfo.subsystem == SysWMType.Android)
+                {
+                    return PlatformType.Android;
+                }
+                else if (wmInfo.subsystem == SysWMType.Cocoa)
+                {
+                    return PlatformType.MacOS;
+                }
+                return PlatformType.Win32;
+            }
+        }
 
         private void SetWindowTitle(string value)
         {
@@ -326,7 +369,8 @@ namespace SharpGame.Sdl2
             {
                 if (_shouldClose)
                 {
-                    CloseCore();
+                    Application.Quit();
+                    //CloseCore();
                     return;
                 }
 
@@ -362,12 +406,29 @@ namespace SharpGame.Sdl2
             _events.Add(ev);
         }
 
-        public InputSnapshot PumpEvents()
+        public void PumpEvents(InputSnapshot inputSnapshot)
         {
             _currentMouseDelta = new Vector2();
             if (_threadedProcessing)
             {
-                SimpleInputSnapshot snapshot = Interlocked.Exchange(ref _privateSnapshot, _privateBackbuffer);
+                InputSnapshot snapshot = Interlocked.Exchange(ref _privateSnapshot, _privateBackbuffer);
+                snapshot.CopyTo(inputSnapshot);
+                snapshot.Clear();
+            }
+            else
+            {
+                ProcessEvents(null);
+                _privateSnapshot.CopyTo(inputSnapshot);
+                _privateSnapshot.Clear();
+            }
+        }
+
+        public IInputSnapshot PumpEvents()
+        {
+            _currentMouseDelta = new Vector2();
+            if (_threadedProcessing)
+            {
+                InputSnapshot snapshot = Interlocked.Exchange(ref _privateSnapshot, _privateBackbuffer);
                 snapshot.CopyTo(_publicSnapshot);
                 snapshot.Clear();
             }
@@ -561,7 +622,7 @@ namespace SharpGame.Sdl2
 
         private void HandleKeyboardEvent(SDL_KeyboardEvent keyboardEvent)
         {
-            SimpleInputSnapshot snapshot = _privateSnapshot;
+            InputSnapshot snapshot = _privateSnapshot;
             KeyEvent keyEvent = new KeyEvent(MapKey(keyboardEvent.keysym), keyboardEvent.state == 1, MapModifierKeys(keyboardEvent.keysym.mod));
             snapshot.KeyEventsList.Add(keyEvent);
             if (keyboardEvent.state == 1)
@@ -949,74 +1010,24 @@ namespace SharpGame.Sdl2
             return _window;
         }
 
-        public void ProcessEvents()
-        {
-            throw new NotImplementedException();
-        }
-
         public Stream Open(string path)
         {
-            return new FileStream(Path.Combine("bin", path), FileMode.Open, FileAccess.Read);
+            return new FileStream(path, FileMode.Open, FileAccess.Read);
+        }
+
+        public void RunMessageLoop()
+        {
+
+        }
+
+        public void ProcessEvents()
+        {
+
         }
 
         public void Dispose()
         {
 
-        }
-
-        public void RunMessageLoop()
-        {
-            throw new NotImplementedException();
-        }
-
-        private class SimpleInputSnapshot : InputSnapshot
-        {
-            public List<KeyEvent> KeyEventsList { get; private set; } = new List<KeyEvent>();
-            public List<MouseEvent> MouseEventsList { get; private set; } = new List<MouseEvent>();
-            public List<char> KeyCharPressesList { get; private set; } = new List<char>();
-
-            public IReadOnlyList<KeyEvent> KeyEvents => KeyEventsList;
-
-            public IReadOnlyList<MouseEvent> MouseEvents => MouseEventsList;
-
-            public IReadOnlyList<char> KeyCharPresses => KeyCharPressesList;
-
-            public Vector2 MousePosition { get; set; }
-
-            private bool[] _mouseDown = new bool[13];
-            public bool[] MouseDown => _mouseDown;
-            public float WheelDelta { get; set; }
-
-            public bool IsMouseDown(MouseButton button)
-            {
-                return _mouseDown[(int)button];
-            }
-
-            internal void Clear()
-            {
-                KeyEventsList.Clear();
-                MouseEventsList.Clear();
-                KeyCharPressesList.Clear();
-                WheelDelta = 0f;
-            }
-
-            public void CopyTo(SimpleInputSnapshot other)
-            {
-                Debug.Assert(this != other);
-
-                other.MouseEventsList.Clear();
-                foreach (var me in MouseEventsList) { other.MouseEventsList.Add(me); }
-
-                other.KeyEventsList.Clear();
-                foreach (var ke in KeyEventsList) { other.KeyEventsList.Add(ke); }
-
-                other.KeyCharPressesList.Clear();
-                foreach (var kcp in KeyCharPressesList) { other.KeyCharPressesList.Add(kcp); }
-
-                other.MousePosition = MousePosition;
-                other.WheelDelta = WheelDelta;
-                _mouseDown.CopyTo(other._mouseDown, 0);
-            }
         }
 
         private class WindowParams

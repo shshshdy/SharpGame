@@ -1,32 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace SharpGame
 {
-    public class Input : Object
+    public interface IInputSnapshot
     {
-        public IReadOnlyList<KeyEvent> KeyEvents => keyEventsList_;
-        public IReadOnlyList<MouseEvent> MouseEvents => mouseEventsList_;
-        public IReadOnlyList<char> KeyCharPresses => keyCharPressesList_;
-        public Vector2 MousePosition { get; set; }
-        public float WheelDelta { get; set; }
+        IReadOnlyList<KeyEvent> KeyEvents { get; }
+        IReadOnlyList<MouseEvent> MouseEvents { get; }
+        IReadOnlyList<char> KeyCharPresses { get; }
+        bool IsMouseDown(MouseButton button);
+        Vector2 MousePosition { get; }
+        float WheelDelta { get; }
+    }
 
-        List<KeyEvent> keyEventsList_ = new List<KeyEvent>();
-        List<MouseEvent> mouseEventsList_ = new List<MouseEvent>();
-        List<char> keyCharPressesList_ = new List<char>();
-        bool[] mouseDown_ = new bool[13];
-        List<Key> keyPressed_ = new List<Key>();
-        
-        public bool IsMouseDown(MouseButton button)
-        {
-            return mouseDown_[(int)button];
-        }
+    public class Input : Object, IInputSnapshot
+    {
+        public InputSnapshot InputSnapshot { get; } = new InputSnapshot();
+        public IReadOnlyList<KeyEvent> KeyEvents => InputSnapshot.KeyEvents;
+        public IReadOnlyList<MouseEvent> MouseEvents => InputSnapshot.MouseEvents;
+        public IReadOnlyList<char> KeyCharPresses => InputSnapshot.KeyCharPresses;
+        public Vector2 MousePosition => InputSnapshot.MousePosition;
+        public float WheelDelta => InputSnapshot.WheelDelta;
+        public bool IsMouseDown(MouseButton button) => InputSnapshot.IsMouseDown(button);
 
         public bool IsKeyPressed(Key key)
         {
-            foreach(Key k in keyPressed_)
+            foreach (var k in KeyEvents)
             {
-                if(k == key)
+                if (k.Key == key)
                 {
                     return true;
                 }
@@ -35,70 +37,59 @@ namespace SharpGame
             return false;
         }
 
-        internal void Clear()
+
+    }
+
+    public class InputSnapshot : IInputSnapshot
+    {
+        public List<KeyEvent> KeyEventsList { get; private set; } = new List<KeyEvent>();
+        public List<MouseEvent> MouseEventsList { get; private set; } = new List<MouseEvent>();
+        public List<char> KeyCharPressesList { get; private set; } = new List<char>();
+
+        public IReadOnlyList<KeyEvent> KeyEvents => KeyEventsList;
+
+        public IReadOnlyList<MouseEvent> MouseEvents => MouseEventsList;
+
+        public IReadOnlyList<char> KeyCharPresses => KeyCharPressesList;
+
+        public Vector2 MousePosition { get; set; }
+
+        private bool[] _mouseDown = new bool[13];
+        public bool[] MouseDown => _mouseDown;
+        public float WheelDelta { get; set; }
+
+        public bool IsMouseDown(MouseButton button)
         {
-            keyEventsList_.Clear();
-            mouseEventsList_.Clear();
-            keyCharPressesList_.Clear();
+            return _mouseDown[(int)button];
+        }
+
+        public void Clear()
+        {
+            KeyEventsList.Clear();
+            MouseEventsList.Clear();
+            KeyCharPressesList.Clear();
             WheelDelta = 0f;
         }
 
-        public event Action<MouseWheelEvent> OnMouseWheel;
-        public event Action<MouseMoveEvent> OnMouseMove;
-        public event Action<MouseEvent> OnMouseDown;
-        public event Action<MouseEvent> OnMouseUp;
-        public event Action<KeyEvent> OnKeyDown;
-        public event Action<KeyEvent> OnKeyUp;
-
-        public void InjectMouseWheel(MouseWheelEvent args)
+        public void CopyTo(InputSnapshot other)
         {
-            OnMouseWheel?.Invoke(args);
-        }
+            Debug.Assert(this != other);
 
-        public void InjectMouseMove(MouseMoveEvent args)
-        {
-            MousePosition = args.MousePosition;
-            OnMouseMove?.Invoke(args);
-        }
+            other.MouseEventsList.Clear();
+            foreach (var me in MouseEventsList) { other.MouseEventsList.Add(me); }
 
-        public void InjectMouseDown(MouseEvent args)
-        {
-            mouseDown_[(int)args.MouseButton] = args.Down;
-            mouseEventsList_.Add(args);
+            other.KeyEventsList.Clear();
+            foreach (var ke in KeyEventsList) { other.KeyEventsList.Add(ke); }
 
-            OnMouseDown?.Invoke(args);
-        }
+            other.KeyCharPressesList.Clear();
+            foreach (var kcp in KeyCharPressesList) { other.KeyCharPressesList.Add(kcp); }
 
-        public void InjectMouseUp(MouseEvent args)
-        {
-            mouseDown_[(int)args.MouseButton] = args.Down;
-            mouseEventsList_.Add(args);
-
-            OnMouseUp?.Invoke(args);
-        }
-
-        public void InjectKeyDown(KeyEvent args)
-        {
-            keyEventsList_.Add(args);
-
-            if(!keyPressed_.Contains(args.Key))
-                keyPressed_.Add(args.Key);
-
-            OnKeyDown?.Invoke(args);
-        }
-
-        public void InjectKeyUp(KeyEvent args)
-        {
-            keyEventsList_.Add(args);
-            keyPressed_.Remove(args.Key);
-            OnKeyUp?.Invoke(args);
-        }
-
-        public void InjectTextInput(char c)
-        {
-            keyCharPressesList_.Add(c);
+            other.MousePosition = MousePosition;
+            other.WheelDelta = WheelDelta;
+            _mouseDown.CopyTo(other._mouseDown, 0);
         }
     }
+
 
     public enum MouseButton
     {
