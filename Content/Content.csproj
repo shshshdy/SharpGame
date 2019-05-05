@@ -49,8 +49,8 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="compile.ps1" />
     <None Include="IndustryForgedDark512.ktx" />
-    <None Include="packages.config" />
     <None Include="ParticleDiffuse.ktx" />
     <None Include="Shader.comp" />
     <None Include="Shader.frag" />

@@ -5,7 +5,7 @@ using System.Text;
 namespace SharpGame.Editor.Asset
 {
     [FileExtension(".shader")]
-    public class ShaderImporter : AssetImporter
+    public class ShaderImporter //: AssetImporter
     {
     }
 }

@@ -20,7 +20,7 @@ namespace SharpGame.Sdl2
         // Current input states
         private int _currentMouseX;
         private int _currentMouseY;
-        private bool[] _currentMouseButtonStates = new bool[5];
+        private bool[] _currentMouseButtonStates = new bool[13];
 
         ConcurrentQueue<SDL_Event> coreEventQueue_ = new ConcurrentQueue<SDL_Event>();
 
@@ -693,7 +693,11 @@ namespace SharpGame.Sdl2
                 _currentMouseX, _currentMouseY,
                 _currentMouseButtonStates[0], _currentMouseButtonStates[1],
                 _currentMouseButtonStates[2], _currentMouseButtonStates[3],
-                _currentMouseButtonStates[4]);
+                _currentMouseButtonStates[4], _currentMouseButtonStates[5],
+                _currentMouseButtonStates[6], _currentMouseButtonStates[7],
+                _currentMouseButtonStates[8], _currentMouseButtonStates[9],
+                _currentMouseButtonStates[10], _currentMouseButtonStates[11],
+                _currentMouseButtonStates[12]);
         }
 
         public Int2 ScreenToClient(Int2 p)
@@ -734,7 +738,7 @@ namespace SharpGame.Sdl2
             if (wmInfo.subsystem == SysWMType.Windows)
             {
                 Win32WindowInfo win32Info = Unsafe.Read<Win32WindowInfo>(&wmInfo.info);
-                return win32Info.window;
+                return win32Info.Sdl2Window;
             }
 
             return _window;

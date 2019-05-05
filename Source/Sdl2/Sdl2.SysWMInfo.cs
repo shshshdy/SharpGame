@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace SharpGame.Sdl2
 {
     public static unsafe partial class Sdl2Native
     {
-        private delegate int SDL_GetWindowWMInfo_t(SDL_Window window, SDL_SysWMinfo* info);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate int SDL_GetWindowWMInfo_t(SDL_Window Sdl2Window, SDL_SysWMinfo* info);
         private static readonly SDL_GetWindowWMInfo_t s_getWindowWMInfo = LoadFunction<SDL_GetWindowWMInfo_t>("SDL_GetWindowWMInfo");
-        public static int SDL_GetWMWindowInfo(SDL_Window window, SDL_SysWMinfo* info) => s_getWindowWMInfo(window, info);
+        public static int SDL_GetWMWindowInfo(SDL_Window Sdl2Window, SDL_SysWMinfo* info) => s_getWindowWMInfo(Sdl2Window, info);
     }
 
     public struct SDL_SysWMinfo
@@ -25,11 +27,11 @@ namespace SharpGame.Sdl2
     public struct Win32WindowInfo
     {
         /// <summary>
-        /// The window handle.
+        /// The Sdl2Window handle.
         /// </summary>
-        public IntPtr window;
+        public IntPtr Sdl2Window;
         /// <summary>
-        /// The window device context.
+        /// The Sdl2Window device context.
         /// </summary>
         public IntPtr hdc;
         /// <summary>
@@ -41,7 +43,22 @@ namespace SharpGame.Sdl2
     public struct X11WindowInfo
     {
         public IntPtr display;
-        public IntPtr window;
+        public IntPtr Sdl2Window;
+    }
+
+    public struct WaylandWindowInfo
+    {
+        public IntPtr display;
+        public IntPtr surface;
+        public IntPtr shellSurface;
+    }
+
+    public struct CocoaWindowInfo
+    {
+        /// <summary>
+        /// The NSWindow* Cocoa window.
+        /// </summary>
+        public IntPtr Window;
     }
 
     public enum SysWMType

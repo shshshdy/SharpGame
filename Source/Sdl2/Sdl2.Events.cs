@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -6,21 +7,44 @@ namespace SharpGame.Sdl2
 {
     public static unsafe partial class Sdl2Native
     {
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void SDL_PumpEvents_t();
         private static SDL_PumpEvents_t s_sdl_pumpEvents = LoadFunction<SDL_PumpEvents_t>("SDL_PumpEvents");
         public static void SDL_PumpEvents() => s_sdl_pumpEvents();
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int SDL_PollEvent_t(SDL_Event* @event);
         private static SDL_PollEvent_t s_sdl_pollEvent = LoadFunction<SDL_PollEvent_t>("SDL_PollEvent");
         public static int SDL_PollEvent(SDL_Event* @event) => s_sdl_pollEvent(@event);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void SDL_AddEventWatch_t(SDL_EventFilter filter, void* userdata);
+        private static SDL_AddEventWatch_t s_sdl_addEventWatch = LoadFunction<SDL_AddEventWatch_t>("SDL_AddEventWatch");
+        public static void SDL_AddEventWatch(SDL_EventFilter filter, void* userdata) => s_sdl_addEventWatch(filter, userdata);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void SDL_SetEventFilter_t(SDL_EventFilter filter, void* userdata);
+        private static SDL_SetEventFilter_t s_sdl_setEventFilter = LoadFunction<SDL_SetEventFilter_t>("SDL_SetEventFilter");
+        public static void SDL_SetEventFilter(SDL_EventFilter filter, void* userdata) => s_sdl_setEventFilter(filter, userdata);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void SDL_FilterEvents_t(SDL_EventFilter filter, void* userdata);
+        private static SDL_FilterEvents_t s_sdl_filterEvents = LoadFunction<SDL_FilterEvents_t>("SDL_FilterEvents");
+        public static void SDL_FilterEvents(SDL_EventFilter filter, void* userdata) => s_sdl_filterEvents(filter, userdata);
     }
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public unsafe delegate int SDL_EventFilter(void* userdata, SDL_Event* @event);
 
     [StructLayout(LayoutKind.Explicit)]
     public struct SDL_Event
     {
         [FieldOffset(0)]
         public SDL_EventType type;
-
+        [FieldOffset(4)]
+        public uint timestamp;
+        [FieldOffset(8)]
+        public uint windowID;
         [FieldOffset(0)]
         private Bytex56 __padding;
         private unsafe struct Bytex56 { private fixed byte bytes[56]; }
@@ -35,7 +59,7 @@ namespace SharpGame.Sdl2
         public SDL_EventType type;
         public uint timestamp;
         /// <summary>
-        /// The associated window
+        /// The associated Sdl2Window
         /// </summary>
         public uint windowID;
         /// <summary>
@@ -62,67 +86,67 @@ namespace SharpGame.Sdl2
         /// </summary>
         None,
         /// <summary>
-        /// Window has been shown.
+        /// Sdl2Window has been shown.
         /// </summary>
         Shown,
         /// <summary>
-        /// Window has been hidden.
+        /// Sdl2Window has been hidden.
         /// </summary>
         Hidden,
         /// <summary>
-        /// Window has been exposed and should be redrawn.
+        /// Sdl2Window has been exposed and should be redrawn.
         /// </summary>
         Exposed,
         /// <summary>
-        /// Window has been moved to data1, data2.
+        /// Sdl2Window has been moved to data1, data2.
         /// </summary>
         Moved,
         /// <summary>
-        /// Window has been resized to data1xdata2.
+        /// Sdl2Window has been resized to data1xdata2.
         /// </summary>
         Resized,
         /// <summary>
-        /// The window size has changed, either as a result of an API call or through the system or user changing the window size.
+        /// The Sdl2Window size has changed, either as a result of an API call or through the system or user changing the Sdl2Window size.
         /// </summary>
         SizeChanged,
         /// <summary>
-        /// Window has been minimized.
+        /// Sdl2Window has been minimized.
         /// </summary>
         Minimized,
         /// <summary>
-        /// Window has been maximized.
+        /// Sdl2Window has been maximized.
         /// </summary>
         Maximized,
         /// <summary>
-        /// Window has been restored to normal size and position.
+        /// Sdl2Window has been restored to normal size and position.
         /// </summary>
         Restored,
         /// <summary>
-        /// Window has gained mouse focus.
+        /// Sdl2Window has gained mouse focus.
         /// </summary>
         Enter,
         /// <summary>
-        /// Window has lost mouse focus.
+        /// Sdl2Window has lost mouse focus.
         /// </summary>
         Leave,
         /// <summary>
-        /// Window has gained keyboard focus.
+        /// Sdl2Window has gained keyboard focus.
         /// </summary>
         FocusGained,
         /// <summary>
-        /// Window has lost keyboard focus
+        /// Sdl2Window has lost keyboard focus
         /// </summary>
         FocusLost,
         /// <summary>
-        /// The window manager requests that the window be closed.
+        /// The Sdl2Window manager requests that the Sdl2Window be closed.
         /// </summary>
         Close,
         /// <summary>
-        /// Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore).
+        /// Sdl2Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore).
         /// </summary>
         TakeFocus,
         /// <summary>
-        /// Window had a hit test that wasn't SDL_HITTEST_NORMAL.
+        /// Sdl2Window had a hit test that wasn't SDL_HITTEST_NORMAL.
         /// </summary>
         HitTest
     }
@@ -180,9 +204,9 @@ namespace SharpGame.Sdl2
         /// </summary>
         DidEnterForeground,
 
-        /* Window events */
+        /* Sdl2Window events */
         /// <summary>
-        /// Window state change
+        /// Sdl2Window state change
         /// </summary>
         WindowEvent = 0x200,
         /// <summary>
@@ -307,7 +331,12 @@ namespace SharpGame.Sdl2
         /// <summary>
         /// text/plain drag-and-drop event
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         DropTest,
+        /// <summary>
+        /// text/plain drag-and-drop event
+        /// </summary>
+        DropText = DropTest,
         /// <summary>
         /// A new set of drops is beginning (NULL filename) 
         /// </summary>
@@ -354,7 +383,7 @@ namespace SharpGame.Sdl2
         public SDL_EventType type;
         public uint timestamp;
         /// <summary>
-        /// The window with mouse focus, if any.
+        /// The Sdl2Window with mouse focus, if any.
         /// </summary>
         public uint windowID;
         /// <summary>
@@ -366,11 +395,11 @@ namespace SharpGame.Sdl2
         /// </summary>
         public ButtonState state;
         /// <summary>
-        /// X coordinate, relative to window.
+        /// X coordinate, relative to Sdl2Window.
         /// </summary>
         public int x;
         /// <summary>
-        /// Y coordinate, relative to window.
+        /// Y coordinate, relative to Sdl2Window.
         /// </summary>
         public int y;
         /// <summary>
@@ -394,7 +423,7 @@ namespace SharpGame.Sdl2
         public SDL_EventType type;
         public uint timestamp;
         /// <summary>
-        /// The window with mouse focus, if any.
+        /// The Sdl2Window with mouse focus, if any.
         /// </summary>
         public uint windowID;
         /// <summary>
@@ -415,11 +444,11 @@ namespace SharpGame.Sdl2
         public byte clicks;
         public byte padding1;
         /// <summary>
-        /// X coordinate, relative to window.
+        /// X coordinate, relative to Sdl2Window.
         /// </summary>
         public int x;
         /// <summary>
-        /// Y coordinate, relative to window
+        /// Y coordinate, relative to Sdl2Window
         /// </summary>
         public int y;
     }
@@ -435,7 +464,7 @@ namespace SharpGame.Sdl2
         public SDL_EventType type;
         public uint timestamp;
         /// <summary>
-        /// The window with mouse focus, if any.
+        /// The Sdl2Window with mouse focus, if any.
         /// </summary>
         public uint windowID;
         /// <summary>
@@ -478,7 +507,7 @@ namespace SharpGame.Sdl2
         public SDL_EventType type;
         public uint timestamp;
         /// <summary>
-        /// The window with keyboard focus, if any
+        /// The Sdl2Window with keyboard focus, if any
         /// </summary>
         public uint windowID;
         /// <summary>
@@ -537,12 +566,26 @@ namespace SharpGame.Sdl2
         public SDL_EventType type;
         public uint timestamp;
         /// <summary>
-        /// The window with keyboard focus, if any.
+        /// The Sdl2Window with keyboard focus, if any.
         /// </summary>
         public uint windowID;
         /// <summary>
         /// The input text.
         /// </summary>
         public fixed byte text[MaxTextSize];
+    }
+
+    public unsafe struct SDL_DropEvent
+    {
+        /// <summary>
+        /// SDL_DROPFILE, SDL_DROPTEXT, SDL_DROPBEGIN, or SDL_DROPCOMPLETE.
+        /// </summary>
+        public SDL_EventType type;
+        /// <summary>timestamp of the event.</summary>
+        public uint timestamp;
+        /// <summary>the file name, which should be freed with SDL_free(), is NULL on BEGIN/COMPLETE</summary>
+        public byte* file;
+        /// <summary>the window that was dropped on, if any</summary>
+        public uint windowID;
     }
 }

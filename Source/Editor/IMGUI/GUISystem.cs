@@ -25,8 +25,11 @@ namespace SharpGame.Editor
         
         public GUISystem()
         {
-            //ImGui.GetIO().FontAtlas.AddDefaultFont();
-            ImGui.GetIO().Fonts.AddFontFromFileTTF("Data/font/arial.ttf", 16);
+            IntPtr context = ImGui.CreateContext();
+            ImGui.SetCurrentContext(context);
+            ImGui.GetIO().Fonts.AddFontDefault();
+
+            //ImGui.GetIO().Fonts.AddFontFromFileTTF("Data/font/arial.ttf", 16);
 
             ResourceCache cache = Get<ResourceCache>();
             uiShader_ = cache.GetResource<Shader>("shaders/ui.shader");

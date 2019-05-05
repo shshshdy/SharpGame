@@ -12,7 +12,7 @@ namespace SharpGame.Editor
         ConcurrentQueue<FileSystemEventArgs> changeFiles_ = new ConcurrentQueue<FileSystemEventArgs>();
         public AssetDatabase()
         {
-            AssetImporter.Init();
+            //AssetImporter.Init();
 
             //WatcherStart(FileSystem.DataPath, "*.*");
 

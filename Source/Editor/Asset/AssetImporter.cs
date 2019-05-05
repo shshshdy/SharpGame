@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
+#if false
 namespace SharpGame.Editor
 {
     [DataContract]
@@ -225,11 +226,11 @@ namespace SharpGame.Editor
                 importer.FileFormatVersion = importer.GetFileFormatVersion();
                 importer.Guid = Guid.NewGuid();
                 importer.AssetTimeStamp = fileInfo.LastWriteTime.Ticks;           
-
+                /*
                 string json = JsonConvert.SerializeObject(importer, Formatting.Indented);
                 System.IO.File.WriteAllText(fileInfo.FullName + ".meta", json);
                 metaInfos_.Add(path, importer);
-                pesistDatabase.Add(AssetType.Meta, path, importer.Guid);
+                pesistDatabase.Add(AssetType.Meta, path, importer.Guid);*/
             }
 
         }
@@ -265,3 +266,5 @@ namespace SharpGame.Editor
     }
 
 }
+
+#endif

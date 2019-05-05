@@ -11,7 +11,8 @@ namespace SharpGame
         FullScreen,
         Maximized,
         Minimized,
-        BorderlessFullScreen
+        BorderlessFullScreen,
+        Hidden,
     }
 
     public abstract class GameWindow : Object

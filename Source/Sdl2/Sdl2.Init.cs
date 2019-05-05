@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace SharpGame.Sdl2
 {
     public static unsafe partial class Sdl2Native
     {
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int SDL_Init_t(SDLInitFlags flags);
         private static SDL_Init_t s_sdl_init = LoadFunction<SDL_Init_t>("SDL_Init");
 
@@ -12,6 +14,11 @@ namespace SharpGame.Sdl2
 
     public enum SDLInitFlags : uint
     {
-        Video = 0x00000020u
+        Timer = 0x00000001u,
+        Audio = 0x00000010u,
+        Video = 0x00000020u,
+        Joystick = 0x00000200u,
+        Haptic = 0x00001000u,
+        GameController = 0x00002000u,
     }
 }

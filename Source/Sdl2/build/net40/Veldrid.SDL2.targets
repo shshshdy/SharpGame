@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_SharpGame_SDL2_IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</_SharpGame_SDL2_IsWindows>
+    <_SharpGame_SDL2_IsMacOS Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</_SharpGame_SDL2_IsMacOS>
+
+    <_SharpGame_SDL2_NativeRuntime Condition=" '$(_SharpGame_SDL2_NativeRuntime)' == '' And '$(_SharpGame_SDL2_IsMacOS)' == 'true' And ('$(Prefer32Bit)' == 'false' Or '$(PlatformTarget)' == 'x64')">osx-x64</_SharpGame_SDL2_NativeRuntime>
+    <_SharpGame_SDL2_NativeRuntime Condition=" '$(_SharpGame_SDL2_NativeRuntime)' == '' And '$(_SharpGame_SDL2_IsWindows)' == 'true' And ('$(Prefer32Bit)' == 'true' Or '$(PlatformTarget)' == 'x86')">win-x86</_SharpGame_SDL2_NativeRuntime>
+    <_SharpGame_SDL2_NativeRuntime Condition=" '$(_SharpGame_SDL2_NativeRuntime)' == '' And '$(_SharpGame_SDL2_IsWindows)' == 'true' And ('$(Prefer32Bit)' == 'false' Or '$(PlatformTarget)' == 'x64')">win-x64</_SharpGame_SDL2_NativeRuntime>
+
+    <_SharpGame_SDL2_NativeLibName Condition="'$(_SharpGame_SDL2_NativeRuntime)' == 'win-x86' Or '$(_SharpGame_SDL2_NativeRuntime)' == 'win-x64'">SDL2.dll</_SharpGame_SDL2_NativeLibName>
+    <_SharpGame_SDL2_NativeLibName Condition="'$(_SharpGame_SDL2_NativeRuntime)' == 'osx-x64'">libsdl2.dylib</_SharpGame_SDL2_NativeLibName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Condition="'$(_SharpGame_SDL2_NativeRuntime)' != ''" Include="$(MSBuildThisFileDirectory)..\..\runtimes\$(_SharpGame_SDL2_NativeRuntime)\native\$(_SharpGame_SDL2_NativeLibName)">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </Content>
+  </ItemGroup>
+</Project>
