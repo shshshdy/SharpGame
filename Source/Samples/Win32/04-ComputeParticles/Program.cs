@@ -11,11 +11,10 @@ namespace SharpGame.Samples.ComputeParticles
         [STAThread]
         public static void Main()
         {
-            using (var window = new Win32Window(
-                Assembly.GetExecutingAssembly().GetName().Name,
-                new ComputeParticlesApp()))
+            using (var app = new ComputeParticlesApp())
             {
-                window.Run();
+                app.Run(new Win32Window(
+                Assembly.GetExecutingAssembly().GetName().Name, app));
             }
         }
     }

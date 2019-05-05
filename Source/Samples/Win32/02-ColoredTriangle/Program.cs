@@ -11,11 +11,10 @@ namespace SharpGame.Samples.StaticScene
         [STAThread]
         public static void Main()
         {
-            using (var window = new Win32Window(
-                Assembly.GetExecutingAssembly().GetName().Name,
-                new StaticSceneApp()))
+            using (var app = new StaticSceneApp())
             {
-                window.Run();
+                app.Run(new Win32Window(
+                Assembly.GetExecutingAssembly().GetName().Name, app));
             }
         }
     }

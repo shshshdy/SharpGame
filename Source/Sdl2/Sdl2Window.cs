@@ -103,6 +103,11 @@ namespace SharpGame.Sdl2
             }
         }
 
+        public void Show()
+        {
+            Visible = true;
+        }
+
         public int X { get => _cachedPosition.Value.X; set => SetWindowPosition(value, Y); }
         public int Y { get => _cachedPosition.Value.Y; set => SetWindowPosition(X, value); }
 

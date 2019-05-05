@@ -21,8 +21,8 @@ namespace SharpGame
         int Width { get; }
         int Height { get; }
         string Title { get; set; }
-
         PlatformType Platform { get; }
+        void Show();
         void ProcessEvents();
         void PumpEvents(InputSnapshot inputSnapshot);       
         Stream Open(string path);
@@ -38,7 +38,8 @@ namespace SharpGame
         protected ResourceCache resourceCache_;
         protected Input input_;
 
-        private Timer timer_;
+        protected Timer timer_;
+
         private int frameNumber_;
         private float _timeElapsed;
         private bool _appPaused = false;
@@ -57,29 +58,27 @@ namespace SharpGame
         {
             _context.Dispose();
         }
-
-        public void Initialize(IGameWindow gameWindow)
+        
+        public void Run(IGameWindow window)
         {
-            gameWindow_ = gameWindow;
-
-            timer_ = CreateSubsystem<Timer>();
-            fileSystem_ = CreateSubsystem<FileSystem>(gameWindow_);            
-            graphics_ = CreateSubsystem<Graphics>(gameWindow_);
-            resourceCache_ = CreateSubsystem<ResourceCache>("../Content");
-            renderer_ = CreateSubsystem<Renderer>();
-            input_ = CreateSubsystem<Input>();
+            gameWindow_ = window;
 
             Setup();
-        }
 
-        public void Run(IGameWindow host)
-        {
-            Initialize(host);
+            gameWindow_.Show();
+
             Run();
         }
 
         protected virtual void Setup()
         {
+            timer_ = CreateSubsystem<Timer>();
+            fileSystem_ = CreateSubsystem<FileSystem>(gameWindow_);
+            graphics_ = CreateSubsystem<Graphics>(gameWindow_);
+            resourceCache_ = CreateSubsystem<ResourceCache>("../../Content");
+            renderer_ = CreateSubsystem<Renderer>();
+            input_ = CreateSubsystem<Input>();
+
         }
 
         protected virtual void OnInit()

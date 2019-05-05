@@ -15,7 +15,12 @@ namespace SharpGame.Editor
         List<AnimatedModel> animators_ = new List<AnimatedModel>();
         protected override void Setup()
         {
-            base.Setup();
+            timer_ = CreateSubsystem<Timer>();
+            fileSystem_ = CreateSubsystem<FileSystem>(gameWindow_);
+            graphics_ = CreateSubsystem<Graphics>(gameWindow_);
+            resourceCache_ = CreateSubsystem<ResourceCache>("../Content");
+            renderer_ = CreateSubsystem<Renderer>();
+            input_ = CreateSubsystem<Input>();
 
             CreateSubsystem<AssetDatabase>();
             /*

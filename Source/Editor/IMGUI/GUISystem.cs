@@ -71,7 +71,7 @@ namespace SharpGame.Editor
             // Build
             io.Fonts.GetTexDataAsRGBA32(out byte* out_pixels, out int out_width, out int out_height, out int out_bytes_per_pixel);
 
-           // Texture.Create2D()
+    //        Texture.Create2D()
    /*
             MemoryBlock mem = new MemoryBlock((IntPtr)textureData.Pixels, textureData.BytesPerPixel * textureData.Width * textureData.Height);
             fontTex_ = Texture.Create2D(textureData.Width, textureData.Height, false, 1, TextureFormat.BGRA8, TextureFlags.None, mem);
@@ -145,19 +145,17 @@ namespace SharpGame.Editor
                 return;
             }
 
-
-            uint totalVBSize = (uint)(draw_data.TotalVtxCount * sizeof(ImDrawVert));
-            if (totalVBSize > _vertexBuffer.Size)
+            
+            if (draw_data.TotalVtxCount > _vertexBuffer.Count)
             {
                 _vertexBuffer.Dispose();
-                _vertexBuffer = VertexBuffer.Create(new BufferDescription((uint)(totalVBSize * 1.5f), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
+                _vertexBuffer = VertexBuffer.Create(IntPtr.Zero, sizeof(ImDrawVert), (int)(1.5f * draw_data.TotalVtxCount), true);
             }
-
-            uint totalIBSize = (uint)(draw_data.TotalIdxCount * sizeof(ushort));
-            if (totalIBSize > _indexBuffer.Size)
+            
+            if (draw_data.TotalIdxCount > _indexBuffer.Count)
             {
                 _indexBuffer.Dispose();
-             //   _indexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)(totalIBSize * 1.5f), BufferUsage.IndexBuffer | BufferUsage.Dynamic));
+                _indexBuffer = IndexBuffer.Create(IntPtr.Zero, sizeof(ushort), (int)(1.5f*draw_data.TotalIdxCount), true);
             }
 
             for (int i = 0; i < draw_data.CmdListsCount; ++i)
@@ -165,8 +163,7 @@ namespace SharpGame.Editor
                 var cmd_list = draw_data.CmdListsRange[i];
                 DrawGUICmdList(cmd_list);
             }
-
-            //Bgfx.SetScissor(0, 0, 0, 0);        
+ 
         }
     
         unsafe void DrawGUICmdList(ImDrawList* cmd_list)

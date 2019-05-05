@@ -17,13 +17,7 @@ namespace SharpGame.Samples
         private bool _resizing;  // Are the resize bars being dragged?
 
         private FormWindowState _lastWindowState = FormWindowState.Normal;
-
-        public Win32Window(string title, Application app)
-        {
-            _title = title;
-            _app = app;
-        }
-
+        
         public IntPtr WindowHandle => _form.Handle;
         public IntPtr InstanceHandle => Process.GetCurrentProcess().Handle;
         public int Width { get; private set; } = 1280;
@@ -34,11 +28,13 @@ namespace SharpGame.Samples
 
         public void ProcessEvents() => System.Windows.Forms.Application.DoEvents();
         public void PumpEvents(InputSnapshot inputSnapshot) { }
-
         public Stream Open(string path) => new FileStream(path, FileMode.Open, FileAccess.Read);
 
-        public void Initialize()
+        public Win32Window(string title, Application app)
         {
+            _title = title;
+            _app = app;
+
             _form = new Form
             {
                 Text = _title,
@@ -52,12 +48,12 @@ namespace SharpGame.Samples
             {
                 _app.Pause();
                 _resizing = true;
-                
+
             };
             _form.ResizeEnd += (sender, e) =>
             {
                 _app.Resume();
-                _resizing = false;                
+                _resizing = false;
                 _app.Resize();
             };
             _form.Activated += (sender, e) =>
@@ -128,30 +124,20 @@ namespace SharpGame.Samples
                     _app.Resize();
                 }
             };
-            _app.Initialize(this);
+
         }
 
-        public void Run()
-        {
-            Initialize();
 
+        public void Show()
+        {            
             _form.Show();
             _form.Update();
-
-            _app.Run();
-
         }
-
-
 
         public void Dispose()
         {
-            _app.Dispose();
-        }
-
-        public void RunMessageLoop()
-        {
 
         }
+        
     }
 }

@@ -73,10 +73,9 @@ namespace SharpGame
 
                 cmdBuffer.Dispose();
 
-            }
-            
-            stagingBuffer?.Dispose();
-            stagingMemory?.Dispose();
+                stagingBuffer.Dispose();
+                stagingMemory.Dispose();
+            }            
 
             this.Buffer = buffer;
             this.Memory = memory;

@@ -11,12 +11,12 @@ namespace SharpGame.Samples.TexturedCube
         [STAThread]
         public static void Main()
         {
-            using (var window = new Win32Window(
-                Assembly.GetExecutingAssembly().GetName().Name,
-                new TexturedCubeApp()))
+            using (var app = new TexturedCubeApp())
             {
-                window.Run();
+                app.Run(new Win32Window(
+                Assembly.GetExecutingAssembly().GetName().Name, app));
             }
+            
         }
     }
 }

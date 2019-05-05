@@ -241,7 +241,7 @@ namespace SharpGame
             return new Texture(tex2D);
         }
 
-        public static Texture Create2D(IntPtr pixels, int width, int height, int bytes_per_pixel)
+        public static Texture Create2D(int width, int height, int bytes_per_pixel, IntPtr pixels)
         {            
             var tex = new Texture();
 

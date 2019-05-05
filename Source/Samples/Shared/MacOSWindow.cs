@@ -13,13 +13,7 @@ namespace SharpGame.Samples
         private NativeMacOS.NativeApp _nativeApp;
         private NativeMacOS.NativeWindow _nativeWindow;
         private NativeMacOS.NativeMetalView _nativeMetalView;
-
-
-        public MacOSWindow(string title, Application app)
-        {
-            _title = title;
-            _app = app;
-        }
+        
 
         public IntPtr WindowHandle => _nativeMetalView.NativeMetalViewPointer;
         public IntPtr InstanceHandle => Process.GetCurrentProcess().Handle;
@@ -34,53 +28,51 @@ namespace SharpGame.Samples
 
         public Stream Open(string path) => new FileStream(Path.Combine("bin", path), FileMode.Open, FileAccess.Read);
 
-        public void Initialize()
+        public MacOSWindow(string title, Application app)
         {
+            _title = title;
+            _app = app;
             _nativeApp = new NativeMacOS.NativeApp();
             _nativeWindow = new NativeMacOS.NativeWindow(_nativeApp, new NativeMacOS.Size(Width, Height));
             _nativeWindow.MinSize = new NativeMacOS.Size(200f, 200f);
             _nativeWindow.Title = _title;
+
             _nativeWindow.BeginResizing += () =>
             {
                 _app.Pause();
             };
+
             _nativeWindow.EndResizing += () =>
             {
                 _app.Resume();
                 _app.Resize();
             };
+
             _nativeWindow.Resized += size =>
             {
                 Width = (int)size.Width;
                 Height = (int)size.Height;
             };
+
             _nativeWindow.CloseRequested += () =>
             {
-                    Application.Quit();
+                Application.Quit();
             };
+
             _nativeMetalView = new NativeMacOS.NativeMetalView(_nativeWindow);
 
-            _app.Initialize(this);
-            
         }
 
-        public void Run()
-        {
-            Initialize();
-
-            _app.Run();
+        public void Show()
+        {           
         }
 
         public void Dispose()
         {
-            _app.Dispose();
             _nativeWindow.Dispose();
             _nativeApp.Dispose();
         }
 
-        public void RunMessageLoop()
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }
