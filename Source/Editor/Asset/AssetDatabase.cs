@@ -14,7 +14,7 @@ namespace SharpGame.Editor
         {
             AssetImporter.Init();
 
-            WatcherStart(FileSystem.DataPath, "*.*");
+            //WatcherStart(FileSystem.DataPath, "*.*");
 
             SubscribeToEvent<BeginFrame>(HandleBeginFrame);
 
@@ -91,7 +91,7 @@ namespace SharpGame.Editor
             ResourceCache cache = Get<ResourceCache>();
             Resource obj = cache.GetExistingResource(null, path);
             if(obj)
-                obj.Modify();
+                obj.Modified = true;
         }
 
         private void OnDeleted(FileSystemEventArgs e)

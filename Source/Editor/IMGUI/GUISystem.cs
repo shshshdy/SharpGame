@@ -26,7 +26,7 @@ namespace SharpGame.Editor
         public GUISystem()
         {
             //ImGui.GetIO().FontAtlas.AddDefaultFont();
-            ImGui.GetIO().FontAtlas.AddFontFromFileTTF("Data/font/arial.ttf", 16);
+            ImGui.GetIO().Fonts.AddFontFromFileTTF("Data/font/arial.ttf", 16);
 
             ResourceCache cache = Get<ResourceCache>();
             uiShader_ = cache.GetResource<Shader>("shaders/ui.shader");
@@ -36,7 +36,7 @@ namespace SharpGame.Editor
 
             RecreateFontDeviceTexture();
 
-            Style style = ImGui.GetStyle();
+            ImGuiStylePtr style = ImGui.GetStyle();
             //ImGuiUtil.ResetStyle(ImGuiStyle.EdinBlack, style );
 
             SetOpenTKKeyMappings();
@@ -47,7 +47,7 @@ namespace SharpGame.Editor
 
             SubscribeToEvent((ref BeginFrame e) => UpdateGUI());
 
-            SubscribeToEvent((ref PostRender e) => RenderGUI());
+            SubscribeToEvent((ref EndRender e) => RenderGUI());
 
         }
         
@@ -214,13 +214,13 @@ namespace SharpGame.Editor
         */
         private unsafe void UpdateImGuiInput()
         {
-            IO io = ImGui.GetIO();
+            ImGuiIOPtr io = ImGui.GetIO();
 
             Input input = Get<Input>();
 
             ImVec2 mousePosition = EditorUtil.Convert(input.MousePosition);
 
-            io.MousePosition = mousePosition;
+            io.MousePos = mousePosition;
             io.MouseDown[0] = input.IsMouseDown(MouseButton.Left);
             io.MouseDown[1] = input.IsMouseDown(MouseButton.Right);
             io.MouseDown[2] = input.IsMouseDown(MouseButton.Middle);
@@ -234,7 +234,7 @@ namespace SharpGame.Editor
             for(int i = 0; i < keyCharPresses.Count; i++)
             {
                 char c = keyCharPresses[i];
-                ImGui.AddInputCharacter(c);
+                ImGui.GetIO().AddInputCharacter(c);
             }
 
             bool controlDown = false;
@@ -260,9 +260,9 @@ namespace SharpGame.Editor
                 }
             }
 
-            io.CtrlPressed = controlDown;
-            io.AltPressed = altDown;
-            io.ShiftPressed = shiftDown;
+            io.KeyCtrl = controlDown;
+            io.KeyAlt = altDown;
+            io.KeyShift = shiftDown;
         }
 
     }

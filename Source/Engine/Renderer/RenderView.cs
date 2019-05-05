@@ -22,8 +22,18 @@ namespace SharpGame
 
         private FrameInfo frame_;
 
-        public RenderView()
+        public RenderView(Camera camera = null, Scene scene = null, RenderPath renderPath = null)
         {
+            Scene = scene;            
+            Camera = camera;
+            RenderPath = renderPath;
+
+            if (RenderPath == null)
+            {
+                RenderPath = new RenderPath();
+                RenderPath.AddRenderPass(new ScenePass());
+            }
+
         }
 
         public void Update(ref FrameInfo frameInfo)
@@ -33,12 +43,6 @@ namespace SharpGame
             frame_.viewSize_ = new Int2(Graphics.Width, Graphics.Height);
 
             SendGlobalEvent(new BeginView { view = this });
-
-            if (RenderPath == null)
-            {
-                RenderPath = new RenderPath();
-                RenderPath.AddRenderPass(new ScenePass());
-            }
 
             CommandBuffer cmdBuffer = Graphics.WorkCmdBuffer;
 

@@ -130,7 +130,7 @@ namespace SharpGame.Samples.TexturedCube
         private void UpdateUniformBuffers()
         {
             IntPtr ptr = _uniformBuffer.Map(0, Interop.SizeOf<WorldViewProjection>());
-            Interop.Write(ptr, ref _wvp);
+            VulkanCore.Interop.Write(ptr, ref _wvp);
             _uniformBuffer.Unmap();
         }
 

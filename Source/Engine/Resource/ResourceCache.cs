@@ -58,6 +58,32 @@ namespace SharpGame
             return res;
         }
 
+        public T GetResource<T>(string contentName) where T : Resource, new()
+        {
+            if (cachedContent_.TryGetValue(contentName, out Resource value))
+                return (T)value;
+
+            File stream = Open(contentName);
+
+            var res = new T();
+
+            if (res.Load(stream).Result)
+            {
+                res.Build();
+            }
+
+            cachedContent_.Add(contentName, res);
+
+            return res;
+        }
+
+        public Resource GetExistingResource(Type type, string contentName)
+        {
+            if (cachedContent_.TryGetValue(contentName, out Resource value))
+                return value;
+            return null;
+        }
+
         public override void Dispose()
         {
             foreach (IDisposable value in cachedContent_.Values)

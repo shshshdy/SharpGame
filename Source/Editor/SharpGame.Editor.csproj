@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Engine\SharpGame.Engine.csproj" />
+    <ProjectReference Include="..\Sdl2\SharpGame.Sdl2.csproj" />
   </ItemGroup>
 
 </Project>

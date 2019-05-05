@@ -1,6 +1,6 @@
 ﻿using System;
-using Unique;
-using Unique.Sdl2;
+using SharpGame;
+using SharpGame.Sdl2;
 
 namespace SharpGame.Editor
 {

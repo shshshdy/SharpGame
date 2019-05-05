@@ -21,12 +21,7 @@ namespace SharpGame
 
         public RenderView CreateRenderView( Camera camera = null, Scene scene = null,RenderPath renderPath = null)
         {
-            var view = new RenderView
-            {
-                Scene = scene,
-                Camera = camera,
-                RenderPath = renderPath
-            };
+            var view = new RenderView(camera, scene, renderPath);           
             views_.Add(view);
             return view;
         }

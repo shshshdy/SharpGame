@@ -7,7 +7,6 @@ namespace SharpGame.Editor
 {
     public class EditorUtil
     {
-        /*
         public static System.Numerics.Vector2 Convert(Vector2 v)
         {
             return new System.Numerics.Vector2(v.X, v.Y);
@@ -16,6 +15,6 @@ namespace SharpGame.Editor
         public static System.Numerics.Vector3 Convert(Vector3 v)
         {
             return new System.Numerics.Vector3(v.X, v.Y, v.Z);
-        }*/
+        }
     }
 }

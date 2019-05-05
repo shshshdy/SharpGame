@@ -6,7 +6,6 @@ using VulkanCore;
 
 namespace SharpGame.Samples.StaticScene
 {
-
     public class StaticSceneApp : Application
     {
         private Scene scene_;
