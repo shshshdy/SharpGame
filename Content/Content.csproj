@@ -50,6 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="compile.ps1" />
+    <None Include="imgui-frag.glsl" />
+    <None Include="imgui-vertex.glsl" />
     <None Include="IndustryForgedDark512.ktx" />
     <None Include="ParticleDiffuse.ktx" />
     <None Include="Shader.comp" />

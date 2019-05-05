@@ -237,8 +237,15 @@ namespace SharpGame
 
 
         public static Texture Create2D(TextureData tex2D)
-        {            
+        {
             return new Texture(tex2D);
+        }
+
+        public static Texture Create2D(IntPtr pixels, int width, int height, int bytes_per_pixel)
+        {            
+            var tex = new Texture();
+
+            return tex;
         }
 
         // Ktx spec: https://www.khronos.org/opengles/sdk/tools/KTX/file_format_spec/

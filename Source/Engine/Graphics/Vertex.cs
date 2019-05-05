@@ -46,4 +46,26 @@ namespace SharpGame
         );
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Pos2dTexColorVertex
+    {
+        public Vector2 Position;
+        public Vector2 TexCoord;
+        public Vector4 Color;
+
+
+        public static PipelineVertexInputStateCreateInfo Layout = new PipelineVertexInputStateCreateInfo
+        (
+            new[]
+            {
+                new VertexInputBindingDescription(0, Interop.SizeOf<Pos2dTexColorVertex>(), VertexInputRate.Vertex)
+            },
+            new[]
+            {
+                new VertexInputAttributeDescription(0, 0, Format.R32G32SFloat, 0),
+                new VertexInputAttributeDescription(1, 0, Format.R32G32SFloat, 8),
+                new VertexInputAttributeDescription(2, 0, Format.R8G8B8A8UNorm, 16)
+            }
+        );
+    }
 }

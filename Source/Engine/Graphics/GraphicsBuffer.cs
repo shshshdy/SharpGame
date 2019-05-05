@@ -12,6 +12,7 @@ namespace SharpGame
         public byte[] Data { get; set; }
         public int Count { get; set; }
         public int Stride { get; set; }
+        public bool Dynamic { get; set; }
 
         [IgnoreDataMember]
         public int Size => Count * Stride;
