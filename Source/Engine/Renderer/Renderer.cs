@@ -43,7 +43,9 @@ namespace SharpGame
                 viewport.Update(ref frameInfo);
             }
 
-            SendGlobalEvent(new EndRender());
+            var endFrame = new EndRender();
+
+            SendGlobalEvent(ref endFrame);
         }
 
         public void Render()

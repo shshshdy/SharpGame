@@ -23,85 +23,103 @@ namespace SharpGame.Editor
             input_ = CreateSubsystem<Input>();
 
             CreateSubsystem<AssetDatabase>();
-            /*
+          
             GUISystem guiSys = CreateSubsystem<GUISystem>();
 
             EditorWindow.GetWindow<MainWindow>();
-
+  
             SubscribeToEvent<GUIEvent>(HandleGUI);
             SubscribeToEvent<Update>(HandleUpdate);
             SubscribeToEvent<PostRenderUpdate>(HandlePostRenderUpdate);
-            */
+           
         }
 
         protected override void OnInit()
         {
             base.OnInit();
-            /*
+  
             scene_ = new Scene();
             camera_ = scene_.CreateChild("Camera").CreateComponent<Camera>();
             root_ = scene_.CreateChild("Parent");
 
-            debugRenderer_ = scene_.CreateComponent<DebugRenderer>();
 
-            ResourceCache cache = ResourceCache.Instance;
-            model_ = cache.GetResource<Model>("models/Kachujin/Kachujin.mdl");
-            diffTex_ = cache.GetResource<Texture>("models/Kachujin/Textures/Kachujin_diffuse.png");
-            // diffTex_ = ResourceCache.Instance.GetResource<Texture>("textures/bark1.dds");
-            const int ROWS = 4;
-            const int COLS = 4;
-            const float GRID_SIZE = 4.0f;
+            var model = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
 
-            float offsetY = -ROWS * GRID_SIZE / 2;
-            for (int r = 0; r < ROWS; r++)
+            var staticModel = root_.AddComponent<StaticModel>();
+            staticModel.SetModel(model);
+
+            var shader = new Shader
             {
-                float offsetX = -COLS * GRID_SIZE / 2;
-                for (int c = 0; c < COLS; c++)
-                {
-                    Node node = root_.CreateChild($"Child_1_{r}_{c}");
-                 
-                    AnimatedModel modelObject = node.CreateComponent<AnimatedModel>();
-                    modelObject.SetModel(model_);
+                Name = "Test",
+                ["main"] = new Pass("Textured.vert.spv", "Textured.frag.spv")
+            };
+            var mat = new Material();
+            mat.Shader = shader;
 
-                    Animation walkAnimation = cache.GetResource<Animation>("Models/Kachujin/Kachujin_Walk.ani");
+            staticModel.SetMaterial(0, mat);
+            /*
+              debugRenderer_ = scene_.CreateComponent<DebugRenderer>();
 
-                    AnimationState state = modelObject.AddAnimationState(walkAnimation);
-                    // The state would fail to create (return null) if the animation was not found
-                    if (state != null)
-                    {
-                        // Enable full blending weight and looping
-                        state.SetWeight(1.0f);
-                        state.SetLooped(true);
-                        state.SetTime(MathUtil.Random(walkAnimation.Length));
-                    }
+              ResourceCache cache = ResourceCache.Instance;
+              model_ = cache.GetResource<Model>("models/Kachujin/Kachujin.mdl");
+              diffTex_ = cache.GetResource<Texture>("models/Kachujin/Textures/Kachujin_diffuse.png");
+              // diffTex_ = ResourceCache.Instance.GetResource<Texture>("textures/bark1.dds");
+              const int ROWS = 4;
+              const int COLS = 4;
+              const float GRID_SIZE = 4.0f;
 
-                    animators_.Add(modelObject);
+              float offsetY = -ROWS * GRID_SIZE / 2;
+              for (int r = 0; r < ROWS; r++)
+              {
+                  float offsetX = -COLS * GRID_SIZE / 2;
+                  for (int c = 0; c < COLS; c++)
+                  {
+                      Node node = root_.CreateChild($"Child_1_{r}_{c}");
 
-                    material_ = new Material
-                    {
-                        ShaderName = "shaders/solid.shader",
-                    };
+                      AnimatedModel modelObject = node.CreateComponent<AnimatedModel>();
+                      modelObject.SetModel(model_);
 
-                    material_.SetUniform("MatDiffColor", Color.White);
-                    material_.SetUniform("UVOffset", new Vector4(1, 1, 0, 0));
-                    material_.SetTexture("DiffMap", diffTex_);
+                      Animation walkAnimation = cache.GetResource<Animation>("Models/Kachujin/Kachujin_Walk.ani");
 
-                    modelObject.SetMaterial(0, material_);
+                      AnimationState state = modelObject.AddAnimationState(walkAnimation);
+                      // The state would fail to create (return null) if the animation was not found
+                      if (state != null)
+                      {
+                          // Enable full blending weight and looping
+                          state.SetWeight(1.0f);
+                          state.SetLooped(true);
+                          state.SetTime(MathUtil.Random(walkAnimation.Length));
+                      }
 
-                    node.Position = new Vector3(offsetX, 0, offsetY);
-                    node.Scaling = new Vector3(1, 1, 1);
-                    offsetX += GRID_SIZE;
-                }
+                      animators_.Add(modelObject);
 
-                offsetY += GRID_SIZE;
-            }
+                      material_ = new Material
+                      {
+                          ShaderName = "shaders/solid.shader",
+                      };
 
-            camera_.Node.Position = new Vector3(0, 4.0f, -20.0f);
-            camera_.Node.LookAt(Vector3.Zero);
+                      material_.SetUniform("MatDiffColor", Color.White);
+                      material_.SetUniform("UVOffset", new Vector4(1, 1, 0, 0));
+                      material_.SetTexture("DiffMap", diffTex_);
 
-            Renderer renderer = Get<Renderer>();
-            RenderView view = renderer.CreateRenderView(camera_, scene_);
-            */
+                      modelObject.SetMaterial(0, material_);
+
+                      node.Position = new Vector3(offsetX, 0, offsetY);
+                      node.Scaling = new Vector3(1, 1, 1);
+                      offsetX += GRID_SIZE;
+                  }
+
+                  offsetY += GRID_SIZE;
+              }
+     */
+              camera_.Node.Position = new Vector3(0, 4.0f, -20.0f);
+              camera_.Node.LookAt(Vector3.Zero);
+
+              var renderer = Get<Renderer>();
+             // RenderView view = renderer.CreateRenderView(camera_, scene_);
+
+                renderer.MainView.Scene = scene_;
+                renderer.MainView.Camera = camera_;
         }
 
         protected override void OnShutdown()
