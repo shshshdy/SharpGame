@@ -18,7 +18,7 @@ namespace SharpGame.Editor
             base.Setup();
 
             CreateSubsystem<AssetDatabase>();
-
+            /*
             GUISystem guiSys = CreateSubsystem<GUISystem>();
 
             EditorWindow.GetWindow<MainWindow>();
@@ -26,13 +26,13 @@ namespace SharpGame.Editor
             SubscribeToEvent<GUIEvent>(HandleGUI);
             SubscribeToEvent<Update>(HandleUpdate);
             SubscribeToEvent<PostRenderUpdate>(HandlePostRenderUpdate);
-
+            */
         }
 
         protected override void OnInit()
         {
             base.OnInit();
-
+            /*
             scene_ = new Scene();
             camera_ = scene_.CreateChild("Camera").CreateComponent<Camera>();
             root_ = scene_.CreateChild("Parent");
@@ -96,7 +96,7 @@ namespace SharpGame.Editor
 
             Renderer renderer = Get<Renderer>();
             RenderView view = renderer.CreateRenderView(camera_, scene_);
-
+            */
         }
 
         protected override void OnShutdown()

@@ -11,6 +11,7 @@ using static SharpGame.Sdl2.Sdl2Native;
 using System.ComponentModel;
 using System.Collections.Concurrent;
 using SharpGame;
+using System.IO;
 
 namespace SharpGame.Sdl2
 {
@@ -54,12 +55,63 @@ namespace SharpGame.Sdl2
             protected set => SetWindowSize(Width, value);
         }
 
-        public override IntPtr Handle => GetUnderlyingWindowHandle();
+        public override IntPtr WindowHandle => GetUnderlyingWindowHandle();
+        public override IntPtr InstanceHandle
+        {
+            get
+            {
+                SDL_SysWMinfo wmInfo;
+                SDL_GetVersion(&wmInfo.version);
+                SDL_GetWMWindowInfo(_window, &wmInfo);
+                if (wmInfo.subsystem == SysWMType.Windows)
+                {
+                    Win32WindowInfo win32Info = Unsafe.Read<Win32WindowInfo>(&wmInfo.info);
+                    return win32Info.hinstance;
+                }
+                else if (wmInfo.subsystem == SysWMType.X11)
+                {
 
-        public string Title
+                }
+                else if (wmInfo.subsystem == SysWMType.Cocoa)
+                {
+
+                }
+
+                return IntPtr.Zero;
+            }
+        }
+
+        public override string Title
         {
             get => SDL_GetWindowTitle(_window);
             set => SDL_SetWindowTitle(_window, value);
+        }
+
+        public override PlatformType Platform
+        {
+            get
+            {
+                SDL_SysWMinfo wmInfo;
+                SDL_GetWMWindowInfo(_window, &wmInfo);
+                if (wmInfo.subsystem == SysWMType.Windows)
+                {
+                    return PlatformType.Win32;
+                }
+                else if (wmInfo.subsystem == SysWMType.Android)
+                {
+                    return PlatformType.Android;
+                }
+                else if (wmInfo.subsystem == SysWMType.Cocoa)
+                {
+                    return PlatformType.MacOS;
+                }
+                return PlatformType.Win32;
+            }
+        }
+
+        public override Stream Open(string path)
+        {
+            return new FileStream(path, FileMode.Open, FileAccess.Read);
         }
 
         public WindowState WindowState
@@ -152,12 +204,12 @@ namespace SharpGame.Sdl2
             switch(ev.type)
             {
                 case SDL_EventType.Quit:
-                //Application.Quit();
+                Application.Quit();
                 //Close();
                 break;
                 case SDL_EventType.Terminating:
                 //Close();
-                //Application.Quit();
+                Application.Quit();
                 break;
                 case SDL_EventType.WindowEvent:
                 SDL_WindowEvent windowEvent = Unsafe.Read<SDL_WindowEvent>(&ev);
@@ -739,6 +791,14 @@ namespace SharpGame.Sdl2
             {
                 Win32WindowInfo win32Info = Unsafe.Read<Win32WindowInfo>(&wmInfo.info);
                 return win32Info.Sdl2Window;
+            }
+            else if (wmInfo.subsystem == SysWMType.X11)
+            {
+
+            }
+            else if (wmInfo.subsystem == SysWMType.Cocoa)
+            {
+
             }
 
             return _window;

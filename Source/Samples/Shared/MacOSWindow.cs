@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace SharpGame.Samples
 {
-    public class MacOSWindow : IPlatform
+    public class MacOSWindow : IGameWindow
     {
         private readonly string _title;
         private readonly Application _app;
@@ -27,7 +27,7 @@ namespace SharpGame.Samples
         public int Height { get; private set; } = 720;
         public PlatformType Platform => PlatformType.MacOS;
 
-        public string Tittle { get => _nativeWindow.Title; set => _nativeWindow.Title = value; }
+        public string Title { get => _nativeWindow.Title; set => _nativeWindow.Title = value; }
 
         public void ProcessEvents() => _nativeApp.ProcessEvents();
         public Stream Open(string path) => new FileStream(Path.Combine("bin", path), FileMode.Open, FileAccess.Read);
@@ -54,7 +54,7 @@ namespace SharpGame.Samples
             };
             _nativeWindow.CloseRequested += () =>
             {
-                _app.Quit();
+                    Application.Quit();
             };
             _nativeMetalView = new NativeMacOS.NativeMetalView(_nativeWindow);
 
@@ -75,6 +75,10 @@ namespace SharpGame.Samples
             _nativeWindow.Dispose();
             _nativeApp.Dispose();
         }
-        
+
+        public void RunMessageLoop()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

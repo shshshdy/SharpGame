@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace SharpGame.Samples
 {
-    public class Win32Window : IPlatform
+    public class Win32Window : IGameWindow
     {
         private readonly string _title;
         private readonly Application _app;
@@ -30,7 +30,7 @@ namespace SharpGame.Samples
         public int Height { get; private set; } = 720;
         public PlatformType Platform => PlatformType.Win32;
 
-        public string Tittle { get => _form.Text; set => _form.Text = value; }
+        public string Title { get => _form.Text; set => _form.Text = value; }
 
         public void ProcessEvents() => System.Windows.Forms.Application.DoEvents();
         public Stream Open(string path) => new FileStream(path, FileMode.Open, FileAccess.Read);
@@ -68,7 +68,7 @@ namespace SharpGame.Samples
                 _app.Deactivate();
             };
 
-            _form.HandleDestroyed += (sender, e) => _app.Quit();
+            _form.HandleDestroyed += (sender, e) => Application.Quit();
             _form.Resize += (sender, e) =>
             {
                 Width = _form.ClientSize.Width;
@@ -147,5 +147,9 @@ namespace SharpGame.Samples
             _app.Dispose();
         }
 
+        public void RunMessageLoop()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

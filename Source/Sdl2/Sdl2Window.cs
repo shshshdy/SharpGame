@@ -10,10 +10,11 @@ using System.Text;
 using static SharpGame.Sdl2.Sdl2Native;
 using System.ComponentModel;
 using SharpGame;
+using System.IO;
 
 namespace SharpGame.Sdl2
 {
-    public unsafe class Sdl2Window
+    public unsafe class Sdl2Window : IGameWindow
     {
         private readonly List<SDL_Event> _events = new List<SDL_Event>();
         private IntPtr _window;
@@ -110,7 +111,12 @@ namespace SharpGame.Sdl2
 
         public IntPtr Handle => GetUnderlyingWindowHandle();
 
+        public IntPtr WindowHandle => GetUnderlyingWindowHandle();
+
+        public IntPtr InstanceHandle => throw new NotImplementedException();
         public string Title { get => _cachedWindowTitle; set => SetWindowTitle(value); }
+
+        public PlatformType Platform => throw new NotImplementedException();
 
         private void SetWindowTitle(string value)
         {
@@ -941,6 +947,26 @@ namespace SharpGame.Sdl2
             }
 
             return _window;
+        }
+
+        public void ProcessEvents()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Stream Open(string path)
+        {
+            return new FileStream(Path.Combine("bin", path), FileMode.Open, FileAccess.Read);
+        }
+
+        public void Dispose()
+        {
+
+        }
+
+        public void RunMessageLoop()
+        {
+            throw new NotImplementedException();
         }
 
         private class SimpleInputSnapshot : InputSnapshot

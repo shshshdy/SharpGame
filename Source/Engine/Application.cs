@@ -14,15 +14,16 @@ namespace SharpGame
         Android, Win32, MacOS
     }
 
-    public interface IPlatform : IDisposable
+    public interface IGameWindow : IDisposable
     {
         IntPtr WindowHandle { get; }
         IntPtr InstanceHandle { get; }
         int Width { get; }
         int Height { get; }
-        string Tittle { get; set; }
+        string Title { get; set; }
 
         PlatformType Platform { get; }
+        void RunMessageLoop();
         void ProcessEvents();
         Stream Open(string path);
     }
@@ -30,20 +31,21 @@ namespace SharpGame
     public abstract class Application : Object
     {
         public string Name { get; set; }
-        protected IPlatform platform_;
+        protected IGameWindow platform_;
         protected FileSystem fileSystem_;
         protected Graphics graphics_;
         protected Renderer renderer_;
         protected ResourceCache resourceCache_;
 
         private Timer timer_;
-        private bool _running;   // Is the application running?
         private int frameNumber_;
         private float _timeElapsed;
         private bool _appPaused = false;
 
         SynchronizationContext workThreadSyncContext_;
         int workThreadId_;
+
+        static private bool _running;   // Is the application running?
 
         public Application()
         {
@@ -55,18 +57,24 @@ namespace SharpGame
             _context.Dispose();
         }
 
-        public void Initialize(IPlatform host)
+        public void Initialize(IGameWindow host)
         {
-            Name = host.Tittle;
+            //Name = host.Title;
             platform_ = host;
 
             timer_ = CreateSubsystem<Timer>();
             fileSystem_ = CreateSubsystem<FileSystem>(platform_);            
             graphics_ = CreateSubsystem<Graphics>(platform_);
-            resourceCache_ = CreateSubsystem<ResourceCache>("../../Content");
+            resourceCache_ = CreateSubsystem<ResourceCache>("../Content");
             renderer_ = CreateSubsystem<Renderer>();
-
+            CreateSubsystem<Input>();
             Setup();
+        }
+
+        public void Run(IGameWindow host)
+        {
+            Initialize(host);
+            Run();
         }
 
         protected virtual void Setup()
@@ -116,7 +124,7 @@ namespace SharpGame
             timer_.Start();
         }
 
-        public void Quit()
+        public static void Quit()
         {
             _running = false;
         }
@@ -135,7 +143,7 @@ namespace SharpGame
 
                 while (_running)
                 {
-                    platform_.ProcessEvents();
+                    platform_.RunMessageLoop();
 
                     if (!_appPaused)
                     {
@@ -162,6 +170,7 @@ namespace SharpGame
 
             while (_running)
             {
+                platform_.RunMessageLoop();
                 platform_.ProcessEvents();
 
                 if (!_appPaused)
@@ -193,7 +202,9 @@ namespace SharpGame
             graphics_.Frame();
 
             while (_running)
-            { 
+            {
+                platform_.ProcessEvents();
+
                 UpdateFrame();
 
                 graphics_.Frame();
@@ -205,18 +216,38 @@ namespace SharpGame
         {
             timer_.Tick();
 
-            SendGlobalEvent(new BeginFrame { frameNum_ = frameNumber_, timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
+            var beginFrame = new BeginFrame
+            {
+                frameNum_ = frameNumber_,
+                timeTotal_ = timer_.TotalTime,
+                timeDelta_ = timer_.DeltaTime
+            };
 
-            SendGlobalEvent(new Update { timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
+            SendGlobalEvent(ref beginFrame);
+
+            var update = new Update
+            {
+                timeTotal_ = timer_.TotalTime,
+                timeDelta_ = timer_.DeltaTime
+            };
+
+            SendGlobalEvent(ref update);
 
             Update(timer_);
 
-            SendGlobalEvent(new PostUpdate { timeTotal_ = timer_.TotalTime, timeDelta_ = timer_.DeltaTime });
+            var postUpdate = new PostUpdate
+            {
+                timeTotal_ = timer_.TotalTime,
+                timeDelta_ = timer_.DeltaTime
+            };
+
+            SendGlobalEvent(ref postUpdate);
 
             renderer_.RenderUpdate();
 
+            var endFrame = new EndFrame { };
 
-            SendGlobalEvent(new EndFrame { }); 
+            SendGlobalEvent(ref endFrame); 
 
             CalculateFrameRateStats();
 
@@ -233,7 +264,7 @@ namespace SharpGame
 
                 graphics_.Post(() =>
                 {
-                    platform_.Tittle = $"{Name}    Fps: {fps}    Mspf: {mspf}";
+                    platform_.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
                 });
 
                 // Reset for next average.

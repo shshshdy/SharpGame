@@ -8,8 +8,8 @@ namespace SharpGame
 {
     public class FileSystem : Object
     {
-        IPlatform platform;
-        public FileSystem(IPlatform platform)
+        IGameWindow platform;
+        public FileSystem(IGameWindow platform)
         {
             this.platform = platform;
         }

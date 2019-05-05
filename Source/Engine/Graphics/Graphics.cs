@@ -13,10 +13,10 @@ namespace SharpGame
         private readonly static Stack<IDisposable> _toDisposePermanent = new Stack<IDisposable>();
         private readonly static Stack<IDisposable> _toDisposeFrame = new Stack<IDisposable>();
         
-        public IPlatform Platform { get; private set; }
+        public IGameWindow Platform { get; private set; }
 
-        public int Width => Platform.Width;
-        public int Height => Platform.Height;
+        public int Width { get; set; }
+        public int Height { get; set; }
 
         public Image[] SwapchainImages { get; private set; }
         public ImageView[] SwapchainImageViews { get; private set; }
@@ -32,9 +32,12 @@ namespace SharpGame
 
         public bool LeftHand { get; set; } = true;
 
-        public Graphics(IPlatform host)
+        public Graphics(IGameWindow host)
         {
             Platform = host;
+
+            Width = host.Width;
+            Height = host.Height;
 #if DEBUG
             const bool debug = true;
 #else

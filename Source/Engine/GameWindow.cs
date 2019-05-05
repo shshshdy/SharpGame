@@ -1,6 +1,7 @@
 ﻿using SharpGame;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace SharpGame
@@ -15,13 +16,8 @@ namespace SharpGame
         Hidden,
     }
 
-    public abstract class GameWindow : Object
+    public abstract class GameWindow : Object, IGameWindow
     {
-        public virtual IntPtr Handle
-        {
-            get;
-        }
-
         public virtual int Width
         {
             get; protected set;
@@ -32,11 +28,27 @@ namespace SharpGame
             get; protected set;
         }
 
+        public virtual IntPtr WindowHandle
+        {
+            get;
+        }
+
+        public virtual IntPtr InstanceHandle
+        {
+            get;
+        }
+
+        public virtual string Title { get; set; }
+
+        public virtual PlatformType Platform { get; }
+
         public virtual void Close() { }
 
         public abstract void RunMessageLoop();
 
         public abstract void ProcessEvents();
+
+        public abstract Stream Open(string path);
 
         public event Action OnResized;
         public event Action OnClosing;
@@ -104,5 +116,6 @@ namespace SharpGame
         {
             OnMoved?.Invoke(point);
         }
+
     }
 }
