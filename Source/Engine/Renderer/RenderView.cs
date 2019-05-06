@@ -13,6 +13,7 @@ namespace SharpGame
         public RenderPath RenderPath { get; set; }
         public VulkanCore.Viewport Viewport { get; set; }
         public uint ViewMask { get; set; }
+        public RenderPass OverlayPass { get; set; }
 
         public Graphics Graphics => Get<Graphics>();
         public Renderer Renderer => Get<Renderer>();
@@ -50,6 +51,8 @@ namespace SharpGame
 
             RenderPath.Draw(this);
 
+            OverlayPass?.Draw(this);
+
             SendGlobalEvent(new EndView { view = this });
         }
 
@@ -85,6 +88,7 @@ namespace SharpGame
         public void Render(int imageIndex)
         {
             RenderPath?.Summit(imageIndex);
+            OverlayPass?.Summit(imageIndex);
         }
     }
 }

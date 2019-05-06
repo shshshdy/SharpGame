@@ -217,7 +217,7 @@ namespace SharpGame
             var shaderStageCreateInfos = pass.GetShaderStageCreateInfos();
 
             viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
-            new VulkanCore.Viewport(0, 0, graphics.Width, graphics.Height),
+            new Viewport(0, 0, graphics.Width, graphics.Height),
             new Rect2D(0, 0, graphics.Width, graphics.Height));
 
             var inputAssemblyStateCreateInfo = new PipelineInputAssemblyStateCreateInfo(

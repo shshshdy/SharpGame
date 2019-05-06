@@ -23,6 +23,7 @@ namespace SharpGame
         public CommandBuffer[] PrimaryCmdBuffers { get; private set; }
         public CommandBuffer WorkCmdBuffer => PrimaryCmdBuffers[WorkContext];
         public CommandBufferPool[] SecondaryCmdBuffers { get; private set; }
+        public CommandBufferPool WorkCmdBuffers => SecondaryCmdBuffers[WorkContext];
         public Fence[] SubmitFences { get; private set; }
         public Semaphore ImageAvailableSemaphore { get; private set; }
         public Semaphore RenderingFinishedSemaphore { get; private set; }

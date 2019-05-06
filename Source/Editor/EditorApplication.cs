@@ -53,8 +53,11 @@ namespace SharpGame.Editor
                 Name = "Test",
                 ["main"] = new Pass("Textured.vert.spv", "Textured.frag.spv")
             };
-            var mat = new Material();
-            mat.Shader = shader;
+
+            var mat = new Material
+            {
+                Shader = shader
+            };
 
             staticModel.SetMaterial(0, mat);
             /*

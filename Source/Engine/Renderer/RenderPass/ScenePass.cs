@@ -44,7 +44,6 @@ namespace SharpGame
 
             pipeline_ = new Pipeline
             {
-                CullMode = CullModes.None,
                 PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { descriptorSetLayout_ }),
             };
 
