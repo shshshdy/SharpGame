@@ -113,7 +113,7 @@ namespace SharpGame.Samples.TexturedCube
             _wvp.View = Matrix.LookAtLH(-Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
             var projection = Matrix.PerspectiveFovLH(
             (float)Math.PI / 4,
-            (float)graphics_.Platform.Width / graphics_.Platform.Height,
+            (float)graphics_.GameWindow.Width / graphics_.GameWindow.Height,
             1.0f, 1000.0f);
             _wvp.ViewProj = _wvp.View * projection;
 

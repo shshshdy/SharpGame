@@ -13,7 +13,7 @@ namespace SharpGame
         private readonly static Stack<IDisposable> _toDisposePermanent = new Stack<IDisposable>();
         private readonly static Stack<IDisposable> _toDisposeFrame = new Stack<IDisposable>();
         
-        public IGameWindow Platform { get; private set; }
+        public IGameWindow GameWindow { get; private set; }
 
         public int Width { get; set; }
         public int Height { get; set; }
@@ -30,11 +30,12 @@ namespace SharpGame
         public Texture DepthStencilBuffer => depthStencilBuffer_;
         private Texture depthStencilBuffer_;
 
+        internal DescriptorPoolManager DescriptorPoolManager { get; }
         public bool LeftHand { get; set; } = true;
 
         public Graphics(IGameWindow host)
         {
-            Platform = host;
+            GameWindow = host;
 
             Width = host.Width;
             Height = host.Height;
@@ -47,7 +48,7 @@ namespace SharpGame
             Instance = CreateInstance(debug);
             DebugReportCallback = CreateDebugReportCallback(debug);
             Surface = CreateSurface();
-            CreateDevice(Instance, Surface, Platform.Platform);
+            CreateDevice(Instance, Surface, GameWindow.Platform);
 
             ImageAvailableSemaphore = ToDispose(Device.CreateSemaphore());
             RenderingFinishedSemaphore = ToDispose(Device.CreateSemaphore());
@@ -82,6 +83,7 @@ namespace SharpGame
 
             renderThreadID_ = System.Threading.Thread.CurrentThread.ManagedThreadId;
 
+            DescriptorPoolManager = new DescriptorPoolManager(this);
         }
 
 
@@ -130,8 +132,8 @@ namespace SharpGame
 
             ComputeCommandPool.Dispose();
             GraphicsCommandPool.Dispose();
+            DescriptorPoolManager.DestroyAll();
             Device.Dispose();
-
             DebugReportCallback.Dispose();
             Surface.Dispose();
 

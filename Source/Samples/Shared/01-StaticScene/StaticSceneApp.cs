@@ -45,7 +45,7 @@ namespace SharpGame.Samples.StaticScene
             cameraNode_.LookAt(Vector3.Zero);
 
             camera_ = cameraNode_.AddComponent<Camera>();
-            camera_.AspectRatio = (float)graphics_.Platform.Width / graphics_.Platform.Height;
+            camera_.AspectRatio = (float)graphics_.GameWindow.Width / graphics_.GameWindow.Height;
 
             model_ = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
 
