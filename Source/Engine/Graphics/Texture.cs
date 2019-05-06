@@ -38,6 +38,8 @@ namespace SharpGame
         [IgnoreDataMember]
         public Sampler Sampler { get; set; }
 
+        public bool Dynamic { get; set; }
+
         public Texture()
         {
         }
@@ -48,11 +50,6 @@ namespace SharpGame
             Memory = memory;
             View = view;
             Format = format;
-        }
-
-        public Texture(TextureData textureData)
-        {
-            SetTextureData(textureData);
         }
 
         public override void Dispose()
@@ -134,15 +131,24 @@ namespace SharpGame
                 }
 
                 SetTextureData(data);
-                Sampler = graphics.CreateSampler();
             }
 
             return true;
         }
 
+        static Format[] bytesToFmt = new[]
+        {
+            Format.Undefined,
+            Format.R8UNorm,
+            Format.R8G8UNorm,
+            Format.R8G8B8UNorm,
+            Format.R8G8B8A8UNorm
+        };
+
         public void SetTextureData(TextureData tex2D)
         {
             var graphics = Get<Graphics>();
+
             Buffer stagingBuffer = graphics.Device.CreateBuffer(
                 new BufferCreateInfo(tex2D.Mipmaps[0].Size, BufferUsages.TransferSrc));
             MemoryRequirements stagingMemReq = stagingBuffer.GetMemoryRequirements();
@@ -233,18 +239,116 @@ namespace SharpGame
             Image = image;
             Memory = memory;
             Format = tex2D.Format;
+            Sampler = graphics.CreateSampler();
         }
 
-
-        public static Texture Create2D(TextureData tex2D)
+        public void SetData(int width, int height, int bytes_per_pixel, IntPtr pixels)
         {
-            return new Texture(tex2D);
+            var graphics = Get<Graphics>();
+
+            int size = width * height * bytes_per_pixel;
+            Format = bytesToFmt[bytes_per_pixel];
+            // Create optimal tiled target image.
+            var image = graphics.Device.CreateImage(new ImageCreateInfo
+            {
+                ImageType = ImageType.Image2D,
+                Format = Format,
+                MipLevels = 1,
+                ArrayLayers = 1,
+                Samples = SampleCounts.Count1,
+                Tiling = ImageTiling.Optimal,
+                SharingMode = SharingMode.Exclusive,
+                InitialLayout = ImageLayout.Undefined,
+                Extent = new Extent3D(width, height, 1),
+                Usage = ImageUsages.Sampled | ImageUsages.TransferDst
+            });
+
+            MemoryRequirements imageMemReq = image.GetMemoryRequirements();
+            int imageHeapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
+                imageMemReq.MemoryTypeBits, MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
+
+            var memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(imageMemReq.Size, imageHeapIndex));
+            image.BindMemory(memory);
+
+            var subresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1);
+
+            if (pixels != IntPtr.Zero)
+            {
+                Buffer stagingBuffer = graphics.Device.CreateBuffer(
+                    new BufferCreateInfo(size, BufferUsages.TransferSrc));
+                MemoryRequirements stagingMemReq = stagingBuffer.GetMemoryRequirements();
+                int heapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
+                    stagingMemReq.MemoryTypeBits, MemoryProperties.HostVisible);
+                DeviceMemory stagingMemory = graphics.Device.AllocateMemory(
+                    new MemoryAllocateInfo(stagingMemReq.Size, heapIndex));
+                stagingBuffer.BindMemory(stagingMemory);
+
+                IntPtr ptr = stagingMemory.Map(0, stagingMemReq.Size);
+                Utilities.CopyMemory(ptr, pixels, size);
+                stagingMemory.Unmap();
+
+                var bufferCopyRegions = new BufferImageCopy
+                {
+                    ImageSubresource = new ImageSubresourceLayers(ImageAspects.Color, 0, 0, 1),
+                    ImageExtent = new Extent3D(width, height, 1),
+                    BufferOffset = 0
+                };
+
+                // Copy the data from staging buffers to device local buffers.
+                CommandBuffer cmdBuffer = graphics.GraphicsCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
+                cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit));
+                cmdBuffer.CmdPipelineBarrier(PipelineStages.TopOfPipe, PipelineStages.Transfer,
+                    imageMemoryBarriers: new[]
+                    {
+                    new ImageMemoryBarrier(
+                        image, subresourceRange,
+                        0, Accesses.TransferWrite,
+                        ImageLayout.Undefined, ImageLayout.TransferDstOptimal)
+                    });
+                cmdBuffer.CmdCopyBufferToImage(stagingBuffer, image, ImageLayout.TransferDstOptimal, bufferCopyRegions);
+                cmdBuffer.CmdPipelineBarrier(PipelineStages.Transfer, PipelineStages.FragmentShader,
+                    imageMemoryBarriers: new[]
+                    {
+                    new ImageMemoryBarrier(
+                        image, subresourceRange,
+                        Accesses.TransferWrite, Accesses.ShaderRead,
+                        ImageLayout.TransferDstOptimal, ImageLayout.General/*ImageLayout.ShaderReadOnlyOptimal*/)
+                    });
+                cmdBuffer.End();
+
+                // Submit.
+                Fence fence = graphics.Device.CreateFence();
+                graphics.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
+                fence.Wait();
+
+                // Cleanup staging resources.
+                fence.Dispose();
+                stagingMemory.Dispose();
+                stagingBuffer.Dispose();
+
+            }
+
+            View = image.CreateView(new ImageViewCreateInfo(Format, subresourceRange));
+            Image = image;
+            Memory = memory;
+            Sampler = graphics.CreateSampler();
         }
 
-        public static Texture Create2D(int width, int height, int bytes_per_pixel, IntPtr pixels)
-        {            
-            var tex = new Texture();
 
+        public static Texture Create2D(TextureData texData)
+        {
+            var tex = new Texture();
+            tex.SetTextureData(texData);
+            return tex;
+        }
+
+        public static Texture CreateDynamic(int width, int height, int bytes_per_pixel, IntPtr pixels)
+        {
+            var tex = new Texture
+            {
+                Dynamic = true
+            };
+            tex.SetData(width, height, bytes_per_pixel, pixels);
             return tex;
         }
 

@@ -43,7 +43,6 @@ namespace SharpGame
                 stagingBuffer.BindMemory(stagingMemory);
             }
 
-
             // Create a device local buffer where the vertex data will be copied and which will be used for rendering.
             VulkanCore.Buffer buffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.TransferDst));
             MemoryRequirements req = buffer.GetMemoryRequirements();
@@ -70,9 +69,7 @@ namespace SharpGame
 
                 // Cleanup.
                 fence.Dispose();
-
                 cmdBuffer.Dispose();
-
                 stagingBuffer.Dispose();
                 stagingMemory.Dispose();
             }            

@@ -115,6 +115,83 @@ namespace SharpGame
             base.Dispose();
         }
 
+        public void SetBlendMode(BlendMode blendMode)
+        {
+            switch(blendMode)
+            {
+                case BlendMode.Replace:
+                    ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
+                    {
+                        new PipelineColorBlendAttachmentState
+                        {
+                            SrcColorBlendFactor = BlendFactor.One,
+                            DstColorBlendFactor = BlendFactor.Zero,
+                            ColorBlendOp = BlendOp.Add,
+                            SrcAlphaBlendFactor = BlendFactor.One,
+                            DstAlphaBlendFactor = BlendFactor.Zero,
+                            AlphaBlendOp = BlendOp.Add,
+                            ColorWriteMask = ColorComponents.All
+                        }
+                    });
+                    break;
+                case BlendMode.Add:
+                    ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
+                    {
+                        new PipelineColorBlendAttachmentState
+                        {
+                            SrcColorBlendFactor = BlendFactor.One,
+                            DstColorBlendFactor = BlendFactor.One,
+                            ColorBlendOp = BlendOp.Add,
+                            SrcAlphaBlendFactor = BlendFactor.One,
+                            DstAlphaBlendFactor = BlendFactor.Zero,
+                            AlphaBlendOp = BlendOp.Add,
+                            ColorWriteMask = ColorComponents.All
+                        }
+                    }, true);
+                    break;
+                case BlendMode.MultiplY:
+                    break;
+                case BlendMode.Alpha:
+                    ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
+                    {
+                        new PipelineColorBlendAttachmentState
+                        {
+                            SrcColorBlendFactor = BlendFactor.SrcAlpha,
+                            DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                            ColorBlendOp = BlendOp.Add,
+                            SrcAlphaBlendFactor = BlendFactor.One,
+                            DstAlphaBlendFactor = BlendFactor.Zero,
+                            AlphaBlendOp = BlendOp.Add,
+                            ColorWriteMask = ColorComponents.All
+                        }
+                    }, true);
+                    break;
+                case BlendMode.AddAlpha:
+                    break;
+                case BlendMode.PremulAlpha:
+                    ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
+                    {
+                        new PipelineColorBlendAttachmentState
+                        {
+                            SrcColorBlendFactor = BlendFactor.One,
+                            DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                            ColorBlendOp = BlendOp.Add,
+                            SrcAlphaBlendFactor = BlendFactor.One,
+                            DstAlphaBlendFactor = BlendFactor.Zero,
+                            AlphaBlendOp = BlendOp.Add,
+                            ColorWriteMask = ColorComponents.All
+                        }
+                    }, true);
+                    break;
+                case BlendMode.InvdestAlpha:
+                    break;
+                case BlendMode.Subtract:
+                    break;
+                case BlendMode.SubtractAlpha:
+                    break;
+            }
+        }
+
         protected override void Recreate()
         {
             pipeline?.Dispose();

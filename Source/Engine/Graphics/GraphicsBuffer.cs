@@ -16,7 +16,8 @@ namespace SharpGame
 
         [IgnoreDataMember]
         public int Size => Count * Stride;
-        internal Buffer Buffer { get; set; }
+        [IgnoreDataMember]
+        public Buffer Buffer { get; set; }
         protected DeviceMemory Memory { get; set; }
 
         public GraphicsBuffer()

@@ -11,5 +11,7 @@ namespace SharpGame
         {
             return new PipelineRasterizationStateCreateInfo(depthClampEnable, rasterizerDiscardEnable, polygonMode, cullMode, frontFace, depthBiasEnable, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor, lineWidth);
         }
+
+
     }
 }

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-
+using VulkanCore;
 using ImVec2 = System.Numerics.Vector2;
 
 namespace SharpGame.Editor
@@ -19,7 +19,7 @@ namespace SharpGame.Editor
         private GraphicsBuffer _vertexBuffer;
         private GraphicsBuffer _indexBuffer;
         private GraphicsBuffer _projMatrixBuffer;
-        private Texture _fontTexture;
+
         private IntPtr _fontAtlasID = (IntPtr)1;
         //private ResourceLayout _layout;
         //private ResourceLayout _textureLayout;
@@ -39,13 +39,19 @@ namespace SharpGame.Editor
 
             //ImGui.GetIO().Fonts.AddFontFromFileTTF("Data/font/arial.ttf", 16);
 
-            ResourceCache cache = Get<ResourceCache>();
+            var cache = Get<ResourceCache>();
+
             uiShader_ = new Shader
             {
                 Name = "UI",
                 ["main"] = new Pass("ImGui.vert.spv", "ImGui.frag.spv")
             };
-            
+
+            pipeline_ = new Pipeline
+            {
+                BlendMode = BlendMode.Alpha
+            };
+
             RecreateFontDeviceTexture();
 
             ImGuiStylePtr style = ImGui.GetStyle();
@@ -66,17 +72,9 @@ namespace SharpGame.Editor
 
         private unsafe void RecreateFontDeviceTexture()
         {
-            var io = ImGui.GetIO();
-         
-            // Build
+            var io = ImGui.GetIO();         
             io.Fonts.GetTexDataAsRGBA32(out byte* out_pixels, out int out_width, out int out_height, out int out_bytes_per_pixel);
-
-    //        Texture.Create2D()
-   /*
-            MemoryBlock mem = new MemoryBlock((IntPtr)textureData.Pixels, textureData.BytesPerPixel * textureData.Width * textureData.Height);
-            fontTex_ = Texture.Create2D(textureData.Width, textureData.Height, false, 1, TextureFormat.BGRA8, TextureFlags.None, mem);
-*/
-            // Store our identifier
+            fontTex_ = Texture.CreateDynamic(out_width, out_height, out_bytes_per_pixel, (IntPtr)out_pixels);
             io.Fonts.SetTexID(_fontAtlasID);
             io.Fonts.ClearTexData();
         }
@@ -130,21 +128,20 @@ namespace SharpGame.Editor
         {
             ImGui.Render();
 
-            RenderImDrawData(ImGui.GetDrawData());
+            RenderImDrawData(null, ImGui.GetDrawData());
         }
 
-        private unsafe void RenderImDrawData(ImDrawDataPtr draw_data)
+        private unsafe void RenderImDrawData(CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
         {
             var io = ImGui.GetIO();
             float width = io.DisplaySize.X;
             float height = io.DisplaySize.Y;
-            Graphics graphics = Get<Graphics>();
+            var graphics = Get<Graphics>();
 
             if (draw_data.CmdListsCount == 0)
             {
                 return;
             }
-
             
             if (draw_data.TotalVtxCount > _vertexBuffer.Count)
             {
@@ -158,87 +155,80 @@ namespace SharpGame.Editor
                 _indexBuffer = IndexBuffer.Create(IntPtr.Zero, sizeof(ushort), (int)(1.5f*draw_data.TotalIdxCount), true);
             }
 
-            for (int i = 0; i < draw_data.CmdListsCount; ++i)
+            uint vertexOffsetInVertices = 0;
+            uint indexOffsetInElements = 0;
+
+            for (int i = 0; i < draw_data.CmdListsCount; i++)
             {
-                var cmd_list = draw_data.CmdListsRange[i];
-                DrawGUICmdList(cmd_list);
+                ImDrawListPtr cmd_list = draw_data.CmdListsRange[i];
+
+                cmdBuffer.CmdUpdateBuffer(
+                    _vertexBuffer,
+                    vertexOffsetInVertices * (uint)sizeof(ImDrawVert),                    
+                    (uint)(cmd_list.VtxBuffer.Size * sizeof(ImDrawVert)),
+                    cmd_list.VtxBuffer.Data);
+
+                cmdBuffer.CmdUpdateBuffer(
+                    _indexBuffer,
+                    indexOffsetInElements * sizeof(ushort),                    
+                    (uint)(cmd_list.IdxBuffer.Size * sizeof(ushort)),
+                    cmd_list.IdxBuffer.Data);
+
+                vertexOffsetInVertices += (uint)cmd_list.VtxBuffer.Size;
+                indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
             }
- 
+
+            cmdBuffer.CmdBindVertexBuffer(_vertexBuffer.Buffer, 0);
+            cmdBuffer.CmdBindIndexBuffer(_indexBuffer.Buffer, 0, IndexType.UInt16);
+            //cmdBuffer.CmdBindPipeline(pipeline.);
+            //cmdBuffer.CmdSetGraphicsResourceSet(0, _mainResourceSet);
+
+            draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
+
+            int vtx_offset = 0;
+            int idx_offset = 0;
+            for (int n = 0; n < draw_data.CmdListsCount; n++)
+            {
+                ImDrawListPtr cmd_list = draw_data.CmdListsRange[n];
+                for (int cmd_i = 0; cmd_i < cmd_list.CmdBuffer.Size; cmd_i++)
+                {
+                    ImDrawCmdPtr pcmd = cmd_list.CmdBuffer[cmd_i];
+                    if (pcmd.UserCallback != IntPtr.Zero)
+                    {
+                        throw new NotImplementedException();
+                    }
+                    else
+                    {
+                        if (pcmd.TextureId != IntPtr.Zero)
+                        {
+                            if (pcmd.TextureId == _fontAtlasID)
+                            {
+                            //    cl.SetGraphicsResourceSet(1, _fontTextureResourceSet);
+                            }
+                            else
+                            {
+                            //    cl.SetGraphicsResourceSet(1, GetImageResourceSet(pcmd.TextureId));
+                            }
+                        }
+
+                        cmdBuffer.CmdSetScissor(
+                            new Rect2D(
+                            (int)pcmd.ClipRect.X,
+                            (int)pcmd.ClipRect.Y,
+                            (int)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
+                            (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y)));
+
+                        cmdBuffer.CmdDrawIndexed((int)pcmd.ElemCount, 1, idx_offset, vtx_offset, 0);
+                    }
+
+                    idx_offset += (int)pcmd.ElemCount;
+                }
+
+                vtx_offset += cmd_list.VtxBuffer.Size;
+            }
+
         }
     
-        unsafe void DrawGUICmdList(ImDrawList* cmd_list)
-        {  
-            int num_indices = cmd_list->IdxBuffer.Size;
-		    int num_vertices = cmd_list->VtxBuffer.Size;
- 
-            var decl = Pos2dTexColorVertex.Layout;
-            Graphics graphics = Get<Graphics>();
-
-
-            /*
-                       if(TransientIndexBuffer.GetAvailableSpace(num_indices) < num_indices)
-                           return;
-
-                       if(TransientVertexBuffer.GetAvailableSpace(num_vertices, decl) < num_vertices)
-                           return;
-
-                       TransientVertexBuffer vertex_buffer = new TransientVertexBuffer(num_vertices, decl);
-                       TransientIndexBuffer index_buffer = new TransientIndexBuffer(num_indices);
-
-                       Unsafe.CopyBlock((void*)vertex_buffer.Data, cmd_list->VtxBuffer.Data, (uint)(num_vertices * decl.Stride));
-                       Unsafe.CopyBlock((void*)index_buffer.Data, cmd_list->IdxBuffer.Data, (uint)(num_indices * sizeof(ushort)));
-
-                       RenderState state = 0
-                           | RenderState.ColorWrite
-                           | RenderState.AlphaWrite
-                           | RenderState.Multisampling
-                           | RenderState.BlendAlpha
-                           ;
-
-                       uint elem_offset = 0;
-                       for(int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
-                       {
-                           DrawCmd* pcmd = &(((DrawCmd*)cmd_list->CmdBuffer.Data)[cmd_i]);
-                           if(pcmd->UserCallback != IntPtr.Zero)
-                           {
-                               elem_offset += pcmd->ElemCount;
-                               throw new NotImplementedException();
-                               //pcmd->UserCallback(cmd_list, pcmd);
-
-                               continue;
-                           }
-
-                           if(0 == pcmd->ElemCount)
-                               continue;
-
-                           Bgfx.SetScissor((ushort)(Math.Max(pcmd->ClipRect.X, 0.0f)),
-                               (ushort)(Math.Max(pcmd->ClipRect.Y, 0.0f)),
-                               (ushort)(Math.Min(pcmd->ClipRect.Z, 65535.0f) - Math.Max(pcmd->ClipRect.X, 0.0f)),
-                               (ushort)(Math.Min(pcmd->ClipRect.W, 65535.0f) - Math.Max(pcmd->ClipRect.Y, 0.0f)));
-
-                           Texture texture = fontTex_;
-                           if(pcmd->TextureId != null)
-                           { 
-                               IntPtr texID = pcmd->TextureId;
-                           }
-
-                           Bgfx.SetTexture(0, uiShader_.TextureSlot[0].UniformHandle, texture);
-
-                           graphics.DrawTransient(
-                               viewId_,
-                               vertex_buffer,
-                               index_buffer,
-                               Matrix.Identity,
-                               (int)elem_offset,
-                               (int)pcmd->ElemCount,
-                               state,
-                               uiShaderInstance_);
-
-                           elem_offset += pcmd->ElemCount;
-                       }
-            */
-        }
-       
         private unsafe void UpdateImGuiInput()
         {
             ImGuiIOPtr io = ImGui.GetIO();

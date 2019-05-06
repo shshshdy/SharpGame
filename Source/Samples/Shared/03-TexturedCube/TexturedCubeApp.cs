@@ -8,14 +8,6 @@ using VulkanCore;
 
 namespace SharpGame.Samples.TexturedCube
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct WorldViewProjection
-    {
-        public Matrix World;
-        public Matrix View;
-        public Matrix ViewInv;
-        public Matrix ViewProj;
-    }
 
     public class TexturedCubeApp : Application
     {

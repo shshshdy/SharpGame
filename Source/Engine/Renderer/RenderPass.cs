@@ -13,7 +13,7 @@ namespace SharpGame
     using mat4 = Matrix;
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct FrameVS
+    public struct FrameUniform
     {
         public float cDeltaTime;
         public float cElapsedTime;
@@ -35,14 +35,6 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct ZoneVS
-    {
-        public vec3 cAmbientStartColor;
-        public vec3 cAmbientEndColor;
-        public mat4 cZone;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
     public struct MaterialVS
     {
         public vec4 cUOffset;
@@ -57,14 +49,6 @@ namespace SharpGame
         //vec4 cSkinMatrices [64*3];
     };
 
-    // Pixel shader uniforms
-    [StructLayout(LayoutKind.Sequential)]
-    public struct FramePS
-    {
-        public float cDeltaTimePS;
-        public float cElapsedTimePS;
-    }
-
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraPS
     {
@@ -73,16 +57,6 @@ namespace SharpGame
         public vec2 cGBufferInvSize;
         public float cNearClipPS;
         public float cFarClipPS;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ZonePS
-    {
-        public vec4 cAmbientColor;
-        public vec4 cFogParams;
-        public vec3 cFogColor;
-        public vec3 cZoneMin;
-        public vec3 cZoneMax;
     }
 
     [StructLayout(LayoutKind.Sequential)]
