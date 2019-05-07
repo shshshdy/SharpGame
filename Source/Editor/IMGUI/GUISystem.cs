@@ -22,6 +22,7 @@ namespace SharpGame.Editor
 
         private IntPtr _fontAtlasID = (IntPtr)1;
 
+        DescriptorPool _descriptorPool;
         private DescriptorSetLayout _layout;
         DescriptorSet descriptorSet_;
         //private ResourceLayout _textureLayout;
@@ -50,29 +51,45 @@ namespace SharpGame.Editor
                 ["main"] = new Pass("ImGui.vert.spv", "ImGui.frag.spv")
             };
 
+            var descriptorPoolSizes = new[]
+            {
+                new DescriptorPoolSize(DescriptorType.UniformBuffer, 2),
+                new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 2)
+            };
+
+            _descriptorPool = graphics.CreateDescriptorPool(descriptorPoolSizes);
+
             _layout = graphics.CreateDescriptorSetLayout(
     new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
     new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
 
-            /*
+            _projMatrixBuffer = UniformBuffer.Create<Matrix>(1);
+
+            pipeline_ = new Pipeline
+            {
+                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _layout }),
+                VertexInputState = Pos2dTexColorVertex.Layout,
+                BlendMode = BlendMode.Alpha
+            };
+
+            unsafe
+            {
+                _vertexBuffer = VertexBuffer.Create(IntPtr.Zero, sizeof(ImDrawVert), 4046, true);
+                _indexBuffer = IndexBuffer.Create(IntPtr.Zero, sizeof(ushort), 4046, true);
+            }
+
+            RecreateFontDeviceTexture();
+
             descriptorSet_ = _descriptorPool.AllocateSets(new DescriptorSetAllocateInfo(1, _layout))[0];
             // Update the descriptor set for the shader binding point.
             var writeDescriptorSets = new[]
             {
-                new WriteDescriptorSet(_layout, 0, 0, 1, DescriptorType.UniformBuffer,
-                    bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
-                new WriteDescriptorSet(_layout, 1, 0, 1, DescriptorType.CombinedImageSampler,
-                    imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
+                new WriteDescriptorSet(descriptorSet_, 0, 0, 1, DescriptorType.UniformBuffer,
+                    bufferInfo: new[] { new DescriptorBufferInfo(_projMatrixBuffer) }),
+                new WriteDescriptorSet(descriptorSet_, 1, 0, 1, DescriptorType.CombinedImageSampler,
+                    imageInfo: new[] { new DescriptorImageInfo(fontTex_.Sampler, fontTex_.View, ImageLayout.General) })
             };
             _descriptorPool.UpdateSets(writeDescriptorSets);
-            */
-
-            pipeline_ = new Pipeline
-            {
-                BlendMode = BlendMode.Alpha
-            };
-
-            RecreateFontDeviceTexture();
 
             ImGuiStylePtr style = ImGui.GetStyle();
             //ImGuiUtil.ResetStyle(ImGuiStyle.EdinBlack, style );
@@ -85,7 +102,7 @@ namespace SharpGame.Editor
 
             SubscribeToEvent((ref BeginFrame e) => UpdateGUI());
 
-            SubscribeToEvent((EndRenderPass e) => RenderGUI(e.commandBuffer));
+            SubscribeToEvent((EndRenderPass e) => RenderGUI(e.renderPass, e.commandBuffer));
 
         }
         
@@ -144,14 +161,14 @@ namespace SharpGame.Editor
 
         }
 
-        unsafe void RenderGUI(CommandBuffer commandBuffer)
+        unsafe void RenderGUI(RenderPass renderPass, CommandBuffer commandBuffer)
         {
             ImGui.Render();
 
-            RenderImDrawData(commandBuffer, ImGui.GetDrawData());
+            RenderImDrawData(renderPass, commandBuffer, ImGui.GetDrawData());
         }
 
-        private unsafe void RenderImDrawData(CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
+        private unsafe void RenderImDrawData(RenderPass renderPass, CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
         {
             var io = ImGui.GetIO();
             float width = io.DisplaySize.X;
@@ -174,6 +191,18 @@ namespace SharpGame.Editor
                 _indexBuffer.Dispose();
                 _indexBuffer = IndexBuffer.Create(IntPtr.Zero, sizeof(ushort), (int)(1.5f*draw_data.TotalIdxCount), true);
             }
+
+            Matrix proj = Matrix.OrthoOffCenterLH(
+                     0f,
+                     io.DisplaySize.X,
+                     io.DisplaySize.Y,
+                     0.0f,
+                     -1.0f,
+                     1.0f, false);
+
+            IntPtr ptr = _projMatrixBuffer.Map(0, Interop.SizeOf<Matrix>());
+            VulkanCore.Interop.Write(ptr, ref proj);
+            _projMatrixBuffer.Unmap();
 
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
@@ -201,9 +230,9 @@ namespace SharpGame.Editor
             cmdBuffer.CmdBindVertexBuffer(_vertexBuffer.Buffer, 0);
             cmdBuffer.CmdBindIndexBuffer(_indexBuffer.Buffer, 0, IndexType.UInt16);
      
-            //var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, uiShader_, null);
-            //cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
-            //cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
+            var pipeline = pipeline_.GetGraphicsPipeline(renderPass, uiShader_, null);
+            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, descriptorSet_);
+            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
 
             draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
 

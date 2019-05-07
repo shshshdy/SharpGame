@@ -9,10 +9,9 @@ namespace SharpGame
     {
         public UniformBuffer()
         {
-
         }
 
-        public void SetData<T>(int count = 1) where T : struct
+        public void Init<T>(int count = 1) where T : struct
         {
             var graphics = Get<Graphics>();
             int stride = Interop.SizeOf<T>();
@@ -38,7 +37,7 @@ namespace SharpGame
         public static UniformBuffer Create<T>(int count) where T : struct
         {
             var ub = new UniformBuffer();
-            ub.SetData<T>(count);
+            ub.Init<T>(count);
             return Graphics.ToDispose(ub);
         }
 

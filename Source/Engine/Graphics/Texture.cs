@@ -265,7 +265,7 @@ namespace SharpGame
 
             MemoryRequirements imageMemReq = image.GetMemoryRequirements();
             int imageHeapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
-                imageMemReq.MemoryTypeBits, MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
+                imageMemReq.MemoryTypeBits, MemoryProperties.DeviceLocal);
 
             var memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(imageMemReq.Size, imageHeapIndex));
             image.BindMemory(memory);

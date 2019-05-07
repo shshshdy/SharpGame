@@ -11,7 +11,7 @@ namespace SharpGame
         {
         }
 
-        public void SetData<T>(T[] data) where T : struct
+        public void Init<T>(T[] data) where T : struct
         {
             Graphics ctx = Get<Graphics>();
             int stride = Interop.SizeOf<T>();
@@ -64,7 +64,7 @@ namespace SharpGame
         public static StorageBuffer Create<T>(T[] data) where T : struct
         {
             StorageBuffer buf = new StorageBuffer();
-            buf.SetData(data);
+            buf.Init(data);
             return Graphics.ToDispose(buf);
         }
 

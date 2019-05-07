@@ -11,16 +11,16 @@ namespace SharpGame
         {
         }
 
-        public void SetData<T>(T[] vertices) where T : struct
+        public void Init<T>(T[] vertices) where T : struct
         {
             var graphics = Get<Graphics>();
             int stride = Interop.SizeOf<T>();
             long size = vertices.Length * stride;
 
-            SetData(Utilities.AsPointer(ref vertices[0]), stride, vertices.Length);
+            Init(Utilities.AsPointer(ref vertices[0]), stride, vertices.Length);
         }
 
-        public void SetData(IntPtr vertices, int stride, int count)
+        public void Init(IntPtr vertices, int stride, int count)
         {
             var graphics = Get<Graphics>();
             long size = count * stride;
@@ -87,7 +87,7 @@ namespace SharpGame
                 Dynamic = dynamic
             };
             
-            vb.SetData(vertices);
+            vb.Init(vertices);
             return Graphics.ToDispose(vb);
         }
 
@@ -98,7 +98,7 @@ namespace SharpGame
                 Dynamic = dynamic
             };
 
-            vb.SetData(vertices, stride, count);
+            vb.Init(vertices, stride, count);
             return Graphics.ToDispose(vb);
         }
 

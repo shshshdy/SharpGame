@@ -17,7 +17,8 @@ namespace SharpGame.Samples.TexturedCube
 
         private DescriptorSetLayout _descriptorSetLayout;
         private DescriptorPool _descriptorPool;
-        private DescriptorSet _descriptorSet;        
+        private DescriptorSet _descriptorSet;
+        private DescriptorSet _descriptorSet1;
 
         private Texture _cubeTexture;
 
@@ -42,7 +43,8 @@ namespace SharpGame.Samples.TexturedCube
 
             _descriptorSetLayout = CreateDescriptorSetLayout();
             _descriptorPool      = CreateDescriptorPool();
-            _descriptorSet       = CreateDescriptorSet();
+
+            CreateDescriptorSet();
 
 
             pipeline_ = new Pipeline
@@ -130,25 +132,26 @@ namespace SharpGame.Samples.TexturedCube
         {
             var descriptorPoolSizes = new[]
             {
-                new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
-                new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 1)
+                new DescriptorPoolSize(DescriptorType.UniformBuffer, 2),
+                new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 2)
             };
             return graphics_.CreateDescriptorPool(descriptorPoolSizes);
         }
 
-        private DescriptorSet CreateDescriptorSet()
+        private void CreateDescriptorSet()
         {
-            DescriptorSet descriptorSet = _descriptorPool.AllocateSets(new DescriptorSetAllocateInfo(1, _descriptorSetLayout))[0];
+            _descriptorSet = _descriptorPool.AllocateSets(new DescriptorSetAllocateInfo(1, _descriptorSetLayout))[0];
             // Update the descriptor set for the shader binding point.
             var writeDescriptorSets = new[]
             {
-                new WriteDescriptorSet(descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
+                new WriteDescriptorSet(_descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
                     bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
-                new WriteDescriptorSet(descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
+                new WriteDescriptorSet(_descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
                     imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
             };
             _descriptorPool.UpdateSets(writeDescriptorSets);
-            return descriptorSet;
+
+
         }
 
         private DescriptorSetLayout CreateDescriptorSetLayout()

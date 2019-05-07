@@ -28,7 +28,7 @@ namespace SharpGame.Editor
 
             EditorWindow.GetWindow<MainWindow>();
   
-            SubscribeToEvent<GUIEvent>(HandleGUI);
+            SubscribeToEvent<BeginFrame>(HandleGUI);
             SubscribeToEvent<Update>(HandleUpdate);
             SubscribeToEvent<PostRenderUpdate>(HandlePostRenderUpdate);
            
@@ -194,7 +194,7 @@ namespace SharpGame.Editor
 
         }
 
-        private void HandleGUI(ref GUIEvent e)
+        private void HandleGUI(ref BeginFrame  e)
         {
             EditorWindow.OnGUI();
         }
