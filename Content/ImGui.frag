@@ -4,7 +4,7 @@
 #extension GL_ARB_shading_language_420pack : enable
 
 //layout(set = 1, binding = 0) uniform texture2D FontTexture;
-layout(set = 0, binding = 1) uniform sampler2D FontSampler;
+layout(binding = 1) uniform sampler2D FontSampler;
 
 layout (location = 0) in vec4 color;
 layout (location = 1) in vec2 texCoord;

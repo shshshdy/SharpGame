@@ -32,11 +32,13 @@ void main()
 {
     gl_Position = projection * vec4(vsin_position, 0, 1);
     vsout_color = vsin_color;
+	/*
     if (!UseLegacyColorSpaceHandling)
     {
         vsout_color.rgb = SrgbToLinear(vsin_color.rgb);
-    }
+    }*/
     vsout_texCoord = vsin_texCoord;
+	
     if (IsClipSpaceYInverted)
     {
         gl_Position.y = -gl_Position.y;

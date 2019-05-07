@@ -12,9 +12,10 @@ namespace SharpGame.Editor
     {
         bool opened = true;
         byte[] textBuffer = new byte[1024];
+        private bool show_test_window = true;
         protected override void Draw()
         {
-
+                 /*
             ImGui.BeginMainMenuBar();
 
             if(ImGui.BeginMenu("File"))
@@ -31,7 +32,7 @@ namespace SharpGame.Editor
 
                 ImGui.EndMenu();
             }
-            /*
+       
             if(ImGui.BeginMenu("Style"))
             {
                 for(ImGuiStyle i = 0; i < ImGuiStyle.Count; i++)
@@ -44,24 +45,31 @@ namespace SharpGame.Editor
 
                 ImGui.EndMenu();
             }
-            */
-            ImGui.EndMainMenuBar();
+           
+            ImGui.EndMainMenuBar(); */
 
-            ImGui.SetNextWindowPos(
-                  new ImVec2(10.0f, 50.0f)
-                , ImGuiCond.FirstUseEver
-                );
-
-            ImGui.Begin("test1", ref opened//, new ImVec2(1024, 768)
-                , ImGuiWindowFlags.AlwaysAutoResize
-                );
-
-            if(ImGui.Button(" Restart"))
+            if (show_test_window)
             {
-                //  cmdExec("app restart");
+                ImGui.SetNextWindowPos(new ImVec2(650, 20), ImGuiCond.FirstUseEver);
+                ImGui.ShowDemoWindow(ref show_test_window);
             }
 
-            ImGui.Text("Test text, 测试文字");
+            /*
+                ImGui.SetNextWindowPos(
+                      new ImVec2(10.0f, 50.0f)
+                    , ImGuiCond.FirstUseEver
+                    );
+
+                ImGui.Begin("test1", ref opened//, new ImVec2(1024, 768)
+                    , ImGuiWindowFlags.AlwaysAutoResize
+                    );
+
+                if(ImGui.Button(" Restart"))
+                {
+                    //  cmdExec("app restart");
+                }
+
+                ImGui.Text("Test text, 测试文字");*/
             /*
             unsafe
             {
@@ -80,9 +88,9 @@ namespace SharpGame.Editor
                 if(ImGui.ColorEdit4(i.ToString(), ref c, true))
                     style.SetColor(i, c);
             }
-            */
+            
 
-            ImGui.End();
+            ImGui.End();*/
         }
         /*
 

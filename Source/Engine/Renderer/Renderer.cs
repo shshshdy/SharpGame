@@ -51,9 +51,9 @@ namespace SharpGame
         public void Render()
         {
             // Acquire an index of drawing image for this frame.
-            int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
+            //int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);
 
-            Graphics.BeginRender();
+            int imageIndex = Graphics.BeginRender();
             // Use a fence to wait until the command buffer has finished execution before using it again
             Graphics.SubmitFences[imageIndex].Wait();
             Graphics.SubmitFences[imageIndex].Reset();

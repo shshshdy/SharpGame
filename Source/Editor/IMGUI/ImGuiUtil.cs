@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Text;
 
 #if false
-
-using ImVec2 = SharpGame.Vector2;
-using ImVec3 = SharpGame.Vector3;
+using ImVec2 = System.Numerics.Vector2;
+using ImVec3 = System.Numerics.Vector3;
+using ImVec4 = System.Numerics.Vector4;
 
 namespace SharpGame.Editor
 {
@@ -39,12 +39,12 @@ namespace SharpGame.Editor
         }
 
         // @dougbinks (https://github.com/ocornut/imgui/issues/438)
-        static void ChangeStyleColors(Style style, float satThresholdForInvertingLuminance, float shiftHue)
+        static void ChangeStyleColors(ImGuiStylePtr style, float satThresholdForInvertingLuminance, float shiftHue)
         {
             if (satThresholdForInvertingLuminance >= 1.0f && shiftHue == 0.0f) return;
             for (int i = 0; i < (int)ColorTarget.Count; i++)
             {
-                ImVec4 col = style.GetColor((ColorTarget)i);
+                ImVec4 col = style.Colors[i];
                 float H = 0.0f, S = 0.0f, V = 0.0f;
                 ImGuiUtil.ColorConvertRGBtoHSV(col.X, col.Y, col.Z, ref H, ref S, ref V);
                 if (S <= satThresholdForInvertingLuminance) { V = 1.0f - V; }
@@ -52,15 +52,15 @@ namespace SharpGame.Editor
                 ImGuiUtil.ColorConvertHSVtoRGB(H, S, V, ref col.X, ref col.Y, ref col.Z);
             }
         }
-        static void InvertStyleColors(ImGuiStyle style) { ChangeStyleColors(style, .1f, 0.0f); }
-        static void ChangeStyleColorsHue(ImGuiStyle style, float shiftHue = 0.0f) { ChangeStyleColors(style, 0.0f, shiftHue); }
+        static void InvertStyleColors(ImGuiStylePtr style) { ChangeStyleColors(style, .1f, 0.0f); }
+        static void ChangeStyleColorsHue(ImGuiStylePtr style, float shiftHue = 0.0f) { ChangeStyleColors(style, 0.0f, shiftHue); }
         static ImVec4 ConvertTitleBgColFromPrevVersion(ImVec4 win_bg_col, ImVec4 title_bg_col)
         {
             float new_a = 1.0f - ((1.0f - win_bg_col.W) * (1.0f - title_bg_col.W)), k = title_bg_col.W / new_a;
             return new_ImVec4((win_bg_col.X* win_bg_col.W + title_bg_col.X) * k, (win_bg_col.Y* win_bg_col.W + title_bg_col.Y) * k, (win_bg_col.Z* win_bg_col.W + title_bg_col.Z) * k, new_a);
         }
 
-        public static bool ResetStyle(ImGuiStyle styleEnum, ImGuiStyle style)
+        public static bool ResetStyle(ImGuiStyle styleEnum, ImGuiStylePtr style)
         {
             if (styleEnum < 0 || styleEnum >= ImGuiStyle.Count) return false;
            // style = ImGuiStyle();
@@ -68,13 +68,13 @@ namespace SharpGame.Editor
             {
                 case ImGuiStyle.DefaultInverse:
                     InvertStyleColors(style);
-                    style.SetColor(ColorTarget.PopupBg, new_ImVec4(0.79f, 0.76f, 0.725f, 0.875f));
+                    style.Colors[(ColorTarget.PopupBg] = new_ImVec4(0.79f, 0.76f, 0.725f, 0.875f);
 
                     break;
                 case ImGuiStyle.Gray:
                     {
                         style.AntiAliasedLines = true;
-                        style.AntiAliasedShapes = true;
+                        style.AntiAliasedFill = true;
                         style.CurveTessellationTolerance = 1.25f;
                         style.Alpha = 1.0f;
                         //style.WindowFillAlphaDefault = .7f;
@@ -141,7 +141,7 @@ namespace SharpGame.Editor
                 case ImGuiStyle.Light:
                     {
                         style.AntiAliasedLines = true;
-                        style.AntiAliasedShapes = true;
+                        style.AntiAliasedFill = true;
                         style.CurveTessellationTolerance = 1.25f;
                         style.Alpha = 1.0f;
                         //style.WindowFillAlphaDefault = .7f;
@@ -262,7 +262,7 @@ namespace SharpGame.Editor
                 case ImGuiStyle.DarkOpaqueInverse:
                     {
                         style.AntiAliasedLines = true;
-                        style.AntiAliasedShapes = true;
+                        style.AntiAliasedFill = true;
                         style.CurveTessellationTolerance = 1.25f;
                         style.Alpha = 1.0f;
                         //style.WindowFillAlphaDefault = .7f;

@@ -41,7 +41,9 @@ namespace SharpGame
 
         public bool DepthTestEnable { get => depthStencilState_.DepthTestEnable; set => depthStencilState_.DepthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.DepthWriteEnable; set => depthStencilState_.DepthWriteEnable = value; }
-        public BlendMode BlendMode { get; set; }
+        public BlendMode BlendMode { set => SetBlendMode(value); }
+
+        public PipelineDynamicStateCreateInfo? DynamicStateCreateInfo {get; set;}
 
         public PipelineLayout pipelineLayout;
 
@@ -147,7 +149,7 @@ namespace SharpGame
                             AlphaBlendOp = BlendOp.Add,
                             ColorWriteMask = ColorComponents.All
                         }
-                    }, true);
+                    });
                     break;
                 case BlendMode.MultiplY:
                     break;
@@ -156,6 +158,7 @@ namespace SharpGame
                     {
                         new PipelineColorBlendAttachmentState
                         {
+                            BlendEnable = true,
                             SrcColorBlendFactor = BlendFactor.SrcAlpha,
                             DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
                             ColorBlendOp = BlendOp.Add,
@@ -164,7 +167,7 @@ namespace SharpGame
                             AlphaBlendOp = BlendOp.Add,
                             ColorWriteMask = ColorComponents.All
                         }
-                    }, true);
+                    });
                     break;
                 case BlendMode.AddAlpha:
                     break;
@@ -173,6 +176,7 @@ namespace SharpGame
                     {
                         new PipelineColorBlendAttachmentState
                         {
+                            BlendEnable = true,
                             SrcColorBlendFactor = BlendFactor.One,
                             DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
                             ColorBlendOp = BlendOp.Add,
@@ -181,7 +185,7 @@ namespace SharpGame
                             AlphaBlendOp = BlendOp.Add,
                             ColorWriteMask = ColorComponents.All
                         }
-                    }, true);
+                    });
                     break;
                 case BlendMode.InvdestAlpha:
                     break;
@@ -232,7 +236,8 @@ namespace SharpGame
                 viewportState: viewportStateCreateInfo,
                 multisampleState: MultisampleState,
                 depthStencilState: DepthStencilState,
-                colorBlendState: ColorBlendState);
+                colorBlendState: ColorBlendState,
+                dynamicState : DynamicStateCreateInfo);
 
             pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
             Graphics.ToDisposeFrame(pipeline);

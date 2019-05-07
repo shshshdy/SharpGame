@@ -299,8 +299,8 @@ namespace SharpGame
         #region MULTITHREADED
 
         private int currentContext_;
-        public int WorkContext => currentContext_;
-        public int RenderContext => 1 - currentContext_;
+        public int WorkContext => SingleThreaded ? imageIndex : currentContext_;
+        //public int RenderContext => 1 - currentContext_;
 
         private int currentFrame_;
         public int CurrentFrame => currentFrame_;
@@ -313,7 +313,7 @@ namespace SharpGame
         private long waitSubmit_;
         private long waitRender_;
 
-        public bool SingleThreaded { get; set; }
+        public bool SingleThreaded { get; set; } = false;
 
         private List<Action> commands_ = new List<Action>();
 
@@ -331,24 +331,18 @@ namespace SharpGame
             RenderSemPost();
         }
 
-        public bool BeginRender()
+        int imageIndex = 0;
+
+        public int BeginRender()
         {
+            imageIndex = Swapchain.AcquireNextImage(semaphore: ImageAvailableSemaphore);
+
             if (MainSemWait())
-            {/*
-                if(commands_.Count > 0)
-                {
-                    foreach (var cmd in commands_)
-                    {
-                        cmd.Invoke();
-                    }
-
-                    commands_.Clear();
-                }*/
-
-                return true;
+            {
+                return imageIndex;
             }
 
-            return false;
+            return imageIndex;
         }
 
         public void EndRender()
