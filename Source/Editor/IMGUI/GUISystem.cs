@@ -29,8 +29,6 @@ namespace SharpGame.Editor
 
         Shader uiShader_;
         Pipeline pipeline_;
-        //ShaderInstance uiShaderInstance_;
-        //RenderState renderState_ = RenderState.Default;
         Texture fontTex_;
 
         
@@ -210,18 +208,24 @@ namespace SharpGame.Editor
             for (int i = 0; i < draw_data.CmdListsCount; i++)
             {
                 ImDrawListPtr cmd_list = draw_data.CmdListsRange[i];
-
+                /*
                 cmdBuffer.CmdUpdateBuffer(
                     _vertexBuffer,
                     vertexOffsetInVertices * (uint)sizeof(ImDrawVert),                    
                     (uint)(cmd_list.VtxBuffer.Size * sizeof(ImDrawVert)),
-                    cmd_list.VtxBuffer.Data);
+                    cmd_list.VtxBuffer.Data);*/
 
+                _vertexBuffer.SetData(cmd_list.VtxBuffer.Data,
+                    (int)vertexOffsetInVertices * sizeof(ImDrawVert), cmd_list.VtxBuffer.Size * sizeof(ImDrawVert));
+                /*
                 cmdBuffer.CmdUpdateBuffer(
                     _indexBuffer,
                     indexOffsetInElements * sizeof(ushort),                    
                     (uint)(cmd_list.IdxBuffer.Size * sizeof(ushort)),
                     cmd_list.IdxBuffer.Data);
+                    */
+                _indexBuffer.SetData(cmd_list.IdxBuffer.Data,
+                    (int)indexOffsetInElements * sizeof(ushort), cmd_list.IdxBuffer.Size * sizeof(ushort));
 
                 vertexOffsetInVertices += (uint)cmd_list.VtxBuffer.Size;
                 indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
@@ -234,7 +238,7 @@ namespace SharpGame.Editor
             cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, descriptorSet_);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
 
-            draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
+            //draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
 
             int vtx_offset = 0;
             int idx_offset = 0;
@@ -261,13 +265,13 @@ namespace SharpGame.Editor
                             //    cl.SetGraphicsResourceSet(1, GetImageResourceSet(pcmd.TextureId));
                             }
                         }
-
+                        /*
                         cmdBuffer.CmdSetScissor(
                             new Rect2D(
                             (int)pcmd.ClipRect.X,
                             (int)pcmd.ClipRect.Y,
                             (int)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
-                            (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y)));
+                            (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y)));*/
 
                         cmdBuffer.CmdDrawIndexed((int)pcmd.ElemCount, 1, idx_offset, vtx_offset, 0);
                     }

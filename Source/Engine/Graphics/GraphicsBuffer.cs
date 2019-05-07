@@ -23,15 +23,22 @@ namespace SharpGame
         public GraphicsBuffer()
         {
         }
-        
-        public IntPtr Map(long offset, long size) => Memory.Map(offset, size);
-        public void Unmap() => Memory.Unmap();
 
         public override void Dispose()
         {
             Memory.Dispose();
             Buffer.Dispose();
         }
+
+        public void SetData(IntPtr data, int offset, int size)
+        {
+            var dest = Map(offset, size);
+            Utilities.CopyMemory(dest, data, size);
+            Unmap();
+        }
+
+        public IntPtr Map(long offset, long size) => Memory.Map(offset, size);
+        public void Unmap() => Memory.Unmap();
 
         public static implicit operator Buffer(GraphicsBuffer value) => value.Buffer;
         
