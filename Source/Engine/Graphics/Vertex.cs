@@ -51,7 +51,7 @@ namespace SharpGame
     {
         public Vector2 Position;
         public Vector2 TexCoord;
-        public Vector4 Color;
+        public uint Color;
 
 
         public static PipelineVertexInputStateCreateInfo Layout = new PipelineVertexInputStateCreateInfo
