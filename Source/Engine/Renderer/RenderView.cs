@@ -58,6 +58,8 @@ namespace SharpGame
 
         private void UpdateDrawables()
         {
+            drawables_.Clear();
+
             if (Scene == null || Camera == null)
             {
                 return;

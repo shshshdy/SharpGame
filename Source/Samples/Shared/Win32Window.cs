@@ -24,9 +24,20 @@ namespace SharpGame.Samples
         public int Height { get; private set; } = 720;
         public PlatformType Platform => PlatformType.Win32;
 
-        public string Title { get => _form.Text; set => _form.Text = value; }
+        public string Title
+        {
+            get;set;
+        }
 
-        public void ProcessEvents() => System.Windows.Forms.Application.DoEvents();
+        public void ProcessEvents()
+        {
+            if(Title != _form.Text)
+            {
+                _form.Text = Title;
+            }
+
+            System.Windows.Forms.Application.DoEvents();
+        }
         public void PumpEvents(InputSnapshot inputSnapshot) { }
         public Stream Open(string path) => new FileStream(path, FileMode.Open, FileAccess.Read);
 
@@ -138,6 +149,6 @@ namespace SharpGame.Samples
         {
 
         }
-        
+
     }
 }
