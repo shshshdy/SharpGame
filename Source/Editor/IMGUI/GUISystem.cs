@@ -275,58 +275,81 @@ namespace SharpGame.Editor
             }
 
         }
-    
+        private bool _controlDown;
+        private bool _shiftDown;
+        private bool _altDown;
+        private bool _winKeyDown;
         private unsafe void UpdateImGuiInput()
         {
+            Input input = Get<Input>();
+            InputSnapshot snapshot = input.InputSnapshot;
             ImGuiIOPtr io = ImGui.GetIO();
 
-            Input input = Get<Input>();
+            var mousePosition = EditorUtil.Convert(snapshot.MousePosition);
 
-            ImVec2 mousePosition = EditorUtil.Convert(input.MousePosition);
-
-            io.MousePos = mousePosition;
-            io.MouseDown[0] = input.IsMouseDown(MouseButton.Left);
-            io.MouseDown[1] = input.IsMouseDown(MouseButton.Right);
-            io.MouseDown[2] = input.IsMouseDown(MouseButton.Middle);
-
-            float delta = input.WheelDelta;
-            io.MouseWheel = delta;
-
-            ImGui.GetIO().MouseWheel = delta;
-
-            IReadOnlyList<char> keyCharPresses = input.KeyCharPresses;
-            for(int i = 0; i < keyCharPresses.Count; i++)
+            // Determine if any of the mouse buttons were pressed during this snapshot period, even if they are no longer held.
+            bool leftPressed = false;
+            bool middlePressed = false;
+            bool rightPressed = false;
+            foreach (MouseEvent me in snapshot.MouseEvents)
             {
-                char c = keyCharPresses[i];
-                ImGui.GetIO().AddInputCharacter(c);
+                if (me.Down)
+                {
+                    switch (me.MouseButton)
+                    {
+                        case MouseButton.Left:
+                            leftPressed = true;
+                            break;
+                        case MouseButton.Middle:
+                            middlePressed = true;
+                            break;
+                        case MouseButton.Right:
+                            rightPressed = true;
+                            break;
+                    }
+                }
             }
 
-            bool controlDown = false;
-            bool shiftDown = false;
-            bool altDown = false;
+            io.MouseDown[0] = leftPressed || snapshot.IsMouseDown(MouseButton.Left);
+            io.MouseDown[1] = rightPressed || snapshot.IsMouseDown(MouseButton.Right);
+            io.MouseDown[2] = middlePressed || snapshot.IsMouseDown(MouseButton.Middle);
+            io.MousePos = mousePosition;
+            io.MouseWheel = snapshot.WheelDelta;
 
-            IReadOnlyList<KeyEvent> keyEvents = input.KeyEvents;
-            for(int i = 0; i < keyEvents.Count; i++)
+            IReadOnlyList<char> keyCharPresses = snapshot.KeyCharPresses;
+            for (int i = 0; i < keyCharPresses.Count; i++)
+            {
+                char c = keyCharPresses[i];
+                io.AddInputCharacter(c);
+            }
+
+            IReadOnlyList<KeyEvent> keyEvents = snapshot.KeyEvents;
+            for (int i = 0; i < keyEvents.Count; i++)
             {
                 KeyEvent keyEvent = keyEvents[i];
                 io.KeysDown[(int)keyEvent.Key] = keyEvent.Down;
-                if(keyEvent.Key == Key.ControlLeft)
+                if (keyEvent.Key == Key.ControlLeft)
                 {
-                    controlDown = keyEvent.Down;
+                    _controlDown = keyEvent.Down;
                 }
-                if(keyEvent.Key == Key.ShiftLeft)
+                if (keyEvent.Key == Key.ShiftLeft)
                 {
-                    shiftDown = keyEvent.Down;
+                    _shiftDown = keyEvent.Down;
                 }
-                if(keyEvent.Key == Key.AltLeft)
+                if (keyEvent.Key == Key.AltLeft)
                 {
-                    altDown = keyEvent.Down;
+                    _altDown = keyEvent.Down;
+                }
+                if (keyEvent.Key == Key.WinLeft)
+                {
+                    _winKeyDown = keyEvent.Down;
                 }
             }
 
-            io.KeyCtrl = controlDown;
-            io.KeyAlt = altDown;
-            io.KeyShift = shiftDown;
+            io.KeyCtrl = _controlDown;
+            io.KeyAlt = _altDown;
+            io.KeyShift = _shiftDown;
+            io.KeySuper = _winKeyDown;
         }
 
     }
