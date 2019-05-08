@@ -65,21 +65,7 @@ namespace SharpGame
             {
                 sizes[i].Type = (DescriptorType)i;
                 sizes[i].DescriptorCount = descriptorCount;
-            }/*
-            sizes[0].Type = DescriptorType.UniformBuffer;
-            sizes[0].DescriptorCount = descriptorCount;
-            sizes[1].Type = DescriptorType.SampledImage;
-            sizes[1].DescriptorCount = descriptorCount;
-            sizes[2].Type = DescriptorType.Sampler;
-            sizes[2].DescriptorCount = descriptorCount;
-            sizes[3].Type = DescriptorType.StorageBuffer;
-            sizes[3].DescriptorCount = descriptorCount;
-            sizes[4].Type = DescriptorType.StorageImage;
-            sizes[4].DescriptorCount = descriptorCount;
-            sizes[5].Type = DescriptorType.UniformBufferDynamic;
-            sizes[5].DescriptorCount = descriptorCount;
-            sizes[6].Type = DescriptorType.StorageBufferDynamic;
-            sizes[6].DescriptorCount = descriptorCount;*/
+            }
 
             DescriptorPoolCreateInfo poolCI = new DescriptorPoolCreateInfo
             {
@@ -87,6 +73,7 @@ namespace SharpGame
                 MaxSets = totalSets,
                 PoolSizes = sizes
             };
+
             DescriptorPool descriptorPool = Graphics.Device.CreateDescriptorPool(poolCI);
             return new PoolInfo(descriptorPool, totalSets, descriptorCount);
         }
@@ -107,7 +94,6 @@ namespace SharpGame
 
             public int RemainingSets;
             public int[] RemainingCount = new int[11];
-
 
             public PoolInfo(DescriptorPool pool, int totalSets, int descriptorCount)
             {
@@ -143,7 +129,7 @@ namespace SharpGame
                 return true;               
             }
 
-            internal void Free(/*DescriptorSet set,*/ ref DescriptorResourceCounts counts)
+            internal void Free(ref DescriptorResourceCounts counts)
             {
                 RemainingSets += 1;
                 for (int i = 0; i < 11; i++)

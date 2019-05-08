@@ -18,7 +18,7 @@ namespace SharpGame
         private Shader shader_;
         public Shader Shader { get => shader_; set => shader_ = value; }
 
-        private DescriptorSet descriptorSet_;
+        private ResourceSet resourceSet_;
 
         public Material()
         {
