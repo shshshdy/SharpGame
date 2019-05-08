@@ -31,7 +31,7 @@ namespace SharpGame
         public Texture DepthStencilBuffer => depthStencilBuffer_;
         private Texture depthStencilBuffer_;
 
-        internal DescriptorPoolManager DescriptorPoolManager { get; }
+        internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
         public bool LeftHand { get; set; } = true;
 
         public Graphics(IGameWindow host)
@@ -83,8 +83,7 @@ namespace SharpGame
                 SecondaryCommandPool[1].AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Secondary, 10)));
 
             renderThreadID_ = System.Threading.Thread.CurrentThread.ManagedThreadId;
-
-            DescriptorPoolManager = new DescriptorPoolManager(this);
+            DescriptorPoolManager = new DescriptorPoolManager();
         }
 
 
@@ -257,7 +256,7 @@ namespace SharpGame
             return ToDisposeFrame(new Texture(image, memory, view, format));
         }
 
-        public Sampler CreateSampler()
+        public static Sampler CreateSampler()
         {
             var createInfo = new SamplerCreateInfo
             {
@@ -279,19 +278,19 @@ namespace SharpGame
             return ToDispose(Device.CreateSampler(createInfo));
         }
 
-        public Fence CreateFence(FenceCreateInfo createInfo = default)
+        public static Fence CreateFence(FenceCreateInfo createInfo = default)
         {
             return ToDispose(Device.CreateFence(createInfo));
         }
 
-        public DescriptorPool CreateDescriptorPool(DescriptorPoolSize[] descriptorPoolSizes, DescriptorPoolCreateFlags flags = DescriptorPoolCreateFlags.None)
+        public static DescriptorPool CreateDescriptorPool(DescriptorPoolSize[] descriptorPoolSizes, DescriptorPoolCreateFlags flags = DescriptorPoolCreateFlags.None)
         {
             return ToDispose(Device.CreateDescriptorPool(
                 new DescriptorPoolCreateInfo(descriptorPoolSizes.Length, descriptorPoolSizes, flags)
                 ));
         }
 
-        public DescriptorSetLayout CreateDescriptorSetLayout(params DescriptorSetLayoutBinding[] bindings)
+        public static DescriptorSetLayout CreateDescriptorSetLayout(params DescriptorSetLayoutBinding[] bindings)
         {
             return ToDispose(Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(bindings)));
         }

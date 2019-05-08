@@ -26,16 +26,16 @@ namespace SharpGame
 
     public partial class Graphics
     {
-        internal Instance Instance { get; private set; }
-        protected DebugReportCallbackExt DebugReportCallback { get; private set; }
-        internal SurfaceKhr Surface { get; private set; }
-        internal SwapchainKhr Swapchain { get; private set; }
+        internal static Instance Instance { get; private set; }
+        protected static DebugReportCallbackExt DebugReportCallback { get; private set; }
+        internal static SurfaceKhr Surface { get; private set; }
+        internal static SwapchainKhr Swapchain { get; private set; }
 
-        internal PhysicalDevice PhysicalDevice { get; private set; }
-        internal Device Device { get; private set; }
-        internal PhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
-        internal PhysicalDeviceFeatures Features { get; private set; }
-        internal PhysicalDeviceProperties Properties { get; private set; }
+        internal static PhysicalDevice PhysicalDevice { get; private set; }
+        internal static Device Device { get; private set; }
+        internal static PhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
+        internal static PhysicalDeviceFeatures Features { get; private set; }
+        internal static PhysicalDeviceProperties Properties { get; private set; }
 
         public Queue GraphicsQueue { get; private set; }
         public Queue ComputeQueue { get; private set; }

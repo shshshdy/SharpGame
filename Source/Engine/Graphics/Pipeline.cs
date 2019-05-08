@@ -217,7 +217,7 @@ namespace SharpGame
                 return null;
             }
 
-            pipelineLayout = graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
+            pipelineLayout = Graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
             var shaderStageCreateInfos = pass.GetShaderStageCreateInfos();
 
             viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
@@ -239,7 +239,7 @@ namespace SharpGame
                 colorBlendState: ColorBlendState,
                 dynamicState : DynamicStateCreateInfo);
 
-            pipeline = graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
+            pipeline = Graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
             Graphics.ToDisposeFrame(pipeline);
             return pipeline;
         }
@@ -251,14 +251,12 @@ namespace SharpGame
                 return null;
             }
 
-            var graphics = Get<Graphics>();
-
-            pipelineLayout = graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
+            pipelineLayout = Graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
 
             var pipelineCreateInfo = new ComputePipelineCreateInfo(
                 shader.GetComputeStageCreateInfo(), pipelineLayout);
 
-            pipeline = graphics.Device.CreateComputePipeline(pipelineCreateInfo);
+            pipeline = Graphics.Device.CreateComputePipeline(pipelineCreateInfo);
             Graphics.ToDisposeFrame(pipeline);
             return pipeline;
         }

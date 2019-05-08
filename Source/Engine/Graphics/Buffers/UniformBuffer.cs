@@ -17,14 +17,14 @@ namespace SharpGame
             int stride = Interop.SizeOf<T>();
             long size = stride * count;
 
-            VulkanCore.Buffer buffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.UniformBuffer));
+            VulkanCore.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.UniformBuffer));
             MemoryRequirements memoryRequirements = buffer.GetMemoryRequirements();
             // We require host visible memory so we can map it and write to it directly.
             // We require host coherent memory so that writes are visible to the GPU right after unmapping it.
-            int memoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
+            int memoryTypeIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 memoryRequirements.MemoryTypeBits,
                 MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
-            DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(memoryRequirements.Size, memoryTypeIndex));
+            DeviceMemory memory = Graphics.Device.AllocateMemory(new MemoryAllocateInfo(memoryRequirements.Size, memoryTypeIndex));
             buffer.BindMemory(memory);
 
             Buffer = buffer;

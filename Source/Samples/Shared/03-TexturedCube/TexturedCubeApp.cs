@@ -18,7 +18,6 @@ namespace SharpGame.Samples.TexturedCube
         private DescriptorSetLayout _descriptorSetLayout;
         private DescriptorPool _descriptorPool;
         private DescriptorSet _descriptorSet;
-        private DescriptorSet _descriptorSet1;
 
         private Texture _cubeTexture;
 
@@ -28,15 +27,14 @@ namespace SharpGame.Samples.TexturedCube
 
         protected override void OnInit()
         {
-            SubscribeToEvent<BeginRenderPass>(Handle);
+            this.SubscribeToEvent<BeginRenderPass>(Handle);
 
             geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
 
             texturedShader_ = new Shader
-            {
-                Name = "Textured",
-                ["main"] = new Pass("Textured.vert.spv", "Textured.frag.spv")
-            };
+            (
+                Name = "Textured", new Pass("Textured.vert.spv", "Textured.frag.spv")
+            );
 
             _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer       = UniformBuffer.Create<WorldViewProjection>(1);
@@ -73,13 +71,13 @@ namespace SharpGame.Samples.TexturedCube
 
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             geometry_.Dispose();
             texturedShader_.Dispose();
             pipeline_.Dispose();
 
-            base.Dispose();
+            base.Destroy();
         }
 
         protected override void Update(Timer timer)
@@ -135,7 +133,7 @@ namespace SharpGame.Samples.TexturedCube
                 new DescriptorPoolSize(DescriptorType.UniformBuffer, 2),
                 new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 2)
             };
-            return graphics_.CreateDescriptorPool(descriptorPoolSizes);
+            return Graphics.CreateDescriptorPool(descriptorPoolSizes);
         }
 
         private void CreateDescriptorSet()
@@ -156,7 +154,7 @@ namespace SharpGame.Samples.TexturedCube
 
         private DescriptorSetLayout CreateDescriptorSetLayout()
         {
-            return graphics_.CreateDescriptorSetLayout(
+            return Graphics.CreateDescriptorSetLayout(
                 new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
                 new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
         }

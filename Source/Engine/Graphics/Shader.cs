@@ -13,7 +13,7 @@ namespace SharpGame
         [DataMember]
         public StringID Name { get; set; }
         [DataMember]
-        public Dictionary<StringID, Pass> Passes { get; set; } = new Dictionary<StringID, Pass>();
+        public List<Pass> Passes { get; set; } = new List<Pass>();
 
         public Shader()
         {
@@ -30,23 +30,10 @@ namespace SharpGame
         {
             if(pass.Name.IsNullOrEmpty)
             {
-                pass.Name = Pass.main;
+                pass.Name = Pass.Main;
             }
 
-            Passes.Add(pass.Name, pass);
-        }
-
-        public Pass this[StringID pass]
-        {
-            get
-            {
-                return Passes[pass];
-            }
-
-            set
-            {
-                Passes[pass] = value;
-            }
+            Passes.Add(pass);
         }
 
         [IgnoreDataMember]
@@ -54,15 +41,18 @@ namespace SharpGame
         {
             get
             {
-                return GetPass(Pass.main);
+                return GetPass(Pass.Main);
             }
         }
 
         public Pass GetPass(StringID name)
         {
-            if(Passes.TryGetValue(name, out Pass pass))
+            foreach(var pass in Passes)
             {
-                return pass;
+                if(pass.Name == name)
+                {
+                    return pass;
+                }
             }
 
             return null;
@@ -70,33 +60,45 @@ namespace SharpGame
 
         protected override void OnBuild()
         {
-            var it = Passes.GetEnumerator();
-            while(it.MoveNext())
+            foreach (var pass in Passes)
             {
-                it.Current.Value.Build();
+                pass.Build();
             }
-
         }
 
         protected override void Destroy()
         {
-            var it = Passes.GetEnumerator();
-            while (it.MoveNext())
+            foreach (var pass in Passes)
             {
-                it.Current.Value.Dispose();
+                pass.Dispose();
             }
 
             Passes.Clear();
 
-            base.Dispose();
+            base.Destroy();
         }
     }
 
     public class Pass : IDisposable
     {
+        public static readonly StringID Shadow = "shadow";
+        public static readonly StringID Depth = "depth";
+        public static readonly StringID Clear = "clear";
+        public static readonly StringID Main = "main";
+
         private StringID name_;
         [IgnoreDataMember]
-        public StringID Name { get => name_; set => name_ = value; }
+        public StringID Name
+        {
+            get => name_;
+            set {
+                name_ = value;
+                passID = GetID(value);
+            }
+        }
+
+        [IgnoreDataMember]
+        public int passID;
 
         [DataMember]
         public ShaderModule VertexShader { get; set; }
@@ -122,20 +124,46 @@ namespace SharpGame
         public bool IsComputeShader => ComputeShader != null;
         private bool builded_ = false;
 
-        public static readonly StringID shadow = "shadow";
-        public static readonly StringID depth = "depth";
-        public static readonly StringID clear = "clear";
-        public static readonly StringID main = "main";
-        
+        static List<StringID> passList = new List<StringID>();
+        static Pass()
+        {
+            passList.Add(Main);
+        }
+
+        public static int GetID(StringID pass)
+        {
+            if(pass.IsNullOrEmpty)
+            {
+                return 0;
+            }
+
+            for(int i = 0; i < passList.Count; i++)
+            {
+                if(passList[i] == pass)
+                {
+                    return i;
+                }
+            }
+            passList.Add(pass);
+            return passList.Count - 1;
+        }
+
         public Pass()
         {            
         }
 
-        public Pass(string vertexShader, string pixelShader, string geometryShader = null,
+        public Pass(string vertexShader = null, string pixelShader = null, string geometryShader = null,
             string hullShader = null, string domainShader = null, string computeShader = null)
         {
-            VertexShader = new ShaderModule(ShaderStages.Vertex, vertexShader);
-            PixelShader = new ShaderModule(ShaderStages.Fragment, pixelShader);
+            if (!string.IsNullOrEmpty(vertexShader))
+            {
+                VertexShader = new ShaderModule(ShaderStages.Vertex, vertexShader);
+            }
+
+            if (!string.IsNullOrEmpty(pixelShader))
+            {
+                PixelShader = new ShaderModule(ShaderStages.Fragment, pixelShader);
+            }
 
             if (!string.IsNullOrEmpty(geometryShader))
             {

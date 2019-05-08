@@ -101,7 +101,7 @@ namespace SharpGame
                 }
             }
 
-            shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
+            shaderModule = Graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
         }
 
         protected override void Destroy()

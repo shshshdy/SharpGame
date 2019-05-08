@@ -10,35 +10,32 @@ namespace SharpGame
     {
         private readonly List<PoolInfo> _pools = new List<PoolInfo>();
         private readonly object _lock = new object();
-        Graphics graphics_;
-        public DescriptorPoolManager(Graphics graphics)
+        public DescriptorPoolManager()
         {
-            graphics_ = graphics;
             _pools.Add(CreateNewPool());
         }
 
-        public unsafe DescriptorAllocationToken Allocate(DescriptorResourceCounts counts, DescriptorSetLayout setLayout)
+        public unsafe DescriptorPool Allocate(ResourceLayout resLayout)
         {
-            DescriptorPool pool = GetPool(counts);
-            var dsAI = new DescriptorSetAllocateInfo(1, setLayout);
-            return new DescriptorAllocationToken(pool.AllocateSets(dsAI)[0], pool);
+            DescriptorPool pool = GetPool(ref resLayout.descriptorResourceCounts);
+            return pool;
         }
 
-        public void Free(DescriptorAllocationToken token, DescriptorResourceCounts counts)
+        public void Free(DescriptorPool pool, ref DescriptorResourceCounts counts)
         {
             lock (_lock)
             {
                 foreach (PoolInfo poolInfo in _pools)
                 {
-                    if (poolInfo.Pool == token.Pool)
+                    if (poolInfo.Pool == pool)
                     {
-                        poolInfo.Free(graphics_, token, counts);
+                        poolInfo.Free(ref counts);
                     }
                 }
             }
         }
 
-        private DescriptorPool GetPool(DescriptorResourceCounts counts)
+        private DescriptorPool GetPool(ref DescriptorResourceCounts counts)
         {
             lock (_lock)
             {
@@ -85,7 +82,7 @@ namespace SharpGame
                 MaxSets = totalSets,
                 PoolSizes = sizes
             };
-            DescriptorPool descriptorPool = graphics_.Device.CreateDescriptorPool(poolCI);
+            DescriptorPool descriptorPool = Graphics.Device.CreateDescriptorPool(poolCI);
             return new PoolInfo(descriptorPool, totalSets, descriptorCount);
         }
 
@@ -145,12 +142,8 @@ namespace SharpGame
                 }
             }
 
-            internal void Free(Graphics device, DescriptorAllocationToken token, DescriptorResourceCounts counts)
+            internal void Free(/*DescriptorSet set,*/ ref DescriptorResourceCounts counts)
             {
-                DescriptorSet set = token.Set;
-                Pool.FreeSets(set);
-                //vkFreeDescriptorSets(device, Pool, 1, ref set);
-
                 RemainingSets += 1;
 
                 UniformBufferCount += counts.UniformBufferCount;
@@ -162,38 +155,4 @@ namespace SharpGame
         }
     }
 
-    internal struct DescriptorAllocationToken
-    {
-        public readonly DescriptorSet Set;
-        public readonly DescriptorPool Pool;
-
-        public DescriptorAllocationToken(DescriptorSet set, DescriptorPool pool)
-        {
-            Set = set;
-            Pool = pool;
-        }
-    }
-
-    internal struct DescriptorResourceCounts
-    {
-        public readonly int UniformBufferCount;
-        public readonly int SampledImageCount;
-        public readonly int SamplerCount;
-        public readonly int StorageBufferCount;
-        public readonly int StorageImageCount;
-
-        public DescriptorResourceCounts(
-            int uniformBufferCount,
-            int sampledImageCount,
-            int samplerCount,
-            int storageBufferCount,
-            int storageImageCount)
-        {
-            UniformBufferCount = uniformBufferCount;
-            SampledImageCount = sampledImageCount;
-            SamplerCount = samplerCount;
-            StorageBufferCount = storageBufferCount;
-            StorageImageCount = storageImageCount;
-        }
-    }
 }

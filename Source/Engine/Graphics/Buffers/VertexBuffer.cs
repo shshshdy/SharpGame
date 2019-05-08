@@ -30,13 +30,13 @@ namespace SharpGame
             DeviceMemory stagingMemory = null;
             if (vertices != IntPtr.Zero)
             {
-                stagingBuffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
+                stagingBuffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
                 MemoryRequirements stagingReq = stagingBuffer.GetMemoryRequirements();
-                int stagingMemoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
+                int stagingMemoryTypeIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                     stagingReq.MemoryTypeBits,
                     MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
 
-                stagingMemory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
+                stagingMemory = Graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
                 IntPtr vertexPtr = stagingMemory.Map(0, stagingReq.Size);
                 Utilities.CopyMemory(vertexPtr, vertices, (int)size);
                 stagingMemory.Unmap();
@@ -44,14 +44,14 @@ namespace SharpGame
             }
 
             // Create a device local buffer where the vertex data will be copied and which will be used for rendering.
-            VulkanCore.Buffer buffer = graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.TransferDst));
+            VulkanCore.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.TransferDst));
             MemoryRequirements req = buffer.GetMemoryRequirements();
-            int memoryTypeIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
+            int memoryTypeIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 req.MemoryTypeBits,
                Dynamic ? MemoryProperties.HostVisible | MemoryProperties.HostCoherent :  MemoryProperties.DeviceLocal
                 );
 
-            DeviceMemory memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
+            DeviceMemory memory = Graphics.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
             buffer.BindMemory(memory);
 
             if(vertices != IntPtr.Zero)
@@ -63,7 +63,7 @@ namespace SharpGame
                 cmdBuffer.End();
 
                 // Submit.
-                Fence fence = graphics.Device.CreateFence();
+                Fence fence = Graphics.Device.CreateFence();
                 graphics.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
                 fence.Wait();
 

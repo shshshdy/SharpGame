@@ -149,12 +149,12 @@ namespace SharpGame
         {
             var graphics = Get<Graphics>();
 
-            Buffer stagingBuffer = graphics.Device.CreateBuffer(
+            Buffer stagingBuffer = Graphics.Device.CreateBuffer(
                 new BufferCreateInfo(tex2D.Mipmaps[0].Size, BufferUsages.TransferSrc));
             MemoryRequirements stagingMemReq = stagingBuffer.GetMemoryRequirements();
-            int heapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
+            int heapIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 stagingMemReq.MemoryTypeBits, MemoryProperties.HostVisible);
-            DeviceMemory stagingMemory = graphics.Device.AllocateMemory(
+            DeviceMemory stagingMemory = Graphics.Device.AllocateMemory(
                 new MemoryAllocateInfo(stagingMemReq.Size, heapIndex));
             stagingBuffer.BindMemory(stagingMemory);
 
@@ -180,7 +180,7 @@ namespace SharpGame
             }
 
             // Create optimal tiled target image.
-            var image = graphics.Device.CreateImage(new ImageCreateInfo
+            var image = Graphics.Device.CreateImage(new ImageCreateInfo
             {
                 ImageType = ImageType.Image2D,
                 Format = tex2D.Format,
@@ -195,10 +195,10 @@ namespace SharpGame
             });
 
             MemoryRequirements imageMemReq = image.GetMemoryRequirements();
-            int imageHeapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
+            int imageHeapIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 imageMemReq.MemoryTypeBits, MemoryProperties.DeviceLocal);
 
-            var memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(imageMemReq.Size, imageHeapIndex));
+            var memory = Graphics.Device.AllocateMemory(new MemoryAllocateInfo(imageMemReq.Size, imageHeapIndex));
             image.BindMemory(memory);
 
             var subresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, tex2D.Mipmaps.Length, 0, 1);
@@ -226,7 +226,7 @@ namespace SharpGame
             cmdBuffer.End();
 
             // Submit.
-            Fence fence = graphics.Device.CreateFence();
+            Fence fence = Graphics.Device.CreateFence();
             graphics.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
             fence.Wait();
 
@@ -239,7 +239,7 @@ namespace SharpGame
             Image = image;
             Memory = memory;
             Format = tex2D.Format;
-            Sampler = graphics.CreateSampler();
+            Sampler = Graphics.CreateSampler();
         }
 
         public void SetData(int width, int height, int bytes_per_pixel, IntPtr pixels)
@@ -249,7 +249,7 @@ namespace SharpGame
             int size = width * height * bytes_per_pixel;
             Format = bytesToFmt[bytes_per_pixel];
             // Create optimal tiled target image.
-            var image = graphics.Device.CreateImage(new ImageCreateInfo
+            var image = Graphics.Device.CreateImage(new ImageCreateInfo
             {
                 ImageType = ImageType.Image2D,
                 Format = Format,
@@ -264,22 +264,22 @@ namespace SharpGame
             });
 
             MemoryRequirements imageMemReq = image.GetMemoryRequirements();
-            int imageHeapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
+            int imageHeapIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 imageMemReq.MemoryTypeBits, MemoryProperties.DeviceLocal);
 
-            var memory = graphics.Device.AllocateMemory(new MemoryAllocateInfo(imageMemReq.Size, imageHeapIndex));
+            var memory = Graphics.Device.AllocateMemory(new MemoryAllocateInfo(imageMemReq.Size, imageHeapIndex));
             image.BindMemory(memory);
 
             var subresourceRange = new ImageSubresourceRange(ImageAspects.Color, 0, 1, 0, 1);
 
             if (pixels != IntPtr.Zero)
             {
-                Buffer stagingBuffer = graphics.Device.CreateBuffer(
+                Buffer stagingBuffer = Graphics.Device.CreateBuffer(
                     new BufferCreateInfo(size, BufferUsages.TransferSrc));
                 MemoryRequirements stagingMemReq = stagingBuffer.GetMemoryRequirements();
-                int heapIndex = graphics.MemoryProperties.MemoryTypes.IndexOf(
+                int heapIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                     stagingMemReq.MemoryTypeBits, MemoryProperties.HostVisible);
-                DeviceMemory stagingMemory = graphics.Device.AllocateMemory(
+                DeviceMemory stagingMemory = Graphics.Device.AllocateMemory(
                     new MemoryAllocateInfo(stagingMemReq.Size, heapIndex));
                 stagingBuffer.BindMemory(stagingMemory);
 
@@ -317,7 +317,7 @@ namespace SharpGame
                 cmdBuffer.End();
 
                 // Submit.
-                Fence fence = graphics.Device.CreateFence();
+                Fence fence = Graphics.Device.CreateFence();
                 graphics.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
                 fence.Wait();
 
@@ -331,7 +331,7 @@ namespace SharpGame
             View = image.CreateView(new ImageViewCreateInfo(Format, subresourceRange));
             Image = image;
             Memory = memory;
-            Sampler = graphics.CreateSampler();
+            Sampler = Graphics.CreateSampler();
         }
 
 

@@ -47,15 +47,15 @@ namespace SharpGame.Samples.ComputeParticles
 
         protected override void OnInit()
         {
-            SubscribeToEvent((Resizing e) => RecordComputeCommandBuffer());
+            this.SubscribeToEvent((Resizing e) => RecordComputeCommandBuffer());
 
-            SubscribeToEvent<BeginRender>(Handle);
+            this.SubscribeToEvent<BeginRender>(Handle);
 
-            SubscribeToEvent<BeginRenderPass>(Handle);
+            this.SubscribeToEvent<BeginRenderPass>(Handle);
 
             _descriptorPool = CreateDescriptorPool();
 
-            _sampler = graphics_.CreateSampler();
+            _sampler = Graphics.CreateSampler();
             _particleDiffuseMap = resourceCache_.Load<Texture>("ParticleDiffuse.ktx").Result;
             _graphicsDescriptorSetLayout = CreateGraphicsDescriptorSetLayout();
             _graphicsDescriptorSet = CreateGraphicsDescriptorSet();
@@ -65,15 +65,15 @@ namespace SharpGame.Samples.ComputeParticles
             _computeDescriptorSetLayout = CreateComputeDescriptorSetLayout();
             _computeDescriptorSet = CreateComputeDescriptorSet();
             _computeCmdBuffer = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
-            _computeFence = graphics_.CreateFence();
+            _computeFence = Graphics.CreateFence();
 
             _shader = new Shader
-            {
+            (
                 Name = "Shader",
-                ["main"] = new Pass("Shader.vert.spv", "Shader.frag.spv")
-            };
+                new Pass("Shader.vert.spv", "Shader.frag.spv")
+            );
             
-            _computePass = new Pass("shader.comp.spv");
+            _computePass = new Pass(computeShader : "shader.comp.spv");
 
             _computePipeline = new Pipeline
             {
@@ -216,7 +216,7 @@ namespace SharpGame.Samples.ComputeParticles
 
         private DescriptorPool CreateDescriptorPool()
         {
-            return graphics_.CreateDescriptorPool(new[]
+            return Graphics.CreateDescriptorPool(new[]
             {
                 new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
                 new DescriptorPoolSize(DescriptorType.StorageBuffer, 1),
@@ -226,7 +226,7 @@ namespace SharpGame.Samples.ComputeParticles
             
         private DescriptorSetLayout CreateGraphicsDescriptorSetLayout()
         {
-            return graphics_.CreateDescriptorSetLayout(new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
+            return Graphics.CreateDescriptorSetLayout(new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
         }
 
         private DescriptorSet CreateGraphicsDescriptorSet()
@@ -243,7 +243,7 @@ namespace SharpGame.Samples.ComputeParticles
 
         private DescriptorSetLayout CreateComputeDescriptorSetLayout()
         {
-            return graphics_.CreateDescriptorSetLayout(
+            return Graphics.CreateDescriptorSetLayout(
                 new DescriptorSetLayoutBinding(0, DescriptorType.StorageBuffer, 1, ShaderStages.Compute),
                 new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, 1, ShaderStages.Compute));
         }

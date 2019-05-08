@@ -23,10 +23,10 @@ namespace SharpGame.Samples.StaticScene
         {
 
             testShader_ = new Shader
-            {
+            (
                 Name = "Test",
-                ["main"] = new Pass("Textured.vert.spv", "Textured.frag.spv")
-            };
+                new Pass("Textured.vert.spv", "Textured.frag.spv")
+            );
 
             scene_ = new Scene();
 
@@ -83,11 +83,11 @@ namespace SharpGame.Samples.StaticScene
 
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             testShader_.Dispose();
 
-            base.Dispose();
+            base.Destroy();
         }
 
 

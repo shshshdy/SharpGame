@@ -18,24 +18,24 @@ namespace SharpGame
             long size = data.Length * stride;
 
             // Create a staging buffer that is writable by host.
-            VulkanCore.Buffer stagingBuffer = ctx.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
+            VulkanCore.Buffer stagingBuffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
             MemoryRequirements stagingReq = stagingBuffer.GetMemoryRequirements();
-            int stagingMemoryTypeIndex = ctx.MemoryProperties.MemoryTypes.IndexOf(
+            int stagingMemoryTypeIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 stagingReq.MemoryTypeBits,
                 MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
-            DeviceMemory stagingMemory = ctx.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
+            DeviceMemory stagingMemory = Graphics.Device.AllocateMemory(new MemoryAllocateInfo(stagingReq.Size, stagingMemoryTypeIndex));
             IntPtr vertexPtr = stagingMemory.Map(0, stagingReq.Size);
             Interop.Write(vertexPtr, data);
             stagingMemory.Unmap();
             stagingBuffer.BindMemory(stagingMemory);
 
             // Create a device local buffer where the data will be copied.
-            VulkanCore.Buffer buffer = ctx.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.StorageBuffer | BufferUsages.TransferDst));
+            VulkanCore.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.StorageBuffer | BufferUsages.TransferDst));
             MemoryRequirements req = buffer.GetMemoryRequirements();
-            int memoryTypeIndex = ctx.MemoryProperties.MemoryTypes.IndexOf(
+            int memoryTypeIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 req.MemoryTypeBits,
                 MemoryProperties.DeviceLocal);
-            DeviceMemory memory = ctx.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
+            DeviceMemory memory = Graphics.Device.AllocateMemory(new MemoryAllocateInfo(req.Size, memoryTypeIndex));
             buffer.BindMemory(memory);
 
             // Copy the data from staging buffers to device local buffers.
@@ -45,7 +45,7 @@ namespace SharpGame
             cmdBuffer.End();
 
             // Submit.
-            Fence fence = ctx.Device.CreateFence();
+            Fence fence = Graphics.Device.CreateFence();
             ctx.GraphicsQueue.Submit(new SubmitInfo(commandBuffers: new[] { cmdBuffer }), fence);
             fence.Wait();
 

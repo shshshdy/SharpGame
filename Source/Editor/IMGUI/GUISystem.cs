@@ -43,10 +43,9 @@ namespace SharpGame.Editor
             var cache = Get<ResourceCache>();
 
             uiShader_ = new Shader
-            {
-                Name = "UI",
-                ["main"] = new Pass("ImGui.vert.spv", "ImGui.frag.spv")
-            };
+            (
+                "UI", new Pass("ImGui.vert.spv", "ImGui.frag.spv")
+            );
 
             var descriptorPoolSizes = new[]
             {
@@ -54,9 +53,9 @@ namespace SharpGame.Editor
                 new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 2)
             };
 
-            _descriptorPool = graphics.CreateDescriptorPool(descriptorPoolSizes);
+            _descriptorPool = Graphics.CreateDescriptorPool(descriptorPoolSizes);
 
-            _descriptorLayout = graphics.CreateDescriptorSetLayout(
+            _descriptorLayout = Graphics.CreateDescriptorSetLayout(
                 new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
                 new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
             );
