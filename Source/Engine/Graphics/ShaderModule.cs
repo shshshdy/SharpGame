@@ -104,7 +104,7 @@ namespace SharpGame
             shaderModule = graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             shaderModule?.Dispose();
             Code = null;

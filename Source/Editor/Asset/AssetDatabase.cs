@@ -16,7 +16,7 @@ namespace SharpGame.Editor
 
             //WatcherStart(FileSystem.DataPath, "*.*");
 
-            SubscribeToEvent<BeginFrame>(HandleBeginFrame);
+            this.SubscribeToEvent<BeginFrame>(HandleBeginFrame);
 
         }
         

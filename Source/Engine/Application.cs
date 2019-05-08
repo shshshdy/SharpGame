@@ -54,7 +54,7 @@ namespace SharpGame
             new Context();
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             _context.Dispose();
         }
@@ -224,7 +224,7 @@ namespace SharpGame
                 timeDelta_ = timer_.DeltaTime
             };
 
-            SendGlobalEvent(ref beginFrame);
+            this.SendGlobalEvent(ref beginFrame);
 
             var update = new Update
             {
@@ -232,7 +232,7 @@ namespace SharpGame
                 timeDelta_ = timer_.DeltaTime
             };
 
-            SendGlobalEvent(ref update);
+            this.SendGlobalEvent(ref update);
 
             Update(timer_);
 
@@ -242,13 +242,13 @@ namespace SharpGame
                 timeDelta_ = timer_.DeltaTime
             };
 
-            SendGlobalEvent(ref postUpdate);
+            this.SendGlobalEvent(ref postUpdate);
 
             renderer_.RenderUpdate();
 
             var endFrame = new EndFrame { };
 
-            SendGlobalEvent(ref endFrame); 
+            this.SendGlobalEvent(ref endFrame); 
 
             CalculateFrameRateStats();
 

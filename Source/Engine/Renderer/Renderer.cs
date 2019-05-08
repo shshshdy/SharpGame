@@ -28,7 +28,7 @@ namespace SharpGame
 
         public void RenderUpdate()
         {
-            SendGlobalEvent(new BeginRender());
+            this.SendGlobalEvent(new BeginRender());
             
             var timer = Get<Timer>();
 
@@ -45,7 +45,7 @@ namespace SharpGame
 
             var endFrame = new EndRender();
 
-            SendGlobalEvent(ref endFrame);
+            this.SendGlobalEvent(ref endFrame);
         }
 
         public void Render()

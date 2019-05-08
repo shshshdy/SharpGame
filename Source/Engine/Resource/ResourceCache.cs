@@ -84,7 +84,7 @@ namespace SharpGame
             return null;
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             foreach (IDisposable value in cachedContent_.Values)
                 value.Dispose();

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Observable : Observer
+    public class Observable : DisposeBase, IObserver
     {
         protected Dictionary<Type, List<IEventHandler>> eventHandlers_;
 

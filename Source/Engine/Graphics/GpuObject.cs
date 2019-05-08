@@ -13,7 +13,7 @@ namespace SharpGame
             GPUObjects_.Add(this);
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             GPUObjects_.Remove(this);
         }

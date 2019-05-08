@@ -41,7 +41,7 @@ namespace SharpGame
         {
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             foreach(var vb in VertexBuffers)
             {

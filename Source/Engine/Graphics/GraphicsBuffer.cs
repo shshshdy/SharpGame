@@ -24,7 +24,7 @@ namespace SharpGame
         {
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             Memory.Dispose();
             Buffer.Dispose();

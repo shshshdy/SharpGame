@@ -85,9 +85,9 @@ namespace SharpGame
         /// Force animation update after becoming visible flag.
         bool forceAnimationUpdate_ = false;
 
-        public override void Dispose()
+        protected override void Destroy()
         {
-            base.Dispose();
+            base.Destroy();
 
             if(!skinMatrices_.IsEmpty)
             {

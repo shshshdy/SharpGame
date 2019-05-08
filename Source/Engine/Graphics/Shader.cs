@@ -78,7 +78,7 @@ namespace SharpGame
 
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             var it = Passes.GetEnumerator();
             while (it.MoveNext())

@@ -119,7 +119,7 @@ namespace SharpGame
             return disposable;
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             Device.WaitIdle();
 

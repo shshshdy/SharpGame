@@ -52,7 +52,7 @@ namespace SharpGame
             Format = format;
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             View.Dispose();
             Memory.Dispose();

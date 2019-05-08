@@ -74,8 +74,8 @@ namespace SharpGame
         public DebugRenderer()
         {
             ResourceCache cache = Get<ResourceCache>();
-         //   uiShader_ = cache.GetResource<Shader>("shaders/default.shader");         
-            SubscribeToEvent<EndFrame>(HandleEndFrame);
+            //   uiShader_ = cache.GetResource<Shader>("shaders/default.shader");         
+            this.SubscribeToEvent<EndFrame>(HandleEndFrame);
         }
 
         public void SetView(Camera camera)

@@ -109,12 +109,12 @@ namespace SharpGame
 
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             pipeline?.Dispose();
             pipeline = null;
 
-            base.Dispose();
+            base.Destroy();
         }
 
         public void SetBlendMode(BlendMode blendMode)

@@ -43,7 +43,7 @@ namespace SharpGame
             frame_.camera_ = Camera;
             frame_.viewSize_ = new Int2(Graphics.Width, Graphics.Height);
 
-            SendGlobalEvent(new BeginView { view = this });
+            this.SendGlobalEvent(new BeginView { view = this });
 
             CommandBuffer cmdBuffer = Graphics.WorkCmdBuffer;
 
@@ -53,7 +53,7 @@ namespace SharpGame
 
             OverlayPass?.Draw(this);
 
-            SendGlobalEvent(new EndView { view = this });
+            this.SendGlobalEvent(new EndView { view = this });
         }
 
         private void UpdateDrawables()

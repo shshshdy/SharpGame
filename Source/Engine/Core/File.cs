@@ -31,9 +31,9 @@ namespace SharpGame
             nativeStreamBuffer = new byte[bufferSize];
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
-            base.Dispose();
+            base.Destroy();
 
             stream_?.Dispose();
         }

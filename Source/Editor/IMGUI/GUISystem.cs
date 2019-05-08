@@ -102,9 +102,9 @@ namespace SharpGame.Editor
 
             ImGui.NewFrame();
 
-            SubscribeToEvent((ref BeginFrame e) => UpdateGUI());
+            this.SubscribeToEvent((ref BeginFrame e) => UpdateGUI());
 
-            SubscribeToEvent((EndRenderPass e) => RenderGUI(e.renderPass, e.commandBuffer));
+            this.SubscribeToEvent((EndRenderPass e) => RenderGUI(e.renderPass, e.commandBuffer));
 
         }
         

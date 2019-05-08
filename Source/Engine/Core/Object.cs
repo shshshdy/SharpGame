@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Object : Observable, IDisposable
+    public class Object : Observable
     {
         internal static Context _context;
 
@@ -27,7 +27,7 @@ namespace SharpGame
             return obj != null;
         }
 
-        public virtual void Dispose()
+        protected override void Destroy()
         {
         }
     }

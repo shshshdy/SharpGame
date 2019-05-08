@@ -151,7 +151,7 @@ namespace SharpGame
             cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue
                 | CommandBufferUsages.SimultaneousUse, inherit));
 
-            SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer });
+            this.SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer });
 
             //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
             cmdBuffers_[workContext] = cmdBuffer;
@@ -170,7 +170,7 @@ namespace SharpGame
 
         protected virtual void EndDraw(CommandBuffer cmdBuffer)
         {
-            SendGlobalEvent(new EndRenderPass { renderPass = this, commandBuffer = cmdBuffer });
+            this.SendGlobalEvent(new EndRenderPass { renderPass = this, commandBuffer = cmdBuffer });
 
             cmdBuffer.End();
         }

@@ -27,10 +27,10 @@ namespace SharpGame.Editor
             GUISystem guiSys = CreateSubsystem<GUISystem>();
 
             EditorWindow.GetWindow<MainWindow>();
-  
-            SubscribeToEvent<BeginFrame>(HandleGUI);
-            SubscribeToEvent<Update>(HandleUpdate);
-            SubscribeToEvent<PostRenderUpdate>(HandlePostRenderUpdate);
+
+            this.SubscribeToEvent<BeginFrame>(HandleGUI);
+            this.SubscribeToEvent<Update>(HandleUpdate);
+            this.SubscribeToEvent<PostRenderUpdate>(HandlePostRenderUpdate);
            
         }
 

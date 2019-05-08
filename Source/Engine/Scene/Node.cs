@@ -481,9 +481,9 @@ namespace SharpGame
             scene_ = null;
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
-            base.Dispose();
+            base.Destroy();
 
             RemoveAllChildren();
             RemoveAllComponents();

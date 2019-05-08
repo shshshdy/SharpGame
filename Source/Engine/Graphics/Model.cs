@@ -80,7 +80,7 @@ namespace SharpGame
         {
         }
 
-        public override void Dispose()
+        protected override void Destroy()
         {
             // todo: Dispose
             Geometries.Clear();
