@@ -15,9 +15,9 @@ namespace SharpGame.Samples.TexturedCube
         private Pipeline pipeline_;
         private Shader texturedShader_;
 
-        private DescriptorSetLayout _descriptorSetLayout;
+        private ResourceLayout _descriptorSetLayout;
         private DescriptorPool _descriptorPool;
-        private DescriptorSet _descriptorSet;
+        private ResourceSet _descriptorSet;
 
         private Texture _cubeTexture;
 
@@ -39,7 +39,12 @@ namespace SharpGame.Samples.TexturedCube
             _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer       = UniformBuffer.Create<WorldViewProjection>(1);
 
-            _descriptorSetLayout = CreateDescriptorSetLayout();
+            _descriptorSetLayout = new ResourceLayout
+            (
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
+                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
+            );
+
             _descriptorPool      = CreateDescriptorPool();
 
             CreateDescriptorSet();
@@ -47,7 +52,7 @@ namespace SharpGame.Samples.TexturedCube
 
             pipeline_ = new Pipeline
             {
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout }),
+                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout.descriptorSetLayout }),
                 VertexInputState = PosNormTex.Layout,
                 FrontFace = FrontFace.CounterClockwise
             };
@@ -102,7 +107,7 @@ namespace SharpGame.Samples.TexturedCube
             var cmdBuffer = e.commandBuffer;
 
             var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, texturedShader_, geometry_);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet);
+            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet.descriptorSet);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             geometry_.Draw(cmdBuffer);
         }
@@ -137,7 +142,7 @@ namespace SharpGame.Samples.TexturedCube
         }
 
         private void CreateDescriptorSet()
-        {
+        {/*
             _descriptorSet = _descriptorPool.AllocateSets(new DescriptorSetAllocateInfo(1, _descriptorSetLayout))[0];
             // Update the descriptor set for the shader binding point.
             var writeDescriptorSets = new[]
@@ -147,9 +152,17 @@ namespace SharpGame.Samples.TexturedCube
                 new WriteDescriptorSet(_descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
                     imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
             };
-            _descriptorPool.UpdateSets(writeDescriptorSets);
+            _descriptorPool.UpdateSets(writeDescriptorSets);*/
 
-
+            _descriptorSet = new ResourceSet(_descriptorSetLayout);
+            var writeDescriptorSets = new[]
+{
+                new WriteDescriptorSet(_descriptorSet.descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
+                    bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
+                new WriteDescriptorSet(_descriptorSet.descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
+                    imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
+            };
+            _descriptorSet.UpdateSets(writeDescriptorSets);
         }
 
         private DescriptorSetLayout CreateDescriptorSetLayout()

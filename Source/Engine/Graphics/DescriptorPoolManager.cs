@@ -59,8 +59,13 @@ namespace SharpGame
         {
             int totalSets = 1000;
             int descriptorCount = 100;
-            int poolSizeCount = 7;
+            int poolSizeCount = 11;
             DescriptorPoolSize[] sizes = new DescriptorPoolSize[(int)poolSizeCount];
+            for(int i = 0; i < 11; i++)
+            {
+                sizes[i].Type = (DescriptorType)i;
+                sizes[i].DescriptorCount = descriptorCount;
+            }/*
             sizes[0].Type = DescriptorType.UniformBuffer;
             sizes[0].DescriptorCount = descriptorCount;
             sizes[1].Type = DescriptorType.SampledImage;
@@ -74,7 +79,7 @@ namespace SharpGame
             sizes[5].Type = DescriptorType.UniformBufferDynamic;
             sizes[5].DescriptorCount = descriptorCount;
             sizes[6].Type = DescriptorType.StorageBufferDynamic;
-            sizes[6].DescriptorCount = descriptorCount;
+            sizes[6].DescriptorCount = descriptorCount;*/
 
             DescriptorPoolCreateInfo poolCI = new DescriptorPoolCreateInfo
             {
@@ -101,56 +106,50 @@ namespace SharpGame
             public readonly DescriptorPool Pool;
 
             public int RemainingSets;
+            public int[] RemainingCount = new int[11];
 
-            public int UniformBufferCount;
-            public int SampledImageCount;
-            public int SamplerCount;
-            public int StorageBufferCount;
-            public int StorageImageCount;
 
             public PoolInfo(DescriptorPool pool, int totalSets, int descriptorCount)
             {
                 Pool = pool;
                 RemainingSets = totalSets;
-                UniformBufferCount = descriptorCount;
-                SampledImageCount = descriptorCount;
-                SamplerCount = descriptorCount;
-                StorageBufferCount = descriptorCount;
-                StorageImageCount = descriptorCount;
+                for (int i = 0; i < 11; i++)
+                {
+                    RemainingCount[i] = descriptorCount;
+                }
             }
 
             internal bool Allocate(DescriptorResourceCounts counts)
             {
-                if (RemainingSets > 0
-                    && UniformBufferCount >= counts.UniformBufferCount
-                    && SampledImageCount >= counts.SampledImageCount
-                    && SamplerCount >= counts.SamplerCount
-                    && StorageBufferCount >= counts.SamplerCount
-                    && StorageImageCount >= counts.StorageImageCount)
-                {
-                    RemainingSets -= 1;
-                    UniformBufferCount -= counts.UniformBufferCount;
-                    SampledImageCount -= counts.SampledImageCount;
-                    SamplerCount -= counts.SamplerCount;
-                    StorageBufferCount -= counts.StorageBufferCount;
-                    StorageImageCount -= counts.StorageImageCount;
-                    return true;
-                }
-                else
+                if(RemainingSets <= 0)
                 {
                     return false;
                 }
+
+                for(int i = 0; i < 11; i++)
+                {
+                    if(RemainingCount[i] < counts[i])
+                    {
+                        return false;
+                    }
+                }
+
+                RemainingSets -= 1;
+                for (int i = 0; i < 11; i++)
+                {
+                    RemainingCount[i] -= counts[i];
+                }
+
+                return true;               
             }
 
             internal void Free(/*DescriptorSet set,*/ ref DescriptorResourceCounts counts)
             {
                 RemainingSets += 1;
-
-                UniformBufferCount += counts.UniformBufferCount;
-                SampledImageCount += counts.SampledImageCount;
-                SamplerCount += counts.SamplerCount;
-                StorageBufferCount += counts.StorageBufferCount;
-                StorageImageCount += counts.StorageImageCount;
+                for (int i = 0; i < 11; i++)
+                {
+                    RemainingCount[i] += counts[i];
+                }
             }
         }
     }

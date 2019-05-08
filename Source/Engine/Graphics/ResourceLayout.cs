@@ -7,47 +7,19 @@ namespace SharpGame
 {
     public class ResourceLayout : IDisposable
     {
-        internal DescriptorSetLayout descriptorSetLayout;
+        public DescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
 
         public ResourceLayout(params DescriptorSetLayoutBinding[] bindings)
         {
             descriptorSetLayout = Graphics.CreateDescriptorSetLayout(bindings);
-
-            int uniformBufferCount = 0;
-            int sampledImageCount = 0;
-            int samplerCount = 0;
-            int storageBufferCount = 0;
-            int storageImageCount = 0;
+            descriptorResourceCounts = new DescriptorResourceCounts();
 
             foreach(var binding in bindings)
-            {                
-                switch (binding.DescriptorType)
-                {
-                    case DescriptorType.Sampler:
-                        samplerCount += 1;
-                        break;
-                    case DescriptorType.SampledImage:
-                        sampledImageCount += 1;
-                        break;
-                    case DescriptorType.StorageImage:
-                        storageImageCount += 1;
-                        break;
-                    case DescriptorType.UniformBuffer:
-                        uniformBufferCount += 1;
-                        break;
-                    case DescriptorType.StorageBuffer:
-                        storageBufferCount += 1;
-                        break;
-                }
+            {
+                descriptorResourceCounts[(int)binding.DescriptorType] += 1;                
             }
 
-            descriptorResourceCounts = new DescriptorResourceCounts(
-                uniformBufferCount,
-                sampledImageCount,
-                samplerCount,
-                storageBufferCount,
-                storageImageCount);
         }
 
         public void Dispose()
@@ -56,8 +28,13 @@ namespace SharpGame
         }
     }
 
-    internal struct DescriptorResourceCounts
+    internal unsafe struct DescriptorResourceCounts
     {
+        public fixed int Count[11];
+
+        public ref int this[int idx] { get=> ref Count[idx]; }
+
+        /*
         public readonly int UniformBufferCount;
         public readonly int SampledImageCount;
         public readonly int SamplerCount;
@@ -76,7 +53,7 @@ namespace SharpGame
             SamplerCount = samplerCount;
             StorageBufferCount = storageBufferCount;
             StorageImageCount = storageImageCount;
-        }
+        }*/
     }
 
 }

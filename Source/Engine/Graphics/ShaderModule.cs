@@ -109,7 +109,7 @@ namespace SharpGame
             shaderModule?.Dispose();
             Code = null;
 
-            base.Dispose();
+            base.Destroy();
         }
 
     }

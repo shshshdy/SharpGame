@@ -50,7 +50,7 @@ namespace SharpGame
 
             IndexBuffer?.Dispose();
 
-            base.Dispose();
+            base.Destroy();
         }
 
         public void SetNumVertexBuffers(int num)

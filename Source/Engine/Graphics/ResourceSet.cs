@@ -7,10 +7,12 @@ namespace SharpGame
 {
     public class ResourceSet : IDisposable
     {
-        internal DescriptorSet descriptorSet;
+        public DescriptorSet descriptorSet;
         internal DescriptorPool descriptorPool;
         internal ResourceLayout resourceLayout;
         internal ref DescriptorResourceCounts Counts => ref resourceLayout.descriptorResourceCounts;
+
+        private WriteDescriptorSet[] writeDescriptorSets;
         public ResourceSet(ResourceLayout resLayout)
         {
             DescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
@@ -24,6 +26,11 @@ namespace SharpGame
         {
             descriptorPool.FreeSets(descriptorSet);
             Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
+        }
+
+        public void UpdateSets(WriteDescriptorSet[] writeDescriptorSets)
+        {
+            descriptorPool.UpdateSets(writeDescriptorSets);
         }
     }
 }
