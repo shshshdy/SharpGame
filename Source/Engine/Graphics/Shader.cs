@@ -114,11 +114,7 @@ namespace SharpGame
         public ShaderModule ComputeShader { get; set; }
 
         [IgnoreDataMember]
-        public DescriptorSetLayout DescriptorSetLayout { get; set; }
-        [IgnoreDataMember]
-        public DescriptorPool DescriptorPool { get; set; }
-        [IgnoreDataMember]
-        public DescriptorSet DescriptorSet { get; set; }
+        public ResourceLayout ResourceLayout { get; set; }
 
         [IgnoreDataMember]
         public bool IsComputeShader => ComputeShader != null;

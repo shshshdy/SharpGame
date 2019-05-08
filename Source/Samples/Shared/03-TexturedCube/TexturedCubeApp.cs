@@ -16,7 +16,6 @@ namespace SharpGame.Samples.TexturedCube
         private Shader texturedShader_;
 
         private ResourceLayout _descriptorSetLayout;
-        private DescriptorPool _descriptorPool;
         private ResourceSet _descriptorSet;
 
         private Texture _cubeTexture;
@@ -44,9 +43,7 @@ namespace SharpGame.Samples.TexturedCube
                 new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
                 new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
             );
-
-            _descriptorPool      = CreateDescriptorPool();
-
+            
             CreateDescriptorSet();
 
 
@@ -131,45 +128,18 @@ namespace SharpGame.Samples.TexturedCube
             _uniformBuffer.Unmap();
         }
 
-        private DescriptorPool CreateDescriptorPool()
-        {
-            var descriptorPoolSizes = new[]
-            {
-                new DescriptorPoolSize(DescriptorType.UniformBuffer, 2),
-                new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 2)
-            };
-            return Graphics.CreateDescriptorPool(descriptorPoolSizes);
-        }
-
         private void CreateDescriptorSet()
-        {/*
-            _descriptorSet = _descriptorPool.AllocateSets(new DescriptorSetAllocateInfo(1, _descriptorSetLayout))[0];
-            // Update the descriptor set for the shader binding point.
-            var writeDescriptorSets = new[]
-            {
-                new WriteDescriptorSet(_descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
-                    bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
-                new WriteDescriptorSet(_descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
-                    imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
-            };
-            _descriptorPool.UpdateSets(writeDescriptorSets);*/
-
+        {
             _descriptorSet = new ResourceSet(_descriptorSetLayout);
             var writeDescriptorSets = new[]
-{
+            {
                 new WriteDescriptorSet(_descriptorSet.descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
                     bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
                 new WriteDescriptorSet(_descriptorSet.descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
                     imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
             };
-            _descriptorSet.UpdateSets(writeDescriptorSets);
-        }
 
-        private DescriptorSetLayout CreateDescriptorSetLayout()
-        {
-            return Graphics.CreateDescriptorSetLayout(
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
-                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
+            _descriptorSet.UpdateSets(writeDescriptorSets);
         }
 
     }
