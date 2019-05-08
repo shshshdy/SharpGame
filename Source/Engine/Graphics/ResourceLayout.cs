@@ -9,13 +9,14 @@ namespace SharpGame
     {
         public DescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
-
+        internal int numBindings;
         public ResourceLayout(params DescriptorSetLayoutBinding[] bindings)
         {
             descriptorSetLayout = Graphics.CreateDescriptorSetLayout(bindings);
             descriptorResourceCounts = new DescriptorResourceCounts();
+            numBindings = bindings.Length;
 
-            foreach(var binding in bindings)
+            foreach (var binding in bindings)
             {
                 descriptorResourceCounts[(int)binding.DescriptorType] += 1;                
             }
@@ -30,30 +31,10 @@ namespace SharpGame
 
     internal unsafe struct DescriptorResourceCounts
     {
-        public fixed int Count[11];
+        fixed int counts[11];
 
-        public ref int this[int idx] { get=> ref Count[idx]; }
-
-        /*
-        public readonly int UniformBufferCount;
-        public readonly int SampledImageCount;
-        public readonly int SamplerCount;
-        public readonly int StorageBufferCount;
-        public readonly int StorageImageCount;
-
-        public DescriptorResourceCounts(
-            int uniformBufferCount,
-            int sampledImageCount,
-            int samplerCount,
-            int storageBufferCount,
-            int storageImageCount)
-        {
-            UniformBufferCount = uniformBufferCount;
-            SampledImageCount = sampledImageCount;
-            SamplerCount = samplerCount;
-            StorageBufferCount = storageBufferCount;
-            StorageImageCount = storageImageCount;
-        }*/
+        public ref int this[int idx] { get=> ref counts[idx]; }
+        
     }
 
 }
