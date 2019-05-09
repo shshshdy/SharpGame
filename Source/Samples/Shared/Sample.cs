@@ -190,37 +190,9 @@ namespace SharpGame.Samples
         private void HandleGUI(ref BeginFrame e)
         {
             var graphics = Get<Graphics>();
-            /*
-            if (ImGui.Begin("Editor", new nk_rect(0, 0, graphics.width, 35), 0))
-            {
-                ImGui.MenubarBegin();
-                ImGui.LayoutRowStatic(20, 60, 2);
-                if (ImGui.MenuBegin("Demo", nk_text_alignment.NK_TEXT_LEFT, new nk_vec2(160, 200)))
-                {
-                    ImGui.LayoutRowDynamic(25);
 
-                    foreach (var s in Sample.all)
-                    {
-                        (string name, string d, int sort, Type t) = s;
-                        var currentType = current?.GetType();
-                        if (ImGui.MenuItem(t == currentType ? nk_symbol_type.NK_SYMBOL_CIRCLE_SOLID : nk_symbol_type.NK_SYMBOL_NONE, name, nk_text_alignment.NK_TEXT_RIGHT))
-                        {
-                            SetSample(System.Activator.CreateInstance(t) as Sample);
-                        }
 
-                    }
-
-                    ImGui.MenuEnd();
-                }
-
-                ImGui.MenubarEnd();
-
-            }
-
-            ImGui.End();
-   */
-
-            if (ImGui.Begin("Sample"))
+            if (ImGui.Begin("Sample", ImGuiWindowFlags.NoMove| ImGuiWindowFlags.NoResize))
             {
                 ImGui.Text("FPS:");
 
@@ -233,7 +205,9 @@ namespace SharpGame.Samples
             }
 
             ImGui.End();
-         
+
+            ImGui.ShowDemoWindow();
+
             if (current)
             {
                 current.OnGUI();
