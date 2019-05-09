@@ -6,7 +6,6 @@ using VulkanCore;
 
 namespace SharpGame
 {
-
     [StructLayout(LayoutKind.Sequential)]
     public struct PosNormTex
     {

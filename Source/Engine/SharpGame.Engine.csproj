@@ -23,6 +23,7 @@
 
 
   <ItemGroup>
+    <Folder Include="Graphics\ObjLoader\" />
     <Folder Include="Utility\" />
     <Folder Include="Input\" />
   </ItemGroup>

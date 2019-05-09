@@ -283,14 +283,7 @@ namespace SharpGame
             return ToDispose(Device.CreateFence(createInfo));
         }
 
-        public static DescriptorPool CreateDescriptorPool(DescriptorPoolSize[] descriptorPoolSizes, DescriptorPoolCreateFlags flags = DescriptorPoolCreateFlags.None)
-        {
-            return ToDispose(Device.CreateDescriptorPool(
-                new DescriptorPoolCreateInfo(descriptorPoolSizes.Length, descriptorPoolSizes, flags)
-                ));
-        }
-
-        public static DescriptorSetLayout CreateDescriptorSetLayout(params DescriptorSetLayoutBinding[] bindings)
+        internal static DescriptorSetLayout CreateDescriptorSetLayout(params DescriptorSetLayoutBinding[] bindings)
         {
             return ToDispose(Device.CreateDescriptorSetLayout(new DescriptorSetLayoutCreateInfo(bindings)));
         }
