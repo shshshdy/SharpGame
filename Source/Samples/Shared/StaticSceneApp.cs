@@ -19,7 +19,7 @@ namespace SharpGame.Samples.StaticScene
 
         private Geometry geometry_;
 
-        protected override void OnInit()
+        protected override void Init()
         {
 
             testShader_ = new Shader
@@ -62,25 +62,6 @@ namespace SharpGame.Samples.StaticScene
 
             renderer_.MainView.Scene = scene_;
             renderer_.MainView.Camera = camera_;
-
-            //geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
-            /*
-            MessagePackSerializer.SetDefaultResolver(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
-
-            byte[] bytes = MessagePackSerializer.Serialize(testShader_);
-
-            System.IO.File.WriteAllText("test_shader.json", MessagePackSerializer.ToJson(bytes));
-            */
-            //Shader newObj = MessagePackSerializer.Deserialize(System.IO.File.ReadAllBytes(path));
-            /*
-            JsonSerializer.SetDefaultResolver(StandardResolver.ExcludeNullSnakeCase);
-            {
-                byte[] bytes = Utf8Json.JsonSerializer.Serialize(testShader_);
-                var json = Utf8Json.JsonSerializer.PrettyPrint(bytes);
-
-                System.IO.File.WriteAllText("test_shader.json", json);
-            }*/
-
         }
 
         protected override void Destroy()
@@ -90,24 +71,6 @@ namespace SharpGame.Samples.StaticScene
             base.Destroy();
         }
 
-
-        protected override void Update(Timer timer)
-        {
-            /*
-            const float twoPi = (float)System.Math.PI * 2.0f;
-            const float yawSpeed = twoPi / 4.0f;
-            const float pitchSpeed = 0.0f;
-            const float rollSpeed = twoPi / 4.0f;
-         
-            _wvp.World = Matrix.RotationYawPitchRoll(
-                timer.TotalTime * yawSpeed % twoPi,
-                timer.TotalTime * pitchSpeed % twoPi,
-                timer.TotalTime * rollSpeed % twoPi);
-
-           // _wvp.World = Matrix.Identity;
-
- */
-        }
         
     }
 }

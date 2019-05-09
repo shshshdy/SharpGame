@@ -42,7 +42,7 @@ namespace SharpGame.Samples.ComputeParticles
         private CommandBuffer _computeCmdBuffer;
         private Fence _computeFence;
 
-        protected override void OnInit()
+        protected override void Init()
         {
             this.SubscribeToEvent((Resizing e) => RecordComputeCommandBuffer());
 
@@ -124,17 +124,17 @@ namespace SharpGame.Samples.ComputeParticles
 
         }
 
-        protected override void Update(Timer timer)
+        protected override void Update()
         {
             const float radius = 0.5f;
             const float rotationSpeed = 0.5f;
 
             var global = new UniformBufferObject
             {
-                DeltaTime = timer.DeltaTime,
+                DeltaTime = Time.Delta,
                 DstPosition = new Vector2(
-                    radius * (float)Math.Cos(timer.TotalTime * rotationSpeed),
-                    radius * (float)Math.Sin(timer.TotalTime * rotationSpeed))
+                    radius * (float)Math.Cos(Time.Total * rotationSpeed),
+                    radius * (float)Math.Sin(Time.Total * rotationSpeed))
             };
 
             _uniformBuffer.SetData(ref global);

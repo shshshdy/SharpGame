@@ -81,15 +81,15 @@ namespace SharpGame
 
         }
 
-        protected virtual void OnInit()
+        protected virtual void Init()
         {
         }
         
-        protected virtual void Update(Timer timer)
+        protected virtual void Update()
         {
         }
 
-        protected virtual void OnShutdown()
+        protected virtual void Shutdown()
         {
         }
 
@@ -129,7 +129,7 @@ namespace SharpGame
             _running = false;
         }
 
-        public void Run()
+        public void Run(bool singleThreaded = false)
         {
             _running = true;
 
@@ -166,7 +166,7 @@ namespace SharpGame
 
             timer_.Reset();
 
-            OnInit();
+            Init();
 
             while (_running)
             {
@@ -185,7 +185,7 @@ namespace SharpGame
                 }
             }
 
-            OnShutdown();
+            Shutdown();
 
         }
 
@@ -196,7 +196,7 @@ namespace SharpGame
 
             timer_.Reset();
 
-            OnInit();
+            Init();
             
             graphics_.FrameNoRenderWait();
             graphics_.Frame();
@@ -234,7 +234,7 @@ namespace SharpGame
 
             this.SendGlobalEvent(ref update);
 
-            Update(timer_);
+            Update();
 
             var postUpdate = new PostUpdate
             {

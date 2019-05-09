@@ -31,13 +31,12 @@ namespace SharpGame.Editor
 
             this.SubscribeToEvent<BeginFrame>(HandleGUI);
             this.SubscribeToEvent<Update>(HandleUpdate);
-            this.SubscribeToEvent<PostRenderUpdate>(HandlePostRenderUpdate);
            
         }
 
-        protected override void OnInit()
+        protected override void Init()
         {
-            base.OnInit();
+            base.Init();
   
             scene_ = new Scene();
             camera_ = scene_.CreateChild("Camera").CreateComponent<Camera>();
@@ -132,7 +131,7 @@ namespace SharpGame.Editor
             renderer.MainView.Camera = camera_;
         }
 
-        protected override void OnShutdown()
+        protected override void Shutdown()
         {
             scene_.Dispose();
         }
@@ -206,9 +205,5 @@ namespace SharpGame.Editor
             EditorWindow.OnGUI();
         }
 
-        private void HandlePostRenderUpdate(ref PostRenderUpdate e)
-        {
-        //    Renderer.Instance.DrawDebugGeometry(false);
-        }
     }
 }

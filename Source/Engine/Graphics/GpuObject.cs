@@ -4,6 +4,10 @@ using System.Text;
 
 namespace SharpGame
 {
+    public interface IBindable
+    {
+    }
+
     public abstract class GPUObject : Object
     {
         public Graphics Graphics => Get<Graphics>();

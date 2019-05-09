@@ -265,7 +265,7 @@ namespace SharpGame.Editor
             InputSnapshot snapshot = input.InputSnapshot;
             ImGuiIOPtr io = ImGui.GetIO();
 
-            var mousePosition = EditorUtil.Convert(snapshot.MousePosition);
+            var mousePosition = NumericsUtil.Convert(snapshot.MousePosition);
 
             // Determine if any of the mouse buttons were pressed during this snapshot period, even if they are no longer held.
             bool leftPressed = false;

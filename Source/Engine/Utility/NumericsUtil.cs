@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 
 
-namespace SharpGame.Editor
+namespace SharpGame
 {
-    public class EditorUtil
+    public class NumericsUtil
     {
         public static System.Numerics.Vector2 Convert(Vector2 v)
         {

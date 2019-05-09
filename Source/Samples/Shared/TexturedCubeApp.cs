@@ -23,7 +23,7 @@ namespace SharpGame.Samples.TexturedCube
         private WorldViewProjection _wvp;
 
 
-        protected override void OnInit()
+        protected override void Init()
         {
             this.SubscribeToEvent<BeginRenderPass>(Handle);
 
@@ -81,7 +81,7 @@ namespace SharpGame.Samples.TexturedCube
             base.Destroy();
         }
 
-        protected override void Update(Timer timer)
+        protected override void Update()
         {
             const float twoPi      = (float)Math.PI * 2.0f;
             const float yawSpeed   = twoPi / 4.0f;
@@ -89,9 +89,9 @@ namespace SharpGame.Samples.TexturedCube
             const float rollSpeed  = twoPi / 4.0f;
 
             _wvp.World = Matrix.RotationYawPitchRoll(
-                timer.TotalTime * yawSpeed % twoPi,
-                timer.TotalTime * pitchSpeed % twoPi,
-                timer.TotalTime * rollSpeed % twoPi);
+                Time.Total * yawSpeed % twoPi,
+                Time.Total * pitchSpeed % twoPi,
+                Time.Total * rollSpeed % twoPi);
             
             SetViewProjection();
         }
