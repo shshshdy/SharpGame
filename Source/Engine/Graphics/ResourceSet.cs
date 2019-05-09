@@ -48,7 +48,38 @@ namespace SharpGame
 
         public ResourceSet Bind(int dstBinding, IBindable bindable)
         {
-            //   return Bind(dstBinding, 0, 1, bindable.DescriptorType, bufferInfo: new[] { new DescriptorBufferInfo(uniformBuffer) });
+            var descriptorType = resourceLayout.bindings[dstBinding].DescriptorType;
+            switch(descriptorType)
+            {
+                case DescriptorType.Sampler:
+                    break;
+                case DescriptorType.CombinedImageSampler:
+                    var texture = bindable as Texture;
+                    writeDescriptorSets[dstBinding] = new WriteDescriptorSet(descriptorSet, dstBinding, 0, 1, 
+                        descriptorType, imageInfo : new[] { new DescriptorImageInfo(texture.Sampler, texture.View, ImageLayout.General) });
+                    break;
+                case DescriptorType.SampledImage:
+                    break;
+                case DescriptorType.StorageImage:
+                    break;
+                case DescriptorType.UniformTexelBuffer:
+                    break;
+                case DescriptorType.StorageTexelBuffer:
+                    break;
+                case DescriptorType.UniformBuffer:
+                    var buffer = bindable as GraphicsBuffer;
+                    writeDescriptorSets[dstBinding] = new WriteDescriptorSet(descriptorSet, dstBinding, 0, 1,
+                        descriptorType, bufferInfo: new[] { new DescriptorBufferInfo(buffer) });
+                    break;
+                case DescriptorType.StorageBuffer:
+                    break;
+                case DescriptorType.UniformBufferDynamic:
+                    break;
+                case DescriptorType.StorageBufferDynamic:
+                    break;
+                case DescriptorType.InputAttachment:
+                    break;
+            }
             return this;
         }
 

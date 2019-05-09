@@ -7,6 +7,5 @@ namespace SharpGame
 {
     public interface IBindable
     {
-        DescriptorType DescriptorType { get; }
     }
 }

@@ -32,7 +32,16 @@ namespace SharpGame.Samples.TexturedCube
 
             texturedShader_ = new Shader
             (
-                Name = "Textured", new Pass("Textured.vert.spv", "Textured.frag.spv")
+                Name = "Textured",
+
+                new Pass("Textured.vert.spv", "Textured.frag.spv")
+                {
+                    ResourceLayout = new ResourceLayout
+                    (
+                        new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
+                        new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
+                    )
+                }
             );
 
             _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
@@ -45,7 +54,6 @@ namespace SharpGame.Samples.TexturedCube
             );
             
             CreateDescriptorSet();
-
 
             pipeline_ = new Pipeline
             {
@@ -95,8 +103,6 @@ namespace SharpGame.Samples.TexturedCube
                 timer.TotalTime * rollSpeed % twoPi);
             
             SetViewProjection();
-
-            UpdateUniformBuffers();
         }
 
         void Handle(BeginRenderPass e)
@@ -119,27 +125,17 @@ namespace SharpGame.Samples.TexturedCube
             1.0f, 1000.0f);
             _wvp.ViewProj = _wvp.View * projection;
 
-        }
-
-        private void UpdateUniformBuffers()
-        {
-            IntPtr ptr = _uniformBuffer.Map(0, Interop.SizeOf<WorldViewProjection>());
-            VulkanCore.Interop.Write(ptr, ref _wvp);
-            _uniformBuffer.Unmap();
+            _uniformBuffer.SetData(ref _wvp);
         }
 
         private void CreateDescriptorSet()
         {
             _descriptorSet = new ResourceSet(_descriptorSetLayout);
-            var writeDescriptorSets = new[]
-            {
-                new WriteDescriptorSet(_descriptorSet.descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
-                    bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
-                new WriteDescriptorSet(_descriptorSet.descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
-                    imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
-            };
+            _descriptorSet.Bind(0, _uniformBuffer)
+                .Bind(1, _cubeTexture)
+                .UpdateSets();
+          
 
-            _descriptorSet.UpdateSets(writeDescriptorSets);
         }
 
     }

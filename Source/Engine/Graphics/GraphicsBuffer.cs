@@ -7,7 +7,7 @@ using Buffer = VulkanCore.Buffer;
 
 namespace SharpGame
 {
-    public class GraphicsBuffer : Object
+    public class GraphicsBuffer : Object, IBindable
     {
         public byte[] Data { get; set; }
         public int Count { get; set; }
@@ -28,6 +28,22 @@ namespace SharpGame
         {
             Memory.Dispose();
             Buffer.Dispose();
+        }
+
+        public void SetData<T>(ref T data, int offset = 0)
+        {
+            int size = Unsafe.SizeOf<T>();
+            var dest = Map(offset, size);
+            Interop.Write(dest, ref data);
+            Unmap();
+        }
+
+        public void SetData<T>(T[] data, int offset = 0)
+        {
+            int size = Unsafe.SizeOf<T>()*data.Length;
+            var dest = Map(offset, size);
+            Interop.Write(dest, ref data);
+            Unmap();
         }
 
         public void SetData(IntPtr data, int offset, int size)

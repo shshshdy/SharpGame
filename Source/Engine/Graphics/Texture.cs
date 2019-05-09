@@ -22,7 +22,7 @@ namespace SharpGame
         }
     }
 
-    public class Texture : Resource
+    public class Texture : Resource, IBindable
     {
         public Format Format { get; set; }
 

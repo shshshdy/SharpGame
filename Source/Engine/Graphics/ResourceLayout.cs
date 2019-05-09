@@ -9,13 +9,14 @@ namespace SharpGame
     {
         public DescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
-        internal int numBindings;
+        internal DescriptorSetLayoutBinding[] bindings;
+        internal int numBindings => bindings.Length;
+
         public ResourceLayout(params DescriptorSetLayoutBinding[] bindings)
         {
             descriptorSetLayout = Graphics.CreateDescriptorSetLayout(bindings);
             descriptorResourceCounts = new DescriptorResourceCounts();
-            numBindings = bindings.Length;
-
+            this.bindings = bindings;
             foreach (var binding in bindings)
             {
                 descriptorResourceCounts[(int)binding.DescriptorType] += 1;                
