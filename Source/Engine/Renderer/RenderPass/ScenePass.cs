@@ -22,9 +22,9 @@ namespace SharpGame
         public SubpassDescription[] subpasses { get; set; }
 
 
-        private DescriptorSetLayout descriptorSetLayout_;
-        private DescriptorPool descriptorPool_;
-        private DescriptorSet descriptorSet_;
+        private ResourceLayout descriptorSetLayout_;
+
+        private ResourceSet descriptorSet_;
 
         private Texture _cubeTexture;
         private GraphicsBuffer _uniformBuffer;
@@ -38,13 +38,16 @@ namespace SharpGame
             _cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer = UniformBuffer.Create<WorldViewProjection>(1);
 
-            descriptorSetLayout_ = CreateDescriptorSetLayout();
-            descriptorPool_ = CreateDescriptorPool();
-            descriptorSet_ = CreateDescriptorSet();
+            descriptorSetLayout_ = new ResourceLayout(
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
+                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
+            );
+
+            descriptorSet_ = new ResourceSet(descriptorSetLayout_, _uniformBuffer, _cubeTexture);
 
             pipeline_ = new Pipeline
             {
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { descriptorSetLayout_ }),
+                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { descriptorSetLayout_ .descriptorSetLayout}),
             };
 
         }
@@ -144,27 +147,7 @@ namespace SharpGame
             return Graphics.CreateDescriptorPool(descriptorPoolSizes);
         }
 
-        private DescriptorSet CreateDescriptorSet()
-        {
-            DescriptorSet descriptorSet = descriptorPool_.AllocateSets(new DescriptorSetAllocateInfo(1, descriptorSetLayout_))[0];
-            // Update the descriptor set for the shader binding point.
-            var writeDescriptorSets = new[]
-            {
-                new WriteDescriptorSet(descriptorSet, 0, 0, 1, DescriptorType.UniformBuffer,
-                    bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
-                new WriteDescriptorSet(descriptorSet, 1, 0, 1, DescriptorType.CombinedImageSampler,
-                    imageInfo: new[] { new DescriptorImageInfo(_cubeTexture.Sampler, _cubeTexture.View, ImageLayout.General) })
-            };
-            descriptorPool_.UpdateSets(writeDescriptorSets);
-            return descriptorSet;
-        }
 
-        private DescriptorSetLayout CreateDescriptorSetLayout()
-        {
-            return Graphics.CreateDescriptorSetLayout(
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
-                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
-        }
 
         protected override void OnDraw(RenderView view, CommandBuffer cmdBuffer)
         {

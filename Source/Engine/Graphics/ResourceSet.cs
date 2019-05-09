@@ -24,14 +24,22 @@ namespace SharpGame
             writeDescriptorSets = new WriteDescriptorSet[resLayout.numBindings];
         }
 
-        public ResourceSet(ResourceLayout resLayout, IBindable[] bindables)
+        public ResourceSet(ResourceLayout resLayout, params IBindable[] bindables)
         {
             DescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
             var dsAI = new DescriptorSetAllocateInfo(1, resLayout.descriptorSetLayout);
             descriptorSet = pool.AllocateSets(dsAI)[0];
             descriptorPool = pool;
             resourceLayout = resLayout;
+
+            System.Diagnostics.Debug.Assert(bindables.Length == resLayout.numBindings);
+
             writeDescriptorSets = new WriteDescriptorSet[resLayout.numBindings];
+            for(int i = 0; i < resLayout.numBindings; i++)
+            {
+                Bind(i, bindables[i]);
+            }
+            UpdateSets();
         }
 
         public void Dispose()
