@@ -217,7 +217,10 @@ namespace SharpGame
                 return null;
             }
 
-            pipelineLayout = Graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
+            var pipelineLayoutInfo = new PipelineLayoutCreateInfo(new[]
+            { pass.ResourceLayout.descriptorSetLayout });
+
+            pipelineLayout = Graphics.Device.CreatePipelineLayout(pipelineLayoutInfo);
             var shaderStageCreateInfos = pass.GetShaderStageCreateInfos();
 
             viewportStateCreateInfo = new PipelineViewportStateCreateInfo(
@@ -251,7 +254,9 @@ namespace SharpGame
                 return null;
             }
 
-            pipelineLayout = Graphics.Device.CreatePipelineLayout(PipelineLayoutInfo);
+            var pipelineLayoutInfo = new PipelineLayoutCreateInfo(new[]
+            { shader.ResourceLayout.descriptorSetLayout });
+            pipelineLayout = Graphics.Device.CreatePipelineLayout(pipelineLayoutInfo);
 
             var pipelineCreateInfo = new ComputePipelineCreateInfo(
                 shader.GetComputeStageCreateInfo(), pipelineLayout);

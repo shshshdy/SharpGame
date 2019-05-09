@@ -22,9 +22,7 @@ namespace SharpGame.Editor
 
         private IntPtr _fontAtlasID = (IntPtr)1;
 
-        private DescriptorPool _descriptorPool;
-        private DescriptorSetLayout _descriptorLayout;
-        private DescriptorSet descriptorSet_;
+        private ResourceSet resourceSet_;
 
         private Shader uiShader_;
         private Pipeline pipeline_;
@@ -42,29 +40,21 @@ namespace SharpGame.Editor
             var graphics = Get<Graphics>();
             var cache = Get<ResourceCache>();
 
-            uiShader_ = new Shader
-            (
-                "UI", new Pass("ImGui.vert.spv", "ImGui.frag.spv")
-            );
-
-            var descriptorPoolSizes = new[]
-            {
-                new DescriptorPoolSize(DescriptorType.UniformBuffer, 2),
-                new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 2)
-            };
-
-            _descriptorPool = Graphics.CreateDescriptorPool(descriptorPoolSizes);
-
-            _descriptorLayout = Graphics.CreateDescriptorSetLayout(
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
-                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
-            );
+            uiShader_ = new Shader(
+                "UI",
+                new Pass("ImGui.vert.spv", "ImGui.frag.spv")
+                {
+                    ResourceLayout = new ResourceLayout(
+                        new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
+                        new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
+                    )
+                }
+            );          
 
             _projMatrixBuffer = UniformBuffer.Create<Matrix>(1);
 
             pipeline_ = new Pipeline
-            {
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorLayout }),
+            {                
                 VertexInputState = Pos2dTexColorVertex.Layout,
                 DepthTestEnable = false,
                 DepthWriteEnable = false,
@@ -81,16 +71,8 @@ namespace SharpGame.Editor
 
             RecreateFontDeviceTexture();
 
-            descriptorSet_ = _descriptorPool.AllocateSets(new DescriptorSetAllocateInfo(1, _descriptorLayout))[0];
-            // Update the descriptor set for the shader binding point.
-            var writeDescriptorSets = new[]
-            {
-                new WriteDescriptorSet(descriptorSet_, 0, 0, 1, DescriptorType.UniformBuffer,
-                    bufferInfo: new[] { new DescriptorBufferInfo(_projMatrixBuffer) }),
-                new WriteDescriptorSet(descriptorSet_, 1, 0, 1, DescriptorType.CombinedImageSampler,
-                    imageInfo: new[] { new DescriptorImageInfo(fontTex_.Sampler, fontTex_.View, ImageLayout.General) })
-            };
-            _descriptorPool.UpdateSets(writeDescriptorSets);
+            var resourceLayout = uiShader_.Main.ResourceLayout;
+            resourceSet_ = new ResourceSet(resourceLayout, _projMatrixBuffer, fontTex_);
 
             ImGuiStylePtr style = ImGui.GetStyle();
             //ImGuiUtil.ResetStyle(ImGuiStyle.EdinBlack, style );
@@ -201,9 +183,7 @@ namespace SharpGame.Editor
                      -1.0f,
                      1.0f, false);
 
-            IntPtr ptr = _projMatrixBuffer.Map(0, Interop.SizeOf<Matrix>());
-            VulkanCore.Interop.Write(ptr, ref proj);
-            _projMatrixBuffer.Unmap();
+            _projMatrixBuffer.SetData(ref proj);            
 
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
@@ -226,7 +206,7 @@ namespace SharpGame.Editor
             cmdBuffer.CmdBindIndexBuffer(_indexBuffer.Buffer, 0, IndexType.UInt16);
      
             var pipeline = pipeline_.GetGraphicsPipeline(renderPass, uiShader_, null);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, descriptorSet_);
+            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, resourceSet_.descriptorSet);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
 
             draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
@@ -274,6 +254,7 @@ namespace SharpGame.Editor
             }
 
         }
+
         private bool _controlDown;
         private bool _shiftDown;
         private bool _altDown;

@@ -21,10 +21,9 @@ namespace SharpGame
         public AttachmentDescription[] attachments { get; set; }
         public SubpassDescription[] subpasses { get; set; }
 
+        private ResourceLayout resourceLayout_;
 
-        private ResourceLayout descriptorSetLayout_;
-
-        private ResourceSet descriptorSet_;
+        private ResourceSet resourceSet_;
 
         private Texture _cubeTexture;
         private GraphicsBuffer _uniformBuffer;
@@ -38,17 +37,13 @@ namespace SharpGame
             _cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer = UniformBuffer.Create<WorldViewProjection>(1);
 
-            descriptorSetLayout_ = new ResourceLayout(
+            resourceLayout_ = new ResourceLayout(
                 new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
                 new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
             );
 
-            descriptorSet_ = new ResourceSet(descriptorSetLayout_, _uniformBuffer, _cubeTexture);
-
-            pipeline_ = new Pipeline
-            {
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { descriptorSetLayout_ .descriptorSetLayout}),
-            };
+            resourceSet_ = new ResourceSet(resourceLayout_, _uniformBuffer, _cubeTexture);
+            pipeline_ = new Pipeline();
 
         }
 
@@ -137,18 +132,6 @@ namespace SharpGame
             return framebuffers;
         }
 
-        private DescriptorPool CreateDescriptorPool()
-        {
-            var descriptorPoolSizes = new[]
-            {
-                new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
-                new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 1)
-            };
-            return Graphics.CreateDescriptorPool(descriptorPoolSizes);
-        }
-
-
-
         protected override void OnDraw(RenderView view, CommandBuffer cmdBuffer)
         {
             if(view.Camera)
@@ -169,7 +152,7 @@ namespace SharpGame
                 for(int i = 0; i < drawable.Batches.Length; i++)
                 {
                     ref SourceBatch batch = ref drawable.Batches[i];
-                    this.DrawBatch(cmdBuffer, ref batch, descriptorSet_);
+                    this.DrawBatch(cmdBuffer, ref batch, resourceSet_);
                 }
             }
         }

@@ -24,24 +24,21 @@ namespace SharpGame.Samples.ComputeParticles
 
     public class ComputeParticlesApp : Application
     {
-        private DescriptorPool _descriptorPool;        
-
-        private Sampler _sampler;
         private Texture _particleDiffuseMap;
-        private DescriptorSetLayout _graphicsDescriptorSetLayout;
-        private DescriptorSet _graphicsDescriptorSet;
+        private ResourceLayout _graphicsDescriptorSetLayout;
+        private ResourceSet _graphicsDescriptorSet;
 
         private Pipeline _graphicsPipeline;
         private Shader _shader;
 
         private GraphicsBuffer _storageBuffer;
         private GraphicsBuffer _uniformBuffer;
-        private DescriptorSetLayout _computeDescriptorSetLayout;
+        private ResourceLayout _computeDescriptorSetLayout;
+        private ResourceSet _computeDescriptorSet;
 
         private Pipeline _computePipeline;
         private Pass _computePass;
 
-        private DescriptorSet _computeDescriptorSet;
         private CommandBuffer _computeCmdBuffer;
         private Fence _computeFence;
 
@@ -53,17 +50,19 @@ namespace SharpGame.Samples.ComputeParticles
 
             this.SubscribeToEvent<BeginRenderPass>(Handle);
 
-            _descriptorPool = CreateDescriptorPool();
-
-            _sampler = Graphics.CreateSampler();
             _particleDiffuseMap = resourceCache_.Load<Texture>("ParticleDiffuse.ktx").Result;
-            _graphicsDescriptorSetLayout = CreateGraphicsDescriptorSetLayout();
-            _graphicsDescriptorSet = CreateGraphicsDescriptorSet();
+            _graphicsDescriptorSetLayout = new ResourceLayout(
+                new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
+            _graphicsDescriptorSet = new ResourceSet(_graphicsDescriptorSetLayout, _particleDiffuseMap);
 
             _storageBuffer = CreateStorageBuffer();
             _uniformBuffer = UniformBuffer.Create<UniformBufferObject>(1);
-            _computeDescriptorSetLayout = CreateComputeDescriptorSetLayout();
-            _computeDescriptorSet = CreateComputeDescriptorSet();
+            _computeDescriptorSetLayout = new ResourceLayout(
+                new DescriptorSetLayoutBinding(0, DescriptorType.StorageBuffer, 1, ShaderStages.Compute),
+                new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, 1, ShaderStages.Compute));
+
+            _computeDescriptorSet = new ResourceSet(_computeDescriptorSetLayout, _storageBuffer, _uniformBuffer);
+
             _computeCmdBuffer = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             _computeFence = Graphics.CreateFence();
 
@@ -71,13 +70,18 @@ namespace SharpGame.Samples.ComputeParticles
             (
                 Name = "Shader",
                 new Pass("Shader.vert.spv", "Shader.frag.spv")
+                {
+                    ResourceLayout = _graphicsDescriptorSetLayout
+                }
             );
             
-            _computePass = new Pass(computeShader : "shader.comp.spv");
+            _computePass = new Pass(computeShader: "shader.comp.spv")
+            {
+                ResourceLayout = _computeDescriptorSetLayout
+            };
 
             _computePipeline = new Pipeline
-            {
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _computeDescriptorSetLayout })               
+            {             
             };
             
             _graphicsPipeline = new Pipeline
@@ -114,7 +118,6 @@ namespace SharpGame.Samples.ComputeParticles
                     }
                 }),
 
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _graphicsDescriptorSetLayout })
             };
 
             RecordComputeCommandBuffer();
@@ -134,9 +137,8 @@ namespace SharpGame.Samples.ComputeParticles
                     radius * (float)Math.Sin(timer.TotalTime * rotationSpeed))
             };
 
-            IntPtr ptr = _uniformBuffer.Map(0, Constant.WholeSize);
-            Interop.Write(ptr, ref global);
-            _uniformBuffer.Unmap();
+            _uniformBuffer.SetData(ref global);
+            
         }
 
         void Handle(BeginRender e)
@@ -152,7 +154,7 @@ namespace SharpGame.Samples.ComputeParticles
             var cmdBuffer = e.commandBuffer;
             var pipeline = _graphicsPipeline.GetGraphicsPipeline(e.renderPass, _shader, null);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet);
+            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet.descriptorSet);
             cmdBuffer.CmdBindVertexBuffer(_storageBuffer);
             cmdBuffer.CmdDraw(_storageBuffer.Count);
         }
@@ -176,7 +178,7 @@ namespace SharpGame.Samples.ComputeParticles
                 bufferMemoryBarriers: new[] { graphicsToComputeBarrier });
             var pipeline = _computePipeline.GetComputePipeline(_computePass);
                 _computeCmdBuffer.CmdBindPipeline(PipelineBindPoint.Compute, pipeline);
-            _computeCmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Compute, _computePipeline.pipelineLayout, _computeDescriptorSet);
+            _computeCmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Compute, _computePipeline.pipelineLayout, _computeDescriptorSet.descriptorSet);
             _computeCmdBuffer.CmdDispatch(_storageBuffer.Count / 256, 1, 1);
             // Add memory barrier to ensure that compute shader has finished writing to the buffer.
             // Without this the (rendering) vertex shader may display incomplete results (partial
@@ -214,53 +216,5 @@ namespace SharpGame.Samples.ComputeParticles
             return StorageBuffer.Create(particles);
         }
 
-        private DescriptorPool CreateDescriptorPool()
-        {
-            return Graphics.CreateDescriptorPool(new[]
-            {
-                new DescriptorPoolSize(DescriptorType.UniformBuffer, 1),
-                new DescriptorPoolSize(DescriptorType.StorageBuffer, 1),
-                new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 1)
-            });
-        }
-            
-        private DescriptorSetLayout CreateGraphicsDescriptorSetLayout()
-        {
-            return Graphics.CreateDescriptorSetLayout(new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
-        }
-
-        private DescriptorSet CreateGraphicsDescriptorSet()
-        {
-            DescriptorSet descriptorSet = _descriptorPool.AllocateSets(new DescriptorSetAllocateInfo(1, _graphicsDescriptorSetLayout))[0];
-            _descriptorPool.UpdateSets(new[]
-            {
-                // Particle diffuse map.
-                new WriteDescriptorSet(descriptorSet, 0, 0, 1, DescriptorType.CombinedImageSampler,
-                    new[] { new DescriptorImageInfo(_sampler, _particleDiffuseMap.View, ImageLayout.General/*ColorAttachmentOptimal*/) })
-            });
-            return descriptorSet;
-        }
-
-        private DescriptorSetLayout CreateComputeDescriptorSetLayout()
-        {
-            return Graphics.CreateDescriptorSetLayout(
-                new DescriptorSetLayoutBinding(0, DescriptorType.StorageBuffer, 1, ShaderStages.Compute),
-                new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, 1, ShaderStages.Compute));
-        }
-
-        private DescriptorSet CreateComputeDescriptorSet()
-        {
-            DescriptorSet descriptorSet = _descriptorPool.AllocateSets(new DescriptorSetAllocateInfo(1, _computeDescriptorSetLayout))[0];
-            _descriptorPool.UpdateSets(new[]
-            {
-                // Particles storage buffer.
-                new WriteDescriptorSet(descriptorSet, 0, 0, 1, DescriptorType.StorageBuffer,
-                    bufferInfo: new[] { new DescriptorBufferInfo(_storageBuffer) }),
-                // Global simulation data (ie. delta time, etc).
-                new WriteDescriptorSet(descriptorSet, 1, 0, 1, DescriptorType.UniformBuffer,
-                    bufferInfo: new[] { new DescriptorBufferInfo(_uniformBuffer) }),
-            });
-            return descriptorSet;
-        }
     }
 }

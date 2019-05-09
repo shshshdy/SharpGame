@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using VulkanCore;
 
 namespace SharpGame.Editor
 {
@@ -52,6 +53,12 @@ namespace SharpGame.Editor
             (
                 Name = "Test",
                 new Pass("Textured.vert.spv", "Textured.frag.spv")
+                {
+                    ResourceLayout = new ResourceLayout(
+                        new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
+                        new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
+                    )
+                }
             );
 
             var mat = new Material
@@ -119,10 +126,10 @@ namespace SharpGame.Editor
               camera_.Node.LookAt(Vector3.Zero);
 
               var renderer = Get<Renderer>();
-             // RenderView view = renderer.CreateRenderView(camera_, scene_);
+            // RenderView view = renderer.CreateRenderView(camera_, scene_);
 
-                renderer.MainView.Scene = scene_;
-                renderer.MainView.Camera = camera_;
+            renderer.MainView.Scene = scene_;
+            renderer.MainView.Camera = camera_;
         }
 
         protected override void OnShutdown()

@@ -74,16 +74,15 @@ namespace SharpGame
                     break;
                 case DescriptorType.StorageTexelBuffer:
                     break;
+
                 case DescriptorType.UniformBuffer:
+                case DescriptorType.StorageBuffer:
+                case DescriptorType.UniformBufferDynamic:
+                case DescriptorType.StorageBufferDynamic:
                     var buffer = bindable as GraphicsBuffer;
                     writeDescriptorSets[dstBinding] = new WriteDescriptorSet(descriptorSet, dstBinding, 0, 1,
                         descriptorType, bufferInfo: new[] { new DescriptorBufferInfo(buffer) });
-                    break;
-                case DescriptorType.StorageBuffer:
-                    break;
-                case DescriptorType.UniformBufferDynamic:
-                    break;
-                case DescriptorType.StorageBufferDynamic:
+                    
                     break;
                 case DescriptorType.InputAttachment:
                     break;
