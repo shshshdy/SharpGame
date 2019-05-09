@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using VulkanCore;
 using ImVec2 = System.Numerics.Vector2;
 
-namespace SharpGame.Editor
+namespace SharpGame
 {
     public struct GUIEvent
     {

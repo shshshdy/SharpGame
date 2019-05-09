@@ -91,8 +91,11 @@ namespace SharpGame
         {
             if(freeList.TryGetValue(count, out var list))
             {
-                IntPtr ret = list.Pop();
-                return ret;
+                if(list.Count > 0)
+                {
+                    IntPtr ret = list.Pop();
+                    return ret;
+                }
             }
 
             for(int i = 0; i < bucketsSize_.Count; i++)

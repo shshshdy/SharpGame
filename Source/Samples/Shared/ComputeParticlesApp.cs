@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using VulkanCore;
 
-namespace SharpGame.Samples.ComputeParticles
+namespace SharpGame.Samples
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct VertexParticle
@@ -21,8 +21,8 @@ namespace SharpGame.Samples.ComputeParticles
         public float DeltaTime;
         public float Padding;
     }
-
-    public class ComputeParticlesApp : Application
+    [SampleDesc(sortOrder = 3)]
+    public class ComputeParticlesApp : Sample
     {
         private Texture _particleDiffuseMap;
         private ResourceLayout _graphicsDescriptorSetLayout;
@@ -42,7 +42,7 @@ namespace SharpGame.Samples.ComputeParticles
         private CommandBuffer _computeCmdBuffer;
         private Fence _computeFence;
 
-        protected override void Init()
+        public override void Init()
         {
             this.SubscribeToEvent((Resizing e) => RecordComputeCommandBuffer());
 
@@ -50,7 +50,7 @@ namespace SharpGame.Samples.ComputeParticles
 
             this.SubscribeToEvent<BeginRenderPass>(Handle);
 
-            _particleDiffuseMap = resourceCache_.Load<Texture>("ParticleDiffuse.ktx").Result;
+            _particleDiffuseMap = ResourceCache.Load<Texture>("ParticleDiffuse.ktx").Result;
             _graphicsDescriptorSetLayout = new ResourceLayout(
                 new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment));
             _graphicsDescriptorSet = new ResourceSet(_graphicsDescriptorSetLayout, _particleDiffuseMap);
@@ -63,12 +63,12 @@ namespace SharpGame.Samples.ComputeParticles
 
             _computeDescriptorSet = new ResourceSet(_computeDescriptorSetLayout, _storageBuffer, _uniformBuffer);
 
-            _computeCmdBuffer = graphics_.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
+            _computeCmdBuffer = Graphics.ComputeCommandPool.AllocateBuffers(new CommandBufferAllocateInfo(CommandBufferLevel.Primary, 1))[0];
             _computeFence = Graphics.CreateFence();
 
             _shader = new Shader
             (
-                Name = "Shader",
+                "Shader",
                 new Pass("Shader.vert.spv", "Shader.frag.spv")
                 {
                     ResourceLayout = _graphicsDescriptorSetLayout
@@ -124,7 +124,7 @@ namespace SharpGame.Samples.ComputeParticles
 
         }
 
-        protected override void Update()
+        public override void Update()
         {
             const float radius = 0.5f;
             const float rotationSpeed = 0.5f;
@@ -144,7 +144,7 @@ namespace SharpGame.Samples.ComputeParticles
         void Handle(BeginRender e)
         {
             // Submit compute commands.
-            graphics_.ComputeQueue.Submit(new SubmitInfo(commandBuffers: new[] { _computeCmdBuffer }), _computeFence);
+            Graphics.ComputeQueue.Submit(new SubmitInfo(commandBuffers: new[] { _computeCmdBuffer }), _computeFence);
             _computeFence.Wait();
             _computeFence.Reset();            
         }
@@ -164,11 +164,11 @@ namespace SharpGame.Samples.ComputeParticles
             // Record particle movements.
             var graphicsToComputeBarrier = new BufferMemoryBarrier(_storageBuffer,
                 Accesses.VertexAttributeRead, Accesses.ShaderWrite,
-                graphics_.GraphicsQueue.FamilyIndex, graphics_.ComputeQueue.FamilyIndex);
+                Graphics.GraphicsQueue.FamilyIndex, Graphics.ComputeQueue.FamilyIndex);
 
             var computeToGraphicsBarrier = new BufferMemoryBarrier(_storageBuffer,
                 Accesses.ShaderWrite, Accesses.VertexAttributeRead,
-                graphics_.ComputeQueue.FamilyIndex, graphics_.GraphicsQueue.FamilyIndex);
+                Graphics.ComputeQueue.FamilyIndex, Graphics.GraphicsQueue.FamilyIndex);
 
             _computeCmdBuffer.Begin();
 
@@ -193,9 +193,7 @@ namespace SharpGame.Samples.ComputeParticles
         {
             var random = new Random();
             
-            int numParticles = gameWindow_.Platform == PlatformType.Android
-                ? 256 * 1024
-                : 256 * 2048; // ~500k particles.
+            int numParticles = 256 * 2048;
 
             var particles = new VertexParticle[numParticles];
             for (int i = 0; i < numParticles; i++)

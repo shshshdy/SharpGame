@@ -4,28 +4,30 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using VulkanCore;
 
-namespace SharpGame.Samples.StaticScene
+namespace SharpGame.Samples
 {
-    public class StaticSceneApp : Application
+    [SampleDesc(sortOrder = 0)]
+    public class StaticSceneApp : Sample
     {
-        private Scene scene_;
         private Node node_;
         private Model model_;
-        private Node cameraNode_;
-        private Camera camera_;
-
-        private Shader testShader_;
+        private Shader texturedShader;
         private Texture _cubeTexture;
 
-        private Geometry geometry_;
 
-        protected override void Init()
+        public override void Init()
         {
 
-            testShader_ = new Shader
+            texturedShader = new Shader
             (
-                Name = "Test",
+                "Test",
                 new Pass("Textured.vert.spv", "Textured.frag.spv")
+                {
+                    ResourceLayout = new ResourceLayout(
+                        new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
+                        new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
+                    )
+                }
             );
 
             scene_ = new Scene();
@@ -37,38 +39,35 @@ namespace SharpGame.Samples.StaticScene
 
             scene_.AddChild(node_);
 
-            cameraNode_ = new Node
-            {
-                Position = new Vector3(0, 0, -3)
-            };
+            var cameraNode = scene_.CreateChild("Camera");
+            cameraNode.Position = new Vector3(0, 0, -3);           
+            cameraNode.LookAt(Vector3.Zero);
 
-            cameraNode_.LookAt(Vector3.Zero);
+            camera_ = cameraNode.AddComponent<Camera>();
+            camera_.AspectRatio = (float)Graphics.Width / Graphics.Height;
 
-            camera_ = cameraNode_.AddComponent<Camera>();
-            camera_.AspectRatio = (float)graphics_.GameWindow.Width / graphics_.GameWindow.Height;
-
-            model_ = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
+            model_ = ResourceCache.Load<Model>("Models/Mushroom.mdl").Result;
 
             var staticModel = node_.AddComponent<StaticModel>();
             staticModel.SetModel(model_);
-            geometry_ = model_.GetGeometry(0, 0);
 
-            _cubeTexture = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
+
+            _cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
 
             var mat = new Material();
-            mat.Shader = testShader_;
+            mat.Shader = texturedShader;
             mat.SetTexture("sampler_Color", _cubeTexture);
             staticModel.SetMaterial(0, mat);
 
-            renderer_.MainView.Scene = scene_;
-            renderer_.MainView.Camera = camera_;
+            Renderer.MainView.Scene = scene_;
+            Renderer.MainView.Camera = camera_;
         }
 
-        protected override void Destroy()
+        public override void Shutdown()
         {
-            testShader_.Dispose();
+            texturedShader.Dispose();
 
-            base.Destroy();
+            base.Shutdown();
         }
 
         

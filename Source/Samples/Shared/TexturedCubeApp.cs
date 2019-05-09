@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 //using Utf8Json.Resolvers;
 using VulkanCore;
 
-namespace SharpGame.Samples.TexturedCube
+namespace SharpGame.Samples
 {
-
-    public class TexturedCubeApp : Application
+    [SampleDesc(sortOrder = 1)]
+    public class TexturedCubeApp : Sample
     {
         private Geometry geometry_;
         private Pipeline pipeline_;
@@ -23,7 +23,7 @@ namespace SharpGame.Samples.TexturedCube
         private WorldViewProjection _wvp;
 
 
-        protected override void Init()
+        public override void Init()
         {
             this.SubscribeToEvent<BeginRenderPass>(Handle);
 
@@ -31,8 +31,7 @@ namespace SharpGame.Samples.TexturedCube
 
             texturedShader_ = new Shader
             (
-                Name = "Textured",
-
+                "Textured",
                 new Pass("Textured.vert.spv", "Textured.frag.spv")
                 {
                     ResourceLayout = new ResourceLayout
@@ -43,7 +42,7 @@ namespace SharpGame.Samples.TexturedCube
                 }
             );
 
-            _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
+            _cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer       = UniformBuffer.Create<WorldViewProjection>(1);
 
             _descriptorSet = new ResourceSet(texturedShader_.Main.ResourceLayout);
@@ -72,7 +71,7 @@ namespace SharpGame.Samples.TexturedCube
 
         }
 
-        protected override void Destroy()
+        public override void Shutdown()
         {
             geometry_.Dispose();
             texturedShader_.Dispose();
@@ -81,7 +80,7 @@ namespace SharpGame.Samples.TexturedCube
             base.Destroy();
         }
 
-        protected override void Update()
+        public override void Update()
         {
             const float twoPi      = (float)Math.PI * 2.0f;
             const float yawSpeed   = twoPi / 4.0f;
@@ -112,7 +111,7 @@ namespace SharpGame.Samples.TexturedCube
             _wvp.View = Matrix.LookAtLH(-Vector3.UnitZ * cameraDistance, Vector3.Zero, Vector3.UnitY);
             var projection = Matrix.PerspectiveFovLH(
             (float)Math.PI / 4,
-            (float)graphics_.GameWindow.Width / graphics_.GameWindow.Height,
+            (float)Graphics.Width / Graphics.Height,
             1.0f, 1000.0f);
             _wvp.ViewProj = _wvp.View * projection;
 

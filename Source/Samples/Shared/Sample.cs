@@ -1,170 +1,266 @@
 ﻿using System;
+using System.Collections.Generic;
+using ImGuiNET;
 using SharpGame;
+using VulkanCore;
 
-public class Sample : Object
+namespace SharpGame.Samples
 {
-    public Sample()
+    public class SampleDescAttribute : System.Attribute
     {
+        public string name;
+        public string desc;
+        public int sortOrder;
     }
 
-    public virtual void Init()
+    public class Sample : Object
     {
-    }
+        public Graphics Graphics => Get<Graphics>();
+        public Renderer Renderer => Get<Renderer>();
+        public ResourceCache ResourceCache => Get<ResourceCache>();
 
-    public virtual void Update()
-    {
-    }
+        protected Scene scene_;
+        protected Camera camera_;
 
-    public virtual void Shutdown()
-    {
-    }
-}
-
-public class SampleApplication : Application
-{
-    Scene scene_;
-    Node root_;
-    Camera camera_;
-    DebugRenderer debugRenderer_;
-    Model model_;
-    Material material_;
-    Texture diffTex_;
-
-    List<AnimatedModel> animators_ = new List<AnimatedModel>();
-    protected override void Setup()
-    {
-        timer_ = CreateSubsystem<Timer>();
-        fileSystem_ = CreateSubsystem<FileSystem>(gameWindow_);
-        graphics_ = CreateSubsystem<Graphics>(gameWindow_);
-        resourceCache_ = CreateSubsystem<ResourceCache>("../Content");
-        renderer_ = CreateSubsystem<Renderer>();
-        input_ = CreateSubsystem<Input>();
-
-        CreateSubsystem<AssetDatabase>();
-
-        GUISystem guiSys = CreateSubsystem<GUISystem>();
-
-        EditorWindow.GetWindow<MainWindow>();
-
-        this.SubscribeToEvent<BeginFrame>(HandleGUI);
-        this.SubscribeToEvent<Update>(HandleUpdate);
-
-    }
-
-    protected override void Init()
-    {
-        base.Init();
-
-        scene_ = new Scene();
-        camera_ = scene_.CreateChild("Camera").CreateComponent<Camera>();
-        root_ = scene_.CreateChild("Parent");
+        Vector2 mousePos_ = Vector2.Zero;
+        float yaw_;
+        float pitch_;
+        float rotSpeed_ = 0.5f;
+        float wheelSpeed_ = 150.0f;
+        float moveSpeed_ = 15.0f;
+        Vector3 offset_;
 
 
-        var model = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
-
-        var staticModel = root_.AddComponent<StaticModel>();
-        staticModel.SetModel(model);
-
-        var shader = new Shader
-        (
-            Name = "Test",
-            new Pass("Textured.vert.spv", "Textured.frag.spv")
-            {
-                ResourceLayout = new ResourceLayout(
-                    new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
-                    new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
-                )
-            }
-        );
-
-        var mat = new Material
+        public Sample()
         {
-            Shader = shader
-        };
+        }
 
-        staticModel.SetMaterial(0, mat);            
-        camera_.Node.Position = new Vector3(0, 4.0f, -20.0f);
-        camera_.Node.LookAt(Vector3.Zero);
+        public virtual void Init()
+        {
+        }
 
-        var renderer = Get<Renderer>();
-        // RenderView view = renderer.CreateRenderView(camera_, scene_);
+        public virtual void Update()
+        {
+            if(camera_ == null)
+            {
+                return;
+            }
 
-        renderer.MainView.Scene = scene_;
-        renderer.MainView.Camera = camera_;
-    }
+            var input = Get<Input>();
 
-    protected override void Shutdown()
-    {
-        scene_.Dispose();
-    }
+            
+            if (mousePos_ == Vector2.Zero)
+                mousePos_ = input.MousePosition;
 
-    Vector2 mousePos_ = Vector2.Zero;
-    float yaw_;
-    float pitch_;
-    float rotSpeed_ = 0.5f;
-    float wheelSpeed_ = 150.0f;
-    float moveSpeed_ = 15.0f;
-    Vector3 offset_;
+            offset_ = Vector3.Zero;
+            if (input.IsMouseDown(MouseButton.Right))
+            {
+                Vector2 delta = (input.MousePosition - mousePos_) * Time.Delta * rotSpeed_ * camera_.AspectRatio;
 
-    private void HandleUpdate(ref Update e)
-    {
-        Input input = Get<Input>();
+                yaw_ += delta.X;
+                pitch_ += delta.Y;
 
-        if (mousePos_ == Vector2.Zero)
+                camera_.Node.Rotation = Quaternion.RotationYawPitchRoll(yaw_, pitch_, 0);
+
+                if (input.IsKeyPressed(Key.W))
+                {
+                    offset_.Z += 1.0f;
+                }
+
+                if (input.IsKeyPressed(Key.S))
+                {
+                    offset_.Z -= 1.0f;
+                }
+
+                if (input.IsKeyPressed(Key.A))
+                {
+                    offset_.X -= 1.0f;
+                }
+
+                if (input.IsKeyPressed(Key.D))
+                {
+                    offset_.X += 1.0f;
+                }
+            }
+
+            if (input.IsMouseDown(MouseButton.Middle))
+            {
+                Vector2 delta = input.MousePosition - mousePos_;
+                offset_.X = -delta.X;
+                offset_.Y = delta.Y;
+            }
+
+            camera_.Node.Translate(offset_ * Time.Delta * moveSpeed_ + new Vector3(0, 0, input.WheelDelta * Time.Delta * wheelSpeed_), TransformSpace.LOCAL);
+
             mousePos_ = input.MousePosition;
 
-        offset_ = Vector3.Zero;
-        if (input.IsMouseDown(MouseButton.Right))
-        {
-            Vector2 delta = (input.MousePosition - mousePos_) * Time.Delta * rotSpeed_ * camera_.AspectRatio;
-
-            yaw_ += delta.X;
-            pitch_ += delta.Y;
-
-            camera_.Node.Rotation = Quaternion.RotationYawPitchRoll(yaw_, pitch_, 0);
-
-            if (input.IsKeyPressed(Key.W))
-            {
-                offset_.Z += 1.0f;
-            }
-
-            if (input.IsKeyPressed(Key.S))
-            {
-                offset_.Z -= 1.0f;
-            }
-
-            if (input.IsKeyPressed(Key.A))
-            {
-                offset_.X -= 1.0f;
-            }
-
-            if (input.IsKeyPressed(Key.D))
-            {
-                offset_.X += 1.0f;
-            }
         }
 
-        if (input.IsMouseDown(MouseButton.Middle))
+        public virtual void OnGUI()
         {
-            Vector2 delta = input.MousePosition - mousePos_;
-            offset_.X = -delta.X;
-            offset_.Y = delta.Y;
         }
 
-        camera_.Node.Translate(offset_ * Time.Delta * moveSpeed_ + new Vector3(0, 0, input.WheelDelta * Time.Delta * wheelSpeed_), TransformSpace.LOCAL);
-
-        mousePos_ = input.MousePosition;
-
-        foreach (var it in animators_)
+        public virtual void Shutdown()
         {
-            it.AnimationStates[0].AddTime(Time.Delta);
+            scene_?.Dispose();
         }
-
     }
 
-    private void HandleGUI(ref BeginFrame e)
+    public class SampleApplication : Application
     {
-        EditorWindow.OnGUI();
+        Sample current;
+        int selected = 0;
+        string[] sampleNames;
+
+        protected override void Setup()
+        {
+            timer_ = CreateSubsystem<Timer>();
+            fileSystem_ = CreateSubsystem<FileSystem>(gameWindow_);
+            graphics_ = CreateSubsystem<Graphics>(gameWindow_);
+            resourceCache_ = CreateSubsystem<ResourceCache>("../Content");
+            renderer_ = CreateSubsystem<Renderer>();
+            input_ = CreateSubsystem<Input>();
+
+            GUISystem guiSys = CreateSubsystem<GUISystem>();
+
+            this.SubscribeToEvent<BeginFrame>(HandleGUI);
+            this.SubscribeToEvent<Update>(HandleUpdate);
+
+        }
+
+        public List<(string, string, int, Type)> allSamples = new List<(string, string, int, Type)>();
+
+       
+        protected override void Init()
+        {
+            base.Init();
+
+
+            var types = System.Reflection.Assembly.GetExecutingAssembly().GetTypes();
+            foreach (var t in types)
+            {
+                if (t.IsSubclassOf(typeof(Sample)))
+                {
+                    var attr = t.GetCustomAttributes(typeof(SampleDescAttribute), true);
+                    if (attr.Length == 0)
+                    {
+                        allSamples.Add((t.Name, "", 0, t));
+                    }
+                    else
+                    {
+                        var a = (SampleDescAttribute)attr[0];
+                        allSamples.Add((string.IsNullOrEmpty(a.name) ? t.Name : a.name, a.desc, a.sortOrder, t));
+                    }
+                }
+            }
+
+            allSamples.Sort((v1, v2) => v1.Item3 - v2.Item3);
+
+            sampleNames = new string[allSamples.Count];
+            for (int i = 0; i < allSamples.Count; i++)
+            {
+                sampleNames[i] = allSamples[i].Item1;
+            }
+
+            if (allSamples.Count > 0)
+            {
+                SetSample(Activator.CreateInstance(allSamples[0].Item4) as Sample);
+                
+            }
+        }
+
+        protected override void Shutdown()
+        {
+            if (current)
+            {
+                current.Shutdown();
+            }
+
+        }
+
+        private void HandleUpdate(ref Update e)
+        {
+            if (current)
+            {
+                current.Update();
+            }
+
+        }
+
+        private void HandleGUI(ref BeginFrame e)
+        {
+            var graphics = Get<Graphics>();
+            /*
+            if (ImGui.Begin("Editor", new nk_rect(0, 0, graphics.width, 35), 0))
+            {
+                ImGui.MenubarBegin();
+                ImGui.LayoutRowStatic(20, 60, 2);
+                if (ImGui.MenuBegin("Demo", nk_text_alignment.NK_TEXT_LEFT, new nk_vec2(160, 200)))
+                {
+                    ImGui.LayoutRowDynamic(25);
+
+                    foreach (var s in Sample.all)
+                    {
+                        (string name, string d, int sort, Type t) = s;
+                        var currentType = current?.GetType();
+                        if (ImGui.MenuItem(t == currentType ? nk_symbol_type.NK_SYMBOL_CIRCLE_SOLID : nk_symbol_type.NK_SYMBOL_NONE, name, nk_text_alignment.NK_TEXT_RIGHT))
+                        {
+                            SetSample(System.Activator.CreateInstance(t) as Sample);
+                        }
+
+                    }
+
+                    ImGui.MenuEnd();
+                }
+
+                ImGui.MenubarEnd();
+
+            }
+
+            ImGui.End();
+   */
+
+            if (ImGui.Begin("Sample"))
+            {
+                ImGui.Text("FPS:");
+
+                if(ImGui.Combo("Sample", ref selected, sampleNames, sampleNames.Length))
+                {
+                    SetSample(Activator.CreateInstance(allSamples[selected].Item4) as Sample);
+                }
+                
+
+            }
+
+            ImGui.End();
+         
+            if (current)
+            {
+                current.OnGUI();
+            }
+
+        }
+
+
+        void SetSample(Sample sample)
+        {
+            if (current != sample)
+            {
+                if (current)
+                {
+                    current.Shutdown();
+                }
+
+                current = sample;
+
+                if (current)
+                {
+                    current.Init();
+                }
+            }
+
+        }
+
     }
 
 }
