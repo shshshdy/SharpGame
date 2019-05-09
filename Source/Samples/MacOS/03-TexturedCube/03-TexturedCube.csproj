@@ -10,10 +10,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
 
-    <Compile Include="..\..\Shared\03-TexturedCube\TexturedCubeApp.cs">
-      <Link>TexturedCubeApp.cs</Link>
-    </Compile>
-
     <Compile Include="..\..\Shared\MacOSWindow.cs">
       <Link>MacOSWindow.cs</Link>
     </Compile>
@@ -26,5 +22,6 @@
 
     <ProjectReference Include="..\..\..\Engine\SharpGame.Engine.csproj" />
   </ItemGroup>
+  <Import Project="..\..\Shared\Shared.projitems" Label="Shared" />
 
 </Project>

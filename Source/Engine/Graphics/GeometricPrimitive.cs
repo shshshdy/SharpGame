@@ -6,15 +6,6 @@ namespace SharpGame
 {
     public class GeometricPrimitive
     {
-        public PosNormTex[] Vertices { get; }
-        public int[] Indices { get; }
-
-        public GeometricPrimitive(PosNormTex[] vertices, int[] indices)
-        {
-            Vertices = vertices;
-            Indices = indices;
-        }
-
         public static Geometry CreateCube(float width, float height, float depth)
         {
             float w2 = 0.5f * width;

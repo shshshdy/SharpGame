@@ -7,7 +7,7 @@ namespace SharpGame
 {
     public class ResourceLayout : IDisposable
     {
-        public DescriptorSetLayout descriptorSetLayout;
+        internal DescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
         internal DescriptorSetLayoutBinding[] bindings;
         internal int numBindings => bindings.Length;

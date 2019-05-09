@@ -15,7 +15,6 @@ namespace SharpGame.Samples.TexturedCube
         private Pipeline pipeline_;
         private Shader texturedShader_;
 
-        private ResourceLayout _descriptorSetLayout;
         private ResourceSet _descriptorSet;
 
         private Texture _cubeTexture;
@@ -47,20 +46,12 @@ namespace SharpGame.Samples.TexturedCube
             _cubeTexture         = resourceCache_.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer       = UniformBuffer.Create<WorldViewProjection>(1);
 
-            _descriptorSetLayout = new ResourceLayout
-            (
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
-                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
-            );
+            _descriptorSet = new ResourceSet(texturedShader_.Main.ResourceLayout);
+            _descriptorSet.Bind(0, _uniformBuffer)
+                .Bind(1, _cubeTexture)
+                .UpdateSets();
             
-            CreateDescriptorSet();
-
-            pipeline_ = new Pipeline
-            {
-                PipelineLayoutInfo = new PipelineLayoutCreateInfo(new[] { _descriptorSetLayout.descriptorSetLayout }),
-                VertexInputState = PosNormTex.Layout,
-                FrontFace = FrontFace.CounterClockwise
-            };
+            pipeline_ = new Pipeline();
 
             /*
             JsonSerializer.SetDefaultResolver(StandardResolver.ExcludeNullSnakeCase);
@@ -128,15 +119,6 @@ namespace SharpGame.Samples.TexturedCube
             _uniformBuffer.SetData(ref _wvp);
         }
 
-        private void CreateDescriptorSet()
-        {
-            _descriptorSet = new ResourceSet(_descriptorSetLayout);
-            _descriptorSet.Bind(0, _uniformBuffer)
-                .Bind(1, _cubeTexture)
-                .UpdateSets();
-          
-
-        }
 
     }
 }
