@@ -21,6 +21,8 @@ namespace SharpGame
         public AttachmentDescription[] attachments { get; set; }
         public SubpassDescription[] subpasses { get; set; }
 
+        protected Pipeline pipeline_;
+
         private ResourceLayout resourceLayout_;
 
         private ResourceSet resourceSet_;
@@ -28,6 +30,7 @@ namespace SharpGame
         private Texture _cubeTexture;
         private GraphicsBuffer _uniformBuffer;
         private WorldViewProjection _wvp;
+
         public ScenePass(string name = "main")
         {
             Name = name;
@@ -132,7 +135,7 @@ namespace SharpGame
             return framebuffers;
         }
 
-        protected override void OnDraw(RenderView view, CommandBuffer cmdBuffer)
+        protected override void OnDraw(RenderView view)
         {
             if(view.Camera)
             {
@@ -152,7 +155,7 @@ namespace SharpGame
                 for(int i = 0; i < drawable.Batches.Length; i++)
                 {
                     ref SourceBatch batch = ref drawable.Batches[i];
-                    this.DrawBatch(cmdBuffer, ref batch, resourceSet_);
+                    DrawBatch(ref batch, pipeline_, resourceSet_);
                 }
             }
         }

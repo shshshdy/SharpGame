@@ -141,11 +141,12 @@ namespace SharpGame
                     {
                         new PipelineColorBlendAttachmentState
                         {
+                            BlendEnable = true,
                             SrcColorBlendFactor = BlendFactor.One,
                             DstColorBlendFactor = BlendFactor.One,
                             ColorBlendOp = BlendOp.Add,
-                            SrcAlphaBlendFactor = BlendFactor.One,
-                            DstAlphaBlendFactor = BlendFactor.Zero,
+                            SrcAlphaBlendFactor = BlendFactor.SrcAlpha,
+                            DstAlphaBlendFactor = BlendFactor.DstAlpha,
                             AlphaBlendOp = BlendOp.Add,
                             ColorWriteMask = ColorComponents.All
                         }

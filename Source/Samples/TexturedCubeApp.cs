@@ -97,12 +97,9 @@ namespace SharpGame.Samples
 
         void Handle(BeginRenderPass e)
         {
-            var cmdBuffer = e.commandBuffer;
 
-            var pipeline = pipeline_.GetGraphicsPipeline(e.renderPass, texturedShader_, geometry_);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, _descriptorSet.descriptorSet);
-            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
-            geometry_.Draw(cmdBuffer);
+            e.renderPass.DrawGeometry(geometry_, pipeline_, texturedShader_, _descriptorSet);
+
         }
         
         private void SetViewProjection()

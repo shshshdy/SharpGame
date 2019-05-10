@@ -15,36 +15,36 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct FrameUniform
     {
-        public float cDeltaTime;
-        public float cElapsedTime;
+        public float DeltaTime;
+        public float ElapsedTime;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraVS
     {
-        public vec3 cCameraPos;
-        public float cNearClip;
-        public float cFarClip;
-        public vec4 cDepthMode;
-        public vec3 cFrustumSize;
-        public vec4 cGBufferOffsets;
-        public mat4 cView;
-        public mat4 cViewInv;
-        public mat4 cViewProj;
-        public vec4 cClipPlane;
+        public vec3 CameraPos;
+        public float NearClip;
+        public float FarClip;
+        public vec4 DepthMode;
+        public vec3 FrustumSize;
+        public vec4 GBufferOffsets;
+        public mat4 View;
+        public mat4 ViewInv;
+        public mat4 ViewProj;
+        public vec4 ClipPlane;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct MaterialVS
     {
-        public vec4 cUOffset;
-        public vec4 cVOffset;
+        public vec4 UOffset;
+        public vec4 VOffset;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct ObjectVS
     {
-        public mat4 cModel;
+        public mat4 Model;
         //mat3 cBillboardRot;
         //vec4 cSkinMatrices [64*3];
     };
@@ -107,10 +107,10 @@ namespace SharpGame
 
         protected CommandBuffer[] cmdBuffers_ = new CommandBuffer[2];
 
+        protected CommandBuffer cmdBuffer_;
+        //public CommandBuffer CommandBuffer => cmdBuffer_;
+
         internal VulkanCore.RenderPass renderPass_;
-
-        protected Pipeline pipeline_;
-
 
         public RenderPass()
         {
@@ -127,14 +127,54 @@ namespace SharpGame
                 );
         }
 
+        public void BindVertexBuffer(GraphicsBuffer buffer, long offset = 0)
+            => cmdBuffer_.CmdBindVertexBuffer(buffer, offset);
 
-        public void DrawBatch(CommandBuffer cmdBuffer, ref SourceBatch batch, ResourceSet resourceSet)
+        public void BindVertexBuffers(int firstBinding, int bindingCount, GraphicsBuffer[] buffers, long[] offsets)
+        {
+            //VulkanCore.Buffer[] bufs = new VulkanCore.Buffer[buffers.Length];            
+            //cmdBuffer_.CmdBindVertexBuffers(firstBinding, bindingCount, buffers, offsets);
+        }
+        public void BindIndexBuffer(GraphicsBuffer buffer, long offset = 0, IndexType indexType = IndexType.UInt32)
+            => cmdBuffer_.CmdBindIndexBuffer(buffer, offset, indexType);
+
+        public void BindGraphicsPipeline(Pipeline pipeline, Shader shader, ResourceSet resourceSet)
+        {
+            var pipe = pipeline.GetGraphicsPipeline(this, shader, null);
+            cmdBuffer_.CmdBindPipeline(PipelineBindPoint.Graphics, pipe);
+            cmdBuffer_.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout, resourceSet.descriptorSet);
+        }
+
+        public void BindDescriptorSet(PipelineBindPoint pipelineBindPoint, PipelineLayout layout, ResourceSet resourceSet, int? dynamicOffset = null)
+            => cmdBuffer_.CmdBindDescriptorSet(pipelineBindPoint, layout, resourceSet.descriptorSet, dynamicOffset);
+
+        public void SetScissor(Rect2D scissor)
+            => cmdBuffer_.CmdSetScissor(scissor);
+
+        public void BindDescriptorSets(PipelineBindPoint pipelineBindPoint, PipelineLayout layout, int firstSet, DescriptorSet[] descriptorSets, int[] dynamicOffsets = null)
+            => cmdBuffer_.CmdBindDescriptorSets(pipelineBindPoint, layout, firstSet, descriptorSets, dynamicOffsets);
+
+        public void DrawPrimitive(int vertexCount, int instanceCount = 1, int firstVertex = 0, int firstInstance = 0)
+            => cmdBuffer_.CmdDraw(vertexCount, instanceCount, firstVertex, firstInstance);
+
+        public void DrawIndexed(int indexCount, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0)
+            => cmdBuffer_.CmdDrawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+
+        public void DrawGeometry(Geometry geometry, Pipeline pipeline, Shader shader, ResourceSet resourceSet)
+        {
+            var pipe = pipeline.GetGraphicsPipeline(this, shader, geometry);
+            cmdBuffer_.CmdBindPipeline(PipelineBindPoint.Graphics, pipe);
+            cmdBuffer_.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout, resourceSet.descriptorSet);
+            geometry.Draw(cmdBuffer_);
+        }
+
+        public void DrawBatch(ref SourceBatch batch, Pipeline pipeline, ResourceSet resourceSet)
         {
             var shader = batch.material_.Shader;
-            var pipeline = pipeline_.GetGraphicsPipeline(this, shader, batch.geometry_);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, resourceSet.descriptorSet);
-            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
-            batch.geometry_.Draw(cmdBuffer);
+            var pipe = pipeline.GetGraphicsPipeline(this, shader, batch.geometry_);
+            cmdBuffer_.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout, resourceSet.descriptorSet);
+            cmdBuffer_.CmdBindPipeline(PipelineBindPoint.Graphics, pipe);
+            batch.geometry_.Draw(cmdBuffer_);
         }
 
         protected virtual CommandBuffer BeginDraw()
@@ -147,35 +187,36 @@ namespace SharpGame
                 RenderPass = renderPass_
             };
 
-            CommandBuffer cmdBuffer = Graphics.SecondaryCmdBuffers[workContext].Get();
-            cmdBuffer.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue
+            cmdBuffer_ = Graphics.SecondaryCmdBuffers[workContext].Get();
+            cmdBuffer_.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue
                 | CommandBufferUsages.SimultaneousUse, inherit));
 
-            this.SendGlobalEvent(new BeginRenderPass { renderPass = this, commandBuffer = cmdBuffer });
+            this.SendGlobalEvent(new BeginRenderPass { renderPass = this});
 
             //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
-            cmdBuffers_[workContext] = cmdBuffer;
+            cmdBuffers_[workContext] = cmdBuffer_;
 
-            return cmdBuffer;
+            return cmdBuffer_;
         }
 
         public void Draw(RenderView view)
         {
-            CommandBuffer cmdBuffer = BeginDraw();
+            BeginDraw();
 
-            OnDraw(view, cmdBuffer);
+            OnDraw(view);
 
-            EndDraw(cmdBuffer);
+            EndDraw();
         }
 
-        protected virtual void EndDraw(CommandBuffer cmdBuffer)
+        protected virtual void EndDraw()
         {
-            this.SendGlobalEvent(new EndRenderPass { renderPass = this, commandBuffer = cmdBuffer });
+            this.SendGlobalEvent(new EndRenderPass { renderPass = this });
 
-            cmdBuffer.End();
+            cmdBuffer_.End();
+            cmdBuffer_ = null;
         }
 
-        protected virtual void OnDraw(RenderView view, CommandBuffer cmdBuffer)
+        protected virtual void OnDraw(RenderView view)
         {
         }
 
@@ -199,5 +240,15 @@ namespace SharpGame
 
             cmdBuffer.CmdEndRenderPass();
         }
+    }
+
+    public class GraphicsPass : RenderPass
+    {
+
+    }
+
+    public class ComputePass : RenderPass
+    {
+
     }
 }

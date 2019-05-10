@@ -29,12 +29,10 @@ namespace SharpGame
     public struct BeginRenderPass
     {
         public RenderPass renderPass;
-        public VulkanCore.CommandBuffer commandBuffer;
     }
 
     public struct EndRenderPass
     {
         public RenderPass renderPass;
-        public VulkanCore.CommandBuffer commandBuffer;
     }
 }

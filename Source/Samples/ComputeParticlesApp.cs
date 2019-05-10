@@ -80,10 +80,8 @@ namespace SharpGame.Samples
                 ResourceLayout = _computeDescriptorSetLayout
             };
 
-            _computePipeline = new Pipeline
-            {             
-            };
-            
+            _computePipeline = new Pipeline();
+      
             _graphicsPipeline = new Pipeline
             {
                 PrimitiveTopology = PrimitiveTopology.PointList,
@@ -100,23 +98,9 @@ namespace SharpGame.Samples
                 ),
 
                 CullMode = CullModes.None,
-
-                DepthStencilState = new PipelineDepthStencilStateCreateInfo(),
-
-                ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
-                {
-                    new PipelineColorBlendAttachmentState
-                    {
-                        BlendEnable = true,
-                        ColorWriteMask = ColorComponents.All,
-                        ColorBlendOp = BlendOp.Add,
-                        SrcColorBlendFactor = BlendFactor.One,
-                        DstColorBlendFactor = BlendFactor.One,
-                        AlphaBlendOp = BlendOp.Add,
-                        SrcAlphaBlendFactor = BlendFactor.SrcAlpha,
-                        DstAlphaBlendFactor = BlendFactor.DstAlpha
-                    }
-                }),
+                DepthTestEnable = false,
+                DepthWriteEnable = false,
+                BlendMode = BlendMode.Add,               
 
             };
 
@@ -151,12 +135,9 @@ namespace SharpGame.Samples
 
         void Handle(BeginRenderPass e)
         {
-            var cmdBuffer = e.commandBuffer;
-            var pipeline = _graphicsPipeline.GetGraphicsPipeline(e.renderPass, _shader, null);
-            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, _graphicsPipeline.pipelineLayout, _graphicsDescriptorSet.descriptorSet);
-            cmdBuffer.CmdBindVertexBuffer(_storageBuffer);
-            cmdBuffer.CmdDraw(_storageBuffer.Count);
+            e.renderPass.BindGraphicsPipeline(_graphicsPipeline, _shader, _graphicsDescriptorSet);
+            e.renderPass.BindVertexBuffer(_storageBuffer);
+            e.renderPass.DrawPrimitive(_storageBuffer.Count);
         }
 
         private void RecordComputeCommandBuffer()

@@ -85,7 +85,7 @@ namespace SharpGame
 
             this.SubscribeToEvent((ref BeginFrame e) => UpdateGUI());
 
-            this.SubscribeToEvent((EndRenderPass e) => RenderGUI(e.renderPass, e.commandBuffer));
+            this.SubscribeToEvent((EndRenderPass e) => RenderGUI(e.renderPass));
 
         }
         
@@ -144,14 +144,14 @@ namespace SharpGame
 
         }
 
-        unsafe void RenderGUI(RenderPass renderPass, CommandBuffer commandBuffer)
+        unsafe void RenderGUI(RenderPass renderPass)
         {
             ImGui.Render();
 
-            RenderImDrawData(renderPass, commandBuffer, ImGui.GetDrawData());
+            RenderImDrawData(renderPass, ImGui.GetDrawData());
         }
 
-        private unsafe void RenderImDrawData(RenderPass renderPass, CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
+        private unsafe void RenderImDrawData(RenderPass renderPass, ImDrawDataPtr draw_data)
         {
             var io = ImGui.GetIO();
             float width = io.DisplaySize.X;
@@ -202,12 +202,9 @@ namespace SharpGame
                 indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
             }
 
-            cmdBuffer.CmdBindVertexBuffer(_vertexBuffer.Buffer, 0);
-            cmdBuffer.CmdBindIndexBuffer(_indexBuffer.Buffer, 0, IndexType.UInt16);
-     
-            var pipeline = pipeline_.GetGraphicsPipeline(renderPass, uiShader_, null);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, resourceSet_.descriptorSet);
-            cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
+            renderPass.BindVertexBuffer(_vertexBuffer, 0);
+            renderPass.BindIndexBuffer(_indexBuffer, 0, IndexType.UInt16);
+            renderPass.BindGraphicsPipeline(pipeline_, uiShader_, resourceSet_);
 
             draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
 
@@ -236,15 +233,15 @@ namespace SharpGame
                             //    cl.SetGraphicsResourceSet(1, GetImageResourceSet(pcmd.TextureId));
                             }
                         }
-                        
-                        cmdBuffer.CmdSetScissor(
+
+                        renderPass.SetScissor(
                             new Rect2D(
                             (int)pcmd.ClipRect.X,
                             (int)pcmd.ClipRect.Y,
                             (int)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
                             (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y)));
 
-                        cmdBuffer.CmdDrawIndexed((int)pcmd.ElemCount, 1, idx_offset, vtx_offset, 0);
+                        renderPass.DrawIndexed((int)pcmd.ElemCount, 1, idx_offset, vtx_offset, 0);
                     }
 
                     idx_offset += (int)pcmd.ElemCount;
