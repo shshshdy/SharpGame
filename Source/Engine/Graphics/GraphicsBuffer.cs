@@ -1,9 +1,9 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using VulkanCore;
+using Vulkan;
 
-using Buffer = VulkanCore.Buffer;
+using Buffer = Vulkan.Buffer;
 
 namespace SharpGame
 {

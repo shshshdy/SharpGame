@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using VulkanCore;
-using VulkanCore.Khr;
-using VulkanCore.Mvk;
+using Vulkan;
+using Vulkan.Khr;
+using Vulkan.Mvk;
 
 namespace SharpGame
 {
@@ -246,7 +246,7 @@ namespace SharpGame
             MemoryRequirements memReq = image.GetMemoryRequirements();
 
             int heapIndex = MemoryProperties.MemoryTypes.IndexOf(
-                memReq.MemoryTypeBits, VulkanCore.MemoryProperties.DeviceLocal);
+                memReq.MemoryTypeBits, Vulkan.MemoryProperties.DeviceLocal);
             DeviceMemory memory = Device.AllocateMemory(new MemoryAllocateInfo(memReq.Size, heapIndex));
             image.BindMemory(memory);
 

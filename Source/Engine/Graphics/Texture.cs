@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using VulkanCore;
-using Buffer = VulkanCore.Buffer;
+using Vulkan;
+using Buffer = Vulkan.Buffer;
 
 namespace SharpGame
 {

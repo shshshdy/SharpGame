@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -47,9 +47,9 @@ namespace SharpGame
 
         public PipelineLayout pipelineLayout;
 
-        public VulkanCore.Pipeline pipeline;
+        public Vulkan.Pipeline pipeline;
 
-        Dictionary<Pass, VulkanCore.Pipeline> cachedPipeline_ = new Dictionary<Pass, VulkanCore.Pipeline>();
+        Dictionary<Pass, Vulkan.Pipeline> cachedPipeline_ = new Dictionary<Pass, Vulkan.Pipeline>();
 
         public Pipeline()
         {
@@ -203,7 +203,7 @@ namespace SharpGame
             pipeline = null;
         }
 
-        public VulkanCore.Pipeline GetGraphicsPipeline(RenderPass renderPass, Shader shader, Geometry geometry)
+        public Vulkan.Pipeline GetGraphicsPipeline(RenderPass renderPass, Shader shader, Geometry geometry)
         {
             if(pipeline != null)
             {
@@ -248,7 +248,7 @@ namespace SharpGame
             return pipeline;
         }
 
-        public VulkanCore.Pipeline GetComputePipeline(Pass shader)
+        public Vulkan.Pipeline GetComputePipeline(Pass shader)
         {
             if(!shader.IsComputeShader)
             {

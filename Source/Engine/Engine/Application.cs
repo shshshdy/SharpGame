@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using VulkanCore;
+using Vulkan;
 
 
 namespace SharpGame

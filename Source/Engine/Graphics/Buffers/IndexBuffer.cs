@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -26,7 +26,7 @@ namespace SharpGame
             var graphics = Get<Graphics>();
             long size = count * stride;
 
-            VulkanCore.Buffer stagingBuffer = null;
+            Vulkan.Buffer stagingBuffer = null;
             DeviceMemory stagingMemory = null;
             if (indices != IntPtr.Zero)
             {
@@ -47,7 +47,7 @@ namespace SharpGame
 
 
             // Create a device local buffer.
-            VulkanCore.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.IndexBuffer | BufferUsages.TransferDst));
+            Vulkan.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.IndexBuffer | BufferUsages.TransferDst));
             MemoryRequirements req = buffer.GetMemoryRequirements();
             int memoryTypeIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 req.MemoryTypeBits,

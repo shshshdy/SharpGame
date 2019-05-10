@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -54,7 +54,7 @@ namespace SharpGame
         [DataMember]
         public ShaderReflection ShaderReflection { get; set; }
 
-        internal VulkanCore.ShaderModule shaderModule;
+        internal Vulkan.ShaderModule shaderModule;
 
         public ShaderModule()
         {

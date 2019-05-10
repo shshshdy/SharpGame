@@ -1,6 +1,6 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {

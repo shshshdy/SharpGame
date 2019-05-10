@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -18,7 +18,7 @@ namespace SharpGame
             long size = data.Length * stride;
 
             // Create a staging buffer that is writable by host.
-            VulkanCore.Buffer stagingBuffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
+            Vulkan.Buffer stagingBuffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.TransferSrc));
             MemoryRequirements stagingReq = stagingBuffer.GetMemoryRequirements();
             int stagingMemoryTypeIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 stagingReq.MemoryTypeBits,
@@ -30,7 +30,7 @@ namespace SharpGame
             stagingBuffer.BindMemory(stagingMemory);
 
             // Create a device local buffer where the data will be copied.
-            VulkanCore.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.StorageBuffer | BufferUsages.TransferDst));
+            Vulkan.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.StorageBuffer | BufferUsages.TransferDst));
             MemoryRequirements req = buffer.GetMemoryRequirements();
             int memoryTypeIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 req.MemoryTypeBits,

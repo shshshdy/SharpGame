@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -26,7 +26,7 @@ namespace SharpGame
             long size = count * stride;
 
             // Create a staging buffer that is writable by host.
-            VulkanCore.Buffer stagingBuffer = null;
+            Vulkan.Buffer stagingBuffer = null;
             DeviceMemory stagingMemory = null;
             if (vertices != IntPtr.Zero)
             {
@@ -44,7 +44,7 @@ namespace SharpGame
             }
 
             // Create a device local buffer where the vertex data will be copied and which will be used for rendering.
-            VulkanCore.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.TransferDst));
+            Vulkan.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.VertexBuffer | BufferUsages.TransferDst));
             MemoryRequirements req = buffer.GetMemoryRequirements();
             int memoryTypeIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
                 req.MemoryTypeBits,

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -11,7 +11,7 @@ namespace SharpGame
         public Scene Scene { get; set; }
         public Camera Camera { get; set; }
         public RenderPath RenderPath { get; set; }
-        public VulkanCore.Viewport Viewport { get; set; }
+        public Vulkan.Viewport Viewport { get; set; }
         public uint ViewMask { get; set; }
         public RenderPass OverlayPass { get; set; }
 

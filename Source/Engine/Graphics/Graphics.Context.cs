@@ -1,23 +1,20 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using VulkanCore;
-using VulkanCore.Ext;
-using VulkanCore.Khr;
-using VulkanCore.Mvk;
+using Vulkan;
 
 namespace SharpGame
 {
     public class CommandBufferPool
     {
-        CommandBuffer[] commandBuffers_;
+        VkCommandBuffer[] commandBuffers_;
         int currentIndex_;
-        public CommandBufferPool(CommandBuffer[] commandBuffers)
+        public CommandBufferPool(VkCommandBuffer[] commandBuffers)
         {
             commandBuffers_ = commandBuffers;
         }
 
-        public CommandBuffer Get()
+        public VkCommandBuffer Get()
         {
             int idx = currentIndex_++;
             return commandBuffers_[idx % commandBuffers_.Length];
@@ -26,25 +23,25 @@ namespace SharpGame
 
     public partial class Graphics
     {
-        internal static Instance Instance { get; private set; }
-        protected static DebugReportCallbackExt DebugReportCallback { get; private set; }
-        internal static SurfaceKhr Surface { get; private set; }
-        internal static SwapchainKhr Swapchain { get; private set; }
+        internal static VkInstance Instance { get; private set; }
+        protected static VkDebugReportCallbackEXT DebugReportCallback { get; private set; }
+        internal static VkSurfaceKHR Surface { get; private set; }
+        internal static VkSwapchainKHR Swapchain { get; private set; }
 
-        internal static PhysicalDevice PhysicalDevice { get; private set; }
-        internal static Device Device { get; private set; }
-        internal static PhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
-        internal static PhysicalDeviceFeatures Features { get; private set; }
-        internal static PhysicalDeviceProperties Properties { get; private set; }
+        internal static VkPhysicalDevice PhysicalDevice { get; private set; }
+        internal static VkDevice Device { get; private set; }
+        internal static VkPhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
+        internal static VkPhysicalDeviceFeatures Features { get; private set; }
+        internal static VkPhysicalDeviceProperties Properties { get; private set; }
 
-        public Queue GraphicsQueue { get; private set; }
-        public Queue ComputeQueue { get; private set; }
-        public Queue PresentQueue { get; private set; }
-        public CommandPool GraphicsCommandPool { get; private set; }
-        public CommandPool ComputeCommandPool { get; private set; }
-        public CommandPool[] SecondaryCommandPool { get; private set; }
+        public VkQueue GraphicsQueue { get; private set; }
+        public VkQueue ComputeQueue { get; private set; }
+        public VkQueue PresentQueue { get; private set; }
+        public VkCommandPool GraphicsCommandPool { get; private set; }
+        public VkCommandPool ComputeCommandPool { get; private set; }
+        public VkCommandPool[] SecondaryCommandPool { get; private set; }
 
-        private Instance CreateInstance(bool debug)
+        private VkInstance CreateInstance(bool debug)
         {
             // Specify standard validation layers.
             string surfaceExtension;
@@ -63,7 +60,7 @@ namespace SharpGame
                     throw new NotImplementedException();
             }
 
-            var createInfo = new InstanceCreateInfo();
+            var createInfo = new VkInstanceCreateInfo();
 
             //Currently MoltenVK (used for MacOS) doesn't support the debug layer.
             if (debug && GameWindow.Platform != PlatformType.MacOS)
@@ -87,14 +84,14 @@ namespace SharpGame
                     surfaceExtension,
                 };
             }
-            return new Instance(createInfo);
+            return new VkInstance(createInfo);
         }
 
-        private DebugReportCallbackExt CreateDebugReportCallback(bool debug)
+        private VkDebugReportCallbackEXT CreateDebugReportCallback(bool debug)
         {
             //Currently MoltenVK (used for MacOS) doesn't support the debug layer.
-            if (!debug || GameWindow.Platform == PlatformType.MacOS) return null;
-
+            if (!debug || GameWindow.Platform == PlatformType.MacOS) return 0;
+            VkDebugReportCallbackCreateInfoEXT
             // Attach debug callback.
             var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
                 DebugReportFlagsExt.All,
@@ -104,10 +101,12 @@ namespace SharpGame
                     return args.Flags.HasFlag(DebugReportFlagsExt.Error);
                 }
             );
+
+            vkCreateDebugReportCallbackEXT(Instance, )
             return Instance.CreateDebugReportCallbackExt(debugReportCreateInfo);
         }
 
-        private SurfaceKhr CreateSurface()
+        private VkSurfaceKHR CreateSurface()
         {
             // Create surface.
             switch (GameWindow.Platform)
@@ -124,14 +123,14 @@ namespace SharpGame
         }
 
 
-        public void CreateDevice(Instance instance, SurfaceKhr surface, PlatformType platform)
+        public void CreateDevice(VkInstance instance, SurfaceKhr surface, PlatformType platform)
         {
             // Find graphics and presentation capable physical device(s) that support
             // the provided surface for platform.
             int graphicsQueueFamilyIndex = -1;
             int computeQueueFamilyIndex = -1;
             int presentQueueFamilyIndex = -1;
-            foreach (PhysicalDevice physicalDevice in instance.EnumeratePhysicalDevices())
+            foreach (VkPhysicalDevice physicalDevice in instance.EnumeratePhysicalDevices())
             {
                 QueueFamilyProperties[] queueFamilyProperties = physicalDevice.GetQueueFamilyProperties();
                 for (int i = 0; i < queueFamilyProperties.Length; i++)

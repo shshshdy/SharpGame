@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -121,7 +121,7 @@ namespace SharpGame
         protected CommandBuffer cmdBuffer_;
         //public CommandBuffer CommandBuffer => cmdBuffer_;
 
-        internal VulkanCore.RenderPass renderPass_;
+        internal Vulkan.RenderPass renderPass_;
 
         public RenderPass()
         {
@@ -143,7 +143,7 @@ namespace SharpGame
 
         public void BindVertexBuffers(int firstBinding, int bindingCount, GraphicsBuffer[] buffers, long[] offsets)
         {
-            //VulkanCore.Buffer[] bufs = new VulkanCore.Buffer[buffers.Length];            
+            //Vulkan.Buffer[] bufs = new Vulkan.Buffer[buffers.Length];            
             //cmdBuffer_.CmdBindVertexBuffers(firstBinding, bindingCount, buffers, offsets);
         }
         public void BindIndexBuffer(GraphicsBuffer buffer, long offset = 0, IndexType indexType = IndexType.UInt32)

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -17,7 +17,7 @@ namespace SharpGame
             int stride = Interop.SizeOf<T>();
             long size = stride * count;
 
-            VulkanCore.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.UniformBuffer));
+            Vulkan.Buffer buffer = Graphics.Device.CreateBuffer(new BufferCreateInfo(size, BufferUsages.UniformBuffer));
             MemoryRequirements memoryRequirements = buffer.GetMemoryRequirements();
             // We require host visible memory so we can map it and write to it directly.
             // We require host coherent memory so that writes are visible to the GPU right after unmapping it.

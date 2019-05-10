@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VulkanCore;
-using VulkanCore.Khr;
+using Vulkan;
+using Vulkan.Khr;
 
 namespace SharpGame
 {

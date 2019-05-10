@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VulkanCore;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -14,7 +14,7 @@ namespace SharpGame
             set
             {
                 vertexBuffers_ = value;
-                buffers_ = new VulkanCore.Buffer[vertexBuffers_.Length];
+                buffers_ = new Vulkan.Buffer[vertexBuffers_.Length];
                 offsets_ = new long[vertexBuffers_.Length];
                 for (int i = 0; i < vertexBuffers_.Length; i++)
                 {
@@ -34,7 +34,7 @@ namespace SharpGame
 
         public PipelineVertexInputStateCreateInfo VertexInputState { get; set; }
 
-        VulkanCore.Buffer[] buffers_;
+        Vulkan.Buffer[] buffers_;
         long[] offsets_;
 
         public Geometry()
