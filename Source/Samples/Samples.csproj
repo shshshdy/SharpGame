@@ -8,7 +8,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>..\..\..\bin\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\Sdl2\native\win-x64\SDL2.dll" Link="SDL2.dll">
+    <None Include="..\Sdl2\native\win-x64\SDL2.dll" Link="SDL2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -27,8 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Engine\SharpGame.Engine.csproj" />
-    <ProjectReference Include="..\..\Sdl2\SharpGame.Sdl2.csproj" />
+    <ProjectReference Include="..\Engine\SharpGame.Engine.csproj" />
+    <ProjectReference Include="..\Sdl2\SharpGame.Sdl2.csproj" />
   </ItemGroup>
 
 </Project>
