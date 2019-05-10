@@ -90,16 +90,6 @@ namespace SharpGame
             return this;
         }
 
-        public ResourceSet UniformBuffer(int dstBinding, GraphicsBuffer uniformBuffer)
-        {
-            return Bind(dstBinding, 0, 1, DescriptorType.UniformBuffer, bufferInfo : new[] { new DescriptorBufferInfo(uniformBuffer) });
-        }
-
-        public ResourceSet CombinedImageSampler(int dstBinding, Texture texture)
-        {
-            return Bind(dstBinding, 0, 1, DescriptorType.CombinedImageSampler, imageInfo : new[] { new DescriptorImageInfo(texture.Sampler, texture.View, ImageLayout.General) });
-        }
-
         public void UpdateSets()
         {
             descriptorPool.UpdateSets(writeDescriptorSets);

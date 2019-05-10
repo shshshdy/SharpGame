@@ -1,8 +1,0 @@
-C:\UniqueNew\SharpGame\Source\Samples\Win32\02-ColoredTriangle\Fakes\System.Runtime.CompilerServices.Unsafe.fakes : warning : 无法为 Microsoft.CodeAnalysis.EmbeddedAttribute 生成存根: 类型已密封。
-C:\UniqueNew\SharpGame\Source\Samples\Win32\02-ColoredTriangle\Fakes\System.Runtime.CompilerServices.Unsafe.fakes : warning : 无法为 System.Runtime.CompilerServices.IsReadOnlyAttribute 生成存根: 类型已密封。
-C:\UniqueNew\SharpGame\Source\Samples\Win32\02-ColoredTriangle\Fakes\System.Runtime.CompilerServices.Unsafe.fakes : warning : 无法为 System.Runtime.CompilerServices.Unsafe 生成存根: 类型已密封。
-C:\UniqueNew\SharpGame\Source\Samples\Win32\02-ColoredTriangle\Fakes\System.Runtime.CompilerServices.Unsafe.fakes : warning : 无法为 System.Runtime.CompilerServices.__BlockReflectionAttribute 生成存根: 类型对 exported or assembly(System.Runtime.CompilerServices.Unsafe.4.0.4.0.Fakes) 不可见。
-C:\UniqueNew\SharpGame\Source\Samples\Win32\02-ColoredTriangle\Fakes\System.Runtime.CompilerServices.Unsafe.fakes : warning : 无法为 Microsoft.CodeAnalysis.EmbeddedAttribute 生成填充码: 类型对 exported or assembly(System.Runtime.CompilerServices.Unsafe.4.0.4.0.Fakes) 不可见。
-C:\UniqueNew\SharpGame\Source\Samples\Win32\02-ColoredTriangle\Fakes\System.Runtime.CompilerServices.Unsafe.fakes : warning : 无法为 System.Runtime.CompilerServices.IsReadOnlyAttribute 生成填充码: 类型不受支持，因为存在内部限制。
-C:\UniqueNew\SharpGame\Source\Samples\Win32\02-ColoredTriangle\Fakes\System.Runtime.CompilerServices.Unsafe.fakes : warning : 无法为 System.Runtime.CompilerServices.Unsafe 生成填充码: 类型不受支持，因为存在内部限制。
-C:\UniqueNew\SharpGame\Source\Samples\Win32\02-ColoredTriangle\Fakes\System.Runtime.CompilerServices.Unsafe.fakes : warning : 无法为 System.Runtime.CompilerServices.__BlockReflectionAttribute 生成填充码: 类型不受支持，因为存在内部限制。

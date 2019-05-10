@@ -128,11 +128,11 @@ namespace SharpGame
         }
 
 
-        public void DrawBatch(CommandBuffer cmdBuffer, ref SourceBatch batch, ResourceSet descriptorSet)
+        public void DrawBatch(CommandBuffer cmdBuffer, ref SourceBatch batch, ResourceSet resourceSet)
         {
             var shader = batch.material_.Shader;
             var pipeline = pipeline_.GetGraphicsPipeline(this, shader, batch.geometry_);
-            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, descriptorSet.descriptorSet);
+            cmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline_.pipelineLayout, resourceSet.descriptorSet);
             cmdBuffer.CmdBindPipeline(PipelineBindPoint.Graphics, pipeline);
             batch.geometry_.Draw(cmdBuffer);
         }

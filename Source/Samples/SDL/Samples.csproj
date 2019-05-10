@@ -17,13 +17,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\ComputeParticlesApp.cs" Link="ComputeParticlesApp.cs" />
-    <Compile Include="..\Shared\Sample.cs" Link="Sample.cs" />
-    <Compile Include="..\Shared\StaticSceneApp.cs" Link="StaticSceneApp.cs" />
-    <Compile Include="..\Shared\TexturedCubeApp.cs" Link="TexturedCubeApp.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\..\Sdl2\native\win-x64\SDL2.dll" Link="SDL2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
