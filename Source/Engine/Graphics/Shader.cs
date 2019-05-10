@@ -28,11 +28,6 @@ namespace SharpGame
 
         public void AddPass(Pass pass)
         {
-            if(pass.Name.IsNullOrEmpty)
-            {
-                pass.Name = Pass.Main;
-            }
-
             Passes.Add(pass);
         }
 
@@ -41,8 +36,21 @@ namespace SharpGame
         {
             get
             {
-                return GetPass(Pass.Main);
+                return GetPass(0);
             }
+        }
+
+        public Pass GetPass(int id)
+        {
+            foreach (var pass in Passes)
+            {
+                if (pass.passID == id)
+                {
+                    return pass;
+                }
+            }
+
+            return null;
         }
 
         public Pass GetPass(StringID name)

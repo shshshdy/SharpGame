@@ -212,7 +212,7 @@ namespace SharpGame
 
             var graphics = Get<Graphics>();
 
-            var pass = shader.GetPass(renderPass.Name);
+            var pass = shader.GetPass(renderPass.passID);
             if(pass == null)
             {
                 return null;

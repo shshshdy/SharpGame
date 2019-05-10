@@ -94,7 +94,18 @@ namespace SharpGame
 
     public class RenderPass : GPUObject
     {
-        public StringID Name { get; set; }
+        private StringID name_;
+        public StringID Name
+        {
+            get => name_;
+            set
+            {
+                name_ = value;
+                passID = Pass.GetID(name_);
+            }
+        }
+
+        public int passID;
 
         [IgnoreDataMember]
         public RenderPath RenderPath { get; set; }
