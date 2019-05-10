@@ -258,7 +258,6 @@ namespace SharpGame
             }
             else
             {
-                // to do : SharpBgfx.Bgfx.GetCaps().HomogeneousDepth
                 Matrix.PerspectiveFovLH(fov_, aspectRatio_, nearClip_, farClip_, out projection_);
             }
 
