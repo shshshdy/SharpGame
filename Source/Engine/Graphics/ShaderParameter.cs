@@ -49,13 +49,6 @@ namespace SharpGame
         public Texture texture;
     }
 
-    public struct ShaderProperty
-    {
-        public StringID name;
-        public UniformType uniformType;
-        public UniformData data;
-    }
-
     public struct TexureParameter
     {
         public StringID name;

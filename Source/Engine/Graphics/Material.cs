@@ -29,6 +29,8 @@ namespace SharpGame
         private ResourceSet resourceSet_;
         public ResourceSet ResourceSet => resourceSet_;
 
+        internal MaterialRenderData materialRenderData;
+
         public Material()
         {
         }
@@ -101,6 +103,13 @@ namespace SharpGame
             TextureParameters.Add(new TexureParameter { name = name, texture = tex });
 
         }
+
+    }
+
+    public class MaterialRenderData
+    {
+        public Shader shader;
+        public ResourceSet[] resourceSets;
 
     }
 }
