@@ -32,7 +32,7 @@ namespace SharpGame
         public int IndexCount { get; set; }
         public float LodDistance { get; set; }
 
-        public PipelineVertexInputStateCreateInfo VertexInputState { get; set; }
+        public PipelineVertexInputStateCreateInfo VertexLayout { get; set; }
 
         VulkanCore.Buffer[] buffers_;
         long[] offsets_;

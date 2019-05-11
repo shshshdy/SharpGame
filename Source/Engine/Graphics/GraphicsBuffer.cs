@@ -114,6 +114,12 @@ namespace SharpGame
                 Utilities.CopyMemory(vertexPtr, vertices, (int)size);
                 stagingMemory.Unmap();
                 stagingBuffer.BindMemory(stagingMemory);
+
+                if(true)
+                {
+                    Data = new byte[size];
+                    Utilities.CopyMemory(Utilities.AsPointer(ref Data[0]), vertices, (int)size);
+                }
             }
 
             // Create a device local buffer where the vertex data will be copied and which will be used for rendering.

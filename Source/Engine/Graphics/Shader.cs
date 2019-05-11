@@ -95,11 +95,11 @@ namespace SharpGame
         public static readonly StringID Main = "main";
 
         private StringID name_;
-        [IgnoreDataMember]
         public StringID Name
         {
             get => name_;
-            set {
+            set
+            {
                 name_ = value;
                 passID = GetID(value);
             }

@@ -40,7 +40,8 @@ namespace SharpGame
             _cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer = GraphicsBuffer.CreateUniform<WorldViewProjection>(1);
 
-            resourceLayout_ = new ResourceLayout(
+            resourceLayout_ = new ResourceLayout
+            (
                 new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
                 new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
             );

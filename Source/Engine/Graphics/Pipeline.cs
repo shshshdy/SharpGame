@@ -235,7 +235,7 @@ namespace SharpGame
                 pipelineLayout, renderPass.renderPass_, 0,
                 shaderStageCreateInfos,
                 inputAssemblyStateCreateInfo,
-                geometry == null ? VertexInputState : geometry.VertexInputState,
+                geometry == null ? VertexInputState : geometry.VertexLayout,
                 RasterizationState,
                 viewportState: viewportStateCreateInfo,
                 multisampleState: MultisampleState,

@@ -66,7 +66,7 @@ namespace SharpGame
             {
                 VertexBuffers = new[] { GraphicsBuffer.Create(BufferUsages.VertexBuffer, vertices) },
                 IndexBuffer = GraphicsBuffer.Create(BufferUsages.IndexBuffer, indices),
-                VertexInputState = PosNormTex.Layout
+                VertexLayout = PosNormTex.Layout
             };
 
             geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, indices.Length);
