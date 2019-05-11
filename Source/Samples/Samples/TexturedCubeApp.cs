@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
-//using Utf8Json;
+using Utf8Json;
 //using Utf8Json.Resolvers;
 using VulkanCore;
 
@@ -43,7 +43,7 @@ namespace SharpGame.Samples
             );
 
             _cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
-            _uniformBuffer       = UniformBuffer.Create<WorldViewProjection>(1);
+            _uniformBuffer       = GraphicsBuffer.CreateUniform<WorldViewProjection>(1);
 
             _descriptorSet = new ResourceSet(texturedShader_.Main.ResourceLayout);
             _descriptorSet.Bind(0, _uniformBuffer)
@@ -52,21 +52,20 @@ namespace SharpGame.Samples
             
             pipeline_ = new Pipeline();
 
-            /*
-            JsonSerializer.SetDefaultResolver(StandardResolver.ExcludeNullSnakeCase);
+            JsonSerializer.SetDefaultResolver(Utf8Json.Resolvers.StandardResolver.ExcludeNullSnakeCase);
             {
                 byte[] bytes = Utf8Json.JsonSerializer.Serialize(texturedShader_);
                 var json = Utf8Json.JsonSerializer.PrettyPrint(bytes);
 
-                File.WriteAllText("test_shader.json", json);
+                System.IO.File.WriteAllText("test_shader.json", json);
             }
 
             {
                 byte[] bytes = Utf8Json.JsonSerializer.Serialize(geometry_);
                 var json = Utf8Json.JsonSerializer.PrettyPrint(bytes);
 
-                File.WriteAllText("test_geom.json", json);
-            }*/
+                System.IO.File.WriteAllText("test_geom.json", json);
+            }
 
 
         }

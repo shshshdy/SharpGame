@@ -56,7 +56,7 @@ namespace SharpGame.Samples
             _graphicsDescriptorSet = new ResourceSet(_graphicsDescriptorSetLayout, _particleDiffuseMap);
 
             _storageBuffer = CreateStorageBuffer();
-            _uniformBuffer = UniformBuffer.Create<UniformBufferObject>(1);
+            _uniformBuffer = GraphicsBuffer.CreateUniform<UniformBufferObject>(1);
             _computeDescriptorSetLayout = new ResourceLayout(
                 new DescriptorSetLayoutBinding(0, DescriptorType.StorageBuffer, 1, ShaderStages.Compute),
                 new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, 1, ShaderStages.Compute));
@@ -192,7 +192,7 @@ namespace SharpGame.Samples
                 };
             }
 
-            return StorageBuffer.Create(particles);
+            return GraphicsBuffer.Create(BufferUsages.VertexBuffer|BufferUsages.StorageBuffer, particles);
         }
 
     }

@@ -64,8 +64,8 @@ namespace SharpGame
 
             var geom = new Geometry
             {
-                VertexBuffers = new[] { VertexBuffer.Create(vertices) },
-                IndexBuffer = IndexBuffer.Create(indices),
+                VertexBuffers = new[] { GraphicsBuffer.Create(BufferUsages.VertexBuffer, vertices) },
+                IndexBuffer = GraphicsBuffer.Create(BufferUsages.IndexBuffer, indices),
                 VertexInputState = PosNormTex.Layout
             };
 

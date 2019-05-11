@@ -70,6 +70,7 @@ namespace SharpGame
                     break;
                 case DescriptorType.StorageImage:
                     break;
+
                 case DescriptorType.UniformTexelBuffer:
                     break;
                 case DescriptorType.StorageTexelBuffer:

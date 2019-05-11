@@ -51,7 +51,7 @@ namespace SharpGame
                 }
             );          
 
-            _projMatrixBuffer = UniformBuffer.Create<Matrix>(1);
+            _projMatrixBuffer = GraphicsBuffer.CreateUniform<Matrix>();
 
             pipeline_ = new Pipeline
             {                
@@ -63,11 +63,8 @@ namespace SharpGame
                 DynamicStateCreateInfo = new PipelineDynamicStateCreateInfo(DynamicState.Scissor)
             };
 
-            unsafe
-            {
-                _vertexBuffer = VertexBuffer.Create(IntPtr.Zero, sizeof(ImDrawVert), 4046, true);
-                _indexBuffer = IndexBuffer.Create(IntPtr.Zero, sizeof(ushort), 4046, true);
-            }
+            _vertexBuffer = GraphicsBuffer.CreateDynamic<ImDrawVert>(BufferUsages.VertexBuffer, 4046);
+            _indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsages.IndexBuffer, 4046);
 
             RecreateFontDeviceTexture();
 
@@ -75,7 +72,6 @@ namespace SharpGame
             resourceSet_ = new ResourceSet(resourceLayout, _projMatrixBuffer, fontTex_);
 
             ImGuiStylePtr style = ImGui.GetStyle();
-            //ImGuiUtil.ResetStyle(ImGuiStyle.EdinBlack, style );
 
             SetOpenTKKeyMappings();
 
@@ -166,13 +162,13 @@ namespace SharpGame
             if (draw_data.TotalVtxCount > _vertexBuffer.Count)
             {
                 _vertexBuffer.Dispose();
-                _vertexBuffer = VertexBuffer.Create(IntPtr.Zero, sizeof(ImDrawVert), (int)(1.5f * draw_data.TotalVtxCount), true);
+                _vertexBuffer = GraphicsBuffer.CreateDynamic<ImDrawVert>( BufferUsages.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
             }
             
             if (draw_data.TotalIdxCount > _indexBuffer.Count)
             {
                 _indexBuffer.Dispose();
-                _indexBuffer = IndexBuffer.Create(IntPtr.Zero, sizeof(ushort), (int)(1.5f*draw_data.TotalIdxCount), true);
+                _indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsages.IndexBuffer, (int)(1.5f*draw_data.TotalIdxCount));
             }
 
             Matrix proj = Matrix.OrthoOffCenterLH(

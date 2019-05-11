@@ -1,12 +1,8 @@
-//using MessagePack;
-using System;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using VulkanCore;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 0)]
+    [SampleDesc(sortOrder = 2)]
     public class StaticSceneApp : Sample
     {
         private Node node_;
@@ -31,14 +27,6 @@ namespace SharpGame.Samples
             );
 
             scene_ = new Scene();
-
-            node_ = new Node
-            {
-                Position = new Vector3(0, 0, 0)
-            };
-
-            scene_.AddChild(node_);
-
             var cameraNode = scene_.CreateChild("Camera");
             cameraNode.Position = new Vector3(0, 0, -3);           
             cameraNode.LookAt(Vector3.Zero);
@@ -46,11 +34,12 @@ namespace SharpGame.Samples
             camera_ = cameraNode.AddComponent<Camera>();
             camera_.AspectRatio = (float)Graphics.Width / Graphics.Height;
 
+            node_ = scene_.CreateChild("Model");
+
             model_ = ResourceCache.Load<Model>("Models/Mushroom.mdl").Result;
 
             var staticModel = node_.AddComponent<StaticModel>();
             staticModel.SetModel(model_);
-
 
             _cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
 
