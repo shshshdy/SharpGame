@@ -155,8 +155,8 @@ namespace SharpGame
             {
                 for(int i = 0; i < drawable.Batches.Length; i++)
                 {
-                    ref SourceBatch batch = ref drawable.Batches[i];
-                    DrawBatch(ref batch, pipeline_, resourceSet_);
+                    SourceBatch batch = drawable.Batches[i];
+                    DrawBatch(batch, pipeline_, resourceSet_);
                 }
             }
         }

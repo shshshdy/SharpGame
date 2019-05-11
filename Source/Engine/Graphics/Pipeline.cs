@@ -24,6 +24,7 @@ namespace SharpGame
         public PipelineRasterizationStateCreateInfo RasterizationState { get => rasterizationState_; set => rasterizationState_ = value; }
 
         public PipelineMultisampleStateCreateInfo MultisampleState { get; set; }
+
         PipelineDepthStencilStateCreateInfo depthStencilState_;
         public PipelineDepthStencilStateCreateInfo DepthStencilState { get => depthStencilState_; set => depthStencilState_ = value; }
         public PipelineColorBlendStateCreateInfo ColorBlendState { get; set; }
@@ -49,7 +50,7 @@ namespace SharpGame
 
         public VulkanCore.Pipeline pipeline;
 
-        Dictionary<Pass, VulkanCore.Pipeline> cachedPipeline_ = new Dictionary<Pass, VulkanCore.Pipeline>();
+        Dictionary<(Pass, Geometry), VulkanCore.Pipeline> cachedPipeline_ = new Dictionary<(Pass, Geometry), VulkanCore.Pipeline>();
 
         public Pipeline()
         {
@@ -248,19 +249,19 @@ namespace SharpGame
             return pipeline;
         }
 
-        public VulkanCore.Pipeline GetComputePipeline(Pass shader)
+        public VulkanCore.Pipeline GetComputePipeline(Pass shaderPass)
         {
-            if(!shader.IsComputeShader)
+            if(!shaderPass.IsComputeShader)
             {
                 return null;
             }
 
             var pipelineLayoutInfo = new PipelineLayoutCreateInfo(new[]
-            { shader.ResourceLayout.descriptorSetLayout });
+            { shaderPass.ResourceLayout.descriptorSetLayout });
             pipelineLayout = Graphics.Device.CreatePipelineLayout(pipelineLayoutInfo);
 
             var pipelineCreateInfo = new ComputePipelineCreateInfo(
-                shader.GetComputeStageCreateInfo(), pipelineLayout);
+                shaderPass.GetComputeStageCreateInfo(), pipelineLayout);
 
             pipeline = Graphics.Device.CreateComputePipeline(pipelineCreateInfo);
             Graphics.ToDisposeFrame(pipeline);

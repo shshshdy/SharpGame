@@ -183,6 +183,7 @@ namespace SharpGame
         }
 
         public IntPtr Map(long offset, long size) => Memory.Map(offset, size);
+        public unsafe ref T Map<T>(long offset = 0) => ref Unsafe.AsRef<T>((void*)Memory.Map(offset, Unsafe.SizeOf<T>()));
         public void Unmap() => Memory.Unmap();
 
         public static implicit operator Buffer(GraphicsBuffer value) => value.Buffer;

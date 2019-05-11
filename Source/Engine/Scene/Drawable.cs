@@ -39,7 +39,7 @@ namespace SharpGame
     };
 
     /// Source data for a 3D geometry draw call.
-    public struct SourceBatch
+    public class SourceBatch
     {
         /// Distance from camera.
         public float distance_;

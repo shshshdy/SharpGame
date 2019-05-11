@@ -141,11 +141,6 @@ namespace SharpGame
         public void BindVertexBuffer(GraphicsBuffer buffer, long offset = 0)
             => cmdBuffer_.CmdBindVertexBuffer(buffer, offset);
 
-        public void BindVertexBuffers(int firstBinding, int bindingCount, GraphicsBuffer[] buffers, long[] offsets)
-        {
-            //VulkanCore.Buffer[] bufs = new VulkanCore.Buffer[buffers.Length];            
-            //cmdBuffer_.CmdBindVertexBuffers(firstBinding, bindingCount, buffers, offsets);
-        }
         public void BindIndexBuffer(GraphicsBuffer buffer, long offset = 0, IndexType indexType = IndexType.UInt32)
             => cmdBuffer_.CmdBindIndexBuffer(buffer, offset, indexType);
 
@@ -158,6 +153,9 @@ namespace SharpGame
 
         public void BindDescriptorSet(PipelineBindPoint pipelineBindPoint, PipelineLayout layout, ResourceSet resourceSet, int? dynamicOffset = null)
             => cmdBuffer_.CmdBindDescriptorSet(pipelineBindPoint, layout, resourceSet.descriptorSet, dynamicOffset);
+
+        public void SetViewport(Viewport viewport)
+            => cmdBuffer_.CmdSetViewport(viewport);
 
         public void SetScissor(Rect2D scissor)
             => cmdBuffer_.CmdSetScissor(scissor);
@@ -179,7 +177,7 @@ namespace SharpGame
             geometry.Draw(cmdBuffer_);
         }
 
-        public void DrawBatch(ref SourceBatch batch, Pipeline pipeline, ResourceSet resourceSet)
+        public void DrawBatch(SourceBatch batch, Pipeline pipeline, ResourceSet resourceSet)
         {
             var shader = batch.material_.Shader;
             var pipe = pipeline.GetGraphicsPipeline(this, shader, batch.geometry_);

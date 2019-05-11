@@ -14,9 +14,7 @@ namespace SharpGame.Samples
         private Geometry geometry_;
         private Pipeline pipeline_;
         private Shader texturedShader_;
-
-        private ResourceSet _descriptorSet;
-
+        private ResourceSet resourceSet_;
         private Texture _cubeTexture;
 
         private GraphicsBuffer _uniformBuffer;
@@ -45,8 +43,8 @@ namespace SharpGame.Samples
             _cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer       = GraphicsBuffer.CreateUniform<WorldViewProjection>(1);
 
-            _descriptorSet = new ResourceSet(texturedShader_.Main.ResourceLayout);
-            _descriptorSet.Bind(0, _uniformBuffer)
+            resourceSet_ = new ResourceSet(texturedShader_.Main.ResourceLayout);
+            resourceSet_.Bind(0, _uniformBuffer)
                 .Bind(1, _cubeTexture)
                 .UpdateSets();
             
@@ -96,9 +94,7 @@ namespace SharpGame.Samples
 
         void Handle(BeginRenderPass e)
         {
-
-            e.renderPass.DrawGeometry(geometry_, pipeline_, texturedShader_, _descriptorSet);
-
+            e.renderPass.DrawGeometry(geometry_, pipeline_, texturedShader_, resourceSet_);
         }
         
         private void SetViewProjection()

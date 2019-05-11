@@ -11,7 +11,7 @@ namespace SharpGame
     public class Shader : Resource
     {
         [DataMember]
-        public StringID Name { get; set; }
+        public string Name { get; set; }
         [DataMember]
         public List<Pass> Passes { get; set; } = new List<Pass>();
 
@@ -121,7 +121,7 @@ namespace SharpGame
         [DataMember]
         public ShaderModule ComputeShader { get; set; }
 
-        [IgnoreDataMember]
+        //[IgnoreDataMember]
         public ResourceLayout ResourceLayout { get; set; }
 
         [IgnoreDataMember]

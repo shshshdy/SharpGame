@@ -7,26 +7,36 @@ namespace SharpGame
 {
     public class ResourceLayout : IDisposable
     {
+        public DescriptorSetLayoutBinding[] bindings;
+
         internal DescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
-        internal DescriptorSetLayoutBinding[] bindings;
         internal int numBindings => bindings.Length;
+
+        public ResourceLayout()
+        {
+        }
 
         public ResourceLayout(params DescriptorSetLayoutBinding[] bindings)
         {
-            descriptorSetLayout = Graphics.CreateDescriptorSetLayout(bindings);
-            descriptorResourceCounts = new DescriptorResourceCounts();
             this.bindings = bindings;
-            foreach (var binding in bindings)
-            {
-                descriptorResourceCounts[(int)binding.DescriptorType] += 1;                
-            }
-
+            Build();
         }
 
         public void Dispose()
         {
             descriptorSetLayout?.Dispose();
+        }
+
+        public void Build()
+        {
+            descriptorSetLayout = Graphics.CreateDescriptorSetLayout(bindings);
+            descriptorResourceCounts = new DescriptorResourceCounts();
+            
+            foreach (var binding in bindings)
+            {
+                descriptorResourceCounts[(int)binding.DescriptorType] += 1;
+            }
         }
     }
 
