@@ -60,11 +60,16 @@ namespace SharpGame
             ref ShaderParameter param = ref GetShaderParameter(name);
             if (!param.IsNull)
             {
-                param.data = val;
+                param.SetValue(val);
             }
             else
             {
-                ShaderParameters.Add(new ShaderParameter { name = name, data = val });
+                var shaderParam = new ShaderParameter
+                {
+                    name = name
+                };
+                shaderParam.SetValue(val);
+                ShaderParameters.Add(shaderParam);
             }
         }
 

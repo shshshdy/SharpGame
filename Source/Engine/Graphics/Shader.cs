@@ -12,6 +12,10 @@ namespace SharpGame
     {
         [DataMember]
         public string Name { get; set; }
+
+        [DataMember]
+        public List<ShaderProperty> Properties { get; set; }
+
         [DataMember]
         public List<Pass> Passes { get; set; } = new List<Pass>();
 
