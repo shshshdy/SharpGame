@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,12 @@ namespace SharpGame
     {
         public Guid guid;
         public Resource resource;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Resource(ResourceRef obj)
+        {
+            return obj.resource;
+        }
     }
 
     public class Resource : Object

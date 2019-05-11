@@ -33,9 +33,9 @@ namespace SharpGame
         {
             IntPtr context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
-            ImGui.GetIO().Fonts.AddFontDefault();
+            //ImGui.GetIO().Fonts.AddFontDefault();
 
-            //ImGui.GetIO().Fonts.AddFontFromFileTTF("Data/font/arial.ttf", 16);
+            AddFont("fonts/arial.ttf", 14);
 
             var graphics = Get<Graphics>();
             var cache = Get<ResourceCache>();
@@ -85,6 +85,17 @@ namespace SharpGame
 
         }
         
+        public void AddFont(string filePath, int size)
+        {
+            var resources = Get<ResourceCache>();
+            using (var file = resources.Open(filePath))
+            {
+                var bytes = file.ReadAllBytes();
+                var io = ImGui.GetIO();
+                io.Fonts.AddFontFromMemoryTTF(Utilities.AsPointer(ref bytes[0]), bytes.Length,
+                    size, IntPtr.Zero, io.Fonts.GetGlyphRangesChineseSimplifiedCommon());
+            }
+        }
 
         private unsafe void RecreateFontDeviceTexture()
         {

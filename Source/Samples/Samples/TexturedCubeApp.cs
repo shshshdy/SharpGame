@@ -12,10 +12,8 @@ namespace SharpGame.Samples
     public class TexturedCubeApp : Sample
     {
         private Geometry geometry_;
+        private Material material;
         private Pipeline pipeline_;
-        private Shader texturedShader_;
-        private ResourceSet resourceSet_;
-        private Texture _cubeTexture;
 
         private GraphicsBuffer _uniformBuffer;
         private WorldViewProjection _wvp;
@@ -26,36 +24,38 @@ namespace SharpGame.Samples
             this.SubscribeToEvent<BeginRenderPass>(Handle);
 
             geometry_ = GeometricPrimitive.CreateCube(1.0f, 1.0f, 1.0f);
+            
+            material = new Material
+            {
+                Shader = new Shader
+                (
+                    "Textured",
+                    new Pass("Textured.vert.spv", "Textured.frag.spv")
+                    {
+                        ResourceLayout = new ResourceLayout
+                        (
+                            new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
+                            new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
+                        )
+                    }
+                )
+            };
 
-            texturedShader_ = new Shader
-            (
-                "Textured",
-                new Pass("Textured.vert.spv", "Textured.frag.spv")
-                {
-                    ResourceLayout = new ResourceLayout
-                    (
-                        new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, 1, ShaderStages.Vertex),
-                        new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, 1, ShaderStages.Fragment)
-                    )
-                }
-            );
-
-            _cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
+            var cubeTexture         = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
             _uniformBuffer       = GraphicsBuffer.CreateUniform<WorldViewProjection>(1);
 
-            resourceSet_ = new ResourceSet(texturedShader_.Main.ResourceLayout);
-            resourceSet_.Bind(0, _uniformBuffer)
-                .Bind(1, _cubeTexture)
+            material.ResourceSet.Bind(0, _uniformBuffer)
+                .Bind(1, cubeTexture)
                 .UpdateSets();
             
             pipeline_ = new Pipeline();
 
             JsonSerializer.SetDefaultResolver(Utf8Json.Resolvers.StandardResolver.ExcludeNullSnakeCase);
             {
-                byte[] bytes = Utf8Json.JsonSerializer.Serialize(texturedShader_);
+                byte[] bytes = Utf8Json.JsonSerializer.Serialize(material);
                 var json = Utf8Json.JsonSerializer.PrettyPrint(bytes);
 
-                System.IO.File.WriteAllText("test_shader.json", json);
+                System.IO.File.WriteAllText("test_mat.json", json);
             }
 
             {
@@ -71,7 +71,7 @@ namespace SharpGame.Samples
         public override void Shutdown()
         {
             geometry_.Dispose();
-            texturedShader_.Dispose();
+            material.Dispose();
             pipeline_.Dispose();
 
             base.Destroy();
@@ -94,7 +94,7 @@ namespace SharpGame.Samples
 
         void Handle(BeginRenderPass e)
         {
-            e.renderPass.DrawGeometry(geometry_, pipeline_, texturedShader_, resourceSet_);
+            e.renderPass.DrawGeometry(geometry_, pipeline_, material);
         }
         
         private void SetViewProjection()

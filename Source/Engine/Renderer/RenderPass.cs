@@ -169,6 +169,15 @@ namespace SharpGame
         public void DrawIndexed(int indexCount, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0)
             => cmdBuffer_.CmdDrawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 
+        public void DrawGeometry(Geometry geometry, Pipeline pipeline, Material material)
+        {
+            var pipe = pipeline.GetGraphicsPipeline(this, material.Shader, geometry);
+            cmdBuffer_.CmdBindPipeline(PipelineBindPoint.Graphics, pipe);
+            cmdBuffer_.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout,
+                material.ResourceSet.descriptorSet);
+            geometry.Draw(cmdBuffer_);
+        }
+
         public void DrawGeometry(Geometry geometry, Pipeline pipeline, Shader shader, ResourceSet resourceSet)
         {
             var pipe = pipeline.GetGraphicsPipeline(this, shader, geometry);
