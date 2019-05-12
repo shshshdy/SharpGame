@@ -1,11 +1,16 @@
-﻿using System;
+﻿using NuklearSharp;
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using VulkanCore;
 
+using static NuklearSharp.NuklearNative;
+
 namespace SharpGame
 {
-    public class GUI : Object
+
+    public unsafe class GUI : Object
     {
         private GraphicsBuffer _vertexBuffer;
         private GraphicsBuffer _indexBuffer;
