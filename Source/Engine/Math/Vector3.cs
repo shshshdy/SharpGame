@@ -1697,6 +1697,18 @@ namespace SharpGame
             return new Vector4(value, 0.0f);
         }
 
+
+        public static explicit operator System.Numerics.Vector3(Vector3 value)
+        {
+            return new System.Numerics.Vector3(value.X, value.Y, value.Z);
+        }
+
+
+        public static explicit operator Vector3(System.Numerics.Vector3 value)
+        {
+            return new Vector3(value.X, value.Y, value.Z);
+        }
+
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
         /// </summary>

@@ -14,14 +14,14 @@ namespace SharpGame.Editor
         Texture diffTex_;
 
         List<AnimatedModel> animators_ = new List<AnimatedModel>();
+
+        public EditorApplication() : base("../Content")
+        {
+        }
+
         protected override void Setup()
         {
-            timer_ = CreateSubsystem<Timer>();
-            fileSystem_ = CreateSubsystem<FileSystem>(gameWindow_);
-            graphics_ = CreateSubsystem<Graphics>(gameWindow_);
-            resourceCache_ = CreateSubsystem<ResourceCache>("../Content");
-            renderer_ = CreateSubsystem<Renderer>();
-            input_ = CreateSubsystem<Input>();
+            base.Setup();
 
             CreateSubsystem<AssetDatabase>();
           
@@ -29,7 +29,7 @@ namespace SharpGame.Editor
 
             EditorWindow.GetWindow<MainWindow>();
 
-            this.SubscribeToEvent<BeginFrame>(HandleGUI);
+            this.SubscribeToEvent<GUIEvent>(HandleGUI);
             this.SubscribeToEvent<Update>(HandleUpdate);
            
         }
@@ -43,7 +43,7 @@ namespace SharpGame.Editor
             root_ = scene_.CreateChild("Parent");
 
 
-            var model = resourceCache_.Load<Model>("Models/Mushroom.mdl").Result;
+            var model = resourceCache.Load<Model>("Models/Mushroom.mdl").Result;
 
             var staticModel = root_.AddComponent<StaticModel>();
             staticModel.SetModel(model);
@@ -200,7 +200,7 @@ namespace SharpGame.Editor
 
         }
 
-        private void HandleGUI(ref BeginFrame  e)
+        private void HandleGUI(GUIEvent  e)
         {
             EditorWindow.OnGUI();
         }

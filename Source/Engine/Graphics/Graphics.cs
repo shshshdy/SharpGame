@@ -307,10 +307,6 @@ namespace SharpGame
 
         public bool SingleThreaded { get; set; } = false;
 
-        private List<Action> commands_ = new List<Action>();
-
-        public void Post(Action action) { commands_.Add(action); }
-
         public void Frame()
         {
             RenderSemWait();

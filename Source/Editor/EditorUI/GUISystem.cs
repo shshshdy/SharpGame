@@ -7,12 +7,6 @@ using ImVec2 = System.Numerics.Vector2;
 
 namespace SharpGame
 {
-    public struct GUIEvent
-    {
-        static GUIEvent ref_;
-        public static ref GUIEvent Ref => ref ref_;
-
-    }
 
     public class GUISystem : Object
     {
@@ -148,7 +142,7 @@ namespace SharpGame
 
             ImGui.NewFrame();
 
-            SendEvent(GUIEvent.Ref);
+            SendEvent(new GUIEvent());
 
         }
 

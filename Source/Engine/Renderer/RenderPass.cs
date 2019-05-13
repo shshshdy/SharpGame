@@ -257,6 +257,7 @@ namespace SharpGame
             if (cmdBuffers_[imageIndex] != null)
             {
                 cmdBuffer.CmdExecuteCommand(cmdBuffers_[imageIndex]);
+                cmdBuffers_[imageIndex].Reset();
                 cmdBuffers_[imageIndex] = null;
             }
 
@@ -264,13 +265,4 @@ namespace SharpGame
         }
     }
 
-    public class GraphicsPass : RenderPass
-    {
-
-    }
-
-    public class ComputePass : RenderPass
-    {
-
-    }
 }

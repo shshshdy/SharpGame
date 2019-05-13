@@ -32,27 +32,33 @@ namespace SharpGame
     public abstract class Application : Object
     {
         public string Name { get; set; }
-        protected IGameWindow gameWindow_;
-        protected FileSystem fileSystem_;
-        protected Graphics graphics_;
-        protected Renderer renderer_;
-        protected ResourceCache resourceCache_;
-        protected Input input_;
 
-        protected Timer timer_;
+        protected IGameWindow gameWindow;
+        protected FileSystem fileSystem;
+        protected Graphics graphics;
+        protected Renderer renderer;
+        protected ResourceCache resourceCache;
+        protected Input input;
+        protected Timer timer;
 
-        private int frameNumber_;
-        private float _timeElapsed;
-        private bool _appPaused = false;
+        private int frameNumber;
+        private float timeElapsed;
+        private bool appPaused = false;
 
-        SynchronizationContext workThreadSyncContext_;
-        int workThreadId_;
+        bool singleThreaded = false;
+
+        SynchronizationContext workThreadSyncContext;
+        int workThreadId;
 
         static private bool _running;   // Is the application running?
 
-        public Application()
+        public string DataPath { get; }
+
+        public Application(string dataPath)
         {
             new Context();
+
+            DataPath = dataPath;
         }
 
         protected override void Destroy()
@@ -62,19 +68,20 @@ namespace SharpGame
         
         public void Run(IGameWindow window)
         {
-            gameWindow_ = window;
+            gameWindow = window;
 
             Run();
         }
 
         protected virtual void Setup()
         {
-            timer_ = CreateSubsystem<Timer>();
-            fileSystem_ = CreateSubsystem<FileSystem>(gameWindow_);
-            graphics_ = CreateSubsystem<Graphics>(gameWindow_);
-            resourceCache_ = CreateSubsystem<ResourceCache>("../../Content");
-            renderer_ = CreateSubsystem<Renderer>();
-            input_ = CreateSubsystem<Input>();
+            timer = CreateSubsystem<Timer>();
+            fileSystem = CreateSubsystem<FileSystem>(gameWindow);
+            graphics = CreateSubsystem<Graphics>(gameWindow);
+            graphics.SingleThreaded = this.singleThreaded;
+            resourceCache = CreateSubsystem<ResourceCache>(DataPath);
+            renderer = CreateSubsystem<Renderer>();
+            input = CreateSubsystem<Input>();
 
         }
 
@@ -99,26 +106,26 @@ namespace SharpGame
 
         public void Activate()
         {
-            _appPaused = false;
-            timer_.Start();
+            appPaused = false;
+            timer.Start();
         }
 
         public void Deactivate()
         {
-            _appPaused = true;
-            timer_.Stop();
+            appPaused = true;
+            timer.Stop();
         }
 
         public void Pause()
         {
-            _appPaused = true;
-            timer_.Stop();
+            appPaused = true;
+            timer.Stop();
         }
 
         public void Resume()
         {
-            _appPaused = false;
-            timer_.Start();
+            appPaused = false;
+            timer.Start();
         }
 
         public static void Quit()
@@ -126,7 +133,7 @@ namespace SharpGame
             _running = false;
         }
 
-        public void Run(bool singleThreaded = false)
+        public void Run()
         {
             if(singleThreaded)
             {
@@ -138,14 +145,14 @@ namespace SharpGame
                 _running = true;
                 while (_running)
                 {
-                    if(renderer_ == null)
+                    if(renderer == null)
                     {
                         continue;
                     }
                     
-                    if (!_appPaused)
+                    if (!appPaused)
                     {
-                        renderer_.Render();
+                        renderer.Render();
                     }
                     else
                     {
@@ -159,30 +166,30 @@ namespace SharpGame
 
         void RunSingleThread()
         {
-            workThreadSyncContext_ = SynchronizationContext.Current;
-            workThreadId_ = Thread.CurrentThread.ManagedThreadId;
+            workThreadSyncContext = SynchronizationContext.Current;
+            workThreadId = Thread.CurrentThread.ManagedThreadId;
 
-            gameWindow_.Create();
+            gameWindow.Create();
 
             Setup();
 
             Init();
 
-            gameWindow_.Show();
+            gameWindow.Show();
 
-            timer_.Reset();
+            timer.Reset();
 
             _running = true;
 
             while (_running)
             {
-                gameWindow_.PumpEvents(input_.InputSnapshot);
+                gameWindow.PumpEvents(input.InputSnapshot);
 
-                if (!_appPaused)
+                if (!appPaused)
                 {
                     UpdateFrame();
 
-                    renderer_.Render();
+                    renderer.Render();
                 }
                 else
                 {
@@ -192,65 +199,65 @@ namespace SharpGame
 
             Shutdown();
 
-            graphics_.Close();
+            graphics.Close();
 
-            gameWindow_.Destroy();
+            gameWindow.Destroy();
         }
 
         void SimulateThread()
         {
-            workThreadSyncContext_ = SynchronizationContext.Current;
-            workThreadId_ = Thread.CurrentThread.ManagedThreadId;
+            workThreadSyncContext = SynchronizationContext.Current;
+            workThreadId = Thread.CurrentThread.ManagedThreadId;
 
-            gameWindow_.Create();
+            gameWindow.Create();
 
             Setup();
 
-            timer_.Reset();
+            timer.Reset();
 
             Init();
 
-            gameWindow_.Show();
+            gameWindow.Show();
 
-            graphics_.FrameNoRenderWait();
-            graphics_.Frame();
+            graphics.FrameNoRenderWait();
+            graphics.Frame();
 
             _running = true;
             while (_running)
             {
-                gameWindow_.PumpEvents(input_.InputSnapshot);
+                gameWindow.PumpEvents(input.InputSnapshot);
 
                 UpdateFrame();
 
-                graphics_.Frame();
+                graphics.Frame();
             }
 
-            graphics_.Frame();
+            graphics.Frame();
 
             Shutdown();
 
-            graphics_.Close();
+            graphics.Close();
 
-            gameWindow_.Destroy();
+            gameWindow.Destroy();
         }
 
         void UpdateFrame()
         {
-            timer_.Tick();
+            timer.Tick();
 
             var beginFrame = new BeginFrame
             {
-                frameNum_ = frameNumber_,
-                timeTotal_ = timer_.TotalTime,
-                timeDelta_ = timer_.DeltaTime
+                frameNum_ = frameNumber,
+                timeTotal_ = timer.TotalTime,
+                timeDelta_ = timer.DeltaTime
             };
 
             this.SendGlobalEvent(ref beginFrame);
 
             var update = new Update
             {
-                timeTotal_ = timer_.TotalTime,
-                timeDelta_ = timer_.DeltaTime
+                timeTotal_ = timer.TotalTime,
+                timeDelta_ = timer.DeltaTime
             };
 
             this.SendGlobalEvent(ref update);
@@ -259,13 +266,13 @@ namespace SharpGame
 
             var postUpdate = new PostUpdate
             {
-                timeTotal_ = timer_.TotalTime,
-                timeDelta_ = timer_.DeltaTime
+                timeTotal_ = timer.TotalTime,
+                timeDelta_ = timer.DeltaTime
             };
 
             this.SendGlobalEvent(ref postUpdate);
 
-            renderer_.RenderUpdate();
+            renderer.RenderUpdate();
 
             var endFrame = new EndFrame { };
 
@@ -277,16 +284,16 @@ namespace SharpGame
 
         private void CalculateFrameRateStats()
         {
-            frameNumber_++;
+            frameNumber++;
 
-            if (timer_.TotalTime - _timeElapsed >= 1.0f)
+            if (timer.TotalTime - timeElapsed >= 1.0f)
             {
-                float fps = frameNumber_;
+                float fps = frameNumber;
                 float mspf = 1000.0f / fps;
-                gameWindow_.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
+                gameWindow.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
                 // Reset for next average.
-                frameNumber_ = 0;
-                _timeElapsed += 1.0f;
+                frameNumber = 0;
+                timeElapsed += 1.0f;
             }
         }
 

@@ -12,129 +12,9 @@ namespace SharpGame
 
     public unsafe partial class ImGUI
     {
-        static nk_context* ctx;
-        static nk_allocator* Allocator;
-        static nk_font_atlas* FontAtlas;
-        static nk_draw_null_texture* NullTexture;
-        static nk_convert_config* ConvertCfg;
-
-        static nk_buffer* Commands, Vertices, Indices;
-        static byte[] LastMemory;
-
-        static nk_draw_vertex_layout_element* VertexLayout;
-        static nk_plugin_alloc_t Alloc;
-        static nk_plugin_free_t Free;
-
-        static bool ForceUpdateQueued;
-
-        static bool Initialized = false;
-
-
-        static IntPtr ManagedAlloc(IntPtr Size, bool ClearMem = true)
-        {
-            if(ClearMem)
-            return Utilities.AllocateAndClear(Size.ToInt32(), 0);
-            else
-                return Utilities.Allocate(Size.ToInt32());
-        }
-
-        static IntPtr ManagedAlloc(int Size)
-        {
-            return Utilities.Allocate(Size);
-        }
-
-        static void ManagedFree(IntPtr Mem)
-        {
-            Utilities.Free(Mem);
-        }
-
-        void FontStash()
-        {
-            NuklearNative.nk_font_atlas_init(FontAtlas, Allocator);
-            NuklearNative.nk_font_atlas_begin(FontAtlas);
-
-            //A?.Invoke(new IntPtr(FontAtlas));
-            FontStash(new IntPtr(FontAtlas));
-
-            int W, H;
-            IntPtr Image = NuklearNative.nk_font_atlas_bake(FontAtlas, &W, &H, nk_font_atlas_format.NK_FONT_ATLAS_RGBA32);
-            int TexHandle = CreateTextureHandle(W, H, Image);
-
-            NuklearNative.nk_font_atlas_end(FontAtlas, NuklearNative.nk_handle_id(TexHandle), NullTexture);
-
-            if (FontAtlas->default_font != null)
-                NuklearNative.nk_style_set_font(ctx, &FontAtlas->default_font->handle);
-        }
-
-
-        private void Init()
-        {
-            if (Initialized)
-                throw new InvalidOperationException("NuklearAPI.Init is called twice");
-
-            Initialized = true;
-
-            // TODO: Free these later
-            ctx = (nk_context*)ManagedAlloc(sizeof(nk_context));
-            Allocator = (nk_allocator*)ManagedAlloc(sizeof(nk_allocator));
-            FontAtlas = (nk_font_atlas*)ManagedAlloc(sizeof(nk_font_atlas));
-            NullTexture = (nk_draw_null_texture*)ManagedAlloc(sizeof(nk_draw_null_texture));
-            ConvertCfg = (nk_convert_config*)ManagedAlloc(sizeof(nk_convert_config));
-            Commands = (nk_buffer*)ManagedAlloc(sizeof(nk_buffer));
-            Vertices = (nk_buffer*)ManagedAlloc(sizeof(nk_buffer));
-            Indices = (nk_buffer*)ManagedAlloc(sizeof(nk_buffer));
-
-            VertexLayout = (nk_draw_vertex_layout_element*)ManagedAlloc(sizeof(nk_draw_vertex_layout_element) * 4);
-            VertexLayout[0] = new nk_draw_vertex_layout_element{
-                attribute = nk_draw_vertex_layout_attribute.NK_VERTEX_POSITION,
-                format = nk_draw_vertex_layout_format.NK_FORMAT_FLOAT,
-                offset_nksize = Marshal.OffsetOf(typeof(NkVertex), nameof(NkVertex.Position)) };
-            VertexLayout[1] = new nk_draw_vertex_layout_element{
-                attribute = nk_draw_vertex_layout_attribute.NK_VERTEX_TEXCOORD,
-                format = nk_draw_vertex_layout_format.NK_FORMAT_FLOAT,
-                offset_nksize = Marshal.OffsetOf(typeof(NkVertex), nameof(NkVertex.UV)) };
-            VertexLayout[2] = new nk_draw_vertex_layout_element{
-                attribute = nk_draw_vertex_layout_attribute.NK_VERTEX_COLOR,
-                format = nk_draw_vertex_layout_format.NK_FORMAT_R8G8B8A8,
-                offset_nksize = Marshal.OffsetOf(typeof(NkVertex), nameof(NkVertex.Color)) };
-            VertexLayout[3] = new nk_draw_vertex_layout_element {
-                attribute = nk_draw_vertex_layout_attribute.NK_VERTEX_ATTRIBUTE_COUNT,
-                format = nk_draw_vertex_layout_format.NK_FORMAT_COUNT,
-                offset_nksize = IntPtr.Zero};
-
-            Alloc = (Handle, Old, Size) => ManagedAlloc(Size);
-            Free = (Handle, Old) => ManagedFree(Old);
-            
-            Allocator->alloc_nkpluginalloct = Marshal.GetFunctionPointerForDelegate(Alloc);
-            Allocator->free_nkpluginfreet = Marshal.GetFunctionPointerForDelegate(Free);
-
-            NuklearNative.nk_init(ctx, Allocator, null);
-
-            CreateGraphicsResource();
-
-            FontStash();
-
-            ConvertCfg->shape_AA = nk_anti_aliasing.NK_ANTI_ALIASING_ON;
-            ConvertCfg->line_AA = nk_anti_aliasing.NK_ANTI_ALIASING_ON;
-            ConvertCfg->vertex_layout = VertexLayout;
-            ConvertCfg->vertex_size = new IntPtr(sizeof(NkVertex));
-            ConvertCfg->vertex_alignment = new IntPtr(1);
-            ConvertCfg->circle_segment_count = 22;
-            ConvertCfg->curve_segment_count = 22;
-            ConvertCfg->arc_segment_count = 22;
-            ConvertCfg->global_alpha = 1.0f;
-            ConvertCfg->null_tex = *NullTexture;
-
-            NuklearNative.nk_buffer_init(Commands, Allocator, new IntPtr(4 * 1024));
-            NuklearNative.nk_buffer_init(Vertices, Allocator, new IntPtr(4 * 1024));
-            NuklearNative.nk_buffer_init(Indices, Allocator, new IntPtr(4 * 1024));
-        }
-
-        public static void SetDeltaTime(float Delta)
-        {
-            if (ctx != null)
-                ctx->delta_time_Seconds = Delta;
-        }
+        public static bool Begin(string Title, float X, float Y, float W, float H, nk_panel_flags Flags) => NuklearNative.nk_begin/*_titled*/(ctx, //(byte*)Marshal.StringToHGlobalAnsi(Name),
+           (byte*)Marshal.StringToHGlobalAnsi(Title), new nk_rect { x = X, y = Y, w = W, h = H }, (uint)Flags) != 0;
+        public static void End() => NuklearNative.nk_end(ctx);
 
         public static bool Window(string Name, string Title, float X, float Y, float W, float H, nk_panel_flags Flags, Action A)
         {
@@ -157,6 +37,12 @@ namespace SharpGame
         public static bool WindowIsHidden(string Name) => NuklearNative.nk_window_is_hidden(ctx, (byte*)Marshal.StringToHGlobalAnsi(Name)) != 0;
 
         public static bool WindowIsCollapsed(string Name) => NuklearNative.nk_window_is_collapsed(ctx, (byte*)Marshal.StringToHGlobalAnsi(Name)) != 0;
+
+        public static bool BeginGroup(string Name, string Title, nk_panel_flags Flags)
+            => NuklearNative.nk_group_begin_titled(ctx, (byte*)Marshal.StringToHGlobalAnsi(Name), (byte*)Marshal.StringToHGlobalAnsi(Title), (uint)Flags) != 0;
+
+        public static void EndGroup()
+            => NuklearNative.nk_group_end(ctx);
 
         public static bool Group(string Name, string Title, nk_panel_flags Flags, Action A)
         {
@@ -248,11 +134,6 @@ namespace SharpGame
             return NuklearNative.nk_input_is_key_pressed(&ctx->input, Key) != 0;
         }
 
-        public static void QueueForceUpdate()
-        {
-            ForceUpdateQueued = true;
-        }
-
         public static void WindowClose(string Name)
         {
             NuklearNative.nk_window_close(ctx, (byte*)Marshal.StringToHGlobalAnsi(Name));
@@ -287,19 +168,6 @@ namespace SharpGame
 
             ctx->clip.copyfun_nkPluginCopyT = Marshal.GetFunctionPointerForDelegate(NkCopyFunc);
             ctx->clip.pastefun_nkPluginPasteT = Marshal.GetFunctionPointerForDelegate(NkPasteFunc);
-        }
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct NkVertex
-    {
-        public nk_vec2 Position;
-        public nk_vec2 UV;
-        public nk_color Color;
-
-        public override string ToString()
-        {
-            return string.Format("Position: {0}; UV: {1}; Color: {2}", Position, UV, Color);
         }
     }
 

@@ -9,8 +9,25 @@ using static NuklearSharp.NuklearNative;
 
 namespace SharpGame
 {
+    public struct GUIEvent
+    {
+    }
+
     public unsafe partial class ImGUI : Object
     {
+        static nk_context* ctx;
+        static nk_allocator* Allocator;
+        static nk_font_atlas* FontAtlas;
+        static nk_draw_null_texture* NullTexture;
+        static nk_convert_config* ConvertCfg;
+
+        static nk_buffer* Commands, Vertices, Indices;
+        static byte[] LastMemory;
+
+        static nk_draw_vertex_layout_element* VertexLayout;
+        static nk_plugin_alloc_t Alloc;
+        static nk_plugin_free_t Free;
+
         private GraphicsBuffer _vertexBuffer;
         private GraphicsBuffer _indexBuffer;
         private GraphicsBuffer _projMatrixBuffer;
@@ -37,6 +54,114 @@ namespace SharpGame
             this.SubscribeToEvent((ref BeginFrame e) => UpdateGUI());
 
             this.SubscribeToEvent((EndRenderPass e) => RenderGUI(e.renderPass));
+        }
+
+        static IntPtr ManagedAlloc(IntPtr Size, bool ClearMem = true)
+        {
+            if (ClearMem)
+                return Utilities.AllocateAndClear(Size.ToInt32(), 0);
+            else
+                return Utilities.Allocate(Size.ToInt32());
+        }
+
+        static IntPtr ManagedAlloc(int Size)
+        {
+            return Utilities.Allocate(Size);
+        }
+
+        static void ManagedFree(IntPtr Mem)
+        {
+            Utilities.Free(Mem);
+        }
+
+        void FontStash()
+        {
+            nk_font_atlas_init(FontAtlas, Allocator);
+            nk_font_atlas_begin(FontAtlas);
+
+            FontStash(new IntPtr(FontAtlas));
+
+            int W, H;
+            IntPtr Image = NuklearNative.nk_font_atlas_bake(FontAtlas, &W, &H, nk_font_atlas_format.NK_FONT_ATLAS_RGBA32);
+            int TexHandle = CreateTextureHandle(W, H, Image);
+
+            nk_font_atlas_end(FontAtlas, NuklearNative.nk_handle_id(TexHandle), NullTexture);
+
+            if (FontAtlas->default_font != null)
+                NuklearNative.nk_style_set_font(ctx, &FontAtlas->default_font->handle);
+        }
+
+
+        private void Init()
+        {
+            // TODO: Free these later
+            ctx = (nk_context*)ManagedAlloc(sizeof(nk_context));
+            Allocator = (nk_allocator*)ManagedAlloc(sizeof(nk_allocator));
+            FontAtlas = (nk_font_atlas*)ManagedAlloc(sizeof(nk_font_atlas));
+            NullTexture = (nk_draw_null_texture*)ManagedAlloc(sizeof(nk_draw_null_texture));
+            ConvertCfg = (nk_convert_config*)ManagedAlloc(sizeof(nk_convert_config));
+            Commands = (nk_buffer*)ManagedAlloc(sizeof(nk_buffer));
+            Vertices = (nk_buffer*)ManagedAlloc(sizeof(nk_buffer));
+            Indices = (nk_buffer*)ManagedAlloc(sizeof(nk_buffer));
+
+            VertexLayout = (nk_draw_vertex_layout_element*)ManagedAlloc(sizeof(nk_draw_vertex_layout_element) * 4);
+            VertexLayout[0] = new nk_draw_vertex_layout_element
+            {
+                attribute = nk_draw_vertex_layout_attribute.NK_VERTEX_POSITION,
+                format = nk_draw_vertex_layout_format.NK_FORMAT_FLOAT,
+                offset_nksize = Marshal.OffsetOf(typeof(Pos2dTexColorVertex), nameof(Pos2dTexColorVertex.Position))
+            };
+            VertexLayout[1] = new nk_draw_vertex_layout_element
+            {
+                attribute = nk_draw_vertex_layout_attribute.NK_VERTEX_TEXCOORD,
+                format = nk_draw_vertex_layout_format.NK_FORMAT_FLOAT,
+                offset_nksize = Marshal.OffsetOf(typeof(Pos2dTexColorVertex), nameof(Pos2dTexColorVertex.TexCoord))
+            };
+            VertexLayout[2] = new nk_draw_vertex_layout_element
+            {
+                attribute = nk_draw_vertex_layout_attribute.NK_VERTEX_COLOR,
+                format = nk_draw_vertex_layout_format.NK_FORMAT_R8G8B8A8,
+                offset_nksize = Marshal.OffsetOf(typeof(Pos2dTexColorVertex), nameof(Pos2dTexColorVertex.Color))
+            };
+            VertexLayout[3] = new nk_draw_vertex_layout_element
+            {
+                attribute = nk_draw_vertex_layout_attribute.NK_VERTEX_ATTRIBUTE_COUNT,
+                format = nk_draw_vertex_layout_format.NK_FORMAT_COUNT,
+                offset_nksize = IntPtr.Zero
+            };
+
+            Alloc = (Handle, Old, Size) => ManagedAlloc(Size);
+            Free = (Handle, Old) => ManagedFree(Old);
+
+            Allocator->alloc_nkpluginalloct = Marshal.GetFunctionPointerForDelegate(Alloc);
+            Allocator->free_nkpluginfreet = Marshal.GetFunctionPointerForDelegate(Free);
+
+            nk_init(ctx, Allocator, null);
+
+            CreateGraphicsResource();
+
+            FontStash();
+
+            ConvertCfg->shape_AA = nk_anti_aliasing.NK_ANTI_ALIASING_ON;
+            ConvertCfg->line_AA = nk_anti_aliasing.NK_ANTI_ALIASING_ON;
+            ConvertCfg->vertex_layout = VertexLayout;
+            ConvertCfg->vertex_size = new IntPtr(sizeof(Pos2dTexColorVertex));
+            ConvertCfg->vertex_alignment = new IntPtr(1);
+            ConvertCfg->circle_segment_count = 22;
+            ConvertCfg->curve_segment_count = 22;
+            ConvertCfg->arc_segment_count = 22;
+            ConvertCfg->global_alpha = 1.0f;
+            ConvertCfg->null_tex = *NullTexture;
+
+            nk_buffer_init(Commands, Allocator, new IntPtr(4 * 1024));
+            nk_buffer_init(Vertices, Allocator, new IntPtr(4 * 1024));
+            nk_buffer_init(Indices, Allocator, new IntPtr(4 * 1024));
+        }
+
+        static void SetDeltaTime(float Delta)
+        {
+            if (ctx != null)
+                ctx->delta_time_Seconds = Delta;
         }
 
         void CreateGraphicsResource()
@@ -111,9 +236,9 @@ namespace SharpGame
 
             HandleInput();
 
-            TestWindow(100, 100);
+            //TestWindow(100, 100);
 
-           // SendEvent(GUIEvent.Ref);
+            this.SendGlobalEvent(new GUIEvent());
         }
        
 
@@ -123,7 +248,7 @@ namespace SharpGame
             if (R != nk_convert_result.NK_CONVERT_SUCCESS)
                 throw new Exception(R.ToString());
 
-            NkVertex* VertsPtr = (NkVertex*)Vertices->memory.ptr;
+            Pos2dTexColorVertex* VertsPtr = (Pos2dTexColorVertex*)Vertices->memory.ptr;
             ushort* IndicesPtr = (ushort*)Indices->memory.ptr;
 
             if (ctx->draw_list.cmd_count == 0)

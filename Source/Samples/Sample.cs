@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ImGuiNET;
+using NuklearSharp;
 using SharpGame;
 using VulkanCore;
 
@@ -112,18 +113,17 @@ namespace SharpGame.Samples
         int selected = 0;
         string[] sampleNames;
 
+        public SampleApplication() : base("../Content")
+        {
+        }
+
         protected override void Setup()
         {
-            timer_ = CreateSubsystem<Timer>();
-            fileSystem_ = CreateSubsystem<FileSystem>(gameWindow_);
-            graphics_ = CreateSubsystem<Graphics>(gameWindow_);
-            resourceCache_ = CreateSubsystem<ResourceCache>("../Content");
-            renderer_ = CreateSubsystem<Renderer>();
-            input_ = CreateSubsystem<Input>();
+            base.Setup();
 
             CreateSubsystem<ImGUI>();
 
-            this.SubscribeToEvent<BeginFrame>(HandleGUI);
+            this.SubscribeToEvent<GUIEvent>(HandleGUI);
             this.SubscribeToEvent<Update>(HandleUpdate);
 
         }
@@ -187,28 +187,27 @@ namespace SharpGame.Samples
 
         }
 
-        private void HandleGUI(ref BeginFrame e)
+        private void HandleGUI(GUIEvent e)
         {
-            return;
             var graphics = Get<Graphics>();
 
-
-            if (ImGui.Begin("Sample", ImGuiWindowFlags.NoMove| ImGuiWindowFlags.NoResize))
+            const nk_panel_flags Flags = nk_panel_flags.NK_WINDOW_BORDER | nk_panel_flags.NK_WINDOW_MOVABLE | nk_panel_flags.NK_WINDOW_SCALABLE |
+                nk_panel_flags.NK_WINDOW_MINIMIZABLE | nk_panel_flags.NK_WINDOW_SCROLL_AUTO_HIDE;
+            if (ImGUI.Begin("Sample", 100, 100, 200, 200, Flags))
             {
-                ImGui.Text("FPS:");
+                ImGUI.LayoutRowStatic(20, 80, 1);
+                ImGUI.Label("FPS:");
 
-                if(ImGui.Combo("Sample", ref selected, sampleNames, sampleNames.Length))
+                //if(ImGui.Combo("Sample", ref selected, sampleNames, sampleNames.Length))
                 {
-                    SetSample(Activator.CreateInstance(allSamples[selected].Item4) as Sample);
+                  //  SetSample(Activator.CreateInstance(allSamples[selected].Item4) as Sample);
                 }
                 
 
             }
 
-            ImGui.End();
-
-            ImGui.ShowDemoWindow();
-
+            ImGUI.End();
+            
             if (current)
             {
                 current.OnGUI();
