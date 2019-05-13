@@ -10,7 +10,7 @@ namespace SharpGame.Samples
         {
             using (var app = new SampleApplication())
             {
-                app.Run(new Sdl2Window("SharpGame Samples", 100, 100, 1280, 720, SDL_WindowFlags.Hidden, true));
+                app.Run(new Sdl2Window("SharpGame Samples", 100, 100, 1280, 720, SDL_WindowFlags.Hidden, false));
             }
         }
     }

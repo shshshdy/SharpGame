@@ -10,7 +10,7 @@ namespace SharpGame.Editor
         {
             using (var app = new EditorApplication())
             {
-                app.Run(new Sdl2Window("SharpGame", 100, 100, 1280, 720, SDL_WindowFlags.Hidden, true));
+                app.Run(new Sdl2Window("SharpGame", 100, 100, 1280, 720, SDL_WindowFlags.Hidden, false));
             }
         }
     }

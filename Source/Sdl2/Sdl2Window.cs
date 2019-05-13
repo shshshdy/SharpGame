@@ -45,14 +45,27 @@ namespace SharpGame.Sdl2
         private bool _newWindowTitleReceived;
         private bool _firstMouseEvent = true;
 
+        WindowParams wp;
         public Sdl2Window(string title, int x, int y, int width, int height, SDL_WindowFlags flags, bool threadedProcessing)
         {
             _threadedProcessing = threadedProcessing;
+
+            wp = new WindowParams()
+            {
+                Title = title,
+                X = x,
+                Y = y,
+                Width = width,
+                Height = height,
+                WindowFlags = flags,
+                //ResetEvent = mre
+            };
+            /*
             if (threadedProcessing)
             {
                 using (ManualResetEvent mre = new ManualResetEvent(false))
                 {
-                    WindowParams wp = new WindowParams()
+                    wp = new WindowParams()
                     {
                         Title = title,
                         X = x,
@@ -73,7 +86,15 @@ namespace SharpGame.Sdl2
                 WindowID = SDL_GetWindowID(_window);
                 Sdl2WindowRegistry.RegisterWindow(this);
                 PostWindowCreated(flags);
-            }
+            }*/
+        }
+
+        public void Create()
+        {
+            _window = wp.Create();
+            WindowID = SDL_GetWindowID(_window);
+            Sdl2WindowRegistry.RegisterWindow(this);
+            PostWindowCreated(wp.WindowFlags);
         }
 
         public Sdl2Window(IntPtr windowHandle, bool threadedProcessing)
@@ -344,8 +365,15 @@ namespace SharpGame.Sdl2
             }
             else
             {
-                CloseCore();
+                Application.Quit();
+            //    CloseCore();
             }
+        }
+
+
+        public void Destroy()
+        {
+            CloseCore();
         }
 
         private void CloseCore()
@@ -1019,17 +1047,7 @@ namespace SharpGame.Sdl2
         {
             return new FileStream(path, FileMode.Open, FileAccess.Read);
         }
-
-        public void RunMessageLoop()
-        {
-
-        }
-
-        public void ProcessEvents()
-        {
-
-        }
-
+        
         public void Dispose()
         {
 

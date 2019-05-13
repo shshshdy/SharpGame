@@ -22,8 +22,9 @@ namespace SharpGame
         int Height { get; }
         string Title { get; set; }
         PlatformType Platform { get; }
+        void Create();
+        void Destroy();
         void Show();
-        void ProcessEvents();
         void PumpEvents(InputSnapshot inputSnapshot);       
         Stream Open(string path);
     }
@@ -62,10 +63,6 @@ namespace SharpGame
         public void Run(IGameWindow window)
         {
             gameWindow_ = window;
-
-            Setup();
-
-            gameWindow_.Show();
 
             Run();
         }
@@ -131,20 +128,21 @@ namespace SharpGame
 
         public void Run(bool singleThreaded = false)
         {
-            _running = true;
-
-            if(graphics_.SingleThreaded)
+            if(singleThreaded)
             {
                 RunSingleThread();
             }
             else
             {
                 new Thread(SimulateThread).Start();
-
+                _running = true;
                 while (_running)
                 {
-                    gameWindow_.ProcessEvents();
-
+                    if(renderer_ == null)
+                    {
+                        continue;
+                    }
+                    
                     if (!_appPaused)
                     {
                         renderer_.Render();
@@ -154,9 +152,9 @@ namespace SharpGame
                         Thread.Sleep(100);
                     }
                 }
+
             }
 
-            graphics_.Close();
         }
 
         void RunSingleThread()
@@ -164,13 +162,20 @@ namespace SharpGame
             workThreadSyncContext_ = SynchronizationContext.Current;
             workThreadId_ = Thread.CurrentThread.ManagedThreadId;
 
-            timer_.Reset();
+            gameWindow_.Create();
+
+            Setup();
 
             Init();
 
+            gameWindow_.Show();
+
+            timer_.Reset();
+
+            _running = true;
+
             while (_running)
             {
-                gameWindow_.ProcessEvents();
                 gameWindow_.PumpEvents(input_.InputSnapshot);
 
                 if (!_appPaused)
@@ -187,6 +192,9 @@ namespace SharpGame
 
             Shutdown();
 
+            graphics_.Close();
+
+            gameWindow_.Destroy();
         }
 
         void SimulateThread()
@@ -194,23 +202,36 @@ namespace SharpGame
             workThreadSyncContext_ = SynchronizationContext.Current;
             workThreadId_ = Thread.CurrentThread.ManagedThreadId;
 
+            gameWindow_.Create();
+
+            Setup();
+
             timer_.Reset();
 
             Init();
-            
+
+            gameWindow_.Show();
+
             graphics_.FrameNoRenderWait();
             graphics_.Frame();
 
+            _running = true;
             while (_running)
             {
                 gameWindow_.PumpEvents(input_.InputSnapshot);
-                //platform_.ProcessEvents();
 
                 UpdateFrame();
 
                 graphics_.Frame();
             }
 
+            graphics_.Frame();
+
+            Shutdown();
+
+            graphics_.Close();
+
+            gameWindow_.Destroy();
         }
 
         void UpdateFrame()
@@ -262,12 +283,7 @@ namespace SharpGame
             {
                 float fps = frameNumber_;
                 float mspf = 1000.0f / fps;
-
-                //graphics_.Post(() =>
-                //{
-                    gameWindow_.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
-                //});
-
+                gameWindow_.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
                 // Reset for next average.
                 frameNumber_ = 0;
                 _timeElapsed += 1.0f;

@@ -117,8 +117,16 @@ namespace SharpGame
         }
 
         protected virtual void SetNumGeometries(int num)
-        {            
+        {
             Array.Resize(ref batches_, num);
+
+            for (int i = 0; i < num; i++)
+            {
+                if (batches_[i] == null)
+                {
+                    batches_[i] = new SourceBatch();
+                }
+            }
         }
 
         public override void OnSetEnabled()
