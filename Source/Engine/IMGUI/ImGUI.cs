@@ -119,7 +119,7 @@ namespace SharpGame
 
         void RenderGUI(RenderPass renderPass)
         {
-            nk_convert_result R = (nk_convert_result)NuklearNative.nk_convert(ctx, Commands, Vertices, Indices, ConvertCfg);
+            nk_convert_result R = (nk_convert_result)nk_convert(ctx, Commands, Vertices, Indices, ConvertCfg);
             if (R != nk_convert_result.NK_CONVERT_SUCCESS)
                 throw new Exception(R.ToString());
 
@@ -203,16 +203,16 @@ namespace SharpGame
             if (list != null)
             {
                 if (list->buffer != null)
-                    NuklearNative.nk_buffer_clear(list->buffer);
+                    nk_buffer_clear(list->buffer);
 
                 if (list->vertices != null)
-                    NuklearNative.nk_buffer_clear(list->vertices);
+                    nk_buffer_clear(list->vertices);
 
                 if (list->elements != null)
-                    NuklearNative.nk_buffer_clear(list->elements);
+                    nk_buffer_clear(list->elements);
             }
 
-            NuklearNative.nk_clear(ctx);
+            nk_clear(ctx);
         }
 
         void HandleInput()
@@ -314,7 +314,7 @@ namespace SharpGame
 
             }
             
-            NuklearNative.nk_input_end(ctx);
+            nk_input_end(ctx);
 
         }
 

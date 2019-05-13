@@ -12,9 +12,7 @@ namespace SharpGame
 
     public unsafe partial class ImGUI
     {
-        public static nk_context* ctx;
-        //public static NuklearDevice Dev;
-
+        static nk_context* ctx;
         static nk_allocator* Allocator;
         static nk_font_atlas* FontAtlas;
         static nk_draw_null_texture* NullTexture;
@@ -26,8 +24,6 @@ namespace SharpGame
         static nk_draw_vertex_layout_element* VertexLayout;
         static nk_plugin_alloc_t Alloc;
         static nk_plugin_free_t Free;
-
-        //static IFrameBuffered FrameBuffered;
 
         static bool ForceUpdateQueued;
 
@@ -49,7 +45,6 @@ namespace SharpGame
 
         static void ManagedFree(IntPtr Mem)
         {
-            //Marshal.FreeHGlobal(Mem);
             Utilities.Free(Mem);
         }
 
@@ -308,37 +303,5 @@ namespace SharpGame
         }
     }
 
-    public struct NuklearEvent
-    {
-        public enum EventType
-        {
-            MouseButton,
-            MouseMove,
-            Scroll,
-            Text,
-            KeyboardKey,
-            ForceUpdate
-        }
-
-        public enum MouseButton
-        {
-            Left, Middle, Right
-        }
-
-        public EventType EvtType;
-        public MouseButton MButton;
-        public nk_keys Key;
-        public int X, Y;
-        public bool Down;
-        public float ScrollX, ScrollY;
-        public string Text;
-    }
-
-    public interface IFrameBuffered
-    {
-        void BeginBuffering();
-        void EndBuffering();
-        void RenderFinal();
-    }
 
 }
