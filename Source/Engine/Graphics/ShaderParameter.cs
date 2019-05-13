@@ -41,12 +41,12 @@ namespace SharpGame
         public Vector4 vec4Val;
         [FieldOffset(0)]
         public Color colorVal;
-        [FieldOffset(0)]
-        public GraphicsBuffer buffer;
-        [FieldOffset(0)]
-        public VulkanCore.Sampler sampler;
-        [FieldOffset(0)]
-        public Texture texture;
+        //[FieldOffset(0)]
+        //public GraphicsBuffer buffer;
+        //[FieldOffset(0)]
+        //public VulkanCore.Sampler sampler;
+        //[FieldOffset(0)]
+        //public Texture texture;
     }
 
     public struct TexureParameter
@@ -108,7 +108,7 @@ namespace SharpGame
                     break;
                 case Texture texture:
                     uniformType = UniformType.Texture;
-                    data.texture = texture;
+                    //data.texture = texture;
                     break;
                 default:
                     System.Diagnostics.Debug.Assert(false);

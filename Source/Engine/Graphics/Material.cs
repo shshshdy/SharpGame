@@ -40,7 +40,7 @@ namespace SharpGame
             base.OnBuild();
 
             Shader = ResourceCache.Instance.Load<Shader>(ShaderName).Result;
-            
+            //materialRenderData = new MaterialRenderData();
         }
 
         public ref ShaderParameter GetShaderParameter(StringID name)

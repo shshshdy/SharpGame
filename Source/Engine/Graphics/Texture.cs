@@ -265,7 +265,9 @@ namespace SharpGame
 
             MemoryRequirements imageMemReq = image.GetMemoryRequirements();
             int imageHeapIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
-                imageMemReq.MemoryTypeBits, MemoryProperties.DeviceLocal);
+                imageMemReq.MemoryTypeBits, 
+                Dynamic ? MemoryProperties.HostVisible | MemoryProperties.HostCoherent
+                    : MemoryProperties.DeviceLocal);
 
             var memory = Graphics.Device.AllocateMemory(new MemoryAllocateInfo(imageMemReq.Size, imageHeapIndex));
             image.BindMemory(memory);
@@ -278,7 +280,8 @@ namespace SharpGame
                     new BufferCreateInfo(size, BufferUsages.TransferSrc));
                 MemoryRequirements stagingMemReq = stagingBuffer.GetMemoryRequirements();
                 int heapIndex = Graphics.MemoryProperties.MemoryTypes.IndexOf(
-                    stagingMemReq.MemoryTypeBits, MemoryProperties.HostVisible);
+                    stagingMemReq.MemoryTypeBits,
+                    MemoryProperties.HostVisible | MemoryProperties.HostCoherent);
                 DeviceMemory stagingMemory = Graphics.Device.AllocateMemory(
                     new MemoryAllocateInfo(stagingMemReq.Size, heapIndex));
                 stagingBuffer.BindMemory(stagingMemory);
@@ -342,11 +345,11 @@ namespace SharpGame
             return tex;
         }
 
-        public static Texture CreateDynamic(int width, int height, int bytes_per_pixel, IntPtr pixels)
+        public static Texture Create2D(int width, int height, int bytes_per_pixel, IntPtr pixels, bool dynamic = false)
         {
             var tex = new Texture
             {
-                Dynamic = true
+                Dynamic = dynamic
             };
             tex.SetData(width, height, bytes_per_pixel, pixels);
             return tex;

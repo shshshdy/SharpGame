@@ -10,10 +10,10 @@ namespace SharpGame
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public unsafe delegate void FontStashAction(IntPtr Atlas);
 
-    public static unsafe class NuklearAPI
+    public unsafe partial class ImGUI
     {
         public static nk_context* Ctx;
-        public static NuklearDevice Dev;
+        //public static NuklearDevice Dev;
 
         static nk_allocator* Allocator;
         static nk_font_atlas* FontAtlas;
@@ -27,7 +27,7 @@ namespace SharpGame
         static nk_plugin_alloc_t Alloc;
         static nk_plugin_free_t Free;
 
-        static IFrameBuffered FrameBuffered;
+        //static IFrameBuffered FrameBuffered;
 
         static bool ForceUpdateQueued;
 
@@ -53,16 +53,17 @@ namespace SharpGame
             Utilities.Free(Mem);
         }
 
-        static void FontStash(FontStashAction A = null)
+        void FontStash()
         {
             NuklearNative.nk_font_atlas_init(FontAtlas, Allocator);
             NuklearNative.nk_font_atlas_begin(FontAtlas);
 
-            A?.Invoke(new IntPtr(FontAtlas));
+            //A?.Invoke(new IntPtr(FontAtlas));
+            FontStash(new IntPtr(FontAtlas));
 
             int W, H;
             IntPtr Image = NuklearNative.nk_font_atlas_bake(FontAtlas, &W, &H, nk_font_atlas_format.NK_FONT_ATLAS_RGBA32);
-            int TexHandle = Dev.CreateTextureHandle(W, H, Image);
+            int TexHandle = CreateTextureHandle(W, H, Image);
 
             NuklearNative.nk_font_atlas_end(FontAtlas, NuklearNative.nk_handle_id(TexHandle), NullTexture);
 
@@ -73,8 +74,8 @@ namespace SharpGame
 
         static bool HandleInput()
         {
-            bool HasInput = FrameBuffered == null || Dev.Events.Count > 0;
-
+            bool HasInput = true;// FrameBuffered == null || Dev.Events.Count > 0;
+            /*
             if (HasInput)
             {
                 NuklearNative.nk_input_begin(Ctx);
@@ -119,17 +120,15 @@ namespace SharpGame
                 }
 
                 NuklearNative.nk_input_end(Ctx);
-            }
+            }*/
 
             return HasInput;
         }
 
-        static void Render(bool HadInput)
+        static void Render()
         {
-            if (HadInput)
-            {
                 bool Dirty = true;
-
+                /*
                 if (FrameBuffered != null)
                 {
                     Dirty = false;
@@ -156,7 +155,7 @@ namespace SharpGame
                                 Marshal.Copy(MemoryBuffer, LastMemory, 0, (int)Ctx->memory.allocated);
                             }
                     }
-                }
+                }*/
 
                 if (Dirty)
                 {
@@ -164,38 +163,29 @@ namespace SharpGame
                     if (R != nk_convert_result.NK_CONVERT_SUCCESS)
                         throw new Exception(R.ToString());
 
-                    NkVertex[] NkVerts = new NkVertex[(int)Vertices->needed / Unsafe.SizeOf<NkVertex>()];
+                    //NkVertex[] NkVerts = new NkVertex[(int)Vertices->needed / Unsafe.SizeOf<NkVertex>()];
                     NkVertex* VertsPtr = (NkVertex*)Vertices->memory.ptr;
-
-                    for (int i = 0; i < NkVerts.Length; i++)
-                    {
-                        //NkVertex* V = &VertsPtr[i];
-                        //NkVerts[i] = new NkVertex() { Position = new NkVector2f() { X = (int)V->Position.X, Y = (int)V->Position.Y }, Color = V->Color, UV = V->UV };
-
-                        NkVerts[i] = VertsPtr[i];
-                    }
-
-                    ushort[] NkIndices = new ushort[(int)Indices->needed / sizeof(ushort)];
+                    
+                    //ushort[] NkIndices = new ushort[(int)Indices->needed / sizeof(ushort)];
                     ushort* IndicesPtr = (ushort*)Indices->memory.ptr;
-                    for (int i = 0; i < NkIndices.Length; i++)
-                        NkIndices[i] = IndicesPtr[i];
+               
 
-                    Dev.SetBuffer(NkVerts, NkIndices);
-                    FrameBuffered?.BeginBuffering();
+                    //Dev.SetBuffer(NkVerts, NkIndices);
+                    //FrameBuffered?.BeginBuffering();
 
                     uint Offset = 0;
-                    Dev.BeginRender();
+                    //Dev.BeginRender();
 
                     NuklearNative.nk_draw_foreach(Ctx, Commands, (Cmd) => {
                         if (Cmd->elem_count == 0)
                             return;
 
-                        Dev.Render(Cmd->userdata, Cmd->texture.ToInt32()/*.id*/, Cmd->clip_rect, Offset, Cmd->elem_count);
+                        //Dev.Render(Cmd->userdata, Cmd->texture.ToInt32()/*.id*/, Cmd->clip_rect, Offset, Cmd->elem_count);
                         Offset += Cmd->elem_count;
                     });
 
-                    Dev.EndRender();
-                    FrameBuffered?.EndBuffering();
+                    //Dev.EndRender();
+                    //FrameBuffered?.EndBuffering();
                 }
 
                 nk_draw_list* list = &Ctx->draw_list;
@@ -212,21 +202,20 @@ namespace SharpGame
                 }
 
                 NuklearNative.nk_clear(Ctx);
-            }
+         
 
-            FrameBuffered?.RenderFinal();
+            //FrameBuffered?.RenderFinal();
         }
 
-        //public  NuklearAPI(NuklearDevice Device) {
-        public static void Init(NuklearDevice Device)
+        public void Init()
         {
             if (Initialized)
                 throw new InvalidOperationException("NuklearAPI.Init is called twice");
 
             Initialized = true;
 
-            Dev = Device;
-            FrameBuffered = Device as IFrameBuffered;
+            //Dev = Device;
+            //FrameBuffered = Device as IFrameBuffered;
 
             // TODO: Free these later
             Ctx = (nk_context*)ManagedAlloc(sizeof(nk_context));
@@ -267,8 +256,9 @@ namespace SharpGame
 
             NuklearNative.nk_init(Ctx, Allocator, null);
 
-            Dev.Init();
-            FontStash(Dev.FontStash);
+            CreateGraphicsResource();
+
+            FontStash();
 
             ConvertCfg->shape_AA = nk_anti_aliasing.NK_ANTI_ALIASING_ON;
             ConvertCfg->line_AA = nk_anti_aliasing.NK_ANTI_ALIASING_ON;
@@ -295,13 +285,14 @@ namespace SharpGame
             {
                 ForceUpdateQueued = false;
 
-                Dev?.ForceUpdate();
+                //Dev?.ForceUpdate();
             }
 
             bool HasInput;
             if (HasInput = HandleInput())
                 A();
-            Render(HasInput);
+
+            Render();
         }
 
         public static void SetDeltaTime(float Delta)
@@ -465,46 +456,10 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct NkVector2f
-    {
-        public float X, Y;
-
-        public NkVector2f(float X, float Y)
-        {
-            this.X = X;
-            this.Y = Y;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("({0}, {1})", X, Y);
-        }
-
-        public static implicit operator Vector2(NkVector2f V)
-        {
-            return new Vector2(V.X, V.Y);
-        }
-
-        public static implicit operator NkVector2f(Vector2 V)
-        {
-            return new NkVector2f(V.X, V.Y);
-        }
-    }
-
-    /*[StructLayout(LayoutKind.Sequential)]
-	public struct nk_color {
-		public byte R, G, B, A;
-
-		public override string ToString() {
-			return string.Format("({0}, {1}, {2}, {3})", R, G, B, A);
-		}
-	}*/
-
-    [StructLayout(LayoutKind.Sequential)]
     public struct NkVertex
     {
-        public NkVector2f Position;
-        public NkVector2f UV;
+        public nk_vec2 Position;
+        public nk_vec2 UV;
         public nk_color Color;
 
         public override string ToString()
@@ -546,98 +501,4 @@ namespace SharpGame
         void RenderFinal();
     }
 
-    public unsafe abstract class NuklearDevice
-    {
-        internal Queue<NuklearEvent> Events;
-
-        public abstract void SetBuffer(NkVertex[] VertexBuffer, ushort[] IndexBuffer);
-        public abstract void Render(IntPtr Userdata, int Texture, nk_rect ClipRect, uint Offset, uint Count);
-        public abstract int CreateTextureHandle(int W, int H, IntPtr Data);
-
-        public NuklearDevice()
-        {
-            Events = new Queue<NuklearEvent>();
-            ForceUpdate();
-        }
-
-        public virtual void Init()
-        {
-        }
-
-        public virtual void FontStash(IntPtr Atlas)
-        {
-        }
-
-        public virtual void BeginRender()
-        {
-        }
-
-        public virtual void EndRender()
-        {
-        }
-
-        public void OnMouseButton(NuklearEvent.MouseButton MouseButton, int X, int Y, bool Down)
-        {
-            Events.Enqueue(new NuklearEvent() { EvtType = NuklearEvent.EventType.MouseButton, MButton = MouseButton, X = X, Y = Y, Down = Down });
-        }
-
-        public void OnMouseMove(int X, int Y)
-        {
-            Events.Enqueue(new NuklearEvent() { EvtType = NuklearEvent.EventType.MouseMove, X = X, Y = Y });
-        }
-
-        public void OnScroll(float ScrollX, float ScrollY)
-        {
-            Events.Enqueue(new NuklearEvent() { EvtType = NuklearEvent.EventType.Scroll, ScrollX = ScrollX, ScrollY = ScrollY });
-        }
-
-        public void OnText(string Txt)
-        {
-            Events.Enqueue(new NuklearEvent() { EvtType = NuklearEvent.EventType.Text, Text = Txt });
-        }
-
-        public void OnKey(nk_keys Key, bool Down)
-        {
-            Events.Enqueue(new NuklearEvent() { EvtType = NuklearEvent.EventType.KeyboardKey, Key = Key, Down = Down });
-        }
-
-        public void ForceUpdate()
-        {
-            Events.Enqueue(new NuklearEvent() { EvtType = NuklearEvent.EventType.ForceUpdate });
-        }
-    }
-
-    public unsafe abstract class NuklearDeviceTex<T> : NuklearDevice
-    {
-        List<T> Textures;
-
-        public NuklearDeviceTex()
-        {
-            Textures = new List<T>();
-            Textures.Add(default(T)); // Start indices at 1
-        }
-
-        public int CreateTextureHandle(T Tex)
-        {
-            Textures.Add(Tex);
-            return Textures.Count - 1;
-        }
-
-        public T GetTexture(int Handle)
-        {
-            return Textures[Handle];
-        }
-
-        public sealed override int CreateTextureHandle(int W, int H, IntPtr Data)
-        {
-            T Tex = CreateTexture(W, H, Data);
-            return CreateTextureHandle(Tex);
-        }
-
-        public sealed override void Render(IntPtr Userdata, int Texture, nk_rect ClipRect, uint Offset, uint Count) =>
-            Render(Userdata, GetTexture(Texture), ClipRect, Offset, Count);
-
-        public abstract T CreateTexture(int W, int H, IntPtr Data);
-        public abstract void Render(IntPtr Userdata, T Texture, nk_rect ClipRect, uint Offset, uint Count);
-    }
 }

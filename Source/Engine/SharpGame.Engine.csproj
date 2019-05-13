@@ -30,6 +30,13 @@
 
 
   <ItemGroup>
+    <None Include="..\..\NuklearSharp\native\win-x64\nuklear.dll" Link="nuklear.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+
+  <ItemGroup>
     <ProjectReference Include="..\..\NuklearSharp\NuklearSharp.csproj" />
   </ItemGroup>
 

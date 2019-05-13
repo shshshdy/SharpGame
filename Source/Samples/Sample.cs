@@ -121,7 +121,7 @@ namespace SharpGame.Samples
             renderer_ = CreateSubsystem<Renderer>();
             input_ = CreateSubsystem<Input>();
 
-            GUISystem guiSys = CreateSubsystem<GUISystem>();
+            CreateSubsystem<ImGUI>();
 
             this.SubscribeToEvent<BeginFrame>(HandleGUI);
             this.SubscribeToEvent<Update>(HandleUpdate);
@@ -189,6 +189,7 @@ namespace SharpGame.Samples
 
         private void HandleGUI(ref BeginFrame e)
         {
+            return;
             var graphics = Get<Graphics>();
 
 

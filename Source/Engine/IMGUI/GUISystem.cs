@@ -101,7 +101,7 @@ namespace SharpGame
         {
             var io = ImGui.GetIO();         
             io.Fonts.GetTexDataAsRGBA32(out byte* out_pixels, out int out_width, out int out_height, out int out_bytes_per_pixel);
-            fontTex_ = Texture.CreateDynamic(out_width, out_height, out_bytes_per_pixel, (IntPtr)out_pixels);
+            fontTex_ = Texture.Create2D(out_width, out_height, out_bytes_per_pixel, (IntPtr)out_pixels);
             io.Fonts.SetTexID(_fontAtlasID);
             io.Fonts.ClearTexData();
         }
@@ -140,6 +140,7 @@ namespace SharpGame
             io.DisplayFramebufferScale = ImVec2.One;// window.ScaleFactor;
             io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
         }
+        
 
         private void UpdateGUI()
         {
