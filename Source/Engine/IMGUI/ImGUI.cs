@@ -65,7 +65,7 @@ namespace SharpGame
                 DepthWriteEnable = false,
                 CullMode = CullModes.None,
                 BlendMode = BlendMode.Alpha,
-               // DynamicStateCreateInfo = new PipelineDynamicStateCreateInfo(DynamicState.Scissor)
+                DynamicStateCreateInfo = new PipelineDynamicStateCreateInfo(DynamicState.Scissor)
             };
 
             _vertexBuffer = GraphicsBuffer.CreateDynamic<Pos2dTexColorVertex>(BufferUsages.VertexBuffer, 4046);
@@ -107,6 +107,8 @@ namespace SharpGame
 
         private void UpdateGUI()
         {
+            SetDeltaTime(Time.Delta);
+
             HandleInput();
 
             TestWindow(100, 100);
@@ -114,6 +116,7 @@ namespace SharpGame
            // SendEvent(GUIEvent.Ref);
         }
 
+        
 
         void RenderGUI(RenderPass renderPass)
         {
@@ -121,10 +124,7 @@ namespace SharpGame
             if (R != nk_convert_result.NK_CONVERT_SUCCESS)
                 throw new Exception(R.ToString());
 
-            //NkVertex[] NkVerts = new NkVertex[(int)Vertices->needed / Unsafe.SizeOf<NkVertex>()];
             NkVertex* VertsPtr = (NkVertex*)Vertices->memory.ptr;
-
-            //ushort[] NkIndices = new ushort[(int)Indices->needed / sizeof(ushort)];
             ushort* IndicesPtr = (ushort*)Indices->memory.ptr;
 
             if (Ctx->draw_list.cmd_count == 0)
@@ -170,9 +170,30 @@ namespace SharpGame
             {
                 if (Cmd->elem_count == 0)
                     return;
-              
-                //renderPass.SetScissor(new Rect2D((int)Cmd->clip_rect.x, (int)Cmd->clip_rect.y, (int)Cmd->clip_rect.w, (int)Cmd->clip_rect.h));
 
+                int xMin = (int)Cmd->clip_rect.x;
+                if (xMin < 0)
+                {
+                    xMin = 0;
+                }
+                int xMax = (int)(Cmd->clip_rect.x + Cmd->clip_rect.w);
+                if (xMax > graphics.Width)
+                {
+                    xMax = graphics.Width;
+                }
+
+                int yMin = (int)Cmd->clip_rect.y;
+                if (yMin < 0)
+                {
+                    yMin = 0;
+                }
+                int yMax = (int)(Cmd->clip_rect.y + Cmd->clip_rect.h);
+                if (yMax > graphics.Height)
+                {
+                    yMax = graphics.Height;
+                }
+
+                renderPass.SetScissor(new Rect2D(xMin, yMin, xMax - xMin, yMax - yMin));
                 renderPass.DrawIndexed((int)Cmd->elem_count, 1, (int)Offset, 0, 0);
 
                 Offset += Cmd->elem_count;

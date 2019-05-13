@@ -4,10 +4,14 @@
     {
         public MouseButton MouseButton { get; }
         public bool Down { get; }
-        public MouseEvent(MouseButton button, bool down)
+        public int X { get; }
+        public int Y { get; }
+        public MouseEvent(MouseButton button, bool down, int x, int y)
         {
             MouseButton = button;
             Down = down;
+            X = x;
+            Y = y;
         }
     }
 
@@ -69,5 +73,14 @@
             Modifiers = modifiers;
         }
 
+    }
+
+    public struct DragDropEvent
+    {
+        public string File { get; }
+        public DragDropEvent(string file)
+        {
+            File = file;
+        }
     }
 }

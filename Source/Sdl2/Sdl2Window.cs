@@ -330,6 +330,7 @@ namespace SharpGame.Sdl2
         public event Action MouseLeft;
         public event Action Exposed;
         public event Action<Point> Moved;
+
         public event Action<MouseWheelEvent> MouseWheel;
         public event Action<MouseMoveEvent> MouseMove;
         public event Action<MouseEvent> MouseDown;
@@ -605,7 +606,7 @@ namespace SharpGame.Sdl2
             bool down = mouseButtonEvent.state == 1;
             _currentMouseButtonStates[(int)button] = down;
             _privateSnapshot.MouseDown[(int)button] = down;
-            MouseEvent mouseEvent = new MouseEvent(button, down);
+            MouseEvent mouseEvent = new MouseEvent(button, down, mouseButtonEvent.x, mouseButtonEvent.y);
             _privateSnapshot.MouseEventsList.Add(mouseEvent);
             if (down)
             {
@@ -644,10 +645,13 @@ namespace SharpGame.Sdl2
             _currentMouseY = (int)mousePos.Y;
             _privateSnapshot.MousePosition = mousePos;
 
+            var motion = new MouseMoveEvent(GetCurrentMouseState(), mousePos);
+            _privateSnapshot.MouseMoveEventList.Add(motion);
+
             if (!_firstMouseEvent)
             {
                 _currentMouseDelta += delta;
-                MouseMove?.Invoke(new MouseMoveEvent(GetCurrentMouseState(), mousePos));
+                MouseMove?.Invoke(motion);
             }
 
             _firstMouseEvent = false;

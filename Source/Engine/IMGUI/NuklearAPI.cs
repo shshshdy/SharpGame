@@ -72,150 +72,80 @@ namespace SharpGame
         }
 
 
-        static bool HandleInput()
+        void HandleInput()
         {
-            bool HasInput = true;// FrameBuffered == null || Dev.Events.Count > 0;
-            /*
-            if (HasInput)
+            var input = Get<Input>();
+            var snapshot = input.InputSnapshot;
+
+            NuklearNative.nk_input_begin(Ctx);
+
+            var mousePos = snapshot.MousePosition;
+
+            bool leftPressed = false;
+            bool middlePressed = false;
+            bool rightPressed = false;
+            foreach (var me in snapshot.MouseEvents)
             {
-                NuklearNative.nk_input_begin(Ctx);
+                NuklearNative.nk_input_button(Ctx, (nk_buttons)me.MouseButton, 
+                    (int)mousePos.X, (int)mousePos.Y, me.Down ? 1 : 0);
+            }
 
-                while (Dev.Events.Count > 0)
+            foreach (var mme in snapshot.MouseMoveEvents)
+            {
+                NuklearNative.nk_input_motion(Ctx, 
+                    (int)mme.MousePosition.X, (int)mme.MousePosition.Y);
+            }
+
+            /*
+            while (Dev.Events.Count > 0)
+            {
+                NuklearEvent E = Dev.Events.Dequeue();
+
+                switch (E.EvtType)
                 {
-                    NuklearEvent E = Dev.Events.Dequeue();
+                    case NuklearEvent.EventType.MouseButton:
+                        NuklearNative.nk_input_button(Ctx, (nk_buttons)E.MButton, E.X, E.Y, E.Down ? 1 : 0);
+                        break;
 
-                    switch (E.EvtType)
-                    {
-                        case NuklearEvent.EventType.MouseButton:
-                            NuklearNative.nk_input_button(Ctx, (nk_buttons)E.MButton, E.X, E.Y, E.Down ? 1 : 0);
-                            break;
+                    case NuklearEvent.EventType.MouseMove:
+                        NuklearNative.nk_input_motion(Ctx, E.X, E.Y);
+                        break;
 
-                        case NuklearEvent.EventType.MouseMove:
-                            NuklearNative.nk_input_motion(Ctx, E.X, E.Y);
-                            break;
+                    case NuklearEvent.EventType.Scroll:
+                        NuklearNative.nk_input_scroll(Ctx, new nk_vec2() { x = E.ScrollX, y = E.ScrollY });
+                        break;
 
-                        case NuklearEvent.EventType.Scroll:
-                            NuklearNative.nk_input_scroll(Ctx, new nk_vec2() { x = E.ScrollX, y = E.ScrollY });
-                            break;
+                    case NuklearEvent.EventType.Text:
+                        for (int i = 0; i < E.Text.Length; i++)
+                        {
+                            if (!char.IsControl(E.Text[i]))
+                                NuklearNative.nk_input_unicode(Ctx, E.Text[i]);
+                        }
 
-                        case NuklearEvent.EventType.Text:
-                            for (int i = 0; i < E.Text.Length; i++)
-                            {
-                                if (!char.IsControl(E.Text[i]))
-                                    NuklearNative.nk_input_unicode(Ctx, E.Text[i]);
-                            }
+                        break;
 
-                            break;
+                    case NuklearEvent.EventType.KeyboardKey:
+                        NuklearNative.nk_input_key(Ctx, E.Key, E.Down ? 1 : 0);
+                        break;
 
-                        case NuklearEvent.EventType.KeyboardKey:
-                            NuklearNative.nk_input_key(Ctx, E.Key, E.Down ? 1 : 0);
-                            break;
+                    case NuklearEvent.EventType.ForceUpdate:
+                        break;
 
-                        case NuklearEvent.EventType.ForceUpdate:
-                            break;
-
-                        default:
-                            throw new NotImplementedException();
-                    }
+                    default:
+                        throw new NotImplementedException();
                 }
-
-                NuklearNative.nk_input_end(Ctx);
             }*/
 
-            return HasInput;
+            NuklearNative.nk_input_end(Ctx);
+
         }
 
-        static void Render()
-        {
-                bool Dirty = true;
-                /*
-                if (FrameBuffered != null)
-                {
-                    Dirty = false;
-
-                    IntPtr MemoryBuffer = NuklearNative.nk_buffer_memory(&Ctx->memory);
-                    if ((int)Ctx->memory.allocated == 0)
-                        Dirty = true;
-
-                    if (!Dirty)
-                    {
-                        if (LastMemory == null || LastMemory.Length < (int)Ctx->memory.allocated)
-                        {
-                            LastMemory = new byte[(int)Ctx->memory.allocated];
-                            Dirty = true;
-                        }
-                    }
-
-                    if (!Dirty)
-                    {
-                        fixed (byte* LastMemoryPtr = LastMemory)
-                            //if ( MemCmp(new IntPtr(LastMemoryPtr), MemoryBuffer, Ctx->memory.allocated) != 0)
-                            {
-                                Dirty = true;
-                                Marshal.Copy(MemoryBuffer, LastMemory, 0, (int)Ctx->memory.allocated);
-                            }
-                    }
-                }*/
-
-                if (Dirty)
-                {
-                    nk_convert_result R = (nk_convert_result)NuklearNative.nk_convert(Ctx, Commands, Vertices, Indices, ConvertCfg);
-                    if (R != nk_convert_result.NK_CONVERT_SUCCESS)
-                        throw new Exception(R.ToString());
-
-                    //NkVertex[] NkVerts = new NkVertex[(int)Vertices->needed / Unsafe.SizeOf<NkVertex>()];
-                    NkVertex* VertsPtr = (NkVertex*)Vertices->memory.ptr;
-                    
-                    //ushort[] NkIndices = new ushort[(int)Indices->needed / sizeof(ushort)];
-                    ushort* IndicesPtr = (ushort*)Indices->memory.ptr;
-               
-
-                    //Dev.SetBuffer(NkVerts, NkIndices);
-                    //FrameBuffered?.BeginBuffering();
-
-                    uint Offset = 0;
-                    //Dev.BeginRender();
-
-                    NuklearNative.nk_draw_foreach(Ctx, Commands, (Cmd) => {
-                        if (Cmd->elem_count == 0)
-                            return;
-
-                        //Dev.Render(Cmd->userdata, Cmd->texture.ToInt32()/*.id*/, Cmd->clip_rect, Offset, Cmd->elem_count);
-                        Offset += Cmd->elem_count;
-                    });
-
-                    //Dev.EndRender();
-                    //FrameBuffered?.EndBuffering();
-                }
-
-                nk_draw_list* list = &Ctx->draw_list;
-                if (list != null)
-                {
-                    if (list->buffer != null)
-                        NuklearNative.nk_buffer_clear(list->buffer);
-
-                    if (list->vertices != null)
-                        NuklearNative.nk_buffer_clear(list->vertices);
-
-                    if (list->elements != null)
-                        NuklearNative.nk_buffer_clear(list->elements);
-                }
-
-                NuklearNative.nk_clear(Ctx);
-         
-
-            //FrameBuffered?.RenderFinal();
-        }
-
-        public void Init()
+        private void Init()
         {
             if (Initialized)
                 throw new InvalidOperationException("NuklearAPI.Init is called twice");
 
             Initialized = true;
-
-            //Dev = Device;
-            //FrameBuffered = Device as IFrameBuffered;
 
             // TODO: Free these later
             Ctx = (nk_context*)ManagedAlloc(sizeof(nk_context));
@@ -247,10 +177,7 @@ namespace SharpGame
 
             Alloc = (Handle, Old, Size) => ManagedAlloc(Size);
             Free = (Handle, Old) => ManagedFree(Old);
-
-            //GCHandle.Alloc(Alloc);
-            //GCHandle.Alloc(Free);
-
+            
             Allocator->alloc_nkpluginalloct = Marshal.GetFunctionPointerForDelegate(Alloc);
             Allocator->free_nkpluginfreet = Marshal.GetFunctionPointerForDelegate(Free);
 
@@ -274,25 +201,6 @@ namespace SharpGame
             NuklearNative.nk_buffer_init(Commands, Allocator, new IntPtr(4 * 1024));
             NuklearNative.nk_buffer_init(Vertices, Allocator, new IntPtr(4 * 1024));
             NuklearNative.nk_buffer_init(Indices, Allocator, new IntPtr(4 * 1024));
-        }
-
-        public static void Frame(Action A)
-        {
-            if (!Initialized)
-                throw new InvalidOperationException("You forgot to call NuklearAPI.Init");
-
-            if (ForceUpdateQueued)
-            {
-                ForceUpdateQueued = false;
-
-                //Dev?.ForceUpdate();
-            }
-
-            bool HasInput;
-            if (HasInput = HandleInput())
-                A();
-
-            Render();
         }
 
         public static void SetDeltaTime(float Delta)

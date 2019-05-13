@@ -158,7 +158,11 @@ namespace SharpGame
             => cmdBuffer_.CmdSetViewport(viewport);
 
         public void SetScissor(Rect2D scissor)
-            => cmdBuffer_.CmdSetScissor(scissor);
+        {
+
+
+            cmdBuffer_.CmdSetScissor(scissor);
+        }
 
         public void BindDescriptorSets(PipelineBindPoint pipelineBindPoint, PipelineLayout layout, int firstSet, DescriptorSet[] descriptorSets, int[] dynamicOffsets = null)
             => cmdBuffer_.CmdBindDescriptorSets(pipelineBindPoint, layout, firstSet, descriptorSets, dynamicOffsets);

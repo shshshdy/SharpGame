@@ -8,6 +8,7 @@ namespace SharpGame
     {
         IReadOnlyList<KeyEvent> KeyEvents { get; }
         IReadOnlyList<MouseEvent> MouseEvents { get; }
+        IReadOnlyList<MouseMoveEvent> MouseMoveEvents { get; }
         IReadOnlyList<char> KeyCharPresses { get; }
         bool IsMouseDown(MouseButton button);
         Vector2 MousePosition { get; }
@@ -19,6 +20,7 @@ namespace SharpGame
         public InputSnapshot InputSnapshot { get; } = new InputSnapshot();
         public IReadOnlyList<KeyEvent> KeyEvents => InputSnapshot.KeyEvents;
         public IReadOnlyList<MouseEvent> MouseEvents => InputSnapshot.MouseEvents;
+        public IReadOnlyList<MouseMoveEvent> MouseMoveEvents => InputSnapshot.MouseMoveEvents;
         public IReadOnlyList<char> KeyCharPresses => InputSnapshot.KeyCharPresses;
         public Vector2 MousePosition => InputSnapshot.MousePosition;
         public float WheelDelta => InputSnapshot.WheelDelta;
@@ -44,12 +46,11 @@ namespace SharpGame
     {
         public List<KeyEvent> KeyEventsList { get; private set; } = new List<KeyEvent>();
         public List<MouseEvent> MouseEventsList { get; private set; } = new List<MouseEvent>();
+        public List<MouseMoveEvent> MouseMoveEventList { get; private set; } = new List<MouseMoveEvent>();
         public List<char> KeyCharPressesList { get; private set; } = new List<char>();
-
         public IReadOnlyList<KeyEvent> KeyEvents => KeyEventsList;
-
         public IReadOnlyList<MouseEvent> MouseEvents => MouseEventsList;
-
+        public IReadOnlyList<MouseMoveEvent> MouseMoveEvents => MouseMoveEventList;
         public IReadOnlyList<char> KeyCharPresses => KeyCharPressesList;
 
         public Vector2 MousePosition { get; set; }
@@ -67,6 +68,7 @@ namespace SharpGame
         {
             KeyEventsList.Clear();
             MouseEventsList.Clear();
+            MouseMoveEventList.Clear();
             KeyCharPressesList.Clear();
             WheelDelta = 0f;
         }
@@ -77,6 +79,9 @@ namespace SharpGame
 
             other.MouseEventsList.Clear();
             foreach (var me in MouseEventsList) { other.MouseEventsList.Add(me); }
+
+            other.MouseMoveEventList.Clear();
+            foreach (var me in MouseMoveEventList) { other.MouseMoveEventList.Add(me); }
 
             other.KeyEventsList.Clear();
             foreach (var ke in KeyEventsList) { other.KeyEventsList.Add(ke); }
