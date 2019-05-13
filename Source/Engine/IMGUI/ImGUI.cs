@@ -82,13 +82,13 @@ namespace SharpGame
             FontStash(new IntPtr(FontAtlas));
 
             int W, H;
-            IntPtr Image = NuklearNative.nk_font_atlas_bake(FontAtlas, &W, &H, nk_font_atlas_format.NK_FONT_ATLAS_RGBA32);
+            IntPtr Image = nk_font_atlas_bake(FontAtlas, &W, &H, nk_font_atlas_format.NK_FONT_ATLAS_RGBA32);
             int TexHandle = CreateTextureHandle(W, H, Image);
 
-            nk_font_atlas_end(FontAtlas, NuklearNative.nk_handle_id(TexHandle), NullTexture);
+            nk_font_atlas_end(FontAtlas, nk_handle_id(TexHandle), NullTexture);
 
             if (FontAtlas->default_font != null)
-                NuklearNative.nk_style_set_font(ctx, &FontAtlas->default_font->handle);
+                nk_style_set_font(ctx, &FontAtlas->default_font->handle);
         }
 
 

@@ -191,17 +191,40 @@ namespace SharpGame.Samples
         {
             var graphics = Get<Graphics>();
 
-            const nk_panel_flags Flags = nk_panel_flags.NK_WINDOW_BORDER | nk_panel_flags.NK_WINDOW_MOVABLE | nk_panel_flags.NK_WINDOW_SCALABLE |
-                nk_panel_flags.NK_WINDOW_MINIMIZABLE | nk_panel_flags.NK_WINDOW_SCROLL_AUTO_HIDE;
-            if (ImGUI.Begin("Sample", 100, 100, 200, 200, Flags))
+            if (ImGUI.Begin("Editor", 0, 0, graphics.Width, 30, 0))
+            {
+                ImGUI.MenubarBegin();
+                ImGUI.LayoutRowStatic(20, 60, 2);
+                if (ImGUI.MenuBegin("Demo", nk_text_alignment.NK_TEXT_LEFT, new nk_vec2 { x = 160, y = 200 }))
+                {
+                    ImGUI.LayoutRowDynamic(25);
+
+                    foreach (var s in allSamples)
+                    {
+                        (string name, string d, int sort, Type t) = s;
+                        var currentType = current?.GetType();
+                        if (ImGUI.MenuItem(t == currentType ? nk_symbol_type.NK_SYMBOL_CIRCLE_SOLID : nk_symbol_type.NK_SYMBOL_NONE, name, nk_text_alignment.NK_TEXT_RIGHT))
+                        {
+                            SetSample(System.Activator.CreateInstance(t) as Sample);
+                        }
+
+                    }
+
+                    ImGUI.MenuEnd();
+                }
+
+
+                ImGUI.MenubarEnd();
+
+                ImGUI.End();
+            }
+
+
+            if (ImGUI.Begin("Sample", graphics.Width - 220, 55, 200, 200, nk_panel_flags.NK_WINDOW_TITLE))
             {
                 ImGUI.LayoutRowStatic(20, 80, 1);
                 ImGUI.Label("FPS:");
 
-                //if(ImGui.Combo("Sample", ref selected, sampleNames, sampleNames.Length))
-                {
-                  //  SetSample(Activator.CreateInstance(allSamples[selected].Item4) as Sample);
-                }
                 
 
             }

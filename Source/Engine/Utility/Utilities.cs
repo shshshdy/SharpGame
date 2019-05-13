@@ -8,6 +8,23 @@ namespace SharpGame
 {
     public static unsafe class Utilities
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int SizeOf<T>()
+        {
+            return Unsafe.SizeOf<T>();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T As<T>(IntPtr ptr)
+        {
+            return ref Unsafe.AsRef<T>((void*)ptr);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IntPtr As<T>(ref T value)
+        {
+            return (IntPtr)Unsafe.AsPointer(ref value);
+        }
         /// <summary>
         /// Return the sizeof an array of struct. Equivalent to sizeof operator but works on generics too.
         /// </summary>
