@@ -12,7 +12,7 @@ namespace SharpGame
 
     public unsafe partial class ImGUI
     {
-        public static nk_context* Ctx;
+        public static nk_context* ctx;
         //public static NuklearDevice Dev;
 
         static nk_allocator* Allocator;
@@ -68,77 +68,9 @@ namespace SharpGame
             NuklearNative.nk_font_atlas_end(FontAtlas, NuklearNative.nk_handle_id(TexHandle), NullTexture);
 
             if (FontAtlas->default_font != null)
-                NuklearNative.nk_style_set_font(Ctx, &FontAtlas->default_font->handle);
+                NuklearNative.nk_style_set_font(ctx, &FontAtlas->default_font->handle);
         }
 
-
-        void HandleInput()
-        {
-            var input = Get<Input>();
-            var snapshot = input.InputSnapshot;
-
-            NuklearNative.nk_input_begin(Ctx);
-
-            var mousePos = snapshot.MousePosition;
-
-            bool leftPressed = false;
-            bool middlePressed = false;
-            bool rightPressed = false;
-            foreach (var me in snapshot.MouseEvents)
-            {
-                NuklearNative.nk_input_button(Ctx, (nk_buttons)me.MouseButton, 
-                    (int)mousePos.X, (int)mousePos.Y, me.Down ? 1 : 0);
-            }
-
-            foreach (var mme in snapshot.MouseMoveEvents)
-            {
-                NuklearNative.nk_input_motion(Ctx, 
-                    (int)mme.MousePosition.X, (int)mme.MousePosition.Y);
-            }
-
-            /*
-            while (Dev.Events.Count > 0)
-            {
-                NuklearEvent E = Dev.Events.Dequeue();
-
-                switch (E.EvtType)
-                {
-                    case NuklearEvent.EventType.MouseButton:
-                        NuklearNative.nk_input_button(Ctx, (nk_buttons)E.MButton, E.X, E.Y, E.Down ? 1 : 0);
-                        break;
-
-                    case NuklearEvent.EventType.MouseMove:
-                        NuklearNative.nk_input_motion(Ctx, E.X, E.Y);
-                        break;
-
-                    case NuklearEvent.EventType.Scroll:
-                        NuklearNative.nk_input_scroll(Ctx, new nk_vec2() { x = E.ScrollX, y = E.ScrollY });
-                        break;
-
-                    case NuklearEvent.EventType.Text:
-                        for (int i = 0; i < E.Text.Length; i++)
-                        {
-                            if (!char.IsControl(E.Text[i]))
-                                NuklearNative.nk_input_unicode(Ctx, E.Text[i]);
-                        }
-
-                        break;
-
-                    case NuklearEvent.EventType.KeyboardKey:
-                        NuklearNative.nk_input_key(Ctx, E.Key, E.Down ? 1 : 0);
-                        break;
-
-                    case NuklearEvent.EventType.ForceUpdate:
-                        break;
-
-                    default:
-                        throw new NotImplementedException();
-                }
-            }*/
-
-            NuklearNative.nk_input_end(Ctx);
-
-        }
 
         private void Init()
         {
@@ -148,7 +80,7 @@ namespace SharpGame
             Initialized = true;
 
             // TODO: Free these later
-            Ctx = (nk_context*)ManagedAlloc(sizeof(nk_context));
+            ctx = (nk_context*)ManagedAlloc(sizeof(nk_context));
             Allocator = (nk_allocator*)ManagedAlloc(sizeof(nk_allocator));
             FontAtlas = (nk_font_atlas*)ManagedAlloc(sizeof(nk_font_atlas));
             NullTexture = (nk_draw_null_texture*)ManagedAlloc(sizeof(nk_draw_null_texture));
@@ -181,7 +113,7 @@ namespace SharpGame
             Allocator->alloc_nkpluginalloct = Marshal.GetFunctionPointerForDelegate(Alloc);
             Allocator->free_nkpluginfreet = Marshal.GetFunctionPointerForDelegate(Free);
 
-            NuklearNative.nk_init(Ctx, Allocator, null);
+            NuklearNative.nk_init(ctx, Allocator, null);
 
             CreateGraphicsResource();
 
@@ -205,42 +137,42 @@ namespace SharpGame
 
         public static void SetDeltaTime(float Delta)
         {
-            if (Ctx != null)
-                Ctx->delta_time_Seconds = Delta;
+            if (ctx != null)
+                ctx->delta_time_Seconds = Delta;
         }
 
         public static bool Window(string Name, string Title, float X, float Y, float W, float H, nk_panel_flags Flags, Action A)
         {
             bool Res = true;
 
-            if (NuklearNative.nk_begin/*_titled*/(Ctx, //(byte*)Marshal.StringToHGlobalAnsi(Name),
+            if (NuklearNative.nk_begin/*_titled*/(ctx, //(byte*)Marshal.StringToHGlobalAnsi(Name),
                 (byte*)Marshal.StringToHGlobalAnsi(Title), new nk_rect { x = X, y = Y, w = W, h = H }, (uint)Flags) != 0)
                 A?.Invoke();
             else
                 Res = false;
 
-            NuklearNative.nk_end(Ctx);
+            NuklearNative.nk_end(ctx);
             return Res;
         }
 
         public static bool Window(string Title, float X, float Y, float W, float H, nk_panel_flags Flags, Action A) => Window(Title, Title, X, Y, W, H, Flags, A);
 
-        public static bool WindowIsClosed(string Name) => NuklearNative.nk_window_is_closed(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Name)) != 0;
+        public static bool WindowIsClosed(string Name) => NuklearNative.nk_window_is_closed(ctx, (byte*)Marshal.StringToHGlobalAnsi(Name)) != 0;
 
-        public static bool WindowIsHidden(string Name) => NuklearNative.nk_window_is_hidden(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Name)) != 0;
+        public static bool WindowIsHidden(string Name) => NuklearNative.nk_window_is_hidden(ctx, (byte*)Marshal.StringToHGlobalAnsi(Name)) != 0;
 
-        public static bool WindowIsCollapsed(string Name) => NuklearNative.nk_window_is_collapsed(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Name)) != 0;
+        public static bool WindowIsCollapsed(string Name) => NuklearNative.nk_window_is_collapsed(ctx, (byte*)Marshal.StringToHGlobalAnsi(Name)) != 0;
 
         public static bool Group(string Name, string Title, nk_panel_flags Flags, Action A)
         {
             bool Res = true;
 
-            if (NuklearNative.nk_group_begin_titled(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Name), (byte*)Marshal.StringToHGlobalAnsi(Title), (uint)Flags) != 0)
+            if (NuklearNative.nk_group_begin_titled(ctx, (byte*)Marshal.StringToHGlobalAnsi(Name), (byte*)Marshal.StringToHGlobalAnsi(Title), (uint)Flags) != 0)
                 A?.Invoke();
             else
                 Res = false;
 
-            NuklearNative.nk_group_end(Ctx);
+            NuklearNative.nk_group_end(ctx);
             return Res;
         }
 
@@ -248,40 +180,40 @@ namespace SharpGame
 
         public static bool ButtonLabel(string Label)
         {
-            return NuklearNative.nk_button_label(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Label)) != 0;
+            return NuklearNative.nk_button_label(ctx, (byte*)Marshal.StringToHGlobalAnsi(Label)) != 0;
         }
 
         public static bool ButtonText(string Text)
         {
-            return NuklearNative.nk_button_text(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Text), Text.Length) != 0;
+            return NuklearNative.nk_button_text(ctx, (byte*)Marshal.StringToHGlobalAnsi(Text), Text.Length) != 0;
         }
 
         public static bool ButtonText(char Char) => ButtonText(Char.ToString());
 
         public static void LayoutRowStatic(float Height, int ItemWidth, int Cols)
         {
-            NuklearNative.nk_layout_row_static(Ctx, Height, ItemWidth, Cols);
+            NuklearNative.nk_layout_row_static(ctx, Height, ItemWidth, Cols);
         }
 
         public static void LayoutRowDynamic(float Height = 0, int Cols = 1)
         {
-            NuklearNative.nk_layout_row_dynamic(Ctx, Height, Cols);
+            NuklearNative.nk_layout_row_dynamic(ctx, Height, Cols);
         }
 
         public static void Label(string Txt, nk_text_align TextAlign = (nk_text_align)nk_text_alignment.NK_TEXT_LEFT)
         {
-            NuklearNative.nk_label(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Txt), (uint)TextAlign);
+            NuklearNative.nk_label(ctx, (byte*)Marshal.StringToHGlobalAnsi(Txt), (uint)TextAlign);
         }
 
         public static void LabelWrap(string Txt)
         {
             //NuklearNative.nk_label(Ctx, Txt, (uint)TextAlign);
-            NuklearNative.nk_label_wrap(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Txt));
+            NuklearNative.nk_label_wrap(ctx, (byte*)Marshal.StringToHGlobalAnsi(Txt));
         }
 
         public static void LabelColored(string Txt, nk_color Clr, nk_text_align TextAlign = (nk_text_align)nk_text_alignment.NK_TEXT_LEFT)
         {
-            NuklearNative.nk_label_colored(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Txt), (uint)TextAlign, Clr);
+            NuklearNative.nk_label_colored(ctx, (byte*)Marshal.StringToHGlobalAnsi(Txt), (uint)TextAlign, Clr);
         }
 
         public static void LabelColored(string Txt, byte R, byte G, byte B, byte A, nk_text_align TextAlign = (nk_text_align)nk_text_alignment.NK_TEXT_LEFT)
@@ -292,7 +224,7 @@ namespace SharpGame
 
         public static void LabelColoredWrap(string Txt, nk_color Clr)
         {
-            NuklearNative.nk_label_colored_wrap(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Txt), Clr);
+            NuklearNative.nk_label_colored_wrap(ctx, (byte*)Marshal.StringToHGlobalAnsi(Txt), Clr);
         }
 
         public static void LabelColoredWrap(string Txt, byte R, byte G, byte B, byte A)
@@ -302,7 +234,7 @@ namespace SharpGame
 
         public static nk_rect WindowGetBounds()
         {
-            return NuklearNative.nk_window_get_bounds(Ctx);
+            return NuklearNative.nk_window_get_bounds(ctx);
         }
         /*
         public static NkEditEvents EditString(NkEditTypes EditType, StringBuilder Buffer, nk_plugin_filter_t Filter)
@@ -318,7 +250,7 @@ namespace SharpGame
         public static bool IsKeyPressed(nk_keys Key)
         {
             //NuklearNative.nk_input_is_key_pressed()
-            return NuklearNative.nk_input_is_key_pressed(&Ctx->input, Key) != 0;
+            return NuklearNative.nk_input_is_key_pressed(&ctx->input, Key) != 0;
         }
 
         public static void QueueForceUpdate()
@@ -328,7 +260,7 @@ namespace SharpGame
 
         public static void WindowClose(string Name)
         {
-            NuklearNative.nk_window_close(Ctx, (byte*)Marshal.StringToHGlobalAnsi(Name));
+            NuklearNative.nk_window_close(ctx, (byte*)Marshal.StringToHGlobalAnsi(Name));
         }
 
         public static void SetClipboardCallback(Action<string> CopyFunc, Func<string> PasteFunc)
@@ -358,8 +290,8 @@ namespace SharpGame
             GCHandle.Alloc(NkCopyFunc);
             GCHandle.Alloc(NkPasteFunc);
 
-            Ctx->clip.copyfun_nkPluginCopyT = Marshal.GetFunctionPointerForDelegate(NkCopyFunc);
-            Ctx->clip.pastefun_nkPluginPasteT = Marshal.GetFunctionPointerForDelegate(NkPasteFunc);
+            ctx->clip.copyfun_nkPluginCopyT = Marshal.GetFunctionPointerForDelegate(NkCopyFunc);
+            ctx->clip.pastefun_nkPluginPasteT = Marshal.GetFunctionPointerForDelegate(NkPasteFunc);
         }
     }
 
