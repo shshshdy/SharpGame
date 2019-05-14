@@ -109,6 +109,13 @@ namespace Vk.Samples
             Unsafe.CopyBlock(mapped, data, (uint)size);
         }
 
+        public void SetData(void* data, uint offset, uint size)
+        {
+            map(size, offset);
+            copyTo(data, size);
+            unmap();
+        }
+
         /** 
         * Flush a memory range of the buffer to make it visible to the device
         *

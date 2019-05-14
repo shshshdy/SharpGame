@@ -11,7 +11,9 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 
+using ImGuiNET;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -22,19 +24,19 @@ using static Vulkan.VulkanNative;
 
 namespace Vk.Samples
 {
-    // Vertex layout for this example
-    public struct Vertex
+    // ImVertex layout for this example
+    public struct ImVertex
     {
-        public Vector3 pos;
+        public Vector2 pos;
         public Vector2 uv;
-        public Vector3 normal;
+        public uint color;
 
         public const uint PositionOffset = 0;
-        public const uint UvOffset = 12;
-        public const uint NormalOffset = 20;
+        public const uint UvOffset = 8;
+        public const uint ColorOffset = 16;
     };
 
-    public unsafe class TextureMappingExample : VulkanExampleBase, IDisposable
+    public unsafe class ImGUI : VulkanExampleBase, IDisposable
     {
         // Contains all Vulkan objects that are required to store and use a texture
         // Note that this repository contains a texture class (VulkanTexture.hpp) that encapsulates texture loading functionality in a class that is used in subsequent demos
@@ -62,16 +64,12 @@ namespace Vk.Samples
 
         vksBuffer vertexBuffer = new Samples.vksBuffer();
         vksBuffer indexBuffer = new vksBuffer();
-        uint indexCount;
 
         vksBuffer uniformBufferVS = new vksBuffer();
 
         public struct UboVS
         {
             public Matrix4x4 projection;
-            public Matrix4x4 model;
-            public Vector4 viewPos;
-            public float lodBias;
         }
 
         UboVS uboVS;
@@ -82,7 +80,7 @@ namespace Vk.Samples
         VkDescriptorSetLayout descriptorSetLayout;
         private const uint VERTEX_BUFFER_BIND_ID = 0;
 
-        TextureMappingExample()
+        ImGUI()
         {
             zoom = -2.5f;
             rotation = new Vector3(0.0f, 15.0f, 0.0f);
@@ -107,93 +105,18 @@ namespace Vk.Samples
             uniformBufferVS.destroy();
         }
 
-        // Create an image memory barrier for changing the layout of
-        // an image and put it into an active command buffer
-        void setImageLayout(
-            VkCommandBuffer cmdBuffer,
-            VkImage image,
-            VkImageAspectFlags aspectMask,
-            VkImageLayout oldImageLayout,
-            VkImageLayout newImageLayout,
-            VkImageSubresourceRange subresourceRange)
+        Texture createTexture(uint w, uint h, uint bytesPerPixel, byte* tex2DDataPtr)
         {
-            // Create an image barrier object
-            VkImageMemoryBarrier imageMemoryBarrier = Initializers.imageMemoryBarrier(); ;
-            imageMemoryBarrier.oldLayout = oldImageLayout;
-            imageMemoryBarrier.newLayout = newImageLayout;
-            imageMemoryBarrier.image = image;
-            imageMemoryBarrier.subresourceRange = subresourceRange;
-
-            // Only sets masks for layouts used in this example
-            // For a more complete version that can be used with other layouts see vks::tools::setImageLayout
-
-            // Source layouts (old)
-            switch (oldImageLayout)
-            {
-                case VkImageLayout.Undefined:
-                    // Only valid as initial layout, memory contents are not preserved
-                    // Can be accessed directly, no source dependency required
-                    imageMemoryBarrier.srcAccessMask = 0;
-                    break;
-                case VkImageLayout.Preinitialized:
-                    // Only valid as initial layout for linear images, preserves memory contents
-                    // Make sure host writes to the image have been finished
-                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.HostWrite;
-                    break;
-                case VkImageLayout.TransferDstOptimal:
-                    // Old layout is transfer destination
-                    // Make sure any writes to the image have been finished
-                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.TransferWrite;
-                    break;
-            }
-
-            // Target layouts (new)
-            switch (newImageLayout)
-            {
-                case VkImageLayout.TransferSrcOptimal:
-                    // Transfer source (copy, blit)
-                    // Make sure any reads from the image have been finished
-                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferRead;
-                    break;
-                case VkImageLayout.TransferDstOptimal:
-                    // Transfer destination (copy, blit)
-                    // Make sure any writes to the image have been finished
-                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferWrite;
-                    break;
-                case VkImageLayout.ShaderReadOnlyOptimal:
-                    // Shader read (sampler, input attachment)
-                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.ShaderRead;
-                    break;
-            }
-
-            // Put barrier on top of pipeline
-            VkPipelineStageFlags srcStageFlags = VkPipelineStageFlags.TopOfPipe;
-            VkPipelineStageFlags destStageFlags = VkPipelineStageFlags.TopOfPipe;
-
-            // Put barrier inside setup command buffer
-            vkCmdPipelineBarrier(
-                cmdBuffer,
-                srcStageFlags,
-                destStageFlags,
-                VkDependencyFlags.None,
-                0, null,
-                0, null,
-                1, &imageMemoryBarrier);
-        }
-
-        void loadTexture(string fileName, VkFormat format, bool forceLinearTiling)
-        {
-            KtxFile tex2D;
-            using (var fs = File.OpenRead(fileName))
-            {
-                tex2D = KtxFile.Load(fs, false);
-            }
-
+            VkFormat format = VkFormat.R8g8b8a8Unorm;
             VkFormatProperties formatProperties;
+            texture = new Texture
+            {
+                width = w,
+                height = h,
+                mipLevels = 1
+            };
 
-            texture.width = tex2D.Header.PixelWidth;
-            texture.height = tex2D.Header.PixelHeight;
-            texture.mipLevels = tex2D.Header.NumberOfMipmapLevels;
+            uint totalBytes = bytesPerPixel * w * h;
 
             // Get Device properites for the requested texture format
             vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProperties);
@@ -204,14 +127,7 @@ namespace Vk.Samples
             // On most implementations linear tiling will only support a very
             // limited amount of formats and features (mip maps, cubemaps, arrays, etc.)
             uint useStaging = 1;
-
-            // Only use linear tiling if forced
-            if (forceLinearTiling)
-            {
-                // Don't use linear if format is not supported for (linear) shader sampling
-                useStaging = ((formatProperties.linearTilingFeatures & VkFormatFeatureFlags.SampledImage) != VkFormatFeatureFlags.SampledImage) ? 1u : 0u;
-            }
-
+            
             VkMemoryAllocateInfo memAllocInfo = Initializers.memoryAllocateInfo();
             VkMemoryRequirements memReqs = new VkMemoryRequirements();
 
@@ -222,7 +138,7 @@ namespace Vk.Samples
                 VkDeviceMemory stagingMemory;
 
                 VkBufferCreateInfo bufferCreateInfo = Initializers.bufferCreateInfo();
-                bufferCreateInfo.size = tex2D.GetTotalSize();
+                bufferCreateInfo.size = totalBytes;
                 // This buffer is used as a transfer source for the buffer copy
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
                 bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
@@ -242,11 +158,7 @@ namespace Vk.Samples
                 // Copy texture data into staging buffer
                 byte* data;
                 Util.CheckResult(vkMapMemory(device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
-                byte[] allData = tex2D.GetAllTextureData();
-                fixed (byte* tex2DDataPtr = &allData[0])
-                {
-                    Unsafe.CopyBlock(data, tex2DDataPtr, (uint)allData.Length);
-                }
+                Unsafe.CopyBlock(data, tex2DDataPtr, totalBytes);               
                 vkUnmapMemory(device, stagingMemory);
 
                 // Setup buffer copy regions for each mip level
@@ -260,14 +172,14 @@ namespace Vk.Samples
                     bufferCopyRegion.imageSubresource.mipLevel = i;
                     bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
                     bufferCopyRegion.imageSubresource.layerCount = 1;
-                    bufferCopyRegion.imageExtent.width = tex2D.Faces[0].Mipmaps[i].Width;
-                    bufferCopyRegion.imageExtent.height = tex2D.Faces[0].Mipmaps[i].Height;
+                    bufferCopyRegion.imageExtent.width = w;// tex2D.Faces[0].Mipmaps[i].Width;
+                    bufferCopyRegion.imageExtent.height = h;// tex2D.Faces[0].Mipmaps[i].Height;
                     bufferCopyRegion.imageExtent.depth = 1;
                     bufferCopyRegion.bufferOffset = offset;
 
                     bufferCopyRegions.Add(bufferCopyRegion);
 
-                    offset += tex2D.Faces[0].Mipmaps[i].SizeInBytes;
+                 //   offset += tex2D.Faces[0].Mipmaps[i].SizeInBytes;
                 }
 
                 // Create optimal tiled target image
@@ -344,100 +256,7 @@ namespace Vk.Samples
                 vkFreeMemory(device, stagingMemory, null);
                 vkDestroyBuffer(device, stagingBuffer, null);
             }
-            else
-            {
-                throw new NotImplementedException();
-
-                /*
-                // Prefer using optimal tiling, as linear tiling 
-                // may support only a small set of features 
-                // depending on implementation (e.g. no mip maps, only one layer, etc.)
-
-                VkImage mappableImage;
-                VkDeviceMemory mappableMemory;
-
-                // Load mip map level 0 to linear tiling image
-                VkImageCreateInfo imageCreateInfo = Initializers.imageCreateInfo();
-                imageCreateInfo.imageType = VkImageType._2d;
-                imageCreateInfo.format = format;
-                imageCreateInfo.mipLevels = 1;
-                imageCreateInfo.arrayLayers = 1;
-                imageCreateInfo.samples = VkSampleCountFlags._1;
-                imageCreateInfo.tiling = VkImageTiling.Linear;
-                imageCreateInfo.usage = VkImageUsageFlags.Sampled;
-                imageCreateInfo.sharingMode = VkSharingMode.Exclusive;
-                imageCreateInfo.initialLayout = VkImageLayout.Preinitialized;
-                imageCreateInfo.extent = new VkExtent3D { width = texture.width, height = texture.height, depth = 1 };
-                Util.CheckResult(vkCreateImage(Device, &imageCreateInfo, null, &mappableImage));
-
-                // Get memory requirements for this image 
-                // like size and alignment
-                vkGetImageMemoryRequirements(Device, mappableImage, &memReqs);
-                // Set memory allocation size to required memory size
-                memAllocInfo.allocationSize = memReqs.size;
-
-                // Get memory type that can be mapped to host memory
-                memAllocInfo.memoryTypeIndex = VulkanDevice.GetMemoryType(memReqs.memoryTypeBits,  VkMemoryPropertyFlags.HostVisible |  VkMemoryPropertyFlags.HostCoherent);
-
-                // Allocate host memory
-                Util.CheckResult(vkAllocateMemory(Device, &memAllocInfo, null, &mappableMemory));
-
-                // Bind allocated image for use
-                Util.CheckResult(vkBindImageMemory(Device, mappableImage, mappableMemory, 0));
-
-                // Get sub resource layout
-                // Mip map count, array layer, etc.
-                VkImageSubresource subRes = new VkImageSubresource();
-                subRes.aspectMask =  VkImageAspectFlags.Color;
-
-                VkSubresourceLayout subResLayout;
-                void* data;
-
-                // Get sub resources layout 
-                // Includes row pitch, size offsets, etc.
-                vkGetImageSubresourceLayout(Device, mappableImage, &subRes, &subResLayout);
-
-                // Map image memory
-                Util.CheckResult(vkMapMemory(Device, mappableMemory, 0, memReqs.size, 0, &data));
-
-                // Copy image data into memory
-                memcpy(data, tex2D[subRes.mipLevel].data(), tex2D[subRes.mipLevel].size());
-
-                vkUnmapMemory(Device, mappableMemory);
-
-                // Linear tiled images don't need to be staged
-                // and can be directly used as textures
-                texture.image = mappableImage;
-                texture.DeviceMemory = mappableMemory;
-                texture.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-                VkCommandBuffer copyCmd = VulkanExampleBase::createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-                // Setup image memory barrier transfer image to shader read layout
-
-                // The sub resource range describes the regions of the image we will be transition
-                VkImageSubresourceRange subresourceRange = { };
-                // Image only contains color data
-                subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                // Start at first mip level
-                subresourceRange.baseMipLevel = 0;
-                // Only one mip level, most implementations won't support more for linear tiled images
-                subresourceRange.levelCount = 1;
-                // The 2D texture only has one layer
-                subresourceRange.layerCount = 1;
-
-                setImageLayout(
-                    copyCmd,
-                    texture.image,
-                    VK_IMAGE_ASPECT_COLOR_BIT,
-                    VK_IMAGE_LAYOUT_PREINITIALIZED,
-                    texture.imageLayout,
-                    subresourceRange);
-
-                VulkanExampleBase::flushCommandBuffer(copyCmd, queue, true);
-                */
-            }
-
+            
             // Create sampler
             // In Vulkan textures are accessed by samplers
             // This separates all the sampling information from the 
@@ -494,6 +313,81 @@ namespace Vk.Samples
             // The view will be based on the texture's image
             view.image = texture.image;
             Util.CheckResult(vkCreateImageView(device, &view, null, out texture.view));
+            return texture;
+        }
+
+        // Create an image memory barrier for changing the layout of
+        // an image and put it into an active command buffer
+        void setImageLayout(
+            VkCommandBuffer cmdBuffer,
+            VkImage image,
+            VkImageAspectFlags aspectMask,
+            VkImageLayout oldImageLayout,
+            VkImageLayout newImageLayout,
+            VkImageSubresourceRange subresourceRange)
+        {
+            // Create an image barrier object
+            VkImageMemoryBarrier imageMemoryBarrier = Initializers.imageMemoryBarrier(); ;
+            imageMemoryBarrier.oldLayout = oldImageLayout;
+            imageMemoryBarrier.newLayout = newImageLayout;
+            imageMemoryBarrier.image = image;
+            imageMemoryBarrier.subresourceRange = subresourceRange;
+
+            // Only sets masks for layouts used in this example
+            // For a more complete version that can be used with other layouts see vks::tools::setImageLayout
+
+            // Source layouts (old)
+            switch (oldImageLayout)
+            {
+                case VkImageLayout.Undefined:
+                    // Only valid as initial layout, memory contents are not preserved
+                    // Can be accessed directly, no source dependency required
+                    imageMemoryBarrier.srcAccessMask = 0;
+                    break;
+                case VkImageLayout.Preinitialized:
+                    // Only valid as initial layout for linear images, preserves memory contents
+                    // Make sure host writes to the image have been finished
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.HostWrite;
+                    break;
+                case VkImageLayout.TransferDstOptimal:
+                    // Old layout is transfer destination
+                    // Make sure any writes to the image have been finished
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.TransferWrite;
+                    break;
+            }
+
+            // Target layouts (new)
+            switch (newImageLayout)
+            {
+                case VkImageLayout.TransferSrcOptimal:
+                    // Transfer source (copy, blit)
+                    // Make sure any reads from the image have been finished
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferRead;
+                    break;
+                case VkImageLayout.TransferDstOptimal:
+                    // Transfer destination (copy, blit)
+                    // Make sure any writes to the image have been finished
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferWrite;
+                    break;
+                case VkImageLayout.ShaderReadOnlyOptimal:
+                    // Shader read (sampler, input attachment)
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.ShaderRead;
+                    break;
+            }
+
+            // Put barrier on top of pipeline
+            VkPipelineStageFlags srcStageFlags = VkPipelineStageFlags.TopOfPipe;
+            VkPipelineStageFlags destStageFlags = VkPipelineStageFlags.TopOfPipe;
+
+            // Put barrier inside setup command buffer
+            vkCmdPipelineBarrier(
+                cmdBuffer,
+                srcStageFlags,
+                destStageFlags,
+                VkDependencyFlags.None,
+                0, null,
+                0, null,
+                1, &imageMemoryBarrier);
         }
 
         // Free all Vulkan resources used a texture object
@@ -505,127 +399,38 @@ namespace Vk.Samples
             vkFreeMemory(device, texture.DeviceMemory, null);
         }
 
-        void loadTextures()
-        {
-            // Vulkan core supports three different compressed texture formats
-            // As the support differs between implemementations we need to check Device features and select a proper format and file
-            string filename;
-            VkFormat format;
-            if (DeviceFeatures.textureCompressionBC == 1)
-            {
-                filename = "metalplate01_bc2_unorm.ktx";
-                format = VkFormat.Bc2UnormBlock;
-            }
-            else if (DeviceFeatures.textureCompressionASTC_LDR == 1)
-            {
-                filename = "metalplate01_astc_8x8_unorm.ktx";
-                format = VkFormat.Astc8x8UnormBlock;
-            }
-            else if (DeviceFeatures.textureCompressionETC2 == 1)
-            {
-                filename = "metalplate01_etc2_unorm.ktx";
-                format = VkFormat.Etc2R8g8b8a8UnormBlock;
-            }
-            else
-            {
-                throw new InvalidOperationException("Device does not support any compressed texture format!");
-            }
-
-            loadTexture(getAssetPath() + "textures/" + filename, format, false);
-        }
-
-        protected override void buildCommandBuffers()
-        {
-            VkCommandBufferBeginInfo cmdBufInfo = Initializers.commandBufferBeginInfo();
-
-            FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
-            clearValues.First.color = defaultClearColor;
-            clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
-
-            VkRenderPassBeginInfo renderPassBeginInfo = Initializers.renderPassBeginInfo();
-            renderPassBeginInfo.renderPass = renderPass;
-            renderPassBeginInfo.renderArea.offset.x = 0;
-            renderPassBeginInfo.renderArea.offset.y = 0;
-            renderPassBeginInfo.renderArea.extent.width = width;
-            renderPassBeginInfo.renderArea.extent.height = height;
-            renderPassBeginInfo.clearValueCount = 2;
-            renderPassBeginInfo.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues);
-
-            for (int i = 0; i < drawCmdBuffers.Count; ++i)
-            {
-                // Set target frame buffer
-                renderPassBeginInfo.framebuffer = frameBuffers[i];
-
-                Util.CheckResult(vkBeginCommandBuffer(drawCmdBuffers[i], &cmdBufInfo));
-
-                vkCmdBeginRenderPass(drawCmdBuffers[i], &renderPassBeginInfo, VkSubpassContents.Inline);
-
-                VkViewport viewport = Initializers.viewport((float)width, (float)height, 0.0f, 1.0f);
-                vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
-
-                VkRect2D scissor = Initializers.rect2D(width, height, 0, 0);
-                vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
-
-                vkCmdBindDescriptorSets(drawCmdBuffers[i], VkPipelineBindPoint.Graphics, pipelineLayout, 0, 1, ref descriptorSet, 0, null);
-                vkCmdBindPipeline(drawCmdBuffers[i], VkPipelineBindPoint.Graphics, pipelines_solid);
-
-                ulong offsets = 0;
-                vkCmdBindVertexBuffers(drawCmdBuffers[i], VERTEX_BUFFER_BIND_ID, 1, ref vertexBuffer.buffer, &offsets);
-                vkCmdBindIndexBuffer(drawCmdBuffers[i], indexBuffer.buffer, 0, VkIndexType.Uint32);
-
-                vkCmdDrawIndexed(drawCmdBuffers[i], indexCount, 1, 0, 0, 0);
-
-                vkCmdEndRenderPass(drawCmdBuffers[i]);
-
-                Util.CheckResult(vkEndCommandBuffer(drawCmdBuffers[i]));
-            }
-        }
-
-        void draw()
-        {
-            base.prepareFrame();
-
-            // Command buffer to be sumitted to the queue
-            submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = (VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
-
-            // Submit to queue
-            Util.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
-
-            submitFrame();
-        }
-
         void generateQuad()
         {
+            /*
             // Setup vertices for a single uv-mapped quad made from two triangles
-            NativeList<Vertex> vertices = new NativeList<Vertex>()
+            NativeList<ImVertex> vertices = new NativeList<ImVertex>()
             {
-                new Vertex() { pos = new Vector3(1.0f,  1.0f, 0.0f), uv = new Vector2(1.0f, 1.0f), normal = new Vector3(0.0f, 0.0f, 1.0f) },
-                new Vertex() { pos = new Vector3(-1.0f,  1.0f, 0.0f), uv = new Vector2(0.0f, 1.0f), normal = new Vector3(0.0f, 0.0f, 1.0f) },
-                new Vertex() { pos = new Vector3(-1.0f, -1.0f, 0.0f), uv = new Vector2(0.0f, 0.0f), normal = new Vector3(0.0f, 0.0f, 1.0f) },
-                new Vertex() { pos = new Vector3(1.0f, -1.0f, 0.0f), uv = new Vector2(1.0f, 0.0f), normal = new Vector3(0.0f, 0.0f, 1.0f) },
+                new ImVertex() { pos = new Vector3(1.0f,  1.0f, 0.0f), uv = new Vector2(1.0f, 1.0f), normal = new Vector3(0.0f, 0.0f, 1.0f) },
+                new ImVertex() { pos = new Vector3(-1.0f,  1.0f, 0.0f), uv = new Vector2(0.0f, 1.0f), normal = new Vector3(0.0f, 0.0f, 1.0f) },
+                new ImVertex() { pos = new Vector3(-1.0f, -1.0f, 0.0f), uv = new Vector2(0.0f, 0.0f), normal = new Vector3(0.0f, 0.0f, 1.0f) },
+                new ImVertex() { pos = new Vector3(1.0f, -1.0f, 0.0f), uv = new Vector2(1.0f, 0.0f), normal = new Vector3(0.0f, 0.0f, 1.0f) },
             };
 
             // Setup indices
             NativeList<uint> indices = new NativeList<uint> { 0, 1, 2, 2, 3, 0 };
-            indexCount = indices.Count;
+            indexCount = indices.Count;*/
 
             // Create buffers
             // For the sake of simplicity we won't stage the vertex data to the gpu memory
-            // Vertex buffer
+            // ImVertex buffer
             Util.CheckResult(vulkanDevice.createBuffer(
                 VkBufferUsageFlags.VertexBuffer,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
                 vertexBuffer,
-                (ulong)(vertices.Count * sizeof(Vertex)),
-                vertices.Data.ToPointer()));
+                (ulong)(4096 * sizeof(ImVertex)),
+                null));
             // Index buffer
             Util.CheckResult(vulkanDevice.createBuffer(
                 VkBufferUsageFlags.IndexBuffer,
                 VkMemoryPropertyFlags.HostCoherent | VkMemoryPropertyFlags.HostCoherent,
                 indexBuffer,
-                indices.Count * sizeof(uint),
-                indices.Data.ToPointer()));
+                4096 * sizeof(ushort),
+                null));
         }
 
         void setupVertexDescriptions()
@@ -635,7 +440,7 @@ namespace Vk.Samples
             vertices.bindingDescriptions[0] =
                 Initializers.vertexInputBindingDescription(
                     VERTEX_BUFFER_BIND_ID,
-                    (uint)sizeof(Vertex),
+                    (uint)sizeof(ImVertex),
                     VkVertexInputRate.Vertex);
 
             // Attribute descriptions
@@ -646,22 +451,22 @@ namespace Vk.Samples
                 Initializers.vertexInputAttributeDescription(
                     VERTEX_BUFFER_BIND_ID,
                     0,
-                    VkFormat.R32g32b32Sfloat,
-                    Vertex.PositionOffset);
+                    VkFormat.R32g32Sfloat,
+                    ImVertex.PositionOffset);
             // Location 1 : Texture coordinates
             vertices.attributeDescriptions[1] =
                 Initializers.vertexInputAttributeDescription(
                     VERTEX_BUFFER_BIND_ID,
                     1,
                     VkFormat.R32g32Sfloat,
-                    Vertex.UvOffset);
-            // Location 1 : Vertex normal
+                    ImVertex.UvOffset);
+            // Location 1 : ImVertex normal
             vertices.attributeDescriptions[2] =
                 Initializers.vertexInputAttributeDescription(
                     VERTEX_BUFFER_BIND_ID,
                     2,
-                    VkFormat.R32g32b32Sfloat,
-                    Vertex.NormalOffset);
+                    VkFormat.R8g8b8a8Unorm,
+                    ImVertex.ColorOffset);
 
             vertices.inputState = Initializers.pipelineVertexInputStateCreateInfo();
             vertices.inputState.vertexBindingDescriptionCount = vertices.bindingDescriptions.Count;
@@ -690,7 +495,7 @@ namespace Vk.Samples
         void setupDescriptorSetLayout()
         {
             FixedArray2<VkDescriptorSetLayoutBinding> setLayoutBindings = new FixedArray2<VkDescriptorSetLayoutBinding>(
-                // Binding 0 : Vertex shader uniform buffer
+                // Binding 0 : ImVertex shader uniform buffer
                 Initializers.descriptorSetLayoutBinding(
                     VkDescriptorType.UniformBuffer,
                     VkShaderStageFlags.Vertex,
@@ -737,7 +542,7 @@ namespace Vk.Samples
 
             var descriptor = uniformBufferVS.descriptor;
             FixedArray2<VkWriteDescriptorSet> writeDescriptorSets = new FixedArray2<VkWriteDescriptorSet>(
-                    // Binding 0 : Vertex shader uniform buffer
+                    // Binding 0 : ImVertex shader uniform buffer
                     Initializers.writeDescriptorSet(
                         descriptorSet,
                         VkDescriptorType.UniformBuffer,
@@ -772,8 +577,13 @@ namespace Vk.Samples
 
             VkPipelineColorBlendAttachmentState blendAttachmentState =
                 Initializers.pipelineColorBlendAttachmentState(
-                    (VkColorComponentFlags)0xf,
-                    False);
+                    (VkColorComponentFlags)0xf, True);
+            blendAttachmentState.alphaBlendOp = VkBlendOp.Add;
+            blendAttachmentState.colorBlendOp = VkBlendOp.Add;
+            blendAttachmentState.srcColorBlendFactor = VkBlendFactor.SrcAlpha;
+            blendAttachmentState.dstColorBlendFactor = VkBlendFactor.OneMinusDstAlpha;
+            blendAttachmentState.srcAlphaBlendFactor = VkBlendFactor.One;
+            blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.Zero;
 
             VkPipelineColorBlendStateCreateInfo colorBlendState =
                 Initializers.pipelineColorBlendStateCreateInfo(
@@ -782,8 +592,8 @@ namespace Vk.Samples
 
             VkPipelineDepthStencilStateCreateInfo depthStencilState =
                 Initializers.pipelineDepthStencilStateCreateInfo(
-                    True,
-                    True,
+                    False,
+                    False,
                     VkCompareOp.LessOrEqual);
 
             VkPipelineViewportStateCreateInfo viewportState =
@@ -806,8 +616,8 @@ namespace Vk.Samples
             // Load shaders
             FixedArray2<VkPipelineShaderStageCreateInfo> shaderStages = new FixedArray2<VkPipelineShaderStageCreateInfo>();
 
-            shaderStages.First = loadShader(getAssetPath() + "shaders/texture/texture.vert.spv", VkShaderStageFlags.Vertex);
-            shaderStages.Second = loadShader(getAssetPath() + "shaders/texture/texture.frag.spv", VkShaderStageFlags.Fragment);
+            shaderStages.First = loadShader(getAssetPath() + "shaders/texture/ImGui.vert.spv", VkShaderStageFlags.Vertex);
+            shaderStages.Second = loadShader(getAssetPath() + "shaders/texture/ImGui.frag.spv", VkShaderStageFlags.Fragment);
 
             VkGraphicsPipelineCreateInfo pipelineCreateInfo =
                 Initializers.pipelineCreateInfo(
@@ -834,7 +644,7 @@ namespace Vk.Samples
         void prepareUniformBuffers()
         {
             var localUboVS = uboVS;
-            // Vertex shader uniform buffer block
+            // ImVertex shader uniform buffer block
             Util.CheckResult(vulkanDevice.createBuffer(
                 VkBufferUsageFlags.UniformBuffer,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
@@ -847,16 +657,13 @@ namespace Vk.Samples
 
         void updateUniformBuffers()
         {
-            // Vertex shader
-            uboVS.projection = Matrix4x4.CreatePerspectiveFieldOfView(Util.DegreesToRadians(60f), width / (float)height, 0.1f, 256.0f);
-            Matrix4x4 viewMatrix = Matrix4x4.CreateTranslation(new Vector3(0f, 0f, zoom));
-
-            uboVS.model = viewMatrix * Matrix4x4.CreateTranslation(cameraPos);
-            uboVS.model = Matrix4x4.CreateRotationX(Util.DegreesToRadians(rotation.X)) * uboVS.model;
-            uboVS.model = Matrix4x4.CreateRotationY(Util.DegreesToRadians(rotation.Y)) * uboVS.model;
-            uboVS.model = Matrix4x4.CreateRotationZ(Util.DegreesToRadians(rotation.Z)) * uboVS.model;
-
-            uboVS.viewPos = new Vector4(0.0f, 0.0f, -zoom, 0.0f);
+            uboVS.projection = Matrix4x4.CreateOrthographicOffCenter(
+                     0f,
+                     width,
+                     height,
+                     0.0f,
+                     -1.0f,
+                     1.0f);
 
             Util.CheckResult(uniformBufferVS.map());
             var local = uboVS;
@@ -868,22 +675,153 @@ namespace Vk.Samples
         public override void Prepare()
         {
             base.Prepare();
-            loadTextures();
+
+            IntPtr context = ImGui.CreateContext();
+            ImGui.SetCurrentContext(context);
+            ImGui.GetIO().Fonts.AddFontDefault();
+           
+
+            //loadTextures();
             generateQuad();
             setupVertexDescriptions();
             prepareUniformBuffers();
             setupDescriptorSetLayout();
             preparePipelines();
             setupDescriptorPool();
+
+
+            RecreateFontDeviceTexture();
+
             setupDescriptorSet();
-            buildCommandBuffers();
+            //buildCommandBuffers();
+
+            ImGuiStylePtr style = ImGui.GetStyle();
+
+            SetOpenTKKeyMappings();
+
+            SetPerFrameImGuiData(1f / 60f);
+
+            ImGui.NewFrame();
+
             prepared = true;
+        }
+
+        private IntPtr _fontAtlasID = (IntPtr)1;
+      
+
+        private unsafe void RecreateFontDeviceTexture()
+        {
+            var io = ImGui.GetIO();
+            io.Fonts.GetTexDataAsRGBA32(out byte* out_pixels, out int out_width, out int out_height, out int out_bytes_per_pixel);
+            this.texture = this.createTexture((uint)out_width, (uint)out_height, (uint)out_bytes_per_pixel, out_pixels);
+            io.Fonts.SetTexID(_fontAtlasID);
+            io.Fonts.ClearTexData();
+        }
+
+        private static unsafe void SetOpenTKKeyMappings()
+        {
+            ImGuiIOPtr io = ImGui.GetIO();
+            io.KeyMap[(int)ImGuiKey.Tab] = (int)Key.Tab;
+            io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Key.Left;
+            io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Key.Right;
+            io.KeyMap[(int)ImGuiKey.UpArrow] = (int)Key.Up;
+            io.KeyMap[(int)ImGuiKey.DownArrow] = (int)Key.Down;
+            io.KeyMap[(int)ImGuiKey.PageUp] = (int)Key.PageUp;
+            io.KeyMap[(int)ImGuiKey.PageDown] = (int)Key.PageDown;
+            io.KeyMap[(int)ImGuiKey.Home] = (int)Key.Home;
+            io.KeyMap[(int)ImGuiKey.End] = (int)Key.End;
+            io.KeyMap[(int)ImGuiKey.Delete] = (int)Key.Delete;
+            io.KeyMap[(int)ImGuiKey.Backspace] = (int)Key.BackSpace;
+            io.KeyMap[(int)ImGuiKey.Enter] = (int)Key.Enter;
+            io.KeyMap[(int)ImGuiKey.Escape] = (int)Key.Escape;
+            io.KeyMap[(int)ImGuiKey.A] = (int)Key.A;
+            io.KeyMap[(int)ImGuiKey.C] = (int)Key.C;
+            io.KeyMap[(int)ImGuiKey.V] = (int)Key.V;
+            io.KeyMap[(int)ImGuiKey.X] = (int)Key.X;
+            io.KeyMap[(int)ImGuiKey.Y] = (int)Key.Y;
+            io.KeyMap[(int)ImGuiKey.Z] = (int)Key.Z;
+        }
+
+        private unsafe void SetPerFrameImGuiData(float deltaSeconds)
+        {
+            ImGuiIOPtr io = ImGui.GetIO();
+            io.DisplaySize = new Vector2(
+                this.width,
+                this.height);
+            io.DisplayFramebufferScale = Vector2.One;// window.ScaleFactor;
+            io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
+        }
+
+        protected override void buildCommandBuffers()
+        {
+            VkCommandBufferBeginInfo cmdBufInfo = Initializers.commandBufferBeginInfo();
+
+            FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
+            clearValues.First.color = defaultClearColor;
+            clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
+
+            VkRenderPassBeginInfo renderPassBeginInfo = Initializers.renderPassBeginInfo();
+            renderPassBeginInfo.renderPass = renderPass;
+            renderPassBeginInfo.renderArea.offset.x = 0;
+            renderPassBeginInfo.renderArea.offset.y = 0;
+            renderPassBeginInfo.renderArea.extent.width = width;
+            renderPassBeginInfo.renderArea.extent.height = height;
+            renderPassBeginInfo.clearValueCount = 2;
+            renderPassBeginInfo.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues);
+
+            //for (int i = 0; i < drawCmdBuffers.Count; ++i)
+            uint i = this.currentBuffer;
+            {
+                // Set target frame buffer
+                renderPassBeginInfo.framebuffer = frameBuffers[i];
+
+                Util.CheckResult(vkBeginCommandBuffer(drawCmdBuffers[i], &cmdBufInfo));
+
+                vkCmdBeginRenderPass(drawCmdBuffers[i], &renderPassBeginInfo, VkSubpassContents.Inline);
+
+                VkViewport viewport = Initializers.viewport((float)width, (float)height, 0.0f, 1.0f);
+                vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
+
+                VkRect2D scissor = Initializers.rect2D(width, height, 0, 0);
+                vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
+
+                RenderImDrawData(ImGui.GetDrawData());
+
+                vkCmdEndRenderPass(drawCmdBuffers[i]);
+
+                Util.CheckResult(vkEndCommandBuffer(drawCmdBuffers[i]));
+            }
+        }
+
+        void draw()
+        {
+            base.prepareFrame();
+
+            buildCommandBuffers();
+
+            // Command buffer to be sumitted to the queue
+            submitInfo.commandBufferCount = 1;
+            submitInfo.pCommandBuffers = (VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
+
+            // Submit to queue
+            Util.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
+
+            submitFrame();
         }
 
         protected override void render()
         {
             if (!prepared)
                 return;
+
+            UpdateImGuiInput();
+
+            ImGui.NewFrame();
+
+            ImGui.ShowDemoWindow();
+
+            ImGui.Render();
+
             draw();
         }
 
@@ -892,30 +830,15 @@ namespace Vk.Samples
             updateUniformBuffers();
         }
 
-        void changeLodBias(float delta)
-        {
-            uboVS.lodBias += delta;
-            if (uboVS.lodBias < 0.0f)
-            {
-                uboVS.lodBias = 0.0f;
-            }
-            if (uboVS.lodBias > texture.mipLevels)
-            {
-                uboVS.lodBias = (float)texture.mipLevels;
-            }
-            updateUniformBuffers();
-            // updateTextOverlay();
-        }
-
         protected override void keyPressed(Key keyCode)
         {
             switch (keyCode)
             {
                 case Key.KeypadAdd:
-                    changeLodBias(0.1f);
+                    //changeLodBias(0.1f);
                     break;
                 case Key.KeypadSubtract:
-                    changeLodBias(-0.1f);
+                    //changeLodBias(-0.1f);
                     break;
             }
         }
@@ -929,6 +852,191 @@ namespace Vk.Samples
         }
         */
 
-        //public static void Main() => new TextureMappingExample().ExampleMain();
+
+        private unsafe void RenderImDrawData(ImDrawDataPtr draw_data)
+        {
+            var io = ImGui.GetIO();
+
+            float width = io.DisplaySize.X;
+            float height = io.DisplaySize.Y;
+            
+            if (draw_data.CmdListsCount == 0)
+            {
+                return;
+            }
+            /*
+            if (draw_data.TotalVtxCount*sizeof(ImDrawVert) > (int)vertexBuffer.size)
+            {
+                vertexBuffer.destroy();
+                //vertexBuffer = GraphicsBuffer.CreateDynamic<ImDrawVert>(BufferUsages.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
+            }
+
+            if (draw_data.TotalIdxCount * sizeof(ushort) > (int)indexBuffer.size)
+            {
+                indexBuffer.destroy();
+                //indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsages.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
+            }*/
+
+            /*
+            Matrix4x4 proj = Matrix4x4.CreateOrthographicOffCenter(
+                     0f,
+                     io.DisplaySize.X,
+                     io.DisplaySize.Y,
+                     0.0f,
+                     -1.0f,
+                     1.0f);
+
+            _projMatrixBuffer.SetData(ref proj);*/
+
+            updateUniformBuffers();
+
+            uint vertexOffsetInVertices = 0;
+            uint indexOffsetInElements = 0;
+
+            for (int i = 0; i < draw_data.CmdListsCount; i++)
+            {
+                ImDrawListPtr cmd_list = draw_data.CmdListsRange[i];
+
+                vertexBuffer.SetData((void*)cmd_list.VtxBuffer.Data,
+                    vertexOffsetInVertices * (uint)sizeof(ImDrawVert), (uint)cmd_list.VtxBuffer.Size * (uint)sizeof(ImDrawVert));
+
+                indexBuffer.SetData((void*)cmd_list.IdxBuffer.Data,
+                    indexOffsetInElements * sizeof(ushort), (uint)cmd_list.IdxBuffer.Size * sizeof(ushort));
+
+                vertexOffsetInVertices += (uint)cmd_list.VtxBuffer.Size;
+                indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
+            }
+
+
+            vkCmdBindDescriptorSets(drawCmdBuffers[currentBuffer], VkPipelineBindPoint.Graphics, pipelineLayout, 0, 1, ref descriptorSet, 0, null);
+            vkCmdBindPipeline(drawCmdBuffers[currentBuffer], VkPipelineBindPoint.Graphics, pipelines_solid);
+
+            ulong offsets = 0;
+            vkCmdBindVertexBuffers(drawCmdBuffers[currentBuffer], VERTEX_BUFFER_BIND_ID, 1, ref vertexBuffer.buffer, &offsets);
+            vkCmdBindIndexBuffer(drawCmdBuffers[currentBuffer], indexBuffer.buffer, 0, VkIndexType.Uint16);
+
+            draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
+
+            int vtx_offset = 0;
+            int idx_offset = 0;
+            for (int n = 0; n < draw_data.CmdListsCount; n++)
+            {
+                ImDrawListPtr cmd_list = draw_data.CmdListsRange[n];
+                for (int cmd_i = 0; cmd_i < cmd_list.CmdBuffer.Size; cmd_i++)
+                {
+                    ImDrawCmdPtr pcmd = cmd_list.CmdBuffer[cmd_i];
+                    if (pcmd.UserCallback != IntPtr.Zero)
+                    {
+                        throw new NotImplementedException();
+                    }
+                    else
+                    {
+                        if (pcmd.TextureId != IntPtr.Zero)
+                        {
+                            if (pcmd.TextureId == _fontAtlasID)
+                            {
+                                //    cl.SetGraphicsResourceSet(1, _fontTextureResourceSet);
+                            }
+                            else
+                            {
+                                //    cl.SetGraphicsResourceSet(1, GetImageResourceSet(pcmd.TextureId));
+                            }
+                        }
+                        
+
+                        VkRect2D scissor = Initializers.rect2D((uint)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
+                            (uint)(pcmd.ClipRect.W - pcmd.ClipRect.Y), (int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y);
+                        vkCmdSetScissor(drawCmdBuffers[currentBuffer], 0, 1, &scissor);
+
+                        vkCmdDrawIndexed(drawCmdBuffers[currentBuffer], pcmd.ElemCount, 1, (uint)idx_offset, vtx_offset, 0);
+
+                    }
+
+                    idx_offset += (int)pcmd.ElemCount;
+                }
+
+                vtx_offset += cmd_list.VtxBuffer.Size;
+            }
+
+        }
+
+
+        private bool _controlDown;
+        private bool _shiftDown;
+        private bool _altDown;
+        private bool _winKeyDown;
+        private unsafe void UpdateImGuiInput()
+        {
+
+            ImGuiIOPtr io = ImGui.GetIO();
+
+            var mousePosition = snapshot.MousePosition;
+
+            // Determine if any of the mouse buttons were pressed during this snapshot period, even if they are no longer held.
+            bool leftPressed = false;
+            bool middlePressed = false;
+            bool rightPressed = false;
+            foreach (MouseEvent me in snapshot.MouseEvents)
+            {
+                if (me.Down)
+                {
+                    switch (me.MouseButton)
+                    {
+                        case MouseButton.Left:
+                            leftPressed = true;
+                            break;
+                        case MouseButton.Middle:
+                            middlePressed = true;
+                            break;
+                        case MouseButton.Right:
+                            rightPressed = true;
+                            break;
+                    }
+                }
+            }
+
+            io.MouseDown[0] = leftPressed || snapshot.IsMouseDown(MouseButton.Left);
+            io.MouseDown[1] = rightPressed || snapshot.IsMouseDown(MouseButton.Right);
+            io.MouseDown[2] = middlePressed || snapshot.IsMouseDown(MouseButton.Middle);
+            io.MousePos = mousePosition;
+            io.MouseWheel = snapshot.WheelDelta;
+
+            IReadOnlyList<char> keyCharPresses = snapshot.KeyCharPresses;
+            for (int i = 0; i < keyCharPresses.Count; i++)
+            {
+                char c = keyCharPresses[i];
+                io.AddInputCharacter(c);
+            }
+
+            IReadOnlyList<KeyEvent> keyEvents = snapshot.KeyEvents;
+            for (int i = 0; i < keyEvents.Count; i++)
+            {
+                KeyEvent keyEvent = keyEvents[i];
+                io.KeysDown[(int)keyEvent.Key] = keyEvent.Down;
+                if (keyEvent.Key == Key.ControlLeft)
+                {
+                    _controlDown = keyEvent.Down;
+                }
+                if (keyEvent.Key == Key.ShiftLeft)
+                {
+                    _shiftDown = keyEvent.Down;
+                }
+                if (keyEvent.Key == Key.AltLeft)
+                {
+                    _altDown = keyEvent.Down;
+                }
+                if (keyEvent.Key == Key.WinLeft)
+                {
+                    _winKeyDown = keyEvent.Down;
+                }
+            }
+
+            io.KeyCtrl = _controlDown;
+            io.KeyAlt = _altDown;
+            io.KeyShift = _shiftDown;
+            io.KeySuper = _winKeyDown;
+        }
+
+        public static void Main() => new ImGUI().ExampleMain();
     }
 }

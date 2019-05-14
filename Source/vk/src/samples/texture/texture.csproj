@@ -28,9 +28,21 @@
       <Link>data\shaders\texture\texture.frag.spv</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+
+    <Content Include="..\..\..\data\shaders\texture\ImGUI.vert.spv">
+      <Link>data\shaders\texture\ImGUI.vert.spv</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\data\shaders\texture\ImGUI.frag.spv">
+      <Link>data\shaders\texture\ImGUI.frag.spv</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../vk/vk.csproj" />
+    <PackageReference Include="ImGui.NET" Version="1.70.0" />
+    <PackageReference Include="Vk" Version="1.0.21" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../vk.samples.base/vk.samples.base.csproj" />
   </ItemGroup>
 </Project>
