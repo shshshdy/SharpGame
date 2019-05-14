@@ -142,7 +142,7 @@ namespace SharpGame
 
             ImGui.NewFrame();
 
-            SendEvent(new GUIEvent());
+            this.SendGlobalEvent(new GUIEvent());
 
         }
 

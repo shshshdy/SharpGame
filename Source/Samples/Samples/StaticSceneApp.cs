@@ -2,10 +2,9 @@ using VulkanCore;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 2)]
+    [SampleDesc(sortOrder = 0)]
     public class StaticSceneApp : Sample
     {
-        private Node node_;
         private Model model_;
         private Shader texturedShader;
         private Texture _cubeTexture;
@@ -34,19 +33,27 @@ namespace SharpGame.Samples
             camera_ = cameraNode.AddComponent<Camera>();
             camera_.AspectRatio = (float)Graphics.Width / Graphics.Height;
 
-            node_ = scene_.CreateChild("Model");
-
             model_ = ResourceCache.Load<Model>("Models/Mushroom.mdl").Result;
-
-            var staticModel = node_.AddComponent<StaticModel>();
-            staticModel.SetModel(model_);
 
             _cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
 
             var mat = new Material();
             mat.Shader = texturedShader;
             mat.SetTexture("sampler_Color", _cubeTexture);
-            staticModel.SetMaterial(0, mat);
+      
+            for(int i = 0; i < 10; i++)
+            {
+                for(int j = 0; j < 10; j++)
+                {
+                    var node = scene_.CreateChild($"Model_{i}_{j}");
+                    node.Position = new Vector3(i*5 - 5*5, 0, j * 5 - 5 * 5);
+                    var staticModel = node.AddComponent<StaticModel>();
+                    staticModel.SetModel(model_);
+                    staticModel.SetMaterial(0, mat);
+                }
+            }
+
+
 
             Renderer.MainView.Scene = scene_;
             Renderer.MainView.Camera = camera_;

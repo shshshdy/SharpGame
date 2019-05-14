@@ -221,7 +221,7 @@ namespace SharpGame
             {
                 ImGUI.LayoutRowDynamic(35);
 
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 10; i++)
                     if (ImGUI.ButtonLabel("Some Button " + i))
                         Console.WriteLine("You pressed button " + i);
 
@@ -236,7 +236,7 @@ namespace SharpGame
 
             HandleInput();
 
-            //TestWindow(100, 100);
+            TestWindow(100, 100);
 
             this.SendGlobalEvent(new GUIEvent());
         }
