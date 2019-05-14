@@ -877,17 +877,6 @@ namespace Vk.Samples
                 //indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsages.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
             }*/
 
-            /*
-            Matrix4x4 proj = Matrix4x4.CreateOrthographicOffCenter(
-                     0f,
-                     io.DisplaySize.X,
-                     io.DisplaySize.Y,
-                     0.0f,
-                     -1.0f,
-                     1.0f);
-
-            _projMatrixBuffer.SetData(ref proj);*/
-
             updateUniformBuffers();
 
             uint vertexOffsetInVertices = 0;
