@@ -20,7 +20,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../../vk/vk.csproj" />
     <ProjectReference Include="../vk.samples.base/vk.samples.base.csproj" />
   </ItemGroup>
 </Project>
