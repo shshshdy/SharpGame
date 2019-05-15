@@ -54,7 +54,7 @@ namespace SharpGame
         [DataMember]
         public ShaderReflection ShaderReflection { get; set; }
 
-        internal ShaderModule shaderModule;
+        internal VkShaderModule shaderModule;
 
         public ShaderModule()
         {
@@ -65,7 +65,6 @@ namespace SharpGame
             Stage = stage;
             FileName = fileName;
             FuncName = funcName;
-            shaderModule = null;
 
             var res = Get<ResourceCache>();
             
@@ -104,7 +103,7 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            shaderModule?.Dispose();
+            //todo shaderModule?.Dispose();
             Code = null;
 
             base.Destroy();

@@ -29,22 +29,22 @@ namespace SharpGame
         }
 
         public void Build()
-        {
+        {/*
             descriptorSetLayout = Graphics.CreateDescriptorSetLayout(bindings);
             descriptorResourceCounts = new DescriptorResourceCounts();
             
             foreach (var binding in bindings)
             {
                 descriptorResourceCounts[(int)binding.descriptorType] += 1;
-            }
+            }*/
         }
     }
 
     internal unsafe struct DescriptorResourceCounts
     {
-        fixed int counts[11];
+        fixed uint counts[11];
 
-        public ref int this[int idx] { get=> ref counts[idx]; }
+        public ref uint this[int idx] { get=> ref counts[idx]; }
         
     }
 

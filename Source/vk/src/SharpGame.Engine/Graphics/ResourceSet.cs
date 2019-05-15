@@ -6,6 +6,7 @@ using Vulkan;
 
 namespace SharpGame
 {
+    using System.Runtime.CompilerServices;
     using static Initializers;
 
     public class ResourceSet : IDisposable
@@ -18,22 +19,28 @@ namespace SharpGame
 
         private VkWriteDescriptorSet[] writeDescriptorSets;
         public ResourceSet(ResourceLayout resLayout)
-        {
+        {/*
             VkDescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
-            var dsAI = new VkDescriptorSetAllocateInfo(1, resLayout.descriptorSetLayout);
-            descriptorSet = pool.AllocateSets(dsAI)[0];
-            descriptorPool = pool;
-            resourceLayout = resLayout;
-            writeDescriptorSets = new VkWriteDescriptorSet[resLayout.numBindings];
+            unsafe
+            {
+                var dsAI = descriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.descriptorSetLayout), 1);
+                descriptorSet = pool.AllocateSets(dsAI)[0];
+                descriptorPool = pool;
+                resourceLayout = resLayout;
+            }
+            writeDescriptorSets = new VkWriteDescriptorSet[resLayout.numBindings];*/
         }
 
         public ResourceSet(ResourceLayout resLayout, params IBindable[] bindables)
-        {
+        {/*
             VkDescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
-            var dsAI = new VkDescriptorSetAllocateInfo(1, resLayout.descriptorSetLayout);
-            descriptorSet = pool.AllocateSets(dsAI)[0];
-            descriptorPool = pool;
-            resourceLayout = resLayout;
+            unsafe
+            {
+                var dsAI = descriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.descriptorSetLayout), 1);
+                descriptorSet = pool.AllocateSets(dsAI)[0];
+                descriptorPool = pool;
+                resourceLayout = resLayout;
+            }
 
             System.Diagnostics.Debug.Assert(bindables.Length == resLayout.numBindings);
 
@@ -42,13 +49,14 @@ namespace SharpGame
             {
                 Bind(i, bindables[i]);
             }
-            UpdateSets();
+
+            UpdateSets();*/
         }
 
         public void Dispose()
         {
-            descriptorPool.FreeSets(descriptorSet);
-            Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
+        //todo    descriptorPool.FreeSets(descriptorSet);
+            //Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
         }
         /*
         public ResourceSet Bind(int dstBinding, int dstArrayElement, int descriptorCount, VkDescriptorType descriptorType, VkDescriptorImageInfo[] imageInfo = null, VkDescriptorBufferInfo[] bufferInfo = null, VkBufferView[] texelBufferView = null)
@@ -58,7 +66,7 @@ namespace SharpGame
         }*/
 
         public ResourceSet Bind(int dstBinding, IBindable bindable)
-        {
+        {/*
             var descriptorType = resourceLayout.bindings[dstBinding].descriptorType;
             switch(descriptorType)
             {
@@ -90,13 +98,13 @@ namespace SharpGame
                     break;
                 case VkDescriptorType.InputAttachment:
                     break;
-            }
+            }*/
             return this;
         }
 
         public void UpdateSets()
         {
-            descriptorPool.UpdateSets(writeDescriptorSets);
+        //    descriptorPool.UpdateSets(writeDescriptorSets);
         }
 
     }

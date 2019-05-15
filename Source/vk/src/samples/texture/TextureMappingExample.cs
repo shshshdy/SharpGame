@@ -234,7 +234,7 @@ namespace SharpGame
 
                 memAllocInfo.allocationSize = memReqs.size;
                 // Get memory type index for a host visible buffer
-                memAllocInfo.memoryTypeIndex = vulkanDevice.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
+                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
 
                 Util.CheckResult(vkAllocateMemory(device, &memAllocInfo, null, &stagingMemory));
                 Util.CheckResult(vkBindBufferMemory(device, stagingBuffer, stagingMemory, 0));
@@ -289,7 +289,7 @@ namespace SharpGame
                 vkGetImageMemoryRequirements(device, texture.image, &memReqs);
 
                 memAllocInfo.allocationSize = memReqs.size;
-                memAllocInfo.memoryTypeIndex = vulkanDevice.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
+                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
                 Util.CheckResult(vkAllocateMemory(device, &memAllocInfo, null, out texture.DeviceMemory));
                 Util.CheckResult(vkBindImageMemory(device, texture.image, texture.DeviceMemory, 0));
@@ -459,10 +459,10 @@ namespace SharpGame
             sampler.maxLod = (useStaging == 1) ? (float)texture.mipLevels : 0.0f;
             // Enable anisotropic filtering
             // This feature is optional, so we must check if it's supported on the Device
-            if (vulkanDevice.features.samplerAnisotropy == 1)
+            if (Device.features.samplerAnisotropy == 1)
             {
                 // Use max. level of anisotropy for this example
-                sampler.maxAnisotropy = vulkanDevice.properties.limits.maxSamplerAnisotropy;
+                sampler.maxAnisotropy = Device.properties.limits.maxSamplerAnisotropy;
                 sampler.anisotropyEnable = True;
             }
             else
@@ -613,14 +613,14 @@ namespace SharpGame
             // Create buffers
             // For the sake of simplicity we won't stage the vertex data to the gpu memory
             // Vertex buffer
-            Util.CheckResult(vulkanDevice.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.VertexBuffer,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
                 vertexBuffer,
                 (ulong)(vertices.Count * sizeof(Vertex)),
                 vertices.Data.ToPointer()));
             // Index buffer
-            Util.CheckResult(vulkanDevice.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.IndexBuffer,
                 VkMemoryPropertyFlags.HostCoherent | VkMemoryPropertyFlags.HostCoherent,
                 indexBuffer,
@@ -835,7 +835,7 @@ namespace SharpGame
         {
             var localUboVS = uboVS;
             // Vertex shader uniform buffer block
-            Util.CheckResult(vulkanDevice.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.UniformBuffer,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
                 uniformBufferVS,

@@ -96,100 +96,87 @@ namespace SharpGame
                 }
             };
 
-            ColorBlendState = new VkPipelineColorBlendStateCreateInfo(new[]
-            {
-                new VkPipelineColorBlendAttachmentState
-                {
-                    srcColorBlendFactor = VkBlendFactor.One,
-                    dstColorBlendFactor = VkBlendFactor.Zero,
-                    colorBlendOp = VkBlendOp.Add,
-                    srcAlphaBlendFactor = VkBlendFactor.One,
-                    dstAlphaBlendFactor = VkBlendFactor.Zero,
-                    alphaBlendOp = VkBlendOp.Add,
-                    colorWriteMask = (VkColorComponentFlags)0xf
-                }
-            });
+            BlendMode = BlendMode.Replace;
 
         }
 
         protected override void Destroy()
         {
-            pipeline?.Dispose();
-            pipeline = null;
+            //todo pipeline?.Dispose();
+            //pipeline = null;
 
             base.Destroy();
         }
 
-        public void SetBlendMode(BlendMode blendMode)
+        public unsafe void SetBlendMode(BlendMode blendMode)
         {
-            switch(blendMode)
+            VkPipelineColorBlendAttachmentState colorBlendAttachmentState;
+            switch (blendMode)
             {
                 case BlendMode.Replace:
-                    ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
+
+                    colorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
                     {
-                        new PipelineColorBlendAttachmentState
-                        {
-                            SrcColorBlendFactor = BlendFactor.One,
-                            DstColorBlendFactor = BlendFactor.Zero,
-                            ColorBlendOp = BlendOp.Add,
-                            SrcAlphaBlendFactor = BlendFactor.One,
-                            DstAlphaBlendFactor = BlendFactor.Zero,
-                            AlphaBlendOp = BlendOp.Add,
-                            ColorWriteMask = ColorComponents.All
-                        }
-                    });
+                        srcColorBlendFactor = VkBlendFactor.One,
+                        dstColorBlendFactor = VkBlendFactor.Zero,
+                        colorBlendOp = VkBlendOp.Add,
+                        srcAlphaBlendFactor = VkBlendFactor.One,
+                        dstAlphaBlendFactor = VkBlendFactor.Zero,
+                        alphaBlendOp = VkBlendOp.Add,
+                        colorWriteMask = (VkColorComponentFlags)0xf
+                    };
+
+                    ColorBlendState = pipelineColorBlendStateCreateInfo(1, &colorBlendAttachmentState);
                     break;
                 case BlendMode.Add:
-                    ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
+
+                    colorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
                     {
-                        new PipelineColorBlendAttachmentState
-                        {
-                            BlendEnable = true,
-                            SrcColorBlendFactor = BlendFactor.One,
-                            DstColorBlendFactor = BlendFactor.One,
-                            ColorBlendOp = BlendOp.Add,
-                            SrcAlphaBlendFactor = BlendFactor.SrcAlpha,
-                            DstAlphaBlendFactor = BlendFactor.DstAlpha,
-                            AlphaBlendOp = BlendOp.Add,
-                            ColorWriteMask = ColorComponents.All
-                        }
-                    });
+                        srcColorBlendFactor = VkBlendFactor.One,
+                        dstColorBlendFactor = VkBlendFactor.One,
+                        colorBlendOp = VkBlendOp.Add,
+                        srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
+                        dstAlphaBlendFactor = VkBlendFactor.DstAlpha,
+                        alphaBlendOp = VkBlendOp.Add,
+                        colorWriteMask = (VkColorComponentFlags)0xf
+                    };
+
+                    ColorBlendState = pipelineColorBlendStateCreateInfo(1, &colorBlendAttachmentState);
+
                     break;
                 case BlendMode.MultiplY:
                     break;
                 case BlendMode.Alpha:
-                    ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
+                    colorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
                     {
-                        new PipelineColorBlendAttachmentState
-                        {
-                            BlendEnable = true,
-                            SrcColorBlendFactor = BlendFactor.SrcAlpha,
-                            DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                            ColorBlendOp = BlendOp.Add,
-                            SrcAlphaBlendFactor = BlendFactor.One,
-                            DstAlphaBlendFactor = BlendFactor.Zero,
-                            AlphaBlendOp = BlendOp.Add,
-                            ColorWriteMask = ColorComponents.All
-                        }
-                    });
+                        blendEnable = true,
+                        srcColorBlendFactor = VkBlendFactor.SrcAlpha,
+                        dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                        colorBlendOp = VkBlendOp.Add,
+                        srcAlphaBlendFactor = VkBlendFactor.One,
+                        dstAlphaBlendFactor = VkBlendFactor.Zero,
+                        alphaBlendOp = VkBlendOp.Add,
+                        colorWriteMask = (VkColorComponentFlags)0xf
+                    };
+
+                    ColorBlendState = pipelineColorBlendStateCreateInfo(1, &colorBlendAttachmentState);
                     break;
                 case BlendMode.AddAlpha:
                     break;
                 case BlendMode.PremulAlpha:
-                    ColorBlendState = new PipelineColorBlendStateCreateInfo(new[]
+                    colorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
                     {
-                        new PipelineColorBlendAttachmentState
-                        {
-                            BlendEnable = true,
-                            SrcColorBlendFactor = BlendFactor.One,
-                            DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                            ColorBlendOp = BlendOp.Add,
-                            SrcAlphaBlendFactor = BlendFactor.One,
-                            DstAlphaBlendFactor = BlendFactor.Zero,
-                            AlphaBlendOp = BlendOp.Add,
-                            ColorWriteMask = ColorComponents.All
-                        }
-                    });
+                        blendEnable = true,
+                        srcColorBlendFactor = VkBlendFactor.SrcAlpha,
+                        dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                        colorBlendOp = VkBlendOp.Add,
+                        srcAlphaBlendFactor = VkBlendFactor.One,
+                        dstAlphaBlendFactor = VkBlendFactor.Zero,
+                        alphaBlendOp = VkBlendOp.Add,
+                        colorWriteMask = (VkColorComponentFlags)0xf
+                    };
+
+                    ColorBlendState = pipelineColorBlendStateCreateInfo(1, &colorBlendAttachmentState);
                     break;
                 case BlendMode.InvdestAlpha:
                     break;
@@ -213,14 +200,12 @@ namespace SharpGame
                 return pipeline;
             }
 
-            var graphics = Get<Graphics>();
-
             var pass = shader.GetPass(renderPass.passID);
             if(pass == null)
             {
                 return 0;
             }
-
+            /*
             var pipelineLayoutInfo = new VkPipelineLayoutCreateInfo(new[]
             { pass.ResourceLayout.descriptorSetLayout });
 
@@ -247,8 +232,9 @@ namespace SharpGame
                 dynamicState : DynamicStateCreateInfo);
 
             pipeline = Graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
-            Graphics.ToDisposeFrame(pipeline);
-            return pipeline;
+            //Graphics.ToDisposeFrame(pipeline);
+            return pipeline;*/
+            return 0;
         }
 
         public VkPipeline GetComputePipeline(Pass shaderPass)
@@ -257,7 +243,7 @@ namespace SharpGame
             {
                 return 0;
             }
-
+            /*
             var pipelineLayoutInfo = new VkPipelineLayoutCreateInfo(new[]
             { shaderPass.ResourceLayout.descriptorSetLayout });
             pipelineLayout = Graphics.Device.CreatePipelineLayout(pipelineLayoutInfo);
@@ -267,7 +253,8 @@ namespace SharpGame
 
             pipeline = Graphics.Device.CreateComputePipeline(pipelineCreateInfo);
             Graphics.ToDisposeFrame(pipeline);
-            return pipeline;
+            return pipeline;*/
+            return 0;
         }
         
     }

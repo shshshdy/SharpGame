@@ -17,4 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\SharpGame.Base\SharpGame.Base.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Rendering\" />
+  </ItemGroup>
 </Project>

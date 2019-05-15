@@ -17,7 +17,7 @@ namespace SharpGame
             rotM = Matrix4x4.CreateRotationY(Util.DegreesToRadians(rotation.Y)) * rotM;
             rotM = Matrix4x4.CreateRotationZ(Util.DegreesToRadians(rotation.Z)) * rotM;
 
-            transM = Matrix4x4.CreateTranslation(position);
+            transM = Matrix4x4.CreateTranslation((System.Numerics.Vector3)position);
 
             //if (type == CameraType.firstperson)
             {

@@ -38,7 +38,7 @@ namespace SharpGame
         public IntPtr WindowInstance { get; protected set; }
         public VkInstance Instance { get; protected set; }
         public VkPhysicalDevice physicalDevice { get; protected set; }
-        public vksVulkanDevice vulkanDevice { get; protected set; }
+        public vksVulkanDevice Device { get; protected set; }
         public VkPhysicalDeviceFeatures enabledFeatures { get; protected set; }
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
         public VkDevice device { get; protected set; }
@@ -125,17 +125,17 @@ namespace SharpGame
             // Vulkan Device creation
             // This is handled by a separate class that gets a logical Device representation
             // and encapsulates functions related to a Device
-            vulkanDevice = new vksVulkanDevice(physicalDevice);
-            VkResult res = vulkanDevice.CreateLogicalDevice(enabledFeatures, EnabledExtensions);
+            Device = new vksVulkanDevice(physicalDevice);
+            VkResult res = Device.CreateLogicalDevice(enabledFeatures, EnabledExtensions);
             if (res != VkResult.Success)
             {
                 throw new InvalidOperationException("Could not create Vulkan Device.");
             }
-            device = vulkanDevice.LogicalDevice;
+            device = Device.LogicalDevice;
 
             // Get a graphics queue from the Device
             VkQueue queue;
-            vkGetDeviceQueue(device, vulkanDevice.QFIndices.Graphics, 0, &queue);
+            vkGetDeviceQueue(device, Device.QFIndices.Graphics, 0, &queue);
             this.queue = queue;
 
             // Find a suitable depth format
@@ -353,7 +353,7 @@ namespace SharpGame
             Util.CheckResult(vkCreateImage(device, &image, null, out DepthStencil.Image));
             vkGetImageMemoryRequirements(device, DepthStencil.Image, out VkMemoryRequirements memReqs);
             mem_alloc.allocationSize = memReqs.size;
-            mem_alloc.memoryTypeIndex = vulkanDevice.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
+            mem_alloc.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
             Util.CheckResult(vkAllocateMemory(device, &mem_alloc, null, out DepthStencil.Mem));
             Util.CheckResult(vkBindImageMemory(device, DepthStencil.Image, DepthStencil.Mem, 0));
 

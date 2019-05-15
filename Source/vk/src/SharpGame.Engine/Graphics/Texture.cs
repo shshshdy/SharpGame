@@ -46,7 +46,7 @@ namespace SharpGame
             bool forceLinear = false)
         {
             KtxFile tex2D;
-            using (var fs = File.OpenRead(filename))
+            using (var fs = System.IO.File.OpenRead(filename))
             {
                 tex2D = KtxFile.Load(fs, false);
             }

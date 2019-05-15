@@ -75,7 +75,7 @@ namespace SharpGame
                 pPoolSizes = sizes
             };
 
-            VkDescriptorPool descriptorPool = Graphics.Device.CreateDescriptorPool(poolCI);
+            VkDescriptorPool descriptorPool = 0;//todo Graphics.Device.CreateDescriptorPool(poolCI);
             return new PoolInfo(descriptorPool, totalSets, descriptorCount);
         }
 
@@ -83,7 +83,8 @@ namespace SharpGame
         {
             foreach (PoolInfo poolInfo in _pools)
             {
-                poolInfo.Pool.Dispose();
+                //todo poolInfo.Pool.Dispose();
+                //vkDestroyDescriptorPool()
             }
 
             _pools.Clear();

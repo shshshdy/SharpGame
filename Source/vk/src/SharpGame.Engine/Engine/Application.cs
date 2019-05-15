@@ -84,7 +84,7 @@ namespace SharpGame
 
         public virtual void Initialize()
         {
-            if (vulkanDevice.EnableDebugMarkers)
+            if (Device.EnableDebugMarkers)
             {
                 // vks::debugmarker::setup(Device);
             }

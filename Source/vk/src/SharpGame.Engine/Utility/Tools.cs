@@ -40,11 +40,11 @@ namespace SharpGame
 
         public static VkShaderModule loadShader(string fileName, VkDevice device, VkShaderStageFlags stage)
         {
-            using (var fs = File.OpenRead(fileName))
+            using (var fs = System.IO.File.OpenRead(fileName))
             {
                 var length = fs.Length;
             }
-            byte[] shaderCode = File.ReadAllBytes(fileName);
+            byte[] shaderCode = System.IO.File.ReadAllBytes(fileName);
             ulong shaderSize = (ulong)shaderCode.Length;
             fixed (byte* scPtr = shaderCode)
             {
