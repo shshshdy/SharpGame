@@ -13,4 +13,7 @@
     <PackageReference Include="Veldrid.Sdl2" Version="4.6.1" />
     <PackageReference Include="Vk" Version="1.0.21" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Core\" />
+  </ItemGroup>
 </Project>
