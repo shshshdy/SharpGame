@@ -3,24 +3,6 @@
 
 // Original file: dynamicuniformbuffer/dynamicuniformbuffer.cpp
 
-/*
-* Vulkan Example - Dynamic uniform buffers
-*
-* Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
-*
-* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-*
-* Summary:
-* Demonstrates the use of dynamic uniform buffers.
-*
-* Instead of using one uniform buffer per-object, this example allocates one big uniform buffer
-* with respect to the alignment reported by the device via minUniformBufferOffsetAlignment that
-* contains all matrices for the objects in the scene.
-*
-* The used descriptor type VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC then allows to set a dynamic
-* offset used to pass data from the single uniform buffer to the connected shader binding point.
-*/
-
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -49,17 +31,6 @@ namespace SharpGame
         void* alignedAlloc(IntPtr size, IntPtr alignment)
         {
             return Marshal.AllocHGlobal(size).ToPointer();
-            /*
-            void* data = null;
-#if defined(_MSC_VER) || defined(__MINGW32__)
-	data = _aligned_malloc(size, alignment);
-#else
-            int res = posix_memalign(&data, alignment, size);
-            if (res != 0)
-                data = null;
-#endif
-            return data;
-            */
         }
 
         void alignedFree(void* data)
