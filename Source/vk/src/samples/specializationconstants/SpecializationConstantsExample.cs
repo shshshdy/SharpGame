@@ -20,9 +20,9 @@ using Vulkan;
 using static Vulkan.VulkanNative;
 using static Vulkan.RawConstants;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class SpecializationConstantsExample : VulkanExampleBase
+    public unsafe class SpecializationConstantsExample : Application
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
 
@@ -39,7 +39,7 @@ namespace Vk.Samples
 
         vksModel models_cube = new vksModel();
         vksTexture2D textures_colormap = new vksTexture2D();
-        vksBuffer uniformBuffer = new vksBuffer();
+        GraphicsBuffer uniformBuffer = new GraphicsBuffer();
 
         // Same uniform buffer layout as shader
         struct UboVS

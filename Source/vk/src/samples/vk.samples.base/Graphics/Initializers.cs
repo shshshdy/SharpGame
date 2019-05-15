@@ -15,7 +15,7 @@ using System;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     public unsafe static class Initializers
     {

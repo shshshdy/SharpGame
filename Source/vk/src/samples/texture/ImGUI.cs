@@ -22,7 +22,7 @@ using Veldrid.Sdl2;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     // ImVertex layout for this example
     public struct ImVertex
@@ -36,7 +36,7 @@ namespace Vk.Samples
         public const uint ColorOffset = 16;
     };
 
-    public unsafe class ImGUI : VulkanExampleBase, IDisposable
+    public unsafe class ImGUI : Application, IDisposable
     {
         // Contains all Vulkan objects that are required to store and use a texture
         // Note that this repository contains a texture class (VulkanTexture.hpp) that encapsulates texture loading functionality in a class that is used in subsequent demos
@@ -62,10 +62,10 @@ namespace Vk.Samples
 
         Vertices vertices = new Vertices();
 
-        vksBuffer vertexBuffer = new Samples.vksBuffer();
-        vksBuffer indexBuffer = new vksBuffer();
+        GraphicsBuffer vertexBuffer = new GraphicsBuffer();
+        GraphicsBuffer indexBuffer = new GraphicsBuffer();
 
-        vksBuffer uniformBufferVS = new vksBuffer();
+        GraphicsBuffer uniformBufferVS = new GraphicsBuffer();
 
         public struct UboVS
         {

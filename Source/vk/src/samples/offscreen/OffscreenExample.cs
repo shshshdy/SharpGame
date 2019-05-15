@@ -23,9 +23,9 @@ using System.IO;
 using Veldrid.Sdl2;
 using Veldrid;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class OffscreenExample : VulkanExampleBase
+    public unsafe class OffscreenExample : Application
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
 
@@ -52,10 +52,10 @@ namespace Vk.Samples
         NativeList<VkVertexInputBindingDescription> vertices_bindingDescriptions = new NativeList<VkVertexInputBindingDescription>();
         NativeList<VkVertexInputAttributeDescription> vertices_attributeDescriptions = new NativeList<VkVertexInputAttributeDescription>();
 
-        vksBuffer uniformBuffers_vsShared = new vksBuffer();
-        vksBuffer uniformBuffers_vsMirror = new vksBuffer();
-        vksBuffer uniformBuffers_vsOffScreen = new vksBuffer();
-        vksBuffer uniformBuffers_vsDebugQuad = new vksBuffer();
+        GraphicsBuffer uniformBuffers_vsShared = new GraphicsBuffer();
+        GraphicsBuffer uniformBuffers_vsMirror = new GraphicsBuffer();
+        GraphicsBuffer uniformBuffers_vsOffScreen = new GraphicsBuffer();
+        GraphicsBuffer uniformBuffers_vsDebugQuad = new GraphicsBuffer();
 
         struct UBO
         {

@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     public struct VertexPositionNormalTexture
     {

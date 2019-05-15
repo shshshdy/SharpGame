@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     // A ridiculously bad KTX file parser.
     // https://www.khronos.org/opengles/sdk/tools/KTX/file_format_spec

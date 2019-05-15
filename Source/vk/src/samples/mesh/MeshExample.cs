@@ -20,9 +20,9 @@ using Veldrid.Sdl2;
 using static Vulkan.VulkanNative;
 using Veldrid;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class MeshExample : VulkanExampleBase
+    public unsafe class MeshExample : Application
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
         bool wireframe = false;
@@ -64,7 +64,7 @@ namespace Vk.Samples
             vkFreeMemory(Device, model_indices_memory, null);
         }
 
-        vksBuffer uniformBuffers_scene = new vksBuffer();
+        GraphicsBuffer uniformBuffers_scene = new GraphicsBuffer();
 
         struct UboVS
         {

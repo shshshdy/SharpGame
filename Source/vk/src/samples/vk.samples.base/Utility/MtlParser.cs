@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     /// <summary>
     /// A parser for Wavefront MTL files.

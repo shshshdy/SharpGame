@@ -19,7 +19,7 @@ using Vulkan;
 using System.Collections.Generic;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     public enum VertexComponent
     {
@@ -99,8 +99,8 @@ namespace Vk.Samples
             PostProcessSteps.FlipWindingOrder | PostProcessSteps.Triangulate | PostProcessSteps.PreTransformVertices 
             | PostProcessSteps.CalculateTangentSpace | PostProcessSteps.GenerateSmoothNormals;
         public VkDevice device;
-        public vksBuffer vertices = new vksBuffer();
-        public vksBuffer indices = new vksBuffer();
+        public GraphicsBuffer vertices = new GraphicsBuffer();
+        public GraphicsBuffer indices = new GraphicsBuffer();
         public uint indexCount = 0;
         public uint vertexCount = 0;
 
@@ -514,8 +514,8 @@ namespace Vk.Samples
 
             // Use staging buffer to move vertex and index buffer to device local memory
             // Create staging buffers
-            vksBuffer vertexStaging = new vksBuffer();
-            vksBuffer indexStaging = new vksBuffer();
+            GraphicsBuffer vertexStaging = new GraphicsBuffer();
+            GraphicsBuffer indexStaging = new GraphicsBuffer();
 
             // Vertex buffer
             Util.CheckResult(device.createBuffer(

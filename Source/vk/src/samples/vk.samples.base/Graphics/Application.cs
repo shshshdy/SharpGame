@@ -23,9 +23,9 @@ using System.IO;
 using Veldrid;
 using Veldrid.Sdl2;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class VulkanExampleBase
+    public unsafe partial class Application
     {
         public FixedUtf8String title { get; set; } = "Vulkan Example";
         public FixedUtf8String Name { get; set; } = "VulkanExample";

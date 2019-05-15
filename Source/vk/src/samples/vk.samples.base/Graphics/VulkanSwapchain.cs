@@ -19,7 +19,7 @@ using Veldrid.Sdl2;
 using static Vulkan.VulkanNative;
 using static Veldrid.Sdl2.Sdl2Native;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     public unsafe class VulkanSwapchain
     {

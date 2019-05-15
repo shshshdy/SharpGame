@@ -1,7 +1,7 @@
 ﻿using System;
 using Vulkan;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     public static class Util
     {

@@ -18,9 +18,9 @@ using System.Runtime.CompilerServices;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class PipelinesExample : VulkanExampleBase, IDisposable
+    public unsafe class PipelinesExample : Application, IDisposable
     {
         public const uint VERTEX_BUFFER_BIND_ID = 0;
 
@@ -37,7 +37,7 @@ namespace Vk.Samples
 
         vksModel models_cube = new vksModel();
 
-        vksBuffer uniformBuffer = new vksBuffer();
+        GraphicsBuffer uniformBuffer = new GraphicsBuffer();
 
         struct UboVS
         {

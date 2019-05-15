@@ -14,7 +14,7 @@
 using System;
 using System.Numerics;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     public class Camera
     {

@@ -1,16 +1,5 @@
 ﻿// This code has been adapted from the "Vulkan" C++ example repository, by Sascha Willems: https://github.com/SaschaWillems/Vulkan
 // It is a direct translation from the original C++ code and style, with as little transformation as possible.
-
-// Original file: base/VulkanDevice.hpp, 
-
-/*
-* Vulkan Example base class
-*
-* Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
-*
-* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-*/
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,7 +7,7 @@ using System.Runtime.CompilerServices;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     public unsafe class vksVulkanDevice
     {
@@ -254,7 +243,7 @@ namespace Vk.Samples
         *
         * @return VK_SUCCESS if buffer handle and memory have been created and (optionally passed) data has been copied
         */
-        public VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, vksBuffer buffer, ulong size, void* data = null)
+        public VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, GraphicsBuffer buffer, ulong size, void* data = null)
         {
             buffer.device = _logicalDevice;
 
@@ -293,7 +282,7 @@ namespace Vk.Samples
             return buffer.bind();
         }
 
-        public VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, vksBuffer buffer, ulong size, IntPtr data)
+        public VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, GraphicsBuffer buffer, ulong size, IntPtr data)
             => createBuffer(usageFlags, memoryPropertyFlags, buffer, size, data.ToPointer());
 
         /**

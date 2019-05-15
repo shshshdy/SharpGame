@@ -17,7 +17,7 @@ using System.IO;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     public unsafe class Tools
     {

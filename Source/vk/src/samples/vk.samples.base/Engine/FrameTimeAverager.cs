@@ -1,4 +1,4 @@
-﻿namespace Vk.Samples
+﻿namespace SharpGame
 {
     // Taken from Game Engine code
     public class FrameTimeAverager

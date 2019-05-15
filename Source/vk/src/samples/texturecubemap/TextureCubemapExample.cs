@@ -21,12 +21,12 @@ using Veldrid.Sdl2;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class TextureCubemapExample : VulkanExampleBase
+    public unsafe class TextureCubemapExample : Application
     {
         public bool displaySkybox = true;
-        public vksTexture cubeMap = new vksTexture();
+        public Texture cubeMap = new Texture();
 
         public class Vertices
         {
@@ -47,8 +47,8 @@ namespace Vk.Samples
         public List<vksModel> models_objects = new List<vksModel>();
         public uint models_objectIndex = 0;
 
-        public vksBuffer uniformBuffers_object = new vksBuffer();
-        public vksBuffer uniformBuffers_skybox = new vksBuffer();
+        public GraphicsBuffer uniformBuffers_object = new GraphicsBuffer();
+        public GraphicsBuffer uniformBuffers_skybox = new GraphicsBuffer();
 
         public struct UboVS
         {

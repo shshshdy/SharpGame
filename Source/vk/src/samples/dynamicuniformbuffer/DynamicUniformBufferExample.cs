@@ -30,9 +30,9 @@ using static Vulkan.RawConstants;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class DynamicUniformBufferExample : VulkanExampleBase
+    public unsafe class DynamicUniformBufferExample : Application
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
         private const uint OBJECT_INSTANCES = 125;
@@ -71,12 +71,12 @@ namespace Vk.Samples
         NativeList<VkVertexInputBindingDescription> vertices_bindingDescriptions = new NativeList<VkVertexInputBindingDescription>();
         NativeList<VkVertexInputAttributeDescription> vertices_attributeDescriptions = new NativeList<VkVertexInputAttributeDescription>();
 
-        vksBuffer vertexBuffer = new vksBuffer();
-        vksBuffer indexBuffer = new vksBuffer();
+        GraphicsBuffer vertexBuffer = new GraphicsBuffer();
+        GraphicsBuffer indexBuffer = new GraphicsBuffer();
         uint indexCount;
 
-        vksBuffer uniformBuffers_view = new vksBuffer();
-        vksBuffer uniformBuffers_dynamic = new vksBuffer();
+        GraphicsBuffer uniformBuffers_view = new GraphicsBuffer();
+        GraphicsBuffer uniformBuffers_dynamic = new GraphicsBuffer();
 
         struct UboVS
         {

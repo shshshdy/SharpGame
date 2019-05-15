@@ -25,9 +25,9 @@ using System.Text;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class TriangleExample : VulkanExampleBase
+    public unsafe class TriangleExample : Application
     {
         public VkSemaphore PresentCompleteSemaphore => _presentCompleteSemaphore;
         public VkSemaphore RenderCompleteSemaphore => _renderCompleteSemaphore;

@@ -1,26 +1,13 @@
-﻿// This code has been adapted from the "Vulkan" C++ example repository, by Sascha Willems: https://github.com/SaschaWillems/Vulkan
-// It is a direct translation from the original C++ code and style, with as little transformation as possible.
-
-// Original file: base/VulkanBuffer.hpp, 
-
-/*
-* Vulkan Example base class
-*
-* Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
-*
-* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-*/
-
-using Vulkan;
+﻿using Vulkan;
 using VkDeviceSize = System.UInt64;
 using static Vulkan.VulkanNative;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class vksBuffer
+    public unsafe class GraphicsBuffer
     {
         /**
         * @brief Encapsulates access to a Vulkan buffer backed up by device memory

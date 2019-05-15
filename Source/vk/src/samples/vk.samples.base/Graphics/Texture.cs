@@ -1,26 +1,13 @@
-﻿// This code has been adapted from the "Vulkan" C++ example repository, by Sascha Willems: https://github.com/SaschaWillems/Vulkan
-// It is a direct translation from the original C++ code and style, with as little transformation as possible.
-
-// Original file: base/VulkanTexture.hpp, 
-
-/*
-* Vulkan Example base class
-*
-* Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
-*
-* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-*/
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public class vksTexture
+    public class Texture
     {
         public VkImageView view;
         public VkImage image;
@@ -33,7 +20,7 @@ namespace Vk.Samples
         public VkDescriptorImageInfo descriptor;
     }
 
-    public unsafe class vksTexture2D : vksTexture
+    public unsafe class vksTexture2D : Texture
     {
         private vksVulkanDevice device;
 

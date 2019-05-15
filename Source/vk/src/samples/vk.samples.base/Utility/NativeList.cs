@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 #if !VALIDATE
 using System.Diagnostics;
 #endif
-namespace Vk.Samples
+namespace SharpGame
 {
     public unsafe class NativeList<T> : IEnumerable<T>, IDisposable where T : struct
     {

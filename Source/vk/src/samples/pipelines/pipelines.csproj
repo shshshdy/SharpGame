@@ -42,6 +42,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../vk.samples.base/vk.samples.base.csproj" />
+    <ProjectReference Include="..\vk.samples.base\SharpGame.Engine.csproj" />
   </ItemGroup>
 </Project>

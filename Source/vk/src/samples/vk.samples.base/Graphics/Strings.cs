@@ -1,4 +1,4 @@
-﻿namespace Vk.Samples
+﻿namespace SharpGame
 {
     public static class Strings
     {

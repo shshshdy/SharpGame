@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     public unsafe class FixedUtf8String : IDisposable
     {

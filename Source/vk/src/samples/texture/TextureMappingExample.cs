@@ -20,7 +20,7 @@ using Veldrid.Sdl2;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
     // Vertex layout for this example
     public struct Vertex
@@ -34,7 +34,7 @@ namespace Vk.Samples
         public const uint NormalOffset = 20;
     };
 
-    public unsafe class TextureMappingExample : VulkanExampleBase, IDisposable
+    public unsafe class TextureMappingExample : Application, IDisposable
     {
         // Contains all Vulkan objects that are required to store and use a texture
         // Note that this repository contains a texture class (VulkanTexture.hpp) that encapsulates texture loading functionality in a class that is used in subsequent demos
@@ -60,11 +60,11 @@ namespace Vk.Samples
 
         Vertices vertices = new Vertices();
 
-        vksBuffer vertexBuffer = new Samples.vksBuffer();
-        vksBuffer indexBuffer = new vksBuffer();
+        GraphicsBuffer vertexBuffer = new GraphicsBuffer();
+        GraphicsBuffer indexBuffer = new GraphicsBuffer();
         uint indexCount;
 
-        vksBuffer uniformBufferVS = new vksBuffer();
+        GraphicsBuffer uniformBufferVS = new GraphicsBuffer();
 
         public struct UboVS
         {

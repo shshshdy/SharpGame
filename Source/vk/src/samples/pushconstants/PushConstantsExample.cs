@@ -18,9 +18,9 @@ using Vulkan;
 using System.Diagnostics;
 using static Vulkan.VulkanNative;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class PushConstantsExample : VulkanExampleBase
+    public unsafe class PushConstantsExample : Application
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
         private VkPipelineVertexInputStateCreateInfo vertices_inputState;
@@ -36,7 +36,7 @@ namespace Vk.Samples
 
         private vksModel models_scene = new vksModel();
 
-        private vksBuffer uniformBuffer = new vksBuffer();
+        private GraphicsBuffer uniformBuffer = new GraphicsBuffer();
 
         public struct UboVS
         {

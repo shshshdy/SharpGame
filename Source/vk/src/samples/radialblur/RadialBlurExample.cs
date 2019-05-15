@@ -20,9 +20,9 @@ using System.Runtime.CompilerServices;
 using Veldrid.Sdl2;
 using Veldrid;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe class RadialBlurExample : VulkanExampleBase
+    public unsafe class RadialBlurExample : Application
     {
 
         private const uint VERTEX_BUFFER_BIND_ID = 0;
@@ -47,8 +47,8 @@ namespace Vk.Samples
         NativeList<VkVertexInputBindingDescription> vertices_bindingDescriptions = new NativeList<VkVertexInputBindingDescription>();
         NativeList<VkVertexInputAttributeDescription> vertices_attributeDescriptions = new NativeList<VkVertexInputAttributeDescription>();
 
-        vksBuffer uniformBuffers_scene = new vksBuffer();
-        vksBuffer uniformBuffers_blurParams = new vksBuffer();
+        GraphicsBuffer uniformBuffers_scene = new GraphicsBuffer();
+        GraphicsBuffer uniformBuffers_blurParams = new GraphicsBuffer();
 
         struct UboVS
         {

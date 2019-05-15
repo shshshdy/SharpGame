@@ -1,8 +1,8 @@
 ﻿using Vulkan;
 
-namespace Vk.Samples
+namespace SharpGame
 {
-    public unsafe static class VkPhysicalDeviceMemoryPropertiesEx
+    public unsafe static class VulkanEx
     {
         public static VkMemoryType GetMemoryType(this VkPhysicalDeviceMemoryProperties memoryProperties, uint index)
         {
