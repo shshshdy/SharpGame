@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples", "Samples\Samples.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuklearSharp", "..\NuklearSharp\NuklearSharp.csproj", "{B7F5E7EA-95DB-4F9D-88A3-DF046C240579}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGame.Base", "SharpGame.Base\SharpGame.Base.csproj", "{163A4529-0960-4ADC-86C7-178F054F3C1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{B7F5E7EA-95DB-4F9D-88A3-DF046C240579}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7F5E7EA-95DB-4F9D-88A3-DF046C240579}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7F5E7EA-95DB-4F9D-88A3-DF046C240579}.Release|Any CPU.Build.0 = Release|Any CPU
+		{163A4529-0960-4ADC-86C7-178F054F3C1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{163A4529-0960-4ADC-86C7-178F054F3C1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{163A4529-0960-4ADC-86C7-178F054F3C1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{163A4529-0960-4ADC-86C7-178F054F3C1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +68,7 @@ Global
 		{BABA6C0F-E988-42F1-B214-B2CABFE4011E} = {24698283-C0E2-4104-9B72-3E8CE247CA61}
 		{07A569EA-AA7E-4B5B-9F7D-26D0CC16965F} = {10BBB27C-8871-46F3-A1E1-B5246BB0315C}
 		{B7F5E7EA-95DB-4F9D-88A3-DF046C240579} = {7F045293-ECC0-48C6-8A8D-8CA351236ACB}
+		{163A4529-0960-4ADC-86C7-178F054F3C1C} = {7F045293-ECC0-48C6-8A8D-8CA351236ACB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC0780F6-BD76-45F9-80BA-1CC438DBDDE7}

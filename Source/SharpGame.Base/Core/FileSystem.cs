@@ -8,13 +8,11 @@ namespace SharpGame
 {
     public class FileSystem : Object
     {
-        IGameWindow platform;
-        public FileSystem(IGameWindow platform)
+        public FileSystem()
         {
-            this.platform = platform;
         }
 
-        public Stream Open(string path) => platform.Open(path);
+        public Stream Open(string path) => new FileStream(path, FileMode.Open);
 
         public byte[] ReadBytes(string path)
         {

@@ -54,16 +54,17 @@ namespace SharpGame
 
         public string DataPath { get; }
 
+        private Context context;
         public Application(string dataPath)
         {
-            new Context();
+            context = new Context();
 
             DataPath = dataPath;
         }
 
         protected override void Destroy()
         {
-            _context.Dispose();
+            context.Dispose();
         }
         
         public void Run(IGameWindow window)
@@ -76,7 +77,7 @@ namespace SharpGame
         protected virtual void Setup()
         {
             timer = CreateSubsystem<Timer>();
-            fileSystem = CreateSubsystem<FileSystem>(gameWindow);
+            fileSystem = CreateSubsystem<FileSystem>();
             graphics = CreateSubsystem<Graphics>(gameWindow);
             graphics.SingleThreaded = this.singleThreaded;
             resourceCache = CreateSubsystem<ResourceCache>(DataPath);

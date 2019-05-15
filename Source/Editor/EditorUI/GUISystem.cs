@@ -264,7 +264,7 @@ namespace SharpGame
             InputSnapshot snapshot = input.InputSnapshot;
             ImGuiIOPtr io = ImGui.GetIO();
 
-            var mousePosition = NumericsUtil.Convert(snapshot.MousePosition);
+            var mousePosition = snapshot.MousePosition;
 
             // Determine if any of the mouse buttons were pressed during this snapshot period, even if they are no longer held.
             bool leftPressed = false;
@@ -292,7 +292,7 @@ namespace SharpGame
             io.MouseDown[0] = leftPressed || snapshot.IsMouseDown(MouseButton.Left);
             io.MouseDown[1] = rightPressed || snapshot.IsMouseDown(MouseButton.Right);
             io.MouseDown[2] = middlePressed || snapshot.IsMouseDown(MouseButton.Middle);
-            io.MousePos = mousePosition;
+            io.MousePos = (ImVec2)mousePosition;
             io.MouseWheel = snapshot.WheelDelta;
 
             IReadOnlyList<char> keyCharPresses = snapshot.KeyCharPresses;
