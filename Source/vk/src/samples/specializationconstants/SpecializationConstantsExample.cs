@@ -60,7 +60,7 @@ namespace SharpGame
 
         public SpecializationConstantsExample()
         {
-            title = "Vulkan Example - Specialization constants";
+            Title = "Vulkan Example - Specialization constants";
             // enableTextOverlay = true;
             camera.type = Camera.CameraType.lookat;
             camera.setPerspective(60.0f, ((float)width / 3.0f) / (float)height, 0.1f, 512.0f);
@@ -441,6 +441,6 @@ namespace SharpGame
             updateUniformBuffers();
         }
 
-        public static void Main() => new SpecializationConstantsExample().ExampleMain();
+        public static void Main() => new SpecializationConstantsExample().Run();
     }
 }

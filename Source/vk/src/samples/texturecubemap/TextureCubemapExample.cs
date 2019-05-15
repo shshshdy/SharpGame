@@ -75,7 +75,7 @@ namespace SharpGame
             rotationSpeed = 0.25f;
             rotation = new Vector3(-7.25f, -120.0f, 0.0f);
             // enableTextOverlay = true;
-            title = "Vulkan Example - Cube map";
+            Title = "Vulkan Example - Cube map";
         }
 
         public void Dispose()
@@ -764,6 +764,6 @@ namespace SharpGame
             }
         }
 
-        public static void Main() => new TextureCubemapExample().ExampleMain();
+        public static void Main() => new TextureCubemapExample().Run();
     }
 }

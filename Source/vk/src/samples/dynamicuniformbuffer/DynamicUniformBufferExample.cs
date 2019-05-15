@@ -105,7 +105,7 @@ namespace SharpGame
 
         public DynamicUniformBufferExample()
         {
-            title = "Vulkan Example - Dynamic uniform buffers";
+            Title = "Vulkan Example - Dynamic uniform buffers";
             // enableTextOverlay = true;
             camera.type = Camera.CameraType.lookat;
             camera.setPosition(new Vector3(0.0f, 0.0f, -30.0f));
@@ -537,6 +537,6 @@ namespace SharpGame
             updateUniformBuffers();
         }
 
-        public static void Main() => new DynamicUniformBufferExample().ExampleMain();
+        public static void Main() => new DynamicUniformBufferExample().Run();
     }
 }

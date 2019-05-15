@@ -88,7 +88,7 @@ namespace SharpGame
             rotationSpeed = 0.5f;
             rotation = new Vector3(-0.5f, -112.75f, 0.0f);
             cameraPos = new Vector3(0.1f, 1.1f, 0.0f);
-            title = "Vulkan Example - Model rendering";
+            Title = "Vulkan Example - Model rendering";
         }
 
         public void Dispose()
@@ -661,6 +661,6 @@ namespace SharpGame
             }
         }
 
-        public static void Main() => new MeshExample().ExampleMain();
+        public static void Main() => new MeshExample().Run();
     }
 }

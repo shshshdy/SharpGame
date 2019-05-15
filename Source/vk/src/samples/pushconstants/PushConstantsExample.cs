@@ -66,7 +66,7 @@ namespace SharpGame
             timerSpeed *= 0.5f;
             rotation = new Vector3(-32.5f, 45.0f, 0.0f);
             // enableTextOverlay = true;
-            title = "Vulkan Example - Push constants";
+            Title = "Vulkan Example - Push constants";
         }
 
         public void Dispose()
@@ -450,6 +450,6 @@ namespace SharpGame
             updateUniformBuffers();
         }
 
-        public static void Main() => new PushConstantsExample().ExampleMain();
+        public static void Main() => new PushConstantsExample().Run();
     }
 }

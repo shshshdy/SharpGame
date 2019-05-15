@@ -21,6 +21,12 @@ using static Veldrid.Sdl2.Sdl2Native;
 
 namespace SharpGame
 {
+    public struct SwapChainBuffer
+    {
+        public VkImage Image;
+        public VkImageView View;
+    }
+
     public unsafe class VulkanSwapchain
     {
         public VkInstance Instance { get; private set; }
@@ -423,9 +429,4 @@ namespace SharpGame
         }
     }
 
-    public struct SwapChainBuffer
-    {
-        public VkImage Image;
-        public VkImageView View;
-    }
 }

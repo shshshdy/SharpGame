@@ -116,7 +116,7 @@ namespace SharpGame
             rotation = new Vector3(-16.25f, -28.75f, 0.0f);
             timerSpeed *= 0.5f;
             enableTextOverlay = true;
-            title = "Vulkan Example - Radial blur";
+            Title = "Vulkan Example - Radial blur";
         }
 
         public void Dispose()
@@ -870,6 +870,6 @@ namespace SharpGame
             }
         }
 
-        public static void Main() => new RadialBlurExample().ExampleMain();
+        public static void Main() => new RadialBlurExample().Run();
     }
 }

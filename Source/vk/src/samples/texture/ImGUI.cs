@@ -84,7 +84,7 @@ namespace SharpGame
         {
             zoom = -2.5f;
             rotation = new Vector3(0.0f, 15.0f, 0.0f);
-            title = "Vulkan Example - Texture loading";
+            Title = "Vulkan Example - Texture loading";
             // enableTextOverlay = true;
         }
 
@@ -1026,6 +1026,6 @@ namespace SharpGame
             io.KeySuper = _winKeyDown;
         }
 
-        public static void Main() => new ImGUI().ExampleMain();
+        public static void Main() => new ImGUI().Run();
     }
 }

@@ -62,7 +62,7 @@ namespace SharpGame
         {
             zoom = -10.5f;
             rotation = new Vector3(-25.0f, 15.0f, 0.0f);
-            title = "Vulkan Example - Pipeline state objects";
+            Title = "Vulkan Example - Pipeline state objects";
         }
 
         // C++ destructor
@@ -422,6 +422,6 @@ namespace SharpGame
             updateUniformBuffers();
         }
 
-        public static void Main() => new PipelinesExample().ExampleMain();
+        public static void Main() => new PipelinesExample().Run();
     }
 }

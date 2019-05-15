@@ -56,11 +56,7 @@ namespace SharpGame
         {
             TriangleExample example = new TriangleExample();
             example.zoom = -2.5f;
-            example.InitVulkan();
-            example.SetupWin32Window();
-            example.InitSwapchain();
-            example.Prepare();
-            example.RenderLoop();
+            example.Run();
         }
 
         public override void Prepare()

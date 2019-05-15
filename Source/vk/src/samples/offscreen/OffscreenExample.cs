@@ -116,7 +116,7 @@ namespace SharpGame
             cameraPos = new Vector3(0.0f, 1.0f, 0.0f);
             timerSpeed *= 0.25f;
             enableTextOverlay = true;
-            title = "Vulkan Example - Offscreen rendering";
+            Title = "Vulkan Example - Offscreen rendering";
             var ef = enabledFeatures;
             ef.shaderClipDistance = VK_TRUE;
             enabledFeatures = ef;
@@ -1013,6 +1013,6 @@ namespace SharpGame
             reBuildCommandBuffers();
         }
 
-        public static void Main() => new OffscreenExample().ExampleMain();
+        public static void Main() => new OffscreenExample().Run();
     }
 }
