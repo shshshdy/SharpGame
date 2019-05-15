@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{2B0FDFF4-F2C0-4A0C-AA8B-1BFACE57E32C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGame.Engine", "samples\vk.samples.base\SharpGame.Engine.csproj", "{4DCC64BC-32D5-4B60-89F2-06D11B91FBE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGame.Engine", "SharpGame.Engine\SharpGame.Engine.csproj", "{4DCC64BC-32D5-4B60-89F2-06D11B91FBE4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "triangle", "samples\triangle\triangle.csproj", "{6CAF233D-FA8D-4D67-AF9C-7F7995349ED6}"
 EndProject
