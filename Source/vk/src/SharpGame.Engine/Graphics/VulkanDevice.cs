@@ -449,6 +449,22 @@ namespace SharpGame
             }
         }
 
+
+        public void DestroyPipeline(VkPipeline pipeline)
+        {
+            vkDestroyPipeline(LogicalDevice, pipeline, null);
+        }
+
+        public void DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
+        {
+            vkDestroyPipelineLayout(LogicalDevice, pipelineLayout, null);
+        }
+
+        public void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+        {
+            vkDestroyDescriptorSetLayout(LogicalDevice, descriptorSetLayout, null);
+        }
+
         public struct QueueFamilyIndices
         {
             public uint Graphics;

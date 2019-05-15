@@ -21,6 +21,8 @@ namespace SharpGame
         public IntPtr Window { get; protected set; }
         public Sdl2Window NativeWindow { get; private set; }
 
+        public IntPtr WindowInstance { get; protected set; }
+        protected Graphics graphics;
 
         // Destination dimensions for resizing the window
         private uint destWidth;
@@ -55,9 +57,14 @@ namespace SharpGame
         protected bool enableTextOverlay = false;
         private uint lastFPS;
         private readonly FrameTimeAverager _frameTimeAverager = new FrameTimeAverager(666);
-        protected uint currentBuffer;
 
         protected InputSnapshot snapshot;
+        protected VkDescriptorPool descriptorPool;
+
+        public Application()
+        {
+            graphics = new Graphics();
+        }
 
         protected string getAssetPath()
         {
@@ -84,26 +91,19 @@ namespace SharpGame
 
         public virtual void Initialize()
         {
-            if (Device.EnableDebugMarkers)
-            {
-                // vks::debugmarker::setup(Device);
-            }
-
-            CreateCommandPool();
-            SetupSwapChain();
-            createCommandBuffers();
-            SetupDepthStencil();
-            SetupRenderPass();
-            CreatePipelineCache();
-            SetupFrameBuffer();
+            graphics.Initialize();
         }
 
         public void Run()
         {
-            InitVulkan();
+            graphics.InitVulkan();
+
             SetupWin32Window();
-            InitSwapchain();
+
+            graphics.InitSwapchain(NativeWindow.SdlWindowHandle);
+
             Initialize();
+
             RenderLoop();
         }
 
@@ -131,6 +131,7 @@ namespace SharpGame
                 mousePos = new Vector2(posx, posy);
                 viewUpdated = true;
             }
+
             if (e.State.IsButtonDown(MouseButton.Left))
             {
                 int posx = (int)e.MousePosition.X;
@@ -141,6 +142,7 @@ namespace SharpGame
                 mousePos = new Vector2(posx, posy);
                 viewUpdated = true;
             }
+
             if (e.State.IsButtonDown(MouseButton.Middle))
             {
                 int posx = (int)e.MousePosition.X;
@@ -167,96 +169,11 @@ namespace SharpGame
             windowResize();
         }
 
-        protected void prepareFrame()
-        {
-            // Acquire the next image from the swap chaing
-            Util.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentBuffer));
-        }
-
-        protected virtual void SetupRenderPass()
-        {
-            using (NativeList<VkAttachmentDescription> attachments = new NativeList<VkAttachmentDescription>())
-            {
-                attachments.Count = 2;
-                // Color attachment
-                attachments[0] = new VkAttachmentDescription();
-                attachments[0].format = Swapchain.ColorFormat;
-                attachments[0].samples = VkSampleCountFlags.Count1;
-                attachments[0].loadOp = VkAttachmentLoadOp.Clear;
-                attachments[0].storeOp = VkAttachmentStoreOp.Store;
-                attachments[0].stencilLoadOp = VkAttachmentLoadOp.DontCare;
-                attachments[0].stencilStoreOp = VkAttachmentStoreOp.DontCare;
-                attachments[0].initialLayout = VkImageLayout.Undefined;
-                attachments[0].finalLayout = VkImageLayout.PresentSrcKHR;
-                // Depth attachment
-                attachments[1] = new VkAttachmentDescription();
-                attachments[1].format = DepthFormat;
-                attachments[1].samples = VkSampleCountFlags.Count1;
-                attachments[1].loadOp = VkAttachmentLoadOp.Clear;
-                attachments[1].storeOp = VkAttachmentStoreOp.Store;
-                attachments[1].stencilLoadOp = VkAttachmentLoadOp.DontCare;
-                attachments[1].stencilStoreOp = VkAttachmentStoreOp.DontCare;
-                attachments[1].initialLayout = VkImageLayout.Undefined;
-                attachments[1].finalLayout = VkImageLayout.DepthStencilAttachmentOptimal;
-
-                VkAttachmentReference colorReference = new VkAttachmentReference();
-                colorReference.attachment = 0;
-                colorReference.layout = VkImageLayout.ColorAttachmentOptimal;
-
-                VkAttachmentReference depthReference = new VkAttachmentReference();
-                depthReference.attachment = 1;
-                depthReference.layout = VkImageLayout.DepthStencilAttachmentOptimal;
-
-                VkSubpassDescription subpassDescription = new VkSubpassDescription();
-                subpassDescription.pipelineBindPoint = VkPipelineBindPoint.Graphics;
-                subpassDescription.colorAttachmentCount = 1;
-                subpassDescription.pColorAttachments = &colorReference;
-                subpassDescription.pDepthStencilAttachment = &depthReference;
-                subpassDescription.inputAttachmentCount = 0;
-                subpassDescription.pInputAttachments = null;
-                subpassDescription.preserveAttachmentCount = 0;
-                subpassDescription.pPreserveAttachments = null;
-                subpassDescription.pResolveAttachments = null;
-
-                // Subpass dependencies for layout transitions
-                using (NativeList<VkSubpassDependency> dependencies = new NativeList<VkSubpassDependency>(2))
-                {
-                    dependencies.Count = 2;
-
-                    dependencies[0].srcSubpass = SubpassExternal;
-                    dependencies[0].dstSubpass = 0;
-                    dependencies[0].srcStageMask = VkPipelineStageFlags.BottomOfPipe;
-                    dependencies[0].dstStageMask = VkPipelineStageFlags.ColorAttachmentOutput;
-                    dependencies[0].srcAccessMask = VkAccessFlags.MemoryRead;
-                    dependencies[0].dstAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite);
-                    dependencies[0].dependencyFlags = VkDependencyFlags.ByRegion;
-
-                    dependencies[1].srcSubpass = 0;
-                    dependencies[1].dstSubpass = SubpassExternal;
-                    dependencies[1].srcStageMask = VkPipelineStageFlags.ColorAttachmentOutput;
-                    dependencies[1].dstStageMask = VkPipelineStageFlags.BottomOfPipe;
-                    dependencies[1].srcAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite);
-                    dependencies[1].dstAccessMask = VkAccessFlags.MemoryRead;
-                    dependencies[1].dependencyFlags = VkDependencyFlags.ByRegion;
-
-                    VkRenderPassCreateInfo renderPassInfo = new VkRenderPassCreateInfo();
-                    renderPassInfo.sType = VkStructureType.RenderPassCreateInfo;
-                    renderPassInfo.attachmentCount = attachments.Count;
-                    renderPassInfo.pAttachments = (VkAttachmentDescription*)attachments.Data.ToPointer();
-                    renderPassInfo.subpassCount = 1;
-                    renderPassInfo.pSubpasses = &subpassDescription;
-                    renderPassInfo.dependencyCount = dependencies.Count;
-                    renderPassInfo.pDependencies = (VkSubpassDependency*)dependencies.Data;
-
-                    Util.CheckResult(vkCreateRenderPass(device, &renderPassInfo, null, out _renderPass));
-                }
-            }
-        }
-
         public void RenderLoop()
         {
             destWidth = width;
             destHeight = height;
+
             while (NativeWindow.Exists)
             {
                 var tStart = DateTime.Now;
@@ -309,8 +226,9 @@ namespace SharpGame
                     frameCounter = 0;
                 }
             }
+
             // Flush device to make sure all resources can be freed 
-            vkDeviceWaitIdle(device);
+            graphics.WaitIdle();
         }
 
         protected virtual void viewChanged()
@@ -327,34 +245,16 @@ namespace SharpGame
             }
             prepared = false;
 
-            // Ensure all operations on the device have been finished before destroying resources
-            vkDeviceWaitIdle(device);
-
             // Recreate swap chain
             width = destWidth;
             height = destHeight;
-            SetupSwapChain();
 
-            // Recreate the frame buffers
+            graphics.Resize(destWidth, destHeight);
 
-            vkDestroyImageView(device, DepthStencil.View, null);
-            vkDestroyImage(device, DepthStencil.Image, null);
-            vkFreeMemory(device, DepthStencil.Mem, null);
-            SetupDepthStencil();
 
-            for (uint i = 0; i < frameBuffers.Count; i++)
-            {
-                vkDestroyFramebuffer(device, frameBuffers[i], null);
-            }
-            SetupFrameBuffer();
-
-            // Command buffers need to be recreated as they may store
-            // references to the recreated frame buffer
-            destroyCommandBuffers();
-            createCommandBuffers();
             buildCommandBuffers();
 
-            vkDeviceWaitIdle(device);
+            graphics.WaitIdle();
 
             // camera.updateAspectRatio((float)width / (float)height);
 
