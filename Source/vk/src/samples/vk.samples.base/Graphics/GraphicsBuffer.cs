@@ -9,10 +9,6 @@ namespace SharpGame
 {
     public unsafe class GraphicsBuffer
     {
-        /**
-        * @brief Encapsulates access to a Vulkan buffer backed up by device memory
-        * @note To be filled by an external source like the VulkanDevice
-        */
         public VkBuffer buffer;
         public VkDevice device;
         public VkDeviceMemory memory;

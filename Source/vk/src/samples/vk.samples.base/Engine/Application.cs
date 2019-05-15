@@ -1,17 +1,4 @@
-﻿// This code has been adapted from the "Vulkan" C++ example repository, by Sascha Willems.
-// It is a direct translation from the original C++ code and style, with as little transformation as possible.
-
-// Original file: base/vulkanexamplebase.cpp/h
-
-/*
-* Vulkan Example base class
-*
-* Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
-*
-* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-*/
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -80,10 +67,12 @@ namespace SharpGame
         public IntPtr SetupWin32Window()
         {
             WindowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            NativeWindow = new Sdl2Window(Name, 50, 50, 1280, 720, SDL_WindowFlags.Resizable, threadedProcessing: false);
-            NativeWindow.X = 50;
-            NativeWindow.Y = 50;
-            NativeWindow.Visible = true;
+            NativeWindow = new Sdl2Window(Name, 50, 50, (int)width, (int)height, SDL_WindowFlags.Resizable, threadedProcessing: false)
+            {
+                X = 50,
+                Y = 50,
+                Visible = true
+            };
             NativeWindow.Resized += OnNativeWindowResized;
             NativeWindow.MouseWheel += OnMouseWheel;
             NativeWindow.MouseMove += OnMouseMove;
@@ -93,7 +82,7 @@ namespace SharpGame
             return NativeWindow.Handle;
         }
 
-        public virtual void Prepare()
+        public virtual void Initialize()
         {
             if (vulkanDevice.EnableDebugMarkers)
             {
@@ -114,17 +103,12 @@ namespace SharpGame
             InitVulkan();
             SetupWin32Window();
             InitSwapchain();
-            Prepare();
+            Initialize();
             RenderLoop();
         }
 
         private void OnKeyDown(KeyEvent e)
         {
-            if (e.Key == Key.F4 && (e.Modifiers & ModifierKeys.Alt) != 0 || e.Key == Key.Escape)
-            {
-                NativeWindow.Close();
-            }
-
             keyPressed(e.Key);
         }
 

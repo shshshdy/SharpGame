@@ -961,9 +961,9 @@ namespace SharpGame
 
             submitFrame();
         }
-        public override void Prepare()
+        public override void Initialize()
         {
-            base.Prepare();
+            base.Initialize();
             loadAssets();
             generateQuad();
             prepareOffscreen();

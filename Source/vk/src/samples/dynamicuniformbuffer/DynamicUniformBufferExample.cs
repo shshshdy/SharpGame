@@ -509,9 +509,9 @@ namespace SharpGame
             vkFlushMappedMemoryRanges(device, 1, &memoryRange);
         }
 
-        public override void Prepare()
+        public override void Initialize()
         {
-            base.Prepare();
+            base.Initialize();
             generateCube();
             setupVertexDescriptions();
             prepareUniformBuffers();

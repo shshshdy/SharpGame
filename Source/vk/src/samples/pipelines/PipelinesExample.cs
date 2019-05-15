@@ -397,9 +397,9 @@ namespace SharpGame
 
             base.submitFrame();
         }
-        public override void Prepare()
+        public override void Initialize()
         {
-            base.Prepare();
+            base.Initialize();
             loadAssets();
             prepareUniformBuffers();
             setupDescriptorSetLayout();

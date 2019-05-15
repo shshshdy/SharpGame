@@ -59,9 +59,9 @@ namespace SharpGame
             example.Run();
         }
 
-        public override void Prepare()
+        public override void Initialize()
         {
-            base.Prepare();
+            base.Initialize();
             PrepareSynchronizationPrimitives();
             PrepareVertices(true);
             PrepareUniformBuffers();

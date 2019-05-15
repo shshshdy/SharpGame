@@ -415,9 +415,9 @@ namespace SharpGame
             base.submitFrame();
         }
 
-        public override void Prepare()
+        public override void Initialize()
         {
-            base.Prepare();
+            base.Initialize();
 
             // Check requested push constant size against hardware limit
             // Specs require 128 bytes, so if the Device complies our push constant buffer should always fit into memory		
