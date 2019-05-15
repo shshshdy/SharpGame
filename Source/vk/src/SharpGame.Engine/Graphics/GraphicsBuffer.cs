@@ -7,6 +7,8 @@ using System;
 
 namespace SharpGame
 {
+    public interface IBindable { }
+
     public unsafe class GraphicsBuffer
     {
         public VkBuffer buffer;
