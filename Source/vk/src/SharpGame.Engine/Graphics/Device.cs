@@ -249,8 +249,6 @@ namespace SharpGame
         */
         public static VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, GraphicsBuffer buffer, ulong size, void* data = null)
         {
-            buffer.device = _logicalDevice;
-
             // Create the buffer handle
             VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
             bufferCreateInfo.usage = usageFlags;

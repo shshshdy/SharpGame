@@ -9,12 +9,16 @@ namespace SharpGame
 {
     public interface IBindable { }
 
-    public unsafe class GraphicsBuffer
+    public unsafe class GraphicsBuffer : DisposeBase, IBindable
     {
+        public int Stride { get; set; }
+        public int Count { get; set; }
+        public bool Dynamic { get; set; }
+
         public VkBuffer buffer;
-        public VkDevice device;
         public VkDeviceMemory memory;
         public VkDescriptorBufferInfo descriptor;
+
         public VkDeviceSize size = 0;
         public VkDeviceSize alignment = 0;
         public void* mapped = null;
@@ -35,7 +39,7 @@ namespace SharpGame
         public VkResult map(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
         {
             void* mappedLocal;
-            var result = vkMapMemory(device, memory, offset, size, 0, &mappedLocal);
+            var result = vkMapMemory(Graphics.device, memory, offset, size, 0, &mappedLocal);
             mapped = mappedLocal;
             return result;
         }
@@ -49,7 +53,7 @@ namespace SharpGame
         {
             if (mapped != null)
             {
-                vkUnmapMemory(device, memory);
+                vkUnmapMemory(Graphics.device, memory);
                 mapped = null;
             }
         }
@@ -63,7 +67,7 @@ namespace SharpGame
         */
         public VkResult bind(VkDeviceSize offset = 0)
         {
-            return vkBindBufferMemory(device, buffer, memory, offset);
+            return vkBindBufferMemory(Graphics.device, buffer, memory, offset);
         }
 
         /**
@@ -94,6 +98,11 @@ namespace SharpGame
             Unsafe.CopyBlock(mapped, data, (uint)size);
         }
 
+        public void SetData<T>(ref T data, int offset = 0) where T : struct
+        {
+            SetData(Unsafe.AsPointer(ref data), (uint)offset, (uint)Unsafe.SizeOf<T>());
+        }
+
         public void SetData(void* data, uint offset, uint size)
         {
             map(size, offset);
@@ -117,7 +126,7 @@ namespace SharpGame
             mappedRange.memory = memory;
             mappedRange.offset = offset;
             mappedRange.size = size;
-            return vkFlushMappedMemoryRanges(device, 1, &mappedRange);
+            return vkFlushMappedMemoryRanges(Graphics.device, 1, &mappedRange);
         }
 
         /**
@@ -136,22 +145,34 @@ namespace SharpGame
             mappedRange.memory = memory;
             mappedRange.offset = offset;
             mappedRange.size = size;
-            return vkInvalidateMappedMemoryRanges(device, 1, &mappedRange);
+            return vkInvalidateMappedMemoryRanges(Graphics.device, 1, &mappedRange);
         }
 
         /** 
         * Release all Vulkan resources held by this buffer
         */
-        public void destroy()
+        protected override void Destroy()
         {
             if (buffer.Handle != 0)
             {
-                vkDestroyBuffer(device, buffer, null);
+                Device.DestroyBuffer(buffer);
             }
             if (memory.Handle != 0)
             {
-                vkFreeMemory(device, memory, null);
+                Device.FreeMemory(memory);
             }
+        }
+
+        public static GraphicsBuffer Create(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
+        {
+            var buffer = new GraphicsBuffer
+            {
+                Stride = stride,
+                Count = count,
+            };
+
+            Util.CheckResult(Device.createBuffer(usageFlags, memoryPropertyFlags, buffer, (ulong)(stride * count), data));
+            return buffer;
         }
 
     }

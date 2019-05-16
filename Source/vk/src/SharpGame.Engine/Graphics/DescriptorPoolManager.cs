@@ -60,7 +60,7 @@ namespace SharpGame
         {
             uint totalSets = 1000;
             uint descriptorCount = 100;
-            int poolSizeCount = 11;
+            uint poolSizeCount = 11;
 
             VkDescriptorPoolSize* sizes = stackalloc VkDescriptorPoolSize[(int)poolSizeCount];
             for(int i = 0; i < 11; i++)
@@ -71,6 +71,7 @@ namespace SharpGame
 
             VkDescriptorPoolCreateInfo poolCI = VkDescriptorPoolCreateInfo.New();
             poolCI.flags = VkDescriptorPoolCreateFlags.FreeDescriptorSet;
+            poolCI.poolSizeCount = poolSizeCount;
             poolCI.maxSets = totalSets;
             poolCI.pPoolSizes = sizes;
 

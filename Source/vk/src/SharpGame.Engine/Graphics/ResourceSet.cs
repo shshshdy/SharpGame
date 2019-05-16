@@ -28,6 +28,7 @@ namespace SharpGame
                 descriptorPool = pool;
                 resourceLayout = resLayout;
             }
+
             writeDescriptorSets = new VkWriteDescriptorSet[resLayout.numBindings];
         }
 
@@ -69,15 +70,8 @@ namespace SharpGame
                     break;
                 case VkDescriptorType.CombinedImageSampler:
                     var texture = bindable as Texture;
-                    var vkDescriptorImageInfo = new VkDescriptorImageInfo
-                    {
-                        sampler = texture.sampler,
-                        imageView = texture.view,
-                        imageLayout = texture.imageLayout
-                    };
-
                     writeDescriptorSets[dstBinding] = WriteDescriptorSet(descriptorSet, descriptorType,
-                        dstBinding, ref vkDescriptorImageInfo, 1);
+                        dstBinding, ref texture.descriptor, 1);
                     break;
                 case VkDescriptorType.SampledImage:
                     break;

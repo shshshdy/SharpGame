@@ -7,7 +7,7 @@ using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    public class Texture
+    public class Texture : DisposeBase, IBindable
     {
         public VkImageView view;
         public VkImage image;
@@ -18,6 +18,27 @@ namespace SharpGame
         public uint mipLevels;
         public VkImageLayout imageLayout;
         public VkDescriptorImageInfo descriptor;
+
+
+        /** @brief Update image descriptor from current sampler, view and image layout */
+        internal void updateDescriptor()
+        {
+            descriptor.sampler = sampler;
+            descriptor.imageView = view;
+            descriptor.imageLayout = imageLayout;
+        }
+
+        protected override void Destroy()
+        {
+
+            vkDestroyImageView(Graphics.device, view, IntPtr.Zero);
+            vkDestroyImage(Graphics.device, image, IntPtr.Zero);
+            vkDestroySampler(Graphics.device, sampler, IntPtr.Zero);
+            vkFreeMemory(Graphics.device, deviceMemory, IntPtr.Zero);
+
+            base.Destroy();
+        }
+
     }
 
     public unsafe class vksTexture2D : Texture
@@ -307,14 +328,6 @@ namespace SharpGame
 
             // Update descriptor image info member that can be used for setting up descriptor sets
             updateDescriptor();
-        }
-
-        /** @brief Update image descriptor from current sampler, view and image layout */
-        void updateDescriptor()
-        {
-            descriptor.sampler = sampler;
-            descriptor.imageView = view;
-            descriptor.imageLayout = imageLayout;
         }
 
         public void destroy() { }

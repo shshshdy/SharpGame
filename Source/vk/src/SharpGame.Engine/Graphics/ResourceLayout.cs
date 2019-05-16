@@ -10,7 +10,7 @@ namespace SharpGame
     {
         public VkDescriptorSetLayoutBinding[] bindings;
 
-        internal VkDescriptorSetLayout descriptorSetLayout;
+        public VkDescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
         internal int numBindings => bindings.Length;
 

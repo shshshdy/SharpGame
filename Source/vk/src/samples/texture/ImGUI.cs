@@ -63,62 +63,80 @@ namespace SharpGame
         VkPipeline pipelines_solid;
 
         VkPipelineLayout pipelineLayout;
-        VkDescriptorSet descriptorSet;
-        VkDescriptorSetLayout descriptorSetLayout;
+
+        ResourceLayout resourceLayout;
+        ResourceSet resourceSet;
+
         private const uint VERTEX_BUFFER_BIND_ID = 0;
+
+        private IntPtr _fontAtlasID = (IntPtr)1;
 
         ImGUI()
         {
             zoom = -2.5f;
             rotation = new Vector3(0.0f, 15.0f, 0.0f);
-            Title = "Vulkan Example - ImGUI";
-            // enableTextOverlay = true;
+            Title = "SharpGame Example - ImGUI";
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            IntPtr context = ImGui.CreateContext();
+            ImGui.SetCurrentContext(context);
+            ImGui.GetIO().Fonts.AddFontDefault();
+
+            CreateGraphicsResources();
+
+            setupVertexDescriptions();
+            prepareUniformBuffers();
+            setupDescriptorSetLayout();
+            preparePipelines();
+
+            RecreateFontDeviceTexture();
+
+            resourceSet = new ResourceSet(resourceLayout, uniformBufferVS, texture);
+
+
+            ImGuiStylePtr style = ImGui.GetStyle();
+
+            SetOpenTKKeyMappings();
+
+            SetPerFrameImGuiData(1f / 60f);
+
+            ImGui.NewFrame();
+
+            prepared = true;
         }
 
         public void Dispose()
         {
-            // Clean up used Vulkan resources 
-            // Note : Inherited destructor cleans up resources stored in base class
-
-            destroyTextureImage(texture);
+            texture.Dispose();
 
             Device.DestroyPipeline(pipelines_solid);
-
             Device.DestroyPipelineLayout(pipelineLayout);
-            Device.DestroyDescriptorSetLayout(descriptorSetLayout);
 
-            vertexBuffer.destroy();
-            indexBuffer.destroy();
-            uniformBufferVS.destroy();
+            vertexBuffer.Dispose();
+            indexBuffer.Dispose();
+            uniformBufferVS.Dispose();
         }
 
-        // Free all Vulkan resources used a texture object
-        void destroyTextureImage(Texture texture)
-        {
-            vkDestroyImageView(Graphics.device, texture.view, null);
-            vkDestroyImage(Graphics.device, texture.image, null);
-            vkDestroySampler(Graphics.device, texture.sampler, null);
-            vkFreeMemory(Graphics.device, texture.deviceMemory, null);
-        }
 
-        void generateQuad()
+        void CreateGraphicsResources()
         {
             // Create buffers
             // For the sake of simplicity we won't stage the vertex data to the gpu memory
             // ImVertex buffer
-            Util.CheckResult(Device.createBuffer(
+            vertexBuffer = GraphicsBuffer.Create(
                 VkBufferUsageFlags.VertexBuffer,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                vertexBuffer,
-                (ulong)(4096 * sizeof(ImVertex)),
-                null));
+                sizeof(ImVertex), 4096);
+
             // Index buffer
-            Util.CheckResult(Device.createBuffer(
+            indexBuffer = GraphicsBuffer.Create(
                 VkBufferUsageFlags.IndexBuffer,
                 VkMemoryPropertyFlags.HostCoherent | VkMemoryPropertyFlags.HostCoherent,
-                indexBuffer,
-                4096 * sizeof(ushort),
-                null));
+                sizeof(ushort), 4096);
         }
 
         void setupVertexDescriptions()
@@ -163,89 +181,24 @@ namespace SharpGame
             vertices.inputState.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)vertices.attributeDescriptions.Data;
         }
 
-        void setupDescriptorPool()
-        {
-            // Example uses one ubo and one image sampler
-            FixedArray2<VkDescriptorPoolSize> poolSizes = new FixedArray2<VkDescriptorPoolSize>(
-                    Builder.DescriptorPoolSize(VkDescriptorType.UniformBuffer, 1),
-                    Builder.DescriptorPoolSize(VkDescriptorType.CombinedImageSampler, 1)
-            );
-
-            VkDescriptorPoolCreateInfo descriptorPoolInfo =
-                Builder.DescriptorPoolCreateInfo(
-                    poolSizes.Count,
-                    (VkDescriptorPoolSize*)Unsafe.AsPointer(ref poolSizes),
-                    2);
-
-            Util.CheckResult(vkCreateDescriptorPool(Graphics.device, &descriptorPoolInfo, null, out descriptorPool));
-        }
 
         void setupDescriptorSetLayout()
         {
-            FixedArray2<VkDescriptorSetLayoutBinding> setLayoutBindings = new FixedArray2<VkDescriptorSetLayoutBinding>(
-                // Binding 0 : ImVertex shader uniform buffer
-                Builder.DescriptorSetLayoutBinding(
-                    VkDescriptorType.UniformBuffer,
-                    VkShaderStageFlags.Vertex,
-                    0),
-                // Binding 1 : Fragment shader image sampler
-                Builder.DescriptorSetLayoutBinding(
-                    VkDescriptorType.CombinedImageSampler,
-                    VkShaderStageFlags.Fragment,
-                    1)
-            );
+            resourceLayout = new ResourceLayout(
+                    Builder.DescriptorSetLayoutBinding(
+                        VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex, 0),
+                    Builder.DescriptorSetLayoutBinding(
+                        VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment, 1)
+                    );
 
-            VkDescriptorSetLayoutCreateInfo descriptorLayout =
-                Builder.DescriptorSetLayoutCreateInfo(
-                    (VkDescriptorSetLayoutBinding*)Unsafe.AsPointer(ref setLayoutBindings),
-                    setLayoutBindings.Count);
 
-            Util.CheckResult(vkCreateDescriptorSetLayout(Graphics.device, &descriptorLayout, null, out descriptorSetLayout));
-
-            var layout = descriptorSetLayout;
+            var layout = resourceLayout.descriptorSetLayout;// descriptorSetLayout;
             VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
                 Builder.PipelineLayoutCreateInfo(
                     ref layout,
                     1);
 
             Util.CheckResult(vkCreatePipelineLayout(Graphics.device, &pPipelineLayoutCreateInfo, null, out pipelineLayout));
-        }
-
-        void setupDescriptorSet()
-        {
-            var layout = descriptorSetLayout;
-            VkDescriptorSetAllocateInfo allocInfo =
-                Builder.DescriptorSetAllocateInfo(
-                    descriptorPool,
-                    &layout,
-                    1);
-
-            Util.CheckResult(vkAllocateDescriptorSets(Graphics.device, &allocInfo, out descriptorSet));
-
-            // Setup a descriptor image info for the current texture to be used as a combined image sampler
-            VkDescriptorImageInfo textureDescriptor;
-            textureDescriptor.imageView = texture.view;             // The image's view (images are never directly accessed by the shader, but rather through views defining subresources)
-            textureDescriptor.sampler = texture.sampler;            //	The sampler (Telling the pipeline how to sample the texture, including repeat, border, etc.)
-            textureDescriptor.imageLayout = texture.imageLayout;    //	The current layout of the image (Note: Should always fit the actual use, e.g. shader read)
-
-            var descriptor = uniformBufferVS.descriptor;
-            FixedArray2<VkWriteDescriptorSet> writeDescriptorSets = new FixedArray2<VkWriteDescriptorSet>(
-                    // Binding 0 : ImVertex shader uniform buffer
-                    Builder.WriteDescriptorSet(
-                        descriptorSet,
-                        VkDescriptorType.UniformBuffer,
-                        0,
-                        ref descriptor),
-                    // Binding 1 : Fragment shader texture sampler
-                    //	Fragment shader: layout (binding = 1) uniform sampler2D samplerColor;
-                    Builder.WriteDescriptorSet(
-                        descriptorSet,
-                        VkDescriptorType.CombinedImageSampler,          // The descriptor set will use a combined image sampler (sampler and image could be split)
-                        1,                                                  // Shader binding point 1
-                        ref textureDescriptor)								// Pointer to the descriptor image for our texture
-            );
-
-            vkUpdateDescriptorSets(Graphics.device, writeDescriptorSets.Count, ref writeDescriptorSets.First, 0, null);
         }
 
         void preparePipelines()
@@ -270,7 +223,7 @@ namespace SharpGame
             blendAttachmentState.srcColorBlendFactor = VkBlendFactor.SrcAlpha;
             blendAttachmentState.dstColorBlendFactor = VkBlendFactor.OneMinusDstAlpha;
             blendAttachmentState.srcAlphaBlendFactor = VkBlendFactor.One;
-            blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.Zero;
+            blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.One;
 
             VkPipelineColorBlendStateCreateInfo colorBlendState =
                 Builder.ColorBlendStateCreateInfo(1, ref blendAttachmentState);
@@ -325,13 +278,10 @@ namespace SharpGame
         void prepareUniformBuffers()
         {
             var localUboVS = uboVS;
-            // ImVertex shader uniform buffer block
-            Util.CheckResult(Device.createBuffer(
-                VkBufferUsageFlags.UniformBuffer,
-                VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                uniformBufferVS,
-                (uint)sizeof(UboVS),
-                &localUboVS));
+
+            uniformBufferVS = GraphicsBuffer.Create(VkBufferUsageFlags.UniformBuffer,
+                VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,              
+                sizeof(UboVS), 1, &localUboVS);
 
             updateUniformBuffers();
         }
@@ -346,48 +296,10 @@ namespace SharpGame
                      -1.0f,
                      1.0f);
 
-            Util.CheckResult(uniformBufferVS.map());
-            var local = uboVS;
-            Unsafe.CopyBlock(uniformBufferVS.mapped, &local, (uint)sizeof(UboVS));
-            uniformBufferVS.unmap();
+            uniformBufferVS.SetData(ref uboVS);
         }
 
 
-        public override void Initialize()
-        {
-            base.Initialize();
-
-            IntPtr context = ImGui.CreateContext();
-            ImGui.SetCurrentContext(context);
-            ImGui.GetIO().Fonts.AddFontDefault();
-           
-
-            //loadTextures();
-            generateQuad();
-            setupVertexDescriptions();
-            prepareUniformBuffers();
-            setupDescriptorSetLayout();
-            preparePipelines();
-            setupDescriptorPool();
-
-
-            RecreateFontDeviceTexture();
-
-            setupDescriptorSet();
-            //buildCommandBuffers();
-
-            ImGuiStylePtr style = ImGui.GetStyle();
-
-            SetOpenTKKeyMappings();
-
-            SetPerFrameImGuiData(1f / 60f);
-
-            ImGui.NewFrame();
-
-            prepared = true;
-        }
-
-        private IntPtr _fontAtlasID = (IntPtr)1;
       
 
         private unsafe void RecreateFontDeviceTexture()
@@ -565,7 +477,7 @@ namespace SharpGame
 
 
             var cmdBuffer = Graphics.drawCmdBuffers[graphics.currentBuffer];
-            vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint.Graphics, pipelineLayout, 0, 1, ref descriptorSet, 0, null);
+            vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint.Graphics, pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
             vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint.Graphics, pipelines_solid);
 
             ulong offsets = 0;

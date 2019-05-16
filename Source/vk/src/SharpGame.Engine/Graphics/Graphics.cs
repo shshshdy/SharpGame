@@ -725,6 +725,7 @@ namespace SharpGame
             // The view will be based on the texture's image
             view.image = texture.image;
             Util.CheckResult(vkCreateImageView(Graphics.device, &view, null, out texture.view));
+            texture.updateDescriptor();
             return texture;
         }
 
