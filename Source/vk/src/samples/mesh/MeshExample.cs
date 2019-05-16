@@ -26,7 +26,7 @@ namespace SharpGame
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
         bool wireframe = false;
-        vksTexture2D textures_colorMap = new vksTexture2D();
+        Texture2D textures_colorMap = new Texture2D();
 
         VkPipelineVertexInputStateCreateInfo vertices_inputState;
         NativeList<VkVertexInputBindingDescription> vertices_bindingDescriptions = new NativeList<VkVertexInputBindingDescription>();
@@ -106,8 +106,8 @@ namespace SharpGame
 
             destroyModel();
 
-            textures_colorMap.destroy();
-            uniformBuffers_scene.destroy();
+            textures_colorMap.Dispose();
+            uniformBuffers_scene.Dispose();
         }
         /*
         protected override void getEnabledFeatures()
@@ -370,7 +370,7 @@ namespace SharpGame
             // Binding description
             vertices_bindingDescriptions.Count = 1;
             vertices_bindingDescriptions[0] =
-                Builder.VertexInputBindingDescription(
+                Builder.VertexBinding(
                     VERTEX_BUFFER_BIND_ID,
                     (uint)sizeof(Vertex),
                     VkVertexInputRate.Vertex);
@@ -380,28 +380,28 @@ namespace SharpGame
             vertices_attributeDescriptions.Count = 4;
             // Location 0 : Position
             vertices_attributeDescriptions[0] =
-                Builder.VertexInputAttributeDescription(
+                Builder.VertexElement(
                     VERTEX_BUFFER_BIND_ID,
                     0,
                     VkFormat.R32g32b32Sfloat,
                     Vertex.PositionOffset);
             // Location 1 : Normal
             vertices_attributeDescriptions[1] =
-                Builder.VertexInputAttributeDescription(
+                Builder.VertexElement(
                     VERTEX_BUFFER_BIND_ID,
                     1,
                     VkFormat.R32g32b32Sfloat,
                     Vertex.NormalOffset);
             // Location 2 : Texture coordinates
             vertices_attributeDescriptions[2] =
-                Builder.VertexInputAttributeDescription(
+                Builder.VertexElement(
                     VERTEX_BUFFER_BIND_ID,
                     2,
                     VkFormat.R32g32Sfloat,
                     Vertex.UvOffset);
             // Location 3 : Color
             vertices_attributeDescriptions[3] =
-                Builder.VertexInputAttributeDescription(
+                Builder.VertexElement(
                     VERTEX_BUFFER_BIND_ID,
                     3,
                     VkFormat.R32g32b32Sfloat,

@@ -21,10 +21,7 @@ namespace SharpGame
             return submitInfo;
         }
 
-        public static VkCommandBufferAllocateInfo CommandBufferAllocateInfo(
-            VkCommandPool commandPool,
-            VkCommandBufferLevel level,
-            uint bufferCount)
+        public static VkCommandBufferAllocateInfo CommandBufferAllocateInfo(VkCommandPool commandPool, VkCommandBufferLevel level, uint bufferCount)
         {
             VkCommandBufferAllocateInfo commandBufferAllocateInfo = new VkCommandBufferAllocateInfo();
             commandBufferAllocateInfo.sType = VkStructureType.CommandBufferAllocateInfo;
@@ -48,11 +45,9 @@ namespace SharpGame
         }
 
         public static VkPipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo(
-            VkPrimitiveTopology topology,
-            uint flags = 0,
-            uint primitiveRestartEnable = False)
+            VkPrimitiveTopology topology, uint flags = 0, uint primitiveRestartEnable = False)
         {
-            VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo = VkPipelineInputAssemblyStateCreateInfo.New();
+            var pipelineInputAssemblyStateCreateInfo = VkPipelineInputAssemblyStateCreateInfo.New();
             pipelineInputAssemblyStateCreateInfo.topology = topology;
             pipelineInputAssemblyStateCreateInfo.flags = flags;
             pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = primitiveRestartEnable;
@@ -60,12 +55,9 @@ namespace SharpGame
         }
 
         public static VkPipelineRasterizationStateCreateInfo RasterizationStateCreateInfo(
-            VkPolygonMode polygonMode,
-            VkCullModeFlags cullMode,
-            VkFrontFace frontFace,
-            uint flags = 0)
+            VkPolygonMode polygonMode, VkCullModeFlags cullMode, VkFrontFace frontFace, uint flags = 0)
         {
-            VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo = VkPipelineRasterizationStateCreateInfo.New();
+            var pipelineRasterizationStateCreateInfo = VkPipelineRasterizationStateCreateInfo.New();
             pipelineRasterizationStateCreateInfo.polygonMode = polygonMode;
             pipelineRasterizationStateCreateInfo.cullMode = cullMode;
             pipelineRasterizationStateCreateInfo.frontFace = frontFace;
@@ -76,20 +68,19 @@ namespace SharpGame
         }
 
         public static VkPipelineColorBlendAttachmentState ColorBlendAttachmentState(
-            VkColorComponentFlags colorWriteMask,
-            bool blendEnable)
+            VkColorComponentFlags colorWriteMask, bool blendEnable)
         {
-            VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState = new VkPipelineColorBlendAttachmentState();
-            pipelineColorBlendAttachmentState.colorWriteMask = colorWriteMask;
-            pipelineColorBlendAttachmentState.blendEnable = blendEnable;
+            var pipelineColorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
+            {
+                colorWriteMask = colorWriteMask,
+                blendEnable = blendEnable
+            };
             return pipelineColorBlendAttachmentState;
         }
 
         public static VkPipelineColorBlendStateCreateInfo ColorBlendStateCreateInfo(
-            uint attachmentCount,
-             ref VkPipelineColorBlendAttachmentState pAttachments)
+            uint attachmentCount, ref VkPipelineColorBlendAttachmentState pAttachments)
         {
-
             VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo = VkPipelineColorBlendStateCreateInfo.New();
             pipelineColorBlendStateCreateInfo.attachmentCount = attachmentCount;
             pipelineColorBlendStateCreateInfo.pAttachments = (VkPipelineColorBlendAttachmentState*)Unsafe.AsPointer(ref pAttachments);
@@ -97,11 +88,9 @@ namespace SharpGame
         }
 
         public static VkPipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo(
-            bool depthTestEnable,
-            bool depthWriteEnable,
-            VkCompareOp depthCompareOp)
+            bool depthTestEnable, bool depthWriteEnable, VkCompareOp depthCompareOp)
         {
-            VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo = VkPipelineDepthStencilStateCreateInfo.New();
+            var pipelineDepthStencilStateCreateInfo = VkPipelineDepthStencilStateCreateInfo.New();
             pipelineDepthStencilStateCreateInfo.depthTestEnable = depthTestEnable;
             pipelineDepthStencilStateCreateInfo.depthWriteEnable = depthWriteEnable;
             pipelineDepthStencilStateCreateInfo.depthCompareOp = depthCompareOp;
@@ -111,11 +100,9 @@ namespace SharpGame
         }
 
         public static VkPipelineViewportStateCreateInfo ViewportStateCreateInfo(
-            uint viewportCount,
-            uint scissorCount,
-            uint flags = 0)
+            uint viewportCount, uint scissorCount, uint flags = 0)
         {
-            VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo = VkPipelineViewportStateCreateInfo.New();
+            var pipelineViewportStateCreateInfo = VkPipelineViewportStateCreateInfo.New();
             pipelineViewportStateCreateInfo.viewportCount = viewportCount;
             pipelineViewportStateCreateInfo.scissorCount = scissorCount;
             pipelineViewportStateCreateInfo.flags = flags;
@@ -123,10 +110,9 @@ namespace SharpGame
         }
 
         public static VkPipelineMultisampleStateCreateInfo MultisampleStateCreateInfo(
-            VkSampleCountFlags rasterizationSamples,
-            uint flags = 0)
+            VkSampleCountFlags rasterizationSamples, uint flags = 0)
         {
-            VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo = VkPipelineMultisampleStateCreateInfo.New();
+            var pipelineMultisampleStateCreateInfo = VkPipelineMultisampleStateCreateInfo.New();
             pipelineMultisampleStateCreateInfo.rasterizationSamples = rasterizationSamples;
             pipelineMultisampleStateCreateInfo.flags = flags;
             return pipelineMultisampleStateCreateInfo;
@@ -137,7 +123,7 @@ namespace SharpGame
             uint dynamicStateCount,
             uint flags = 0)
         {
-            VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo = VkPipelineDynamicStateCreateInfo.New();
+            var pipelineDynamicStateCreateInfo = VkPipelineDynamicStateCreateInfo.New();
             pipelineDynamicStateCreateInfo.pDynamicStates = pDynamicStates;
             pipelineDynamicStateCreateInfo.dynamicStateCount = dynamicStateCount;
             pipelineDynamicStateCreateInfo.flags = flags;
@@ -148,7 +134,7 @@ namespace SharpGame
             NativeList<VkDynamicState> pDynamicStates,
             uint flags = 0)
         {
-            VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo = VkPipelineDynamicStateCreateInfo.New();
+            var pipelineDynamicStateCreateInfo = VkPipelineDynamicStateCreateInfo.New();
             pipelineDynamicStateCreateInfo.pDynamicStates = (VkDynamicState*)pDynamicStates.Data;
             pipelineDynamicStateCreateInfo.dynamicStateCount = pDynamicStates.Count;
             pipelineDynamicStateCreateInfo.flags = flags;
@@ -157,7 +143,7 @@ namespace SharpGame
 
         public static VkPipelineTessellationStateCreateInfo TessellationStateCreateInfo(uint patchControlPoints)
         {
-            VkPipelineTessellationStateCreateInfo pipelineTessellationStateCreateInfo = VkPipelineTessellationStateCreateInfo.New();
+            var pipelineTessellationStateCreateInfo = VkPipelineTessellationStateCreateInfo.New();
             pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
             return pipelineTessellationStateCreateInfo;
         }
@@ -176,8 +162,7 @@ namespace SharpGame
             return pipelineCreateInfo;
         }
 
-        public static VkVertexInputBindingDescription VertexInputBindingDescription(
-            uint binding, uint stride, VkVertexInputRate inputRate)
+        public static VkVertexInputBindingDescription VertexBinding(uint binding, uint stride, VkVertexInputRate inputRate)
         {
             VkVertexInputBindingDescription vInputBindDescription = new VkVertexInputBindingDescription
             {
@@ -188,8 +173,7 @@ namespace SharpGame
             return vInputBindDescription;
         }
 
-        public static VkVertexInputAttributeDescription VertexInputAttributeDescription(
-            uint binding, uint location, VkFormat format, uint offset)
+        public static VkVertexInputAttributeDescription VertexElement(uint binding, uint location, VkFormat format, uint offset)
         {
             VkVertexInputAttributeDescription vInputAttribDescription = new VkVertexInputAttributeDescription
             {
@@ -263,9 +247,7 @@ namespace SharpGame
             return bufCreateInfo;
         }
 
-        public static VkBufferCreateInfo BufferCreateInfo(
-            VkBufferUsageFlags usage,
-            ulong size)
+        public static VkBufferCreateInfo BufferCreateInfo(VkBufferUsageFlags usage, ulong size)
         {
             VkBufferCreateInfo bufCreateInfo = VkBufferCreateInfo.New();
             bufCreateInfo.usage = usage;
@@ -285,11 +267,7 @@ namespace SharpGame
             return imageViewCreateInfo;
         }
 
-        public static VkViewport Viewport(
-            float width,
-            float height,
-            float minDepth,
-            float maxDepth)
+        public static VkViewport Viewport(float width, float height, float minDepth, float maxDepth)
         {
             VkViewport viewport = new VkViewport
             {
@@ -301,11 +279,7 @@ namespace SharpGame
             return viewport;
         }
 
-        public static VkRect2D Rect2D(
-            int offsetX,
-            int offsetY,
-            uint width,
-            uint height)
+        public static VkRect2D Rect2D(int offsetX, int offsetY, uint width, uint height)
         {
             VkRect2D rect2D = new VkRect2D();
             rect2D.extent.width = width;

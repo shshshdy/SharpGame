@@ -157,6 +157,7 @@ namespace SharpGame
             {
                 Device.DestroyBuffer(buffer);
             }
+
             if (memory.Handle != 0)
             {
                 Device.FreeMemory(memory);

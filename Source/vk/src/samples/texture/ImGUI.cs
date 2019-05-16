@@ -43,15 +43,14 @@ namespace SharpGame
         public class Vertices
         {
             public VkPipelineVertexInputStateCreateInfo inputState;
-            public NativeList<VkVertexInputBindingDescription> bindingDescriptions = new NativeList<VkVertexInputBindingDescription>();
-            public NativeList<VkVertexInputAttributeDescription> attributeDescriptions = new NativeList<VkVertexInputAttributeDescription>();
+            public NativeList<VkVertexInputBindingDescription> bindings = new NativeList<VkVertexInputBindingDescription>();
+            public NativeList<VkVertexInputAttributeDescription> attributes = new NativeList<VkVertexInputAttributeDescription>();
         }
 
         Vertices vertices = new Vertices();
 
         GraphicsBuffer vertexBuffer = new GraphicsBuffer();
         GraphicsBuffer indexBuffer = new GraphicsBuffer();
-
         GraphicsBuffer uniformBufferVS = new GraphicsBuffer();
 
         public struct UboVS
@@ -71,7 +70,7 @@ namespace SharpGame
 
         private IntPtr _fontAtlasID = (IntPtr)1;
 
-        ImGUI()
+        public ImGUI()
         {
             zoom = -2.5f;
             rotation = new Vector3(0.0f, 15.0f, 0.0f);
@@ -88,15 +87,14 @@ namespace SharpGame
 
             CreateGraphicsResources();
 
-            setupVertexDescriptions();
-            prepareUniformBuffers();
-            setupDescriptorSetLayout();
-            preparePipelines();
+            SetupVertexDescriptions();
+            PrepareUniformBuffers();
+            SetupDescriptorSetLayout();
+            PreparePipelines();
 
             RecreateFontDeviceTexture();
 
             resourceSet = new ResourceSet(resourceLayout, uniformBufferVS, texture);
-
 
             ImGuiStylePtr style = ImGui.GetStyle();
 
@@ -139,69 +137,38 @@ namespace SharpGame
                 sizeof(ushort), 4096);
         }
 
-        void setupVertexDescriptions()
+        void SetupVertexDescriptions()
         {
-            // Binding description
-            vertices.bindingDescriptions.Count = 1;
-            vertices.bindingDescriptions[0] =
-                Builder.VertexInputBindingDescription(
-                    VERTEX_BUFFER_BIND_ID,
-                    (uint)sizeof(ImVertex),
-                    VkVertexInputRate.Vertex);
+            vertices.bindings.Count = 1;
+            vertices.bindings[0] = Builder.VertexBinding(0, (uint)sizeof(ImVertex), VkVertexInputRate.Vertex);
 
-            // Attribute descriptions
-            // Describes memory layout and shader positions
-            vertices.attributeDescriptions.Count = 3;
-            // Location 0 : Position
-            vertices.attributeDescriptions[0] =
-                Builder.VertexInputAttributeDescription(
-                    VERTEX_BUFFER_BIND_ID,
-                    0,
-                    VkFormat.R32g32Sfloat,
-                    ImVertex.PositionOffset);
-            // Location 1 : Texture coordinates
-            vertices.attributeDescriptions[1] =
-                Builder.VertexInputAttributeDescription(
-                    VERTEX_BUFFER_BIND_ID,
-                    1,
-                    VkFormat.R32g32Sfloat,
-                    ImVertex.UvOffset);
-            // Location 1 : ImVertex normal
-            vertices.attributeDescriptions[2] =
-                Builder.VertexInputAttributeDescription(
-                    VERTEX_BUFFER_BIND_ID,
-                    2,
-                    VkFormat.R8g8b8a8Unorm,
-                    ImVertex.ColorOffset);
+            vertices.attributes.Count = 3;
+            vertices.attributes[0] = Builder.VertexElement(0, 0, VkFormat.R32g32Sfloat, ImVertex.PositionOffset);
+            vertices.attributes[1] = Builder.VertexElement(0, 1, VkFormat.R32g32Sfloat, ImVertex.UvOffset);
+            vertices.attributes[2] = Builder.VertexElement(0, 2, VkFormat.R8g8b8a8Unorm, ImVertex.ColorOffset);
 
             vertices.inputState = Builder.VertexInputStateCreateInfo();
-            vertices.inputState.vertexBindingDescriptionCount = vertices.bindingDescriptions.Count;
-            vertices.inputState.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)vertices.bindingDescriptions.Data;
-            vertices.inputState.vertexAttributeDescriptionCount = vertices.attributeDescriptions.Count;
-            vertices.inputState.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)vertices.attributeDescriptions.Data;
+            vertices.inputState.vertexBindingDescriptionCount = vertices.bindings.Count;
+            vertices.inputState.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)vertices.bindings.Data;
+            vertices.inputState.vertexAttributeDescriptionCount = vertices.attributes.Count;
+            vertices.inputState.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)vertices.attributes.Data;
         }
 
 
-        void setupDescriptorSetLayout()
+        void SetupDescriptorSetLayout()
         {
             resourceLayout = new ResourceLayout(
-                    Builder.DescriptorSetLayoutBinding(
-                        VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex, 0),
-                    Builder.DescriptorSetLayoutBinding(
-                        VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment, 1)
+                    Builder.DescriptorSetLayoutBinding(VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex, 0),
+                    Builder.DescriptorSetLayoutBinding(VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment, 1)
                     );
 
-
-            var layout = resourceLayout.descriptorSetLayout;// descriptorSetLayout;
-            VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
-                Builder.PipelineLayoutCreateInfo(
-                    ref layout,
-                    1);
+            var layout = resourceLayout.descriptorSetLayout;
+            VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = Builder.PipelineLayoutCreateInfo(ref layout);
 
             Util.CheckResult(vkCreatePipelineLayout(Graphics.device, &pPipelineLayoutCreateInfo, null, out pipelineLayout));
         }
 
-        void preparePipelines()
+        void PreparePipelines()
         {
             VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
                 Builder.InputAssemblyStateCreateInfo(
@@ -225,18 +192,10 @@ namespace SharpGame
             blendAttachmentState.srcAlphaBlendFactor = VkBlendFactor.One;
             blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.One;
 
-            VkPipelineColorBlendStateCreateInfo colorBlendState =
-                Builder.ColorBlendStateCreateInfo(1, ref blendAttachmentState);
-
-            VkPipelineDepthStencilStateCreateInfo depthStencilState =
-                Builder.DepthStencilStateCreateInfo(false, false, VkCompareOp.LessOrEqual);
-
-            VkPipelineViewportStateCreateInfo viewportState = Builder.ViewportStateCreateInfo(1, 1, 0);
-
-            VkPipelineMultisampleStateCreateInfo multisampleState =
-                Builder.MultisampleStateCreateInfo(
-                    VkSampleCountFlags.Count1,
-                    0);
+            var colorBlendState = Builder.ColorBlendStateCreateInfo(1, ref blendAttachmentState);
+            var depthStencilState = Builder.DepthStencilStateCreateInfo(false, false, VkCompareOp.LessOrEqual);
+            var viewportState = Builder.ViewportStateCreateInfo(1, 1, 0);
+            var multisampleState = Builder.MultisampleStateCreateInfo(VkSampleCountFlags.Count1, 0);
 
             FixedArray2<VkDynamicState> dynamicStateEnables = new FixedArray2<VkDynamicState>(
                 VkDynamicState.Viewport,
@@ -275,7 +234,7 @@ namespace SharpGame
         }
 
         // Prepare and initialize uniform buffer containing shader uniforms
-        void prepareUniformBuffers()
+        void PrepareUniformBuffers()
         {
             var localUboVS = uboVS;
 
@@ -298,9 +257,6 @@ namespace SharpGame
 
             uniformBufferVS.SetData(ref uboVS);
         }
-
-
-      
 
         private unsafe void RecreateFontDeviceTexture()
         {
@@ -419,19 +375,6 @@ namespace SharpGame
             updateUniformBuffers();
         }
 
-        protected override void keyPressed(Key keyCode)
-        {
-            switch (keyCode)
-            {
-                case Key.KeypadAdd:
-                    //changeLodBias(0.1f);
-                    break;
-                case Key.KeypadSubtract:
-                    //changeLodBias(-0.1f);
-                    break;
-            }
-        }
-
         private unsafe void RenderImDrawData(ImDrawDataPtr draw_data)
         {
             var io = ImGui.GetIO();
@@ -443,18 +386,20 @@ namespace SharpGame
             {
                 return;
             }
-            /*
+           
             if (draw_data.TotalVtxCount*sizeof(ImDrawVert) > (int)vertexBuffer.size)
             {
-                vertexBuffer.destroy();
-                //vertexBuffer = GraphicsBuffer.CreateDynamic<ImDrawVert>(BufferUsages.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
+                vertexBuffer.Dispose();
+                vertexBuffer = GraphicsBuffer.Create(VkBufferUsageFlags.VertexBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
+                    sizeof(ImDrawVert), (int)(1.5f * draw_data.TotalVtxCount));
             }
 
             if (draw_data.TotalIdxCount * sizeof(ushort) > (int)indexBuffer.size)
             {
-                indexBuffer.destroy();
-                //indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsages.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
-            }*/
+                indexBuffer.Dispose();
+                indexBuffer = GraphicsBuffer.Create(VkBufferUsageFlags.IndexBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
+                   sizeof(ushort), (int)(1.5f * draw_data.TotalIdxCount));
+            }
 
             updateUniformBuffers();
 

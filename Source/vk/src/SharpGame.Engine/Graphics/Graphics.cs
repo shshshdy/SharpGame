@@ -519,8 +519,6 @@ namespace SharpGame
 
         public Texture createTexture(uint w, uint h, uint bytesPerPixel, byte* tex2DDataPtr)
         {
-            VkFormat format = VkFormat.R8g8b8a8Unorm;
-            VkFormatProperties formatProperties;
             var texture = new Texture
             {
                 width = w,
@@ -530,14 +528,11 @@ namespace SharpGame
 
             uint totalBytes = bytesPerPixel * w * h;
 
+            VkFormat format = VkFormat.R8g8b8a8Unorm;
+            VkFormatProperties formatProperties;
             // Get Device properites for the requested texture format
             vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProperties);
 
-            // Only use linear tiling if requested (and supported by the Device)
-            // Support for linear tiling is mostly limited, so prefer to use
-            // optimal tiling instead
-            // On most implementations linear tiling will only support a very
-            // limited amount of formats and features (mip maps, cubemaps, arrays, etc.)
             uint useStaging = 1;
 
             VkMemoryAllocateInfo memAllocInfo = Builder.MemoryAllocateInfo();
@@ -669,20 +664,13 @@ namespace SharpGame
                 vkDestroyBuffer(device, stagingBuffer, null);
             }
 
-            // Create sampler
-            // In Vulkan textures are accessed by samplers
-            // This separates all the sampling information from the 
-            // texture data
-            // This means you could have multiple sampler objects
-            // for the same texture with different settings
-            // Similar to the samplers available with OpenGL 3.3
             VkSamplerCreateInfo sampler = Builder.SamplerCreateInfo();
             sampler.magFilter = VkFilter.Linear;
             sampler.minFilter = VkFilter.Linear;
             sampler.mipmapMode = VkSamplerMipmapMode.Linear;
-            sampler.addressModeU = VkSamplerAddressMode.Repeat;
-            sampler.addressModeV = VkSamplerAddressMode.Repeat;
-            sampler.addressModeW = VkSamplerAddressMode.Repeat;
+            sampler.addressModeU = VkSamplerAddressMode.ClampToEdge;
+            sampler.addressModeV = VkSamplerAddressMode.ClampToEdge;
+            sampler.addressModeW = VkSamplerAddressMode.ClampToEdge;
             sampler.mipLodBias = 0.0f;
             sampler.compareOp = VkCompareOp.Never;
             sampler.minLod = 0.0f;

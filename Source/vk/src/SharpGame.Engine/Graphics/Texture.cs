@@ -41,20 +41,8 @@ namespace SharpGame
 
     }
 
-    public unsafe class vksTexture2D : Texture
+    public unsafe class Texture2D : Texture
     {
-        /**
-        * Load a 2D texture including all mip levels
-        *
-        * @param filename File to load (supports .ktx and .dds)
-        * @param format Vulkan format of the image data stored in the file
-        * @param device Vulkan device to create the texture on
-        * @param copyQueue Queue used for the texture staging copy commands (must support transfer)
-        * @param (Optional) imageUsageFlags Usage flags for the texture's image (defaults to VK_IMAGE_USAGE_SAMPLED_BIT)
-        * @param (Optional) imageLayout Usage layout for the texture (defaults VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-        * @param (Optional) forceLinear Force linear tiling (not advised, defaults to false)
-        *
-        */
         public void loadFromFile(
             string filename,
             VkFormat format,
@@ -330,6 +318,6 @@ namespace SharpGame
             updateDescriptor();
         }
 
-        public void destroy() { }
+
     }
 }
