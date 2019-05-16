@@ -291,11 +291,13 @@ namespace SharpGame
             float minDepth,
             float maxDepth)
         {
-            VkViewport viewport = new VkViewport();
-            viewport.width = width;
-            viewport.height = height;
-            viewport.minDepth = minDepth;
-            viewport.maxDepth = maxDepth;
+            VkViewport viewport = new VkViewport
+            {
+                width = width,
+                height = height,
+                minDepth = minDepth,
+                maxDepth = maxDepth
+            };
             return viewport;
         }
 

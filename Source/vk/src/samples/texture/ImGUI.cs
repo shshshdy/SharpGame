@@ -264,8 +264,7 @@ namespace SharpGame
                     0);
 
             VkPipelineColorBlendAttachmentState blendAttachmentState =
-                Builder.ColorBlendAttachmentState(
-                    (VkColorComponentFlags)0xf, true);
+                Builder.ColorBlendAttachmentState((VkColorComponentFlags)0xf, true);
             blendAttachmentState.alphaBlendOp = VkBlendOp.Add;
             blendAttachmentState.colorBlendOp = VkBlendOp.Add;
             blendAttachmentState.srcColorBlendFactor = VkBlendFactor.SrcAlpha;
@@ -274,18 +273,12 @@ namespace SharpGame
             blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.Zero;
 
             VkPipelineColorBlendStateCreateInfo colorBlendState =
-                Builder.ColorBlendStateCreateInfo(
-                    1,
-                    ref blendAttachmentState);
+                Builder.ColorBlendStateCreateInfo(1, ref blendAttachmentState);
 
             VkPipelineDepthStencilStateCreateInfo depthStencilState =
-                Builder.DepthStencilStateCreateInfo(
-                    false,
-                    false,
-                    VkCompareOp.LessOrEqual);
+                Builder.DepthStencilStateCreateInfo(false, false, VkCompareOp.LessOrEqual);
 
-            VkPipelineViewportStateCreateInfo viewportState =
-                Builder.ViewportStateCreateInfo(1, 1, 0);
+            VkPipelineViewportStateCreateInfo viewportState = Builder.ViewportStateCreateInfo(1, 1, 0);
 
             VkPipelineMultisampleStateCreateInfo multisampleState =
                 Builder.MultisampleStateCreateInfo(
@@ -495,6 +488,8 @@ namespace SharpGame
         {
             if (!prepared)
                 return;
+
+            //SetPerFrameImGuiData(Time.Delta);
 
             UpdateImGuiInput();
 
