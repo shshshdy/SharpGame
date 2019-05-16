@@ -41,6 +41,7 @@
     <PackageReference Include="Vk" Version="1.0.21" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\vk.samples.base\SharpGame.Engine.csproj" />
+    <ProjectReference Include="..\..\..\..\SharpGame.Base\SharpGame.Base.csproj" />
+    <ProjectReference Include="..\..\SharpGame.Engine\SharpGame.Engine.csproj" />
   </ItemGroup>
 </Project>

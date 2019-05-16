@@ -140,7 +140,7 @@ namespace SharpGame
             // Binding description
             vertices.bindingDescriptions.Count = 1;
             vertices.bindingDescriptions[0] =
-                Builder.vertexInputBindingDescription(
+                Builder.VertexInputBindingDescription(
                     VERTEX_BUFFER_BIND_ID,
                     (uint)sizeof(ImVertex),
                     VkVertexInputRate.Vertex);
@@ -150,27 +150,27 @@ namespace SharpGame
             vertices.attributeDescriptions.Count = 3;
             // Location 0 : Position
             vertices.attributeDescriptions[0] =
-                Builder.vertexInputAttributeDescription(
+                Builder.VertexInputAttributeDescription(
                     VERTEX_BUFFER_BIND_ID,
                     0,
                     VkFormat.R32g32Sfloat,
                     ImVertex.PositionOffset);
             // Location 1 : Texture coordinates
             vertices.attributeDescriptions[1] =
-                Builder.vertexInputAttributeDescription(
+                Builder.VertexInputAttributeDescription(
                     VERTEX_BUFFER_BIND_ID,
                     1,
                     VkFormat.R32g32Sfloat,
                     ImVertex.UvOffset);
             // Location 1 : ImVertex normal
             vertices.attributeDescriptions[2] =
-                Builder.vertexInputAttributeDescription(
+                Builder.VertexInputAttributeDescription(
                     VERTEX_BUFFER_BIND_ID,
                     2,
                     VkFormat.R8g8b8a8Unorm,
                     ImVertex.ColorOffset);
 
-            vertices.inputState = Builder.pipelineVertexInputStateCreateInfo();
+            vertices.inputState = Builder.VertexInputStateCreateInfo();
             vertices.inputState.vertexBindingDescriptionCount = vertices.bindingDescriptions.Count;
             vertices.inputState.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)vertices.bindingDescriptions.Data;
             vertices.inputState.vertexAttributeDescriptionCount = vertices.attributeDescriptions.Count;
@@ -181,12 +181,12 @@ namespace SharpGame
         {
             // Example uses one ubo and one image sampler
             FixedArray2<VkDescriptorPoolSize> poolSizes = new FixedArray2<VkDescriptorPoolSize>(
-                    Builder.descriptorPoolSize(VkDescriptorType.UniformBuffer, 1),
-                    Builder.descriptorPoolSize(VkDescriptorType.CombinedImageSampler, 1)
+                    Builder.DescriptorPoolSize(VkDescriptorType.UniformBuffer, 1),
+                    Builder.DescriptorPoolSize(VkDescriptorType.CombinedImageSampler, 1)
             );
 
             VkDescriptorPoolCreateInfo descriptorPoolInfo =
-                Builder.descriptorPoolCreateInfo(
+                Builder.DescriptorPoolCreateInfo(
                     poolSizes.Count,
                     (VkDescriptorPoolSize*)Unsafe.AsPointer(ref poolSizes),
                     2);
@@ -198,12 +198,12 @@ namespace SharpGame
         {
             FixedArray2<VkDescriptorSetLayoutBinding> setLayoutBindings = new FixedArray2<VkDescriptorSetLayoutBinding>(
                 // Binding 0 : ImVertex shader uniform buffer
-                Builder.descriptorSetLayoutBinding(
+                Builder.DescriptorSetLayoutBinding(
                     VkDescriptorType.UniformBuffer,
                     VkShaderStageFlags.Vertex,
                     0),
                 // Binding 1 : Fragment shader image sampler
-                Builder.descriptorSetLayoutBinding(
+                Builder.DescriptorSetLayoutBinding(
                     VkDescriptorType.CombinedImageSampler,
                     VkShaderStageFlags.Fragment,
                     1)
@@ -218,7 +218,7 @@ namespace SharpGame
 
             var layout = descriptorSetLayout;
             VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
-                Builder.pipelineLayoutCreateInfo(
+                Builder.PipelineLayoutCreateInfo(
                     &layout,
                     1);
 
@@ -245,14 +245,14 @@ namespace SharpGame
             var descriptor = uniformBufferVS.descriptor;
             FixedArray2<VkWriteDescriptorSet> writeDescriptorSets = new FixedArray2<VkWriteDescriptorSet>(
                     // Binding 0 : ImVertex shader uniform buffer
-                    Builder.writeDescriptorSet(
+                    Builder.WriteDescriptorSet(
                         descriptorSet,
                         VkDescriptorType.UniformBuffer,
                         0,
                         ref descriptor),
                     // Binding 1 : Fragment shader texture sampler
                     //	Fragment shader: layout (binding = 1) uniform sampler2D samplerColor;
-                    Builder.writeDescriptorSet(
+                    Builder.WriteDescriptorSet(
                         descriptorSet,
                         VkDescriptorType.CombinedImageSampler,          // The descriptor set will use a combined image sampler (sampler and image could be split)
                         1,                                                  // Shader binding point 1
@@ -265,21 +265,21 @@ namespace SharpGame
         void preparePipelines()
         {
             VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
-                Builder.pipelineInputAssemblyStateCreateInfo(
+                Builder.InputAssemblyStateCreateInfo(
                     VkPrimitiveTopology.TriangleList,
                     0,
                     False);
 
             VkPipelineRasterizationStateCreateInfo rasterizationState =
-                Builder.pipelineRasterizationStateCreateInfo(
+                Builder.RasterizationStateCreateInfo(
                     VkPolygonMode.Fill,
                     VkCullModeFlags.None,
                     VkFrontFace.CounterClockwise,
                     0);
 
             VkPipelineColorBlendAttachmentState blendAttachmentState =
-                Builder.pipelineColorBlendAttachmentState(
-                    (VkColorComponentFlags)0xf, True);
+                Builder.ColorBlendAttachmentState(
+                    (VkColorComponentFlags)0xf, true);
             blendAttachmentState.alphaBlendOp = VkBlendOp.Add;
             blendAttachmentState.colorBlendOp = VkBlendOp.Add;
             blendAttachmentState.srcColorBlendFactor = VkBlendFactor.SrcAlpha;
@@ -288,21 +288,21 @@ namespace SharpGame
             blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.Zero;
 
             VkPipelineColorBlendStateCreateInfo colorBlendState =
-                Builder.pipelineColorBlendStateCreateInfo(
+                Builder.ColorBlendStateCreateInfo(
                     1,
-                    &blendAttachmentState);
+                    ref blendAttachmentState);
 
             VkPipelineDepthStencilStateCreateInfo depthStencilState =
-                Builder.pipelineDepthStencilStateCreateInfo(
-                    False,
-                    False,
+                Builder.DepthStencilStateCreateInfo(
+                    false,
+                    false,
                     VkCompareOp.LessOrEqual);
 
             VkPipelineViewportStateCreateInfo viewportState =
-                Builder.pipelineViewportStateCreateInfo(1, 1, 0);
+                Builder.ViewportStateCreateInfo(1, 1, 0);
 
             VkPipelineMultisampleStateCreateInfo multisampleState =
-                Builder.pipelineMultisampleStateCreateInfo(
+                Builder.MultisampleStateCreateInfo(
                     VkSampleCountFlags.Count1,
                     0);
 
@@ -310,7 +310,7 @@ namespace SharpGame
                 VkDynamicState.Viewport,
                 VkDynamicState.Scissor);
             VkPipelineDynamicStateCreateInfo dynamicState =
-                Builder.pipelineDynamicStateCreateInfo(
+                Builder.DynamicStateCreateInfo(
                     (VkDynamicState*)Unsafe.AsPointer(ref dynamicStateEnables),
                     dynamicStateEnables.Count,
                     0);
@@ -322,7 +322,7 @@ namespace SharpGame
             shaderStages.Second = Graphics.loadShader(getAssetPath() + "shaders/texture/ImGui.frag.spv", VkShaderStageFlags.Fragment);
 
             VkGraphicsPipelineCreateInfo pipelineCreateInfo =
-                Builder.pipelineCreateInfo(
+                Builder.PipelineCreateInfo(
                     pipelineLayout,
                     Graphics.renderPass,
                     0);
@@ -456,13 +456,13 @@ namespace SharpGame
 
         protected override void buildCommandBuffers()
         {
-            VkCommandBufferBeginInfo cmdBufInfo = Builder.commandBufferBeginInfo();
+            VkCommandBufferBeginInfo cmdBufInfo = Builder.CommandBufferBeginInfo();
 
             FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
             clearValues.First.color = defaultClearColor;
             clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
 
-            VkRenderPassBeginInfo renderPassBeginInfo = Builder.renderPassBeginInfo();
+            VkRenderPassBeginInfo renderPassBeginInfo = Builder.RenderPassBeginInfo();
             renderPassBeginInfo.renderPass = Graphics.renderPass;
             renderPassBeginInfo.renderArea.offset.x = 0;
             renderPassBeginInfo.renderArea.offset.y = 0;
@@ -482,10 +482,10 @@ namespace SharpGame
 
                 vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VkSubpassContents.Inline);
 
-                VkViewport viewport = Builder.viewport((float)width, (float)height, 0.0f, 1.0f);
+                VkViewport viewport = Builder.Viewport((float)width, (float)height, 0.0f, 1.0f);
                 vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 
-                VkRect2D scissor = Builder.rect2D(width, height, 0, 0);
+                VkRect2D scissor = Builder.Rect2D(width, height, 0, 0);
                 vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
                 RenderImDrawData(ImGui.GetDrawData());
@@ -620,7 +620,7 @@ namespace SharpGame
                         }
                         
 
-                        VkRect2D scissor = Builder.rect2D((uint)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
+                        VkRect2D scissor = Builder.Rect2D((uint)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
                             (uint)(pcmd.ClipRect.W - pcmd.ClipRect.Y), (int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y);
                         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 

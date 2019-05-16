@@ -7,7 +7,7 @@ namespace SharpGame
 {
     public unsafe static class Builder
     {
-        public static VkSemaphoreCreateInfo semaphoreCreateInfo()
+        public static VkSemaphoreCreateInfo SemaphoreCreateInfo()
         {
             VkSemaphoreCreateInfo semaphoreCreateInfo = new VkSemaphoreCreateInfo();
             semaphoreCreateInfo.sType = VkStructureType.SemaphoreCreateInfo;
@@ -34,24 +34,23 @@ namespace SharpGame
             return commandBufferAllocateInfo;
         }
 
-        public static VkCommandBufferBeginInfo commandBufferBeginInfo()
+        public static VkCommandBufferBeginInfo CommandBufferBeginInfo()
         {
             VkCommandBufferBeginInfo cmdBufferBeginInfo = new VkCommandBufferBeginInfo();
             cmdBufferBeginInfo.sType = VkStructureType.CommandBufferBeginInfo;
             return cmdBufferBeginInfo;
         }
 
-
-        public static VkRenderPassBeginInfo renderPassBeginInfo()
+        public static VkRenderPassBeginInfo RenderPassBeginInfo()
         {
             VkRenderPassBeginInfo renderPassBeginInfo = VkRenderPassBeginInfo.New();
             return renderPassBeginInfo;
         }
 
-        public static VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo(
+        public static VkPipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo(
             VkPrimitiveTopology topology,
-            uint flags,
-            uint primitiveRestartEnable)
+            uint flags = 0,
+            uint primitiveRestartEnable = False)
         {
             VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo = VkPipelineInputAssemblyStateCreateInfo.New();
             pipelineInputAssemblyStateCreateInfo.topology = topology;
@@ -60,7 +59,7 @@ namespace SharpGame
             return pipelineInputAssemblyStateCreateInfo;
         }
 
-        public static VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo(
+        public static VkPipelineRasterizationStateCreateInfo RasterizationStateCreateInfo(
             VkPolygonMode polygonMode,
             VkCullModeFlags cullMode,
             VkFrontFace frontFace,
@@ -76,9 +75,9 @@ namespace SharpGame
             return pipelineRasterizationStateCreateInfo;
         }
 
-        public static VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState(
+        public static VkPipelineColorBlendAttachmentState ColorBlendAttachmentState(
             VkColorComponentFlags colorWriteMask,
-            uint blendEnable)
+            bool blendEnable)
         {
             VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState = new VkPipelineColorBlendAttachmentState();
             pipelineColorBlendAttachmentState.colorWriteMask = colorWriteMask;
@@ -86,30 +85,20 @@ namespace SharpGame
             return pipelineColorBlendAttachmentState;
         }
 
-        public static VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState(
-            uint colorWriteMask,
-            uint blendEnable)
-        {
-            VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState = new VkPipelineColorBlendAttachmentState();
-            pipelineColorBlendAttachmentState.colorWriteMask = (VkColorComponentFlags)colorWriteMask;
-            pipelineColorBlendAttachmentState.blendEnable = blendEnable;
-            return pipelineColorBlendAttachmentState;
-        }
-
-        public static VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo(
+        public static VkPipelineColorBlendStateCreateInfo ColorBlendStateCreateInfo(
             uint attachmentCount,
-             VkPipelineColorBlendAttachmentState* pAttachments)
+             ref VkPipelineColorBlendAttachmentState pAttachments)
         {
 
             VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo = VkPipelineColorBlendStateCreateInfo.New();
             pipelineColorBlendStateCreateInfo.attachmentCount = attachmentCount;
-            pipelineColorBlendStateCreateInfo.pAttachments = pAttachments;
+            pipelineColorBlendStateCreateInfo.pAttachments = (VkPipelineColorBlendAttachmentState*)Unsafe.AsPointer(ref pAttachments);
             return pipelineColorBlendStateCreateInfo;
         }
 
-        public static VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo(
-            uint depthTestEnable,
-            uint depthWriteEnable,
+        public static VkPipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo(
+            bool depthTestEnable,
+            bool depthWriteEnable,
             VkCompareOp depthCompareOp)
         {
             VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo = VkPipelineDepthStencilStateCreateInfo.New();
@@ -121,7 +110,7 @@ namespace SharpGame
             return pipelineDepthStencilStateCreateInfo;
         }
 
-        public static VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo(
+        public static VkPipelineViewportStateCreateInfo ViewportStateCreateInfo(
             uint viewportCount,
             uint scissorCount,
             uint flags = 0)
@@ -133,7 +122,7 @@ namespace SharpGame
             return pipelineViewportStateCreateInfo;
         }
 
-        public static VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo(
+        public static VkPipelineMultisampleStateCreateInfo MultisampleStateCreateInfo(
             VkSampleCountFlags rasterizationSamples,
             uint flags = 0)
         {
@@ -143,7 +132,7 @@ namespace SharpGame
             return pipelineMultisampleStateCreateInfo;
         }
 
-        public static VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo(
+        public static VkPipelineDynamicStateCreateInfo DynamicStateCreateInfo(
             VkDynamicState* pDynamicStates,
             uint dynamicStateCount,
             uint flags = 0)
@@ -155,7 +144,7 @@ namespace SharpGame
             return pipelineDynamicStateCreateInfo;
         }
 
-        public static VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo(
+        public static VkPipelineDynamicStateCreateInfo DynamicStateCreateInfo(
             NativeList<VkDynamicState> pDynamicStates,
             uint flags = 0)
         {
@@ -166,14 +155,14 @@ namespace SharpGame
             return pipelineDynamicStateCreateInfo;
         }
 
-        public static VkPipelineTessellationStateCreateInfo pipelineTessellationStateCreateInfo(uint patchControlPoints)
+        public static VkPipelineTessellationStateCreateInfo TessellationStateCreateInfo(uint patchControlPoints)
         {
             VkPipelineTessellationStateCreateInfo pipelineTessellationStateCreateInfo = VkPipelineTessellationStateCreateInfo.New();
             pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
             return pipelineTessellationStateCreateInfo;
         }
 
-        public static VkGraphicsPipelineCreateInfo pipelineCreateInfo(
+        public static VkGraphicsPipelineCreateInfo PipelineCreateInfo(
             VkPipelineLayout layout,
             VkRenderPass renderPass,
             VkPipelineCreateFlags flags = 0)
@@ -187,33 +176,32 @@ namespace SharpGame
             return pipelineCreateInfo;
         }
 
-        public static VkVertexInputBindingDescription vertexInputBindingDescription(
-            uint binding,
-            uint stride,
-            VkVertexInputRate inputRate)
+        public static VkVertexInputBindingDescription VertexInputBindingDescription(
+            uint binding, uint stride, VkVertexInputRate inputRate)
         {
-            VkVertexInputBindingDescription vInputBindDescription = new VkVertexInputBindingDescription();
-            vInputBindDescription.binding = binding;
-            vInputBindDescription.stride = stride;
-            vInputBindDescription.inputRate = inputRate;
+            VkVertexInputBindingDescription vInputBindDescription = new VkVertexInputBindingDescription
+            {
+                binding = binding,
+                stride = stride,
+                inputRate = inputRate
+            };
             return vInputBindDescription;
         }
 
-        public static VkVertexInputAttributeDescription vertexInputAttributeDescription(
-            uint binding,
-            uint location,
-            VkFormat format,
-            uint offset)
+        public static VkVertexInputAttributeDescription VertexInputAttributeDescription(
+            uint binding, uint location, VkFormat format, uint offset)
         {
-            VkVertexInputAttributeDescription vInputAttribDescription = new VkVertexInputAttributeDescription();
-            vInputAttribDescription.location = location;
-            vInputAttribDescription.binding = binding;
-            vInputAttribDescription.format = format;
-            vInputAttribDescription.offset = offset;
+            VkVertexInputAttributeDescription vInputAttribDescription = new VkVertexInputAttributeDescription
+            {
+                location = location,
+                binding = binding,
+                format = format,
+                offset = offset
+            };
             return vInputAttribDescription;
         }
 
-        public static VkWriteDescriptorSet writeDescriptorSet(
+        public static VkWriteDescriptorSet WriteDescriptorSet(
             VkDescriptorSet dstSet,
             VkDescriptorType type,
             uint binding,
@@ -229,7 +217,7 @@ namespace SharpGame
             return writeDescriptorSet;
         }
 
-        public static VkWriteDescriptorSet writeDescriptorSet(
+        public static VkWriteDescriptorSet WriteDescriptorSet(
             VkDescriptorSet dstSet,
             VkDescriptorType type,
             uint binding,
@@ -247,7 +235,7 @@ namespace SharpGame
 
 
         /** @brief Initialize an image memory barrier with no image transfer ownership */
-        public static VkImageMemoryBarrier imageMemoryBarrier()
+        public static VkImageMemoryBarrier ImageMemoryBarrier()
         {
             VkImageMemoryBarrier imageMemoryBarrier = VkImageMemoryBarrier.New();
             imageMemoryBarrier.srcQueueFamilyIndex = QueueFamilyIgnored;
@@ -255,13 +243,13 @@ namespace SharpGame
             return imageMemoryBarrier;
         }
 
-        public static VkImageCreateInfo imageCreateInfo()
+        public static VkImageCreateInfo ImageCreateInfo()
         {
             VkImageCreateInfo imageCreateInfo = VkImageCreateInfo.New();
             return imageCreateInfo;
         }
 
-        public static VkMemoryAllocateInfo memoryAllocateInfo()
+        public static VkMemoryAllocateInfo MemoryAllocateInfo()
         {
             VkMemoryAllocateInfo memAllocInfo = new VkMemoryAllocateInfo();
             memAllocInfo.sType = VkStructureType.MemoryAllocateInfo;
@@ -269,13 +257,13 @@ namespace SharpGame
         }
 
 
-        public static VkBufferCreateInfo bufferCreateInfo()
+        public static VkBufferCreateInfo BufferCreateInfo()
         {
             VkBufferCreateInfo bufCreateInfo = VkBufferCreateInfo.New();
             return bufCreateInfo;
         }
 
-        public static VkBufferCreateInfo bufferCreateInfo(
+        public static VkBufferCreateInfo BufferCreateInfo(
             VkBufferUsageFlags usage,
             ulong size)
         {
@@ -285,19 +273,19 @@ namespace SharpGame
             return bufCreateInfo;
         }
 
-        public static VkSamplerCreateInfo samplerCreateInfo()
+        public static VkSamplerCreateInfo SamplerCreateInfo()
         {
             VkSamplerCreateInfo samplerCreateInfo = VkSamplerCreateInfo.New();
             return samplerCreateInfo;
         }
 
-        public static VkImageViewCreateInfo imageViewCreateInfo()
+        public static VkImageViewCreateInfo ImageViewCreateInfo()
         {
             VkImageViewCreateInfo imageViewCreateInfo = VkImageViewCreateInfo.New();
             return imageViewCreateInfo;
         }
 
-        public static VkViewport viewport(
+        public static VkViewport Viewport(
             float width,
             float height,
             float minDepth,
@@ -311,7 +299,7 @@ namespace SharpGame
             return viewport;
         }
 
-        public static VkRect2D rect2D(
+        public static VkRect2D Rect2D(
             uint width,
             uint height,
             int offsetX,
@@ -325,13 +313,13 @@ namespace SharpGame
             return rect2D;
         }
 
-        public static VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo()
+        public static VkPipelineVertexInputStateCreateInfo VertexInputStateCreateInfo()
         {
             VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo = VkPipelineVertexInputStateCreateInfo.New();
             return pipelineVertexInputStateCreateInfo;
         }
 
-        public static VkDescriptorPoolCreateInfo descriptorPoolCreateInfo(
+        public static VkDescriptorPoolCreateInfo DescriptorPoolCreateInfo(
             uint poolSizeCount,
             VkDescriptorPoolSize* pPoolSizes,
             uint maxSets)
@@ -343,27 +331,31 @@ namespace SharpGame
             return descriptorPoolInfo;
         }
 
-        public static VkDescriptorPoolSize descriptorPoolSize(
+        public static VkDescriptorPoolSize DescriptorPoolSize(
             VkDescriptorType type,
             uint descriptorCount)
         {
-            VkDescriptorPoolSize descriptorPoolSize = new VkDescriptorPoolSize();
-            descriptorPoolSize.type = type;
-            descriptorPoolSize.descriptorCount = descriptorCount;
+            VkDescriptorPoolSize descriptorPoolSize = new VkDescriptorPoolSize
+            {
+                type = type,
+                descriptorCount = descriptorCount
+            };
             return descriptorPoolSize;
         }
 
-        public static VkDescriptorSetLayoutBinding descriptorSetLayoutBinding(
+        public static VkDescriptorSetLayoutBinding DescriptorSetLayoutBinding(
             VkDescriptorType type,
             VkShaderStageFlags stageFlags,
             uint binding,
             uint descriptorCount = 1)
         {
-            VkDescriptorSetLayoutBinding setLayoutBinding = new VkDescriptorSetLayoutBinding();
-            setLayoutBinding.descriptorType = type;
-            setLayoutBinding.stageFlags = stageFlags;
-            setLayoutBinding.binding = binding;
-            setLayoutBinding.descriptorCount = descriptorCount;
+            VkDescriptorSetLayoutBinding setLayoutBinding = new VkDescriptorSetLayoutBinding
+            {
+                descriptorType = type,
+                stageFlags = stageFlags,
+                binding = binding,
+                descriptorCount = descriptorCount
+            };
             return setLayoutBinding;
         }
 
@@ -389,7 +381,7 @@ namespace SharpGame
             return descriptorSetLayoutCreateInfo;
         }
 
-        public static VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo(
+        public static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo(
             VkDescriptorSetLayout* pSetLayouts,
             uint setLayoutCount = 1)
         {
@@ -399,7 +391,7 @@ namespace SharpGame
             return pipelineLayoutCreateInfo;
         }
 
-        public static VkMappedMemoryRange mappedMemoryRange()
+        public static VkMappedMemoryRange MappedMemoryRange()
         {
             VkMappedMemoryRange mappedMemoryRange = VkMappedMemoryRange.New();
             return mappedMemoryRange;
@@ -417,24 +409,25 @@ namespace SharpGame
             return descriptorSetAllocateInfo;
         }
 
-        public static VkDescriptorImageInfo descriptorImageInfo(VkSampler sampler, VkImageView imageView, VkImageLayout imageLayout)
+        public static VkDescriptorImageInfo DescriptorImageInfo(VkSampler sampler, VkImageView imageView, VkImageLayout imageLayout)
         {
-            VkDescriptorImageInfo descriptorImageInfo = new VkDescriptorImageInfo();
-            descriptorImageInfo.sampler = sampler;
-            descriptorImageInfo.imageView = imageView;
-            descriptorImageInfo.imageLayout = imageLayout;
+            VkDescriptorImageInfo descriptorImageInfo = new VkDescriptorImageInfo
+            {
+                sampler = sampler,
+                imageView = imageView,
+                imageLayout = imageLayout
+            };
             return descriptorImageInfo;
         }
 
-        public static VkPushConstantRange pushConstantRange(
-            VkShaderStageFlags stageFlags,
-            uint size,
-            uint offset)
+        public static VkPushConstantRange PushConstantRange(VkShaderStageFlags stageFlags, uint size, uint offset)
         {
-            VkPushConstantRange pushConstantRange = new VkPushConstantRange();
-            pushConstantRange.stageFlags = stageFlags;
-            pushConstantRange.offset = offset;
-            pushConstantRange.size = size;
+            VkPushConstantRange pushConstantRange = new VkPushConstantRange
+            {
+                stageFlags = stageFlags,
+                offset = offset,
+                size = size
+            };
             return pushConstantRange;
         }
     }

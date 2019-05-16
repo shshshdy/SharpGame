@@ -300,13 +300,13 @@ namespace SharpGame
         public VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
         {
             // Create the buffer handle
-            VkBufferCreateInfo bufferCreateInfo = Builder.bufferCreateInfo(usageFlags, size);
+            VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo(usageFlags, size);
             bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
             Util.CheckResult(vkCreateBuffer(LogicalDevice, &bufferCreateInfo, null, buffer));
 
             // Create the memory backing up the buffer handle
             VkMemoryRequirements memReqs;
-            VkMemoryAllocateInfo memAlloc = Builder.memoryAllocateInfo();
+            VkMemoryAllocateInfo memAlloc = Builder.MemoryAllocateInfo();
             vkGetBufferMemoryRequirements(LogicalDevice, *buffer, &memReqs);
             memAlloc.allocationSize = memReqs.size;
             // Find a memory type index that fits the properties of the buffer
@@ -322,7 +322,7 @@ namespace SharpGame
                 // If host coherency hasn't been requested, do a manual flush to make writes visible
                 if ((memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
                 {
-                    VkMappedMemoryRange mappedRange = Builder.mappedMemoryRange();
+                    VkMappedMemoryRange mappedRange = Builder.MappedMemoryRange();
                     mappedRange.memory = *memory;
                     mappedRange.offset = 0;
                     mappedRange.size = size;

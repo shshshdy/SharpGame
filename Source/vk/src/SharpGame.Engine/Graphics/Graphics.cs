@@ -159,7 +159,7 @@ namespace SharpGame
             Swapchain.Connect(Instance, physicalDevice, device);
 
             // Create synchronization objects
-            VkSemaphoreCreateInfo semaphoreCreateInfo = Builder.semaphoreCreateInfo();
+            VkSemaphoreCreateInfo semaphoreCreateInfo = Builder.SemaphoreCreateInfo();
             // Create a semaphore used to synchronize image presentation
             // Ensures that the image is displayed before we start submitting new commands to the queu
             Util.CheckResult(vkCreateSemaphore(device, &semaphoreCreateInfo, null, &GetSemaphoresPtr()->PresentComplete));
@@ -553,7 +553,7 @@ namespace SharpGame
             // limited amount of formats and features (mip maps, cubemaps, arrays, etc.)
             uint useStaging = 1;
 
-            VkMemoryAllocateInfo memAllocInfo = Builder.memoryAllocateInfo();
+            VkMemoryAllocateInfo memAllocInfo = Builder.MemoryAllocateInfo();
             VkMemoryRequirements memReqs = new VkMemoryRequirements();
 
             if (useStaging == 1)
@@ -562,7 +562,7 @@ namespace SharpGame
                 VkBuffer stagingBuffer;
                 VkDeviceMemory stagingMemory;
 
-                VkBufferCreateInfo bufferCreateInfo = Builder.bufferCreateInfo();
+                VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo();
                 bufferCreateInfo.size = totalBytes;
                 // This buffer is used as a transfer source for the buffer copy
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
@@ -608,7 +608,7 @@ namespace SharpGame
                 }
 
                 // Create optimal tiled target image
-                VkImageCreateInfo imageCreateInfo = Builder.imageCreateInfo();
+                VkImageCreateInfo imageCreateInfo = Builder.ImageCreateInfo();
                 imageCreateInfo.imageType = VkImageType.Image2D;
                 imageCreateInfo.format = format;
                 imageCreateInfo.mipLevels = texture.mipLevels;
@@ -689,7 +689,7 @@ namespace SharpGame
             // This means you could have multiple sampler objects
             // for the same texture with different settings
             // Similar to the samplers available with OpenGL 3.3
-            VkSamplerCreateInfo sampler = Builder.samplerCreateInfo();
+            VkSamplerCreateInfo sampler = Builder.SamplerCreateInfo();
             sampler.magFilter = VkFilter.Linear;
             sampler.minFilter = VkFilter.Linear;
             sampler.mipmapMode = VkSamplerMipmapMode.Linear;
@@ -722,7 +722,7 @@ namespace SharpGame
             // Textures are not directly accessed by the shaders and
             // are abstracted by image views containing additional
             // information and sub resource ranges
-            VkImageViewCreateInfo view = Builder.imageViewCreateInfo();
+            VkImageViewCreateInfo view = Builder.ImageViewCreateInfo();
             view.viewType = VkImageViewType.Image2D;
             view.format = format;
             view.components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A };
@@ -752,7 +752,7 @@ namespace SharpGame
             VkImageSubresourceRange subresourceRange)
         {
             // Create an image barrier object
-            VkImageMemoryBarrier imageMemoryBarrier = Builder.imageMemoryBarrier(); ;
+            VkImageMemoryBarrier imageMemoryBarrier = Builder.ImageMemoryBarrier(); ;
             imageMemoryBarrier.oldLayout = oldImageLayout;
             imageMemoryBarrier.newLayout = newImageLayout;
             imageMemoryBarrier.image = image;

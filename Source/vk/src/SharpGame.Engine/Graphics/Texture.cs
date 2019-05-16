@@ -68,7 +68,7 @@ namespace SharpGame
             // limited amount of formats and features (mip maps, cubemaps, arrays, etc.)
             bool useStaging = !forceLinear;
 
-            VkMemoryAllocateInfo memAllocInfo = Builder.memoryAllocateInfo();
+            VkMemoryAllocateInfo memAllocInfo = Builder.MemoryAllocateInfo();
             VkMemoryRequirements memReqs;
 
             // Use a separate command buffer for texture loading
@@ -80,7 +80,7 @@ namespace SharpGame
                 VkBuffer stagingBuffer;
                 VkDeviceMemory stagingMemory;
 
-                VkBufferCreateInfo bufferCreateInfo = Builder.bufferCreateInfo();
+                VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo();
                 bufferCreateInfo.size = tex2D.GetTotalSize();
                 // This buffer is used as a transfer source for the buffer copy
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
@@ -130,7 +130,7 @@ namespace SharpGame
                 }
 
                 // Create optimal tiled target image
-                VkImageCreateInfo imageCreateInfo = Builder.imageCreateInfo();
+                VkImageCreateInfo imageCreateInfo = Builder.ImageCreateInfo();
                 imageCreateInfo.imageType = VkImageType.Image2D;
                 imageCreateInfo.format = format;
                 imageCreateInfo.mipLevels = mipLevels;

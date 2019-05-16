@@ -76,7 +76,7 @@ namespace SharpGame
                         imageLayout = texture.imageLayout
                     };
 
-                    writeDescriptorSets[dstBinding] = writeDescriptorSet(descriptorSet, descriptorType,
+                    writeDescriptorSets[dstBinding] = WriteDescriptorSet(descriptorSet, descriptorType,
                         dstBinding, ref vkDescriptorImageInfo, 1);
                     break;
                 case VkDescriptorType.SampledImage:
@@ -95,7 +95,7 @@ namespace SharpGame
                 case VkDescriptorType.UniformBufferDynamic:
                 case VkDescriptorType.StorageBufferDynamic:
                     var buffer = bindable as GraphicsBuffer;                    
-                    writeDescriptorSets[dstBinding] = writeDescriptorSet(descriptorSet,
+                    writeDescriptorSets[dstBinding] = WriteDescriptorSet(descriptorSet,
                         descriptorType, dstBinding, ref buffer.descriptor, 1);
                     
                     break;

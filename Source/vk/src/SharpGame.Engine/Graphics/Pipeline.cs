@@ -126,7 +126,7 @@ namespace SharpGame
                         colorWriteMask = (VkColorComponentFlags)0xf
                     };
 
-                    ColorBlendState = pipelineColorBlendStateCreateInfo(1, &colorBlendAttachmentState);
+                    ColorBlendState = ColorBlendStateCreateInfo(1, ref colorBlendAttachmentState);
                     break;
                 case BlendMode.Add:
 
@@ -141,7 +141,7 @@ namespace SharpGame
                         colorWriteMask = (VkColorComponentFlags)0xf
                     };
 
-                    ColorBlendState = pipelineColorBlendStateCreateInfo(1, &colorBlendAttachmentState);
+                    ColorBlendState = ColorBlendStateCreateInfo(1, ref colorBlendAttachmentState);
 
                     break;
                 case BlendMode.MultiplY:
@@ -159,7 +159,7 @@ namespace SharpGame
                         colorWriteMask = (VkColorComponentFlags)0xf
                     };
 
-                    ColorBlendState = pipelineColorBlendStateCreateInfo(1, &colorBlendAttachmentState);
+                    ColorBlendState = ColorBlendStateCreateInfo(1, ref colorBlendAttachmentState);
                     break;
                 case BlendMode.AddAlpha:
                     break;
@@ -176,7 +176,7 @@ namespace SharpGame
                         colorWriteMask = (VkColorComponentFlags)0xf
                     };
 
-                    ColorBlendState = pipelineColorBlendStateCreateInfo(1, &colorBlendAttachmentState);
+                    ColorBlendState = ColorBlendStateCreateInfo(1, ref colorBlendAttachmentState);
                     break;
                 case BlendMode.InvdestAlpha:
                     break;
