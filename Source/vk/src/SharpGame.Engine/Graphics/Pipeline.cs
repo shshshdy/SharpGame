@@ -6,6 +6,7 @@ using Vulkan;
 namespace SharpGame
 {
     using static Builder;
+    using static VulkanNative;
 
     public enum BlendMode
     {
@@ -23,12 +24,11 @@ namespace SharpGame
     public class Pipeline : DisposeBase
     {
         private VkPipelineRasterizationStateCreateInfo rasterizationState_;
-        public VkPipelineRasterizationStateCreateInfo RasterizationState { get => rasterizationState_; set => rasterizationState_ = value; }
-
+        public ref VkPipelineRasterizationStateCreateInfo RasterizationState => ref rasterizationState_;
         public VkPipelineMultisampleStateCreateInfo MultisampleState { get; set; }
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState_;
-        public VkPipelineDepthStencilStateCreateInfo DepthStencilState { get => depthStencilState_; set => depthStencilState_ = value; }
+        public ref VkPipelineDepthStencilStateCreateInfo DepthStencilState => ref depthStencilState_;
         public VkPipelineColorBlendStateCreateInfo ColorBlendState { get; set; }
         public VkPrimitiveTopology PrimitiveTopology { get; set; } = VkPrimitiveTopology.TriangleList;
 
@@ -102,9 +102,8 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            //todo pipeline?.Dispose();
-            //pipeline = null;
-
+            vkDestroyPipeline(Graphics.device, pipeline, IntPtr.Zero);
+            pipeline = 0;
             base.Destroy();
         }
 
@@ -189,8 +188,8 @@ namespace SharpGame
 
         protected /*override*/ void Recreate()
         {
-          //todo  pipeline?.Dispose();
-           // pipeline = null;
+            vkDestroyPipeline(Graphics.device, pipeline, IntPtr.Zero);
+            pipeline = 0;
         }
 
         public VkPipeline GetGraphicsPipeline(RenderPass renderPass, Shader shader, Geometry geometry)
@@ -205,17 +204,16 @@ namespace SharpGame
             {
                 return 0;
             }
-            /*
-            var pipelineLayoutInfo = new VkPipelineLayoutCreateInfo(new[]
-            { pass.ResourceLayout.descriptorSetLayout });
+      
+            var pipelineLayoutInfo = PipelineLayoutCreateInfo(ref pass.ResourceLayout.descriptorSetLayout, 1);
+            vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
-            pipelineLayout = Graphics.Device.CreatePipelineLayout(pipelineLayoutInfo);
             var shaderStageCreateInfos = pass.GetShaderStageCreateInfos();
-
-            viewportStateCreateInfo = pipelineViewportStateCreateInfo(
-            viewport(0, 0, graphics.Width, graphics.Height),
-            rect2D(0, 0, graphics.Width, graphics.Height));
-
+    /*
+            viewportStateCreateInfo = ViewportStateCreateInfo(
+            Viewport(0, 0, graphics.Width, graphics.Height),
+            Rect2D(0, 0, graphics.Width, graphics.Height));
+ 
             var inputAssemblyStateCreateInfo = pipelineInputAssemblyStateCreateInfo(
                 geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
 

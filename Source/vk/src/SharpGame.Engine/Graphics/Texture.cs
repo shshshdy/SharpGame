@@ -22,8 +22,6 @@ namespace SharpGame
 
     public unsafe class vksTexture2D : Texture
     {
-        private vksVulkanDevice device;
-
         /**
         * Load a 2D texture including all mip levels
         *
@@ -39,7 +37,6 @@ namespace SharpGame
         public void loadFromFile(
             string filename,
             VkFormat format,
-            vksVulkanDevice device,
             VkQueue copyQueue,
             VkImageUsageFlags imageUsageFlags = VkImageUsageFlags.Sampled,
             VkImageLayout imageLayout = VkImageLayout.ShaderReadOnlyOptimal,
@@ -51,7 +48,6 @@ namespace SharpGame
                 tex2D = KtxFile.Load(fs, false);
             }
 
-            this.device = device;
             width = tex2D.Header.PixelWidth;
             height = tex2D.Header.PixelHeight;
             if (height == 0) height = width;
@@ -59,7 +55,7 @@ namespace SharpGame
 
             // Get device properites for the requested texture format
             VkFormatProperties formatProperties;
-            vkGetPhysicalDeviceFormatProperties(device.PhysicalDevice, format, out formatProperties);
+            vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, format, out formatProperties);
 
             // Only use linear tiling if requested (and supported by the device)
             // Support for linear tiling is mostly limited, so prefer to use
@@ -72,7 +68,7 @@ namespace SharpGame
             VkMemoryRequirements memReqs;
 
             // Use a separate command buffer for texture loading
-            VkCommandBuffer copyCmd = device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
+            VkCommandBuffer copyCmd = Device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
 
             if (useStaging)
             {
@@ -86,27 +82,27 @@ namespace SharpGame
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
                 bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
 
-                Util.CheckResult(vkCreateBuffer(device.LogicalDevice, &bufferCreateInfo, null, &stagingBuffer));
+                Util.CheckResult(vkCreateBuffer(Device.LogicalDevice, &bufferCreateInfo, null, &stagingBuffer));
 
                 // Get memory requirements for the staging buffer (alignment, memory type bits)
-                vkGetBufferMemoryRequirements(device.LogicalDevice, stagingBuffer, &memReqs);
+                vkGetBufferMemoryRequirements(Device.LogicalDevice, stagingBuffer, &memReqs);
 
                 memAllocInfo.allocationSize = memReqs.size;
                 // Get memory type index for a host visible buffer
-                memAllocInfo.memoryTypeIndex = device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
+                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
 
-                Util.CheckResult(vkAllocateMemory(device.LogicalDevice, &memAllocInfo, null, &stagingMemory));
-                Util.CheckResult(vkBindBufferMemory(device.LogicalDevice, stagingBuffer, stagingMemory, 0));
+                Util.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, &stagingMemory));
+                Util.CheckResult(vkBindBufferMemory(Device.LogicalDevice, stagingBuffer, stagingMemory, 0));
 
                 // Copy texture data into staging buffer
                 byte* data;
-                Util.CheckResult(vkMapMemory(device.LogicalDevice, stagingMemory, 0, memReqs.size, 0, (void**)&data));
+                Util.CheckResult(vkMapMemory(Device.LogicalDevice, stagingMemory, 0, memReqs.size, 0, (void**)&data));
                 byte[] pixelData = tex2D.GetAllTextureData();
                 fixed (byte* pixelDataPtr = &pixelData[0])
                 {
                     Unsafe.CopyBlock(data, pixelDataPtr, (uint)pixelData.Length);
                 }
-                vkUnmapMemory(device.LogicalDevice, stagingMemory);
+                vkUnmapMemory(Device.LogicalDevice, stagingMemory);
 
                 // Setup buffer copy regions for each mip level
                 NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
@@ -146,15 +142,15 @@ namespace SharpGame
                 {
                     imageCreateInfo.usage |= VkImageUsageFlags.TransferDst;
                 }
-                Util.CheckResult(vkCreateImage(device.LogicalDevice, &imageCreateInfo, null, out image));
+                Util.CheckResult(vkCreateImage(Device.LogicalDevice, &imageCreateInfo, null, out image));
 
-                vkGetImageMemoryRequirements(device.LogicalDevice, image, &memReqs);
+                vkGetImageMemoryRequirements(Device.LogicalDevice, image, &memReqs);
 
                 memAllocInfo.allocationSize = memReqs.size;
 
-                memAllocInfo.memoryTypeIndex = device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-                Util.CheckResult(vkAllocateMemory(device.LogicalDevice, &memAllocInfo, null, out deviceMemory));
-                Util.CheckResult(vkBindImageMemory(device.LogicalDevice, image, deviceMemory, 0));
+                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
+                Util.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, out deviceMemory));
+                Util.CheckResult(vkBindImageMemory(Device.LogicalDevice, image, deviceMemory, 0));
 
                 VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
                 subresourceRange.aspectMask = VkImageAspectFlags.Color;
@@ -191,11 +187,11 @@ namespace SharpGame
                     imageLayout,
                     subresourceRange);
 
-                device.flushCommandBuffer(copyCmd, copyQueue);
+                Device.flushCommandBuffer(copyCmd, copyQueue);
 
                 // Clean up staging resources
-                vkFreeMemory(device.LogicalDevice, stagingMemory, null);
-                vkDestroyBuffer(device.LogicalDevice, stagingBuffer, null);
+                vkFreeMemory(Device.LogicalDevice, stagingMemory, null);
+                vkDestroyBuffer(Device.LogicalDevice, stagingBuffer, null);
             }
             else
             {
@@ -224,11 +220,11 @@ namespace SharpGame
                 imageCreateInfo.initialLayout = VkImageLayout.Undefined;
 
                 // Load mip map level 0 to linear tiling image
-                Util.CheckResult(vkCreateImage(device.LogicalDevice, &imageCreateInfo, null, &mappableImage));
+                Util.CheckResult(vkCreateImage(Device.LogicalDevice, &imageCreateInfo, null, &mappableImage));
 
                 // Get memory requirements for this image 
                 // like size and alignment
-                vkGetImageMemoryRequirements(device.LogicalDevice, mappableImage, &memReqs);
+                vkGetImageMemoryRequirements(Device.LogicalDevice, mappableImage, &memReqs);
                 // Set memory allocation size to required memory size
                 memAllocInfo.allocationSize = memReqs.size;
 
@@ -236,10 +232,10 @@ namespace SharpGame
                 memAllocInfo.memoryTypeIndex = device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
 
                 // Allocate host memory
-                Util.CheckResult(vkAllocateMemory(device.LogicalDevice, &memAllocInfo, null, &mappableMemory));
+                Util.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, &mappableMemory));
 
                 // Bind allocated image for use
-                Util.CheckResult(vkBindImageMemory(device.LogicalDevice, mappableImage, mappableMemory, 0));
+                Util.CheckResult(vkBindImageMemory(Device.LogicalDevice, mappableImage, mappableMemory, 0));
 
                 // Get sub resource layout
                 // Mip map count, array layer, etc.
@@ -252,15 +248,15 @@ namespace SharpGame
 
                 // Get sub resources layout 
                 // Includes row pitch, size offsets, etc.
-                vkGetImageSubresourceLayout(device.LogicalDevice, mappableImage, &subRes, &subResLayout);
+                vkGetImageSubresourceLayout(Device.LogicalDevice, mappableImage, &subRes, &subResLayout);
 
                 // Map image memory
-                Util.CheckResult(vkMapMemory(device.LogicalDevice, mappableMemory, 0, memReqs.size, 0, &data));
+                Util.CheckResult(vkMapMemory(Device.LogicalDevice, mappableMemory, 0, memReqs.size, 0, &data));
 
                 // Copy image data into memory
                 memcpy(data, tex2D[subRes.mipLevel].data(), tex2D[subRes.mipLevel].size());
 
-                vkUnmapMemory(device.LogicalDevice, mappableMemory);
+                vkUnmapMemory(Device.LogicalDevice, mappableMemory);
 
                 // Linear tiled images don't need to be staged
                 // and can be directly used as textures
@@ -292,7 +288,7 @@ namespace SharpGame
             samplerCreateInfo.maxAnisotropy = 8;
             samplerCreateInfo.anisotropyEnable = True;
             samplerCreateInfo.borderColor = VkBorderColor.FloatOpaqueWhite;
-            Util.CheckResult(vkCreateSampler(device.LogicalDevice, &samplerCreateInfo, null, out sampler));
+            Util.CheckResult(vkCreateSampler(Device.LogicalDevice, &samplerCreateInfo, null, out sampler));
 
             // Create image view
             // Textures are not directly accessed by the shaders and
@@ -307,7 +303,7 @@ namespace SharpGame
             // Only set mip map count if optimal tiling is used
             viewCreateInfo.subresourceRange.levelCount = (useStaging) ? mipLevels : 1;
             viewCreateInfo.image = image;
-            Util.CheckResult(vkCreateImageView(device.LogicalDevice, &viewCreateInfo, null, out view));
+            Util.CheckResult(vkCreateImageView(Device.LogicalDevice, &viewCreateInfo, null, out view));
 
             // Update descriptor image info member that can be used for setting up descriptor sets
             updateDescriptor();

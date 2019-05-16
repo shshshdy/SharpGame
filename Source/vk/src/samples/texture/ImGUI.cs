@@ -38,20 +38,6 @@ namespace SharpGame
 
     public unsafe class ImGUI : Application, IDisposable
     {
-        // Contains all Vulkan objects that are required to store and use a texture
-        // Note that this repository contains a texture class (VulkanTexture.hpp) that encapsulates texture loading functionality in a class that is used in subsequent demos
-        /*
-        public struct Texture
-        {
-            public VkSampler sampler;
-            public VkImage image;
-            public VkImageLayout imageLayout;
-            public VkDeviceMemory DeviceMemory;
-            public VkImageView view;
-            public uint width, height;
-            public uint mipLevels;
-        }*/
-
         Texture texture;
 
         public class Vertices
@@ -85,7 +71,7 @@ namespace SharpGame
         {
             zoom = -2.5f;
             rotation = new Vector3(0.0f, 15.0f, 0.0f);
-            Title = "Vulkan Example - Texture loading";
+            Title = "Vulkan Example - ImGUI";
             // enableTextOverlay = true;
         }
 
@@ -96,10 +82,10 @@ namespace SharpGame
 
             destroyTextureImage(texture);
 
-            Graphics.Device.DestroyPipeline(pipelines_solid);
+            Device.DestroyPipeline(pipelines_solid);
 
-            Graphics.Device.DestroyPipelineLayout(pipelineLayout);
-            Graphics.Device.DestroyDescriptorSetLayout(descriptorSetLayout);
+            Device.DestroyPipelineLayout(pipelineLayout);
+            Device.DestroyDescriptorSetLayout(descriptorSetLayout);
 
             vertexBuffer.destroy();
             indexBuffer.destroy();
@@ -120,14 +106,14 @@ namespace SharpGame
             // Create buffers
             // For the sake of simplicity we won't stage the vertex data to the gpu memory
             // ImVertex buffer
-            Util.CheckResult(Graphics.Device.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.VertexBuffer,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
                 vertexBuffer,
                 (ulong)(4096 * sizeof(ImVertex)),
                 null));
             // Index buffer
-            Util.CheckResult(Graphics.Device.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.IndexBuffer,
                 VkMemoryPropertyFlags.HostCoherent | VkMemoryPropertyFlags.HostCoherent,
                 indexBuffer,
@@ -219,7 +205,7 @@ namespace SharpGame
             var layout = descriptorSetLayout;
             VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
                 Builder.PipelineLayoutCreateInfo(
-                    &layout,
+                    ref layout,
                     1);
 
             Util.CheckResult(vkCreatePipelineLayout(Graphics.device, &pPipelineLayoutCreateInfo, null, out pipelineLayout));
@@ -347,7 +333,7 @@ namespace SharpGame
         {
             var localUboVS = uboVS;
             // ImVertex shader uniform buffer block
-            Util.CheckResult(Graphics.Device.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.UniformBuffer,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
                 uniformBufferVS,

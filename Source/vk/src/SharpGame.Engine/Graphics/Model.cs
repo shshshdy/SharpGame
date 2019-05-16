@@ -134,9 +134,9 @@ namespace SharpGame
     * @param copyQueue Queue used for the memory staging copy commands (must support transfer)
     * @param (Optional) flags ASSIMP model loading flags
     */
-        bool loadFromFile(string filename, vksVertexLayout layout, vksModelCreateInfo* createInfo, vksVulkanDevice device, VkQueue copyQueue, PostProcessSteps flags = DefaultPostProcessSteps)
+        bool loadFromFile(string filename, vksVertexLayout layout, vksModelCreateInfo* createInfo, VkQueue copyQueue, PostProcessSteps flags = DefaultPostProcessSteps)
         {
-            this.device = device.LogicalDevice;
+            this.device = Device.LogicalDevice;
 
             // Load file
             var assimpContext = new AssimpContext();
@@ -267,7 +267,7 @@ namespace SharpGame
             GraphicsBuffer indexStaging = new GraphicsBuffer();
 
             // Vertex buffer
-            Util.CheckResult(device.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.TransferSrc,
                 VkMemoryPropertyFlags.HostVisible,
                 vertexStaging,
@@ -275,7 +275,7 @@ namespace SharpGame
                 vertexBuffer.Data.ToPointer()));
 
             // Index buffer
-            Util.CheckResult(device.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.TransferSrc,
                 VkMemoryPropertyFlags.HostVisible,
                 indexStaging,
@@ -284,21 +284,21 @@ namespace SharpGame
 
             // Create device local target buffers
             // Vertex buffer
-            Util.CheckResult(device.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.VertexBuffer | VkBufferUsageFlags.TransferDst,
                 VkMemoryPropertyFlags.DeviceLocal,
                 vertices,
                 vBufferSize));
 
             // Index buffer
-            Util.CheckResult(device.createBuffer(
+            Util.CheckResult(Device.createBuffer(
                 VkBufferUsageFlags.IndexBuffer | VkBufferUsageFlags.TransferDst,
                 VkMemoryPropertyFlags.DeviceLocal,
                 indices,
                 iBufferSize));
 
             // Copy from staging buffers
-            VkCommandBuffer copyCmd = device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
+            VkCommandBuffer copyCmd = Device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
 
             VkBufferCopy copyRegion = new VkBufferCopy();
 
@@ -308,13 +308,13 @@ namespace SharpGame
             copyRegion.size = indices.size;
             vkCmdCopyBuffer(copyCmd, indexStaging.buffer, indices.buffer, 1, &copyRegion);
 
-            device.flushCommandBuffer(copyCmd, copyQueue);
+            Device.flushCommandBuffer(copyCmd, copyQueue);
 
             // Destroy staging resources
-            vkDestroyBuffer(device.LogicalDevice, vertexStaging.buffer, null);
-            vkFreeMemory(device.LogicalDevice, vertexStaging.memory, null);
-            vkDestroyBuffer(device.LogicalDevice, indexStaging.buffer, null);
-            vkFreeMemory(device.LogicalDevice, indexStaging.memory, null);
+            Device.DestroyBuffer(vertexStaging.buffer);
+            Device.FreeMemory(vertexStaging.memory);
+            Device.DestroyBuffer(indexStaging.buffer);
+            Device.FreeMemory(indexStaging.memory);
 
             return true;
         }
@@ -334,10 +334,10 @@ namespace SharpGame
         * @param copyQueue Queue used for the memory staging copy commands (must support transfer)
         * @param (Optional) flags ASSIMP model loading flags
 */
-        public bool loadFromFile(string filename, vksVertexLayout layout, float scale, vksVulkanDevice device, VkQueue copyQueue, PostProcessSteps flags = DefaultPostProcessSteps)
+        public bool loadFromFile(string filename, vksVertexLayout layout, float scale, VkQueue copyQueue, PostProcessSteps flags = DefaultPostProcessSteps)
         {
             vksModelCreateInfo modelCreateInfo = new vksModelCreateInfo(scale, 1.0f, 0.0f);
-            return loadFromFile(filename, layout, &modelCreateInfo, device, copyQueue, flags);
+            return loadFromFile(filename, layout, &modelCreateInfo, copyQueue, flags);
         }
     }
 }

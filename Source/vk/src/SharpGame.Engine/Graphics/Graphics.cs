@@ -37,7 +37,6 @@ namespace SharpGame
         public Settings Settings { get; } = new Settings();
         public VkInstance Instance { get; protected set; }
         public VkPhysicalDevice physicalDevice { get; protected set; }
-        public static vksVulkanDevice Device { get; protected set; }
         public VkPhysicalDeviceFeatures enabledFeatures { get; protected set; }
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
 
@@ -52,9 +51,6 @@ namespace SharpGame
 
         public VkPipelineCache pipelineCache => _pipelineCache;
         public static NativeList<VkFramebuffer> frameBuffers { get; protected set; } = new NativeList<VkFramebuffer>();
-        public VkPhysicalDeviceMemoryProperties DeviceMemoryProperties { get; set; }
-        public VkPhysicalDeviceProperties DeviceProperties { get; protected set; }
-        public VkPhysicalDeviceFeatures DeviceFeatures { get; protected set; }
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
@@ -115,7 +111,7 @@ namespace SharpGame
             // TODO: Implement arg parsing, etc.
 
             physicalDevice = ((VkPhysicalDevice*)physicalDevices)[selectedDevice];
-
+            /*
             // Store properties (including limits) and features of the phyiscal Device
             // So examples can check against them and see if a feature is actually supported
             VkPhysicalDeviceProperties deviceProperties;
@@ -130,19 +126,20 @@ namespace SharpGame
             VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
             vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
             DeviceMemoryProperties = deviceMemoryProperties;
-
+            */
             // Derived examples can override this to set actual features (based on above readings) to enable for logical device creation
             getEnabledFeatures();
 
             // Vulkan Device creation
             // This is handled by a separate class that gets a logical Device representation
             // and encapsulates functions related to a Device
-            Device = new vksVulkanDevice(physicalDevice);
+            Device.Init(physicalDevice);
             VkResult res = Device.CreateLogicalDevice(enabledFeatures, EnabledExtensions);
             if (res != VkResult.Success)
             {
                 throw new InvalidOperationException("Could not create Vulkan Device.");
             }
+
             device = Device.LogicalDevice;
 
             // Get a graphics queue from the Device
@@ -575,14 +572,14 @@ namespace SharpGame
 
                 memAllocInfo.allocationSize = memReqs.size;
                 // Get memory type index for a host visible buffer
-                memAllocInfo.memoryTypeIndex = Graphics.Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
+                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
 
-                Util.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, &stagingMemory));
-                Util.CheckResult(vkBindBufferMemory(Graphics.device, stagingBuffer, stagingMemory, 0));
+                Util.CheckResult(vkAllocateMemory(device, &memAllocInfo, null, &stagingMemory));
+                Util.CheckResult(vkBindBufferMemory(device, stagingBuffer, stagingMemory, 0));
 
                 // Copy texture data into staging buffer
                 byte* data;
-                Util.CheckResult(vkMapMemory(Graphics.device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
+                Util.CheckResult(vkMapMemory(device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
                 Unsafe.CopyBlock(data, tex2DDataPtr, totalBytes);
                 vkUnmapMemory(Graphics.device, stagingMemory);
 
@@ -621,17 +618,17 @@ namespace SharpGame
                 imageCreateInfo.extent = new VkExtent3D { width = texture.width, height = texture.height, depth = 1 };
                 imageCreateInfo.usage = VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled;
 
-                Util.CheckResult(vkCreateImage(Graphics.device, &imageCreateInfo, null, out texture.image));
+                Util.CheckResult(vkCreateImage(device, &imageCreateInfo, null, out texture.image));
 
-                vkGetImageMemoryRequirements(Graphics.device, texture.image, &memReqs);
+                vkGetImageMemoryRequirements(device, texture.image, &memReqs);
 
                 memAllocInfo.allocationSize = memReqs.size;
-                memAllocInfo.memoryTypeIndex = Graphics.Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
+                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
                 Util.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, out texture.deviceMemory));
                 Util.CheckResult(vkBindImageMemory(Graphics.device, texture.image, texture.deviceMemory, 0));
 
-                VkCommandBuffer copyCmd = Graphics.Device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
+                VkCommandBuffer copyCmd = Device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
 
                 // Image barrier for optimal image
 
@@ -675,11 +672,11 @@ namespace SharpGame
                     texture.imageLayout,
                     subresourceRange);
 
-                Graphics.Device.flushCommandBuffer(copyCmd, queue, true);
+                Device.flushCommandBuffer(copyCmd, queue, true);
 
                 // Clean up staging resources
-                vkFreeMemory(Graphics.device, stagingMemory, null);
-                vkDestroyBuffer(Graphics.device, stagingBuffer, null);
+                vkFreeMemory(device, stagingMemory, null);
+                vkDestroyBuffer(device, stagingBuffer, null);
             }
 
             // Create sampler
@@ -703,10 +700,10 @@ namespace SharpGame
             sampler.maxLod = (useStaging == 1) ? (float)texture.mipLevels : 0.0f;
             // Enable anisotropic filtering
             // This feature is optional, so we must check if it's supported on the Device
-            if (Graphics.Device.features.samplerAnisotropy == 1)
+            if (Device.Features.samplerAnisotropy == 1)
             {
                 // Use max. level of anisotropy for this example
-                sampler.maxAnisotropy = Graphics.Device.properties.limits.maxSamplerAnisotropy;
+                sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;
                 sampler.anisotropyEnable = True;
             }
             else

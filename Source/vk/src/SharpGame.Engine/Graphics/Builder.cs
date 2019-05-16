@@ -382,12 +382,12 @@ namespace SharpGame
         }
 
         public static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo(
-            VkDescriptorSetLayout* pSetLayouts,
+            ref VkDescriptorSetLayout pSetLayouts,
             uint setLayoutCount = 1)
         {
             VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo.New();
             pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
-            pipelineLayoutCreateInfo.pSetLayouts = pSetLayouts;
+            pipelineLayoutCreateInfo.pSetLayouts = (VkDescriptorSetLayout*)Unsafe.AsPointer(ref pSetLayouts);
             return pipelineLayoutCreateInfo;
         }
 

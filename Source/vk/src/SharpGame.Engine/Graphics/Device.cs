@@ -9,37 +9,37 @@ using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    public unsafe class vksVulkanDevice
+    public unsafe class Device
     {
         public const ulong DEFAULT_FENCE_TIMEOUT = 100000000000;
 
-        public VkPhysicalDevice PhysicalDevice { get; private set; }
-        public VkPhysicalDeviceProperties properties { get; private set; }
-        public VkPhysicalDeviceFeatures features { get; private set; }
-        public VkPhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
-        public NativeList<VkQueueFamilyProperties> QueueFamilyProperties { get; } = new NativeList<VkQueueFamilyProperties>();
-        public List<string> SuppertedExcentions { get; } = new List<string>();
-        public VkDevice LogicalDevice => _logicalDevice;
-        public VkCommandPool CommandPool { get; private set; }
-        public bool EnableDebugMarkers { get; internal set; }
+        public static VkPhysicalDevice PhysicalDevice { get; private set; }
+        public static VkPhysicalDeviceProperties Properties { get; private set; }
+        public static VkPhysicalDeviceFeatures Features { get; private set; }
+        public static VkPhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
+        public static NativeList<VkQueueFamilyProperties> QueueFamilyProperties { get; } = new NativeList<VkQueueFamilyProperties>();
+        public static List<string> SuppertedExcentions { get; } = new List<string>();
+        public static VkDevice LogicalDevice => _logicalDevice;
+        public static VkCommandPool CommandPool { get; private set; }
+        public static bool EnableDebugMarkers { get; internal set; }
 
-        public QueueFamilyIndices QFIndices;
-        private VkDevice _logicalDevice;
+        public static QueueFamilyIndices QFIndices;
+        private static VkDevice _logicalDevice;
 
-        public vksVulkanDevice(VkPhysicalDevice physicalDevice)
+        public static void Init(VkPhysicalDevice physicalDevice)
         {
             Debug.Assert(physicalDevice.Handle != IntPtr.Zero);
             PhysicalDevice = physicalDevice;
 
             // Store Properties features, limits and properties of the physical device for later use
             // Device properties also contain limits and sparse properties
-            VkPhysicalDeviceProperties properties;
-            vkGetPhysicalDeviceProperties(physicalDevice, out properties);
-            this.properties = properties;
+
+            vkGetPhysicalDeviceProperties(physicalDevice, out VkPhysicalDeviceProperties properties);
+            Properties = properties;
+
             // Features should be checked by the examples before using them
-            VkPhysicalDeviceFeatures features;
-            vkGetPhysicalDeviceFeatures(physicalDevice, out features);
-            this.features = features;
+            vkGetPhysicalDeviceFeatures(physicalDevice, out VkPhysicalDeviceFeatures features);
+            Features = features;
             // Memory properties are used regularly for creating all kinds of buffers
             VkPhysicalDeviceMemoryProperties memoryProperties;
             vkGetPhysicalDeviceMemoryProperties(physicalDevice, out memoryProperties);
@@ -74,7 +74,7 @@ namespace SharpGame
         }
 
 
-        public VkResult CreateLogicalDevice(
+        public static VkResult CreateLogicalDevice(
             VkPhysicalDeviceFeatures enabledFeatures,
             NativeList<IntPtr> enabledExtensions,
             bool useSwapChain = true,
@@ -178,7 +178,7 @@ namespace SharpGame
             }
         }
 
-        private uint GetQueueFamilyIndex(VkQueueFlags queueFlags)
+        private static uint GetQueueFamilyIndex(VkQueueFlags queueFlags)
         {
             // Dedicated queue for compute
             // Try to find a queue family index that supports compute but not graphics
@@ -221,7 +221,7 @@ namespace SharpGame
             throw new InvalidOperationException("Could not find a matching queue family index");
         }
 
-        private VkCommandPool CreateCommandPool(
+        public static VkCommandPool CreateCommandPool(
             uint queueFamilyIndex,
             VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
         {
@@ -243,7 +243,7 @@ namespace SharpGame
         *
         * @return VK_SUCCESS if buffer handle and memory have been created and (optionally passed) data has been copied
         */
-        public VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, GraphicsBuffer buffer, ulong size, void* data = null)
+        public static VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, GraphicsBuffer buffer, ulong size, void* data = null)
         {
             buffer.device = _logicalDevice;
 
@@ -282,7 +282,7 @@ namespace SharpGame
             return buffer.bind();
         }
 
-        public VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, GraphicsBuffer buffer, ulong size, IntPtr data)
+        public static VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, GraphicsBuffer buffer, ulong size, IntPtr data)
             => createBuffer(usageFlags, memoryPropertyFlags, buffer, size, data.ToPointer());
 
         /**
@@ -297,7 +297,7 @@ namespace SharpGame
         *
         * @return VK_SUCCESS if buffer handle and memory have been created and (optionally passed) data has been copied
         */
-        public VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
+        public static VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
         {
             // Create the buffer handle
             VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo(usageFlags, size);
@@ -337,7 +337,7 @@ namespace SharpGame
             return VkResult.Success;
         }
 
-        public VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, out VkBuffer buffer, out VkDeviceMemory memory, void* data = null)
+        public static VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, out VkBuffer buffer, out VkDeviceMemory memory, void* data = null)
         {
             VkBuffer b;
             VkDeviceMemory dm;
@@ -347,7 +347,7 @@ namespace SharpGame
             return result;
         }
 
-        public VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin = false)
+        public static VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin = false)
         {
             VkCommandBufferAllocateInfo cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
             cmdBufAllocateInfo.commandPool = CommandPool;
@@ -377,7 +377,7 @@ namespace SharpGame
 		* @note The queue that the command buffer is submitted to must be from the same family index as the pool it was allocated from
 		* @note Uses a fence to ensure command buffer has finished executing
 		*/
-        public void flushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free = true)
+        public static void flushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free = true)
         {
             if (commandBuffer.Handle == NullHandle)
             {
@@ -420,7 +420,7 @@ namespace SharpGame
         *
         * @throw Throws an exception if memTypeFound is null and no memory type could be found that supports the requested properties
         */
-        public uint getMemoryType(uint typeBits, VkMemoryPropertyFlags properties, uint* memTypeFound = null)
+        public static uint getMemoryType(uint typeBits, VkMemoryPropertyFlags properties, uint* memTypeFound = null)
         {
             for (uint i = 0; i < MemoryProperties.memoryTypeCount; i++)
             {
@@ -449,18 +449,34 @@ namespace SharpGame
             }
         }
 
+        public static VkPipeline CreateGraphicsPipelines(VkPipelineCache pipelineCache, ref VkGraphicsPipelineCreateInfo pCreateInfos)
+        {
+            Util.CheckResult(vkCreateGraphicsPipelines(LogicalDevice, pipelineCache,
+                1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
+            return pPipelines;
+        }
 
-        public void DestroyPipeline(VkPipeline pipeline)
+        public static void DestroyBuffer(VkBuffer buffer)
+        {
+            vkDestroyBuffer(LogicalDevice, buffer, null);
+        }
+
+        public static void FreeMemory(VkDeviceMemory memory)
+        {
+            vkFreeMemory(LogicalDevice, memory, null);
+        }
+
+        public static void DestroyPipeline(VkPipeline pipeline)
         {
             vkDestroyPipeline(LogicalDevice, pipeline, null);
         }
 
-        public void DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
+        public static void DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
         {
             vkDestroyPipelineLayout(LogicalDevice, pipelineLayout, null);
         }
 
-        public void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+        public static void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
         {
             vkDestroyDescriptorSetLayout(LogicalDevice, descriptorSetLayout, null);
         }
