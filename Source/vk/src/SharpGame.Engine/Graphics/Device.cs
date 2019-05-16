@@ -451,6 +451,17 @@ namespace SharpGame
             }
         }
 
+        public static VkShaderModule CreateShaderModule(ref VkShaderModuleCreateInfo shaderModuleCreateInfo)
+        {
+            Util.CheckResult(vkCreateShaderModule(LogicalDevice, ref shaderModuleCreateInfo, null, out VkShaderModule shaderModule));
+            return shaderModule;
+        }
+
+        public static void DestroyShaderModule(VkShaderModule shaderModule)
+        {
+            vkDestroyShaderModule(LogicalDevice, shaderModule, IntPtr.Zero);
+        }
+
         public static VkPipeline CreateGraphicsPipeline(ref VkGraphicsPipelineCreateInfo pCreateInfos)
         {
             Util.CheckResult(vkCreateGraphicsPipelines(LogicalDevice, _pipelineCache,
@@ -460,8 +471,7 @@ namespace SharpGame
 
         public static VkPipeline CreateComputePipeline(ref VkComputePipelineCreateInfo pCreateInfos)
         {
-            Util.CheckResult(vkCreateComputePipelines(LogicalDevice, _pipelineCache,
-    1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
+            Util.CheckResult(vkCreateComputePipelines(LogicalDevice, _pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
             return pPipelines;
         }
 

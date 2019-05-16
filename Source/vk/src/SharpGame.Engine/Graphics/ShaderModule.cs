@@ -98,12 +98,28 @@ namespace SharpGame
                 }
             }
 
-         //   shaderModule = Graphics.Device.CreateShaderModule(new ShaderModuleCreateInfo(Code));
+            unsafe
+            {
+                var sm = VkShaderModuleCreateInfo.New();
+                ulong shaderSize = (ulong)Code.Length;
+                fixed (byte* scPtr = Code)
+                {
+                    sm.pCode = (uint*)scPtr;
+                    sm.codeSize = new UIntPtr(shaderSize);
+                }
+
+                shaderModule = Device.CreateShaderModule(ref sm);
+            }
         }
 
         protected override void Destroy()
         {
-            //todo shaderModule?.Dispose();
+            if(shaderModule != 0)
+            {
+                Device.DestroyShaderModule(shaderModule);
+                shaderModule = 0;
+            }
+
             Code = null;
 
             base.Destroy();
