@@ -92,7 +92,7 @@ namespace SharpGame
             VkPipelineStageFlags dstStageMask = VkPipelineStageFlags.AllCommands)
         {
             // Create an image barrier object
-            VkImageMemoryBarrier imageMemoryBarrier = Initializers.imageMemoryBarrier();
+            VkImageMemoryBarrier imageMemoryBarrier = Builder.imageMemoryBarrier();
             imageMemoryBarrier.oldLayout = oldImageLayout;
             imageMemoryBarrier.newLayout = newImageLayout;
             imageMemoryBarrier.image = image;

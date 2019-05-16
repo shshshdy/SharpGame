@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    public unsafe static class Initializers
+    public unsafe static class Builder
     {
         public static VkSemaphoreCreateInfo semaphoreCreateInfo()
         {
@@ -216,14 +217,14 @@ namespace SharpGame
             VkDescriptorSet dstSet,
             VkDescriptorType type,
             uint binding,
-            VkDescriptorBufferInfo* bufferInfo,
+            ref VkDescriptorBufferInfo bufferInfo,
             uint descriptorCount = 1)
         {
             VkWriteDescriptorSet writeDescriptorSet = VkWriteDescriptorSet.New();
             writeDescriptorSet.dstSet = dstSet;
             writeDescriptorSet.descriptorType = type;
             writeDescriptorSet.dstBinding = binding;
-            writeDescriptorSet.pBufferInfo = bufferInfo;
+            writeDescriptorSet.pBufferInfo = (VkDescriptorBufferInfo*)Unsafe.AsPointer(ref bufferInfo);
             writeDescriptorSet.descriptorCount = descriptorCount;
             return writeDescriptorSet;
         }
@@ -232,14 +233,14 @@ namespace SharpGame
             VkDescriptorSet dstSet,
             VkDescriptorType type,
             uint binding,
-            VkDescriptorImageInfo* imageInfo,
+            ref VkDescriptorImageInfo imageInfo,
             uint descriptorCount = 1)
         {
             VkWriteDescriptorSet writeDescriptorSet = VkWriteDescriptorSet.New();
             writeDescriptorSet.dstSet = dstSet;
             writeDescriptorSet.descriptorType = type;
             writeDescriptorSet.dstBinding = binding;
-            writeDescriptorSet.pImageInfo = imageInfo;
+            writeDescriptorSet.pImageInfo = (VkDescriptorImageInfo*)Unsafe.AsPointer(ref imageInfo);
             writeDescriptorSet.descriptorCount = descriptorCount;
             return writeDescriptorSet;
         }
@@ -366,13 +367,19 @@ namespace SharpGame
             return setLayoutBinding;
         }
 
-        public static VkFramebufferCreateInfo framebufferCreateInfo()
+        public static VkFramebufferCreateInfo FramebufferCreateInfo()
         {
             VkFramebufferCreateInfo framebufferCreateInfo = VkFramebufferCreateInfo.New();
             return framebufferCreateInfo;
         }
 
-        public static VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo(
+        public static VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo(
+            VkDescriptorSetLayoutBinding[] bindings)
+        {
+            return DescriptorSetLayoutCreateInfo((VkDescriptorSetLayoutBinding*)Unsafe.AsPointer(ref bindings[0]), (uint)bindings.Length);
+        }
+
+        public static VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo(
             VkDescriptorSetLayoutBinding* pBindings,
             uint bindingCount)
         {
@@ -398,7 +405,7 @@ namespace SharpGame
             return mappedMemoryRange;
         }
 
-        public static VkDescriptorSetAllocateInfo descriptorSetAllocateInfo(
+        public static VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo(
             VkDescriptorPool descriptorPool,
             VkDescriptorSetLayout* pSetLayouts,
             uint descriptorSetCount)

@@ -7,7 +7,7 @@ using Vulkan;
 namespace SharpGame
 {
     using System.Runtime.CompilerServices;
-    using static Initializers;
+    using static Builder;
 
     public class ResourceSet : IDisposable
     {
@@ -19,25 +19,25 @@ namespace SharpGame
 
         private VkWriteDescriptorSet[] writeDescriptorSets;
         public ResourceSet(ResourceLayout resLayout)
-        {/*
+        {
             VkDescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
             unsafe
             {
-                var dsAI = descriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.descriptorSetLayout), 1);
-                descriptorSet = pool.AllocateSets(dsAI)[0];
+                var dsAI = DescriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.descriptorSetLayout), 1);
+                VulkanNative.vkAllocateDescriptorSets(Graphics.device, ref dsAI, out descriptorSet);
                 descriptorPool = pool;
                 resourceLayout = resLayout;
             }
-            writeDescriptorSets = new VkWriteDescriptorSet[resLayout.numBindings];*/
+            writeDescriptorSets = new VkWriteDescriptorSet[resLayout.numBindings];
         }
 
         public ResourceSet(ResourceLayout resLayout, params IBindable[] bindables)
-        {/*
+        {
             VkDescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
             unsafe
             {
-                var dsAI = descriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.descriptorSetLayout), 1);
-                descriptorSet = pool.AllocateSets(dsAI)[0];
+                var dsAI = DescriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.descriptorSetLayout), 1);
+                VulkanNative.vkAllocateDescriptorSets(Graphics.device, ref dsAI, out descriptorSet);
                 descriptorPool = pool;
                 resourceLayout = resLayout;
             }
@@ -45,28 +45,23 @@ namespace SharpGame
             System.Diagnostics.Debug.Assert(bindables.Length == resLayout.numBindings);
 
             writeDescriptorSets = new VkWriteDescriptorSet[resLayout.numBindings];
-            for(int i = 0; i < resLayout.numBindings; i++)
+
+            for(uint i = 0; i < resLayout.numBindings; i++)
             {
                 Bind(i, bindables[i]);
             }
 
-            UpdateSets();*/
+            UpdateSets();
         }
 
         public void Dispose()
         {
-        //todo    descriptorPool.FreeSets(descriptorSet);
-            //Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
+            VulkanNative.vkFreeDescriptorSets(Graphics.device, descriptorPool, 1, ref descriptorSet);
+            Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
         }
-        /*
-        public ResourceSet Bind(int dstBinding, int dstArrayElement, int descriptorCount, VkDescriptorType descriptorType, VkDescriptorImageInfo[] imageInfo = null, VkDescriptorBufferInfo[] bufferInfo = null, VkBufferView[] texelBufferView = null)
-        {
-            writeDescriptorSets[dstBinding] = writeDescriptorSet(descriptorSet, dstBinding, dstArrayElement, descriptorCount, descriptorType, imageInfo, bufferInfo, texelBufferView);
-            return this;
-        }*/
 
-        public ResourceSet Bind(int dstBinding, IBindable bindable)
-        {/*
+        public ResourceSet Bind(uint dstBinding, IBindable bindable)
+        {
             var descriptorType = resourceLayout.bindings[dstBinding].descriptorType;
             switch(descriptorType)
             {
@@ -74,8 +69,15 @@ namespace SharpGame
                     break;
                 case VkDescriptorType.CombinedImageSampler:
                     var texture = bindable as Texture;
-                    writeDescriptorSets[dstBinding] = writeDescriptorSet(descriptorSet, dstBinding, 0, 1, 
-                        descriptorType, imageInfo : new[] { new DescriptorImageInfo(texture.Sampler, texture.View, ImageLayout.General) });
+                    var vkDescriptorImageInfo = new VkDescriptorImageInfo
+                    {
+                        sampler = texture.sampler,
+                        imageView = texture.view,
+                        imageLayout = texture.imageLayout
+                    };
+
+                    writeDescriptorSets[dstBinding] = writeDescriptorSet(descriptorSet, descriptorType,
+                        dstBinding, ref vkDescriptorImageInfo, 1);
                     break;
                 case VkDescriptorType.SampledImage:
                     break;
@@ -87,24 +89,26 @@ namespace SharpGame
                 case VkDescriptorType.StorageTexelBuffer:
                     break;
 
+
                 case VkDescriptorType.UniformBuffer:
                 case VkDescriptorType.StorageBuffer:
                 case VkDescriptorType.UniformBufferDynamic:
                 case VkDescriptorType.StorageBufferDynamic:
-                    var buffer = bindable as GraphicsBuffer;
-                    writeDescriptorSets[dstBinding] = writeDescriptorSet(descriptorSet, dstBinding, 0, 1,
-                        descriptorType, bufferInfo: new[] { new DescriptorBufferInfo(buffer) });
+                    var buffer = bindable as GraphicsBuffer;                    
+                    writeDescriptorSets[dstBinding] = writeDescriptorSet(descriptorSet,
+                        descriptorType, dstBinding, ref buffer.descriptor, 1);
                     
                     break;
                 case VkDescriptorType.InputAttachment:
                     break;
-            }*/
+            }
             return this;
         }
 
         public void UpdateSets()
         {
-        //    descriptorPool.UpdateSets(writeDescriptorSets);
+            VulkanNative.vkUpdateDescriptorSets(Graphics.device, (uint)writeDescriptorSets.Length,
+                ref writeDescriptorSets[0], 0, IntPtr.Zero);
         }
 
     }

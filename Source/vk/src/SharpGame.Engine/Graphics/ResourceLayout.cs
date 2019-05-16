@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Vulkan;
 
@@ -25,18 +26,19 @@ namespace SharpGame
 
         public void Dispose()
         {
-         //todo   descriptorSetLayout?.Dispose();
+            VulkanNative.vkDestroyDescriptorSetLayout(Graphics.device, descriptorSetLayout, IntPtr.Zero);
         }
 
         public void Build()
-        {/*
-            descriptorSetLayout = Graphics.CreateDescriptorSetLayout(bindings);
-            descriptorResourceCounts = new DescriptorResourceCounts();
-            
+        {
+            var descriptorSetLayoutCreateInfo = Builder.DescriptorSetLayoutCreateInfo(bindings);
+            VulkanNative.vkCreateDescriptorSetLayout(Graphics.device, ref descriptorSetLayoutCreateInfo, IntPtr.Zero, out descriptorSetLayout);
+
+            descriptorResourceCounts = new DescriptorResourceCounts();            
             foreach (var binding in bindings)
             {
                 descriptorResourceCounts[(int)binding.descriptorType] += 1;
-            }*/
+            }
         }
     }
 

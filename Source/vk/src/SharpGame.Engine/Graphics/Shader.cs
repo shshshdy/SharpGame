@@ -7,7 +7,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    using static Initializers;
+    using static Builder;
 
     [DataContract]
     public class Shader : Resource

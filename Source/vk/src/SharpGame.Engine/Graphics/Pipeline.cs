@@ -5,7 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    using static Initializers;
+    using static Builder;
 
     public enum BlendMode
     {

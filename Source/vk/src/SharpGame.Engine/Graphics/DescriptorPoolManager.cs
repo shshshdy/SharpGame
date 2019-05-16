@@ -6,6 +6,7 @@ using Vulkan;
 
 namespace SharpGame
 {
+    using static Vulkan.VulkanNative;
     internal class DescriptorPoolManager
     {
         private readonly List<PoolInfo> _pools = new List<PoolInfo>();
@@ -68,14 +69,13 @@ namespace SharpGame
                 sizes[i].descriptorCount = descriptorCount;
             }
 
-            VkDescriptorPoolCreateInfo poolCI = new VkDescriptorPoolCreateInfo
-            {
-                flags = VkDescriptorPoolCreateFlags.FreeDescriptorSet,
-                maxSets = totalSets,
-                pPoolSizes = sizes
-            };
+            VkDescriptorPoolCreateInfo poolCI = VkDescriptorPoolCreateInfo.New();
+            poolCI.flags = VkDescriptorPoolCreateFlags.FreeDescriptorSet;
+            poolCI.maxSets = totalSets;
+            poolCI.pPoolSizes = sizes;
 
-            VkDescriptorPool descriptorPool = 0;//todo Graphics.Device.CreateDescriptorPool(poolCI);
+            VkDescriptorPool descriptorPool;
+            Util.CheckResult(vkCreateDescriptorPool(Graphics.device, ref poolCI, null, out descriptorPool));
             return new PoolInfo(descriptorPool, totalSets, descriptorCount);
         }
 
@@ -83,8 +83,7 @@ namespace SharpGame
         {
             foreach (PoolInfo poolInfo in _pools)
             {
-                //todo poolInfo.Pool.Dispose();
-                //vkDestroyDescriptorPool()
+                vkDestroyDescriptorPool(Graphics.device, poolInfo.Pool, null);
             }
 
             _pools.Clear();
