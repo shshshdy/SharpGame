@@ -160,7 +160,7 @@ namespace SharpGame
                 VkViewport viewport = Builder.Viewport((float)width, (float)height, 0.0f, 1.0f);
                 vkCmdSetViewport(Graphics.drawCmdBuffers[i], 0, 1, &viewport);
 
-                VkRect2D scissor = Builder.Rect2D(width, height, 0, 0);
+                VkRect2D scissor = Builder.Rect2D(0, 0, width, height);
                 vkCmdSetScissor(Graphics.drawCmdBuffers[i], 0, 1, &scissor);
 
                 vkCmdBindDescriptorSets(Graphics.drawCmdBuffers[i], VkPipelineBindPoint.Graphics, pipelineLayout, 0, 1, ref descriptorSet, 0, null);
@@ -550,7 +550,7 @@ namespace SharpGame
                 Graphics.loadShader(getAssetPath() + "shaders/mesh/mesh.frag.spv", VkShaderStageFlags.Fragment));
 
             VkGraphicsPipelineCreateInfo pipelineCreateInfo =
-                Builder.PipelineCreateInfo(
+                Builder.GraphicsPipelineCreateInfo(
                     pipelineLayout,
                     Graphics.renderPass,
                     0);
@@ -567,14 +567,14 @@ namespace SharpGame
             pipelineCreateInfo.stageCount = shaderStages.Count;
             pipelineCreateInfo.pStages = &shaderStages.First;
 
-            pipelines_solid = Device.CreateGraphicsPipelines(graphics.pipelineCache, ref pipelineCreateInfo);
+            pipelines_solid = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
 
             // Wire frame rendering pipeline
             if (Device.Features.fillModeNonSolid == 1)
             {
                 rasterizationState.polygonMode = VkPolygonMode.Line;
                 rasterizationState.lineWidth = 1.0f;
-                pipelines_wireframe = Device.CreateGraphicsPipelines(graphics.pipelineCache, ref pipelineCreateInfo);
+                pipelines_wireframe = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
             }
         }
 

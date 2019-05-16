@@ -25,6 +25,7 @@ namespace SharpGame
 
         public static QueueFamilyIndices QFIndices;
         private static VkDevice _logicalDevice;
+        private static VkPipelineCache _pipelineCache;
 
         public static void Init(VkPhysicalDevice physicalDevice)
         {
@@ -176,6 +177,9 @@ namespace SharpGame
                     return result;
                 }
             }
+
+            VkPipelineCacheCreateInfo pipelineCacheCreateInfo = VkPipelineCacheCreateInfo.New();
+            Util.CheckResult(vkCreatePipelineCache(LogicalDevice, ref pipelineCacheCreateInfo, null, out _pipelineCache));
         }
 
         private static uint GetQueueFamilyIndex(VkQueueFlags queueFlags)
@@ -449,10 +453,17 @@ namespace SharpGame
             }
         }
 
-        public static VkPipeline CreateGraphicsPipelines(VkPipelineCache pipelineCache, ref VkGraphicsPipelineCreateInfo pCreateInfos)
+        public static VkPipeline CreateGraphicsPipeline(ref VkGraphicsPipelineCreateInfo pCreateInfos)
         {
-            Util.CheckResult(vkCreateGraphicsPipelines(LogicalDevice, pipelineCache,
+            Util.CheckResult(vkCreateGraphicsPipelines(LogicalDevice, _pipelineCache,
                 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
+            return pPipelines;
+        }
+
+        public static VkPipeline CreateComputePipeline(ref VkComputePipelineCreateInfo pCreateInfos)
+        {
+            Util.CheckResult(vkCreateComputePipelines(LogicalDevice, _pipelineCache,
+    1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
             return pPipelines;
         }
 

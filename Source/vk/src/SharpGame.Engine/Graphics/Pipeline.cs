@@ -5,6 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
+    using System.Runtime.CompilerServices;
     using static Builder;
     using static VulkanNative;
 
@@ -25,16 +26,19 @@ namespace SharpGame
     {
         private VkPipelineRasterizationStateCreateInfo rasterizationState_;
         public ref VkPipelineRasterizationStateCreateInfo RasterizationState => ref rasterizationState_;
-        public VkPipelineMultisampleStateCreateInfo MultisampleState { get; set; }
 
-        VkPipelineDepthStencilStateCreateInfo depthStencilState_;
+        private VkPipelineMultisampleStateCreateInfo multisampleState;
+        public ref VkPipelineMultisampleStateCreateInfo MultisampleState => ref multisampleState;
+
+        private VkPipelineDepthStencilStateCreateInfo depthStencilState_;
         public ref VkPipelineDepthStencilStateCreateInfo DepthStencilState => ref depthStencilState_;
-        public VkPipelineColorBlendStateCreateInfo ColorBlendState { get; set; }
+
+        private VkPipelineColorBlendStateCreateInfo colorBlendState;
+        public ref VkPipelineColorBlendStateCreateInfo ColorBlendState => ref colorBlendState;
         public VkPrimitiveTopology PrimitiveTopology { get; set; } = VkPrimitiveTopology.TriangleList;
 
-        public VkPipelineVertexInputStateCreateInfo VertexInputState { get; set; }
-
-        VkPipelineViewportStateCreateInfo viewportStateCreateInfo;
+        private VkPipelineVertexInputStateCreateInfo vertexInputState;
+        public ref VkPipelineVertexInputStateCreateInfo VertexInputState => ref vertexInputState;
 
         public VkPipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
 
@@ -45,7 +49,6 @@ namespace SharpGame
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
         public BlendMode BlendMode { set => SetBlendMode(value); }
-
         public VkPipelineDynamicStateCreateInfo? DynamicStateCreateInfo {get; set;}
 
         public VkPipelineLayout pipelineLayout;
@@ -208,31 +211,40 @@ namespace SharpGame
             var pipelineLayoutInfo = PipelineLayoutCreateInfo(ref pass.ResourceLayout.descriptorSetLayout, 1);
             vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
-            var shaderStageCreateInfos = pass.GetShaderStageCreateInfos();
-    /*
-            viewportStateCreateInfo = ViewportStateCreateInfo(
-            Viewport(0, 0, graphics.Width, graphics.Height),
-            Rect2D(0, 0, graphics.Width, graphics.Height));
- 
-            var inputAssemblyStateCreateInfo = pipelineInputAssemblyStateCreateInfo(
-                geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
+            unsafe
+            {
+                VkPipelineShaderStageCreateInfo* shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];
+                uint count = pass.GetShaderStageCreateInfos(shaderStageCreateInfos);
 
-            var pipelineCreateInfo = GraphicsPipelineCreateInfo(
-                pipelineLayout, renderPass.renderPass_, 0,
-                shaderStageCreateInfos,
-                inputAssemblyStateCreateInfo,
-                geometry == null ? VertexInputState : geometry.VertexLayout,
-                RasterizationState,
-                viewportState: viewportStateCreateInfo,
-                multisampleState: MultisampleState,
-                depthStencilState: DepthStencilState,
-                colorBlendState: ColorBlendState,
-                dynamicState : DynamicStateCreateInfo);
+                var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
 
-            pipeline = Graphics.Device.CreateGraphicsPipeline(pipelineCreateInfo);
-            //Graphics.ToDisposeFrame(pipeline);
-            return pipeline;*/
-            return 0;
+                var inputAssemblyStateCreateInfo = InputAssemblyStateCreateInfo(
+                    geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
+
+                var pipelineCreateInfo = GraphicsPipelineCreateInfo(
+                    pipelineLayout, renderPass.renderPass, 0);//,
+
+                pipelineCreateInfo.stageCount = count;
+                pipelineCreateInfo.pStages = shaderStageCreateInfos;
+                pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+                pipelineCreateInfo.pVertexInputState = (VkPipelineVertexInputStateCreateInfo*)Unsafe.AsPointer(ref vertexInputState);
+                pipelineCreateInfo.pRasterizationState = (VkPipelineRasterizationStateCreateInfo*)Unsafe.AsPointer(ref rasterizationState_);
+                pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+                pipelineCreateInfo.pMultisampleState = (VkPipelineMultisampleStateCreateInfo*)Unsafe.AsPointer(ref multisampleState);
+                pipelineCreateInfo.pDepthStencilState = (VkPipelineDepthStencilStateCreateInfo*)Unsafe.AsPointer(ref depthStencilState_);
+                pipelineCreateInfo.pColorBlendState = (VkPipelineColorBlendStateCreateInfo*)Unsafe.AsPointer(ref colorBlendState);
+
+                VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
+                if (DynamicStateCreateInfo.HasValue)
+                {
+                    dynamicStateCreateInfo = DynamicStateCreateInfo.Value;
+                    pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
+                }
+
+                pipeline = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
+            }
+
+            return pipeline;
         }
 
         public VkPipeline GetComputePipeline(Pass shaderPass)
@@ -241,18 +253,17 @@ namespace SharpGame
             {
                 return 0;
             }
-            /*
-            var pipelineLayoutInfo = new VkPipelineLayoutCreateInfo(new[]
-            { shaderPass.ResourceLayout.descriptorSetLayout });
-            pipelineLayout = Graphics.Device.CreatePipelineLayout(pipelineLayoutInfo);
 
-            var pipelineCreateInfo = new ComputePipelineCreateInfo(
-                shaderPass.GetComputeStageCreateInfo(), pipelineLayout);
+            var pipelineLayoutInfo = PipelineLayoutCreateInfo(ref shaderPass.ResourceLayout.descriptorSetLayout, 1);
+            vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
-            pipeline = Graphics.Device.CreateComputePipeline(pipelineCreateInfo);
-            Graphics.ToDisposeFrame(pipeline);
-            return pipeline;*/
-            return 0;
+            var pipelineCreateInfo = VkComputePipelineCreateInfo.New();
+            pipelineCreateInfo.stage = shaderPass.GetComputeStageCreateInfo();
+            pipelineCreateInfo.layout = pipelineLayout;
+
+            pipeline = Device.CreateComputePipeline(ref pipelineCreateInfo);
+            return pipeline;
+            
         }
         
     }

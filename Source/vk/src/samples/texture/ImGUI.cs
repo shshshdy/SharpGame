@@ -308,7 +308,7 @@ namespace SharpGame
             shaderStages.Second = Graphics.loadShader(getAssetPath() + "shaders/texture/ImGui.frag.spv", VkShaderStageFlags.Fragment);
 
             VkGraphicsPipelineCreateInfo pipelineCreateInfo =
-                Builder.PipelineCreateInfo(
+                Builder.GraphicsPipelineCreateInfo(
                     pipelineLayout,
                     Graphics.renderPass,
                     0);
@@ -325,7 +325,7 @@ namespace SharpGame
             pipelineCreateInfo.stageCount = shaderStages.Count;
             pipelineCreateInfo.pStages = (VkPipelineShaderStageCreateInfo*)Unsafe.AsPointer(ref shaderStages);
 
-            Util.CheckResult(vkCreateGraphicsPipelines(Graphics.device, graphics.pipelineCache, 1, &pipelineCreateInfo, null, out pipelines_solid));
+            pipelines_solid = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
         }
 
         // Prepare and initialize uniform buffer containing shader uniforms
@@ -471,7 +471,7 @@ namespace SharpGame
                 VkViewport viewport = Builder.Viewport((float)width, (float)height, 0.0f, 1.0f);
                 vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 
-                VkRect2D scissor = Builder.Rect2D(width, height, 0, 0);
+                VkRect2D scissor = Builder.Rect2D(0, 0, width, height);
                 vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
                 RenderImDrawData(ImGui.GetDrawData());
@@ -606,8 +606,8 @@ namespace SharpGame
                         }
                         
 
-                        VkRect2D scissor = Builder.Rect2D((uint)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
-                            (uint)(pcmd.ClipRect.W - pcmd.ClipRect.Y), (int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y);
+                        VkRect2D scissor = Builder.Rect2D((int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y,
+                            (uint)(pcmd.ClipRect.Z - pcmd.ClipRect.X), (uint)(pcmd.ClipRect.W - pcmd.ClipRect.Y));
                         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
                         vkCmdDrawIndexed(cmdBuffer, pcmd.ElemCount, 1, (uint)idx_offset, vtx_offset, 0);

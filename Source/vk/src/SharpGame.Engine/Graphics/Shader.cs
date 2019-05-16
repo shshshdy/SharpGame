@@ -265,9 +265,9 @@ namespace SharpGame
 
         }
 
-        public unsafe VkPipelineShaderStageCreateInfo[] GetShaderStageCreateInfos()
+        public unsafe uint GetShaderStageCreateInfos(VkPipelineShaderStageCreateInfo* shaderStageCreateInfo)
         {
-            var shaderStageCreateInfo = new List<VkPipelineShaderStageCreateInfo>();
+            uint count = 0;
             foreach(var sm in GetShaderModules())
             {
                 if(sm != null)
@@ -276,10 +276,10 @@ namespace SharpGame
                     shaderStage.stage = sm.Stage;
                     shaderStage.module = sm.shaderModule;
                     shaderStage.pName = Strings.main;// sm.FuncName;
-                    shaderStageCreateInfo.Add(shaderStage);
+                    shaderStageCreateInfo[count++] = shaderStage;
                 }
             }
-            return shaderStageCreateInfo.ToArray();
+            return count;
         }
 
         public unsafe VkPipelineShaderStageCreateInfo GetComputeStageCreateInfo()

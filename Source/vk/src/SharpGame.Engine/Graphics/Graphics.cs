@@ -46,10 +46,9 @@ namespace SharpGame
         public VkFormat DepthFormat { get; protected set; }
         public VulkanSwapchain Swapchain { get; } = new VulkanSwapchain();
 
-        public uint width;
-        public uint height;
+        public static uint Width { get; private set; }
+        public static uint Height { get; private set; }
 
-        public VkPipelineCache pipelineCache => _pipelineCache;
         public static NativeList<VkFramebuffer> frameBuffers { get; protected set; } = new NativeList<VkFramebuffer>();
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
@@ -67,7 +66,6 @@ namespace SharpGame
         private static NativeList<VkPipelineStageFlags> CreateSubmitPipelineStages()
             => new NativeList<VkPipelineStageFlags>() { VkPipelineStageFlags.ColorAttachmentOutput };
         protected static VkRenderPass _renderPass;
-        private VkPipelineCache _pipelineCache;
         private VkCommandPool _cmdPool;
 
         public uint currentBuffer;
@@ -224,7 +222,6 @@ namespace SharpGame
                 instanceCreateInfo.ppEnabledExtensionNames = (byte**)instanceExtensions.Data;
             }
 
-
             if (enableValidation)
             {
                 NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr>(1);
@@ -254,14 +251,7 @@ namespace SharpGame
             createCommandBuffers();
             SetupDepthStencil();
             SetupRenderPass();
-            CreatePipelineCache();
             SetupFrameBuffer();
-        }
-
-        private void CreatePipelineCache()
-        {
-            VkPipelineCacheCreateInfo pipelineCacheCreateInfo = VkPipelineCacheCreateInfo.New();
-            Util.CheckResult(vkCreatePipelineCache(device, ref pipelineCacheCreateInfo, null, out _pipelineCache));
         }
 
         protected virtual void SetupFrameBuffer()
@@ -276,8 +266,8 @@ namespace SharpGame
                 frameBufferCreateInfo.renderPass = renderPass;
                 frameBufferCreateInfo.attachmentCount = 2;
                 frameBufferCreateInfo.pAttachments = (VkImageView*)attachments.Data;
-                frameBufferCreateInfo.width = width;
-                frameBufferCreateInfo.height = height;
+                frameBufferCreateInfo.width = Width;
+                frameBufferCreateInfo.height = Height;
                 frameBufferCreateInfo.layers = 1;
 
                 // Create frame buffers for every swap chain image
@@ -295,8 +285,8 @@ namespace SharpGame
             uint width, height;
             Swapchain.Create(&width, &height, Settings.VSync);
 
-            this.width = width;
-            this.height = height;
+            Width = width;
+            Height = height;
         }
 
         protected virtual void SetupRenderPass()
@@ -386,8 +376,8 @@ namespace SharpGame
 
         public void Resize(uint w, uint h)
         {
-            width = w;
-            height = h;
+            Width = w;
+            Height = h;
 
 
             // Ensure all operations on the device have been finished before destroying resources
@@ -483,7 +473,7 @@ namespace SharpGame
             VkImageCreateInfo image = VkImageCreateInfo.New();
             image.imageType = VkImageType.Image2D;
             image.format = DepthFormat;
-            image.extent = new VkExtent3D() { width = width, height = height, depth = 1 };
+            image.extent = new VkExtent3D() { width = Width, height = Height, depth = 1 };
             image.mipLevels = 1;
             image.arrayLayers = 1;
             image.samples = VkSampleCountFlags.Count1;

@@ -162,7 +162,7 @@ namespace SharpGame
             return pipelineTessellationStateCreateInfo;
         }
 
-        public static VkGraphicsPipelineCreateInfo PipelineCreateInfo(
+        public static VkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo(
             VkPipelineLayout layout,
             VkRenderPass renderPass,
             VkPipelineCreateFlags flags = 0)
@@ -300,10 +300,10 @@ namespace SharpGame
         }
 
         public static VkRect2D Rect2D(
-            uint width,
-            uint height,
             int offsetX,
-            int offsetY)
+            int offsetY,
+            uint width,
+            uint height)
         {
             VkRect2D rect2D = new VkRect2D();
             rect2D.extent.width = width;
