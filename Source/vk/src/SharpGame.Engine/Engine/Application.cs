@@ -12,8 +12,10 @@ using Veldrid.Sdl2;
 
 namespace SharpGame
 {
-    public unsafe partial class Application
+    public unsafe partial class Application : Subsystem<Application>
     {
+        public static string DataPath => Path.Combine(AppContext.BaseDirectory, "data/");
+
         public FixedUtf8String Title { get; set; } = "Vulkan Example";
         public FixedUtf8String Name { get; set; } = "VulkanExample";
         public uint width { get; protected set; } = 1280;
@@ -22,22 +24,19 @@ namespace SharpGame
         public Sdl2Window NativeWindow { get; private set; }
 
         public IntPtr WindowInstance { get; protected set; }
+
+        protected Timer timer;
+        protected FileSystem fileSystem;
+        protected ResourceCache cache;
         protected Graphics graphics;
 
         // Destination dimensions for resizing the window
         private uint destWidth;
         private uint destHeight;
         private bool viewUpdated;
-        private int frameCounter;
-        protected float frameTimer;
+
         protected bool paused = false;
         protected bool prepared;
-
-        // Defines a frame rate independent timer value clamped from -1.0...1.0
-        // For use in animations, rotations, etc.
-        protected float timer = 0.0f;
-        // Multiplier for speeding up (or slowing down) the global timer
-        protected float timerSpeed = 0.25f;
 
         protected float zoom;
         protected float zoomSpeed = 50f;
@@ -48,9 +47,7 @@ namespace SharpGame
 
         protected Camera camera = new Camera();
 
-        protected VkClearColorValue defaultClearColor = GetDefaultClearColor();
-        private static VkClearColorValue GetDefaultClearColor()
-            => new VkClearColorValue(0.025f, 0.025f, 0.025f, 1.0f);
+        protected VkClearColorValue defaultClearColor => new VkClearColorValue(0.025f, 0.025f, 0.025f, 1.0f);
 
         // fps timer (one second interval)
         float fpsTimer = 0.0f;
@@ -61,17 +58,30 @@ namespace SharpGame
         protected InputSnapshot snapshot;
         protected VkDescriptorPool descriptorPool;
 
+        private Context context;
+
         public Application()
         {
-            graphics = new Graphics();
+            context = new Context();
         }
 
-        protected string getAssetPath()
+        protected virtual void Setup()
         {
-            return Path.Combine(AppContext.BaseDirectory, "data/");
+            timer = CreateSubsystem<Timer>();
+            fileSystem = CreateSubsystem<FileSystem>();
+            graphics = CreateSubsystem<Graphics>();
+            cache = CreateSubsystem<ResourceCache>(DataPath);
         }
 
-        public IntPtr SetupWin32Window()
+        public virtual void Initialize()
+        {
+        }
+
+        protected override void Destroy()
+        {
+        }
+
+        private IntPtr CreateWindow()
         {
             WindowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
             NativeWindow = new Sdl2Window(Name, 50, 50, (int)width, (int)height, SDL_WindowFlags.Resizable, threadedProcessing: false)
@@ -89,18 +99,13 @@ namespace SharpGame
             return NativeWindow.Handle;
         }
 
-        public virtual void Initialize()
-        {
-            graphics.Initialize();
-        }
-
         public void Run()
         {
-            graphics.InitVulkan();
+            Setup();
 
-            SetupWin32Window();
+            CreateWindow();
 
-            graphics.InitSwapchain(NativeWindow.SdlWindowHandle);
+            graphics.CreateSwapchain(NativeWindow.SdlWindowHandle);
 
             Initialize();
 
@@ -174,6 +179,8 @@ namespace SharpGame
             destWidth = width;
             destHeight = height;
 
+            timer.Start();
+
             while (NativeWindow.Exists)
             {
                 var tStart = DateTime.Now;
@@ -191,42 +198,12 @@ namespace SharpGame
                     break;
                 }
 
+                timer.Tick();
+
                 render();
-                frameCounter++;
-                var tEnd = DateTime.Now;
-                var tDiff = tEnd - tStart;
-                frameTimer = (float)tDiff.TotalMilliseconds / 1000.0f;
-                _frameTimeAverager.AddTime(tDiff.TotalMilliseconds);
-                /*
-                camera.update(frameTimer);
-                if (camera.moving())
-                {
-                    viewUpdated = true;
-                }
-                */
-                // Convert to clamped timer value
-                if (!paused)
-                {
-                    timer += timerSpeed * frameTimer;
-                    if (timer > 1.0)
-                    {
-                        timer -= 1.0f;
-                    }
-                }
-                fpsTimer += (float)tDiff.TotalMilliseconds * 1000f;
-                if (fpsTimer > 1000.0f)
-                {
-                    if (!enableTextOverlay)
-                    {
-                        NativeWindow.Title = Title;
-                    }
-                    lastFPS = (uint)(1.0f / frameTimer);
-                    // updateTextOverlay();
-                    fpsTimer = 0.0f;
-                    frameCounter = 0;
-                }
             }
 
+            timer.Stop();
             // Flush device to make sure all resources can be freed 
             graphics.WaitIdle();
         }
@@ -255,8 +232,6 @@ namespace SharpGame
             buildCommandBuffers();
 
             graphics.WaitIdle();
-
-            // camera.updateAspectRatio((float)width / (float)height);
 
             // Notify derived class
             windowResized();

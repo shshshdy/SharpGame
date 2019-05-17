@@ -78,7 +78,7 @@ namespace SharpGame
             Title = "Vulkan Example - Model rendering";
         }
 
-        public void Dispose()
+        protected override void Destroy()
         {
             // Clean up used Vulkan resources 
             // Note : Inherited destructor cleans up resources stored in base class
@@ -95,6 +95,8 @@ namespace SharpGame
 
             textures_colorMap.Dispose();
             uniformBuffers_scene.Dispose();
+
+            base.Destroy();
         }
         /*
         protected override void getEnabledFeatures()
@@ -332,19 +334,19 @@ namespace SharpGame
 
         void loadAssets()
         {
-            loadModel(getAssetPath() + "models/voyager/voyager.dae");
+            loadModel(DataPath + "models/voyager/voyager.dae");
             if (Device.Features.textureCompressionBC == 1)
             {
-                textures_colorMap.loadFromFile(getAssetPath() + "models/voyager/voyager_bc3_unorm.ktx",
+                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_bc3_unorm.ktx",
                     VkFormat.Bc3UnormBlock, graphics.queue);
             }
             else if (Device.Features.textureCompressionASTC_LDR == 1)
             {
-                textures_colorMap.loadFromFile(getAssetPath() + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, graphics.queue);
+                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, graphics.queue);
             }
             else if (Device.Features.textureCompressionETC2 == 1)
             {
-                textures_colorMap.loadFromFile(getAssetPath() + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, graphics.queue);
+                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, graphics.queue);
             }
             else
             {
@@ -533,8 +535,8 @@ namespace SharpGame
             // Solid rendering pipeline
             // Load shaders
             FixedArray2<VkPipelineShaderStageCreateInfo> shaderStages = new FixedArray2<VkPipelineShaderStageCreateInfo>(
-                Graphics.loadShader(getAssetPath() + "shaders/mesh/mesh.vert.spv", VkShaderStageFlags.Vertex),
-                Graphics.loadShader(getAssetPath() + "shaders/mesh/mesh.frag.spv", VkShaderStageFlags.Fragment));
+                Graphics.loadShader(DataPath + "shaders/mesh/mesh.vert.spv", VkShaderStageFlags.Vertex),
+                Graphics.loadShader(DataPath + "shaders/mesh/mesh.frag.spv", VkShaderStageFlags.Fragment));
 
             VkGraphicsPipelineCreateInfo pipelineCreateInfo =
                 Builder.GraphicsPipelineCreateInfo(

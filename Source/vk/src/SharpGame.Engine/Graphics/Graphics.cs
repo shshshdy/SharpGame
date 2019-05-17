@@ -73,10 +73,6 @@ namespace SharpGame
         DebugReportCallbackExt debugReportCallbackExt;
         public Graphics()
         {
-        }
-
-        public void InitVulkan()
-        {
             VkResult err;
             err = CreateInstance(false);
             if (err != VkResult.Success)
@@ -248,25 +244,7 @@ namespace SharpGame
             Instance = instance;
             return result;
         }
-
-        public void Initialize()
-        {
-
-            if (Device.EnableDebugMarkers)
-            {
-                // vks::debugmarker::setup(Device);
-            }
-
-            DescriptorPoolManager = new DescriptorPoolManager();
-
-            CreateCommandPool();
-            SetupSwapChain();
-            createCommandBuffers();
-            SetupDepthStencil();
-            SetupRenderPass();
-            SetupFrameBuffer();
-        }
-
+        
         protected virtual void SetupFrameBuffer()
         {
             using (NativeList<VkImageView> attachments = new NativeList<VkImageView>(2))
@@ -382,9 +360,23 @@ namespace SharpGame
             }
         }
 
-        public void InitSwapchain(IntPtr wnd)
+        public void CreateSwapchain(IntPtr wnd)
         {
             Swapchain.InitSurface(wnd);
+
+            if (Device.EnableDebugMarkers)
+            {
+                // vks::debugmarker::setup(Device);
+            }
+
+            DescriptorPoolManager = new DescriptorPoolManager();
+
+            CreateCommandPool();
+            SetupSwapChain();
+            createCommandBuffers();
+            SetupDepthStencil();
+            SetupRenderPass();
+            SetupFrameBuffer();
         }
 
         public void Resize(uint w, uint h)

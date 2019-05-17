@@ -11,18 +11,6 @@ using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    // ImVertex layout for this example
-    public struct ImVertex
-    {
-        public Vector2 pos;
-        public Vector2 uv;
-        public uint color;
-
-        public const uint PositionOffset = 0;
-        public const uint UvOffset = 8;
-        public const uint ColorOffset = 16;
-    };
-
     public struct UboVS
     {
         public Matrix4x4 projection;
@@ -86,7 +74,7 @@ namespace SharpGame
             prepared = true;
         }
 
-        public void Dispose()
+        protected override void Destroy()
         {
             texture.Dispose();
 
@@ -107,7 +95,7 @@ namespace SharpGame
             vertexBuffer = GraphicsBuffer.Create(
                 VkBufferUsageFlags.VertexBuffer,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                sizeof(ImVertex), 4096);
+                sizeof(Pos2dTexColorVertex), 4096);
 
             // Index buffer
             indexBuffer = GraphicsBuffer.Create(
@@ -119,7 +107,7 @@ namespace SharpGame
             {
                 bindings = new []
                 {
-                    new VertexInputBinding(0, (uint)sizeof(ImVertex), VertexInputRate.Vertex)
+                    new VertexInputBinding(0, (uint)sizeof(Pos2dTexColorVertex), VertexInputRate.Vertex)
                 },
 
                 attributes = new[]
@@ -186,8 +174,8 @@ namespace SharpGame
             // Load shaders
             FixedArray2<VkPipelineShaderStageCreateInfo> shaderStages = new FixedArray2<VkPipelineShaderStageCreateInfo>();
 
-            shaderStages.First = Graphics.loadShader(getAssetPath() + "shaders/texture/ImGui.vert.spv", VkShaderStageFlags.Vertex);
-            shaderStages.Second = Graphics.loadShader(getAssetPath() + "shaders/texture/ImGui.frag.spv", VkShaderStageFlags.Fragment);
+            shaderStages.First = Graphics.loadShader(DataPath + "shaders/texture/ImGui.vert.spv", VkShaderStageFlags.Vertex);
+            shaderStages.Second = Graphics.loadShader(DataPath + "shaders/texture/ImGui.frag.spv", VkShaderStageFlags.Fragment);
 
             VkGraphicsPipelineCreateInfo pipelineCreateInfo =
                 Builder.GraphicsPipelineCreateInfo(

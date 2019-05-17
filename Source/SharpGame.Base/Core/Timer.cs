@@ -107,7 +107,7 @@ namespace SharpGame
 
     public class Time
     {
-        public static float Delta => Object.Get<Timer>().DeltaTime;
-        public static float Total => Object.Get<Timer>().TotalTime;
+        public static float Delta => InstanceHoler<Timer>.inst.DeltaTime;
+        public static float Total => InstanceHoler<Timer>.inst.TotalTime;
     }
 }

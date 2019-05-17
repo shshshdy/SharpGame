@@ -9,15 +9,6 @@ namespace SharpGame
     {
         internal static Context _context;
 
-        public static T CreateSubsystem<T>() where T : Object, new()
-            => _context.CreateSubsystem<T>();
-
-        public static T CreateSubsystem<T>(params object[] param) where T : Object
-            => _context.CreateSubsystem<T>(param);
-
-        public static T RegisterSubsystem<T>(T sub) where T : Object
-            => _context.RegisterSubsystem(sub);
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>() => _context.Get<T>();
 

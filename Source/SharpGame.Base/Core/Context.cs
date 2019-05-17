@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SharpGame
@@ -17,26 +18,26 @@ namespace SharpGame
 
         public T CreateSubsystem<T>() where T : Object, new()
         {
-            InstanceHoler<T>._inst = new T();
-            return RegisterSubsystem(InstanceHoler<T>._inst);
+            InstanceHoler<T>.inst = new T();
+            return RegisterSubsystem(InstanceHoler<T>.inst);
         }
 
         public T CreateSubsystem<T>(params object[] param) where T : Object
         {
-            InstanceHoler<T>._inst = Activator.CreateInstance(typeof(T), param) as T;
-            return RegisterSubsystem(InstanceHoler<T>._inst);
+            InstanceHoler<T>.inst = Activator.CreateInstance(typeof(T), param) as T;
+            return RegisterSubsystem(InstanceHoler<T>.inst);
         }
 
         public T RegisterSubsystem<T>(T sub) where T : Object
         {
-            InstanceHoler<T>._inst = sub;
+            InstanceHoler<T>.inst = sub;
             _subsystems.Push(sub);
-            return InstanceHoler<T>._inst;
+            return InstanceHoler<T>.inst;
         }
 
         public T Get<T>()
         {
-            return InstanceHoler<T>._inst;
+            return InstanceHoler<T>.inst;
         }
 
         public void Dispose()
@@ -48,6 +49,6 @@ namespace SharpGame
 
     internal class InstanceHoler<T>
     {
-        internal static T _inst;
+        internal static T inst;
     }
 }
