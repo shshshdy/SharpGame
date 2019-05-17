@@ -24,21 +24,21 @@ namespace SharpGame
 
     public class Pipeline : Resource
     {
-        private VkPipelineRasterizationStateCreateInfo rasterizationState_;
-        public ref VkPipelineRasterizationStateCreateInfo RasterizationState => ref rasterizationState_;
+        private RasterizationStateInfo rasterizationState_;
+        public ref RasterizationStateInfo RasterizationState => ref rasterizationState_;
 
-        private VkPipelineMultisampleStateCreateInfo multisampleState;
-        public ref VkPipelineMultisampleStateCreateInfo MultisampleState => ref multisampleState;
+        private MultisampleStateInfo multisampleState;
+        public ref MultisampleStateInfo MultisampleState => ref multisampleState;
 
-        private VkPipelineDepthStencilStateCreateInfo depthStencilState_;
-        public ref VkPipelineDepthStencilStateCreateInfo DepthStencilState => ref depthStencilState_;
+        private DepthStencilStateInfo depthStencilState_;
+        public ref DepthStencilStateInfo DepthStencilState => ref depthStencilState_;
 
-        private VkPipelineColorBlendStateCreateInfo colorBlendState;
-        public ref VkPipelineColorBlendStateCreateInfo ColorBlendState => ref colorBlendState;
+        private ColorBlendStateInfo colorBlendState;
+        public ref ColorBlendStateInfo ColorBlendState => ref colorBlendState;
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
 
         private VertexLayout vertexlayout;
-        public ref VertexLayout Vertexlayout => ref vertexlayout;
+        public ref VertexLayout VertexLayout => ref vertexlayout;
 
         public VkPipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
 
@@ -49,7 +49,7 @@ namespace SharpGame
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
         public BlendMode BlendMode { set => SetBlendMode(value); }
-        public VkPipelineDynamicStateCreateInfo? DynamicStateCreateInfo {get; set;}
+        public DynamicStateInfo? DynamicState {get; set;}
 
         public VkPipelineLayout pipelineLayout;
 
@@ -64,7 +64,7 @@ namespace SharpGame
         {
             vertexlayout = new VertexLayout();
 
-            RasterizationState = new VkPipelineRasterizationStateCreateInfo
+            RasterizationState = new RasterizationStateInfo
             {
                 polygonMode = VkPolygonMode.Fill,
                 cullMode = VkCullModeFlags.Back,
@@ -72,13 +72,13 @@ namespace SharpGame
                 lineWidth = 1.0f
             };
 
-            MultisampleState = new VkPipelineMultisampleStateCreateInfo
+            MultisampleState = new MultisampleStateInfo
             {
                 rasterizationSamples = VkSampleCountFlags.Count1,
                 minSampleShading = 1.0f
             };
 
-            DepthStencilState = new VkPipelineDepthStencilStateCreateInfo
+            DepthStencilState = new DepthStencilStateInfo
             {
                 depthTestEnable = true,
                 depthWriteEnable = true,
@@ -115,68 +115,86 @@ namespace SharpGame
             {
                 case BlendMode.Replace:
 
-                    colorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
+                    ColorBlendState = new ColorBlendStateInfo
                     {
-                        srcColorBlendFactor = VkBlendFactor.One,
-                        dstColorBlendFactor = VkBlendFactor.Zero,
-                        colorBlendOp = VkBlendOp.Add,
-                        srcAlphaBlendFactor = VkBlendFactor.One,
-                        dstAlphaBlendFactor = VkBlendFactor.Zero,
-                        alphaBlendOp = VkBlendOp.Add,
-                        colorWriteMask = (VkColorComponentFlags)0xf
+                        attachments = new[]
+                        {
+                            new ColorBlendAttachment
+                            {
+                                srcColorBlendFactor = VkBlendFactor.One,
+                                dstColorBlendFactor = VkBlendFactor.Zero,
+                                colorBlendOp = VkBlendOp.Add,
+                                srcAlphaBlendFactor = VkBlendFactor.One,
+                                dstAlphaBlendFactor = VkBlendFactor.Zero,
+                                alphaBlendOp = VkBlendOp.Add,
+                                colorWriteMask = (VkColorComponentFlags)0xf
+                            }
+                        }
                     };
-
-                    ColorBlendState = ColorBlendStateCreateInfo(1, ref colorBlendAttachmentState);
                     break;
                 case BlendMode.Add:
 
-                    colorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
+                    ColorBlendState = new ColorBlendStateInfo
                     {
-                        srcColorBlendFactor = VkBlendFactor.One,
-                        dstColorBlendFactor = VkBlendFactor.One,
-                        colorBlendOp = VkBlendOp.Add,
-                        srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
-                        dstAlphaBlendFactor = VkBlendFactor.DstAlpha,
-                        alphaBlendOp = VkBlendOp.Add,
-                        colorWriteMask = (VkColorComponentFlags)0xf
+                        attachments = new[]
+                        {
+                            new ColorBlendAttachment
+                            {
+                                srcColorBlendFactor = VkBlendFactor.One,
+                                dstColorBlendFactor = VkBlendFactor.One,
+                                colorBlendOp = VkBlendOp.Add,
+                                srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
+                                dstAlphaBlendFactor = VkBlendFactor.DstAlpha,
+                                alphaBlendOp = VkBlendOp.Add,
+                                colorWriteMask = (VkColorComponentFlags)0xf
+                            }
+                        }
                     };
-
-                    ColorBlendState = ColorBlendStateCreateInfo(1, ref colorBlendAttachmentState);
 
                     break;
                 case BlendMode.MultiplY:
                     break;
                 case BlendMode.Alpha:
-                    colorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
+                   
+                    ColorBlendState = new ColorBlendStateInfo
                     {
-                        blendEnable = true,
-                        srcColorBlendFactor = VkBlendFactor.SrcAlpha,
-                        dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                        colorBlendOp = VkBlendOp.Add,
-                        srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
-                        dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                        alphaBlendOp = VkBlendOp.Add,
-                        colorWriteMask = (VkColorComponentFlags)0xf
+                        attachments = new[]
+                        {
+                            new ColorBlendAttachment
+                            {
+                                blendEnable = true,
+                                srcColorBlendFactor = VkBlendFactor.SrcAlpha,
+                                dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                                colorBlendOp = VkBlendOp.Add,
+                                srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
+                                dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                                alphaBlendOp = VkBlendOp.Add,
+                                colorWriteMask = (VkColorComponentFlags)0xf
+                            }
+                        }
                     };
-
-                    ColorBlendState = ColorBlendStateCreateInfo(1, ref colorBlendAttachmentState);
                     break;
                 case BlendMode.AddAlpha:
                     break;
                 case BlendMode.PremulAlpha:
-                    colorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
+                   
+                    ColorBlendState = new ColorBlendStateInfo
                     {
-                        blendEnable = true,
-                        srcColorBlendFactor = VkBlendFactor.One,
-                        dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                        colorBlendOp = VkBlendOp.Add,
-                        srcAlphaBlendFactor = VkBlendFactor.One,
-                        dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                        alphaBlendOp = VkBlendOp.Add,
-                        colorWriteMask = (VkColorComponentFlags)0xf
+                        attachments = new[]
+                        {
+                            new ColorBlendAttachment
+                            {
+                                blendEnable = true,
+                                srcColorBlendFactor = VkBlendFactor.One,
+                                dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                                colorBlendOp = VkBlendOp.Add,
+                                srcAlphaBlendFactor = VkBlendFactor.One,
+                                dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                                alphaBlendOp = VkBlendOp.Add,
+                                colorWriteMask = (VkColorComponentFlags)0xf
+                            }
+                        }
                     };
-
-                    ColorBlendState = ColorBlendStateCreateInfo(1, ref colorBlendAttachmentState);
                     break;
                 case BlendMode.InvdestAlpha:
                     break;
@@ -193,14 +211,13 @@ namespace SharpGame
             pipeline = 0;
         }
 
-        public VkPipeline GetGraphicsPipeline(RenderPass renderPass, Shader shader, Geometry geometry)
+        public VkPipeline GetGraphicsPipeline(VkRenderPass renderPass, Pass pass, Geometry geometry)
         {
-            if(pipeline != null)
+            if(pipeline != 0)
             {
                 return pipeline;
             }
 
-            var pass = shader.GetPass(renderPass.passID);
             if(pass == null)
             {
                 return 0;
@@ -211,28 +228,38 @@ namespace SharpGame
 
             unsafe
             {
+                var pipelineCreateInfo = GraphicsPipelineCreateInfo(pipelineLayout, renderPass, 0);//,
+
+                vertexlayout.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
+                pipelineCreateInfo.pVertexInputState = &vertexInputState;
+
                 VkPipelineShaderStageCreateInfo* shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];
                 uint count = pass.GetShaderStageCreateInfos(shaderStageCreateInfos);
-                var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
-                var inputAssemblyStateCreateInfo = InputAssemblyStateCreateInfo(geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
-                var pipelineCreateInfo = GraphicsPipelineCreateInfo(pipelineLayout, renderPass.renderPass, 0);//,
-
-                var vertexInputState = vertexlayout.ToNative();
-
                 pipelineCreateInfo.stageCount = count;
                 pipelineCreateInfo.pStages = shaderStageCreateInfos;
+
+                var inputAssemblyStateCreateInfo = InputAssemblyStateCreateInfo(geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
                 pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
-                pipelineCreateInfo.pVertexInputState = &vertexInputState;
-                pipelineCreateInfo.pRasterizationState = (VkPipelineRasterizationStateCreateInfo*)Unsafe.AsPointer(ref rasterizationState_);
+
+                rasterizationState_.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationState);
+                pipelineCreateInfo.pRasterizationState = &rasterizationState;
+
+                var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
                 pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
-                pipelineCreateInfo.pMultisampleState = (VkPipelineMultisampleStateCreateInfo*)Unsafe.AsPointer(ref multisampleState);
-                pipelineCreateInfo.pDepthStencilState = (VkPipelineDepthStencilStateCreateInfo*)Unsafe.AsPointer(ref depthStencilState_);
-                pipelineCreateInfo.pColorBlendState = (VkPipelineColorBlendStateCreateInfo*)Unsafe.AsPointer(ref colorBlendState);
+
+                this.multisampleState.ToNative(out VkPipelineMultisampleStateCreateInfo multisampleState);
+                pipelineCreateInfo.pMultisampleState = &multisampleState;
+
+                depthStencilState_.ToNative(out VkPipelineDepthStencilStateCreateInfo depthStencilState);
+                pipelineCreateInfo.pDepthStencilState = &depthStencilState;
+
+                ColorBlendState.ToNative(out VkPipelineColorBlendStateCreateInfo colorBlendState);
+                pipelineCreateInfo.pColorBlendState = &colorBlendState;
 
                 VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
-                if (DynamicStateCreateInfo.HasValue)
+                if (DynamicState.HasValue)
                 {
-                    dynamicStateCreateInfo = DynamicStateCreateInfo.Value;
+                    DynamicState.Value.ToNative(out dynamicStateCreateInfo);
                     pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
                 }
 

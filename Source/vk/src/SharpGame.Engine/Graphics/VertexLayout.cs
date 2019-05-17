@@ -61,15 +61,13 @@ namespace SharpGame
             this.attributes = attributes;
         }
 
-        public unsafe Vulkan.VkPipelineVertexInputStateCreateInfo ToNative()
+        public unsafe void ToNative(out VkPipelineVertexInputStateCreateInfo native)
         {
-            Vulkan.VkPipelineVertexInputStateCreateInfo native = Builder.VertexInputStateCreateInfo();
+            native = Builder.VertexInputStateCreateInfo();
             native.vertexBindingDescriptionCount = (uint)bindings.Length;
             native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AllocToPointer(bindings);
             native.vertexAttributeDescriptionCount = (uint)attributes.Length;
-            native.pVertexAttributeDescriptions = (Vulkan.VkVertexInputAttributeDescription*)Utilities.AllocToPointer(attributes);
-           
-            return native;
+            native.pVertexAttributeDescriptions = (Vulkan.VkVertexInputAttributeDescription*)Utilities.AllocToPointer(attributes);           
         }
     }
 

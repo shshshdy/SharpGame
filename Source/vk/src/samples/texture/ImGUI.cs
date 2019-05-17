@@ -27,10 +27,10 @@ namespace SharpGame
         Texture texture;
 
         UboVS uboVS;
-        VkPipeline pipelines_solid;
 
-        VkPipelineLayout pipelineLayout;
+        Shader uiShader;
         Pipeline pipeline;
+
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
 
@@ -55,8 +55,6 @@ namespace SharpGame
 
             CreateGraphicsResources();
             
-            PreparePipelines();
-
             RecreateFontDeviceTexture();
 
             resourceSet = new ResourceSet(resourceLayout, uniformBufferVS, texture);
@@ -75,13 +73,11 @@ namespace SharpGame
         protected override void Destroy()
         {
             texture.Dispose();
-
-            Device.DestroyPipeline(pipelines_solid);
-            Device.DestroyPipelineLayout(pipelineLayout);
-
+            
             vertexBuffer.Dispose();
             indexBuffer.Dispose();
             uniformBufferVS.Dispose();
+            pipeline.Dispose();
         }
 
 
@@ -110,77 +106,23 @@ namespace SharpGame
                     Builder.DescriptorSetLayoutBinding(VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment, 1)
                     );
 
-            var layout = resourceLayout.descriptorSetLayout;
-            VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = Builder.PipelineLayoutCreateInfo(ref layout);
+            uiShader = new Shader
+            (
+                new Pass("shaders/texture/ImGui.vert.spv", "shaders/texture/ImGui.frag.spv")
+                {
+                    ResourceLayout = resourceLayout
+                }
+            );
 
-            Util.CheckResult(vkCreatePipelineLayout(Graphics.device, &pPipelineLayoutCreateInfo, null, out pipelineLayout));
-        }
-
-        void PreparePipelines()
-        {
-            VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
-                Builder.InputAssemblyStateCreateInfo(
-                    PrimitiveTopology.TriangleList,
-                    0,
-                    False);
-
-            VkPipelineRasterizationStateCreateInfo rasterizationState =
-                Builder.RasterizationStateCreateInfo(
-                    VkPolygonMode.Fill,
-                    VkCullModeFlags.None,
-                    VkFrontFace.CounterClockwise,
-                    0);
-
-            VkPipelineColorBlendAttachmentState blendAttachmentState =
-                Builder.ColorBlendAttachmentState((VkColorComponentFlags)0xf, true);
-            blendAttachmentState.alphaBlendOp = VkBlendOp.Add;
-            blendAttachmentState.colorBlendOp = VkBlendOp.Add;
-            blendAttachmentState.srcColorBlendFactor = VkBlendFactor.SrcAlpha;
-            blendAttachmentState.dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha;
-            blendAttachmentState.srcAlphaBlendFactor = VkBlendFactor.SrcAlpha;
-            blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha;
-
-            var colorBlendState = Builder.ColorBlendStateCreateInfo(1, ref blendAttachmentState);
-            var depthStencilState = Builder.DepthStencilStateCreateInfo(false, false, VkCompareOp.LessOrEqual);
-            var viewportState = Builder.ViewportStateCreateInfo(1, 1, 0);
-            var multisampleState = Builder.MultisampleStateCreateInfo(VkSampleCountFlags.Count1, 0);
-
-            FixedArray2<VkDynamicState> dynamicStateEnables = new FixedArray2<VkDynamicState>(
-                VkDynamicState.Viewport,
-                VkDynamicState.Scissor);
-            VkPipelineDynamicStateCreateInfo dynamicState =
-                Builder.DynamicStateCreateInfo(
-                    (VkDynamicState*)Unsafe.AsPointer(ref dynamicStateEnables),
-                    dynamicStateEnables.Count,
-                    0);
-
-            // Load shaders
-            FixedArray2<VkPipelineShaderStageCreateInfo> shaderStages = new FixedArray2<VkPipelineShaderStageCreateInfo>();
-
-            shaderStages.First = Graphics.loadShader(DataPath + "shaders/texture/ImGui.vert.spv", VkShaderStageFlags.Vertex);
-            shaderStages.Second = Graphics.loadShader(DataPath + "shaders/texture/ImGui.frag.spv", VkShaderStageFlags.Fragment);
-
-            VkGraphicsPipelineCreateInfo pipelineCreateInfo =
-                Builder.GraphicsPipelineCreateInfo(
-                    pipelineLayout,
-                    Graphics.renderPass,
-                    0);
-
-            var vertexInputState = vertexLayout.ToNative();
-            pipelineCreateInfo.pVertexInputState = &vertexInputState;
-            pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
-            pipelineCreateInfo.pRasterizationState = &rasterizationState;
-            pipelineCreateInfo.pColorBlendState = &colorBlendState;
-            pipelineCreateInfo.pMultisampleState = &multisampleState;
-            pipelineCreateInfo.pViewportState = &viewportState;
-            pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-            pipelineCreateInfo.pDynamicState = &dynamicState;
-            pipelineCreateInfo.stageCount = shaderStages.Count;
-            pipelineCreateInfo.pStages = (VkPipelineShaderStageCreateInfo*)Unsafe.AsPointer(ref shaderStages);
-
-            pipelines_solid = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
-
-            pipeline = new Pipeline();
+            pipeline = new Pipeline
+            {
+                CullMode = VkCullModeFlags.None,
+                DepthTestEnable = false,
+                DepthWriteEnable = false,
+                BlendMode = BlendMode.Alpha,
+                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
+                VertexLayout = vertexLayout
+            };
         }
 
         // Prepare and initialize uniform buffer containing shader uniforms
@@ -372,7 +314,9 @@ namespace SharpGame
 
 
             var cmdBuffer = Graphics.drawCmdBuffers[graphics.currentBuffer];
-            vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint.Graphics, pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
+
+            var pipelines_solid = pipeline.GetGraphicsPipeline(Graphics.renderPass, uiShader.Main, null);
+            vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
             vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint.Graphics, pipelines_solid);
 
             ulong offsets = 0;

@@ -22,7 +22,6 @@ namespace SharpGame
         public uint height { get; protected set; } = 720;
         public IntPtr Window { get; protected set; }
         public Sdl2Window NativeWindow { get; private set; }
-
         public IntPtr WindowInstance { get; protected set; }
 
         protected Timer timer;
@@ -48,12 +47,6 @@ namespace SharpGame
         protected Camera camera = new Camera();
 
         protected VkClearColorValue defaultClearColor => new VkClearColorValue(0.025f, 0.025f, 0.025f, 1.0f);
-
-        // fps timer (one second interval)
-        float fpsTimer = 0.0f;
-        protected bool enableTextOverlay = false;
-        private uint lastFPS;
-        private readonly FrameTimeAverager _frameTimeAverager = new FrameTimeAverager(666);
 
         protected InputSnapshot snapshot;
         protected VkDescriptorPool descriptorPool;

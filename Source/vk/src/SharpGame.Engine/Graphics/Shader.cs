@@ -25,11 +25,12 @@ namespace SharpGame
         {
         }
 
-        public Shader(string name, Pass pass)
+        public Shader(params Pass[] passes)
         {
-            Name = name;
-
-            AddPass(pass);
+            foreach(var pass in passes)
+            {
+                AddPass(pass);
+            }
         }
 
         public void AddPass(Pass pass)
