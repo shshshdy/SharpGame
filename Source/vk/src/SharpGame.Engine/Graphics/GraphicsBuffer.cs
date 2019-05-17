@@ -178,9 +178,9 @@ namespace SharpGame
             return Create(bufferUsages, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, Unsafe.SizeOf<T>(), data.Length);
         }
 
-        public static GraphicsBuffer Create(VkBufferUsageFlags usageFlags, bool dynamic, int stride, int count, void* data = null)
+        public static GraphicsBuffer Create(VkBufferUsageFlags usageFlags, bool dynamic, int stride, int count, IntPtr data = default)
         {
-            return Create(usageFlags, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, stride, count, data);
+            return Create(usageFlags, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, stride, count, (void*)data);
         }
 
         public static GraphicsBuffer Create(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)

@@ -172,7 +172,7 @@ namespace SharpGame
         {
             VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
                 Builder.InputAssemblyStateCreateInfo(
-                    VkPrimitiveTopology.TriangleList,
+                    PrimitiveTopology.TriangleList,
                     0,
                     False);
 
@@ -187,10 +187,10 @@ namespace SharpGame
                 Builder.ColorBlendAttachmentState((VkColorComponentFlags)0xf, true);
             blendAttachmentState.alphaBlendOp = VkBlendOp.Add;
             blendAttachmentState.colorBlendOp = VkBlendOp.Add;
-            blendAttachmentState.srcColorBlendFactor = VkBlendFactor.SrcAlpha;
+            blendAttachmentState.srcColorBlendFactor = VkBlendFactor.One;
             blendAttachmentState.dstColorBlendFactor = VkBlendFactor.OneMinusDstAlpha;
             blendAttachmentState.srcAlphaBlendFactor = VkBlendFactor.One;
-            blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.One;
+            blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.Zero;
 
             var colorBlendState = Builder.ColorBlendStateCreateInfo(1, ref blendAttachmentState);
             var depthStencilState = Builder.DepthStencilStateCreateInfo(false, false, VkCompareOp.LessOrEqual);

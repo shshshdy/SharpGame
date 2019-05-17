@@ -1,17 +1,4 @@
-﻿// This code has been adapted from the "Vulkan" C++ example repository, by Sascha Willems: https://github.com/SaschaWillems/Vulkan
-// It is a direct translation from the original C++ code and style, with as little transformation as possible.
-
-// Original file: mesh/mesh.cpp, 
-
-/*
-* Vulkan Example - Model loading and rendering
-*
-* Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
-*
-* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-*/
-
-using Assimp;
+﻿using Assimp;
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -499,7 +486,7 @@ namespace SharpGame
         {
             VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
                 Builder.InputAssemblyStateCreateInfo(
-                    VkPrimitiveTopology.TriangleList,
+                    PrimitiveTopology.TriangleList,
                     0,
                     False);
 

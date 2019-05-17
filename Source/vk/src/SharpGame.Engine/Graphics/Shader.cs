@@ -93,7 +93,7 @@ namespace SharpGame
         }
     }
 
-    public class Pass : IDisposable
+    public class Pass : DisposeBase
     {
         public static readonly StringID Shadow = "shadow";
         public static readonly StringID Depth = "depth";
@@ -256,7 +256,7 @@ namespace SharpGame
             ComputeShader?.Build();
         }
 
-        public void Dispose()
+        protected override void Destroy()
         {
             foreach(var stage in this.GetShaderModules())
             {

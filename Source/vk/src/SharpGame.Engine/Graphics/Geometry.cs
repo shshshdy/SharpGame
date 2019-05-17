@@ -25,14 +25,14 @@ namespace SharpGame
         }
 
         public GraphicsBuffer IndexBuffer { get; set; }
-        public VkPrimitiveTopology PrimitiveTopology { get; set; } = VkPrimitiveTopology.TriangleList;
+        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
         public int VertexStart { get; set; }
         public int VertexCount { get; set; }
         public int IndexStart { get; set; }
         public int IndexCount { get; set; }
         public float LodDistance { get; set; }
 
-        public VkPipelineVertexInputStateCreateInfo VertexLayout { get; set; }
+        public VertexLayout VertexLayout { get; set; }
 
         VkBuffer[] buffers_;
         long[] offsets_;
@@ -58,7 +58,7 @@ namespace SharpGame
             Array.Resize(ref vertexBuffers_, num);
         }
 
-        public bool SetDrawRange(VkPrimitiveTopology type, int indexStart, int indexCount)
+        public bool SetDrawRange(PrimitiveTopology type, int indexStart, int indexCount)
         {
             if (IndexBuffer == null)
             {
@@ -90,7 +90,7 @@ namespace SharpGame
             return true;
         }
 
-        public bool SetDrawRange(VkPrimitiveTopology type, int indexStart, int indexCount, int vertexStart, int vertexCount)
+        public bool SetDrawRange(PrimitiveTopology type, int indexStart, int indexCount, int vertexStart, int vertexCount)
         {
             if (IndexBuffer != null)
             {

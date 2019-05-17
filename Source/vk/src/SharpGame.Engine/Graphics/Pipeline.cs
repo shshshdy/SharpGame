@@ -22,7 +22,7 @@ namespace SharpGame
         SubtractAlpha,
     }
 
-    public class Pipeline : DisposeBase
+    public class Pipeline : Resource
     {
         private VkPipelineRasterizationStateCreateInfo rasterizationState_;
         public ref VkPipelineRasterizationStateCreateInfo RasterizationState => ref rasterizationState_;
@@ -35,7 +35,7 @@ namespace SharpGame
 
         private VkPipelineColorBlendStateCreateInfo colorBlendState;
         public ref VkPipelineColorBlendStateCreateInfo ColorBlendState => ref colorBlendState;
-        public VkPrimitiveTopology PrimitiveTopology { get; set; } = VkPrimitiveTopology.TriangleList;
+        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
 
         private VkPipelineVertexInputStateCreateInfo vertexInputState;
         public ref VkPipelineVertexInputStateCreateInfo VertexInputState => ref vertexInputState;
@@ -54,8 +54,6 @@ namespace SharpGame
         public VkPipelineLayout pipelineLayout;
 
         public VkPipeline pipeline;
-
-      //  Dictionary<(Pass, Geometry), VkPipeline> cachedPipeline_ = new Dictionary<(Pass, Geometry), Vulkan.Pipeline>();
 
         public Pipeline()
         {
@@ -169,7 +167,7 @@ namespace SharpGame
                     colorBlendAttachmentState = new VkPipelineColorBlendAttachmentState
                     {
                         blendEnable = true,
-                        srcColorBlendFactor = VkBlendFactor.SrcAlpha,
+                        srcColorBlendFactor = VkBlendFactor.One,
                         dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
                         colorBlendOp = VkBlendOp.Add,
                         srcAlphaBlendFactor = VkBlendFactor.One,

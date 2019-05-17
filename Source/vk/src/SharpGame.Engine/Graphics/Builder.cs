@@ -45,10 +45,10 @@ namespace SharpGame
         }
 
         public static VkPipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo(
-            VkPrimitiveTopology topology, uint flags = 0, uint primitiveRestartEnable = False)
+            PrimitiveTopology topology, uint flags = 0, uint primitiveRestartEnable = False)
         {
             var pipelineInputAssemblyStateCreateInfo = VkPipelineInputAssemblyStateCreateInfo.New();
-            pipelineInputAssemblyStateCreateInfo.topology = topology;
+            pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)topology;
             pipelineInputAssemblyStateCreateInfo.flags = flags;
             pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = primitiveRestartEnable;
             return pipelineInputAssemblyStateCreateInfo;
