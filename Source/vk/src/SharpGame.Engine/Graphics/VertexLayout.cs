@@ -48,26 +48,26 @@ namespace SharpGame
 
     public class VertexLayout
     {
-        public VertexInputBinding[] vertexInputBindings;
-        public VertexInputAttribute[] vertexInputAttributes;
+        public VertexInputBinding[] bindings;
+        public VertexInputAttribute[] attributes;
 
         public VertexLayout()
         {
         }
 
-        public VertexLayout(VertexInputBinding[] vertexInputBindings, VertexInputAttribute[] vertexInputAttributes)
+        public VertexLayout(VertexInputBinding[] bindings, VertexInputAttribute[] attributes)
         {
-            this.vertexInputBindings = vertexInputBindings;
-            this.vertexInputAttributes = vertexInputAttributes;
+            this.bindings = bindings;
+            this.attributes = attributes;
         }
 
         public unsafe Vulkan.VkPipelineVertexInputStateCreateInfo ToNative()
         {
             Vulkan.VkPipelineVertexInputStateCreateInfo native = Builder.VertexInputStateCreateInfo();
-            native.vertexBindingDescriptionCount = (uint)vertexInputBindings.Length;
-            native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AllocToPointer(vertexInputBindings);
-            native.vertexAttributeDescriptionCount = (uint)vertexInputAttributes.Length;
-            native.pVertexAttributeDescriptions = (Vulkan.VkVertexInputAttributeDescription*)Utilities.AllocToPointer(vertexInputAttributes);
+            native.vertexBindingDescriptionCount = (uint)bindings.Length;
+            native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AllocToPointer(bindings);
+            native.vertexAttributeDescriptionCount = (uint)attributes.Length;
+            native.pVertexAttributeDescriptions = (Vulkan.VkVertexInputAttributeDescription*)Utilities.AllocToPointer(attributes);
            
             return native;
         }

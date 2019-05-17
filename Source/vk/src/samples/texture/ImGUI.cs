@@ -117,12 +117,12 @@ namespace SharpGame
 
             vertexLayout = new VertexLayout
             {
-                vertexInputBindings = new []
+                bindings = new []
                 {
                     new VertexInputBinding(0, (uint)sizeof(ImVertex), VertexInputRate.Vertex)
                 },
 
-                vertexInputAttributes = new[]
+                attributes = new[]
                 {
                     new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
                     new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),

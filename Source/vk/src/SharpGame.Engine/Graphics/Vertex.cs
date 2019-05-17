@@ -5,19 +5,19 @@ using System.Text;
 using Vulkan;
 
 namespace SharpGame
-{/*
+{
     [StructLayout(LayoutKind.Sequential)]
     public struct PosNormTex
     {
-        public Vector3 Position;
-        public Vector3 Normal;
-        public Vector2 TexCoord;
+        public Vector3 position;
+        public Vector3 normal;
+        public Vector2 texcoord;
 
         public PosNormTex(Vector3 p, Vector3 n, Vector2 uv)
         {
-            Position = p;
-            Normal = n;
-            TexCoord = uv;
+            position = p;
+            normal = n;
+            texcoord = uv;
         }
 
         public PosNormTex(
@@ -25,22 +25,22 @@ namespace SharpGame
             float nx, float ny, float nz,
             float u, float v)
         {
-            Position = new Vector3(px, py, pz);
-            Normal = new Vector3(nx, ny, nz);
-            TexCoord = new Vector2(u, v);
+            position = new Vector3(px, py, pz);
+            normal = new Vector3(nx, ny, nz);
+            texcoord = new Vector2(u, v);
         }
 
-        public static PipelineVertexInputStateCreateInfo Layout = new PipelineVertexInputStateCreateInfo
+        public static VertexLayout Layout = new VertexLayout
         (
             new[]
             {
-                new VertexInputBindingDescription(0, Interop.SizeOf<PosNormTex>(), VkVertexInputRate.Vertex)
+                new VertexInputBinding(0, (uint)Utilities.SizeOf<PosNormTex>(), VertexInputRate.Vertex)
             },
             new[]
             {
-                new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),
-                new VertexInputAttributeDescription(1, 0, Format.R32G32B32SFloat, 12),
-                new VertexInputAttributeDescription(2, 0, Format.R32G32SFloat, 24)
+                new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+                new VertexInputAttribute(1, 0, Format.R32g32b32Sfloat, 12),
+                new VertexInputAttribute(2, 0, Format.R32g32Sfloat, 24)
             }
         );
     }
@@ -52,16 +52,16 @@ namespace SharpGame
         public uint Color;
 
 
-        public static PipelineVertexInputStateCreateInfo Layout = new PipelineVertexInputStateCreateInfo
+        public static VertexLayout Layout = new VertexLayout
         (
             new[]
             {
-                new VertexInputBindingDescription(0, Interop.SizeOf<PosColorVertex>(), VertexInputRate.Vertex)
+                new VertexInputBinding(0, (uint)Utilities.SizeOf<PosColorVertex>(), VertexInputRate.Vertex)
             },
             new[]
             {
-                new VertexInputAttributeDescription(0, 0, Format.R32G32B32SFloat, 0),
-                new VertexInputAttributeDescription(2, 0, Format.R8G8B8A8UNorm, 12)
+                new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+                new VertexInputAttribute(2, 0, Format.R8g8b8a8Unorm, 12)
             }
         );
     }
@@ -74,18 +74,18 @@ namespace SharpGame
         public uint Color;
 
 
-        public static PipelineVertexInputStateCreateInfo Layout = new PipelineVertexInputStateCreateInfo
+        public static VertexLayout Layout = new VertexLayout
         (
             new[]
             {
-                new VertexInputBindingDescription(0, Interop.SizeOf<Pos2dTexColorVertex>(), VertexInputRate.Vertex)
+                new VertexInputBinding(0, (uint)Utilities.SizeOf<Pos2dTexColorVertex>(), VertexInputRate.Vertex)
             },
             new[]
             {
-                new VertexInputAttributeDescription(0, 0, Format.R32G32SFloat, 0),
-                new VertexInputAttributeDescription(1, 0, Format.R32G32SFloat, 8),
-                new VertexInputAttributeDescription(2, 0, Format.R8G8B8A8UNorm, 16)
+                new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
+                new VertexInputAttribute(1, 0, Format.R32g32Sfloat, 8),
+                new VertexInputAttribute(2, 0, Format.R8g8b8a8Unorm, 16)
             }
         );
-    }*/
+    }
 }
