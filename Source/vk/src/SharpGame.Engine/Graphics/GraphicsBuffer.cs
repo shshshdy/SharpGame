@@ -13,7 +13,6 @@ namespace SharpGame
     {
         public int Stride { get; set; }
         public int Count { get; set; }
-        public bool Dynamic { get; set; }
 
         public VkBuffer buffer;
         public VkDeviceMemory memory;
@@ -162,6 +161,26 @@ namespace SharpGame
             {
                 Device.FreeMemory(memory);
             }
+        }
+
+        public static GraphicsBuffer CreateDynamic<T>(VkBufferUsageFlags bufferUsages, int count = 1) where T : struct
+        {
+            return Create(bufferUsages, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, Unsafe.SizeOf<T>(), count);
+        }
+
+        public static GraphicsBuffer CreateUniform<T>(int count = 1) where T : struct
+        {
+            return CreateDynamic<T>(VkBufferUsageFlags.UniformBuffer, count);
+        }
+
+        public static GraphicsBuffer Create<T>(VkBufferUsageFlags bufferUsages, T[] data, bool dynamic = false) where T : struct
+        {
+            return Create(bufferUsages, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, Unsafe.SizeOf<T>(), data.Length);
+        }
+
+        public static GraphicsBuffer Create(VkBufferUsageFlags usageFlags, bool dynamic, int stride, int count, void* data = null)
+        {
+            return Create(usageFlags, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, stride, count, data);
         }
 
         public static GraphicsBuffer Create(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)

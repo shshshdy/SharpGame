@@ -8,5 +8,10 @@ namespace SharpGame
     public class CommandBuffer : DisposeBase
     {
         internal VkCommandBuffer commandBuffer;
+
+        public void BindVertexBuffers()
+        {
+
+        }
     }
 }
