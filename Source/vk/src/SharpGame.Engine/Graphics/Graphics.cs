@@ -27,12 +27,12 @@ namespace SharpGame
 
     public class Settings
     {
-        public bool Validation { get; set; } = false;
+        public bool Validation { get; set; } = true;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
     }
 
-    public unsafe partial class Graphics
+    public unsafe partial class Graphics : Object
     {
         public Settings Settings { get; } = new Settings();
         public VkInstance Instance { get; protected set; }
@@ -70,6 +70,7 @@ namespace SharpGame
 
         public uint currentBuffer;
 
+        DebugReportCallbackExt debugReportCallbackExt;
         public Graphics()
         {
         }
@@ -85,6 +86,7 @@ namespace SharpGame
 
             if (Settings.Validation)
             {
+                debugReportCallbackExt = CreateDebugReportCallback();
 
             }
 
@@ -109,22 +111,7 @@ namespace SharpGame
             // TODO: Implement arg parsing, etc.
 
             physicalDevice = ((VkPhysicalDevice*)physicalDevices)[selectedDevice];
-            /*
-            // Store properties (including limits) and features of the phyiscal Device
-            // So examples can check against them and see if a feature is actually supported
-            VkPhysicalDeviceProperties deviceProperties;
-            vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
-            DeviceProperties = deviceProperties;
 
-            VkPhysicalDeviceFeatures deviceFeatures;
-            vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
-            DeviceFeatures = deviceFeatures;
-
-            // Gather physical Device memory properties
-            VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
-            vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
-            DeviceMemoryProperties = deviceMemoryProperties;
-            */
             // Derived examples can override this to set actual features (based on above readings) to enable for logical device creation
             getEnabledFeatures();
 
@@ -177,6 +164,32 @@ namespace SharpGame
             submitInfo.pSignalSemaphores = &GetSemaphoresPtr()->RenderComplete;
         }
 
+        private DebugReportCallbackExt CreateDebugReportCallback()
+        {
+            // Attach debug callback.
+            var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
+                VkDebugReportFlagsEXT.InformationEXT|
+                VkDebugReportFlagsEXT.WarningEXT |
+                VkDebugReportFlagsEXT.PerformanceWarningEXT |
+                VkDebugReportFlagsEXT.ErrorEXT |
+                VkDebugReportFlagsEXT.DebugEXT,
+                args =>
+                {
+                    Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}] {args.Message}");
+                    return args.Flags.HasFlag(DebugReportFlagsExt.Error);
+                }
+            );
+            return new DebugReportCallbackExt(Instance, ref debugReportCreateInfo);
+        }
+
+        protected override void Destroy()
+        {
+            debugReportCallbackExt?.Dispose();
+
+            base.Destroy();
+
+        }
+
         protected virtual void getEnabledFeatures()
         {
             // Used in some derived classes.
@@ -221,7 +234,7 @@ namespace SharpGame
                 instanceCreateInfo.enabledExtensionCount = instanceExtensions.Count;
                 instanceCreateInfo.ppEnabledExtensionNames = (byte**)instanceExtensions.Data;
             }
-
+            
             if (enableValidation)
             {
                 NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr>(1);

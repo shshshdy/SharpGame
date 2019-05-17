@@ -174,12 +174,12 @@ namespace SharpGame
                         CommandPool = CreateCommandPool(QFIndices.Graphics);
                     }
 
+                    VkPipelineCacheCreateInfo pipelineCacheCreateInfo = VkPipelineCacheCreateInfo.New();
+                    Util.CheckResult(vkCreatePipelineCache(LogicalDevice, ref pipelineCacheCreateInfo, null, out _pipelineCache));
                     return result;
                 }
             }
 
-            VkPipelineCacheCreateInfo pipelineCacheCreateInfo = VkPipelineCacheCreateInfo.New();
-            Util.CheckResult(vkCreatePipelineCache(LogicalDevice, ref pipelineCacheCreateInfo, null, out _pipelineCache));
         }
 
         private static uint GetQueueFamilyIndex(VkQueueFlags queueFlags)

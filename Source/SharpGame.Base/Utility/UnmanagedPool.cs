@@ -137,7 +137,7 @@ namespace SharpGame
 
         IntPtr CreateBucket()
         {
-            var ret = Utilities.Allocate(Unsafe.SizeOf<T>() * capacity_);
+            var ret = Utilities.Alloc(Unsafe.SizeOf<T>() * capacity_);
             buckets_.Add(ret);
             bucketsSize_.Add(0);
             return ret;

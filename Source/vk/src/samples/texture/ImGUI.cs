@@ -1,17 +1,4 @@
-﻿// This code has been adapted from the "Vulkan" C++ example repository, by Sascha Willems: https://github.com/SaschaWillems/Vulkan
-// It is a direct translation from the original C++ code and style, with as little transformation as possible.
-
-// Original file: texture/texture.cpp, 
-
-/*
-* Vulkan Example - Texture loading (and display) example (including mip maps)
-*
-* Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
-*
-* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
-*/
-
-using ImGuiNET;
+﻿using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,33 +23,26 @@ namespace SharpGame
         public const uint ColorOffset = 16;
     };
 
+    public struct UboVS
+    {
+        public Matrix4x4 projection;
+    }
+
     public unsafe class ImGUI : Application, IDisposable
     {
-        Texture texture;
-
-        public class Vertices
-        {
-            public VkPipelineVertexInputStateCreateInfo inputState;
-            public NativeList<VkVertexInputBindingDescription> bindings = new NativeList<VkVertexInputBindingDescription>();
-            public NativeList<VkVertexInputAttributeDescription> attributes = new NativeList<VkVertexInputAttributeDescription>();
-        }
-
-        Vertices vertices = new Vertices();
+        VertexLayout vertexLayout;
 
         GraphicsBuffer vertexBuffer = new GraphicsBuffer();
         GraphicsBuffer indexBuffer = new GraphicsBuffer();
         GraphicsBuffer uniformBufferVS = new GraphicsBuffer();
 
-        public struct UboVS
-        {
-            public Matrix4x4 projection;
-        }
+        Texture texture;
 
         UboVS uboVS;
         VkPipeline pipelines_solid;
 
         VkPipelineLayout pipelineLayout;
-
+        Pipeline pipeline;
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
 
@@ -87,7 +67,6 @@ namespace SharpGame
 
             CreateGraphicsResources();
 
-            SetupVertexDescriptions();
             PrepareUniformBuffers();
             SetupDescriptorSetLayout();
             PreparePipelines();
@@ -135,25 +114,23 @@ namespace SharpGame
                 VkBufferUsageFlags.IndexBuffer,
                 VkMemoryPropertyFlags.HostCoherent | VkMemoryPropertyFlags.HostCoherent,
                 sizeof(ushort), 4096);
+
+            vertexLayout = new VertexLayout
+            {
+                vertexInputBindings = new []
+                {
+                    new VertexInputBinding(0, (uint)sizeof(ImVertex), VertexInputRate.Vertex)
+                },
+
+                vertexInputAttributes = new[]
+                {
+                    new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
+                    new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
+                    new VertexInputAttribute(0, 2, Format.R8g8b8a8Unorm, 16)
+                }
+            };
+
         }
-
-        void SetupVertexDescriptions()
-        {
-            vertices.bindings.Count = 1;
-            vertices.bindings[0] = Builder.VertexBinding(0, (uint)sizeof(ImVertex), VkVertexInputRate.Vertex);
-
-            vertices.attributes.Count = 3;
-            vertices.attributes[0] = Builder.VertexElement(0, 0, VkFormat.R32g32Sfloat, ImVertex.PositionOffset);
-            vertices.attributes[1] = Builder.VertexElement(0, 1, VkFormat.R32g32Sfloat, ImVertex.UvOffset);
-            vertices.attributes[2] = Builder.VertexElement(0, 2, VkFormat.R8g8b8a8Unorm, ImVertex.ColorOffset);
-
-            vertices.inputState = Builder.VertexInputStateCreateInfo();
-            vertices.inputState.vertexBindingDescriptionCount = vertices.bindings.Count;
-            vertices.inputState.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)vertices.bindings.Data;
-            vertices.inputState.vertexAttributeDescriptionCount = vertices.attributes.Count;
-            vertices.inputState.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)vertices.attributes.Data;
-        }
-
 
         void SetupDescriptorSetLayout()
         {
@@ -218,7 +195,7 @@ namespace SharpGame
                     Graphics.renderPass,
                     0);
 
-            var vertexInputState = vertices.inputState;
+            var vertexInputState = vertexLayout.ToNative();
             pipelineCreateInfo.pVertexInputState = &vertexInputState;
             pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
             pipelineCreateInfo.pRasterizationState = &rasterizationState;
@@ -231,6 +208,8 @@ namespace SharpGame
             pipelineCreateInfo.pStages = (VkPipelineShaderStageCreateInfo*)Unsafe.AsPointer(ref shaderStages);
 
             pipelines_solid = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
+
+            pipeline = new Pipeline();
         }
 
         // Prepare and initialize uniform buffer containing shader uniforms

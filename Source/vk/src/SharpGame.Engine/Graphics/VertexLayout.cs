@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
+using Vulkan;
 
 namespace SharpGame
 {
-    public enum VertexInputRate
+    public enum VertexInputRate : uint
     {
         Vertex = 0,
         Instance = 1
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct VertexInputBinding
     {
         public uint binding;
@@ -25,6 +28,7 @@ namespace SharpGame
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct VertexInputAttribute
     {
         public uint location;
@@ -32,20 +36,24 @@ namespace SharpGame
         public Format format;
         public uint offset;
 
-        public VertexInputAttribute(uint location, uint binding, Format format, uint offset)
+        public VertexInputAttribute(uint bind, uint loc, Format fmt, uint offset)
         {
-            this.location = location;
-            this.binding = binding;
-            this.format = format;
+            binding = bind;
+            location = loc;
+            format = fmt;
             this.offset = offset;
         }
         
     }
 
-    public struct VertexLayout
+    public class VertexLayout
     {
         public VertexInputBinding[] vertexInputBindings;
         public VertexInputAttribute[] vertexInputAttributes;
+
+        public VertexLayout()
+        {
+        }
 
         public VertexLayout(VertexInputBinding[] vertexInputBindings, VertexInputAttribute[] vertexInputAttributes)
         {
@@ -53,13 +61,15 @@ namespace SharpGame
             this.vertexInputAttributes = vertexInputAttributes;
         }
 
-        internal unsafe void ToNative(out Vulkan.VkPipelineVertexInputStateCreateInfo native)
+        public unsafe Vulkan.VkPipelineVertexInputStateCreateInfo ToNative()
         {
-            native = Vulkan.VkPipelineVertexInputStateCreateInfo.New();
+            Vulkan.VkPipelineVertexInputStateCreateInfo native = Builder.VertexInputStateCreateInfo();
             native.vertexBindingDescriptionCount = (uint)vertexInputBindings.Length;
-            native.pVertexBindingDescriptions = (Vulkan.VkVertexInputBindingDescription*)Unsafe.AsPointer(ref vertexInputBindings[0]);
+            native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AllocToPointer(vertexInputBindings);
             native.vertexAttributeDescriptionCount = (uint)vertexInputAttributes.Length;
-            native.pVertexAttributeDescriptions = (Vulkan.VkVertexInputAttributeDescription*)Unsafe.AsPointer(ref vertexInputAttributes[0]);
+            native.pVertexAttributeDescriptions = (Vulkan.VkVertexInputAttributeDescription*)Utilities.AllocToPointer(vertexInputAttributes);
+           
+            return native;
         }
     }
 

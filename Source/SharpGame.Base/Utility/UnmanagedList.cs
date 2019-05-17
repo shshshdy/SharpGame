@@ -16,7 +16,7 @@ namespace SharpGame
         {
             capacity_ = cap;
             var finalSize = cap * Unsafe.SizeOf<T>();
-            ptr_ = Utilities.Allocate(finalSize);
+            ptr_ = Utilities.Alloc(finalSize);
             size_ = 0;
         }
         

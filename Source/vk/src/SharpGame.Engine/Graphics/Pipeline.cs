@@ -37,8 +37,8 @@ namespace SharpGame
         public ref VkPipelineColorBlendStateCreateInfo ColorBlendState => ref colorBlendState;
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
 
-        private VkPipelineVertexInputStateCreateInfo vertexInputState;
-        public ref VkPipelineVertexInputStateCreateInfo VertexInputState => ref vertexInputState;
+        private VertexLayout vertexlayout;
+        public ref VertexLayout Vertexlayout => ref vertexlayout;
 
         public VkPipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
 
@@ -62,7 +62,7 @@ namespace SharpGame
         
         public void Init()
         {
-            VertexInputState = new VkPipelineVertexInputStateCreateInfo();
+            vertexlayout = new VertexLayout();
 
             RasterizationState = new VkPipelineRasterizationStateCreateInfo
             {
@@ -213,19 +213,16 @@ namespace SharpGame
             {
                 VkPipelineShaderStageCreateInfo* shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];
                 uint count = pass.GetShaderStageCreateInfos(shaderStageCreateInfos);
-
                 var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
+                var inputAssemblyStateCreateInfo = InputAssemblyStateCreateInfo(geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
+                var pipelineCreateInfo = GraphicsPipelineCreateInfo(pipelineLayout, renderPass.renderPass, 0);//,
 
-                var inputAssemblyStateCreateInfo = InputAssemblyStateCreateInfo(
-                    geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
-
-                var pipelineCreateInfo = GraphicsPipelineCreateInfo(
-                    pipelineLayout, renderPass.renderPass, 0);//,
+                var vertexInputState = vertexlayout.ToNative();
 
                 pipelineCreateInfo.stageCount = count;
                 pipelineCreateInfo.pStages = shaderStageCreateInfos;
                 pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
-                pipelineCreateInfo.pVertexInputState = (VkPipelineVertexInputStateCreateInfo*)Unsafe.AsPointer(ref vertexInputState);
+                pipelineCreateInfo.pVertexInputState = &vertexInputState;
                 pipelineCreateInfo.pRasterizationState = (VkPipelineRasterizationStateCreateInfo*)Unsafe.AsPointer(ref rasterizationState_);
                 pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
                 pipelineCreateInfo.pMultisampleState = (VkPipelineMultisampleStateCreateInfo*)Unsafe.AsPointer(ref multisampleState);

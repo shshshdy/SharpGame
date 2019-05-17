@@ -272,14 +272,16 @@ namespace SharpGame
             return AllocateAndClear(Unsafe.SizeOf<T>());
         }
 
-        public unsafe static IntPtr Allocate(int sizeInBytes)
+        public unsafe static IntPtr Alloc(int sizeInBytes)
         {
             return Marshal.AllocHGlobal(sizeInBytes);
         }
-        
+
+        public static IntPtr Alloc<T>(int count = 1) => Alloc(SizeOf<T>() * count);
+
         public static IntPtr AllocateAndClear(int sizeInBytes, byte clearValue = 0)
         {
-            var ptr = Allocate(sizeInBytes);
+            var ptr = Alloc(sizeInBytes);
             ClearMemory(ptr, clearValue, sizeInBytes);
             return ptr;
         }
@@ -294,6 +296,82 @@ namespace SharpGame
         {
             Marshal.FreeHGlobal(buffer);
         }
-        
+
+        /// <summary>
+        /// Allocates unmanaged memory and copies the specified structure over.
+        /// </summary>
+        /// <typeparam name="T">Type of structure to copy.</typeparam>
+        /// <param name="value">The value to copy.</param>
+        /// <returns>
+        /// A pointer to the newly allocated memory. This memory must be released using the <see
+        /// cref="Free(IntPtr)"/> method.
+        /// </returns>
+        public static IntPtr AllocToPointer<T>(ref T value) where T : struct
+        {
+            IntPtr ptr = Alloc<T>();
+            Unsafe.Copy(ptr.ToPointer(), ref value);
+            return ptr;
+        }
+
+        /// <summary>
+        /// Allocates unmanaged memory and copies the specified structure over.
+        /// <para>If the value is <c>null</c>, returns <see cref="IntPtr.Zero"/>.</para>
+        /// </summary>
+        /// <typeparam name="T">Type of structure to copy.</typeparam>
+        /// <param name="value">The value to copy.</param>
+        /// <returns>
+        /// A pointer to the newly allocated memory. This memory must be released using the <see
+        /// cref="Free(IntPtr)"/> method.
+        /// </returns>
+        public static IntPtr AllocToPointer<T>(ref T? value) where T : struct
+        {
+            if (!value.HasValue) return IntPtr.Zero;
+
+            IntPtr ptr = Alloc<T>();
+            Unsafe.Write(ptr.ToPointer(), value.Value);
+            return ptr;
+        }
+
+        /// <summary>
+        /// Allocates unmanaged memory and copies the specified structures over.
+        /// <para>If the array is <c>null</c> or empty, returns <see cref="IntPtr.Zero"/>.</para>
+        /// </summary>
+        /// <typeparam name="T">Type of elements to copy.</typeparam>
+        /// <param name="values">The values to copy.</param>
+        /// <returns>
+        /// A pointer to the newly allocated memory. This memory must be released using the <see
+        /// cref="Free(IntPtr)"/> method.
+        /// </returns>
+        public static IntPtr AllocToPointer<T>(T[] values) where T : struct
+        {
+            if (values == null || values.Length == 0) return IntPtr.Zero;
+
+            int structSize = SizeOf<T>();
+            int totalSize = values.Length * structSize;
+            IntPtr ptr = Alloc(totalSize);
+
+            var walk = (byte*)ptr;
+            for (int i = 0; i < values.Length; i++)
+            {
+                Unsafe.Copy(walk, ref values[i]);
+                walk += structSize;
+            }
+
+            return ptr;
+        }
+
+        public static string FromPointer(byte* pointer)
+        {
+            if (pointer == null) return null;
+
+            // Read until null-terminator.
+            byte* walkPtr = pointer;
+            while (*walkPtr != 0) walkPtr++;
+
+            // Decode UTF-8 bytes to string.
+            return Encoding.UTF8.GetString(pointer, (int)(walkPtr - pointer));
+        }
+
+
     }
 }
