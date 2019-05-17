@@ -153,8 +153,8 @@ namespace SharpGame
                         srcColorBlendFactor = VkBlendFactor.SrcAlpha,
                         dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
                         colorBlendOp = VkBlendOp.Add,
-                        srcAlphaBlendFactor = VkBlendFactor.One,
-                        dstAlphaBlendFactor = VkBlendFactor.Zero,
+                        srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
+                        dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
                         alphaBlendOp = VkBlendOp.Add,
                         colorWriteMask = (VkColorComponentFlags)0xf
                     };
@@ -171,7 +171,7 @@ namespace SharpGame
                         dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
                         colorBlendOp = VkBlendOp.Add,
                         srcAlphaBlendFactor = VkBlendFactor.One,
-                        dstAlphaBlendFactor = VkBlendFactor.Zero,
+                        dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
                         alphaBlendOp = VkBlendOp.Add,
                         colorWriteMask = (VkColorComponentFlags)0xf
                     };

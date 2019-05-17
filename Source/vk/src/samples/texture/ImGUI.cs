@@ -187,10 +187,10 @@ namespace SharpGame
                 Builder.ColorBlendAttachmentState((VkColorComponentFlags)0xf, true);
             blendAttachmentState.alphaBlendOp = VkBlendOp.Add;
             blendAttachmentState.colorBlendOp = VkBlendOp.Add;
-            blendAttachmentState.srcColorBlendFactor = VkBlendFactor.One;
-            blendAttachmentState.dstColorBlendFactor = VkBlendFactor.OneMinusDstAlpha;
-            blendAttachmentState.srcAlphaBlendFactor = VkBlendFactor.One;
-            blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.Zero;
+            blendAttachmentState.srcColorBlendFactor = VkBlendFactor.SrcAlpha;
+            blendAttachmentState.dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha;
+            blendAttachmentState.srcAlphaBlendFactor = VkBlendFactor.SrcAlpha;
+            blendAttachmentState.dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha;
 
             var colorBlendState = Builder.ColorBlendStateCreateInfo(1, ref blendAttachmentState);
             var depthStencilState = Builder.DepthStencilStateCreateInfo(false, false, VkCompareOp.LessOrEqual);
