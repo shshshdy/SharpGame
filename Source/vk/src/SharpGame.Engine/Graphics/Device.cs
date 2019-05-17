@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
@@ -12,7 +13,7 @@ namespace SharpGame
     public unsafe class Device
     {
         public const ulong DEFAULT_FENCE_TIMEOUT = 100000000000;
-
+        public static VkInstance VkInstance { get; private set; }
         public static VkPhysicalDevice PhysicalDevice { get; private set; }
         public static VkPhysicalDeviceProperties Properties { get; private set; }
         public static VkPhysicalDeviceFeatures Features { get; private set; }
@@ -27,8 +28,97 @@ namespace SharpGame
         private static VkDevice _logicalDevice;
         private static VkPipelineCache _pipelineCache;
 
-        public static void Init(VkPhysicalDevice physicalDevice)
+        static DebugReportCallbackExt debugReportCallbackExt;
+
+        public static VkResult CreateInstance(Settings settings)
         {
+            bool enableValidation = settings.Validation;
+
+            VkApplicationInfo appInfo = new VkApplicationInfo()
+            {
+                sType = VkStructureType.ApplicationInfo,
+                apiVersion = new Version(1, 0, 0),
+                //pApplicationName = Name,
+                //pEngineName = Name,
+            };
+
+            NativeList<IntPtr> instanceExtensions = new NativeList<IntPtr>(2);
+            instanceExtensions.Add(Strings.VK_KHR_SURFACE_EXTENSION_NAME);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                instanceExtensions.Add(Strings.VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                instanceExtensions.Add(Strings.VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException();
+            }
+
+            VkInstanceCreateInfo instanceCreateInfo = VkInstanceCreateInfo.New();
+            instanceCreateInfo.pApplicationInfo = &appInfo;
+
+            if (instanceExtensions.Count > 0)
+            {
+                if (enableValidation)
+                {
+                    instanceExtensions.Add(Strings.VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+                }
+                instanceCreateInfo.enabledExtensionCount = instanceExtensions.Count;
+                instanceCreateInfo.ppEnabledExtensionNames = (byte**)instanceExtensions.Data;
+            }
+
+            if (enableValidation)
+            {
+                NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr>(1);
+                enabledLayerNames.Add(Strings.StandardValidationLayeName);
+                instanceCreateInfo.enabledLayerCount = enabledLayerNames.Count;
+                instanceCreateInfo.ppEnabledLayerNames = (byte**)enabledLayerNames.Data;
+            }
+
+            VkInstance instance;
+            VkResult result = vkCreateInstance(&instanceCreateInfo, null, &instance);
+            VkInstance = instance;
+
+            if (settings.Validation)
+            {
+                debugReportCallbackExt = CreateDebugReportCallback();
+            }
+            return result;
+        }
+
+
+        public static void Init(
+            VkPhysicalDeviceFeatures enabledFeatures,
+            NativeList<IntPtr> enabledExtensions,
+            bool useSwapChain = true,
+            VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute)
+        {
+            // Physical Device
+            uint gpuCount = 0;
+            Util.CheckResult(vkEnumeratePhysicalDevices(VkInstance, &gpuCount, null));
+            Debug.Assert(gpuCount > 0);
+            // Enumerate devices
+            IntPtr* physicalDevices = stackalloc IntPtr[(int)gpuCount];
+
+            VkResult err = vkEnumeratePhysicalDevices(VkInstance, &gpuCount, (VkPhysicalDevice*)physicalDevices);
+            if (err != VkResult.Success)
+            {
+                throw new InvalidOperationException("Could not enumerate physical devices.");
+            }
+
+            // GPU selection
+
+            // Select physical Device to be used for the Vulkan example
+            // Defaults to the first Device unless specified by command line
+
+            uint selectedDevice = 0;
+            // TODO: Implement arg parsing, etc.
+
+            var physicalDevice = ((VkPhysicalDevice*)physicalDevices)[selectedDevice];
+          
             Debug.Assert(physicalDevice.Handle != IntPtr.Zero);
             PhysicalDevice = physicalDevice;
 
@@ -72,10 +162,18 @@ namespace SharpGame
                     }
                 }
             }
+
+
+            VkResult res = Device.CreateLogicalDevice(enabledFeatures, enabledExtensions);
+
+            if (res != VkResult.Success)
+            {
+                throw new InvalidOperationException("Could not create Vulkan Device.");
+            }
         }
 
 
-        public static VkResult CreateLogicalDevice(
+        static VkResult CreateLogicalDevice(
             VkPhysicalDeviceFeatures enabledFeatures,
             NativeList<IntPtr> enabledExtensions,
             bool useSwapChain = true,
@@ -182,6 +280,24 @@ namespace SharpGame
 
         }
 
+        private static DebugReportCallbackExt CreateDebugReportCallback()
+        {
+            // Attach debug callback.
+            var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
+                VkDebugReportFlagsEXT.InformationEXT |
+                VkDebugReportFlagsEXT.WarningEXT |
+                VkDebugReportFlagsEXT.PerformanceWarningEXT |
+                VkDebugReportFlagsEXT.ErrorEXT |
+                VkDebugReportFlagsEXT.DebugEXT,
+                (args) =>
+                {
+                    Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}] {args.Message}");
+                    return args.Flags.HasFlag(DebugReportFlagsExt.Error);
+                }, IntPtr.Zero
+            );
+            return new DebugReportCallbackExt(VkInstance, ref debugReportCreateInfo);
+        }
+
         private static uint GetQueueFamilyIndex(VkQueueFlags queueFlags)
         {
             // Dedicated queue for compute
@@ -223,6 +339,12 @@ namespace SharpGame
             }
 
             throw new InvalidOperationException("Could not find a matching queue family index");
+        }
+
+        public static void Shutdown()
+        {
+
+            debugReportCallbackExt?.Dispose();
         }
 
         public static VkCommandPool CreateCommandPool(

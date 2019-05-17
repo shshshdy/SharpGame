@@ -35,6 +35,7 @@ namespace SharpGame
     public unsafe partial class Graphics : System<Graphics>
     {
         public Settings Settings { get; } = new Settings();
+
         public VkInstance VkInstance { get; protected set; }
         public VkPhysicalDevice physicalDevice { get; protected set; }
         public VkPhysicalDeviceFeatures enabledFeatures { get; protected set; }
@@ -74,54 +75,26 @@ namespace SharpGame
 
         public uint currentBuffer;
 
-        DebugReportCallbackExt debugReportCallbackExt;
         public Graphics()
         {
+            Settings.Validation = false;
+
             VkResult err;
-            err = CreateInstance(false);
+            err = Device.CreateInstance(Settings);
             if (err != VkResult.Success)
             {
                 throw new InvalidOperationException("Could not create Vulkan instance. Error: " + err);
             }
 
-            if (Settings.Validation)
-            {
-                debugReportCallbackExt = CreateDebugReportCallback();
+            VkInstance = Device.VkInstance;
 
-            }
-
-            // Physical Device
-            uint gpuCount = 0;
-            Util.CheckResult(vkEnumeratePhysicalDevices(VkInstance, &gpuCount, null));
-            Debug.Assert(gpuCount > 0);
-            // Enumerate devices
-            IntPtr* physicalDevices = stackalloc IntPtr[(int)gpuCount];
-            err = vkEnumeratePhysicalDevices(VkInstance, &gpuCount, (VkPhysicalDevice*)physicalDevices);
-            if (err != VkResult.Success)
-            {
-                throw new InvalidOperationException("Could not enumerate physical devices.");
-            }
-
-            // GPU selection
-
-            // Select physical Device to be used for the Vulkan example
-            // Defaults to the first Device unless specified by command line
-
-            uint selectedDevice = 0;
-            // TODO: Implement arg parsing, etc.
-
-            physicalDevice = ((VkPhysicalDevice*)physicalDevices)[selectedDevice];
 
             // Vulkan Device creation
             // This is handled by a separate class that gets a logical Device representation
             // and encapsulates functions related to a Device
-            Device.Init(physicalDevice);
-            VkResult res = Device.CreateLogicalDevice(enabledFeatures, EnabledExtensions);
-            if (res != VkResult.Success)
-            {
-                throw new InvalidOperationException("Could not create Vulkan Device.");
-            }
+            Device.Init(enabledFeatures, EnabledExtensions);
 
+            physicalDevice = Device.PhysicalDevice;
             device = Device.LogicalDevice;
 
             // Get a graphics queue from the Device
@@ -161,86 +134,15 @@ namespace SharpGame
             submitInfo.pSignalSemaphores = &GetSemaphoresPtr()->RenderComplete;
         }
 
-        private DebugReportCallbackExt CreateDebugReportCallback()
-        {
-            // Attach debug callback.
-            var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
-                VkDebugReportFlagsEXT.InformationEXT|
-                VkDebugReportFlagsEXT.WarningEXT |
-                VkDebugReportFlagsEXT.PerformanceWarningEXT |
-                VkDebugReportFlagsEXT.ErrorEXT |
-                VkDebugReportFlagsEXT.DebugEXT,
-                args =>
-                {
-                    Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}] {args.Message}");
-                    return args.Flags.HasFlag(DebugReportFlagsExt.Error);
-                }
-            );
-            return new DebugReportCallbackExt(VkInstance, ref debugReportCreateInfo);
-        }
 
         protected override void Destroy()
         {
-            debugReportCallbackExt?.Dispose();
+            Device.Shutdown();
 
             base.Destroy();
 
         }
-        
-        private VkResult CreateInstance(bool enableValidation)
-        {
-            Settings.Validation = enableValidation;
 
-            VkApplicationInfo appInfo = new VkApplicationInfo()
-            {
-                sType = VkStructureType.ApplicationInfo,
-                apiVersion = new Version(1, 0, 0),
-                //pApplicationName = Name,
-                //pEngineName = Name,
-            };
-
-            NativeList<IntPtr> instanceExtensions = new NativeList<IntPtr>(2);
-            instanceExtensions.Add(Strings.VK_KHR_SURFACE_EXTENSION_NAME);
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                instanceExtensions.Add(Strings.VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                instanceExtensions.Add(Strings.VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
-            }
-            else
-            {
-                throw new PlatformNotSupportedException();
-            }
-
-            VkInstanceCreateInfo instanceCreateInfo = VkInstanceCreateInfo.New();
-            instanceCreateInfo.pApplicationInfo = &appInfo;
-
-            if (instanceExtensions.Count > 0)
-            {
-                if (enableValidation)
-                {
-                    instanceExtensions.Add(Strings.VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-                }
-                instanceCreateInfo.enabledExtensionCount = instanceExtensions.Count;
-                instanceCreateInfo.ppEnabledExtensionNames = (byte**)instanceExtensions.Data;
-            }
-            
-            if (enableValidation)
-            {
-                NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr>(1);
-                enabledLayerNames.Add(Strings.StandardValidationLayeName);
-                instanceCreateInfo.enabledLayerCount = enabledLayerNames.Count;
-                instanceCreateInfo.ppEnabledLayerNames = (byte**)enabledLayerNames.Data;
-            }
-
-            VkInstance instance;
-            VkResult result = vkCreateInstance(&instanceCreateInfo, null, &instance);
-            VkInstance = instance;
-            return result;
-        }
-        
         protected virtual void SetupFrameBuffer()
         {
             using (NativeList<VkImageView> attachments = new NativeList<VkImageView>(2))
