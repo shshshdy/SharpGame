@@ -42,9 +42,9 @@ namespace SharpGame
 
         public VkPipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
 
-        public VkPolygonMode FillMode { get => rasterizationState_.polygonMode; set => rasterizationState_.polygonMode = value; }
-        public VkCullModeFlags CullMode { get => rasterizationState_.cullMode; set => rasterizationState_.cullMode = value; }
-        public VkFrontFace FrontFace { get => rasterizationState_.frontFace; set => rasterizationState_.frontFace = value; }
+        public PolygonMode FillMode { get => rasterizationState_.polygonMode; set => rasterizationState_.polygonMode = value; }
+        public CullMode CullMode { get => rasterizationState_.cullMode; set => rasterizationState_.cullMode = value; }
+        public FrontFace FrontFace { get => rasterizationState_.frontFace; set => rasterizationState_.frontFace = value; }
 
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
@@ -66,9 +66,9 @@ namespace SharpGame
 
             RasterizationState = new RasterizationStateInfo
             {
-                polygonMode = VkPolygonMode.Fill,
-                cullMode = VkCullModeFlags.Back,
-                frontFace = VkFrontFace.CounterClockwise,
+                polygonMode = PolygonMode.Fill,
+                cullMode = CullMode.Back,
+                frontFace = FrontFace.CounterClockwise,
                 lineWidth = 1.0f
             };
 

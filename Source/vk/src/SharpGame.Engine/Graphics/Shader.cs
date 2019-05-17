@@ -45,6 +45,26 @@ namespace SharpGame
             {
                 return GetPass(0);
             }
+
+            set
+            {
+                if(value.passID != 0)
+                {
+                    Log.Warn("Not a main pass.");
+                    return;
+                }
+
+                for(int i = 0; i < Passes.Count; i++)
+                {
+                    if(Passes[i].passID == 0)
+                    {
+                        Passes[i].Dispose();
+                        Passes[i] = value;
+                    }
+                }
+
+                AddPass(value);
+            }
         }
 
         public Pass GetPass(int id)
@@ -168,32 +188,32 @@ namespace SharpGame
         {
             if (!string.IsNullOrEmpty(vertexShader))
             {
-                VertexShader = new ShaderModule(VkShaderStageFlags.Vertex, vertexShader);
+                VertexShader = new ShaderModule(ShaderStage.Vertex, vertexShader);
             }
 
             if (!string.IsNullOrEmpty(pixelShader))
             {
-                PixelShader = new ShaderModule(VkShaderStageFlags.Fragment, pixelShader);
+                PixelShader = new ShaderModule(ShaderStage.Fragment, pixelShader);
             }
 
             if (!string.IsNullOrEmpty(geometryShader))
             {
-                GeometryShader = new ShaderModule(VkShaderStageFlags.Geometry, geometryShader);
+                GeometryShader = new ShaderModule(ShaderStage.Geometry, geometryShader);
             }
 
             if (!string.IsNullOrEmpty(hullShader))
             {
-                HullShader = new ShaderModule(VkShaderStageFlags.TessellationControl, hullShader);
+                HullShader = new ShaderModule(ShaderStage.TessellationControl, hullShader);
             }
 
             if (!string.IsNullOrEmpty(domainShader))
             {
-                DomainShader = new ShaderModule(VkShaderStageFlags.TessellationEvaluation, domainShader);
+                DomainShader = new ShaderModule(ShaderStage.TessellationEvaluation, domainShader);
             }
 
             if (!string.IsNullOrEmpty(computeShader))
             {
-                ComputeShader = new ShaderModule(VkShaderStageFlags.Compute, computeShader);
+                ComputeShader = new ShaderModule(ShaderStage.Compute, computeShader);
             }
 
             Build();
@@ -205,22 +225,22 @@ namespace SharpGame
             {
                 switch (sm.Stage)
                 {
-                    case VkShaderStageFlags.Vertex:
+                    case ShaderStage.Vertex:
                         VertexShader = sm;
                         break;
-                    case VkShaderStageFlags.Fragment:
+                    case ShaderStage.Fragment:
                         PixelShader = sm;
                         break;
-                    case VkShaderStageFlags.Geometry:
+                    case ShaderStage.Geometry:
                         GeometryShader = sm;
                         break;
-                    case VkShaderStageFlags.TessellationControl:
+                    case ShaderStage.TessellationControl:
                         HullShader = sm;
                         break;
-                    case VkShaderStageFlags.TessellationEvaluation:
+                    case ShaderStage.TessellationEvaluation:
                         DomainShader = sm;
                         break;
-                    case VkShaderStageFlags.Compute:
+                    case ShaderStage.Compute:
                         ComputeShader = sm;
                         break;
 
@@ -274,7 +294,7 @@ namespace SharpGame
                 if(sm != null)
                 {
                     var shaderStage = VkPipelineShaderStageCreateInfo.New();
-                    shaderStage.stage = sm.Stage;
+                    shaderStage.stage = (VkShaderStageFlags)sm.Stage;
                     shaderStage.module = sm.shaderModule;
                     shaderStage.pName = Strings.main;// sm.FuncName;
                     shaderStageCreateInfo[count++] = shaderStage;

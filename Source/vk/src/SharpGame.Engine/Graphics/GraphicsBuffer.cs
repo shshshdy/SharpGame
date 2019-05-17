@@ -168,7 +168,7 @@ namespace SharpGame
             return Create(bufferUsages, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, Unsafe.SizeOf<T>(), count);
         }
 
-        public static GraphicsBuffer CreateUniform<T>(int count = 1) where T : struct
+        public static GraphicsBuffer CreateUniformBuffer<T>(int count = 1) where T : struct
         {
             return CreateDynamic<T>(VkBufferUsageFlags.UniformBuffer, count);
         }

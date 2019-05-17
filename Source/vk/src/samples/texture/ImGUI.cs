@@ -18,25 +18,17 @@ namespace SharpGame
 
     public unsafe class ImGUI : Application, IDisposable
     {
-        VertexLayout vertexLayout;
-
         GraphicsBuffer vertexBuffer = new GraphicsBuffer();
         GraphicsBuffer indexBuffer = new GraphicsBuffer();
         GraphicsBuffer uniformBufferVS = new GraphicsBuffer();
-
         Texture texture;
-
         UboVS uboVS;
-
         Shader uiShader;
         Pipeline pipeline;
-
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
 
-        private const uint VERTEX_BUFFER_BIND_ID = 0;
-
-        private IntPtr _fontAtlasID = (IntPtr)1;
+        private IntPtr fontAtlasID = (IntPtr)1;
 
         public ImGUI()
         {
@@ -60,6 +52,7 @@ namespace SharpGame
             resourceSet = new ResourceSet(resourceLayout, uniformBufferVS, texture);
 
             ImGuiStylePtr style = ImGui.GetStyle();
+            style.WindowRounding = 2;
 
             SetOpenTKKeyMappings();
 
@@ -83,45 +76,32 @@ namespace SharpGame
 
         void CreateGraphicsResources()
         {
-            // Create buffers
-            // For the sake of simplicity we won't stage the vertex data to the gpu memory
-            // ImVertex buffer
-            vertexBuffer = GraphicsBuffer.Create(
-                VkBufferUsageFlags.VertexBuffer,
-                VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                sizeof(Pos2dTexColorVertex), 4096);
-
-            // Index buffer
-            indexBuffer = GraphicsBuffer.Create(
-                VkBufferUsageFlags.IndexBuffer,
-                VkMemoryPropertyFlags.HostCoherent | VkMemoryPropertyFlags.HostCoherent,
-                sizeof(ushort), 4096);
-
-            uniformBufferVS = GraphicsBuffer.CreateUniform<UboVS>();
-
-            vertexLayout = Pos2dTexColorVertex.Layout;
-            
-            resourceLayout = new ResourceLayout(
-                    Builder.DescriptorSetLayoutBinding(VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex, 0),
-                    Builder.DescriptorSetLayoutBinding(VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment, 1)
-                    );
+            vertexBuffer = GraphicsBuffer.CreateDynamic<Pos2dTexColorVertex>(VkBufferUsageFlags.VertexBuffer, 4096);
+            indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(VkBufferUsageFlags.IndexBuffer, 4096);
+            uniformBufferVS = GraphicsBuffer.CreateUniformBuffer<UboVS>();
+                        
+            resourceLayout = new ResourceLayout
+            (
+                new ResourceLayoutBinding(DescriptorType.UniformBuffer, ShaderStage.Vertex, 0),
+                new ResourceLayoutBinding(DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
+            );
 
             uiShader = new Shader
-            (
-                new Pass("shaders/texture/ImGui.vert.spv", "shaders/texture/ImGui.frag.spv")
+            {
+                Main = new Pass("shaders/texture/ImGui.vert.spv", "shaders/texture/ImGui.frag.spv")
                 {
                     ResourceLayout = resourceLayout
                 }
-            );
+            };
 
             pipeline = new Pipeline
             {
-                CullMode = VkCullModeFlags.None,
+                CullMode = CullMode.None,
                 DepthTestEnable = false,
                 DepthWriteEnable = false,
                 BlendMode = BlendMode.Alpha,
                 DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-                VertexLayout = vertexLayout
+                VertexLayout = Pos2dTexColorVertex.Layout
             };
         }
 
@@ -130,9 +110,7 @@ namespace SharpGame
         {
             var localUboVS = uboVS;
 
-            uniformBufferVS = GraphicsBuffer.Create(VkBufferUsageFlags.UniformBuffer,
-                VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                sizeof(UboVS), 1, &localUboVS);
+            uniformBufferVS = GraphicsBuffer.CreateUniformBuffer<UboVS>();
 
             updateUniformBuffers();
         }
@@ -155,7 +133,7 @@ namespace SharpGame
             var io = ImGui.GetIO();
             io.Fonts.GetTexDataAsRGBA32(out byte* out_pixels, out int out_width, out int out_height, out int out_bytes_per_pixel);
             this.texture = graphics.createTexture((uint)out_width, (uint)out_height, (uint)out_bytes_per_pixel, out_pixels);
-            io.Fonts.SetTexID(_fontAtlasID);
+            io.Fonts.SetTexID(fontAtlasID);
             io.Fonts.ClearTexData();
         }
 
@@ -249,7 +227,7 @@ namespace SharpGame
             if (!prepared)
                 return;
 
-            //SetPerFrameImGuiData(Time.Delta);
+            SetPerFrameImGuiData(Time.Delta);
 
             UpdateImGuiInput();
 
@@ -320,7 +298,7 @@ namespace SharpGame
             vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint.Graphics, pipelines_solid);
 
             ulong offsets = 0;
-            vkCmdBindVertexBuffers(cmdBuffer, VERTEX_BUFFER_BIND_ID, 1, ref vertexBuffer.buffer, &offsets);
+            vkCmdBindVertexBuffers(cmdBuffer, 0, 1, ref vertexBuffer.buffer, &offsets);
             vkCmdBindIndexBuffer(cmdBuffer, indexBuffer.buffer, 0, VkIndexType.Uint16);
 
             draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
@@ -341,7 +319,7 @@ namespace SharpGame
                     {
                         if (pcmd.TextureId != IntPtr.Zero)
                         {
-                            if (pcmd.TextureId == _fontAtlasID)
+                            if (pcmd.TextureId == fontAtlasID)
                             {
                                 //    cl.SetGraphicsResourceSet(1, _fontTextureResourceSet);
                             }

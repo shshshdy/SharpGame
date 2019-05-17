@@ -8,12 +8,12 @@ namespace SharpGame
     public struct RasterizationStateInfo
     {
         public uint flags;
-        public VkBool32 depthClampEnable;
-        public VkBool32 rasterizerDiscardEnable;
-        public VkPolygonMode polygonMode;
-        public VkCullModeFlags cullMode;
-        public VkFrontFace frontFace;
-        public VkBool32 depthBiasEnable;
+        public bool depthClampEnable;
+        public bool rasterizerDiscardEnable;
+        public PolygonMode polygonMode;
+        public CullMode cullMode;
+        public FrontFace frontFace;
+        public bool depthBiasEnable;
         public float depthBiasConstantFactor;
         public float depthBiasClamp;
         public float depthBiasSlopeFactor;
@@ -24,9 +24,9 @@ namespace SharpGame
             rasterizationStateCreateInfo = VkPipelineRasterizationStateCreateInfo.New();
             rasterizationStateCreateInfo.depthClampEnable = depthClampEnable;
             rasterizationStateCreateInfo.rasterizerDiscardEnable = rasterizerDiscardEnable;
-            rasterizationStateCreateInfo.polygonMode = polygonMode;
-            rasterizationStateCreateInfo.cullMode = cullMode;
-            rasterizationStateCreateInfo.frontFace = frontFace;
+            rasterizationStateCreateInfo.polygonMode = (VkPolygonMode)polygonMode;
+            rasterizationStateCreateInfo.cullMode = (VkCullModeFlags)cullMode;
+            rasterizationStateCreateInfo.frontFace = (VkFrontFace)frontFace;
             rasterizationStateCreateInfo.depthBiasEnable = depthBiasEnable;
             rasterizationStateCreateInfo.depthBiasConstantFactor = depthBiasConstantFactor;
             rasterizationStateCreateInfo.depthBiasClamp = depthBiasClamp;

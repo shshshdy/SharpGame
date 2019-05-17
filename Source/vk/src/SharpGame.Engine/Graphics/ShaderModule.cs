@@ -8,6 +8,20 @@ using Vulkan;
 
 namespace SharpGame
 {
+    [Flags]
+    public enum ShaderStage
+    {
+        None = 0,
+        Vertex = 1,
+        TessellationControl = 2,
+        TessellationEvaluation = 4,
+        Geometry = 8,
+        Fragment = 16,
+        AllGraphics = 31,
+        Compute = 32,
+        All = int.MaxValue
+    }
+
     public struct BlockMember
     {
         public string name;
@@ -45,7 +59,7 @@ namespace SharpGame
     public class ShaderModule : Resource
     {
         [DataMember]
-        public VkShaderStageFlags Stage { get; set; }
+        public ShaderStage Stage { get; set; }
         [DataMember]
         public string FuncName { get; set; }
         [DataMember]
@@ -60,7 +74,7 @@ namespace SharpGame
         {
         }
 
-        public ShaderModule(VkShaderStageFlags stage, string fileName, string funcName = "main")
+        public ShaderModule(ShaderStage stage, string fileName, string funcName = "main")
         {
             Stage = stage;
             FileName = fileName;
