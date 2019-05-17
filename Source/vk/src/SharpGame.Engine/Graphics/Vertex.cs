@@ -39,8 +39,8 @@ namespace SharpGame
             new[]
             {
                 new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-                new VertexInputAttribute(1, 0, Format.R32g32b32Sfloat, 12),
-                new VertexInputAttribute(2, 0, Format.R32g32Sfloat, 24)
+                new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
+                new VertexInputAttribute(0, 2, Format.R32g32Sfloat, 24)
             }
         );
     }
@@ -61,7 +61,7 @@ namespace SharpGame
             new[]
             {
                 new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-                new VertexInputAttribute(2, 0, Format.R8g8b8a8Unorm, 12)
+                new VertexInputAttribute(0, 1, Format.R8g8b8a8Unorm, 12)
             }
         );
     }
@@ -83,8 +83,8 @@ namespace SharpGame
             new[]
             {
                 new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
-                new VertexInputAttribute(1, 0, Format.R32g32Sfloat, 8),
-                new VertexInputAttribute(2, 0, Format.R8g8b8a8Unorm, 16)
+                new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
+                new VertexInputAttribute(0, 2, Format.R8g8b8a8Unorm, 16)
             }
         );
     }

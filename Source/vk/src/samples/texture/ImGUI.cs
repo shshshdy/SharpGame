@@ -54,9 +54,7 @@ namespace SharpGame
             ImGui.GetIO().Fonts.AddFontDefault();
 
             CreateGraphicsResources();
-
-            PrepareUniformBuffers();
-            SetupDescriptorSetLayout();
+            
             PreparePipelines();
 
             RecreateFontDeviceTexture();
@@ -103,25 +101,10 @@ namespace SharpGame
                 VkMemoryPropertyFlags.HostCoherent | VkMemoryPropertyFlags.HostCoherent,
                 sizeof(ushort), 4096);
 
-            vertexLayout = new VertexLayout
-            {
-                bindings = new []
-                {
-                    new VertexInputBinding(0, (uint)sizeof(Pos2dTexColorVertex), VertexInputRate.Vertex)
-                },
+            uniformBufferVS = GraphicsBuffer.CreateUniform<UboVS>();
 
-                attributes = new[]
-                {
-                    new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
-                    new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
-                    new VertexInputAttribute(0, 2, Format.R8g8b8a8Unorm, 16)
-                }
-            };
-
-        }
-
-        void SetupDescriptorSetLayout()
-        {
+            vertexLayout = Pos2dTexColorVertex.Layout;
+            
             resourceLayout = new ResourceLayout(
                     Builder.DescriptorSetLayoutBinding(VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex, 0),
                     Builder.DescriptorSetLayoutBinding(VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment, 1)
@@ -206,7 +189,7 @@ namespace SharpGame
             var localUboVS = uboVS;
 
             uniformBufferVS = GraphicsBuffer.Create(VkBufferUsageFlags.UniformBuffer,
-                VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,              
+                VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
                 sizeof(UboVS), 1, &localUboVS);
 
             updateUniformBuffers();
