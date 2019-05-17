@@ -41,7 +41,10 @@ namespace SharpGame
 
     public class ResourceLayout : IDisposable
     {
-        internal VkDescriptorSetLayoutBinding[] bindings;
+        public ResourceLayoutBinding[] Bindings { get; set; }
+
+
+        private VkDescriptorSetLayoutBinding[] bindings;
 
         public VkDescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
@@ -53,6 +56,8 @@ namespace SharpGame
 
         public ResourceLayout(params ResourceLayoutBinding[] bindings)
         {
+            Bindings = bindings;
+
             this.bindings = new VkDescriptorSetLayoutBinding[bindings.Length];
             for(int i = 0; i < bindings.Length; i++)
             {
@@ -66,13 +71,7 @@ namespace SharpGame
             }
             Build();
         }
-
-        public ResourceLayout(params VkDescriptorSetLayoutBinding[] bindings)
-        {
-            this.bindings = bindings;
-            Build();
-        }
-
+        
         public void Dispose()
         {
             VulkanNative.vkDestroyDescriptorSetLayout(Graphics.device, descriptorSetLayout, IntPtr.Zero);

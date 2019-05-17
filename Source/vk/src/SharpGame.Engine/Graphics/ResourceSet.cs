@@ -63,37 +63,36 @@ namespace SharpGame
 
         public ResourceSet Bind(uint dstBinding, IBindable bindable)
         {
-            var descriptorType = resourceLayout.bindings[dstBinding].descriptorType;
+            var descriptorType = resourceLayout.Bindings[dstBinding].descriptorType;
             switch(descriptorType)
             {
-                case VkDescriptorType.Sampler:
+                case DescriptorType.Sampler:
                     break;
-                case VkDescriptorType.CombinedImageSampler:
+                case DescriptorType.CombinedImageSampler:
                     var texture = bindable as Texture;
-                    writeDescriptorSets[dstBinding] = WriteDescriptorSet(descriptorSet, descriptorType,
+                    writeDescriptorSets[dstBinding] = WriteDescriptorSet(descriptorSet, (VkDescriptorType)descriptorType,
                         dstBinding, ref texture.descriptor, 1);
                     break;
-                case VkDescriptorType.SampledImage:
+                case DescriptorType.SampledImage:
                     break;
-                case VkDescriptorType.StorageImage:
-                    break;
-
-                case VkDescriptorType.UniformTexelBuffer:
-                    break;
-                case VkDescriptorType.StorageTexelBuffer:
+                case DescriptorType.StorageImage:
                     break;
 
+                case DescriptorType.UniformTexelBuffer:
+                    break;
+                case DescriptorType.StorageTexelBuffer:
+                    break;
 
-                case VkDescriptorType.UniformBuffer:
-                case VkDescriptorType.StorageBuffer:
-                case VkDescriptorType.UniformBufferDynamic:
-                case VkDescriptorType.StorageBufferDynamic:
+                case DescriptorType.UniformBuffer:
+                case DescriptorType.StorageBuffer:
+                case DescriptorType.UniformBufferDynamic:
+                case DescriptorType.StorageBufferDynamic:
                     var buffer = bindable as GraphicsBuffer;                    
                     writeDescriptorSets[dstBinding] = WriteDescriptorSet(descriptorSet,
-                        descriptorType, dstBinding, ref buffer.descriptor, 1);
+                        (VkDescriptorType)descriptorType, dstBinding, ref buffer.descriptor, 1);
                     
                     break;
-                case VkDescriptorType.InputAttachment:
+                case DescriptorType.InputAttachment:
                     break;
             }
             return this;

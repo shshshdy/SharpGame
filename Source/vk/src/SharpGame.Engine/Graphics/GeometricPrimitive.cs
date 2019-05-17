@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Vulkan;
 
 namespace SharpGame
-{/*
+{
     public class GeometricPrimitive
     {
         public static Geometry CreateCube(float width, float height, float depth)
@@ -69,10 +69,10 @@ namespace SharpGame
                 VertexLayout = PosNormTex.Layout
             };
 
-            geom.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, indices.Length);
+            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, indices.Length);
             return geom;
         }
 
 
-    }*/
+    }
 }

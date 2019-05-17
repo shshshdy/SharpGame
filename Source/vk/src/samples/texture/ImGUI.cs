@@ -132,7 +132,7 @@ namespace SharpGame
         {
             var io = ImGui.GetIO();
             io.Fonts.GetTexDataAsRGBA32(out byte* out_pixels, out int out_width, out int out_height, out int out_bytes_per_pixel);
-            this.texture = graphics.createTexture((uint)out_width, (uint)out_height, (uint)out_bytes_per_pixel, out_pixels);
+            this.texture = Texture2D.Create((uint)out_width, (uint)out_height, (uint)out_bytes_per_pixel, out_pixels);
             io.Fonts.SetTexID(fontAtlasID);
             io.Fonts.ClearTexData();
         }
@@ -173,7 +173,7 @@ namespace SharpGame
 
         protected override void buildCommandBuffers()
         {
-            VkCommandBufferBeginInfo cmdBufInfo = Builder.CommandBufferBeginInfo();
+            //VkCommandBufferBeginInfo cmdBufInfo = Builder.CommandBufferBeginInfo();
 
             FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
             clearValues.First.color = defaultClearColor;
@@ -189,37 +189,42 @@ namespace SharpGame
             renderPassBeginInfo.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues);
 
             //for (int i = 0; i < drawCmdBuffers.Count; ++i)
-           
-            var cmdBuffer = Graphics.drawCmdBuffers[graphics.currentBuffer];
+
+            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;// Graphics.drawCmdBuffers[graphics.currentBuffer];
             {
                 // Set target frame buffer
                 renderPassBeginInfo.framebuffer = Graphics.frameBuffers[graphics.currentBuffer];
 
-                Util.CheckResult(vkBeginCommandBuffer(cmdBuffer, &cmdBufInfo));
+                //Util.CheckResult(vkBeginCommandBuffer(cmdBuffer.commandBuffer, &cmdBufInfo));
+                cmdBuffer.Begin();
 
-                vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VkSubpassContents.Inline);
+                //vkCmdBeginRenderPass(cmdBuffer.commandBuffer, &renderPassBeginInfo, VkSubpassContents.Inline);
+                cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
 
                 VkViewport viewport = Builder.Viewport((float)width, (float)height, 0.0f, 1.0f);
-                vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
-
+                //vkCmdSetViewport(cmdBuffer.commandBuffer, 0, 1, &viewport);
+                cmdBuffer.SetViewport(ref viewport);
                 VkRect2D scissor = Builder.Rect2D(0, 0, width, height);
-                vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+                //vkCmdSetScissor(cmdBuffer.commandBuffer, 0, 1, &scissor);
+                cmdBuffer.SetScissor(ref scissor);
 
                 RenderImDrawData(ImGui.GetDrawData());
 
-                vkCmdEndRenderPass(cmdBuffer);
+                //vkCmdEndRenderPass(cmdBuffer.commandBuffer);
+                cmdBuffer.EndRenderPass();
 
-                Util.CheckResult(vkEndCommandBuffer(cmdBuffer));
+                //Util.CheckResult(vkEndCommandBuffer(cmdBuffer.commandBuffer));
+                cmdBuffer.End();
             }
         }
 
         void draw()
         {
-            graphics.prepareFrame();
+            graphics.BeginRender();
 
             buildCommandBuffers();
 
-            graphics.submitFrame();
+            graphics.EndRender();
         }
 
         protected override void render()
@@ -260,15 +265,13 @@ namespace SharpGame
             if (draw_data.TotalVtxCount*sizeof(ImDrawVert) > (int)vertexBuffer.size)
             {
                 vertexBuffer.Dispose();
-                vertexBuffer = GraphicsBuffer.Create(VkBufferUsageFlags.VertexBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                    sizeof(ImDrawVert), (int)(1.5f * draw_data.TotalVtxCount));
+                vertexBuffer = GraphicsBuffer.CreateDynamic<ImDrawVert>(VkBufferUsageFlags.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
             }
 
             if (draw_data.TotalIdxCount * sizeof(ushort) > (int)indexBuffer.size)
             {
                 indexBuffer.Dispose();
-                indexBuffer = GraphicsBuffer.Create(VkBufferUsageFlags.IndexBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                   sizeof(ushort), (int)(1.5f * draw_data.TotalIdxCount));
+                indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(VkBufferUsageFlags.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
             }
 
             updateUniformBuffers();
@@ -291,15 +294,20 @@ namespace SharpGame
             }
 
 
-            var cmdBuffer = Graphics.drawCmdBuffers[graphics.currentBuffer];
+            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;////Graphics.drawCmdBuffers[graphics.currentBuffer];
 
             var pipelines_solid = pipeline.GetGraphicsPipeline(Graphics.renderPass, uiShader.Main, null);
-            vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
-            vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint.Graphics, pipelines_solid);
+            //vkCmdBindDescriptorSets(cmdBuffer.commandBuffer, VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
+            cmdBuffer.BindDescriptorSets(VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
+            //vkCmdBindPipeline(cmdBuffer.commandBuffer, VkPipelineBindPoint.Graphics, pipelines_solid);
+            cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipelines_solid);
 
             ulong offsets = 0;
-            vkCmdBindVertexBuffers(cmdBuffer, 0, 1, ref vertexBuffer.buffer, &offsets);
-            vkCmdBindIndexBuffer(cmdBuffer, indexBuffer.buffer, 0, VkIndexType.Uint16);
+            //vkCmdBindVertexBuffers(cmdBuffer.commandBuffer, 0, 1, ref vertexBuffer.buffer, &offsets);
+            cmdBuffer.BindVertexBuffer(0, vertexBuffer, &offsets);
+
+            //vkCmdBindIndexBuffer(cmdBuffer.commandBuffer, indexBuffer.buffer, 0, VkIndexType.Uint16);
+            cmdBuffer.BindIndexBuffer(indexBuffer, 0, IndexType.Uint16);
 
             draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
 
@@ -332,9 +340,9 @@ namespace SharpGame
 
                         VkRect2D scissor = Builder.Rect2D((int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y,
                             (uint)(pcmd.ClipRect.Z - pcmd.ClipRect.X), (uint)(pcmd.ClipRect.W - pcmd.ClipRect.Y));
-                        vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+                        cmdBuffer.SetScissor(ref scissor);
 
-                        vkCmdDrawIndexed(cmdBuffer, pcmd.ElemCount, 1, (uint)idx_offset, vtx_offset, 0);
+                        cmdBuffer.DrawIndexed(pcmd.ElemCount, 1, (uint)idx_offset, vtx_offset, 0);
 
                     }
 
@@ -347,14 +355,9 @@ namespace SharpGame
         }
 
 
-        private bool _controlDown;
-        private bool _shiftDown;
-        private bool _altDown;
-        private bool _winKeyDown;
         private unsafe void UpdateImGuiInput()
         {
-
-            ImGuiIOPtr io = ImGui.GetIO();
+            var io = ImGui.GetIO();
 
             var mousePosition = snapshot.MousePosition;
 
@@ -393,6 +396,11 @@ namespace SharpGame
                 char c = keyCharPresses[i];
                 io.AddInputCharacter(c);
             }
+
+            bool _controlDown = false;
+            bool _shiftDown = false;
+            bool _altDown = false;
+            bool _winKeyDown = false;
 
             IReadOnlyList<KeyEvent> keyEvents = snapshot.KeyEvents;
             for (int i = 0; i < keyEvents.Count; i++)

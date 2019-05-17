@@ -20,10 +20,7 @@ namespace SharpGame
             texcoord = uv;
         }
 
-        public PosNormTex(
-            float px, float py, float pz,
-            float nx, float ny, float nz,
-            float u, float v)
+        public PosNormTex(float px, float py, float pz, float nx, float ny, float nz, float u, float v)
         {
             position = new Vector3(px, py, pz);
             normal = new Vector3(nx, ny, nz);

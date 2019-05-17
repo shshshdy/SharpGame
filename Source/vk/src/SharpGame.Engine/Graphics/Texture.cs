@@ -43,6 +43,282 @@ namespace SharpGame
 
     public unsafe class Texture2D : Texture
     {
+
+        public static Texture Create(uint w, uint h, uint bytesPerPixel, byte* tex2DDataPtr, bool dynamic = false)
+        {
+            var texture = new Texture2D
+            {
+                width = w,
+                height = h,
+                mipLevels = 1
+            };
+
+            uint totalBytes = bytesPerPixel * w * h;
+
+            VkFormat format = VkFormat.R8g8b8a8Unorm;
+            VkFormatProperties formatProperties;
+            // Get Device properites for the requested texture format
+            vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, format, &formatProperties);
+
+            uint useStaging = 1;
+
+            VkMemoryAllocateInfo memAllocInfo = Builder.MemoryAllocateInfo();
+            VkMemoryRequirements memReqs = new VkMemoryRequirements();
+
+            if (useStaging == 1)
+            {
+                // Create a host-visible staging buffer that contains the raw image data
+                VkBuffer stagingBuffer;
+                VkDeviceMemory stagingMemory;
+
+                VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo();
+                bufferCreateInfo.size = totalBytes;
+                // This buffer is used as a transfer source for the buffer copy
+                bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
+                bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
+
+                Util.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, &stagingBuffer));
+
+                // Get memory requirements for the staging buffer (alignment, memory type bits)
+                vkGetBufferMemoryRequirements(Graphics.device, stagingBuffer, &memReqs);
+
+                memAllocInfo.allocationSize = memReqs.size;
+                // Get memory type index for a host visible buffer
+                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
+
+                Util.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, &stagingMemory));
+                Util.CheckResult(vkBindBufferMemory(Graphics.device, stagingBuffer, stagingMemory, 0));
+
+                // Copy texture data into staging buffer
+                byte* data;
+                Util.CheckResult(vkMapMemory(Graphics.device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
+                Unsafe.CopyBlock(data, tex2DDataPtr, totalBytes);
+                vkUnmapMemory(Graphics.device, stagingMemory);
+
+                // Setup buffer copy regions for each mip level
+                NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
+                uint offset = 0;
+
+                for (uint i = 0; i < texture.mipLevels; i++)
+                {
+                    VkBufferImageCopy bufferCopyRegion = new VkBufferImageCopy();
+                    bufferCopyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
+                    bufferCopyRegion.imageSubresource.mipLevel = i;
+                    bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
+                    bufferCopyRegion.imageSubresource.layerCount = 1;
+                    bufferCopyRegion.imageExtent.width = w;// tex2D.Faces[0].Mipmaps[i].Width;
+                    bufferCopyRegion.imageExtent.height = h;// tex2D.Faces[0].Mipmaps[i].Height;
+                    bufferCopyRegion.imageExtent.depth = 1;
+                    bufferCopyRegion.bufferOffset = offset;
+
+                    bufferCopyRegions.Add(bufferCopyRegion);
+
+                    //   offset += tex2D.Faces[0].Mipmaps[i].SizeInBytes;
+                }
+
+                // Create optimal tiled target image
+                VkImageCreateInfo imageCreateInfo = Builder.ImageCreateInfo();
+                imageCreateInfo.imageType = VkImageType.Image2D;
+                imageCreateInfo.format = format;
+                imageCreateInfo.mipLevels = texture.mipLevels;
+                imageCreateInfo.arrayLayers = 1;
+                imageCreateInfo.samples = VkSampleCountFlags.Count1;
+                imageCreateInfo.tiling = VkImageTiling.Optimal;
+                imageCreateInfo.sharingMode = VkSharingMode.Exclusive;
+                // Set initial layout of the image to undefined
+                imageCreateInfo.initialLayout = VkImageLayout.Undefined;
+                imageCreateInfo.extent = new VkExtent3D { width = texture.width, height = texture.height, depth = 1 };
+                imageCreateInfo.usage = VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled;
+
+                Util.CheckResult(vkCreateImage(Graphics.device, &imageCreateInfo, null, out texture.image));
+
+                vkGetImageMemoryRequirements(Graphics.device, texture.image, &memReqs);
+
+                memAllocInfo.allocationSize = memReqs.size;
+                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
+
+                Util.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, out texture.deviceMemory));
+                Util.CheckResult(vkBindImageMemory(Graphics.device, texture.image, texture.deviceMemory, 0));
+
+                VkCommandBuffer copyCmd = Device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
+
+                // Image barrier for optimal image
+
+                // The sub resource range describes the regions of the image we will be transition
+                VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
+                // Image only contains color data
+                subresourceRange.aspectMask = VkImageAspectFlags.Color;
+                // Start at first mip level
+                subresourceRange.baseMipLevel = 0;
+                // We will transition on all mip levels
+                subresourceRange.levelCount = texture.mipLevels;
+                // The 2D texture only has one layer
+                subresourceRange.layerCount = 1;
+
+                // Optimal image will be used as destination for the copy, so we must transfer from our
+                // initial undefined image layout to the transfer destination layout
+                setImageLayout(
+                    copyCmd,
+                    texture.image,
+                     VkImageAspectFlags.Color,
+                     VkImageLayout.Undefined,
+                     VkImageLayout.TransferDstOptimal,
+                    subresourceRange);
+
+                // Copy mip levels from staging buffer
+                vkCmdCopyBufferToImage(
+                    copyCmd,
+                    stagingBuffer,
+                    texture.image,
+                     VkImageLayout.TransferDstOptimal,
+                    bufferCopyRegions.Count,
+                    bufferCopyRegions.Data);
+
+                // Change texture image layout to shader read after all mip levels have been copied
+                texture.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
+                setImageLayout(
+                    copyCmd,
+                    texture.image,
+                    VkImageAspectFlags.Color,
+                    VkImageLayout.TransferDstOptimal,
+                    texture.imageLayout,
+                    subresourceRange);
+
+                Device.flushCommandBuffer(copyCmd, Graphics.queue, true);
+
+                // Clean up staging resources
+                vkFreeMemory(Graphics.device, stagingMemory, null);
+                vkDestroyBuffer(Graphics.device, stagingBuffer, null);
+            }
+
+            VkSamplerCreateInfo sampler = Builder.SamplerCreateInfo();
+            sampler.magFilter = VkFilter.Linear;
+            sampler.minFilter = VkFilter.Linear;
+            sampler.mipmapMode = VkSamplerMipmapMode.Linear;
+            sampler.addressModeU = VkSamplerAddressMode.ClampToEdge;
+            sampler.addressModeV = VkSamplerAddressMode.ClampToEdge;
+            sampler.addressModeW = VkSamplerAddressMode.ClampToEdge;
+            sampler.mipLodBias = 0.0f;
+            sampler.compareOp = VkCompareOp.Never;
+            sampler.minLod = 0.0f;
+            // Set max level-of-detail to mip level count of the texture
+            sampler.maxLod = (useStaging == 1) ? (float)texture.mipLevels : 0.0f;
+            // Enable anisotropic filtering
+            // This feature is optional, so we must check if it's supported on the Device
+            if (Device.Features.samplerAnisotropy == 1)
+            {
+                // Use max. level of anisotropy for this example
+                sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;
+                sampler.anisotropyEnable = True;
+            }
+            else
+            {
+                // The Device does not support anisotropic filtering
+                sampler.maxAnisotropy = 1.0f;
+                sampler.anisotropyEnable = False;
+            }
+            sampler.borderColor = VkBorderColor.FloatOpaqueWhite;
+            Util.CheckResult(vkCreateSampler(Graphics.device, ref sampler, null, out texture.sampler));
+
+            // Create image view
+            // Textures are not directly accessed by the shaders and
+            // are abstracted by image views containing additional
+            // information and sub resource ranges
+            VkImageViewCreateInfo view = Builder.ImageViewCreateInfo();
+            view.viewType = VkImageViewType.Image2D;
+            view.format = format;
+            view.components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A };
+            // The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
+            // It's possible to create multiple image views for a single image referring to different (and/or overlapping) ranges of the image
+            view.subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            view.subresourceRange.baseMipLevel = 0;
+            view.subresourceRange.baseArrayLayer = 0;
+            view.subresourceRange.layerCount = 1;
+            // Linear tiling usually won't support mip maps
+            // Only set mip map count if optimal tiling is used
+            view.subresourceRange.levelCount = (useStaging == 1) ? texture.mipLevels : 1;
+            // The view will be based on the texture's image
+            view.image = texture.image;
+            Util.CheckResult(vkCreateImageView(Graphics.device, &view, null, out texture.view));
+            texture.updateDescriptor();
+            return texture;
+        }
+
+        // Create an image memory barrier for changing the layout of
+        // an image and put it into an active command buffer
+        static void setImageLayout(
+            VkCommandBuffer cmdBuffer,
+            VkImage image,
+            VkImageAspectFlags aspectMask,
+            VkImageLayout oldImageLayout,
+            VkImageLayout newImageLayout,
+            VkImageSubresourceRange subresourceRange)
+        {
+            // Create an image barrier object
+            VkImageMemoryBarrier imageMemoryBarrier = Builder.ImageMemoryBarrier(); ;
+            imageMemoryBarrier.oldLayout = oldImageLayout;
+            imageMemoryBarrier.newLayout = newImageLayout;
+            imageMemoryBarrier.image = image;
+            imageMemoryBarrier.subresourceRange = subresourceRange;
+
+            // Only sets masks for layouts used in this example
+            // For a more complete version that can be used with other layouts see vks::tools::setImageLayout
+
+            // Source layouts (old)
+            switch (oldImageLayout)
+            {
+                case VkImageLayout.Undefined:
+                    // Only valid as initial layout, memory contents are not preserved
+                    // Can be accessed directly, no source dependency required
+                    imageMemoryBarrier.srcAccessMask = 0;
+                    break;
+                case VkImageLayout.Preinitialized:
+                    // Only valid as initial layout for linear images, preserves memory contents
+                    // Make sure host writes to the image have been finished
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.HostWrite;
+                    break;
+                case VkImageLayout.TransferDstOptimal:
+                    // Old layout is transfer destination
+                    // Make sure any writes to the image have been finished
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.TransferWrite;
+                    break;
+            }
+
+            // Target layouts (new)
+            switch (newImageLayout)
+            {
+                case VkImageLayout.TransferSrcOptimal:
+                    // Transfer source (copy, blit)
+                    // Make sure any reads from the image have been finished
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferRead;
+                    break;
+                case VkImageLayout.TransferDstOptimal:
+                    // Transfer destination (copy, blit)
+                    // Make sure any writes to the image have been finished
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferWrite;
+                    break;
+                case VkImageLayout.ShaderReadOnlyOptimal:
+                    // Shader read (sampler, input attachment)
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.ShaderRead;
+                    break;
+            }
+
+            // Put barrier on top of pipeline
+            VkPipelineStageFlags srcStageFlags = VkPipelineStageFlags.TopOfPipe;
+            VkPipelineStageFlags destStageFlags = VkPipelineStageFlags.TopOfPipe;
+
+            // Put barrier inside setup command buffer
+            vkCmdPipelineBarrier(
+                cmdBuffer,
+                srcStageFlags,
+                destStageFlags,
+                VkDependencyFlags.None,
+                0, null,
+                0, null,
+                1, &imageMemoryBarrier);
+        }
+
+
         public void loadFromFile(
             string filename,
             VkFormat format,
@@ -204,80 +480,7 @@ namespace SharpGame
             }
             else
             {
-                throw new NotImplementedException();
-                /*
-                // Prefer using optimal tiling, as linear tiling 
-                // may support only a small set of features 
-                // depending on implementation (e.g. no mip maps, only one layer, etc.)
-
-                // Check if this support is supported for linear tiling
-                Debug.Assert((formatProperties.linearTilingFeatures & VkFormatFeatureFlags.SampledImage) != 0);
-
-                VkImage mappableImage;
-                VkDeviceMemory mappableMemory;
-
-                VkImageCreateInfo imageCreateInfo = Initializers.imageCreateInfo();
-                imageCreateInfo.imageType = VkImageType._2d;
-                imageCreateInfo.format = format;
-                imageCreateInfo.extent = new VkExtent3D { width = width, height = height, depth = 1 };
-                imageCreateInfo.mipLevels = 1;
-                imageCreateInfo.arrayLayers = 1;
-                imageCreateInfo.samples = VkSampleCountFlags._1;
-                imageCreateInfo.tiling = VkImageTiling.Linear;
-                imageCreateInfo.usage = imageUsageFlags;
-                imageCreateInfo.sharingMode = VkSharingMode.Exclusive;
-                imageCreateInfo.initialLayout = VkImageLayout.Undefined;
-
-                // Load mip map level 0 to linear tiling image
-                Util.CheckResult(vkCreateImage(Device.LogicalDevice, &imageCreateInfo, null, &mappableImage));
-
-                // Get memory requirements for this image 
-                // like size and alignment
-                vkGetImageMemoryRequirements(Device.LogicalDevice, mappableImage, &memReqs);
-                // Set memory allocation size to required memory size
-                memAllocInfo.allocationSize = memReqs.size;
-
-                // Get memory type that can be mapped to host memory
-                memAllocInfo.memoryTypeIndex = device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
-
-                // Allocate host memory
-                Util.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, &mappableMemory));
-
-                // Bind allocated image for use
-                Util.CheckResult(vkBindImageMemory(Device.LogicalDevice, mappableImage, mappableMemory, 0));
-
-                // Get sub resource layout
-                // Mip map count, array layer, etc.
-                VkImageSubresource subRes = new VkImageSubresource();
-                subRes.aspectMask = VkImageAspectFlags.Color;
-                subRes.mipLevel = 0;
-
-                VkSubresourceLayout subResLayout;
-                void* data;
-
-                // Get sub resources layout 
-                // Includes row pitch, size offsets, etc.
-                vkGetImageSubresourceLayout(Device.LogicalDevice, mappableImage, &subRes, &subResLayout);
-
-                // Map image memory
-                Util.CheckResult(vkMapMemory(Device.LogicalDevice, mappableMemory, 0, memReqs.size, 0, &data));
-
-                // Copy image data into memory
-                memcpy(data, tex2D[subRes.mipLevel].data(), tex2D[subRes.mipLevel].size());
-
-                vkUnmapMemory(Device.LogicalDevice, mappableMemory);
-
-                // Linear tiled images don't need to be staged
-                // and can be directly used as textures
-                image = mappableImage;
-                deviceMemory = mappableMemory;
-                imageLayout = imageLayout;
-
-                // Setup image memory barrier
-                vks::tools::setImageLayout(copyCmd, image, VkImageAspectFlags.Color, VkImageLayout.Undefined, imageLayout);
-
-                device.flushCommandBuffer(copyCmd, copyQueue);
-                */
+                throw new NotImplementedException();                
             }
 
             // Create a defaultsampler

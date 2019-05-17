@@ -1,0 +1,75 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Vulkan;
+
+namespace SharpGame
+{
+    public class CommandBufferPool : DisposeBase
+    {
+        public CommandBuffer[] CommandBuffers { get; private set; }
+
+        private VkCommandPool cmdPool;
+        private NativeList<VkCommandBuffer> cmdBuffers = new NativeList<VkCommandBuffer>();
+
+        public int currentIndex;
+
+        public IntPtr GetAddress(uint idx) => cmdBuffers.GetAddress(idx);
+
+        public CommandBufferPool(uint queue, VkCommandPoolCreateFlags commandPoolCreateFlags)
+        {
+            VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
+            cmdPoolInfo.queueFamilyIndex = queue;
+            cmdPoolInfo.flags = commandPoolCreateFlags;
+
+            unsafe
+            {
+                Util.CheckResult(VulkanNative.vkCreateCommandPool(Graphics.device, &cmdPoolInfo, null, out cmdPool));
+            }
+
+        }
+
+        protected override void Destroy()
+        {
+            Free();
+
+            base.Destroy();
+        }
+
+        public void Allocate(uint count)
+        {
+            cmdBuffers.Resize(count);
+            cmdBuffers.Count = count;
+
+            VkCommandBufferAllocateInfo cmdBufAllocateInfo = Builder.CommandBufferAllocateInfo(cmdPool, VkCommandBufferLevel.Primary, count);
+
+            unsafe
+            {
+                Util.CheckResult(VulkanNative.vkAllocateCommandBuffers(Graphics.device, ref cmdBufAllocateInfo, (VkCommandBuffer*)cmdBuffers.Data));
+            }
+
+            CommandBuffers = new CommandBuffer[count];
+            for (int i = 0; i < count; i++)
+            {
+                CommandBuffers[i] = new CommandBuffer(cmdBuffers[i]);
+            }
+        }
+
+        public void Free()
+        {
+            VulkanNative.vkFreeCommandBuffers(Graphics.device, cmdPool, cmdBuffers.Count, cmdBuffers.Data);
+            CommandBuffers = null;
+        }
+
+        public CommandBuffer Get()
+        {
+            int idx = currentIndex++;
+            return CommandBuffers[idx % CommandBuffers.Length];
+        }
+
+        public void Reset()
+        {
+            VulkanNative.vkResetCommandPool(Graphics.device, cmdPool, VkCommandPoolResetFlags.None);
+        }
+    }
+}

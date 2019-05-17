@@ -32,18 +32,18 @@ namespace SharpGame
         public bool VSync { get; set; } = false;
     }
 
-    public unsafe partial class Graphics : Object
+    public unsafe partial class Graphics : System<Graphics>
     {
         public Settings Settings { get; } = new Settings();
-        public VkInstance Instance { get; protected set; }
+        public VkInstance VkInstance { get; protected set; }
         public VkPhysicalDevice physicalDevice { get; protected set; }
         public VkPhysicalDeviceFeatures enabledFeatures { get; protected set; }
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
 
         public static VkDevice device { get; protected set; }
 
-        public VkQueue queue { get; protected set; }
-        public VkFormat DepthFormat { get; protected set; }
+        public static VkQueue queue { get; protected set; }
+        public static VkFormat DepthFormat { get; protected set; }
         public VulkanSwapchain Swapchain { get; } = new VulkanSwapchain();
 
         public static uint Width { get; private set; }
@@ -54,6 +54,10 @@ namespace SharpGame
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
         public VkCommandPool cmdPool => _cmdPool;
+
+        public CommandBufferPool commandBufferPool;
+
+        public CommandBuffer RenderCmdBuffer => commandBufferPool.CommandBuffers[currentBuffer];
 
         public static NativeList<VkCommandBuffer> drawCmdBuffers { get; protected set; } = new NativeList<VkCommandBuffer>();
         public static VkRenderPass renderPass => _renderPass;
@@ -88,11 +92,11 @@ namespace SharpGame
 
             // Physical Device
             uint gpuCount = 0;
-            Util.CheckResult(vkEnumeratePhysicalDevices(Instance, &gpuCount, null));
+            Util.CheckResult(vkEnumeratePhysicalDevices(VkInstance, &gpuCount, null));
             Debug.Assert(gpuCount > 0);
             // Enumerate devices
             IntPtr* physicalDevices = stackalloc IntPtr[(int)gpuCount];
-            err = vkEnumeratePhysicalDevices(Instance, &gpuCount, (VkPhysicalDevice*)physicalDevices);
+            err = vkEnumeratePhysicalDevices(VkInstance, &gpuCount, (VkPhysicalDevice*)physicalDevices);
             if (err != VkResult.Success)
             {
                 throw new InvalidOperationException("Could not enumerate physical devices.");
@@ -107,9 +111,6 @@ namespace SharpGame
             // TODO: Implement arg parsing, etc.
 
             physicalDevice = ((VkPhysicalDevice*)physicalDevices)[selectedDevice];
-
-            // Derived examples can override this to set actual features (based on above readings) to enable for logical device creation
-            getEnabledFeatures();
 
             // Vulkan Device creation
             // This is handled by a separate class that gets a logical Device representation
@@ -126,7 +127,7 @@ namespace SharpGame
             // Get a graphics queue from the Device
             VkQueue queue;
             vkGetDeviceQueue(device, Device.QFIndices.Graphics, 0, &queue);
-            this.queue = queue;
+            Graphics.queue = queue;
 
             // Find a suitable depth format
             VkFormat depthFormat;
@@ -134,7 +135,7 @@ namespace SharpGame
             Debug.Assert(validDepthFormat == True);
             DepthFormat = depthFormat;
 
-            Swapchain.Connect(Instance, physicalDevice, device);
+            Swapchain.Connect(VkInstance, physicalDevice, device);
 
             // Create synchronization objects
             VkSemaphoreCreateInfo semaphoreCreateInfo = Builder.SemaphoreCreateInfo();
@@ -175,7 +176,7 @@ namespace SharpGame
                     return args.Flags.HasFlag(DebugReportFlagsExt.Error);
                 }
             );
-            return new DebugReportCallbackExt(Instance, ref debugReportCreateInfo);
+            return new DebugReportCallbackExt(VkInstance, ref debugReportCreateInfo);
         }
 
         protected override void Destroy()
@@ -185,12 +186,7 @@ namespace SharpGame
             base.Destroy();
 
         }
-
-        protected virtual void getEnabledFeatures()
-        {
-            // Used in some derived classes.
-        }
-
+        
         private VkResult CreateInstance(bool enableValidation)
         {
             Settings.Validation = enableValidation;
@@ -241,7 +237,7 @@ namespace SharpGame
 
             VkInstance instance;
             VkResult result = vkCreateInstance(&instanceCreateInfo, null, &instance);
-            Instance = instance;
+            VkInstance = instance;
             return result;
         }
         
@@ -415,17 +411,17 @@ namespace SharpGame
             vkDeviceWaitIdle(device);
         }
 
-        public void prepareFrame()
+        public void BeginRender()
         {
             // Acquire the next image from the swap chaing
             Util.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentBuffer));
         }
 
-        public void submitFrame()
+        public void EndRender()
         {
             // Command buffer to be sumitted to the queue
             submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = (VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
+            submitInfo.pCommandBuffers = (VkCommandBuffer*)commandBufferPool.GetAddress(currentBuffer); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
 
             // Submit to queue
             Util.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
@@ -438,14 +434,18 @@ namespace SharpGame
 
         private void CreateCommandPool()
         {
-            VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
-            cmdPoolInfo.queueFamilyIndex = Swapchain.QueueNodeIndex;
-            cmdPoolInfo.flags = VkCommandPoolCreateFlags.ResetCommandBuffer;
-            Util.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out _cmdPool));
+            commandBufferPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
+
+            //VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
+            //cmdPoolInfo.queueFamilyIndex = Swapchain.QueueNodeIndex;
+            //cmdPoolInfo.flags = VkCommandPoolCreateFlags.ResetCommandBuffer;
+            //Util.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out _cmdPool));
         }
 
         protected void createCommandBuffers()
         {
+            commandBufferPool.Allocate(Swapchain.ImageCount);
+            /*
             // Create one command buffer for each swap chain image and reuse for rendering
             drawCmdBuffers.Resize(Swapchain.ImageCount);
             drawCmdBuffers.Count = Swapchain.ImageCount;
@@ -454,26 +454,16 @@ namespace SharpGame
                 Builder.CommandBufferAllocateInfo(cmdPool, VkCommandBufferLevel.Primary, drawCmdBuffers.Count);
 
             Util.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, (VkCommandBuffer*)drawCmdBuffers.Data));
-        }
-
-        protected bool checkCommandBuffers()
-        {
-            foreach (var cmdBuffer in drawCmdBuffers)
-            {
-                if (cmdBuffer == NullHandle)
-                {
-                    return false;
-                }
-            }
-            return true;
+            */
         }
 
         protected void destroyCommandBuffers()
         {
-            vkFreeCommandBuffers(device, cmdPool, drawCmdBuffers.Count, drawCmdBuffers.Data);
+            commandBufferPool.Free();
+            //vkFreeCommandBuffers(device, cmdPool, drawCmdBuffers.Count, drawCmdBuffers.Data);
         }
 
-        protected virtual void SetupDepthStencil()
+        protected void SetupDepthStencil()
         {
             VkImageCreateInfo image = VkImageCreateInfo.New();
             image.imageType = VkImageType.Image2D;
@@ -522,279 +512,6 @@ namespace SharpGame
             return shaderStage;
         }
 
-        public Texture createTexture(uint w, uint h, uint bytesPerPixel, byte* tex2DDataPtr)
-        {
-            var texture = new Texture
-            {
-                width = w,
-                height = h,
-                mipLevels = 1
-            };
-
-            uint totalBytes = bytesPerPixel * w * h;
-
-            VkFormat format = VkFormat.R8g8b8a8Unorm;
-            VkFormatProperties formatProperties;
-            // Get Device properites for the requested texture format
-            vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProperties);
-
-            uint useStaging = 1;
-
-            VkMemoryAllocateInfo memAllocInfo = Builder.MemoryAllocateInfo();
-            VkMemoryRequirements memReqs = new VkMemoryRequirements();
-
-            if (useStaging == 1)
-            {
-                // Create a host-visible staging buffer that contains the raw image data
-                VkBuffer stagingBuffer;
-                VkDeviceMemory stagingMemory;
-
-                VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo();
-                bufferCreateInfo.size = totalBytes;
-                // This buffer is used as a transfer source for the buffer copy
-                bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
-                bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
-
-                Util.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, &stagingBuffer));
-
-                // Get memory requirements for the staging buffer (alignment, memory type bits)
-                vkGetBufferMemoryRequirements(Graphics.device, stagingBuffer, &memReqs);
-
-                memAllocInfo.allocationSize = memReqs.size;
-                // Get memory type index for a host visible buffer
-                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
-
-                Util.CheckResult(vkAllocateMemory(device, &memAllocInfo, null, &stagingMemory));
-                Util.CheckResult(vkBindBufferMemory(device, stagingBuffer, stagingMemory, 0));
-
-                // Copy texture data into staging buffer
-                byte* data;
-                Util.CheckResult(vkMapMemory(device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
-                Unsafe.CopyBlock(data, tex2DDataPtr, totalBytes);
-                vkUnmapMemory(Graphics.device, stagingMemory);
-
-                // Setup buffer copy regions for each mip level
-                NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
-                uint offset = 0;
-
-                for (uint i = 0; i < texture.mipLevels; i++)
-                {
-                    VkBufferImageCopy bufferCopyRegion = new VkBufferImageCopy();
-                    bufferCopyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
-                    bufferCopyRegion.imageSubresource.mipLevel = i;
-                    bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
-                    bufferCopyRegion.imageSubresource.layerCount = 1;
-                    bufferCopyRegion.imageExtent.width = w;// tex2D.Faces[0].Mipmaps[i].Width;
-                    bufferCopyRegion.imageExtent.height = h;// tex2D.Faces[0].Mipmaps[i].Height;
-                    bufferCopyRegion.imageExtent.depth = 1;
-                    bufferCopyRegion.bufferOffset = offset;
-
-                    bufferCopyRegions.Add(bufferCopyRegion);
-
-                    //   offset += tex2D.Faces[0].Mipmaps[i].SizeInBytes;
-                }
-
-                // Create optimal tiled target image
-                VkImageCreateInfo imageCreateInfo = Builder.ImageCreateInfo();
-                imageCreateInfo.imageType = VkImageType.Image2D;
-                imageCreateInfo.format = format;
-                imageCreateInfo.mipLevels = texture.mipLevels;
-                imageCreateInfo.arrayLayers = 1;
-                imageCreateInfo.samples = VkSampleCountFlags.Count1;
-                imageCreateInfo.tiling = VkImageTiling.Optimal;
-                imageCreateInfo.sharingMode = VkSharingMode.Exclusive;
-                // Set initial layout of the image to undefined
-                imageCreateInfo.initialLayout = VkImageLayout.Undefined;
-                imageCreateInfo.extent = new VkExtent3D { width = texture.width, height = texture.height, depth = 1 };
-                imageCreateInfo.usage = VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled;
-
-                Util.CheckResult(vkCreateImage(device, &imageCreateInfo, null, out texture.image));
-
-                vkGetImageMemoryRequirements(device, texture.image, &memReqs);
-
-                memAllocInfo.allocationSize = memReqs.size;
-                memAllocInfo.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-
-                Util.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, out texture.deviceMemory));
-                Util.CheckResult(vkBindImageMemory(Graphics.device, texture.image, texture.deviceMemory, 0));
-
-                VkCommandBuffer copyCmd = Device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
-
-                // Image barrier for optimal image
-
-                // The sub resource range describes the regions of the image we will be transition
-                VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
-                // Image only contains color data
-                subresourceRange.aspectMask = VkImageAspectFlags.Color;
-                // Start at first mip level
-                subresourceRange.baseMipLevel = 0;
-                // We will transition on all mip levels
-                subresourceRange.levelCount = texture.mipLevels;
-                // The 2D texture only has one layer
-                subresourceRange.layerCount = 1;
-
-                // Optimal image will be used as destination for the copy, so we must transfer from our
-                // initial undefined image layout to the transfer destination layout
-                setImageLayout(
-                    copyCmd,
-                    texture.image,
-                     VkImageAspectFlags.Color,
-                     VkImageLayout.Undefined,
-                     VkImageLayout.TransferDstOptimal,
-                    subresourceRange);
-
-                // Copy mip levels from staging buffer
-                vkCmdCopyBufferToImage(
-                    copyCmd,
-                    stagingBuffer,
-                    texture.image,
-                     VkImageLayout.TransferDstOptimal,
-                    bufferCopyRegions.Count,
-                    bufferCopyRegions.Data);
-
-                // Change texture image layout to shader read after all mip levels have been copied
-                texture.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
-                setImageLayout(
-                    copyCmd,
-                    texture.image,
-                    VkImageAspectFlags.Color,
-                    VkImageLayout.TransferDstOptimal,
-                    texture.imageLayout,
-                    subresourceRange);
-
-                Device.flushCommandBuffer(copyCmd, queue, true);
-
-                // Clean up staging resources
-                vkFreeMemory(device, stagingMemory, null);
-                vkDestroyBuffer(device, stagingBuffer, null);
-            }
-
-            VkSamplerCreateInfo sampler = Builder.SamplerCreateInfo();
-            sampler.magFilter = VkFilter.Linear;
-            sampler.minFilter = VkFilter.Linear;
-            sampler.mipmapMode = VkSamplerMipmapMode.Linear;
-            sampler.addressModeU = VkSamplerAddressMode.ClampToEdge;
-            sampler.addressModeV = VkSamplerAddressMode.ClampToEdge;
-            sampler.addressModeW = VkSamplerAddressMode.ClampToEdge;
-            sampler.mipLodBias = 0.0f;
-            sampler.compareOp = VkCompareOp.Never;
-            sampler.minLod = 0.0f;
-            // Set max level-of-detail to mip level count of the texture
-            sampler.maxLod = (useStaging == 1) ? (float)texture.mipLevels : 0.0f;
-            // Enable anisotropic filtering
-            // This feature is optional, so we must check if it's supported on the Device
-            if (Device.Features.samplerAnisotropy == 1)
-            {
-                // Use max. level of anisotropy for this example
-                sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;
-                sampler.anisotropyEnable = True;
-            }
-            else
-            {
-                // The Device does not support anisotropic filtering
-                sampler.maxAnisotropy = 1.0f;
-                sampler.anisotropyEnable = False;
-            }
-            sampler.borderColor = VkBorderColor.FloatOpaqueWhite;
-            Util.CheckResult(vkCreateSampler(Graphics.device, ref sampler, null, out texture.sampler));
-
-            // Create image view
-            // Textures are not directly accessed by the shaders and
-            // are abstracted by image views containing additional
-            // information and sub resource ranges
-            VkImageViewCreateInfo view = Builder.ImageViewCreateInfo();
-            view.viewType = VkImageViewType.Image2D;
-            view.format = format;
-            view.components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A };
-            // The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
-            // It's possible to create multiple image views for a single image referring to different (and/or overlapping) ranges of the image
-            view.subresourceRange.aspectMask = VkImageAspectFlags.Color;
-            view.subresourceRange.baseMipLevel = 0;
-            view.subresourceRange.baseArrayLayer = 0;
-            view.subresourceRange.layerCount = 1;
-            // Linear tiling usually won't support mip maps
-            // Only set mip map count if optimal tiling is used
-            view.subresourceRange.levelCount = (useStaging == 1) ? texture.mipLevels : 1;
-            // The view will be based on the texture's image
-            view.image = texture.image;
-            Util.CheckResult(vkCreateImageView(Graphics.device, &view, null, out texture.view));
-            texture.updateDescriptor();
-            return texture;
-        }
-
-        // Create an image memory barrier for changing the layout of
-        // an image and put it into an active command buffer
-        void setImageLayout(
-            VkCommandBuffer cmdBuffer,
-            VkImage image,
-            VkImageAspectFlags aspectMask,
-            VkImageLayout oldImageLayout,
-            VkImageLayout newImageLayout,
-            VkImageSubresourceRange subresourceRange)
-        {
-            // Create an image barrier object
-            VkImageMemoryBarrier imageMemoryBarrier = Builder.ImageMemoryBarrier(); ;
-            imageMemoryBarrier.oldLayout = oldImageLayout;
-            imageMemoryBarrier.newLayout = newImageLayout;
-            imageMemoryBarrier.image = image;
-            imageMemoryBarrier.subresourceRange = subresourceRange;
-
-            // Only sets masks for layouts used in this example
-            // For a more complete version that can be used with other layouts see vks::tools::setImageLayout
-
-            // Source layouts (old)
-            switch (oldImageLayout)
-            {
-                case VkImageLayout.Undefined:
-                    // Only valid as initial layout, memory contents are not preserved
-                    // Can be accessed directly, no source dependency required
-                    imageMemoryBarrier.srcAccessMask = 0;
-                    break;
-                case VkImageLayout.Preinitialized:
-                    // Only valid as initial layout for linear images, preserves memory contents
-                    // Make sure host writes to the image have been finished
-                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.HostWrite;
-                    break;
-                case VkImageLayout.TransferDstOptimal:
-                    // Old layout is transfer destination
-                    // Make sure any writes to the image have been finished
-                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.TransferWrite;
-                    break;
-            }
-
-            // Target layouts (new)
-            switch (newImageLayout)
-            {
-                case VkImageLayout.TransferSrcOptimal:
-                    // Transfer source (copy, blit)
-                    // Make sure any reads from the image have been finished
-                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferRead;
-                    break;
-                case VkImageLayout.TransferDstOptimal:
-                    // Transfer destination (copy, blit)
-                    // Make sure any writes to the image have been finished
-                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferWrite;
-                    break;
-                case VkImageLayout.ShaderReadOnlyOptimal:
-                    // Shader read (sampler, input attachment)
-                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.ShaderRead;
-                    break;
-            }
-
-            // Put barrier on top of pipeline
-            VkPipelineStageFlags srcStageFlags = VkPipelineStageFlags.TopOfPipe;
-            VkPipelineStageFlags destStageFlags = VkPipelineStageFlags.TopOfPipe;
-
-            // Put barrier inside setup command buffer
-            vkCmdPipelineBarrier(
-                cmdBuffer,
-                srcStageFlags,
-                destStageFlags,
-                VkDependencyFlags.None,
-                0, null,
-                0, null,
-                1, &imageMemoryBarrier);
-        }
 
     }
 }

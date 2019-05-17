@@ -19,6 +19,12 @@ namespace SharpGame
         PatchList = 10
     }
 
+    public enum IndexType
+    {
+        Uint16 = 0,
+        Uint32 = 1
+    }
+
     public enum PolygonMode
     {
         Fill = 0,

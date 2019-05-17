@@ -300,7 +300,7 @@ namespace SharpGame
                     1,
                     &copyRegion);
 
-                Device.flushCommandBuffer(copyCmd, graphics.queue, true);
+                Device.flushCommandBuffer(copyCmd, Graphics.queue, true);
 
 
                 Device.DestroyBuffer(vertexStaging_buffer);
@@ -338,15 +338,15 @@ namespace SharpGame
             if (Device.Features.textureCompressionBC == 1)
             {
                 textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_bc3_unorm.ktx",
-                    VkFormat.Bc3UnormBlock, graphics.queue);
+                    VkFormat.Bc3UnormBlock, Graphics.queue);
             }
             else if (Device.Features.textureCompressionASTC_LDR == 1)
             {
-                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, graphics.queue);
+                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, Graphics.queue);
             }
             else if (Device.Features.textureCompressionETC2 == 1)
             {
-                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, graphics.queue);
+                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, Graphics.queue);
             }
             else
             {
@@ -598,9 +598,9 @@ namespace SharpGame
 
         void draw()
         {
-            graphics.prepareFrame();
+            graphics.BeginRender();
 
-            graphics.submitFrame();
+            graphics.EndRender();
         }
 
 

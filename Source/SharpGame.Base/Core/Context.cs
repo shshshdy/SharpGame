@@ -7,7 +7,6 @@ namespace SharpGame
 {
 
 
-
     public class Context : IDisposable
     {
         Stack<Object> _subsystems = new Stack<Object>();
@@ -50,5 +49,10 @@ namespace SharpGame
     internal class InstanceHoler<T>
     {
         internal static T inst;
+    }
+
+    public class System<T> : Object
+    {
+        public static T Instance => InstanceHoler<T>.inst;
     }
 }

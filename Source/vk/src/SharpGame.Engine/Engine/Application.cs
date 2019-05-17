@@ -12,7 +12,7 @@ using Veldrid.Sdl2;
 
 namespace SharpGame
 {
-    public unsafe partial class Application : Subsystem<Application>
+    public unsafe partial class Application : System<Application>
     {
         public static string DataPath => Path.Combine(AppContext.BaseDirectory, "data/");
 
@@ -51,7 +51,7 @@ namespace SharpGame
         protected InputSnapshot snapshot;
         protected VkDescriptorPool descriptorPool;
 
-        private Context context;
+        protected Context context;
 
         public Application()
         {
@@ -60,10 +60,10 @@ namespace SharpGame
 
         protected virtual void Setup()
         {
-            timer = CreateSubsystem<Timer>();
-            fileSystem = CreateSubsystem<FileSystem>();
-            graphics = CreateSubsystem<Graphics>();
-            cache = CreateSubsystem<ResourceCache>(DataPath);
+            timer = context.CreateSubsystem<Timer>();
+            fileSystem = context.CreateSubsystem<FileSystem>();
+            graphics = context.CreateSubsystem<Graphics>();
+            cache = context.CreateSubsystem<ResourceCache>(DataPath);
         }
 
         public virtual void Initialize()
