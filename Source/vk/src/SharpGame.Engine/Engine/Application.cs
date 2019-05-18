@@ -29,26 +29,12 @@ namespace SharpGame
         protected ResourceCache cache;
         protected Graphics graphics;
 
-        // Destination dimensions for resizing the window
-        private uint destWidth;
-        private uint destHeight;
-        private bool viewUpdated;
         protected bool paused = false;
         protected bool prepared;
 
-        protected float zoom;
-        protected float zoomSpeed = 50f;
-        protected Vector3 rotation;
-        protected float rotationSpeed = 1f;
-        protected Vector3 cameraPos = new Vector3();
-        protected Vector2 mousePos;
-
-        protected vkCamera camera = new vkCamera();
-
-        protected VkClearColorValue defaultClearColor => new VkClearColorValue(0.025f, 0.025f, 0.025f, 1.0f);
-
         protected InputSnapshot snapshot;
 
+        protected bool viewUpdated;
 
         protected Context context;
 
@@ -74,7 +60,7 @@ namespace SharpGame
             context.Dispose();
         }
 
-        private IntPtr CreateWindow()
+        protected virtual void CreateWindow()
         {
             WindowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
             NativeWindow = new Sdl2Window(Name, 50, 50, (int)width, (int)height, SDL_WindowFlags.Resizable, threadedProcessing: false)
@@ -83,13 +69,10 @@ namespace SharpGame
                 Y = 50,
                 Visible = true
             };
-            NativeWindow.Resized += OnNativeWindowResized;
-            NativeWindow.MouseWheel += OnMouseWheel;
-            NativeWindow.MouseMove += OnMouseMove;
-            NativeWindow.MouseDown += OnMouseDown;
-            NativeWindow.KeyDown += OnKeyDown;
+
             Window = NativeWindow.Handle;
-            return NativeWindow.Handle;
+
+            NativeWindow.Resized += WindowResize;
         }
 
         public void Run()
@@ -105,73 +88,8 @@ namespace SharpGame
             RenderLoop();
         }
 
-        private void OnKeyDown(KeyEvent e)
-        {
-            keyPressed(e.Key);
-        }
-
-        private void OnMouseDown(MouseEvent e)
-        {
-            if (e.Down)
-            {
-                mousePos = new Vector2(snapshot.MousePosition.X, snapshot.MousePosition.Y);
-            }
-        }
-
-        private void OnMouseMove(MouseMoveEventArgs e)
-        {
-            if (e.State.IsButtonDown(MouseButton.Right))
-            {
-                int posx = (int)e.MousePosition.X;
-                int posy = (int)e.MousePosition.Y;
-                zoom += (mousePos.Y - posy) * .005f * zoomSpeed;
-                camera.translate(new Vector3(-0.0f, 0.0f, (mousePos.Y - posy) * .005f * zoomSpeed));
-                mousePos = new Vector2(posx, posy);
-                viewUpdated = true;
-            }
-
-            if (e.State.IsButtonDown(MouseButton.Left))
-            {
-                int posx = (int)e.MousePosition.X;
-                int posy = (int)e.MousePosition.Y;
-                rotation.X += (mousePos.Y - posy) * 1.25f * rotationSpeed;
-                rotation.Y -= (mousePos.X - posx) * 1.25f * rotationSpeed;
-                camera.rotate(new Vector3((mousePos.Y - posy) * camera.rotationSpeed, -(mousePos.X - posx) * camera.rotationSpeed, 0.0f));
-                mousePos = new Vector2(posx, posy);
-                viewUpdated = true;
-            }
-
-            if (e.State.IsButtonDown(MouseButton.Middle))
-            {
-                int posx = (int)e.MousePosition.X;
-                int posy = (int)e.MousePosition.Y;
-                cameraPos.X -= (mousePos.X - posx) * 0.01f;
-                cameraPos.Y -= (mousePos.Y - posy) * 0.01f;
-                camera.translate(new Vector3(-(mousePos.X - posx) * 0.01f, -(mousePos.Y - posy) * 0.01f, 0.0f));
-                viewUpdated = true;
-                mousePos.X = posx;
-                mousePos.Y = posy;
-            }
-        }
-
-        private void OnMouseWheel(MouseWheelEventArgs e)
-        {
-            var wheelDelta = e.WheelDelta;
-            zoom += wheelDelta * 0.005f * zoomSpeed;
-            camera.translate(new Vector3(0.0f, 0.0f, wheelDelta * 0.005f * zoomSpeed));
-            viewUpdated = true;
-        }
-
-        private void OnNativeWindowResized()
-        {
-            windowResize();
-        }
-
         public void RenderLoop()
         {
-            destWidth = width;
-            destHeight = height;
-
             timer.Start();
 
             while (NativeWindow.Exists)
@@ -180,7 +98,7 @@ namespace SharpGame
                 if (viewUpdated)
                 {
                     viewUpdated = false;
-                    viewChanged();
+                    WiewChanged();
                 }
 
                 snapshot = NativeWindow.PumpEvents();
@@ -201,46 +119,44 @@ namespace SharpGame
             graphics.WaitIdle();
         }
 
-        protected virtual void viewChanged()
+        protected virtual void WiewChanged()
         {
         }
 
         protected virtual void render() { }
 
-        void windowResize()
+        void WindowResize()
         {
             if (!prepared)
             {
                 return;
             }
+
             prepared = false;
 
             // Recreate swap chain
-            width = destWidth;
-            height = destHeight;
+            width = (uint)NativeWindow.Width;
+            height = (uint)NativeWindow.Width;
 
-            graphics.Resize(destWidth, destHeight);
+            graphics.Resize(width, height);
 
             graphics.WaitIdle();
 
             // Notify derived class
-            windowResized();
-            viewChanged();
+            WindowResized();
+            WiewChanged();
 
             prepared = true;
         }
 
-        protected virtual void windowResized()
+        protected virtual void WindowResized()
         {
         }
 
-        protected virtual void buildCommandBuffers()
+        protected virtual void BuildCommandBuffers()
         {
         }
 
-        protected virtual void keyPressed(Key key)
-        {
-        }
     }
 
 }

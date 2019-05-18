@@ -16,7 +16,7 @@ namespace SharpGame
         public Vector4 lightPos;
     }
 
-    public unsafe class MeshExample : Application
+    public unsafe class MeshExample : SampleApp
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
         bool wireframe = false;
@@ -83,7 +83,7 @@ namespace SharpGame
             base.Destroy();
         }
         
-        protected override void buildCommandBuffers()
+        protected override void BuildCommandBuffers()
         {
             FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
             clearValues.First.color = defaultClearColor;
@@ -301,12 +301,12 @@ namespace SharpGame
 
             graphics.BeginRender();
 
-            buildCommandBuffers();
+            BuildCommandBuffers();
 
             graphics.EndRender();
         }
 
-        protected override void viewChanged()
+        protected override void WiewChanged()
         {
             updateUniformBuffers();
         }

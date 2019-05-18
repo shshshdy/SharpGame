@@ -16,7 +16,7 @@ namespace SharpGame
         public Matrix4x4 projection;
     }
 
-    public unsafe class ImGUI : Application, IDisposable
+    public unsafe class ImGUI : SampleApp
     {
         GraphicsBuffer vertexBuffer = new GraphicsBuffer();
         GraphicsBuffer indexBuffer = new GraphicsBuffer();
@@ -161,7 +161,7 @@ namespace SharpGame
             io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
         }
 
-        protected override void buildCommandBuffers()
+        protected override void BuildCommandBuffers()
         {
             FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
             clearValues.First.color = defaultClearColor;
@@ -201,7 +201,7 @@ namespace SharpGame
         {
             graphics.BeginRender();
 
-            buildCommandBuffers();
+            BuildCommandBuffers();
 
             graphics.EndRender();
         }
@@ -224,7 +224,7 @@ namespace SharpGame
             draw();
         }
 
-        protected override void viewChanged()
+        protected override void WiewChanged()
         {
             updateUniformBuffers();
         }
