@@ -173,13 +173,11 @@ namespace SharpGame
 
         protected override void buildCommandBuffers()
         {
-            //VkCommandBufferBeginInfo cmdBufInfo = Builder.CommandBufferBeginInfo();
-
             FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
             clearValues.First.color = defaultClearColor;
             clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
 
-            VkRenderPassBeginInfo renderPassBeginInfo = Builder.RenderPassBeginInfo();
+            var renderPassBeginInfo = VkRenderPassBeginInfo.New();
             renderPassBeginInfo.renderPass = Graphics.renderPass;
             renderPassBeginInfo.renderArea.offset.x = 0;
             renderPassBeginInfo.renderArea.offset.y = 0;
@@ -188,32 +186,23 @@ namespace SharpGame
             renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues);
 
-            //for (int i = 0; i < drawCmdBuffers.Count; ++i)
-
-            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;// Graphics.drawCmdBuffers[graphics.currentBuffer];
+            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
             {
                 // Set target frame buffer
                 renderPassBeginInfo.framebuffer = Graphics.frameBuffers[graphics.currentBuffer];
 
-                //Util.CheckResult(vkBeginCommandBuffer(cmdBuffer.commandBuffer, &cmdBufInfo));
                 cmdBuffer.Begin();
-
-                //vkCmdBeginRenderPass(cmdBuffer.commandBuffer, &renderPassBeginInfo, VkSubpassContents.Inline);
                 cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
 
-                VkViewport viewport = Builder.Viewport((float)width, (float)height, 0.0f, 1.0f);
-                //vkCmdSetViewport(cmdBuffer.commandBuffer, 0, 1, &viewport);
+                Viewport viewport = new Viewport(0, 0, width, height);
                 cmdBuffer.SetViewport(ref viewport);
-                VkRect2D scissor = Builder.Rect2D(0, 0, width, height);
-                //vkCmdSetScissor(cmdBuffer.commandBuffer, 0, 1, &scissor);
+
+                Rect2D scissor = new Rect2D(0, 0, (int)width, (int)height);
                 cmdBuffer.SetScissor(ref scissor);
 
                 RenderImDrawData(ImGui.GetDrawData());
 
-                //vkCmdEndRenderPass(cmdBuffer.commandBuffer);
                 cmdBuffer.EndRenderPass();
-
-                //Util.CheckResult(vkEndCommandBuffer(cmdBuffer.commandBuffer));
                 cmdBuffer.End();
             }
         }
@@ -294,19 +283,18 @@ namespace SharpGame
             }
 
 
-            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;////Graphics.drawCmdBuffers[graphics.currentBuffer];
+            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
 
             var pipelines_solid = pipeline.GetGraphicsPipeline(Graphics.renderPass, uiShader.Main, null);
-            //vkCmdBindDescriptorSets(cmdBuffer.commandBuffer, VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
+
             cmdBuffer.BindDescriptorSets(VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
-            //vkCmdBindPipeline(cmdBuffer.commandBuffer, VkPipelineBindPoint.Graphics, pipelines_solid);
+
             cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipelines_solid);
 
             ulong offsets = 0;
-            //vkCmdBindVertexBuffers(cmdBuffer.commandBuffer, 0, 1, ref vertexBuffer.buffer, &offsets);
+
             cmdBuffer.BindVertexBuffer(0, vertexBuffer, &offsets);
 
-            //vkCmdBindIndexBuffer(cmdBuffer.commandBuffer, indexBuffer.buffer, 0, VkIndexType.Uint16);
             cmdBuffer.BindIndexBuffer(indexBuffer, 0, IndexType.Uint16);
 
             draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
@@ -338,8 +326,8 @@ namespace SharpGame
                         }
                         
 
-                        VkRect2D scissor = Builder.Rect2D((int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y,
-                            (uint)(pcmd.ClipRect.Z - pcmd.ClipRect.X), (uint)(pcmd.ClipRect.W - pcmd.ClipRect.Y));
+                        Rect2D scissor = new Rect2D((int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y,
+                            (int)(pcmd.ClipRect.Z - pcmd.ClipRect.X), (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y));
                         cmdBuffer.SetScissor(ref scissor);
 
                         cmdBuffer.DrawIndexed(pcmd.ElemCount, 1, (uint)idx_offset, vtx_offset, 0);

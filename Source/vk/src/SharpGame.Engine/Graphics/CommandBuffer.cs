@@ -18,7 +18,7 @@ namespace SharpGame
 
         public void Begin()
         {
-            VkCommandBufferBeginInfo cmdBufInfo = Builder.CommandBufferBeginInfo();
+            var cmdBufInfo = VkCommandBufferBeginInfo.New();
             Util.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
         }
 
@@ -37,14 +37,14 @@ namespace SharpGame
             vkCmdEndRenderPass(commandBuffer);
         }
 
-        public void SetScissor(ref VkRect2D pScissors)
+        public void SetScissor(ref Rect2D pScissors)
         {
-            vkCmdSetScissor(commandBuffer, 0, 1, ref pScissors);
+            vkCmdSetScissor(commandBuffer, 0, 1, Utilities.AsPointer(ref pScissors));
         }
 
-        public void SetViewport(ref VkViewport pViewports)
+        public void SetViewport(ref Viewport pViewports)
         {
-            vkCmdSetViewport(commandBuffer, 0, 1, ref pViewports);
+            vkCmdSetViewport(commandBuffer, 0, 1, Utilities.AsPointer(ref pViewports));
         }
 
         public unsafe void BindDescriptorSets(VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint firstSet, uint descriptorSetCount, ref VkDescriptorSet pDescriptorSets, uint dynamicOffsetCount, uint* pDynamicOffsets)

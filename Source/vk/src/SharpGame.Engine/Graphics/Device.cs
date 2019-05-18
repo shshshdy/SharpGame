@@ -504,7 +504,7 @@ namespace SharpGame
                 // If host coherency hasn't been requested, do a manual flush to make writes visible
                 if ((memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
                 {
-                    VkMappedMemoryRange mappedRange = Builder.MappedMemoryRange();
+                    VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
                     mappedRange.memory = *memory;
                     mappedRange.offset = 0;
                     mappedRange.size = size;

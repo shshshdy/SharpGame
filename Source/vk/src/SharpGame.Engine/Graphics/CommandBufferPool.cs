@@ -41,7 +41,10 @@ namespace SharpGame
             cmdBuffers.Resize(count);
             cmdBuffers.Count = count;
 
-            VkCommandBufferAllocateInfo cmdBufAllocateInfo = Builder.CommandBufferAllocateInfo(cmdPool, VkCommandBufferLevel.Primary, count);
+            var cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
+            cmdBufAllocateInfo.commandPool = cmdPool;
+            cmdBufAllocateInfo.level = VkCommandBufferLevel.Primary;
+            cmdBufAllocateInfo.commandBufferCount = count;
 
             unsafe
             {

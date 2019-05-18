@@ -7,36 +7,6 @@ namespace SharpGame
 {
     public unsafe static class Builder
     {
-        public static VkSubmitInfo SubmitInfo()
-        {
-            VkSubmitInfo submitInfo = new VkSubmitInfo();
-            submitInfo.sType = VkStructureType.SubmitInfo;
-            return submitInfo;
-        }
-
-        public static VkCommandBufferAllocateInfo CommandBufferAllocateInfo(VkCommandPool commandPool, VkCommandBufferLevel level, uint bufferCount)
-        {
-            VkCommandBufferAllocateInfo commandBufferAllocateInfo = new VkCommandBufferAllocateInfo();
-            commandBufferAllocateInfo.sType = VkStructureType.CommandBufferAllocateInfo;
-            commandBufferAllocateInfo.commandPool = commandPool;
-            commandBufferAllocateInfo.level = level;
-            commandBufferAllocateInfo.commandBufferCount = bufferCount;
-            return commandBufferAllocateInfo;
-        }
-
-        public static VkCommandBufferBeginInfo CommandBufferBeginInfo()
-        {
-            VkCommandBufferBeginInfo cmdBufferBeginInfo = new VkCommandBufferBeginInfo();
-            cmdBufferBeginInfo.sType = VkStructureType.CommandBufferBeginInfo;
-            return cmdBufferBeginInfo;
-        }
-
-        public static VkRenderPassBeginInfo RenderPassBeginInfo()
-        {
-            VkRenderPassBeginInfo renderPassBeginInfo = VkRenderPassBeginInfo.New();
-            return renderPassBeginInfo;
-        }
-
         public static VkPipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo(
             PrimitiveTopology topology, uint flags = 0, uint primitiveRestartEnable = False)
         {
@@ -358,12 +328,6 @@ namespace SharpGame
             pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
             pipelineLayoutCreateInfo.pSetLayouts = (VkDescriptorSetLayout*)Unsafe.AsPointer(ref pSetLayouts);
             return pipelineLayoutCreateInfo;
-        }
-
-        public static VkMappedMemoryRange MappedMemoryRange()
-        {
-            VkMappedMemoryRange mappedMemoryRange = VkMappedMemoryRange.New();
-            return mappedMemoryRange;
         }
 
         public static VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo(

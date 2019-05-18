@@ -122,13 +122,13 @@ namespace SharpGame
 
         protected override void buildCommandBuffers()
         {
-            VkCommandBufferBeginInfo cmdBufInfo = Builder.CommandBufferBeginInfo();
+            var cmdBufInfo = VkCommandBufferBeginInfo.New();
 
             FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
             clearValues.First.color = defaultClearColor;
             clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
 
-            VkRenderPassBeginInfo renderPassBeginInfo = Builder.RenderPassBeginInfo();
+            var renderPassBeginInfo = VkRenderPassBeginInfo.New();
             renderPassBeginInfo.renderPass = Graphics.renderPass;
             renderPassBeginInfo.renderArea.offset.x = 0;
             renderPassBeginInfo.renderArea.offset.y = 0;
