@@ -63,7 +63,7 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkPipelineVertexInputStateCreateInfo native)
         {
-            native = Builder.VertexInputStateCreateInfo();
+            native = VkPipelineVertexInputStateCreateInfo.New();
             native.vertexBindingDescriptionCount = (uint)bindings.Length;
             native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AllocToPointer(bindings);
             native.vertexAttributeDescriptionCount = (uint)attributes.Length;

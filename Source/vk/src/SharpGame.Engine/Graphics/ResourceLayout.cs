@@ -77,9 +77,12 @@ namespace SharpGame
             VulkanNative.vkDestroyDescriptorSetLayout(Graphics.device, descriptorSetLayout, IntPtr.Zero);
         }
 
-        public void Build()
+        public unsafe void Build()
         {
-            var descriptorSetLayoutCreateInfo = Builder.DescriptorSetLayoutCreateInfo(bindings);
+            var descriptorSetLayoutCreateInfo = VkDescriptorSetLayoutCreateInfo.New();
+            descriptorSetLayoutCreateInfo.pBindings = (VkDescriptorSetLayoutBinding*)Utilities.AsPointer(ref bindings[0]);
+            descriptorSetLayoutCreateInfo.bindingCount = (uint)bindings.Length;
+
             VulkanNative.vkCreateDescriptorSetLayout(Graphics.device, ref descriptorSetLayoutCreateInfo, IntPtr.Zero, out descriptorSetLayout);
 
             descriptorResourceCounts = new DescriptorResourceCounts();            

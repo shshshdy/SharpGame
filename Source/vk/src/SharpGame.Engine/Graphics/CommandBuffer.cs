@@ -72,7 +72,7 @@ namespace SharpGame
             vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Graphics, pipeline);
         }
 
-        public void BindVertexBuffers(uint firstBinding, uint bindingCount, IntPtr pBuffers, ref ulong pOffsets)
+        public unsafe void BindVertexBuffers(uint firstBinding, uint bindingCount, IntPtr pBuffers, ref ulong pOffsets)
         {
             vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount, pBuffers, ref pOffsets);
         }

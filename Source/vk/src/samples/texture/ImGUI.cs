@@ -37,9 +37,9 @@ namespace SharpGame
             Title = "SharpGame Example - ImGUI";
         }
 
-        public override void Initialize()
+        public override void Init()
         {
-            base.Initialize();
+            base.Init();
 
             IntPtr context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
@@ -108,23 +108,13 @@ namespace SharpGame
         // Prepare and initialize uniform buffer containing shader uniforms
         void PrepareUniformBuffers()
         {
-            var localUboVS = uboVS;
-
             uniformBufferVS = GraphicsBuffer.CreateUniformBuffer<UboVS>();
-
             updateUniformBuffers();
         }
 
         void updateUniformBuffers()
         {
-            uboVS.projection = Matrix4x4.CreateOrthographicOffCenter(
-                     0f,
-                     width,
-                     height,
-                     0.0f,
-                     -1.0f,
-                     1.0f);
-
+            uboVS.projection = Matrix4x4.CreateOrthographicOffCenter(0f, width, height, 0.0f, -1.0f, 1.0f);
             uniformBufferVS.SetData(ref uboVS);
         }
 

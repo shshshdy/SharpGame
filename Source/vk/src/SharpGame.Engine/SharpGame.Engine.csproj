@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\..\SharpGame.Base\SharpGame.Base.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Rendering\" />
+    <Folder Include="FrameGraph\" />
+    <Folder Include="FrameGraph\" />
   </ItemGroup>
 </Project>

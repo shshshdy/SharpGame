@@ -33,7 +33,6 @@ namespace SharpGame
         private uint destWidth;
         private uint destHeight;
         private bool viewUpdated;
-
         protected bool paused = false;
         protected bool prepared;
 
@@ -44,12 +43,12 @@ namespace SharpGame
         protected Vector3 cameraPos = new Vector3();
         protected Vector2 mousePos;
 
-        protected Camera camera = new Camera();
+        protected vkCamera camera = new vkCamera();
 
         protected VkClearColorValue defaultClearColor => new VkClearColorValue(0.025f, 0.025f, 0.025f, 1.0f);
 
         protected InputSnapshot snapshot;
-        protected VkDescriptorPool descriptorPool;
+
 
         protected Context context;
 
@@ -66,12 +65,13 @@ namespace SharpGame
             cache = context.CreateSubsystem<ResourceCache>(DataPath);
         }
 
-        public virtual void Initialize()
+        public virtual void Init()
         {
         }
 
         protected override void Destroy()
         {
+            context.Dispose();
         }
 
         private IntPtr CreateWindow()
@@ -100,7 +100,7 @@ namespace SharpGame
 
             graphics.CreateSwapchain(NativeWindow.SdlWindowHandle);
 
-            Initialize();
+            Init();
 
             RenderLoop();
         }
@@ -220,9 +220,6 @@ namespace SharpGame
             height = destHeight;
 
             graphics.Resize(destWidth, destHeight);
-
-
-            buildCommandBuffers();
 
             graphics.WaitIdle();
 

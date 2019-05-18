@@ -109,5 +109,6 @@ namespace SharpGame
     {
         public static float Delta => InstanceHoler<Timer>.inst.DeltaTime;
         public static float Total => InstanceHoler<Timer>.inst.TotalTime;
+        public static int FrameNum => InstanceHoler<Timer>.inst.FrameNum;
     }
 }

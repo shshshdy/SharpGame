@@ -14,8 +14,9 @@ namespace SharpGame
             set
             {
                 vertexBuffers_ = value;
-                buffers_ = new VkBuffer[vertexBuffers_.Length];
-                offsets_ = new long[vertexBuffers_.Length];
+
+                buffers_.Count = (uint)vertexBuffers_.Length;
+                offsets_.Count = (uint)vertexBuffers_.Length;
                 for (int i = 0; i < vertexBuffers_.Length; i++)
                 {
                     buffers_[i] = vertexBuffers_[i].buffer;
@@ -34,8 +35,8 @@ namespace SharpGame
 
         public VertexLayout VertexLayout { get; set; }
 
-        VkBuffer[] buffers_;
-        long[] offsets_;
+        NativeList<VkBuffer> buffers_ = new NativeList<VkBuffer>();
+        NativeList<ulong> offsets_ = new NativeList<ulong>();
 
         public Geometry()
         {
@@ -117,18 +118,17 @@ namespace SharpGame
 
         public void Draw(CommandBuffer cmdBuffer)
         {
-            /*
-            cmdBuffer.CmdBindVertexBuffers(0, buffers_.Length, buffers_, offsets_);
+            cmdBuffer.BindVertexBuffers(0, buffers_.Count, buffers_.Data, ref offsets_[0]);
 
             if(IndexBuffer != null && IndexCount > 0)
             {
-                cmdBuffer.CmdBindIndexBuffer(IndexBuffer, 0, IndexBuffer.Stride == 2 ?  IndexType.UInt16 : IndexType.UInt32);
-                cmdBuffer.CmdDrawIndexed(IndexCount, 1, IndexStart, VertexStart);
+                cmdBuffer.BindIndexBuffer(IndexBuffer, 0, IndexBuffer.Stride == 2 ?  IndexType.Uint16 : IndexType.Uint32);
+                cmdBuffer.DrawIndexed((uint)IndexCount, 1, (uint)IndexStart, VertexStart, 0);
             }
             else
             {
-                cmdBuffer.CmdDraw(VertexCount, 1, VertexStart);
-            }*/
+                cmdBuffer.Draw((uint)VertexCount, 1, (uint)VertexStart, 0);
+            }
         }
     }
 }

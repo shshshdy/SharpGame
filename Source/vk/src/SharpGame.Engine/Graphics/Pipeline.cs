@@ -13,7 +13,7 @@ namespace SharpGame
     {
         Replace = 0,
         Add,
-        MultiplY,
+        Multiply,
         Alpha,
         AddAlpha,
         PremulAlpha,
@@ -24,8 +24,8 @@ namespace SharpGame
 
     public class Pipeline : Resource
     {
-        private RasterizationStateInfo rasterizationState_;
-        public ref RasterizationStateInfo RasterizationState => ref rasterizationState_;
+        private RasterizationStateInfo rasterizationState;
+        public ref RasterizationStateInfo RasterizationState => ref rasterizationState;
 
         private MultisampleStateInfo multisampleState;
         public ref MultisampleStateInfo MultisampleState => ref multisampleState;
@@ -40,19 +40,15 @@ namespace SharpGame
         private VertexLayout vertexlayout;
         public ref VertexLayout VertexLayout => ref vertexlayout;
 
-        public VkPipelineLayoutCreateInfo PipelineLayoutInfo { get; set; }
-
-        public PolygonMode FillMode { get => rasterizationState_.polygonMode; set => rasterizationState_.polygonMode = value; }
-        public CullMode CullMode { get => rasterizationState_.cullMode; set => rasterizationState_.cullMode = value; }
-        public FrontFace FrontFace { get => rasterizationState_.frontFace; set => rasterizationState_.frontFace = value; }
-
+        public PolygonMode FillMode { get => rasterizationState.polygonMode; set => rasterizationState.polygonMode = value; }
+        public CullMode CullMode { get => rasterizationState.cullMode; set => rasterizationState.cullMode = value; }
+        public FrontFace FrontFace { get => rasterizationState.frontFace; set => rasterizationState.frontFace = value; }
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
         public BlendMode BlendMode { set => SetBlendMode(value); }
         public DynamicStateInfo? DynamicState {get; set;}
 
         public VkPipelineLayout pipelineLayout;
-
         public VkPipeline pipeline;
 
         public Pipeline()
@@ -110,7 +106,6 @@ namespace SharpGame
 
         public unsafe void SetBlendMode(BlendMode blendMode)
         {
-            VkPipelineColorBlendAttachmentState colorBlendAttachmentState;
             switch (blendMode)
             {
                 case BlendMode.Replace:
@@ -152,7 +147,7 @@ namespace SharpGame
                     };
 
                     break;
-                case BlendMode.MultiplY:
+                case BlendMode.Multiply:
                     break;
                 case BlendMode.Alpha:
                    
@@ -241,8 +236,8 @@ namespace SharpGame
                 var inputAssemblyStateCreateInfo = InputAssemblyStateCreateInfo(geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
                 pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
 
-                rasterizationState_.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationState);
-                pipelineCreateInfo.pRasterizationState = &rasterizationState;
+                rasterizationState.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo);
+                pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 
                 var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
                 pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;

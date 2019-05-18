@@ -1,189 +1,324 @@
 ﻿using System;
-using System.Numerics;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace SharpGame
 {
-    public class Camera
+    [DataContract]
+    public class Camera : Component
     {
-        float fov;
-        float znear, zfar;
+        const float M_LARGE_EPSILON = 0.00005f;
+        const float M_MIN_NEARCLIP = 0.01f;
+        const float M_MAX_FOV = 160.0f;
 
-        public void updateViewMatrix()
+        const float DEFAULT_NEARCLIP = 0.1f;
+        const float DEFAULT_FARCLIP = 1000.0f;
+        const float DEFAULT_CAMERA_FOV = 45.0f * (MathUtil.Pi / 180.0f);
+        const float DEFAULT_ORTHOSIZE = 20.0f;
+
+        const uint DEFAULT_VIEWMASK = uint.MaxValue;
+
+        [DataMember(Order = 0)]
+        public bool Orthographic { get => orthographic_; set => SetOrthographic(value); }
+
+        [DataMember(Order = 1)]
+        public float NearClip { get => nearClip_; set => SetNearClip(value); }
+
+        [DataMember(Order = 2)]
+        public float FarClip { get => farClip_; set => SetFarClip(value); }
+
+        [DataMember(Order = 3)]
+        public float Fov { get => fov_; set => SetFov(value); }
+
+        [DataMember(Order = 4)]
+        public float OrthoSize { get => orthoSize_; set => SetOrthoSize(value); }
+
+        [DataMember(Order = 5)]
+        public float AspectRatio { get => aspectRatio_; set => SetAspectRatio(value); }
+
+        [IgnoreDataMember]
+        public bool AutoAspectRatio => autoAspectRatio_;
+
+        [DataMember(Order = 6)]
+        public float Zoom { get => zoom_; set => SetZoom(value); }
+
+
+        /// Return projection matrix. It's in D3D convention with depth range 0 - 1.
+        [IgnoreDataMember]
+        public ref Matrix Projection
         {
-            Matrix4x4 rotM = Matrix4x4.Identity;
-            Matrix4x4 transM;
-
-            rotM = Matrix4x4.CreateRotationX(Util.DegreesToRadians(rotation.X)) * rotM;
-            rotM = Matrix4x4.CreateRotationY(Util.DegreesToRadians(rotation.Y)) * rotM;
-            rotM = Matrix4x4.CreateRotationZ(Util.DegreesToRadians(rotation.Z)) * rotM;
-
-            transM = Matrix4x4.CreateTranslation((System.Numerics.Vector3)position);
-
-            //if (type == CameraType.firstperson)
+            get
             {
-                matrices_view = rotM * transM;
-            }
-            //else
-            //{
-            //    matrices_view = transM * rotM;
-            //}
-        }
-
-        public enum CameraType { lookat, firstperson }
-        public CameraType type = CameraType.lookat;
-
-        Vector3 rotation = new Vector3();
-        Vector3 position = new Vector3();
-
-        public float rotationSpeed = 1.0f;
-        public float movementSpeed = 1.0f;
-
-        public Matrix4x4 matrices_perspective;
-        public Matrix4x4 matrices_view;
-
-        bool keys_left = false;
-        bool keys_right = false;
-        bool keys_up = false;
-        bool keys_down = false;
-
-        public bool moving()
-        {
-            return keys_left || keys_right || keys_up || keys_down;
-        }
-
-        public void setPerspective(float fov, float aspect, float znear, float zfar)
-        {
-            this.fov = fov;
-            this.znear = znear;
-            this.zfar = zfar;
-            matrices_perspective = Matrix4x4.CreatePerspectiveFieldOfView(Util.DegreesToRadians(fov), aspect, znear, zfar);
-        }
-
-        public void updateAspectRatio(float aspect)
-        {
-            matrices_perspective = Matrix4x4.CreatePerspectiveFieldOfView(Util.DegreesToRadians(fov), aspect, znear, zfar);
-        }
-
-        public void setPosition(Vector3 position)
-        {
-            this.position = position;
-            updateViewMatrix();
-        }
-
-        public void setRotation(Vector3 rotation)
-        {
-            this.rotation = rotation;
-            updateViewMatrix();
-        }
-
-        public void rotate(Vector3 delta)
-        {
-            this.rotation += delta;
-            updateViewMatrix();
-        }
-
-        public void setTranslation(Vector3 translation)
-        {
-            this.position = translation;
-            updateViewMatrix();
-        }
-
-        public void translate(Vector3 delta)
-        {
-            this.position += delta;
-            updateViewMatrix();
-        }
-
-        public void update(float deltaTime)
-        {
-            if (type == CameraType.firstperson)
-            {
-                if (moving())
+                if(projectionDirty_)
                 {
-                    Vector3 camFront;
-                    camFront.X = (float)(-Math.Cos(Util.DegreesToRadians(rotation.X)) * Math.Sin(Util.DegreesToRadians(rotation.Y)));
-                    camFront.Y = (float)(Math.Sin(Util.DegreesToRadians(rotation.X)));
-                    camFront.Z = (float)(Math.Cos(Util.DegreesToRadians(rotation.X)) * Math.Cos(Util.DegreesToRadians(rotation.Y)));
-                    camFront = Vector3.Normalize(camFront);
-
-                    float moveSpeed = deltaTime * movementSpeed;
-
-                    if (keys_up)
-                        position += camFront * moveSpeed;
-                    if (keys_down)
-                        position -= camFront * moveSpeed;
-                    if (keys_left)
-                        position -= Vector3.Normalize(Vector3.Cross(camFront, new Vector3(0.0f, 1.0f, 0.0f))) * moveSpeed;
-                    if (keys_right)
-                        position += Vector3.Normalize(Vector3.Cross(camFront, new Vector3(0.0f, 1.0f, 0.0f))) * moveSpeed;
-
-                    updateViewMatrix();
+                    UpdateProjection();
                 }
+
+                return ref projection_;
             }
         }
 
-        // Update camera passing separate axis data (gamepad)
-        // Returns true if view or position has been changed
-        bool updatePad(Vector2 axisLeft, Vector2 axisRight, float deltaTime)
+        /// Return view matrix.
+        [IgnoreDataMember]
+        public ref Matrix View
         {
-            bool retVal = false;
-
-            if (type == CameraType.firstperson)
+            get
             {
-                // Use the common console thumbstick layout		
-                // Left = view, right = move
-
-                const float deadZone = 0.0015f;
-                const float range = 1.0f - deadZone;
-
-                Vector3 camFront;
-                camFront.X = (float)(-Math.Cos(Util.DegreesToRadians(rotation.X)) * Math.Sin(Util.DegreesToRadians(rotation.Y)));
-                camFront.Y = (float)(Math.Sin(Util.DegreesToRadians(rotation.X)));
-                camFront.Z = (float)(Math.Cos(Util.DegreesToRadians(rotation.X)) * Math.Cos(Util.DegreesToRadians(rotation.Y)));
-                camFront = Vector3.Normalize(camFront);
-
-                float moveSpeed = deltaTime * movementSpeed * 2.0f;
-                float rotSpeed = deltaTime * rotationSpeed * 50.0f;
-
-                // Move
-                if (Math.Abs(axisLeft.Y) > deadZone)
+                if(viewDirty_)
                 {
-                    float pos = (Math.Abs(axisLeft.Y) - deadZone) / range;
-                    position -= camFront * pos * ((axisLeft.Y < 0.0f) ? -1.0f : 1.0f) * moveSpeed;
-                    retVal = true;
-                }
-                if (Math.Abs(axisLeft.X) > deadZone)
-                {
-                    float pos = (Math.Abs(axisLeft.X) - deadZone) / range;
-                    position += Vector3.Normalize(Vector3.Cross(camFront, new Vector3(0.0f, 1.0f, 0.0f))) * pos * ((axisLeft.X < 0.0f) ? -1.0f : 1.0f) * moveSpeed;
-                    retVal = true;
+                    if(node_ != null)
+                    {
+                        // Note: view matrix is unaffected by node or parent scale
+                        Vector3 worldPosition = node_.WorldPosition;
+                        view_ = Matrix.Transformation(ref worldPosition, ref node_.WorldRotation);
+                        view_.Invert();
+                        
+                    }
+                    else
+                    {
+                        view_ = Matrix.Identity;
+                    }
+
+                    viewDirty_ = false;
                 }
 
-                // Rotate
-                if (Math.Abs(axisRight.X) > deadZone)
+                return ref view_;
+            }
+        }
+
+        [IgnoreDataMember]
+        public ref BoundingFrustum Frustum
+        {
+            get
+            {
+                if(projectionDirty_)
                 {
-                    float pos = (Math.Abs(axisRight.X) - deadZone) / range;
-                    rotation.Y += pos * ((axisRight.X < 0.0f) ? -1.0f : 1.0f) * rotSpeed;
-                    retVal = true;
+                    UpdateProjection();
                 }
-                if (Math.Abs(axisRight.Y) > deadZone)
+
+                if(frustumDirty_)
                 {
-                    float pos = (Math.Abs(axisRight.Y) - deadZone) / range;
-                    rotation.X -= pos * ((axisRight.Y < 0.0f) ? -1.0f : 1.0f) * rotSpeed;
-                    retVal = true;
+                    frustum_.Matrix = View * projection_;
+                    frustumDirty_ = false;
                 }
+
+                return ref frustum_;
+            }
+
+        }
+
+        [IgnoreDataMember]
+        public BoundingFrustum ViewSpaceFrustum
+        {
+            get
+            {
+                if (projectionDirty_)
+                    UpdateProjection();
+
+                return new BoundingFrustum(projection_);
+            }
+
+        }
+
+        /// Cached view matrix.
+        Matrix view_;
+        /// Cached projection matrix.
+        Matrix projection_;
+        /// Cached world space frustum.
+        BoundingFrustum frustum_;
+
+        /// View matrix dirty flag.
+        bool viewDirty_ = true;
+        /// Projection matrix dirty flag.
+        bool projectionDirty_ = true;
+        /// Frustum dirty flag.
+        bool frustumDirty_ = true;
+        /// Orthographic mode flag.
+        bool orthographic_ = false;
+
+        /// Near clip distance.
+        float nearClip_ = DEFAULT_NEARCLIP;
+        /// Far clip distance.
+        float farClip_ = DEFAULT_FARCLIP;
+        /// Field of view.
+        float fov_ = DEFAULT_CAMERA_FOV;
+        /// Orthographic view size.
+        float orthoSize_ = DEFAULT_ORTHOSIZE;
+        /// Aspect ratio.
+        float aspectRatio_ = 1.0f;
+        /// Zoom.
+        float zoom_ = 1.0f;
+        /// View mask.
+        uint viewMask_ = uint.MaxValue;
+        /// LOD bias.
+        float lodBias_ = 1.0f;
+        /// View override flags.
+        uint viewOverrideFlags_;
+
+        bool autoAspectRatio_ = true;
+
+        public void SetNearClip(float nearClip)
+        {
+            nearClip_ = Math.Max(nearClip, M_MIN_NEARCLIP);
+            frustumDirty_ = true;
+            projectionDirty_ = true;
+        }
+
+        public void SetFarClip(float farClip)
+        {
+            farClip_ = Math.Max(farClip, M_MIN_NEARCLIP);
+            frustumDirty_ = true;
+            projectionDirty_ = true;
+        }
+
+        public void SetFov(float fov)
+        {
+            fov_ = MathUtil.Clamp(fov, 0.0f, M_MAX_FOV);
+            frustumDirty_ = true;
+            projectionDirty_ = true;
+        }
+
+        public void SetOrthoSize(float orthoSize)
+        {
+            orthoSize_ = orthoSize;
+            aspectRatio_ = 1.0f;
+            frustumDirty_ = true;
+            projectionDirty_ = true;
+        }
+
+        public void SetOrthoSize(Vector2 orthoSize)
+        {
+            autoAspectRatio_ = false;
+            orthoSize_ = orthoSize.Y;
+            aspectRatio_ = orthoSize.X / orthoSize.Y;
+            frustumDirty_ = true;
+            projectionDirty_ = true;
+        }
+
+        public void SetAspectRatio(float aspectRatio)
+        {
+            autoAspectRatio_ = false;
+            SetAspectRatioInternal(aspectRatio);
+        }
+
+        internal void SetAspectRatioInternal(float aspectRatio)
+        {
+            if(aspectRatio != aspectRatio_)
+            {
+                aspectRatio_ = aspectRatio;
+                frustumDirty_ = true;
+                projectionDirty_ = true;
+            }
+        }
+
+        public void SetZoom(float zoom)
+        {
+            zoom_ = Math.Max(zoom, MathUtil.Epsilon);
+            frustumDirty_ = true;
+            projectionDirty_ = true;
+        }
+
+        public void SetViewMask(uint mask)
+        {
+            viewMask_ = mask;
+        }
+
+        public void SetOrthographic(bool enable)
+        {
+            orthographic_ = enable;
+            frustumDirty_ = true;
+            projectionDirty_ = true;
+        }
+
+        public void SetAutoAspectRatio(bool enable)
+        {
+            autoAspectRatio_ = enable;
+        }
+
+        public override void OnNodeSet(Node node)
+        {
+            if(node != null)
+                node.AddListener(this);
+        }
+
+        public override void OnMarkedDirty(Node node)
+        {
+            frustumDirty_ = true;
+            viewDirty_ = true;
+        }
+
+        void UpdateProjection()
+        {
+            if(orthographic_)
+            {
+                float h = (1.0f / (orthoSize_ * 0.5f)) * zoom_;
+                float w = h / aspectRatio_;
+                Matrix.OrthoLH(w, h, nearClip_, farClip_, false, out projection_);
             }
             else
             {
-                // todo: move code from example base class for look-at
+                Matrix.PerspectiveFovLH(fov_, aspectRatio_, nearClip_, farClip_, out projection_);
             }
 
-            if (retVal)
+            projectionDirty_ = false;
+        }
+
+
+        public void GetFrustumSize(ref Vector3 near, ref Vector3 far)
+        {
+            var viewSpaceFrustum = ViewSpaceFrustum;  /*
+            near = viewSpaceFrustum.vertices_[0];
+            far = viewSpaceFrustum.vertices_[4];
+          
+                /// \todo Necessary? Explain this
+                if (flipVertical_)
+                {
+                    near.Y = -near.Y;
+                    far.Y = -far.Y;
+                }*/
+        }
+
+        public float GetHalfViewSize()
+        {
+            if(!orthographic_)
+                return (float)Math.Tan(fov_/** MathUtil.DegreesToRadians*/ * 0.5f) / zoom_;
+            else
+                return orthoSize_ * 0.5f / zoom_;
+        }
+
+        public float GetDistance(Vector3 worldPos)
+        {
+            if(!orthographic_)
             {
-                updateViewMatrix();
+                Vector3 cameraPos = node_ ? node_.WorldPosition : Vector3.Zero;
+                return (worldPos - cameraPos).Length();
             }
+            else
+                return Math.Abs(Vector3.Transform(worldPos, View).Z);
+        }
 
-            return retVal;
+        public float GetDistanceSquared(ref Vector3 worldPos)
+        {
+            if(!orthographic_)
+            {
+                Vector3 cameraPos = node_ ? node_.WorldPosition : Vector3.Zero;
+                return (worldPos - cameraPos).LengthSquared();
+            }
+            else
+            {
+                float distance = Vector3.Transform(worldPos, View).Z;
+                return distance * distance;
+            }
+        }
+
+        public float GetLodDistance(float distance, float scale, float bias)
+        {
+            float d = Math.Max(lodBias_ * bias * scale * zoom_, MathUtil.Epsilon);
+            if(!orthographic_)
+                return distance / d;
+            else
+                return orthoSize_ / d;
         }
     }
 }

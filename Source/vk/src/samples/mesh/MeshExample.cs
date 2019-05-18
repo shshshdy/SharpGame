@@ -20,12 +20,8 @@ namespace SharpGame
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
         bool wireframe = false;
-        Texture2D textures_colorMap = new Texture2D();
 
-        VkPipelineVertexInputStateCreateInfo vertices_inputState;
-        NativeList<VkVertexInputBindingDescription> vertices_bindingDescriptions = new NativeList<VkVertexInputBindingDescription>();
-        NativeList<VkVertexInputAttributeDescription> vertices_attributeDescriptions = new NativeList<VkVertexInputAttributeDescription>();
-
+        Texture2D colorMap = new Texture2D();
         VertexLayout vertexLayout;
 
         // Vertex layout used in this example
@@ -46,9 +42,7 @@ namespace SharpGame
 
         GraphicsBuffer modelVertexBuffer;
         GraphicsBuffer modelIndexBuffer;
-
-
-        GraphicsBuffer uniformBuffers_scene = new GraphicsBuffer();
+        GraphicsBuffer uniformBufferScene = new GraphicsBuffer();
 
         UboVS uboVS = new UboVS() { lightPos = new Vector4(25.0f, 5.0f, 5.0f, 1.0f) };
 
@@ -58,10 +52,7 @@ namespace SharpGame
 
         Pipeline pipelineSolid;
         Pipeline pipelineWireframe;
-
-        VkPipeline pipelines_solid;
-        VkPipeline pipelines_wireframe;
-
+        
         public MeshExample()
         {
             zoom = -5.5f;
@@ -72,12 +63,12 @@ namespace SharpGame
             Title = "Vulkan Example - Model rendering";
         }
 
-        public override void Initialize()
+        public override void Init()
         {
-            base.Initialize();
+            base.Init();
 
-            loadAssets();
-            prepareUniformBuffers();
+            LoadAssets();
+            CreateUniformBuffers();
             CreatePipelines();
             SetupResourceSet();
 
@@ -86,19 +77,12 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            // Clean up used Vulkan resources 
-            // Note : Inherited destructor cleans up resources stored in base class
-            Device.DestroyPipeline(pipelines_solid);
-            if (pipelines_wireframe != 0)
-            {
-                Device.DestroyPipeline(pipelines_wireframe);
-            }
-
             modelVertexBuffer.Dispose();
             modelIndexBuffer.Dispose();
-
-            textures_colorMap.Dispose();
-            uniformBuffers_scene.Dispose();
+            colorMap.Dispose();
+            uniformBufferScene.Dispose();
+            pipelineSolid.Dispose();
+            pipelineWireframe.Dispose();
 
             base.Destroy();
         }
@@ -134,9 +118,8 @@ namespace SharpGame
                 Rect2D scissor = new Rect2D(0, 0, (int)width, (int)height);
                 cmdBuffer.SetScissor(ref scissor);
 
-                var pipe = wireframe ? pipelineSolid : pipelineWireframe;
-                var pipeline = wireframe ? pipe.GetGraphicsPipeline(Graphics.renderPass, shader.Main, null)
-                            : pipe.GetGraphicsPipeline(Graphics.renderPass, shader.Main, null);
+                var pipe = wireframe ? pipelineWireframe : pipelineSolid;
+                var pipeline = pipe.GetGraphicsPipeline(Graphics.renderPass, shader.Main, null);
 
                 cmdBuffer.BindDescriptorSets(VkPipelineBindPoint.Graphics, pipe.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
                 cmdBuffer.BindGraphicsPipeline(pipeline);
@@ -152,7 +135,7 @@ namespace SharpGame
         }
 
         // Load a model from file using the ASSIMP model loader and generate all resources required to render the model
-        void loadModel(string filename)
+        void LoadModel(string filename)
         {
             // Load the model from file using ASSIMP
 
@@ -222,21 +205,22 @@ namespace SharpGame
 
         }
 
-        void loadAssets()
+        void LoadAssets()
         {
-            loadModel(DataPath + "models/voyager/voyager.dae");
+            LoadModel(DataPath + "models/voyager/voyager.dae");
+
             if (Device.Features.textureCompressionBC == 1)
             {
-                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_bc3_unorm.ktx",
+                colorMap.loadFromFile(DataPath + "models/voyager/voyager_bc3_unorm.ktx",
                     VkFormat.Bc3UnormBlock, Graphics.queue);
             }
             else if (Device.Features.textureCompressionASTC_LDR == 1)
             {
-                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, Graphics.queue);
+                colorMap.loadFromFile(DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, Graphics.queue);
             }
             else if (Device.Features.textureCompressionETC2 == 1)
             {
-                textures_colorMap.loadFromFile(DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, Graphics.queue);
+                colorMap.loadFromFile(DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, Graphics.queue);
             }
             else
             {
@@ -246,7 +230,7 @@ namespace SharpGame
 
         void SetupResourceSet()
         {
-            resourceSet = new ResourceSet(resourceLayout, uniformBuffers_scene, textures_colorMap);
+            resourceSet = new ResourceSet(resourceLayout, uniformBufferScene, colorMap);
         }
 
         void CreatePipelines()
@@ -254,12 +238,12 @@ namespace SharpGame
             vertexLayout = new VertexLayout
             {
                 bindings = new[]
-                   {
+                {
                     new VertexInputBinding(0, (uint)sizeof(Vertex), VertexInputRate.Vertex)
                 },
 
                 attributes = new[]
-                   {
+                {
                     new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, Vertex.PositionOffset),
                     new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, Vertex.NormalOffset),
                     new VertexInputAttribute(0, 2, Format.R32g32Sfloat, Vertex.UvOffset),
@@ -301,9 +285,9 @@ namespace SharpGame
         }
 
         // Prepare and initialize uniform buffer containing shader uniforms
-        void prepareUniformBuffers()
+        void CreateUniformBuffers()
         {
-            uniformBuffers_scene = GraphicsBuffer.CreateUniformBuffer<UboVS>();
+            uniformBufferScene = GraphicsBuffer.CreateUniformBuffer<UboVS>();
             updateUniformBuffers();
         }
 
@@ -317,7 +301,7 @@ namespace SharpGame
             uboVS.model = System.Numerics.Matrix4x4.CreateRotationY(Util.DegreesToRadians(rotation.Y)) * uboVS.model;
             uboVS.model = System.Numerics.Matrix4x4.CreateRotationZ(Util.DegreesToRadians(rotation.Z)) * uboVS.model;
 
-            uniformBuffers_scene.SetData(ref uboVS);
+            uniformBufferScene.SetData(ref uboVS);
         }
         
         protected override void render()
