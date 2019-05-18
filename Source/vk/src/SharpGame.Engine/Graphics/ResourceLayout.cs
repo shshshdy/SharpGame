@@ -29,7 +29,7 @@ namespace SharpGame
         public ShaderStage stageFlags;
         public VkSampler[] pImmutableSamplers;
 
-        public ResourceLayoutBinding(DescriptorType type, ShaderStage stageFlags, uint binding, uint descriptorCount = 1)
+        public ResourceLayoutBinding(uint binding, DescriptorType type, ShaderStage stageFlags, uint descriptorCount = 1)
         {
             descriptorType = type;
             this.binding = binding;

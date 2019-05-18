@@ -38,10 +38,7 @@ namespace SharpGame
             public const uint ColorOffset = 32;
         };
 
-        int model_indices_count;
-
-        GraphicsBuffer modelVertexBuffer;
-        GraphicsBuffer modelIndexBuffer;
+        Geometry geometry;
         GraphicsBuffer uniformBufferScene = new GraphicsBuffer();
 
         UboVS uboVS = new UboVS() { lightPos = new Vector4(25.0f, 5.0f, 5.0f, 1.0f) };
@@ -77,8 +74,7 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            modelVertexBuffer.Dispose();
-            modelIndexBuffer.Dispose();
+            geometry.Dispose();
             colorMap.Dispose();
             uniformBufferScene.Dispose();
             pipelineSolid.Dispose();
@@ -112,22 +108,11 @@ namespace SharpGame
                 cmdBuffer.Begin();
                 cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
 
-                Viewport viewport = new Viewport(0, 0, (float)width, (float)height, 0.0f, 1.0f);
-                cmdBuffer.SetViewport(ref viewport);
-
-                Rect2D scissor = new Rect2D(0, 0, (int)width, (int)height);
-                cmdBuffer.SetScissor(ref scissor);
+                cmdBuffer.SetViewport(new Viewport(0, 0, (float)width, (float)height, 0.0f, 1.0f));
+                cmdBuffer.SetScissor(new Rect2D(0, 0, (int)width, (int)height));
 
                 var pipe = wireframe ? pipelineWireframe : pipelineSolid;
-                var pipeline = pipe.GetGraphicsPipeline(Graphics.renderPass, shader.Main, null);
-
-                cmdBuffer.BindDescriptorSets(VkPipelineBindPoint.Graphics, pipe.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
-                cmdBuffer.BindGraphicsPipeline(pipeline);
-
-                // Bind mesh vertex buffer
-                cmdBuffer.BindVertexBuffer(VERTEX_BUFFER_BIND_ID, modelVertexBuffer);
-                cmdBuffer.BindIndexBuffer(modelIndexBuffer, 0, IndexType.Uint32);
-                cmdBuffer.DrawIndexed((uint)model_indices_count, 1, 0, 0, 0);
+                cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);
 
                 cmdBuffer.EndRenderPass();
                 cmdBuffer.End();
@@ -178,7 +163,7 @@ namespace SharpGame
                 }
             }
 
-            modelVertexBuffer = GraphicsBuffer.Create(BufferUsage.VertexBuffer, false,
+            var vb = GraphicsBuffer.Create(BufferUsage.VertexBuffer, false,
                 sizeof(Vertex), (int)vertexBuffer.Count, vertexBuffer.Data);
 
             ulong vertexBufferSize = (ulong)(vertexBuffer.Count * sizeof(Vertex));
@@ -198,11 +183,16 @@ namespace SharpGame
                 }
             }
 
-            modelIndexBuffer = GraphicsBuffer.Create(BufferUsage.IndexBuffer, false,
-                sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
+            var ib = GraphicsBuffer.Create(BufferUsage.IndexBuffer, false, sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
 
-            model_indices_count = (int)indexBuffer.Count;
+            geometry = new Geometry
+            {
+                VertexBuffers = new[] { vb },
+                IndexBuffer = ib,
+                VertexLayout = vertexLayout
+            };
 
+            geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, ib.Count);
         }
 
         void LoadAssets()
@@ -254,8 +244,8 @@ namespace SharpGame
 
             resourceLayout = new ResourceLayout
             (
-                new ResourceLayoutBinding(DescriptorType.UniformBuffer, ShaderStage.Vertex, 0),
-                new ResourceLayoutBinding(DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
             );
 
             shader = new Shader

@@ -131,23 +131,6 @@ namespace SharpGame
                 );
         }*/
 
-        public void DrawGeometry(Geometry geometry, Pipeline pipeline, Material material)
-        {/*
-            var pipe = pipeline.GetGraphicsPipeline(this, material.Shader, geometry);
-            cmdBuffer_.CmdBindPipeline(PipelineBindPoint.Graphics, pipe);
-            cmdBuffer_.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout,
-                material.ResourceSet.descriptorSet);
-            geometry.Draw(cmdBuffer_);*/
-        }
-
-        public void DrawGeometry(Geometry geometry, Pipeline pipeline, Shader shader, ResourceSet resourceSet)
-        {/*
-            var pipe = pipeline.GetGraphicsPipeline(this, shader, geometry);
-            cmdBuffer_.CmdBindPipeline(PipelineBindPoint.Graphics, pipe);
-            cmdBuffer_.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout, resourceSet.descriptorSet);
-            geometry.Draw(cmdBuffer_);*/
-        }
-
         public void DrawBatch(SourceBatch batch, Pipeline pipeline, ResourceSet resourceSet)
         {/*
             var shader = batch.material_.Shader;

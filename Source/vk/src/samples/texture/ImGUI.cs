@@ -82,8 +82,8 @@ namespace SharpGame
                         
             resourceLayout = new ResourceLayout
             (
-                new ResourceLayoutBinding(DescriptorType.UniformBuffer, ShaderStage.Vertex, 0),
-                new ResourceLayoutBinding(DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
             );
 
             uiShader = new Shader

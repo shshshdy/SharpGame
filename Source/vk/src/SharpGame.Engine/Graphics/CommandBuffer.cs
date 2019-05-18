@@ -10,7 +10,7 @@ namespace SharpGame
     public class CommandBuffer : DisposeBase
     {
         public VkCommandBuffer commandBuffer;
-
+        private VkRenderPass renderPass;
         public CommandBuffer(VkCommandBuffer cmdBuffer)
         {
             commandBuffer = cmdBuffer;
@@ -30,6 +30,7 @@ namespace SharpGame
         public void BeginRenderPass(ref VkRenderPassBeginInfo renderPassBeginInfo, VkSubpassContents contents)
         {
             vkCmdBeginRenderPass(commandBuffer, ref renderPassBeginInfo, contents);
+            renderPass = renderPassBeginInfo.renderPass;
         }
 
         public void EndRenderPass()
@@ -60,6 +61,12 @@ namespace SharpGame
         public unsafe void BindDescriptorSets(VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint firstSet, uint descriptorSetCount, ref VkDescriptorSet pDescriptorSets, uint dynamicOffsetCount, uint* pDynamicOffsets)
         {
             vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, ref pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
+        }
+
+        public unsafe void BindResourceSet(VkPipelineBindPoint pipelineBindPoint,
+            VkPipelineLayout layout, ResourceSet pDescriptorSets, uint dynamicOffsetCount, uint* pDynamicOffsets)
+        {
+            vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout, 0, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
         public void BindPipeline(VkPipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
@@ -97,5 +104,22 @@ namespace SharpGame
         {
             vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
         }
+
+        public unsafe void DrawGeometry(Geometry geometry, Pipeline pipeline, Material material)
+        {
+            var pipe = pipeline.GetGraphicsPipeline(renderPass, material.Shader.Main, geometry);
+            BindPipeline(VkPipelineBindPoint.Graphics, pipe);
+            BindResourceSet(VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, material.ResourceSet, 0, null);
+            geometry.Draw(this);
+        }
+
+        public unsafe void DrawGeometry(Geometry geometry, Pipeline pipeline, Pass shader, ResourceSet resourceSet)
+        {
+            var pipe = pipeline.GetGraphicsPipeline(renderPass, shader, geometry);
+            BindPipeline(VkPipelineBindPoint.Graphics, pipe);
+            BindResourceSet(VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, resourceSet, 0, null);
+            geometry.Draw(this);
+        }
+
     }
 }
