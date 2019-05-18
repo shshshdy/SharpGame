@@ -79,10 +79,8 @@ namespace SharpGame
             Stage = stage;
             FileName = fileName;
             FuncName = funcName;
-
-            var res = Get<ResourceCache>();
-            
-            using (File stream = res.Open(fileName))
+                        
+            using (File stream = ResourceCache.Instance.Open(fileName))
             {
                 Code = stream.ReadAllBytes();
             }
@@ -101,12 +99,9 @@ namespace SharpGame
 
         protected override void OnBuild()
         {
-            var fileSystem = Get<FileSystem>();
-            var resourceCache = Get<ResourceCache>();
-
             if (Code == null)
             {
-                using (File stream = resourceCache.Open(FileName))
+                using (File stream = ResourceCache.Instance.Open(FileName))
                 {
                     Code = stream.ReadAllBytes();
                 }

@@ -54,7 +54,7 @@ namespace SharpGame
                     return;
                 }
 
-                for(int i = 0; i < Passes.Count; i++)
+                for (int i = 0; i < Passes.Count; i++)
                 {
                     if(Passes[i].passID == 0)
                     {

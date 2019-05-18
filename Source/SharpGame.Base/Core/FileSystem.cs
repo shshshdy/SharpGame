@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    public class FileSystem : Object
+    public class FileSystem : System<FileSystem>
     {
         public FileSystem()
         {

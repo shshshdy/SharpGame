@@ -18,13 +18,6 @@ namespace SharpGame
         public VkSemaphore TextOverlayComplete;
     }
 
-    public struct DepthStencil
-    {
-        public VkImage Image;
-        public VkDeviceMemory Mem;
-        public VkImageView View;
-    }
-
     public class Settings
     {
         public bool Validation { get; set; } = true;
@@ -35,17 +28,14 @@ namespace SharpGame
     public unsafe partial class Graphics : System<Graphics>
     {
         public Settings Settings { get; } = new Settings();
-
         public VkInstance VkInstance { get; protected set; }
-        public VkPhysicalDevice physicalDevice { get; protected set; }
         public VkPhysicalDeviceFeatures enabledFeatures { get; protected set; }
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
 
         public static VkDevice device { get; protected set; }
-
         public static VkQueue queue { get; protected set; }
-        public static VkFormat DepthFormat { get; protected set; }
-        public VulkanSwapchain Swapchain { get; } = new VulkanSwapchain();
+        public static Format DepthFormat { get; protected set; }
+        public Swapchain Swapchain { get; } = new Swapchain();
 
         public static uint Width { get; private set; }
         public static uint Height { get; private set; }
@@ -54,8 +44,6 @@ namespace SharpGame
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
-        public VkCommandPool cmdPool => _cmdPool;
-
         public CommandBufferPool commandBufferPool;
 
         public CommandBuffer RenderCmdBuffer => commandBufferPool.CommandBuffers[currentBuffer];
@@ -63,17 +51,17 @@ namespace SharpGame
         public static NativeList<VkCommandBuffer> drawCmdBuffers { get; protected set; } = new NativeList<VkCommandBuffer>();
         public static VkRenderPass renderPass => _renderPass;
 
-        public NativeList<Semaphores> semaphores = new NativeList<Semaphores>(1, 1);
-        public Semaphores* GetSemaphoresPtr() => (Semaphores*)semaphores.GetAddress(0);
-        public DepthStencil DepthStencil;
-        public VkSubmitInfo submitInfo;
+        public uint currentBuffer;
+
+        private NativeList<Semaphores> semaphores = new NativeList<Semaphores>(1, 1);
+        private DepthStencil depthStencil;
+
         public NativeList<VkPipelineStageFlags> submitPipelineStages = CreateSubmitPipelineStages();
         private static NativeList<VkPipelineStageFlags> CreateSubmitPipelineStages()
             => new NativeList<VkPipelineStageFlags>() { VkPipelineStageFlags.ColorAttachmentOutput };
         protected static VkRenderPass _renderPass;
-        private VkCommandPool _cmdPool;
 
-        public uint currentBuffer;
+        private VkSubmitInfo submitInfo;
 
         public Graphics()
         {
@@ -88,50 +76,30 @@ namespace SharpGame
 
             VkInstance = Device.VkInstance;
 
-
-            // Vulkan Device creation
-            // This is handled by a separate class that gets a logical Device representation
-            // and encapsulates functions related to a Device
             Device.Init(enabledFeatures, EnabledExtensions);
-
-            physicalDevice = Device.PhysicalDevice;
+           
             device = Device.LogicalDevice;
 
             // Get a graphics queue from the Device
-            VkQueue queue;
-            vkGetDeviceQueue(device, Device.QFIndices.Graphics, 0, &queue);
-            Graphics.queue = queue;
+            queue = Device.GetDeviceQueue(Device.QFIndices.Graphics, 0);
 
-            // Find a suitable depth format
-            VkFormat depthFormat;
-            uint validDepthFormat = Tools.getSupportedDepthFormat(physicalDevice, &depthFormat);
-            Debug.Assert(validDepthFormat == True);
-            DepthFormat = depthFormat;
-
-            Swapchain.Connect(VkInstance, physicalDevice, device);
+            DepthFormat = Device.GetSupportedDepthFormat();            
 
             // Create synchronization objects
-            VkSemaphoreCreateInfo semaphoreCreateInfo = Builder.SemaphoreCreateInfo();
-            // Create a semaphore used to synchronize image presentation
-            // Ensures that the image is displayed before we start submitting new commands to the queu
-            Util.CheckResult(vkCreateSemaphore(device, &semaphoreCreateInfo, null, &GetSemaphoresPtr()->PresentComplete));
-            // Create a semaphore used to synchronize command submission
-            // Ensures that the image is not presented until all commands have been sumbitted and executed
-            Util.CheckResult(vkCreateSemaphore(device, &semaphoreCreateInfo, null, &GetSemaphoresPtr()->RenderComplete));
-            // Create a semaphore used to synchronize command submission
-            // Ensures that the image is not presented until all commands for the text overlay have been sumbitted and executed
-            // Will be inserted after the render complete semaphore if the text overlay is enabled
-            Util.CheckResult(vkCreateSemaphore(device, &semaphoreCreateInfo, null, &GetSemaphoresPtr()->TextOverlayComplete));
+            Semaphores* pSem = (Semaphores*)semaphores.GetAddress(0);
+            pSem->PresentComplete = Device.CreateSemaphore();
+            pSem->RenderComplete = Device.CreateSemaphore();
+            pSem->TextOverlayComplete = Device.CreateSemaphore();
 
             // Set up submit info structure
             // Semaphores will stay the same during application lifetime
             // Command buffer submission info is set by each example
-            submitInfo = Builder.SubmitInfo();
+            submitInfo = VkSubmitInfo.New();
             submitInfo.pWaitDstStageMask = (VkPipelineStageFlags*)submitPipelineStages.Data;
             submitInfo.waitSemaphoreCount = 1;
-            submitInfo.pWaitSemaphores = &GetSemaphoresPtr()->PresentComplete;
+            submitInfo.pWaitSemaphores = &pSem->PresentComplete;
             submitInfo.signalSemaphoreCount = 1;
-            submitInfo.pSignalSemaphores = &GetSemaphoresPtr()->RenderComplete;
+            submitInfo.pSignalSemaphores = &pSem->RenderComplete;
         }
 
 
@@ -149,7 +117,7 @@ namespace SharpGame
             {
                 attachments.Count = 2;
                 // Depth/Stencil attachment is the same for all frame buffers
-                attachments[1] = DepthStencil.View;
+                attachments[1] = depthStencil.view;
 
                 VkFramebufferCreateInfo frameBufferCreateInfo = VkFramebufferCreateInfo.New();
                 frameBufferCreateInfo.renderPass = renderPass;
@@ -160,7 +128,8 @@ namespace SharpGame
                 frameBufferCreateInfo.layers = 1;
 
                 // Create frame buffers for every swap chain image
-                frameBuffers.Count = (Swapchain.ImageCount);
+                frameBuffers.Count = Swapchain.ImageCount;
+
                 for (uint i = 0; i < frameBuffers.Count; i++)
                 {
                     attachments[0] = Swapchain.Buffers[i].View;
@@ -195,7 +164,7 @@ namespace SharpGame
                 attachments[0].finalLayout = VkImageLayout.PresentSrcKHR;
                 // Depth attachment
                 attachments[1] = new VkAttachmentDescription();
-                attachments[1].format = DepthFormat;
+                attachments[1].format = (VkFormat)DepthFormat;
                 attachments[1].samples = VkSampleCountFlags.Count1;
                 attachments[1].loadOp = VkAttachmentLoadOp.Clear;
                 attachments[1].storeOp = VkAttachmentStoreOp.Store;
@@ -271,7 +240,7 @@ namespace SharpGame
 
             CreateCommandPool();
             SetupSwapChain();
-            createCommandBuffers();
+            CreateCommandBuffers();
             SetupDepthStencil();
             SetupRenderPass();
             SetupFrameBuffer();
@@ -282,29 +251,24 @@ namespace SharpGame
             Width = w;
             Height = h;
 
-
             // Ensure all operations on the device have been finished before destroying resources
-            vkDeviceWaitIdle(device);
+            WaitIdle();
 
             SetupSwapChain();
-
             // Recreate the frame buffers
-
-            vkDestroyImageView(device, DepthStencil.View, null);
-            vkDestroyImage(device, DepthStencil.Image, null);
-            vkFreeMemory(device, DepthStencil.Mem, null);
             SetupDepthStencil();
 
             for (uint i = 0; i < frameBuffers.Count; i++)
             {
                 vkDestroyFramebuffer(device, frameBuffers[i], null);
             }
+
             SetupFrameBuffer();
 
             // Command buffers need to be recreated as they may store
             // references to the recreated frame buffer
-            destroyCommandBuffers();
-            createCommandBuffers();
+            DestroyCommandBuffers();
+            CreateCommandBuffers();
 
         }
 
@@ -328,7 +292,6 @@ namespace SharpGame
             // Submit to queue
             Util.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
 
-
             Util.CheckResult(Swapchain.QueuePresent(queue, currentBuffer, semaphores[0].RenderComplete));
 
             Util.CheckResult(vkQueueWaitIdle(queue));
@@ -337,71 +300,28 @@ namespace SharpGame
         private void CreateCommandPool()
         {
             commandBufferPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
-
-            //VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
-            //cmdPoolInfo.queueFamilyIndex = Swapchain.QueueNodeIndex;
-            //cmdPoolInfo.flags = VkCommandPoolCreateFlags.ResetCommandBuffer;
-            //Util.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out _cmdPool));
         }
 
-        protected void createCommandBuffers()
+        protected void CreateCommandBuffers()
         {
             commandBufferPool.Allocate(Swapchain.ImageCount);
-            /*
-            // Create one command buffer for each swap chain image and reuse for rendering
-            drawCmdBuffers.Resize(Swapchain.ImageCount);
-            drawCmdBuffers.Count = Swapchain.ImageCount;
-
-            VkCommandBufferAllocateInfo cmdBufAllocateInfo =
-                Builder.CommandBufferAllocateInfo(cmdPool, VkCommandBufferLevel.Primary, drawCmdBuffers.Count);
-
-            Util.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, (VkCommandBuffer*)drawCmdBuffers.Data));
-            */
         }
 
-        protected void destroyCommandBuffers()
+        protected void DestroyCommandBuffers()
         {
             commandBufferPool.Free();
-            //vkFreeCommandBuffers(device, cmdPool, drawCmdBuffers.Count, drawCmdBuffers.Data);
         }
 
         protected void SetupDepthStencil()
         {
-            VkImageCreateInfo image = VkImageCreateInfo.New();
-            image.imageType = VkImageType.Image2D;
-            image.format = DepthFormat;
-            image.extent = new VkExtent3D() { width = Width, height = Height, depth = 1 };
-            image.mipLevels = 1;
-            image.arrayLayers = 1;
-            image.samples = VkSampleCountFlags.Count1;
-            image.tiling = VkImageTiling.Optimal;
-            image.usage = (VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.TransferSrc);
-            image.flags = 0;
+            if(depthStencil != null)
+            {
+                depthStencil.Dispose();
+                depthStencil = null;
+            }
 
-            VkMemoryAllocateInfo mem_alloc = VkMemoryAllocateInfo.New();
-            mem_alloc.allocationSize = 0;
-            mem_alloc.memoryTypeIndex = 0;
+            depthStencil = new DepthStencil(Width, Height, DepthFormat);
 
-            VkImageViewCreateInfo depthStencilView = VkImageViewCreateInfo.New();
-            depthStencilView.viewType = VkImageViewType.Image2D;
-            depthStencilView.format = DepthFormat;
-            depthStencilView.flags = 0;
-            depthStencilView.subresourceRange = new VkImageSubresourceRange();
-            depthStencilView.subresourceRange.aspectMask = (VkImageAspectFlags.Depth | VkImageAspectFlags.Stencil);
-            depthStencilView.subresourceRange.baseMipLevel = 0;
-            depthStencilView.subresourceRange.levelCount = 1;
-            depthStencilView.subresourceRange.baseArrayLayer = 0;
-            depthStencilView.subresourceRange.layerCount = 1;
-
-            Util.CheckResult(vkCreateImage(device, &image, null, out DepthStencil.Image));
-            vkGetImageMemoryRequirements(device, DepthStencil.Image, out VkMemoryRequirements memReqs);
-            mem_alloc.allocationSize = memReqs.size;
-            mem_alloc.memoryTypeIndex = Device.getMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-            Util.CheckResult(vkAllocateMemory(device, &mem_alloc, null, out DepthStencil.Mem));
-            Util.CheckResult(vkBindImageMemory(device, DepthStencil.Image, DepthStencil.Mem, 0));
-
-            depthStencilView.image = DepthStencil.Image;
-            Util.CheckResult(vkCreateImageView(device, ref depthStencilView, null, out DepthStencil.View));
         }
 
         public static VkPipelineShaderStageCreateInfo loadShader(string fileName, VkShaderStageFlags stage)

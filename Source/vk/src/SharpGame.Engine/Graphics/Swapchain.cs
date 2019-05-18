@@ -14,27 +14,17 @@ namespace SharpGame
         public VkImageView View;
     }
 
-    public unsafe class VulkanSwapchain
+    public unsafe class Swapchain
     {
-        public VkInstance Instance { get; private set; }
-        public VkPhysicalDevice PhysicalDevice { get; private set; }
-        public VkDevice Device { get; private set; }
         public VkSurfaceKHR Surface { get; private set; }
         public uint QueueNodeIndex { get; private set; } = uint.MaxValue;
         public VkFormat ColorFormat { get; private set; }
         public VkColorSpaceKHR ColorSpace { get; private set; }
-        public VkSwapchainKHR Swapchain { get; private set; }
+        public VkSwapchainKHR swapchain;
         public uint ImageCount { get; private set; }
         public NativeList<VkImage> Images { get; set; } = new NativeList<VkImage>();
         public NativeList<SwapChainBuffer> Buffers { get; set; } = new NativeList<SwapChainBuffer>();
-
-        public void Connect(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device)
-        {
-            Instance = instance;
-            PhysicalDevice = physicalDevice;
-            Device = device;
-        }
-
+        
         public unsafe void InitSurface(IntPtr sdlWindow)
         {
             SDL_version version;
@@ -56,7 +46,7 @@ namespace SharpGame
                 surfaceCreateInfo.hinstance = processHandle;
                 surfaceCreateInfo.hwnd = win32Info.Sdl2Window;
                 VkSurfaceKHR surface;
-                err = vkCreateWin32SurfaceKHR(Instance, &surfaceCreateInfo, null, &surface);
+                err = vkCreateWin32SurfaceKHR(Device.VkInstance, &surfaceCreateInfo, null, &surface);
                 Surface = surface;
             }
             else if (sysWmInfo.subsystem == SysWMType.X11)
@@ -66,7 +56,7 @@ namespace SharpGame
                 surfaceCreateInfo.dpy = (Vulkan.Xlib.Display*)x11Info.display;
                 surfaceCreateInfo.window = new Vulkan.Xlib.Window { Value = x11Info.Sdl2Window };
                 VkSurfaceKHR surface;
-                err = vkCreateXlibSurfaceKHR(Instance, &surfaceCreateInfo, null, out surface);
+                err = vkCreateXlibSurfaceKHR(Device.VkInstance, &surfaceCreateInfo, null, out surface);
                 Surface = surface;
             }
             else
@@ -76,12 +66,12 @@ namespace SharpGame
 
             // Get available queue family properties
             uint queueCount;
-            vkGetPhysicalDeviceQueueFamilyProperties(PhysicalDevice, &queueCount, null);
+            vkGetPhysicalDeviceQueueFamilyProperties(Device.PhysicalDevice, &queueCount, null);
             Debug.Assert(queueCount >= 1);
 
             using (NativeList<VkQueueFamilyProperties> queueProps = new NativeList<VkQueueFamilyProperties>(queueCount))
             {
-                vkGetPhysicalDeviceQueueFamilyProperties(PhysicalDevice, &queueCount, (VkQueueFamilyProperties*)queueProps.Data.ToPointer());
+                vkGetPhysicalDeviceQueueFamilyProperties(Device.PhysicalDevice, &queueCount, (VkQueueFamilyProperties*)queueProps.Data.ToPointer());
                 queueProps.Count = queueCount;
 
                 // Iterate over each queue to learn whether it supports presenting:
@@ -91,7 +81,7 @@ namespace SharpGame
 
                 for (uint i = 0; i < queueCount; i++)
                 {
-                    vkGetPhysicalDeviceSurfaceSupportKHR(PhysicalDevice, i, Surface, &supportsPresent[i]);
+                    vkGetPhysicalDeviceSurfaceSupportKHR(Device.PhysicalDevice, i, Surface, &supportsPresent[i]);
                 }
 
                 // Search for a graphics and a present queue in the array of queue
@@ -146,13 +136,13 @@ namespace SharpGame
 
                 // Get list of supported Surface formats
                 uint formatCount;
-                err = vkGetPhysicalDeviceSurfaceFormatsKHR(PhysicalDevice, Surface, &formatCount, null);
+                err = vkGetPhysicalDeviceSurfaceFormatsKHR(Device.PhysicalDevice, Surface, &formatCount, null);
                 Debug.Assert(err == VkResult.Success);
                 Debug.Assert(formatCount > 0);
 
                 using (NativeList<VkSurfaceFormatKHR> surfaceFormats = new NativeList<VkSurfaceFormatKHR>(formatCount))
                 {
-                    err = vkGetPhysicalDeviceSurfaceFormatsKHR(PhysicalDevice, Surface, &formatCount, (VkSurfaceFormatKHR*)surfaceFormats.Data.ToPointer());
+                    err = vkGetPhysicalDeviceSurfaceFormatsKHR(Device.PhysicalDevice, Surface, &formatCount, (VkSurfaceFormatKHR*)surfaceFormats.Data.ToPointer());
                     surfaceFormats.Count = formatCount;
                     Debug.Assert(err == VkResult.Success);
 
@@ -201,22 +191,22 @@ namespace SharpGame
         public void Create(uint* width, uint* height, bool vsync = false)
         {
             VkResult err;
-            VkSwapchainKHR oldSwapchain = Swapchain;
+            VkSwapchainKHR oldSwapchain = swapchain;
 
             // Get physical Device Surface properties and formats
             VkSurfaceCapabilitiesKHR surfCaps;
-            err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(PhysicalDevice, Surface, &surfCaps);
+            err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Device.PhysicalDevice, Surface, &surfCaps);
             Debug.Assert(err == VkResult.Success);
 
             // Get available present modes
             uint presentModeCount;
-            err = vkGetPhysicalDeviceSurfacePresentModesKHR(PhysicalDevice, Surface, &presentModeCount, null);
+            err = vkGetPhysicalDeviceSurfacePresentModesKHR(Device.PhysicalDevice, Surface, &presentModeCount, null);
             Debug.Assert(err == VkResult.Success);
             Debug.Assert(presentModeCount > 0);
 
             using (NativeList<VkPresentModeKHR> presentModes = new NativeList<VkPresentModeKHR>(presentModeCount))
             {
-                err = vkGetPhysicalDeviceSurfacePresentModesKHR(PhysicalDevice, Surface, &presentModeCount, (VkPresentModeKHR*)presentModes.Data);
+                err = vkGetPhysicalDeviceSurfacePresentModesKHR(Device.PhysicalDevice, Surface, &presentModeCount, (VkPresentModeKHR*)presentModes.Data);
                 Debug.Assert(err == VkResult.Success);
                 presentModes.Count = presentModeCount;
 
@@ -302,16 +292,16 @@ namespace SharpGame
 
                 // Set additional usage flag for blitting from the swapchain Images if supported
                 VkFormatProperties formatProps;
-                vkGetPhysicalDeviceFormatProperties(PhysicalDevice, ColorFormat, out formatProps);
+                vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, ColorFormat, out formatProps);
                 if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.BlitDst) != 0)
                 {
                     swapchainCI.imageUsage |= VkImageUsageFlags.TransferSrc;
                 }
 
                 VkSwapchainKHR swapChain;
-                err = vkCreateSwapchainKHR(Device, &swapchainCI, null, out swapChain);
+                err = vkCreateSwapchainKHR(Device.LogicalDevice, &swapchainCI, null, out swapChain);
                 Debug.Assert(err == VkResult.Success);
-                Swapchain = swapChain;
+                this.swapchain = swapChain;
 
                 // If an existing swap chain is re-created, destroy the old swap chain
                 // This also cleans up all the presentable Images
@@ -319,19 +309,19 @@ namespace SharpGame
                 {
                     for (uint i = 0; i < ImageCount; i++)
                     {
-                        vkDestroyImageView(Device, Buffers[i].View, null);
+                        vkDestroyImageView(Device.LogicalDevice, Buffers[i].View, null);
                     }
-                    vkDestroySwapchainKHR(Device, oldSwapchain, null);
+                    vkDestroySwapchainKHR(Device.LogicalDevice, oldSwapchain, null);
                 }
 
                 uint imageCount;
-                err = vkGetSwapchainImagesKHR(Device, swapChain, &imageCount, null);
+                err = vkGetSwapchainImagesKHR(Device.LogicalDevice, swapChain, &imageCount, null);
                 Debug.Assert(err == VkResult.Success);
                 ImageCount = imageCount;
 
                 // Get the swap chain Images
                 Images.Resize(imageCount);
-                err = vkGetSwapchainImagesKHR(Device, swapChain, &imageCount, (VkImage*)Images.Data.ToPointer());
+                err = vkGetSwapchainImagesKHR(Device.LogicalDevice, swapChain, &imageCount, (VkImage*)Images.Data.ToPointer());
                 Images.Count = imageCount;
                 Debug.Assert(err == VkResult.Success);
 
@@ -365,7 +355,7 @@ namespace SharpGame
                     colorAttachmentView.image = Buffers[i].Image;
 
                     VkImageView view;
-                    err = vkCreateImageView(Device, &colorAttachmentView, null, &view);
+                    err = vkCreateImageView(Device.LogicalDevice, &colorAttachmentView, null, &view);
                     Buffers[i].View = view;
                     Debug.Assert(err == VkResult.Success);
                 }
@@ -386,7 +376,7 @@ namespace SharpGame
         {
             // By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
             // With that we don't have to handle VK_NOT_READY
-            return vkAcquireNextImageKHR(Device, Swapchain, ulong.MaxValue, presentCompleteSemaphore, new VkFence(), ref imageIndex);
+            return vkAcquireNextImageKHR(Device.LogicalDevice, swapchain, ulong.MaxValue, presentCompleteSemaphore, new VkFence(), ref imageIndex);
         }
 
         /**
@@ -403,7 +393,7 @@ namespace SharpGame
             VkPresentInfoKHR presentInfo = VkPresentInfoKHR.New();
             presentInfo.pNext = null;
             presentInfo.swapchainCount = 1;
-            var sc = Swapchain;
+            var sc = swapchain;
             presentInfo.pSwapchains = &sc;
             presentInfo.pImageIndices = &imageIndex;
             // Check if a wait semaphore has been specified to wait for before presenting the image

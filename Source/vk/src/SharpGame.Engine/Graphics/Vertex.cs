@@ -7,20 +7,20 @@ using Vulkan;
 namespace SharpGame
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct PosNormTex
+    public struct VertexPosNormTex
     {
         public Vector3 position;
         public Vector3 normal;
         public Vector2 texcoord;
 
-        public PosNormTex(Vector3 p, Vector3 n, Vector2 uv)
+        public VertexPosNormTex(Vector3 p, Vector3 n, Vector2 uv)
         {
             position = p;
             normal = n;
             texcoord = uv;
         }
 
-        public PosNormTex(float px, float py, float pz, float nx, float ny, float nz, float u, float v)
+        public VertexPosNormTex(float px, float py, float pz, float nx, float ny, float nz, float u, float v)
         {
             position = new Vector3(px, py, pz);
             normal = new Vector3(nx, ny, nz);
@@ -31,7 +31,7 @@ namespace SharpGame
         (
             new[]
             {
-                new VertexInputBinding(0, (uint)Utilities.SizeOf<PosNormTex>(), VertexInputRate.Vertex)
+                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosNormTex>(), VertexInputRate.Vertex)
             },
             new[]
             {

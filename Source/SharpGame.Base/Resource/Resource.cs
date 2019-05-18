@@ -31,7 +31,7 @@ namespace SharpGame
         [IgnoreDataMember]
         public bool Modified { get; set; }
 
-        protected FileSystem FileSystem => Get<FileSystem>();
+        protected FileSystem FileSystem => FileSystem.Instance;
 
         protected bool builded_ = false;
 

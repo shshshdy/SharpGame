@@ -20,15 +20,14 @@ namespace SharpGame
         public static VkPhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
         public static NativeList<VkQueueFamilyProperties> QueueFamilyProperties { get; } = new NativeList<VkQueueFamilyProperties>();
         public static List<string> SuppertedExcentions { get; } = new List<string>();
-        public static VkDevice LogicalDevice => _logicalDevice;
-        public static VkCommandPool CommandPool { get; private set; }
+        public static VkDevice LogicalDevice => device;
         public static bool EnableDebugMarkers { get; internal set; }
 
         public static QueueFamilyIndices QFIndices;
-        private static VkDevice _logicalDevice;
-        private static VkPipelineCache _pipelineCache;
-
-        static DebugReportCallbackExt debugReportCallbackExt;
+        private static VkDevice device;
+        private static VkCommandPool commandPool;
+        private static VkPipelineCache pipelineCache;
+        private static DebugReportCallbackExt debugReportCallbackExt;
 
         public static VkResult CreateInstance(Settings settings)
         {
@@ -88,7 +87,6 @@ namespace SharpGame
             }
             return result;
         }
-
 
         public static void Init(
             VkPhysicalDeviceFeatures enabledFeatures,
@@ -265,15 +263,15 @@ namespace SharpGame
                         deviceCreateInfo.ppEnabledExtensionNames = (byte**)deviceExtensions.Data.ToPointer();
                     }
 
-                    VkResult result = vkCreateDevice(PhysicalDevice, &deviceCreateInfo, null, out _logicalDevice);
+                    VkResult result = vkCreateDevice(PhysicalDevice, &deviceCreateInfo, null, out device);
                     if (result == VkResult.Success)
                     {
                         // Create a default command pool for graphics command buffers
-                        CommandPool = CreateCommandPool(QFIndices.Graphics);
+                        commandPool = CreateCommandPool(QFIndices.Graphics);
                     }
 
                     VkPipelineCacheCreateInfo pipelineCacheCreateInfo = VkPipelineCacheCreateInfo.New();
-                    Util.CheckResult(vkCreatePipelineCache(LogicalDevice, ref pipelineCacheCreateInfo, null, out _pipelineCache));
+                    Util.CheckResult(vkCreatePipelineCache(LogicalDevice, ref pipelineCacheCreateInfo, null, out pipelineCache));
                     return result;
                 }
             }
@@ -343,18 +341,78 @@ namespace SharpGame
 
         public static void Shutdown()
         {
-
             debugReportCallbackExt?.Dispose();
         }
 
-        public static VkCommandPool CreateCommandPool(
-            uint queueFamilyIndex,
-            VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
+        public static VkQueue GetDeviceQueue(uint queueFamilyIndex, uint queueIndex)
+        {
+            vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, out VkQueue pQueue);
+            return pQueue;
+        }
+
+        public static Format GetSupportedDepthFormat()
+        {
+            // Since all depth formats may be optional, we need to find a suitable depth format to use
+            // Start with the highest precision packed format
+            List<VkFormat> depthFormats = new List<VkFormat>()
+            {
+                VkFormat.D32SfloatS8Uint,
+                VkFormat.D32Sfloat,
+                VkFormat.D24UnormS8Uint,
+                VkFormat.D16UnormS8Uint,
+                VkFormat.D16Unorm,
+            };
+
+            foreach (VkFormat format in depthFormats)
+            {
+                VkFormatProperties formatProps;
+                vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, &formatProps);
+                // Format must support depth stencil attachment for optimal tiling
+                if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.DepthStencilAttachment) != 0)
+                {
+                    return (Format)format;
+                }
+            }
+
+            return Format.Undefined;
+        }
+
+        public static VkSemaphore CreateSemaphore(uint flags = 0)
+        {
+            var semaphoreCreateInfo = VkSemaphoreCreateInfo.New();
+            semaphoreCreateInfo.flags = flags;
+            Util.CheckResult(vkCreateSemaphore(device, ref semaphoreCreateInfo, null, out VkSemaphore pSemaphore));
+            return pSemaphore;
+        }
+
+        public static VkImage CreateImage(ref VkImageCreateInfo pCreateInfo)
+        {
+            Util.CheckResult(vkCreateImage(device, ref pCreateInfo, null, out VkImage pImage));
+            return pImage;
+        }
+
+        public static void DestroyImage(VkImage image)
+        {
+            vkDestroyImage(device, image, null);
+        }
+
+        public static VkImageView CreateImageView( ref VkImageViewCreateInfo pCreateInfo)
+        {
+            Util.CheckResult(vkCreateImageView(device, ref pCreateInfo, null, out VkImageView pView));
+            return pView;
+        }
+
+        public static void DestroyImageView(VkImageView imageView)
+        {
+            vkDestroyImageView(device, imageView, null);
+        }
+
+        public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
         {
             VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
             cmdPoolInfo.queueFamilyIndex = queueFamilyIndex;
             cmdPoolInfo.flags = createFlags;
-            Util.CheckResult(vkCreateCommandPool(LogicalDevice, &cmdPoolInfo, null, out VkCommandPool cmdPool));
+            Util.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out VkCommandPool cmdPool));
             return cmdPool;
         }
 
@@ -375,16 +433,16 @@ namespace SharpGame
             VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
             bufferCreateInfo.usage = usageFlags;
             bufferCreateInfo.size = size;
-            Util.CheckResult(vkCreateBuffer(_logicalDevice, &bufferCreateInfo, null, out buffer.buffer));
+            Util.CheckResult(vkCreateBuffer(device, &bufferCreateInfo, null, out buffer.buffer));
 
             // Create the memory backing up the buffer handle
             VkMemoryRequirements memReqs;
             VkMemoryAllocateInfo memAlloc = VkMemoryAllocateInfo.New();
-            vkGetBufferMemoryRequirements(_logicalDevice, buffer.buffer, &memReqs);
+            vkGetBufferMemoryRequirements(device, buffer.buffer, &memReqs);
             memAlloc.allocationSize = memReqs.size;
             // Find a memory type index that fits the properties of the buffer
-            memAlloc.memoryTypeIndex = getMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
-            Util.CheckResult(vkAllocateMemory(_logicalDevice, &memAlloc, null, out buffer.memory));
+            memAlloc.memoryTypeIndex = GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
+            Util.CheckResult(vkAllocateMemory(device, &memAlloc, null, out buffer.memory));
 
             buffer.alignment = memReqs.alignment;
             buffer.size = memAlloc.allocationSize;
@@ -434,7 +492,7 @@ namespace SharpGame
             vkGetBufferMemoryRequirements(LogicalDevice, *buffer, &memReqs);
             memAlloc.allocationSize = memReqs.size;
             // Find a memory type index that fits the properties of the buffer
-            memAlloc.memoryTypeIndex = getMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
+            memAlloc.memoryTypeIndex = GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
             Util.CheckResult(vkAllocateMemory(LogicalDevice, &memAlloc, null, memory));
 
             // If a pointer to the buffer data has been passed, map the buffer and copy over the data
@@ -474,12 +532,12 @@ namespace SharpGame
         public static VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin = false)
         {
             VkCommandBufferAllocateInfo cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
-            cmdBufAllocateInfo.commandPool = CommandPool;
+            cmdBufAllocateInfo.commandPool = commandPool;
             cmdBufAllocateInfo.level = level;
             cmdBufAllocateInfo.commandBufferCount = 1;
 
             VkCommandBuffer cmdBuffer;
-            Util.CheckResult(vkAllocateCommandBuffers(_logicalDevice, ref cmdBufAllocateInfo, out cmdBuffer));
+            Util.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, out cmdBuffer));
 
             // If requested, also start recording for the new command buffer
             if (begin)
@@ -518,18 +576,18 @@ namespace SharpGame
             VkFenceCreateInfo fenceInfo = VkFenceCreateInfo.New();
             fenceInfo.flags = VkFenceCreateFlags.None;
             VkFence fence;
-            Util.CheckResult(vkCreateFence(_logicalDevice, &fenceInfo, null, &fence));
+            Util.CheckResult(vkCreateFence(device, &fenceInfo, null, &fence));
 
             // Submit to the queue
             Util.CheckResult(vkQueueSubmit(queue, 1, &submitInfo, fence));
             // Wait for the fence to signal that command buffer has finished executing
-            Util.CheckResult(vkWaitForFences(_logicalDevice, 1, &fence, True, DEFAULT_FENCE_TIMEOUT));
+            Util.CheckResult(vkWaitForFences(device, 1, &fence, True, DEFAULT_FENCE_TIMEOUT));
 
-            vkDestroyFence(_logicalDevice, fence, null);
+            vkDestroyFence(device, fence, null);
 
             if (free)
             {
-                vkFreeCommandBuffers(_logicalDevice, CommandPool, 1, &commandBuffer);
+                vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
             }
         }
 
@@ -544,7 +602,7 @@ namespace SharpGame
         *
         * @throw Throws an exception if memTypeFound is null and no memory type could be found that supports the requested properties
         */
-        public static uint getMemoryType(uint typeBits, VkMemoryPropertyFlags properties, uint* memTypeFound = null)
+        public static uint GetMemoryType(uint typeBits, VkMemoryPropertyFlags properties, uint* memTypeFound = null)
         {
             for (uint i = 0; i < MemoryProperties.memoryTypeCount; i++)
             {
@@ -575,51 +633,51 @@ namespace SharpGame
 
         public static VkShaderModule CreateShaderModule(ref VkShaderModuleCreateInfo shaderModuleCreateInfo)
         {
-            Util.CheckResult(vkCreateShaderModule(LogicalDevice, ref shaderModuleCreateInfo, null, out VkShaderModule shaderModule));
+            Util.CheckResult(vkCreateShaderModule(device, ref shaderModuleCreateInfo, null, out VkShaderModule shaderModule));
             return shaderModule;
         }
 
         public static void DestroyShaderModule(VkShaderModule shaderModule)
         {
-            vkDestroyShaderModule(LogicalDevice, shaderModule, IntPtr.Zero);
+            vkDestroyShaderModule(device, shaderModule, IntPtr.Zero);
         }
 
         public static VkPipeline CreateGraphicsPipeline(ref VkGraphicsPipelineCreateInfo pCreateInfos)
         {
-            Util.CheckResult(vkCreateGraphicsPipelines(LogicalDevice, _pipelineCache,
+            Util.CheckResult(vkCreateGraphicsPipelines(device, pipelineCache,
                 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
             return pPipelines;
         }
 
         public static VkPipeline CreateComputePipeline(ref VkComputePipelineCreateInfo pCreateInfos)
         {
-            Util.CheckResult(vkCreateComputePipelines(LogicalDevice, _pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
+            Util.CheckResult(vkCreateComputePipelines(device, pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
             return pPipelines;
         }
 
         public static void DestroyBuffer(VkBuffer buffer)
         {
-            vkDestroyBuffer(LogicalDevice, buffer, null);
+            vkDestroyBuffer(device, buffer, null);
         }
 
         public static void FreeMemory(VkDeviceMemory memory)
         {
-            vkFreeMemory(LogicalDevice, memory, null);
+            vkFreeMemory(device, memory, null);
         }
 
         public static void DestroyPipeline(VkPipeline pipeline)
         {
-            vkDestroyPipeline(LogicalDevice, pipeline, null);
+            vkDestroyPipeline(device, pipeline, null);
         }
 
         public static void DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
         {
-            vkDestroyPipelineLayout(LogicalDevice, pipelineLayout, null);
+            vkDestroyPipelineLayout(device, pipelineLayout, null);
         }
 
         public static void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
         {
-            vkDestroyDescriptorSetLayout(LogicalDevice, descriptorSetLayout, null);
+            vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null);
         }
 
         public struct QueueFamilyIndices

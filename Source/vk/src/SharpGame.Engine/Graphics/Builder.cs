@@ -7,13 +7,6 @@ namespace SharpGame
 {
     public unsafe static class Builder
     {
-        public static VkSemaphoreCreateInfo SemaphoreCreateInfo()
-        {
-            VkSemaphoreCreateInfo semaphoreCreateInfo = new VkSemaphoreCreateInfo();
-            semaphoreCreateInfo.sType = VkStructureType.SemaphoreCreateInfo;
-            return semaphoreCreateInfo;
-        }
-
         public static VkSubmitInfo SubmitInfo()
         {
             VkSubmitInfo submitInfo = new VkSubmitInfo();

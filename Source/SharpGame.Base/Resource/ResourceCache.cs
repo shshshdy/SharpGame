@@ -12,10 +12,9 @@ namespace SharpGame
 
     }
 
-    public class ResourceCache : Object
+    public class ResourceCache : System<ResourceCache>
     {
-        public FileSystem FileSystem => Get<FileSystem>();
-        public static ResourceCache Instance => Get<ResourceCache>();
+        public FileSystem FileSystem => FileSystem.Instance;
 
         public static string ContentRoot { get; set; }
         private readonly Dictionary<string, Resource> cachedContent_ = new Dictionary<string, Resource>();

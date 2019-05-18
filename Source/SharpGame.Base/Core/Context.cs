@@ -12,7 +12,6 @@ namespace SharpGame
         Stack<Object> _subsystems = new Stack<Object>();
         public Context()
         {
-            Object._context = this;
         }
 
         public T CreateSubsystem<T>() where T : Object, new()

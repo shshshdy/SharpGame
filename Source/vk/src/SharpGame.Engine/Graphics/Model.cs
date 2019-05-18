@@ -82,7 +82,18 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            // todo: Dispose
+            foreach(var vb in vertexBuffers_)
+            {
+                vb.Dispose();
+            }
+            Array.Clear(vertexBuffers_, 0, vertexBuffers_.Length);
+
+            foreach (var ib in indexBuffers_)
+            {
+                ib.Dispose();
+            }
+            Array.Clear(indexBuffers_, 0, indexBuffers_.Length);
+
             Geometries.Clear();
         }
 
@@ -440,8 +451,6 @@ namespace SharpGame
     
         protected override void OnBuild()
         {
-            var graphics = Get<Graphics>();
-
             // Upload vertex buffer data
             for (int i = 0; i < vertexBuffers_.Length; ++i)
             {

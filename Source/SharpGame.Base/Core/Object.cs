@@ -7,11 +7,6 @@ namespace SharpGame
 {
     public class Object : Observable
     {
-        internal static Context _context;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Get<T>() => _context.Get<T>();
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator bool(Object obj)
         {
