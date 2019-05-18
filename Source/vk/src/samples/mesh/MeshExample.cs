@@ -64,9 +64,9 @@ namespace SharpGame
         {
             base.Init();
 
-            LoadAssets();
             CreateUniformBuffers();
             CreatePipelines();
+            LoadAssets();
             SetupResourceSet();
 
             prepared = true;
@@ -82,40 +82,78 @@ namespace SharpGame
 
             base.Destroy();
         }
-        
-        protected override void BuildCommandBuffers()
+
+        void CreatePipelines()
         {
-            FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
-            clearValues.First.color = defaultClearColor;
-            clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
-
-            var renderPassBeginInfo = VkRenderPassBeginInfo.New();
-            renderPassBeginInfo.renderPass = Graphics.renderPass;
-            renderPassBeginInfo.renderArea.offset.x = 0;
-            renderPassBeginInfo.renderArea.offset.y = 0;
-            renderPassBeginInfo.renderArea.extent.width = width;
-            renderPassBeginInfo.renderArea.extent.height = height;
-            renderPassBeginInfo.clearValueCount = 2;
-            renderPassBeginInfo.pClearValues = &clearValues.First;
-
-            var graphics = Graphics.Instance;
-            //for (int i = 0; i < Graphics.drawCmdBuffers.Count; ++i)
-            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
+            vertexLayout = new VertexLayout
             {
-                // Set target frame buffer
-                renderPassBeginInfo.framebuffer = Graphics.frameBuffers[graphics.currentBuffer];
+                bindings = new[]
+                {
+                    new VertexInputBinding(0, (uint)sizeof(Vertex), VertexInputRate.Vertex)
+                },
 
-                cmdBuffer.Begin();
-                cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
+                attributes = new[]
+                {
+                    new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, Vertex.PositionOffset),
+                    new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, Vertex.NormalOffset),
+                    new VertexInputAttribute(0, 2, Format.R32g32Sfloat, Vertex.UvOffset),
+                    new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, Vertex.ColorOffset)
+                }
 
-                cmdBuffer.SetViewport(new Viewport(0, 0, (float)width, (float)height, 0.0f, 1.0f));
-                cmdBuffer.SetScissor(new Rect2D(0, 0, (int)width, (int)height));
+            };
 
-                var pipe = wireframe ? pipelineWireframe : pipelineSolid;
-                cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);
+            resourceLayout = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
+            };
 
-                cmdBuffer.EndRenderPass();
-                cmdBuffer.End();
+            shader = new Shader
+            {
+                new Pass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
+                {
+                    ResourceLayout = resourceLayout
+                }
+            };
+
+            pipelineSolid = new Pipeline
+            {
+                CullMode = CullMode.Back,
+                FrontFace = FrontFace.Clockwise,
+                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
+                VertexLayout = vertexLayout
+            };
+
+            pipelineWireframe = new Pipeline
+            {
+                FillMode = PolygonMode.Line,
+                CullMode = CullMode.Back,
+                FrontFace = FrontFace.Clockwise,
+                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
+                VertexLayout = vertexLayout
+            };
+        }
+
+        void LoadAssets()
+        {
+            LoadModel(DataPath + "models/voyager/voyager.dae");
+
+            if (Device.Features.textureCompressionBC == 1)
+            {
+                colorMap.loadFromFile(DataPath + "models/voyager/voyager_bc3_unorm.ktx",
+                    VkFormat.Bc3UnormBlock, Graphics.queue);
+            }
+            else if (Device.Features.textureCompressionASTC_LDR == 1)
+            {
+                colorMap.loadFromFile(DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, Graphics.queue);
+            }
+            else if (Device.Features.textureCompressionETC2 == 1)
+            {
+                colorMap.loadFromFile(DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, Graphics.queue);
+            }
+            else
+            {
+                throw new InvalidOperationException("Device does not support any compressed texture format!");
             }
         }
 
@@ -195,93 +233,20 @@ namespace SharpGame
             geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, ib.Count);
         }
 
-        void LoadAssets()
-        {
-            LoadModel(DataPath + "models/voyager/voyager.dae");
-
-            if (Device.Features.textureCompressionBC == 1)
-            {
-                colorMap.loadFromFile(DataPath + "models/voyager/voyager_bc3_unorm.ktx",
-                    VkFormat.Bc3UnormBlock, Graphics.queue);
-            }
-            else if (Device.Features.textureCompressionASTC_LDR == 1)
-            {
-                colorMap.loadFromFile(DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, Graphics.queue);
-            }
-            else if (Device.Features.textureCompressionETC2 == 1)
-            {
-                colorMap.loadFromFile(DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, Graphics.queue);
-            }
-            else
-            {
-                throw new InvalidOperationException("Device does not support any compressed texture format!");
-            }
-        }
-
         void SetupResourceSet()
         {
             resourceSet = new ResourceSet(resourceLayout, uniformBufferScene, colorMap);
         }
 
-        void CreatePipelines()
-        {
-            vertexLayout = new VertexLayout
-            {
-                bindings = new[]
-                {
-                    new VertexInputBinding(0, (uint)sizeof(Vertex), VertexInputRate.Vertex)
-                },
-
-                attributes = new[]
-                {
-                    new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, Vertex.PositionOffset),
-                    new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, Vertex.NormalOffset),
-                    new VertexInputAttribute(0, 2, Format.R32g32Sfloat, Vertex.UvOffset),
-                    new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, Vertex.ColorOffset)
-                }
-
-            };
-
-            resourceLayout = new ResourceLayout
-            {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
-            };
-
-            shader = new Shader
-            {
-                new Pass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
-                {
-                    ResourceLayout = resourceLayout
-                }
-            };
-
-            pipelineSolid = new Pipeline
-            {
-                CullMode = CullMode.Back,
-                FrontFace = FrontFace.Clockwise,
-                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-                VertexLayout = vertexLayout
-            };
-
-            pipelineWireframe = new Pipeline
-            {
-                FillMode = PolygonMode.Line,
-                CullMode = CullMode.Back,
-                FrontFace = FrontFace.Clockwise,
-                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-                VertexLayout = vertexLayout
-            };
-        }
 
         // Prepare and initialize uniform buffer containing shader uniforms
         void CreateUniformBuffers()
         {
             uniformBufferScene = GraphicsBuffer.CreateUniformBuffer<UboVS>();
-            updateUniformBuffers();
+            UpdateUniformBuffers();
         }
 
-        void updateUniformBuffers()
+        void UpdateUniformBuffers()
         {
             uboVS.projection = System.Numerics.Matrix4x4.CreatePerspectiveFieldOfView(Util.DegreesToRadians(60.0f), (float)width / (float)height, 0.1f, 256.0f);
             System.Numerics.Matrix4x4 viewMatrix = System.Numerics.Matrix4x4.CreateTranslation(0.0f, 0.0f, zoom);
@@ -294,10 +259,12 @@ namespace SharpGame
             uniformBufferScene.SetData(ref uboVS);
         }
         
-        protected override void render()
+        protected override void Render()
         {
             if (!prepared)
                 return;
+
+            UpdateUniformBuffers();
 
             graphics.BeginRender();
 
@@ -306,9 +273,40 @@ namespace SharpGame
             graphics.EndRender();
         }
 
-        protected override void ViewChanged()
+        protected override void BuildCommandBuffers()
         {
-            updateUniformBuffers();
+            FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
+            clearValues.First.color = defaultClearColor;
+            clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
+
+            var renderPassBeginInfo = VkRenderPassBeginInfo.New();
+            renderPassBeginInfo.renderPass = Graphics.renderPass;
+            renderPassBeginInfo.renderArea.offset.x = 0;
+            renderPassBeginInfo.renderArea.offset.y = 0;
+            renderPassBeginInfo.renderArea.extent.width = width;
+            renderPassBeginInfo.renderArea.extent.height = height;
+            renderPassBeginInfo.clearValueCount = 2;
+            renderPassBeginInfo.pClearValues = &clearValues.First;
+
+            var graphics = Graphics.Instance;
+            //for (int i = 0; i < Graphics.drawCmdBuffers.Count; ++i)
+            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
+            {
+                // Set target frame buffer
+                renderPassBeginInfo.framebuffer = Graphics.frameBuffers[graphics.currentBuffer];
+
+                cmdBuffer.Begin();
+                cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
+
+                cmdBuffer.SetViewport(new Viewport(0, 0, (float)width, (float)height, 0.0f, 1.0f));
+                cmdBuffer.SetScissor(new Rect2D(0, 0, (int)width, (int)height));
+
+                var pipe = wireframe ? pipelineWireframe : pipelineSolid;
+                cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);
+
+                cmdBuffer.EndRenderPass();
+                cmdBuffer.End();
+            }
         }
 
         protected override void KeyPressed(Key keyCode)

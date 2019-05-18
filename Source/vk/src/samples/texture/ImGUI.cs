@@ -205,7 +205,7 @@ namespace SharpGame
             graphics.EndRender();
         }
 
-        protected override void render()
+        protected override void Render()
         {
             if (!prepared)
                 return;
@@ -221,11 +221,6 @@ namespace SharpGame
             ImGui.Render();
 
             draw();
-        }
-
-        protected override void ViewChanged()
-        {
-            updateUniformBuffers();
         }
 
         private unsafe void RenderImDrawData(ImDrawDataPtr draw_data)

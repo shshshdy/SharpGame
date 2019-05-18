@@ -6,9 +6,11 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class FrameGraph : Resource
+    public class FrameGraph : Resource//, IEnum
     {
-        public Dictionary<string, Framebuffer> FrameBuffers = new Dictionary<string, Framebuffer>();
+        public RenderTarget[] RenderTargets { get; set; }
+
+
         public List<RenderPass> RenderPasses { get; set; } = new List<RenderPass>();
 
         public FrameGraph()
@@ -23,7 +25,6 @@ namespace SharpGame
 
         public void Draw(RenderView view)
         {
-
             foreach (var renderPass in RenderPasses)
             {
                 renderPass.Draw(view);

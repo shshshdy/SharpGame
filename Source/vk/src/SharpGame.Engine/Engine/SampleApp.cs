@@ -46,7 +46,6 @@ namespace SharpGame
                 zoom += (mousePos.Y - posy) * .005f * zoomSpeed;
                 camera.translate(new Vector3(-0.0f, 0.0f, (mousePos.Y - posy) * .005f * zoomSpeed));
                 mousePos = new Vector2(posx, posy);
-                viewUpdated = true;
             }
 
             if (e.State.IsButtonDown(MouseButton.Left))
@@ -57,7 +56,6 @@ namespace SharpGame
                 rotation.Y -= (mousePos.X - posx) * 1.25f * rotationSpeed;
                 camera.rotate(new Vector3((mousePos.Y - posy) * camera.rotationSpeed, -(mousePos.X - posx) * camera.rotationSpeed, 0.0f));
                 mousePos = new Vector2(posx, posy);
-                viewUpdated = true;
             }
 
             if (e.State.IsButtonDown(MouseButton.Middle))
@@ -67,7 +65,6 @@ namespace SharpGame
                 cameraPos.X -= (mousePos.X - posx) * 0.01f;
                 cameraPos.Y -= (mousePos.Y - posy) * 0.01f;
                 camera.translate(new Vector3(-(mousePos.X - posx) * 0.01f, -(mousePos.Y - posy) * 0.01f, 0.0f));
-                viewUpdated = true;
                 mousePos.X = posx;
                 mousePos.Y = posy;
             }
@@ -78,7 +75,6 @@ namespace SharpGame
             var wheelDelta = e.WheelDelta;
             zoom += wheelDelta * 0.005f * zoomSpeed;
             camera.translate(new Vector3(0.0f, 0.0f, wheelDelta * 0.005f * zoomSpeed));
-            viewUpdated = true;
         }
 
         private void OnKeyDown(KeyEvent e)

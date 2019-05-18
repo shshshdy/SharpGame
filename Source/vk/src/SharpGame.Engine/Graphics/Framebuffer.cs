@@ -5,6 +5,10 @@ using Vulkan;
 
 namespace SharpGame
 {
+    public class RenderTarget
+    {
+
+    }
 
     public struct FramebufferInfo
     {

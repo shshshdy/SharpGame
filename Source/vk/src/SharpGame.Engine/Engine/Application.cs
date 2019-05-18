@@ -24,19 +24,21 @@ namespace SharpGame
         public Sdl2Window NativeWindow { get; private set; }
         public IntPtr WindowInstance { get; protected set; }
 
+        protected Context context;
         protected Timer timer;
         protected FileSystem fileSystem;
         protected ResourceCache cache;
         protected Graphics graphics;
+        protected Renderer renderer;
 
         protected bool paused = false;
         protected bool prepared;
 
         protected InputSnapshot snapshot;
 
-        protected bool viewUpdated;
-
-        protected Context context;
+        private int frameNumber;
+        private float timeElapsed = 0.0f;
+        bool singleThreaded = true;
 
         public Application()
         {
@@ -49,6 +51,7 @@ namespace SharpGame
             fileSystem = context.CreateSubsystem<FileSystem>();
             graphics = context.CreateSubsystem<Graphics>();
             cache = context.CreateSubsystem<ResourceCache>(DataPath);
+            renderer = context.CreateSubsystem<Renderer>();
         }
 
         public virtual void Init()
@@ -63,7 +66,7 @@ namespace SharpGame
         protected virtual void CreateWindow()
         {
             WindowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            NativeWindow = new Sdl2Window(Name, 50, 50, (int)width, (int)height, SDL_WindowFlags.Resizable, threadedProcessing: false)
+            NativeWindow = new Sdl2Window(Name, 50, 50, (int)width, (int)height, SDL_WindowFlags.Resizable, threadedProcessing : false)
             {
                 X = 50,
                 Y = 50,
@@ -77,6 +80,18 @@ namespace SharpGame
 
         public void Run()
         {
+            if(singleThreaded)
+            {
+                SingleLoop();
+            }
+            else
+            {
+                DoubleLoop();
+            }
+        }
+
+        public void SingleLoop()
+        {
             Setup();
 
             CreateWindow();
@@ -85,21 +100,11 @@ namespace SharpGame
 
             Init();
 
-            RenderLoop();
-        }
-
-        public void RenderLoop()
-        {
-            timer.Start();
+            timer.Reset();
 
             while (NativeWindow.Exists)
             {
                 var tStart = DateTime.Now;
-                if (viewUpdated)
-                {
-                    viewUpdated = false;
-                    ViewChanged();
-                }
 
                 snapshot = NativeWindow.PumpEvents();
 
@@ -111,7 +116,9 @@ namespace SharpGame
 
                 timer.Tick();
 
-                render();
+                UpdateFrame();
+
+                Render();
             }
 
             timer.Stop();
@@ -119,12 +126,11 @@ namespace SharpGame
             graphics.WaitIdle();
         }
 
-        protected virtual void ViewChanged()
+        private void DoubleLoop()
         {
+
         }
-
-        protected virtual void render() { }
-
+        
         void WindowResize()
         {
             if (!prepared)
@@ -142,21 +148,77 @@ namespace SharpGame
 
             graphics.WaitIdle();
 
-            // Notify derived class
-            WindowResized();
-            ViewChanged();
-
             prepared = true;
         }
+        
+        void UpdateFrame()
+        {
+            timer.Tick();
 
-        protected virtual void WindowResized()
+            var beginFrame = new BeginFrame
+            {
+                frameNum_ = frameNumber,
+                timeTotal_ = timer.TotalTime,
+                timeDelta_ = timer.DeltaTime
+            };
+
+            this.SendGlobalEvent(ref beginFrame);
+
+            var update = new Update
+            {
+                timeTotal_ = timer.TotalTime,
+                timeDelta_ = timer.DeltaTime
+            };
+
+            this.SendGlobalEvent(ref update);
+
+            Update();
+
+            var postUpdate = new PostUpdate
+            {
+                timeTotal_ = timer.TotalTime,
+                timeDelta_ = timer.DeltaTime
+            };
+
+            this.SendGlobalEvent(ref postUpdate);
+
+            //renderer.RenderUpdate();
+
+            var endFrame = new EndFrame { };
+
+            this.SendGlobalEvent(ref endFrame);
+
+            CalculateFrameRateStats();
+
+        }
+
+        private void CalculateFrameRateStats()
+        {
+            frameNumber++;
+
+            if (timer.TotalTime - timeElapsed >= 1.0f)
+            {
+                float fps = frameNumber;
+                float mspf = 1000.0f / fps;
+                NativeWindow.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
+               
+                // Reset for next average.
+                frameNumber = 0;
+                timeElapsed += 1.0f;
+            }
+        }
+
+        protected virtual void Update()
+        {
+        }
+
+        protected virtual void Render()
         {
         }
 
         protected virtual void BuildCommandBuffers()
         {
         }
-
     }
 
 }

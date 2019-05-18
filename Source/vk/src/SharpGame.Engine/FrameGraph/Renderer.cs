@@ -15,7 +15,7 @@ namespace SharpGame
             MainView = CreateRenderView();
         }
 
-        public RenderView CreateRenderView( Camera camera = null, Scene scene = null,FrameGraph renderPath = null)
+        public RenderView CreateRenderView(Camera camera = null, Scene scene = null,FrameGraph renderPath = null)
         {
             var view = new RenderView(camera, scene, renderPath);           
             views_.Add(view);
