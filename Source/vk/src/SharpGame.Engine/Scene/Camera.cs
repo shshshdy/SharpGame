@@ -264,21 +264,6 @@ namespace SharpGame
             projectionDirty_ = false;
         }
 
-
-        public void GetFrustumSize(ref Vector3 near, ref Vector3 far)
-        {
-            var viewSpaceFrustum = ViewSpaceFrustum;  /*
-            near = viewSpaceFrustum.vertices_[0];
-            far = viewSpaceFrustum.vertices_[4];
-          
-                /// \todo Necessary? Explain this
-                if (flipVertical_)
-                {
-                    near.Y = -near.Y;
-                    far.Y = -far.Y;
-                }*/
-        }
-
         public float GetHalfViewSize()
         {
             if(!orthographic_)

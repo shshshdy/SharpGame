@@ -35,7 +35,12 @@ namespace SharpGame
 
         protected bool builded_ = false;
 
-        public async virtual Task<bool> Load(File stream)
+        public async virtual Task<bool> LoadAsync(File stream)
+        {
+            return false;
+        }
+
+        public virtual bool Load(File stream)
         {
             return false;
         }

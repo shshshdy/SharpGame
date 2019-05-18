@@ -29,7 +29,7 @@ namespace SharpGame
         private static VkPipelineCache pipelineCache;
         private static DebugReportCallbackExt debugReportCallbackExt;
 
-        public static VkResult CreateInstance(Settings settings)
+        public static VkInstance CreateInstance(Settings settings)
         {
             bool enableValidation = settings.Validation;
 
@@ -78,17 +78,17 @@ namespace SharpGame
             }
 
             VkInstance instance;
-            VkResult result = vkCreateInstance(&instanceCreateInfo, null, &instance);
+            Util.CheckResult(vkCreateInstance(&instanceCreateInfo, null, &instance));
             VkInstance = instance;
 
             if (settings.Validation)
             {
                 debugReportCallbackExt = CreateDebugReportCallback();
             }
-            return result;
+            return instance;
         }
 
-        public static void Init(
+        public static VkDevice Init(
             VkPhysicalDeviceFeatures enabledFeatures,
             NativeList<IntPtr> enabledExtensions,
             bool useSwapChain = true,
@@ -161,13 +161,8 @@ namespace SharpGame
                 }
             }
 
-
-            VkResult res = Device.CreateLogicalDevice(enabledFeatures, enabledExtensions);
-
-            if (res != VkResult.Success)
-            {
-                throw new InvalidOperationException("Could not create Vulkan Device.");
-            }
+            Util.CheckResult(CreateLogicalDevice(enabledFeatures, enabledExtensions));
+            return device;
         }
 
 

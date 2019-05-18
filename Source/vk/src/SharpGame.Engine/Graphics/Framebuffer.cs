@@ -5,6 +5,12 @@ using Vulkan;
 
 namespace SharpGame
 {
+
+    public struct FramebufferInfo
+    {
+
+    }
+
     public class Framebuffer : DisposeBase
     {
         VkFramebuffer framebuffer;

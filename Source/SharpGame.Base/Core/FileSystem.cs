@@ -20,7 +20,7 @@ namespace SharpGame
             return null;
         }
 
-        public async Task<byte[]> ReadBytesAsync(string path)
+        public byte[] ReadBytesAsync(string path)
         {
             return null;
                 

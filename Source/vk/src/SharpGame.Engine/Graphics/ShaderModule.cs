@@ -88,7 +88,7 @@ namespace SharpGame
             Build();
         }
         
-        public async override Task<bool> Load(File stream)
+        public override bool Load(File stream)
         {
             Code = stream.ReadAllBytes();
 

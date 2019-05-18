@@ -108,7 +108,7 @@ namespace SharpGame
         public int passID;
 
         [IgnoreDataMember]
-        public RenderPath RenderPath { get; set; }
+        public FrameGraph RenderPath { get; set; }
 
         [IgnoreDataMember]
         public Framebuffer[] framebuffer_;

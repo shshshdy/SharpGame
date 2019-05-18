@@ -7,10 +7,11 @@ using Vulkan;
 
 namespace SharpGame
 {
+    using System.Collections;
     using static Builder;
 
     [DataContract]
-    public class Shader : Resource
+    public class Shader : Resource, IEnumerable<Pass>
     {
         [DataMember]
         public string Name { get; set; }
@@ -25,15 +26,20 @@ namespace SharpGame
         {
         }
 
+        public Shader(string name)
+        {
+            Name = name;
+        }
+
         public Shader(params Pass[] passes)
         {
             foreach(var pass in passes)
             {
-                AddPass(pass);
+                Add(pass);
             }
         }
 
-        public void AddPass(Pass pass)
+        public void Add(Pass pass)
         {
             Passes.Add(pass);
         }
@@ -63,7 +69,7 @@ namespace SharpGame
                     }
                 }
 
-                AddPass(value);
+                Add(value);
             }
         }
 
@@ -111,6 +117,16 @@ namespace SharpGame
             Passes.Clear();
 
             base.Destroy();
+        }
+
+        public IEnumerator<Pass> GetEnumerator()
+        {
+            return ((IEnumerable<Pass>)Passes).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<Pass>)Passes).GetEnumerator();
         }
     }
 

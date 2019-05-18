@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,9 +16,9 @@ namespace SharpGame
     public class ResourceCache : System<ResourceCache>
     {
         public FileSystem FileSystem => FileSystem.Instance;
-
+        
         public static string ContentRoot { get; set; }
-        private readonly Dictionary<string, Resource> cachedContent_ = new Dictionary<string, Resource>();
+        private readonly ConcurrentDictionary<string, Resource> cachedContent_ = new ConcurrentDictionary<string, Resource>();
 
         public ResourceCache(string contentRoot)
         {
@@ -37,7 +38,7 @@ namespace SharpGame
             return new StreamReader(stream);
         }
 
-        public async Task<T> Load<T>(string contentName) where T : Resource, new()
+        public T Load<T>(string contentName) where T : Resource, new()
         {
             if (cachedContent_.TryGetValue(contentName, out Resource value))
                 return (T)value;
@@ -46,17 +47,17 @@ namespace SharpGame
 
             var res = new T();
 
-            if(await res.Load(stream))
+            if(res.Load(stream))
             {
                 res.Build();
             }
 
-            cachedContent_.Add(contentName, res);
+            cachedContent_.TryAdd(contentName, res);
 
             return res;
         }
 
-        public T GetResource<T>(string contentName) where T : Resource, new()
+        public async Task<T> LoadAsync<T>(string contentName) where T : Resource, new()
         {
             if (cachedContent_.TryGetValue(contentName, out Resource value))
                 return (T)value;
@@ -65,12 +66,12 @@ namespace SharpGame
 
             var res = new T();
 
-            if (res.Load(stream).Result)
+            if (await res.LoadAsync(stream))
             {
                 res.Build();
             }
 
-            cachedContent_.Add(contentName, res);
+            cachedContent_.TryAdd(contentName, res);
 
             return res;
         }
@@ -86,6 +87,7 @@ namespace SharpGame
         {
             foreach (IDisposable value in cachedContent_.Values)
                 value.Dispose();
+
             cachedContent_.Clear();
         }
     }

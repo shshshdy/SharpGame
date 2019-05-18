@@ -98,7 +98,7 @@ namespace SharpGame
                 if (viewUpdated)
                 {
                     viewUpdated = false;
-                    WiewChanged();
+                    ViewChanged();
                 }
 
                 snapshot = NativeWindow.PumpEvents();
@@ -119,7 +119,7 @@ namespace SharpGame
             graphics.WaitIdle();
         }
 
-        protected virtual void WiewChanged()
+        protected virtual void ViewChanged()
         {
         }
 
@@ -144,7 +144,7 @@ namespace SharpGame
 
             // Notify derived class
             WindowResized();
-            WiewChanged();
+            ViewChanged();
 
             prepared = true;
         }

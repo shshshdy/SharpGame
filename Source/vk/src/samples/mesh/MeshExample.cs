@@ -250,7 +250,7 @@ namespace SharpGame
 
             shader = new Shader
             {
-                Main = new Pass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
+                new Pass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
                 {
                     ResourceLayout = resourceLayout
                 }
@@ -306,12 +306,12 @@ namespace SharpGame
             graphics.EndRender();
         }
 
-        protected override void WiewChanged()
+        protected override void ViewChanged()
         {
             updateUniformBuffers();
         }
 
-        protected override void keyPressed(Key keyCode)
+        protected override void KeyPressed(Key keyCode)
         {
             switch (keyCode)
             {

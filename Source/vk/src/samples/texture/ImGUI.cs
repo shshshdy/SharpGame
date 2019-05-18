@@ -16,11 +16,6 @@ namespace SharpGame
         public Matrix4x4 projection;
     }
 
-    public class Vector3List : List<Vector3>
-    {
-        public float test;
-    }
-
     public unsafe class ImGUI : SampleApp
     {
         GraphicsBuffer vertexBuffer = new GraphicsBuffer();
@@ -32,15 +27,7 @@ namespace SharpGame
         Pipeline pipeline;
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
-
         private IntPtr fontAtlasID = (IntPtr)1;
-
-        Vector3List t = new Vector3List
-        {
-            new Vector3(1,1,1),
-            new Vector3(1,1,1),
-            
-        };
 
         public ImGUI()
         {
@@ -93,14 +80,14 @@ namespace SharpGame
             uniformBufferVS = GraphicsBuffer.CreateUniformBuffer<UboVS>();
                         
             resourceLayout = new ResourceLayout
-            (
+            {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
                 new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
-            );
+            };
 
-            uiShader = new Shader
+            uiShader = new Shader("UI")
             {
-                Main = new Pass("shaders/texture/ImGui.vert.spv", "shaders/texture/ImGui.frag.spv")
+                new Pass("shaders/texture/ImGui.vert.spv", "shaders/texture/ImGui.frag.spv")
                 {
                     ResourceLayout = resourceLayout
                 }
@@ -236,7 +223,7 @@ namespace SharpGame
             draw();
         }
 
-        protected override void WiewChanged()
+        protected override void ViewChanged()
         {
             updateUniformBuffers();
         }

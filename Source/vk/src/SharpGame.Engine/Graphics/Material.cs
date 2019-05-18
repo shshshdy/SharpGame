@@ -39,7 +39,7 @@ namespace SharpGame
         {
             base.OnBuild();
 
-            Shader = ResourceCache.Instance.Load<Shader>(ShaderName).Result;
+            Shader = ResourceCache.Instance.Load<Shader>(ShaderName);
             //materialRenderData = new MaterialRenderData();
         }
 

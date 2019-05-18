@@ -83,10 +83,10 @@ namespace SharpGame
 
         private void OnKeyDown(KeyEvent e)
         {
-            keyPressed(e.Key);
+            KeyPressed(e.Key);
         }
 
-        protected virtual void keyPressed(Key key)
+        protected virtual void KeyPressed(Key key)
         {
         }
     }

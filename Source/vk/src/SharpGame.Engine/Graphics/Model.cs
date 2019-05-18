@@ -257,7 +257,7 @@ namespace SharpGame
             return new VertexLayout(vertexInputBinding.ToArray(), vertexInputAttributes.ToArray());
         }
 
-        public async override Task<bool> Load(File source)
+        public override bool Load(File source)
         {
             String fileID = source.ReadFileID();
             if (fileID != "UMDL" && fileID != "UMD2")
@@ -395,8 +395,6 @@ namespace SharpGame
             morphs_ = new ModelMorph[(int)numMorphs];
             for (int i = 0; i < numMorphs; ++i)
             {
-                //ModelMorph newMorph = morphs_[i];
-
                 morphs_[i].name_ = source.ReadCString();
                 morphs_[i].weight_ = 0.0f;
                 uint numBuffers = source.Read<uint>();

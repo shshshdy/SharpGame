@@ -67,19 +67,9 @@ namespace SharpGame
         {
             Settings.Validation = false;
 
-            VkResult err;
-            err = Device.CreateInstance(Settings);
-            if (err != VkResult.Success)
-            {
-                throw new InvalidOperationException("Could not create Vulkan instance. Error: " + err);
-            }
-
-            VkInstance = Device.VkInstance;
-
-            Device.Init(enabledFeatures, EnabledExtensions);
+            VkInstance = Device.CreateInstance(Settings);
+            device = Device.Init(enabledFeatures, EnabledExtensions);
            
-            device = Device.LogicalDevice;
-
             // Get a graphics queue from the Device
             queue = Device.GetDeviceQueue(Device.QFIndices.Graphics, 0);
 

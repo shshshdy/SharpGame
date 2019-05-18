@@ -6,12 +6,12 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class RenderPath : Resource
+    public class FrameGraph : Resource
     {
         public Dictionary<string, Framebuffer> FrameBuffers = new Dictionary<string, Framebuffer>();
         public List<RenderPass> RenderPasses { get; set; } = new List<RenderPass>();
 
-        public RenderPath()
+        public FrameGraph()
         {
         }
 

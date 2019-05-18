@@ -9,7 +9,7 @@ namespace SharpGame
     {
         public Scene Scene { get; set; }
         public Camera Camera { get; set; }
-        public RenderPath RenderPath { get; set; }
+        public FrameGraph RenderPath { get; set; }
         public Viewport Viewport { get; set; }
         public uint ViewMask { get; set; }
         public RenderPass OverlayPass { get; set; }
@@ -19,7 +19,7 @@ namespace SharpGame
 
         private FrameInfo frame_;
 
-        public RenderView(Camera camera = null, Scene scene = null, RenderPath renderPath = null)
+        public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
             Scene = scene;            
             Camera = camera;
@@ -27,7 +27,7 @@ namespace SharpGame
 
             if (RenderPath == null)
             {
-                RenderPath = new RenderPath();
+                RenderPath = new FrameGraph();
                 RenderPath.AddRenderPass(new ScenePass());
             }
 
