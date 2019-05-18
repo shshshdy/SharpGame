@@ -16,6 +16,11 @@ namespace SharpGame
         public Matrix4x4 projection;
     }
 
+    public class Vector3List : List<Vector3>
+    {
+        public float test;
+    }
+
     public unsafe class ImGUI : SampleApp
     {
         GraphicsBuffer vertexBuffer = new GraphicsBuffer();
@@ -29,6 +34,13 @@ namespace SharpGame
         ResourceSet resourceSet;
 
         private IntPtr fontAtlasID = (IntPtr)1;
+
+        Vector3List t = new Vector3List
+        {
+            new Vector3(1,1,1),
+            new Vector3(1,1,1),
+            
+        };
 
         public ImGUI()
         {

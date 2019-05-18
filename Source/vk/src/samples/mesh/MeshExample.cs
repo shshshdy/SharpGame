@@ -243,10 +243,10 @@ namespace SharpGame
             };
 
             resourceLayout = new ResourceLayout
-            (
+            {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
                 new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
-            );
+            }.Build();
 
             shader = new Shader
             {

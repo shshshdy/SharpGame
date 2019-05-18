@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -39,46 +40,55 @@ namespace SharpGame
         }
     }
 
-    public class ResourceLayout : IDisposable
+    public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
-        public ResourceLayoutBinding[] Bindings { get; set; }
-
+        public List<ResourceLayoutBinding> Bindings { get; set; }
 
         private VkDescriptorSetLayoutBinding[] bindings;
 
-        public VkDescriptorSetLayout descriptorSetLayout;
+        internal VkDescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
-        internal int numBindings => bindings.Length;
-
+        internal int numBindings => Bindings.Count;
+        bool builded = false;
         public ResourceLayout()
         {
         }
 
         public ResourceLayout(params ResourceLayoutBinding[] bindings)
         {
-            Bindings = bindings;
-
-            this.bindings = new VkDescriptorSetLayoutBinding[bindings.Length];
-            for(int i = 0; i < bindings.Length; i++)
-            {
-                this.bindings[i] = new VkDescriptorSetLayoutBinding
-                {
-                    descriptorType = (VkDescriptorType)bindings[i].descriptorType,
-                    stageFlags = (VkShaderStageFlags)bindings[i].stageFlags,
-                    binding = bindings[i].binding,
-                    descriptorCount = bindings[i].descriptorCount
-                };
-            }
+            Bindings = new List<ResourceLayoutBinding>(bindings);
             Build();
         }
         
-        public void Dispose()
+        protected override void Destroy()
         {
-            VulkanNative.vkDestroyDescriptorSetLayout(Graphics.device, descriptorSetLayout, IntPtr.Zero);
+            if(descriptorSetLayout != 0)
+            {
+                VulkanNative.vkDestroyDescriptorSetLayout(Graphics.device, descriptorSetLayout, IntPtr.Zero);
+            }
         }
 
-        public unsafe void Build()
+        public unsafe ResourceLayout Build()
         {
+            if(builded)
+            {
+                return this;
+            }
+
+            builded = true;
+            Destroy();
+            bindings = new VkDescriptorSetLayoutBinding[Bindings.Count];
+            for (int i = 0; i < Bindings.Count; i++)
+            {
+                bindings[i] = new VkDescriptorSetLayoutBinding
+                {
+                    descriptorType = (VkDescriptorType)Bindings[i].descriptorType,
+                    stageFlags = (VkShaderStageFlags)Bindings[i].stageFlags,
+                    binding = Bindings[i].binding,
+                    descriptorCount = Bindings[i].descriptorCount
+                };
+            }
+
             var descriptorSetLayoutCreateInfo = VkDescriptorSetLayoutCreateInfo.New();
             descriptorSetLayoutCreateInfo.pBindings = (VkDescriptorSetLayoutBinding*)Utilities.AsPointer(ref bindings[0]);
             descriptorSetLayoutCreateInfo.bindingCount = (uint)bindings.Length;
@@ -90,6 +100,29 @@ namespace SharpGame
             {
                 descriptorResourceCounts[(int)binding.descriptorType] += 1;
             }
+
+            return this;
+        }
+
+        public IEnumerator<ResourceLayoutBinding> GetEnumerator()
+        {
+            return Bindings.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Bindings.GetEnumerator();
+        }
+
+        public void Add(ResourceLayoutBinding binding)
+        {
+            if(Bindings == null)
+            {
+                Bindings = new List<ResourceLayoutBinding>();
+            }
+
+            Bindings.Add(binding);
+            builded = false;
         }
     }
 

@@ -20,6 +20,7 @@ namespace SharpGame
         private VkWriteDescriptorSet[] writeDescriptorSets;
         public ResourceSet(ResourceLayout resLayout)
         {
+            resLayout.Build();
             VkDescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
             unsafe
             {
@@ -63,7 +64,7 @@ namespace SharpGame
 
         public ResourceSet Bind(uint dstBinding, IBindable bindable)
         {
-            var descriptorType = resourceLayout.Bindings[dstBinding].descriptorType;
+            var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             switch(descriptorType)
             {
                 case DescriptorType.Sampler:
