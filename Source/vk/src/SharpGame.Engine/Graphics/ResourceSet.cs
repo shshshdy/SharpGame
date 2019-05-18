@@ -35,6 +35,7 @@ namespace SharpGame
 
         public ResourceSet(ResourceLayout resLayout, params IBindable[] bindables)
         {
+            resLayout.Build();
             VkDescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
             unsafe
             {
