@@ -37,9 +37,19 @@ namespace SharpGame
             vkCmdEndRenderPass(commandBuffer);
         }
 
+        public void SetScissor(Rect2D scissor)
+        {
+            SetScissor(ref scissor);
+        }
+
         public void SetScissor(ref Rect2D pScissors)
         {
             vkCmdSetScissor(commandBuffer, 0, 1, Utilities.AsPointer(ref pScissors));
+        }
+
+        public void SetViewport(Viewport viewport)
+        {
+            SetViewport(ref viewport);
         }
 
         public void SetViewport(ref Viewport pViewports)
@@ -57,14 +67,20 @@ namespace SharpGame
             vkCmdBindPipeline(commandBuffer, pipelineBindPoint, pipeline);
         }
 
+        public void BindGraphicsPipeline(VkPipeline pipeline)
+        {
+            vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Graphics, pipeline);
+        }
+
         public void BindVertexBuffers(uint firstBinding, uint bindingCount, IntPtr pBuffers, ref ulong pOffsets)
         {
             vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount, pBuffers, ref pOffsets);
         }
 
-        public unsafe void BindVertexBuffer(uint firstBinding, GraphicsBuffer buffer, ulong* pOffsets = null)
+        public void BindVertexBuffer(uint firstBinding, GraphicsBuffer buffer)
         {
-            vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, ref buffer.buffer, pOffsets);
+            ulong pOffsets = 0;
+            vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, ref buffer.buffer, ref pOffsets);
         }
 
         public unsafe void BindIndexBuffer(GraphicsBuffer buffer, ulong offset, IndexType indexType)

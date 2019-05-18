@@ -9,6 +9,13 @@ using Veldrid;
 
 namespace SharpGame
 {
+    struct UboVS
+    {
+        public System.Numerics.Matrix4x4 projection;
+        public System.Numerics.Matrix4x4 model;
+        public Vector4 lightPos;
+    }
+
     public unsafe class MeshExample : Application
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
@@ -18,6 +25,8 @@ namespace SharpGame
         VkPipelineVertexInputStateCreateInfo vertices_inputState;
         NativeList<VkVertexInputBindingDescription> vertices_bindingDescriptions = new NativeList<VkVertexInputBindingDescription>();
         NativeList<VkVertexInputAttributeDescription> vertices_attributeDescriptions = new NativeList<VkVertexInputAttributeDescription>();
+
+        VertexLayout vertexLayout;
 
         // Vertex layout used in this example
         // This must fit input locations of the vertex shader used to render the model
@@ -33,40 +42,25 @@ namespace SharpGame
             public const uint ColorOffset = 32;
         };
 
-        // Contains all Vulkan resources required to represent vertex and index buffers for a model
-        // This is for demonstration and learning purposes, the other examples use a model loader class for easy access
-        VkBuffer model_vertices_buffer;
-        VkDeviceMemory model_vertices_memory;
-
         int model_indices_count;
-        VkBuffer model_indices_buffer;
-        VkDeviceMemory model_indices_memory;
 
-        // Destroys all Vulkan resources created for this model
-        void destroyModel()
-        {
-            Device.DestroyBuffer(model_vertices_buffer);
-            Device.FreeMemory(model_vertices_memory);
-            Device.DestroyBuffer(model_indices_buffer);
-            Device.FreeMemory(model_indices_memory);
-        }
+        GraphicsBuffer modelVertexBuffer;
+        GraphicsBuffer modelIndexBuffer;
+
 
         GraphicsBuffer uniformBuffers_scene = new GraphicsBuffer();
 
-        struct UboVS
-        {
-            public System.Numerics.Matrix4x4 projection;
-            public System.Numerics.Matrix4x4 model;
-            public Vector4 lightPos;
-        }
-
         UboVS uboVS = new UboVS() { lightPos = new Vector4(25.0f, 5.0f, 5.0f, 1.0f) };
+
+        Shader shader;
+        ResourceLayout resourceLayout;
+        ResourceSet resourceSet;
+
+        Pipeline pipelineSolid;
+        Pipeline pipelineWireframe;
+
         VkPipeline pipelines_solid;
         VkPipeline pipelines_wireframe;
-
-        VkPipelineLayout pipelineLayout;
-        VkDescriptorSet descriptorSet;
-        VkDescriptorSetLayout descriptorSetLayout;
 
         public MeshExample()
         {
@@ -76,6 +70,18 @@ namespace SharpGame
             rotation = new Vector3(-0.5f, -112.75f, 0.0f);
             cameraPos = new Vector3(0.1f, 1.1f, 0.0f);
             Title = "Vulkan Example - Model rendering";
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            loadAssets();
+            prepareUniformBuffers();
+            CreatePipelines();
+            SetupResourceSet();
+
+            prepared = true;
         }
 
         protected override void Destroy()
@@ -88,42 +94,17 @@ namespace SharpGame
                 Device.DestroyPipeline(pipelines_wireframe);
             }
 
-            Device.DestroyPipelineLayout(pipelineLayout);
-            Device.DestroyDescriptorSetLayout(descriptorSetLayout);
-
-            destroyModel();
+            modelVertexBuffer.Dispose();
+            modelIndexBuffer.Dispose();
 
             textures_colorMap.Dispose();
             uniformBuffers_scene.Dispose();
 
             base.Destroy();
         }
-        /*
-        protected override void getEnabledFeatures()
-        {
-            // Fill mode non solid is required for wireframe display
-            if (DeviceFeatures.fillModeNonSolid == 1)
-            {
-                var features = enabledFeatures;
-                features.fillModeNonSolid = True;
-                enabledFeatures = features;
-            };
-        }
-        */
-        void reBuildCommandBuffers()
-        {/*
-            if (!checkCommandBuffers())
-            {
-                destroyCommandBuffers();
-                createCommandBuffers();
-            }*/
-            buildCommandBuffers();
-        }
-
+        
         protected override void buildCommandBuffers()
         {
-            var cmdBufInfo = VkCommandBufferBeginInfo.New();
-
             FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
             clearValues.First.color = defaultClearColor;
             clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
@@ -137,35 +118,36 @@ namespace SharpGame
             renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = &clearValues.First;
 
-            for (int i = 0; i < Graphics.drawCmdBuffers.Count; ++i)
+            var graphics = Graphics.Instance;
+            //for (int i = 0; i < Graphics.drawCmdBuffers.Count; ++i)
+            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
             {
                 // Set target frame buffer
-                renderPassBeginInfo.framebuffer = Graphics.frameBuffers[i];
+                renderPassBeginInfo.framebuffer = Graphics.frameBuffers[graphics.currentBuffer];
 
-                Util.CheckResult(vkBeginCommandBuffer(Graphics.drawCmdBuffers[i], &cmdBufInfo));
+                cmdBuffer.Begin();
+                cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
 
-                vkCmdBeginRenderPass(Graphics.drawCmdBuffers[i], &renderPassBeginInfo, VkSubpassContents.Inline);
+                Viewport viewport = new Viewport(0, 0, (float)width, (float)height, 0.0f, 1.0f);
+                cmdBuffer.SetViewport(ref viewport);
 
-                VkViewport viewport = Builder.Viewport((float)width, (float)height, 0.0f, 1.0f);
-                vkCmdSetViewport(Graphics.drawCmdBuffers[i], 0, 1, &viewport);
+                Rect2D scissor = new Rect2D(0, 0, (int)width, (int)height);
+                cmdBuffer.SetScissor(ref scissor);
 
-                VkRect2D scissor = Builder.Rect2D(0, 0, width, height);
-                vkCmdSetScissor(Graphics.drawCmdBuffers[i], 0, 1, &scissor);
+                var pipe = wireframe ? pipelineSolid : pipelineWireframe;
+                var pipeline = wireframe ? pipe.GetGraphicsPipeline(Graphics.renderPass, shader.Main, null)
+                            : pipe.GetGraphicsPipeline(Graphics.renderPass, shader.Main, null);
 
-                vkCmdBindDescriptorSets(Graphics.drawCmdBuffers[i], VkPipelineBindPoint.Graphics, pipelineLayout, 0, 1, ref descriptorSet, 0, null);
-                vkCmdBindPipeline(Graphics.drawCmdBuffers[i], VkPipelineBindPoint.Graphics, wireframe ? pipelines_wireframe : pipelines_solid);
+                cmdBuffer.BindDescriptorSets(VkPipelineBindPoint.Graphics, pipe.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
+                cmdBuffer.BindGraphicsPipeline(pipeline);
 
-                ulong offsets = 0;
                 // Bind mesh vertex buffer
-                vkCmdBindVertexBuffers(Graphics.drawCmdBuffers[i], VERTEX_BUFFER_BIND_ID, 1, ref model_vertices_buffer, ref offsets);
-                // Bind mesh index buffer
-                vkCmdBindIndexBuffer(Graphics.drawCmdBuffers[i], model_indices_buffer, 0, VkIndexType.Uint32);
-                // Render mesh vertex buffer using it's indices
-                vkCmdDrawIndexed(Graphics.drawCmdBuffers[i], (uint)model_indices_count, 1, 0, 0, 0);
+                cmdBuffer.BindVertexBuffer(VERTEX_BUFFER_BIND_ID, modelVertexBuffer);
+                cmdBuffer.BindIndexBuffer(modelIndexBuffer, 0, IndexType.Uint32);
+                cmdBuffer.DrawIndexed((uint)model_indices_count, 1, 0, 0, 0);
 
-                vkCmdEndRenderPass(Graphics.drawCmdBuffers[i]);
-
-                Util.CheckResult(vkEndCommandBuffer(Graphics.drawCmdBuffers[i]));
+                cmdBuffer.EndRenderPass();
+                cmdBuffer.End();
             }
         }
 
@@ -212,6 +194,10 @@ namespace SharpGame
                     vertexBuffer.Add(vertex);
                 }
             }
+
+            modelVertexBuffer = GraphicsBuffer.Create(BufferUsage.VertexBuffer, false,
+                sizeof(Vertex), (int)vertexBuffer.Count, vertexBuffer.Data);
+
             ulong vertexBufferSize = (ulong)(vertexBuffer.Count * sizeof(Vertex));
 
             // Generate index buffer from ASSIMP scene data
@@ -228,108 +214,12 @@ namespace SharpGame
                     }
                 }
             }
-            ulong indexBufferSize = (ulong)(indexBuffer.Count * sizeof(uint));
+
+            modelIndexBuffer = GraphicsBuffer.Create(BufferUsage.IndexBuffer, false,
+                sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
+
             model_indices_count = (int)indexBuffer.Count;
 
-            // Static mesh should always be Device local
-
-            bool useStaging = true;
-
-            if (useStaging)
-            {
-
-                VkBuffer vertexStaging_buffer;
-                VkDeviceMemory vertexStaging_memory;
-                VkBuffer indexStaging_buffer;
-                VkDeviceMemory indexStaging_memory;
-
-                // Create staging buffers
-                // Vertex data
-                Util.CheckResult(Device.createBuffer(
-                    VkBufferUsageFlags.TransferSrc,
-                    VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                    vertexBufferSize,
-                    &vertexStaging_buffer,
-                    &vertexStaging_memory,
-                    vertexBuffer.Data.ToPointer()));
-                // Index data
-                Util.CheckResult(Device.createBuffer(
-                    VkBufferUsageFlags.TransferSrc,
-                    VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                    indexBufferSize,
-                    &indexStaging_buffer,
-                    &indexStaging_memory,
-                    indexBuffer.Data.ToPointer()));
-
-                // Create Device local buffers
-                // Vertex buffer
-                Util.CheckResult(Device.createBuffer(
-                    VkBufferUsageFlags.VertexBuffer | VkBufferUsageFlags.TransferDst,
-                    VkMemoryPropertyFlags.DeviceLocal,
-                    vertexBufferSize,
-                    out model_vertices_buffer,
-                    out model_vertices_memory));
-                // Index buffer
-                Util.CheckResult(Device.createBuffer(
-                    VkBufferUsageFlags.IndexBuffer | VkBufferUsageFlags.TransferDst,
-                    VkMemoryPropertyFlags.DeviceLocal,
-                    indexBufferSize,
-                    out model_indices_buffer,
-                    out model_indices_memory));
-
-                // Copy from staging buffers
-                VkCommandBuffer copyCmd = Device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
-
-                VkBufferCopy copyRegion = new VkBufferCopy();
-
-                copyRegion.size = vertexBufferSize;
-
-                vkCmdCopyBuffer(
-                    copyCmd,
-                    vertexStaging_buffer,
-                    model_vertices_buffer,
-                    1,
-                    &copyRegion);
-
-                copyRegion.size = indexBufferSize;
-
-                vkCmdCopyBuffer(
-                    copyCmd,
-                    indexStaging_buffer,
-                    model_indices_buffer,
-                    1,
-                    &copyRegion);
-
-                Device.flushCommandBuffer(copyCmd, Graphics.queue, true);
-
-
-                Device.DestroyBuffer(vertexStaging_buffer);
-
-                Device.FreeMemory(vertexStaging_memory);
-
-                Device.DestroyBuffer(indexStaging_buffer);
-
-                Device.FreeMemory(indexStaging_memory);
-            }
-            else
-            {
-                // Vertex buffer
-                Util.CheckResult(Device.createBuffer(
-                    VkBufferUsageFlags.VertexBuffer,
-                    VkMemoryPropertyFlags.HostVisible,
-                    vertexBufferSize,
-                    out model_vertices_buffer,
-                    out model_vertices_memory,
-                    vertexBuffer.Data.ToPointer()));
-                // Index buffer
-                Util.CheckResult(Device.createBuffer(
-                    VkBufferUsageFlags.IndexBuffer,
-                    VkMemoryPropertyFlags.HostVisible,
-                    indexBufferSize,
-                    out model_indices_buffer,
-                    out model_indices_memory,
-                    indexBuffer.Data.ToPointer()));
-            }
         }
 
         void loadAssets()
@@ -354,232 +244,66 @@ namespace SharpGame
             }
         }
 
-        void setupVertexDescriptions()
+        void SetupResourceSet()
         {
-            // Binding description
-            vertices_bindingDescriptions.Count = 1;
-            vertices_bindingDescriptions[0] =
-                Builder.VertexBinding(
-                    VERTEX_BUFFER_BIND_ID,
-                    (uint)sizeof(Vertex),
-                    VkVertexInputRate.Vertex);
-
-            // Attribute descriptions
-            // Describes memory layout and shader positions
-            vertices_attributeDescriptions.Count = 4;
-            // Location 0 : Position
-            vertices_attributeDescriptions[0] =
-                Builder.VertexElement(
-                    VERTEX_BUFFER_BIND_ID,
-                    0,
-                    VkFormat.R32g32b32Sfloat,
-                    Vertex.PositionOffset);
-            // Location 1 : Normal
-            vertices_attributeDescriptions[1] =
-                Builder.VertexElement(
-                    VERTEX_BUFFER_BIND_ID,
-                    1,
-                    VkFormat.R32g32b32Sfloat,
-                    Vertex.NormalOffset);
-            // Location 2 : Texture coordinates
-            vertices_attributeDescriptions[2] =
-                Builder.VertexElement(
-                    VERTEX_BUFFER_BIND_ID,
-                    2,
-                    VkFormat.R32g32Sfloat,
-                    Vertex.UvOffset);
-            // Location 3 : Color
-            vertices_attributeDescriptions[3] =
-                Builder.VertexElement(
-                    VERTEX_BUFFER_BIND_ID,
-                    3,
-                    VkFormat.R32g32b32Sfloat,
-                    Vertex.ColorOffset);
-
-            vertices_inputState = Builder.VertexInputStateCreateInfo();
-            vertices_inputState.vertexBindingDescriptionCount = (vertices_bindingDescriptions.Count);
-            vertices_inputState.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)vertices_bindingDescriptions.Data;
-            vertices_inputState.vertexAttributeDescriptionCount = (vertices_attributeDescriptions.Count);
-            vertices_inputState.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)vertices_attributeDescriptions.Data;
+            resourceSet = new ResourceSet(resourceLayout, uniformBuffers_scene, textures_colorMap);
         }
 
-        void setupDescriptorPool()
+        void CreatePipelines()
         {
-            // Example uses one ubo and one combined image sampler
-            FixedArray2<VkDescriptorPoolSize> poolSizes = new FixedArray2<VkDescriptorPoolSize>(
-                Builder.DescriptorPoolSize(VkDescriptorType.UniformBuffer, 1),
-                Builder.DescriptorPoolSize(VkDescriptorType.CombinedImageSampler, 1));
-
-            VkDescriptorPoolCreateInfo descriptorPoolInfo =
-                Builder.DescriptorPoolCreateInfo(
-                    poolSizes.Count,
-                    &poolSizes.First,
-                    1);
-
-            Util.CheckResult(vkCreateDescriptorPool(Graphics.device, &descriptorPoolInfo, null, out descriptorPool));
-        }
-
-        void setupDescriptorSetLayout()
-        {
-            FixedArray2<VkDescriptorSetLayoutBinding> setLayoutBindings = new FixedArray2<VkDescriptorSetLayoutBinding>(
-                // Binding 0 : Vertex shader uniform buffer
-                Builder.DescriptorSetLayoutBinding(
-                    VkDescriptorType.UniformBuffer,
-                    VkShaderStageFlags.Vertex,
-                    0),
-                // Binding 1 : Fragment shader combined sampler
-                Builder.DescriptorSetLayoutBinding(
-                    VkDescriptorType.CombinedImageSampler,
-                    VkShaderStageFlags.Fragment,
-                    1));
-
-            VkDescriptorSetLayoutCreateInfo descriptorLayout =
-                Builder.DescriptorSetLayoutCreateInfo(
-                    &setLayoutBindings.First,
-                    setLayoutBindings.Count);
-
-            Util.CheckResult(vkCreateDescriptorSetLayout(Graphics.device, &descriptorLayout, null, out descriptorSetLayout));
-
-            var dsl = descriptorSetLayout;
-            VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
-                Builder.PipelineLayoutCreateInfo(
-                    ref dsl,
-                    1);
-
-            Util.CheckResult(vkCreatePipelineLayout(Graphics.device, &pPipelineLayoutCreateInfo, null, out pipelineLayout));
-        }
-
-        void setupDescriptorSet()
-        {
-            var dsl = descriptorSetLayout;
-            VkDescriptorSetAllocateInfo allocInfo =
-                Builder.DescriptorSetAllocateInfo(
-                    descriptorPool,
-                    &dsl,
-                    1);
-
-            Util.CheckResult(vkAllocateDescriptorSets(Graphics.device, &allocInfo, out descriptorSet));
-
-            VkDescriptorImageInfo texDescriptor =
-                Builder.DescriptorImageInfo(
-                    textures_colorMap.sampler,
-                    textures_colorMap.view,
-                    VkImageLayout.General);
-
-            var temp = uniformBuffers_scene.descriptor;
-            FixedArray2<VkWriteDescriptorSet> writeDescriptorSets = new FixedArray2<VkWriteDescriptorSet>(
-                // Binding 0 : Vertex shader uniform buffer
-                Builder.WriteDescriptorSet(
-                    descriptorSet,
-                    VkDescriptorType.UniformBuffer,
-                    0,
-                    ref temp),
-                // Binding 1 : Color map 
-                Builder.WriteDescriptorSet(
-                    descriptorSet,
-                    VkDescriptorType.CombinedImageSampler,
-                    1,
-                    ref texDescriptor));
-
-            vkUpdateDescriptorSets(Graphics.device, (writeDescriptorSets.Count), ref writeDescriptorSets.First, 0, null);
-        }
-
-        void preparePipelines()
-        {
-            VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
-                Builder.InputAssemblyStateCreateInfo(
-                    PrimitiveTopology.TriangleList,
-                    0,
-                    False);
-
-            VkPipelineRasterizationStateCreateInfo rasterizationState =
-                Builder.RasterizationStateCreateInfo(
-                    VkPolygonMode.Fill,
-                    VkCullModeFlags.Back,
-                    VkFrontFace.Clockwise,
-                    0);
-
-            VkPipelineColorBlendAttachmentState blendAttachmentState =
-                Builder.ColorBlendAttachmentState(
-                    (VkColorComponentFlags)0xf,
-                    false);
-
-            VkPipelineColorBlendStateCreateInfo colorBlendState =
-                Builder.ColorBlendStateCreateInfo(
-                    1,
-                    ref blendAttachmentState);
-
-            VkPipelineDepthStencilStateCreateInfo depthStencilState =
-                Builder.DepthStencilStateCreateInfo(
-                    true,
-                    true,
-                     VkCompareOp.LessOrEqual);
-
-            VkPipelineViewportStateCreateInfo viewportState =
-                Builder.ViewportStateCreateInfo(1, 1, 0);
-
-            VkPipelineMultisampleStateCreateInfo multisampleState =
-                Builder.MultisampleStateCreateInfo(
-                    VkSampleCountFlags.Count1,
-                    0);
-
-            FixedArray2<VkDynamicState> dynamicStateEnables = new FixedArray2<VkDynamicState>(
-                 VkDynamicState.Viewport,
-                 VkDynamicState.Scissor);
-            VkPipelineDynamicStateCreateInfo dynamicState =
-                Builder.DynamicStateCreateInfo(
-                    &dynamicStateEnables.First,
-                    dynamicStateEnables.Count,
-                    0);
-
-            // Solid rendering pipeline
-            // Load shaders
-            FixedArray2<VkPipelineShaderStageCreateInfo> shaderStages = new FixedArray2<VkPipelineShaderStageCreateInfo>(
-                Graphics.loadShader(DataPath + "shaders/mesh/mesh.vert.spv", VkShaderStageFlags.Vertex),
-                Graphics.loadShader(DataPath + "shaders/mesh/mesh.frag.spv", VkShaderStageFlags.Fragment));
-
-            VkGraphicsPipelineCreateInfo pipelineCreateInfo =
-                Builder.GraphicsPipelineCreateInfo(
-                    pipelineLayout,
-                    Graphics.renderPass,
-                    0);
-
-            var via = vertices_inputState;
-            pipelineCreateInfo.pVertexInputState = &via;
-            pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
-            pipelineCreateInfo.pRasterizationState = &rasterizationState;
-            pipelineCreateInfo.pColorBlendState = &colorBlendState;
-            pipelineCreateInfo.pMultisampleState = &multisampleState;
-            pipelineCreateInfo.pViewportState = &viewportState;
-            pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-            pipelineCreateInfo.pDynamicState = &dynamicState;
-            pipelineCreateInfo.stageCount = shaderStages.Count;
-            pipelineCreateInfo.pStages = &shaderStages.First;
-
-            pipelines_solid = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
-
-            // Wire frame rendering pipeline
-            if (Device.Features.fillModeNonSolid == 1)
+            vertexLayout = new VertexLayout
             {
-                rasterizationState.polygonMode = VkPolygonMode.Line;
-                rasterizationState.lineWidth = 1.0f;
-                pipelines_wireframe = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
-            }
+                bindings = new[]
+                   {
+                    new VertexInputBinding(0, (uint)sizeof(Vertex), VertexInputRate.Vertex)
+                },
+
+                attributes = new[]
+                   {
+                    new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, Vertex.PositionOffset),
+                    new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, Vertex.NormalOffset),
+                    new VertexInputAttribute(0, 2, Format.R32g32Sfloat, Vertex.UvOffset),
+                    new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, Vertex.ColorOffset)
+                }
+
+            };
+
+            resourceLayout = new ResourceLayout
+            (
+                new ResourceLayoutBinding(DescriptorType.UniformBuffer, ShaderStage.Vertex, 0),
+                new ResourceLayoutBinding(DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
+            );
+
+            shader = new Shader
+            {
+                Main = new Pass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
+                {
+                    ResourceLayout = resourceLayout
+                }
+            };
+
+            pipelineSolid = new Pipeline
+            {
+                CullMode = CullMode.Back,
+                FrontFace = FrontFace.Clockwise,
+                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
+                VertexLayout = vertexLayout
+            };
+
+            pipelineWireframe = new Pipeline
+            {
+                FillMode = PolygonMode.Line,
+                CullMode = CullMode.Back,
+                FrontFace = FrontFace.Clockwise,
+                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
+                VertexLayout = vertexLayout
+            };
         }
 
         // Prepare and initialize uniform buffer containing shader uniforms
         void prepareUniformBuffers()
         {
-            // Vertex shader uniform buffer block
-            Util.CheckResult(Device.createBuffer(
-                VkBufferUsageFlags.UniformBuffer,
-                VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                uniformBuffers_scene,
-                (uint)sizeof(UboVS)));
-
-            // Map persistent
-            Util.CheckResult(uniformBuffers_scene.map());
-
+            uniformBuffers_scene = GraphicsBuffer.CreateUniformBuffer<UboVS>();
             updateUniformBuffers();
         }
 
@@ -593,36 +317,19 @@ namespace SharpGame
             uboVS.model = System.Numerics.Matrix4x4.CreateRotationY(Util.DegreesToRadians(rotation.Y)) * uboVS.model;
             uboVS.model = System.Numerics.Matrix4x4.CreateRotationZ(Util.DegreesToRadians(rotation.Z)) * uboVS.model;
 
-            Unsafe.Copy(uniformBuffers_scene.mapped, ref uboVS);
+            uniformBuffers_scene.SetData(ref uboVS);
         }
-
-        void draw()
-        {
-            graphics.BeginRender();
-
-            graphics.EndRender();
-        }
-
-
-        public override void Initialize()
-        {
-            base.Initialize();
-            loadAssets();
-            setupVertexDescriptions();
-            prepareUniformBuffers();
-            setupDescriptorSetLayout();
-            preparePipelines();
-            setupDescriptorPool();
-            setupDescriptorSet();
-            buildCommandBuffers();
-            prepared = true;
-        }
-
+        
         protected override void render()
         {
             if (!prepared)
                 return;
-            draw();
+
+            graphics.BeginRender();
+
+            buildCommandBuffers();
+
+            graphics.EndRender();
         }
 
         protected override void viewChanged()
@@ -638,7 +345,6 @@ namespace SharpGame
                     if (Device.Features.fillModeNonSolid == 1)
                     {
                         wireframe = !wireframe;
-                        reBuildCommandBuffers();
                     }
                     break;
             }

@@ -23,18 +23,10 @@ namespace SharpGame
         public void* mapped = null;
 
         /** @brief Usage flags to be filled by external source at buffer creation (to query at some later point) */
-        public VkBufferUsageFlags usageFlags;
+        public BufferUsage usageFlags;
         /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
         public VkMemoryPropertyFlags memoryPropertyFlags;
 
-        /** 
-        * Map a memory range of this buffer. If successful, mapped points to the specified buffer range.
-        * 
-        * @param size (Optional) Size of the memory range to map. Pass WholeSize to map the complete buffer range.
-        * @param offset (Optional) Byte offset from beginning
-        * 
-        * @return VkResult of the buffer mapping call
-        */
         public VkResult map(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
         {
             void* mappedLocal;
@@ -43,11 +35,6 @@ namespace SharpGame
             return result;
         }
 
-        /**
-        * Unmap a mapped memory range
-        *
-        * @note Does not return a result as vkUnmapMemory can't fail
-        */
         public void unmap()
         {
             if (mapped != null)
@@ -57,25 +44,11 @@ namespace SharpGame
             }
         }
 
-        /** 
-        * Attach the allocated memory block to the buffer
-        * 
-        * @param offset (Optional) Byte offset (from the beginning) for the memory region to bind
-        * 
-        * @return VkResult of the bindBufferMemory call
-        */
         public VkResult bind(VkDeviceSize offset = 0)
         {
             return vkBindBufferMemory(Graphics.device, buffer, memory, offset);
         }
 
-        /**
-        * Setup the default descriptor for this buffer
-        *
-        * @param size (Optional) Size of the memory range of the descriptor
-        * @param offset (Optional) Byte offset from beginning
-        *
-        */
         public void setupDescriptor(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
         {
             descriptor.offset = offset;
@@ -83,13 +56,6 @@ namespace SharpGame
             descriptor.range = size;
         }
 
-        /**
-        * Copies the specified data to the mapped buffer
-        * 
-        * @param data Pointer to the data to copy
-        * @param size Size of the data to copy in machine units
-        *
-        */
         public void copyTo(void* data, VkDeviceSize size)
         {
             Debug.Assert(mapped != null);
@@ -109,16 +75,6 @@ namespace SharpGame
             unmap();
         }
 
-        /** 
-        * Flush a memory range of the buffer to make it visible to the device
-        *
-        * @note Only required for non-coherent memory
-        *
-        * @param size (Optional) Size of the memory range to flush. Pass WholeSize to flush the complete buffer range.
-        * @param offset (Optional) Byte offset from beginning
-        *
-        * @return VkResult of the flush call
-        */
         public VkResult flush(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
         {
             VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
@@ -128,16 +84,6 @@ namespace SharpGame
             return vkFlushMappedMemoryRanges(Graphics.device, 1, &mappedRange);
         }
 
-        /**
-        * Invalidate a memory range of the buffer to make it visible to the host
-        *
-        * @note Only required for non-coherent memory
-        *
-        * @param size (Optional) Size of the memory range to invalidate. Pass WholeSize to invalidate the complete buffer range.
-        * @param offset (Optional) Byte offset from beginning
-        *
-        * @return VkResult of the invalidate call
-        */
         public VkResult invalidate(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
         {
             VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
@@ -147,9 +93,6 @@ namespace SharpGame
             return vkInvalidateMappedMemoryRanges(Graphics.device, 1, &mappedRange);
         }
 
-        /** 
-        * Release all Vulkan resources held by this buffer
-        */
         protected override void Destroy()
         {
             if (buffer.Handle != 0)
@@ -163,37 +106,96 @@ namespace SharpGame
             }
         }
 
-        public static GraphicsBuffer CreateDynamic<T>(VkBufferUsageFlags bufferUsages, int count = 1) where T : struct
+        public static GraphicsBuffer CreateDynamic<T>(BufferUsage bufferUsages, int count = 1) where T : struct
         {
             return Create(bufferUsages, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, Unsafe.SizeOf<T>(), count);
         }
 
         public static GraphicsBuffer CreateUniformBuffer<T>(int count = 1) where T : struct
         {
-            return CreateDynamic<T>(VkBufferUsageFlags.UniformBuffer, count);
+            return CreateDynamic<T>(BufferUsage.UniformBuffer, count);
         }
 
-        public static GraphicsBuffer Create<T>(VkBufferUsageFlags bufferUsages, T[] data, bool dynamic = false) where T : struct
+        public static GraphicsBuffer Create<T>(BufferUsage bufferUsages, T[] data, bool dynamic = false) where T : struct
         {
             return Create(bufferUsages, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, Unsafe.SizeOf<T>(), data.Length);
         }
 
-        public static GraphicsBuffer Create(VkBufferUsageFlags usageFlags, bool dynamic, int stride, int count, IntPtr data = default)
+        public static GraphicsBuffer Create(BufferUsage usageFlags, bool dynamic, int stride, int count, IntPtr data = default)
         {
             return Create(usageFlags, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, stride, count, (void*)data);
         }
 
-        public static GraphicsBuffer Create(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
+        public static GraphicsBuffer Create(BufferUsage usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
         {
-            var buffer = new GraphicsBuffer
+            GraphicsBuffer buffer = new GraphicsBuffer
             {
                 Stride = stride,
-                Count = count,
+                Count = count
             };
 
-            Util.CheckResult(Device.createBuffer(usageFlags, memoryPropertyFlags, buffer, (ulong)(stride * count), data));
+            ulong size = (ulong)(stride * count);
+
+            // Create the buffer handle
+            VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
+            bufferCreateInfo.usage = (VkBufferUsageFlags)usageFlags;
+            bufferCreateInfo.size = size;
+            Util.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, out buffer.buffer));
+
+            // Create the memory backing up the buffer handle
+            VkMemoryRequirements memReqs;
+            VkMemoryAllocateInfo memAlloc = VkMemoryAllocateInfo.New();
+            vkGetBufferMemoryRequirements(Graphics.device, buffer.buffer, &memReqs);
+            memAlloc.allocationSize = memReqs.size;
+            // Find a memory type index that fits the properties of the buffer
+            memAlloc.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
+            Util.CheckResult(vkAllocateMemory(Graphics.device, &memAlloc, null, out buffer.memory));
+
+            buffer.alignment = memReqs.alignment;
+            buffer.size = memAlloc.allocationSize;
+            buffer.usageFlags = usageFlags;
+            buffer.memoryPropertyFlags = memoryPropertyFlags;
+
+            vkBindBufferMemory(Graphics.device, buffer.buffer, buffer.memory, 0);
+
+            // If a pointer to the buffer data has been passed, map the buffer and copy over the data
+            if (data != null)
+            {
+                if ((memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
+                {
+                    VkBuffer stagingBuffer;
+                    VkDeviceMemory stagingMemory;
+
+                    Util.CheckResult(Device.CreateBuffer(VkBufferUsageFlags.TransferSrc,
+                        VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, size, &stagingBuffer, &stagingMemory, data));
+
+                    // Copy from staging buffers
+                    VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
+                    VkBufferCopy copyRegion = new VkBufferCopy();
+                    copyRegion.size = size;
+                    vkCmdCopyBuffer(copyCmd, stagingBuffer, buffer.buffer, 1, &copyRegion);
+
+                    Device.FlushCommandBuffer(copyCmd, Graphics.queue, true);
+                    Device.DestroyBuffer(stagingBuffer);
+                    Device.FreeMemory(stagingMemory);
+                }
+                else
+                {
+                    Util.CheckResult(buffer.map());
+                    Unsafe.CopyBlock(buffer.mapped, data, (uint)size);
+                    buffer.unmap();
+                }
+
+            }
+
+            // Initialize a default descriptor that covers the whole buffer size
+            buffer.setupDescriptor();
+
+            // Attach the memory to the buffer object
             return buffer;
         }
+
+
 
     }
 }

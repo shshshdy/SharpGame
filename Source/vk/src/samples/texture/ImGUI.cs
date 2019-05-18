@@ -76,8 +76,8 @@ namespace SharpGame
 
         void CreateGraphicsResources()
         {
-            vertexBuffer = GraphicsBuffer.CreateDynamic<Pos2dTexColorVertex>(VkBufferUsageFlags.VertexBuffer, 4096);
-            indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(VkBufferUsageFlags.IndexBuffer, 4096);
+            vertexBuffer = GraphicsBuffer.CreateDynamic<Pos2dTexColorVertex>(BufferUsage.VertexBuffer, 4096);
+            indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, 4096);
             uniformBufferVS = GraphicsBuffer.CreateUniformBuffer<UboVS>();
                         
             resourceLayout = new ResourceLayout
@@ -254,13 +254,13 @@ namespace SharpGame
             if (draw_data.TotalVtxCount*sizeof(ImDrawVert) > (int)vertexBuffer.size)
             {
                 vertexBuffer.Dispose();
-                vertexBuffer = GraphicsBuffer.CreateDynamic<ImDrawVert>(VkBufferUsageFlags.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
+                vertexBuffer = GraphicsBuffer.CreateDynamic<ImDrawVert>(BufferUsage.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
             }
 
             if (draw_data.TotalIdxCount * sizeof(ushort) > (int)indexBuffer.size)
             {
                 indexBuffer.Dispose();
-                indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(VkBufferUsageFlags.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
+                indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
             }
 
             updateUniformBuffers();
@@ -288,13 +288,8 @@ namespace SharpGame
             var pipelines_solid = pipeline.GetGraphicsPipeline(Graphics.renderPass, uiShader.Main, null);
 
             cmdBuffer.BindDescriptorSets(VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
-
             cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipelines_solid);
-
-            ulong offsets = 0;
-
-            cmdBuffer.BindVertexBuffer(0, vertexBuffer, &offsets);
-
+            cmdBuffer.BindVertexBuffer(0, vertexBuffer);
             cmdBuffer.BindIndexBuffer(indexBuffer, 0, IndexType.Uint16);
 
             draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);

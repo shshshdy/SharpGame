@@ -415,71 +415,8 @@ namespace SharpGame
             Util.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out VkCommandPool cmdPool));
             return cmdPool;
         }
-
-        /**
-        * Create a buffer on the device
-        *
-        * @param usageFlags Usage flag bitmask for the buffer (i.e. index, vertex, uniform buffer)
-        * @param memoryPropertyFlags Memory properties for this buffer (i.e. device local, host visible, coherent)
-        * @param buffer Pointer to a vk::Vulkan buffer object
-        * @param size Size of the buffer in byes
-        * @param data Pointer to the data that should be copied to the buffer after creation (optional, if not set, no data is copied over)
-        *
-        * @return VK_SUCCESS if buffer handle and memory have been created and (optionally passed) data has been copied
-        */
-        public static VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, GraphicsBuffer buffer, ulong size, void* data = null)
-        {
-            // Create the buffer handle
-            VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
-            bufferCreateInfo.usage = usageFlags;
-            bufferCreateInfo.size = size;
-            Util.CheckResult(vkCreateBuffer(device, &bufferCreateInfo, null, out buffer.buffer));
-
-            // Create the memory backing up the buffer handle
-            VkMemoryRequirements memReqs;
-            VkMemoryAllocateInfo memAlloc = VkMemoryAllocateInfo.New();
-            vkGetBufferMemoryRequirements(device, buffer.buffer, &memReqs);
-            memAlloc.allocationSize = memReqs.size;
-            // Find a memory type index that fits the properties of the buffer
-            memAlloc.memoryTypeIndex = GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
-            Util.CheckResult(vkAllocateMemory(device, &memAlloc, null, out buffer.memory));
-
-            buffer.alignment = memReqs.alignment;
-            buffer.size = memAlloc.allocationSize;
-            buffer.usageFlags = usageFlags;
-            buffer.memoryPropertyFlags = memoryPropertyFlags;
-
-            // If a pointer to the buffer data has been passed, map the buffer and copy over the data
-            if (data != null)
-            {
-                Util.CheckResult(buffer.map());
-                Unsafe.CopyBlock(buffer.mapped, data, (uint)size);
-                buffer.unmap();
-            }
-
-            // Initialize a default descriptor that covers the whole buffer size
-            buffer.setupDescriptor();
-
-            // Attach the memory to the buffer object
-            return buffer.bind();
-        }
-
-        public static VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, GraphicsBuffer buffer, ulong size, IntPtr data)
-            => createBuffer(usageFlags, memoryPropertyFlags, buffer, size, data.ToPointer());
-
-        /**
-        * Create a buffer on the device
-        *
-        * @param usageFlags Usage flag bitmask for the buffer (i.e. index, vertex, uniform buffer)
-        * @param memoryPropertyFlags Memory properties for this buffer (i.e. device local, host visible, coherent)
-        * @param size Size of the buffer in byes
-        * @param buffer Pointer to the buffer handle acquired by the function
-        * @param memory Pointer to the memory handle acquired by the function
-        * @param data Pointer to the data that should be copied to the buffer after creation (optional, if not set, no data is copied over)
-        *
-        * @return VK_SUCCESS if buffer handle and memory have been created and (optionally passed) data has been copied
-        */
-        public static VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
+        
+        public static VkResult CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
         {
             // Create the buffer handle
             VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo(usageFlags, size);
@@ -519,17 +456,17 @@ namespace SharpGame
             return VkResult.Success;
         }
 
-        public static VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, out VkBuffer buffer, out VkDeviceMemory memory, void* data = null)
+        public static VkResult CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, out VkBuffer buffer, out VkDeviceMemory memory, void* data = null)
         {
             VkBuffer b;
             VkDeviceMemory dm;
-            VkResult result = createBuffer(usageFlags, memoryPropertyFlags, size, &b, &dm, data);
+            VkResult result = CreateBuffer(usageFlags, memoryPropertyFlags, size, &b, &dm, data);
             buffer = b;
             memory = dm;
             return result;
         }
 
-        public static VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin = false)
+        public static VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, bool begin = false)
         {
             VkCommandBufferAllocateInfo cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
             cmdBufAllocateInfo.commandPool = commandPool;
@@ -549,17 +486,7 @@ namespace SharpGame
             return cmdBuffer;
         }
 
-        /**
-		* Finish command buffer recording and submit it to a queue
-		*
-		* @param commandBuffer Command buffer to flush
-		* @param queue Queue to submit the command buffer to 
-		* @param free (Optional) Free the command buffer once it has been submitted (Defaults to true)
-		*
-		* @note The queue that the command buffer is submitted to must be from the same family index as the pool it was allocated from
-		* @note Uses a fence to ensure command buffer has finished executing
-		*/
-        public static void flushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free = true)
+        public static void FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free = true)
         {
             if (commandBuffer.Handle == NullHandle)
             {
@@ -591,17 +518,6 @@ namespace SharpGame
             }
         }
 
-        /**
-        * Get the index of a memory type that has all the requested property bits set
-        *
-        * @param typeBits Bitmask with bits set for each memory type supported by the resource to request for (from VkMemoryRequirements)
-        * @param properties Bitmask of properties for the memory type to request
-        * @param (Optional) memTypeFound Pointer to a bool that is set to true if a matching memory type has been found
-        * 
-        * @return Index of the requested memory type
-        *
-        * @throw Throws an exception if memTypeFound is null and no memory type could be found that supports the requested properties
-        */
         public static uint GetMemoryType(uint typeBits, VkMemoryPropertyFlags properties, uint* memTypeFound = null)
         {
             for (uint i = 0; i < MemoryProperties.memoryTypeCount; i++)

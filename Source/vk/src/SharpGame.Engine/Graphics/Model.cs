@@ -458,7 +458,7 @@ namespace SharpGame
                 ref VertexBufferDesc desc = ref loadVBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = GraphicsBuffer.Create(VkBufferUsageFlags.VertexBuffer, false
+                    buffer = GraphicsBuffer.Create(BufferUsage.VertexBuffer, false
                         , desc.vertexSize_, desc.vertexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
@@ -470,7 +470,7 @@ namespace SharpGame
                 ref IndexBufferDesc desc = ref loadIBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = GraphicsBuffer.Create(VkBufferUsageFlags.IndexBuffer, false, desc.indexSize_, desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
+                    buffer = GraphicsBuffer.Create(BufferUsage.IndexBuffer, false, desc.indexSize_, desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
 

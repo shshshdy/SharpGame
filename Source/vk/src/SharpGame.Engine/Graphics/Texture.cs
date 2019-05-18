@@ -140,7 +140,7 @@ namespace SharpGame
                 Util.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, out texture.deviceMemory));
                 Util.CheckResult(vkBindImageMemory(Graphics.device, texture.image, texture.deviceMemory, 0));
 
-                VkCommandBuffer copyCmd = Device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
+                VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
 
                 // Image barrier for optimal image
 
@@ -184,7 +184,7 @@ namespace SharpGame
                     texture.imageLayout,
                     subresourceRange);
 
-                Device.flushCommandBuffer(copyCmd, Graphics.queue, true);
+                Device.FlushCommandBuffer(copyCmd, Graphics.queue, true);
 
                 // Clean up staging resources
                 vkFreeMemory(Graphics.device, stagingMemory, null);
@@ -353,7 +353,7 @@ namespace SharpGame
             VkMemoryRequirements memReqs;
 
             // Use a separate command buffer for texture loading
-            VkCommandBuffer copyCmd = Device.createCommandBuffer(VkCommandBufferLevel.Primary, true);
+            VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
 
             if (useStaging)
             {
@@ -472,7 +472,7 @@ namespace SharpGame
                     imageLayout,
                     subresourceRange);
 
-                Device.flushCommandBuffer(copyCmd, copyQueue);
+                Device.FlushCommandBuffer(copyCmd, copyQueue);
 
                 // Clean up staging resources
                 vkFreeMemory(Device.LogicalDevice, stagingMemory, null);
