@@ -38,6 +38,11 @@ namespace SharpGame
 
         public void Allocate(uint count)
         {
+            if(cmdBuffers.Count > 0)
+            {
+                Free();
+            }
+
             cmdBuffers.Resize(count);
             cmdBuffers.Count = count;
 
@@ -61,6 +66,7 @@ namespace SharpGame
         public void Free()
         {
             VulkanNative.vkFreeCommandBuffers(Graphics.device, cmdPool, cmdBuffers.Count, cmdBuffers.Data);
+            cmdBuffers.Count = 0;
             CommandBuffers = null;
         }
 

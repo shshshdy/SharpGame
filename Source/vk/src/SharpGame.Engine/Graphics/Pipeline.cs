@@ -99,7 +99,7 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            vkDestroyPipeline(Graphics.device, pipeline, IntPtr.Zero);
+            Device.DestroyPipeline(pipeline);
             pipeline = 0;
             base.Destroy();
         }
@@ -202,7 +202,7 @@ namespace SharpGame
 
         protected /*override*/ void Recreate()
         {
-            vkDestroyPipeline(Graphics.device, pipeline, IntPtr.Zero);
+            Device.DestroyPipeline(pipeline);
             pipeline = 0;
         }
 

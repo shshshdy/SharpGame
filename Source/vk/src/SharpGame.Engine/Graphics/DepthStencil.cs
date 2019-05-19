@@ -55,8 +55,8 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            Device.DestroyImageView(view);
-            Device.DestroyImage(image);
+            Device.Destroy(view);
+            Device.Destroy(image);
             Device.FreeMemory(mem);
 
             base.Destroy();

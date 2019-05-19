@@ -7,8 +7,7 @@ namespace SharpGame
 {
     public unsafe static class Builder
     {
-        public static VkPipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo(
-            PrimitiveTopology topology, uint flags = 0, uint primitiveRestartEnable = False)
+        public static VkPipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo(PrimitiveTopology topology, uint flags = 0, uint primitiveRestartEnable = False)
         {
             var pipelineInputAssemblyStateCreateInfo = VkPipelineInputAssemblyStateCreateInfo.New();
             pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)topology;
@@ -33,10 +32,7 @@ namespace SharpGame
             return pipelineTessellationStateCreateInfo;
         }
 
-        public static VkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo(
-            VkPipelineLayout layout,
-            VkRenderPass renderPass,
-            VkPipelineCreateFlags flags = 0)
+        public static VkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo(VkPipelineLayout layout, VkRenderPass renderPass, VkPipelineCreateFlags flags = 0)
         {
             VkGraphicsPipelineCreateInfo pipelineCreateInfo = VkGraphicsPipelineCreateInfo.New();
             pipelineCreateInfo.layout = layout;
@@ -48,9 +44,9 @@ namespace SharpGame
         }
 
         public static VkWriteDescriptorSet WriteDescriptorSet(
-            VkDescriptorSet dstSet,
-            VkDescriptorType type,
             uint binding,
+            VkDescriptorSet dstSet,
+            VkDescriptorType type,        
             ref VkDescriptorBufferInfo bufferInfo,
             uint descriptorCount = 1)
         {
@@ -64,9 +60,9 @@ namespace SharpGame
         }
 
         public static VkWriteDescriptorSet WriteDescriptorSet(
-            VkDescriptorSet dstSet,
-            VkDescriptorType type,
             uint binding,
+            VkDescriptorSet dstSet,
+            VkDescriptorType type,            
             ref VkDescriptorImageInfo imageInfo,
             uint descriptorCount = 1)
         {

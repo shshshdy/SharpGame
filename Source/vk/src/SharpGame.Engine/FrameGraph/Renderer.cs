@@ -9,6 +9,7 @@ namespace SharpGame
         public RenderView MainView { get; private set; }
 
         private List<RenderView> views_ = new List<RenderView>();
+        
 
         public Renderer()
         {
@@ -44,6 +45,13 @@ namespace SharpGame
 
         public void Render()
         {
+            var graphics = Graphics.Instance;
+
+            graphics.BeginRender();
+
+
+
+            graphics.EndRender();
             /*
             // Acquire an index of drawing image for this frame.
             //int imageIndex = Graphics.Swapchain.AcquireNextImage(semaphore: Graphics.ImageAvailableSemaphore);

@@ -386,7 +386,7 @@ namespace SharpGame
             return pImage;
         }
 
-        public static void DestroyImage(VkImage image)
+        public static void Destroy(VkImage image)
         {
             vkDestroyImage(device, image, null);
         }
@@ -397,9 +397,20 @@ namespace SharpGame
             return pView;
         }
 
-        public static void DestroyImageView(VkImageView imageView)
+        public static void Destroy(VkImageView imageView)
         {
             vkDestroyImageView(device, imageView, null);
+        }
+
+        public static VkFramebuffer CreateFramebuffer(ref VkFramebufferCreateInfo framebufferCreateInfo)
+        {
+            Util.CheckResult(vkCreateFramebuffer(device, ref framebufferCreateInfo, null, out VkFramebuffer framebuffer));
+            return framebuffer;
+        }
+
+        public static void Destroy(VkFramebuffer framebuffer)
+        {
+            vkDestroyFramebuffer(device, framebuffer, null);
         }
 
         public static VkResult CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
@@ -548,7 +559,7 @@ namespace SharpGame
             return shaderModule;
         }
 
-        public static void DestroyShaderModule(VkShaderModule shaderModule)
+        public static void Destroy(VkShaderModule shaderModule)
         {
             vkDestroyShaderModule(device, shaderModule, IntPtr.Zero);
         }

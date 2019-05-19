@@ -125,7 +125,7 @@ namespace SharpGame
         {
             if(shaderModule != 0)
             {
-                Device.DestroyShaderModule(shaderModule);
+                Device.Destroy(shaderModule);
                 shaderModule = 0;
             }
 

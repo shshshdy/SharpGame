@@ -72,8 +72,8 @@ namespace SharpGame
                     break;
                 case DescriptorType.CombinedImageSampler:
                     var texture = bindable as Texture;
-                    writeDescriptorSets[dstBinding] = WriteDescriptorSet(descriptorSet, (VkDescriptorType)descriptorType,
-                        dstBinding, ref texture.descriptor, 1);
+                    writeDescriptorSets[dstBinding] = WriteDescriptorSet(dstBinding, descriptorSet,
+                        (VkDescriptorType)descriptorType, ref texture.descriptor, 1);
                     break;
                 case DescriptorType.SampledImage:
                     break;
@@ -90,8 +90,8 @@ namespace SharpGame
                 case DescriptorType.UniformBufferDynamic:
                 case DescriptorType.StorageBufferDynamic:
                     var buffer = bindable as GraphicsBuffer;                    
-                    writeDescriptorSets[dstBinding] = WriteDescriptorSet(descriptorSet,
-                        (VkDescriptorType)descriptorType, dstBinding, ref buffer.descriptor, 1);
+                    writeDescriptorSets[dstBinding] = WriteDescriptorSet(dstBinding, descriptorSet,
+                        (VkDescriptorType)descriptorType, ref buffer.descriptor, 1);
                     
                     break;
                 case DescriptorType.InputAttachment:

@@ -40,15 +40,15 @@ namespace SharpGame
         public static int Width { get; private set; }
         public static int Height { get; private set; }
 
-        public static NativeList<VkFramebuffer> frameBuffers { get; protected set; } = new NativeList<VkFramebuffer>();
+        public static NativeList<VkFramebuffer> FrameBuffers { get; protected set; } = new NativeList<VkFramebuffer>();
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
-        public CommandBufferPool commandBufferPool;
+        private CommandBufferPool commandBufferPool;
 
         public CommandBuffer RenderCmdBuffer => commandBufferPool.CommandBuffers[currentBuffer];
 
-        public static NativeList<VkCommandBuffer> drawCmdBuffers { get; protected set; } = new NativeList<VkCommandBuffer>();
+        private static VkRenderPass _renderPass;
         public static VkRenderPass renderPass => _renderPass;
 
         public uint currentBuffer;
@@ -56,10 +56,8 @@ namespace SharpGame
         private NativeList<Semaphores> semaphores = new NativeList<Semaphores>(1, 1);
         private DepthStencil depthStencil;
 
-        public NativeList<VkPipelineStageFlags> submitPipelineStages = CreateSubmitPipelineStages();
-        private static NativeList<VkPipelineStageFlags> CreateSubmitPipelineStages()
-            => new NativeList<VkPipelineStageFlags>() { VkPipelineStageFlags.ColorAttachmentOutput };
-        protected static VkRenderPass _renderPass;
+        public NativeList<VkPipelineStageFlags> submitPipelineStages = new NativeList<VkPipelineStageFlags>() { VkPipelineStageFlags.ColorAttachmentOutput };
+
 
         private VkSubmitInfo submitInfo;
 
@@ -101,8 +99,52 @@ namespace SharpGame
 
         }
 
-        protected virtual void SetupFrameBuffer()
+        public void Init(IntPtr wnd)
         {
+            Swapchain.InitSurface(wnd);
+
+            if (Device.EnableDebugMarkers)
+            {
+                // vks::debugmarker::setup(Device);
+            }
+
+            DescriptorPoolManager = new DescriptorPoolManager();
+
+            CreateCommandPool();
+            CreateSwapChain();
+            CreateCommandBuffers();
+            CreateDepthStencil();
+            SetupRenderPass();
+            CreateFrameBuffer();
+        }
+
+        public void Resize(int w, int h)
+        {
+            Width = w;
+            Height = h;
+
+            // Ensure all operations on the device have been finished before destroying resources
+            WaitIdle();
+
+            CreateSwapChain();
+            // Recreate the frame buffers
+            CreateDepthStencil();
+
+            CreateFrameBuffer();
+
+            // Command buffers need to be recreated as they may store
+            // references to the recreated frame buffer
+            CreateCommandBuffers();
+
+        }
+
+        protected void CreateFrameBuffer()
+        {
+            for (uint i = 0; i < FrameBuffers.Count; i++)
+            {
+                Device.Destroy(FrameBuffers[i]);
+            }
+
             using (NativeList<VkImageView> attachments = new NativeList<VkImageView>(2))
             {
                 attachments.Count = 2;
@@ -118,17 +160,17 @@ namespace SharpGame
                 frameBufferCreateInfo.layers = 1;
 
                 // Create frame buffers for every swap chain image
-                frameBuffers.Count = Swapchain.ImageCount;
+                FrameBuffers.Count = Swapchain.ImageCount;
 
-                for (uint i = 0; i < frameBuffers.Count; i++)
+                for (uint i = 0; i < FrameBuffers.Count; i++)
                 {
                     attachments[0] = Swapchain.Buffers[i].View;
-                    Util.CheckResult(vkCreateFramebuffer(device, ref frameBufferCreateInfo, null, (VkFramebuffer*)Unsafe.AsPointer(ref frameBuffers[i])));
+                    FrameBuffers[i] = Device.CreateFramebuffer(ref frameBufferCreateInfo);
                 }
             }
         }
 
-        private void SetupSwapChain()
+        private void CreateSwapChain()
         {
             uint width, height;
             Swapchain.Create(&width, &height, Settings.VSync);
@@ -137,128 +179,123 @@ namespace SharpGame
             Height = (int)height;
         }
 
-        protected virtual void SetupRenderPass()
+        protected void SetupRenderPass()
         {
-            using (NativeList<VkAttachmentDescription> attachments = new NativeList<VkAttachmentDescription>())
+            VkAttachmentDescription[] attachments =
             {
-                attachments.Count = 2;
                 // Color attachment
-                attachments[0] = new VkAttachmentDescription();
-                attachments[0].format = Swapchain.ColorFormat;
-                attachments[0].samples = VkSampleCountFlags.Count1;
-                attachments[0].loadOp = VkAttachmentLoadOp.Clear;
-                attachments[0].storeOp = VkAttachmentStoreOp.Store;
-                attachments[0].stencilLoadOp = VkAttachmentLoadOp.DontCare;
-                attachments[0].stencilStoreOp = VkAttachmentStoreOp.DontCare;
-                attachments[0].initialLayout = VkImageLayout.Undefined;
-                attachments[0].finalLayout = VkImageLayout.PresentSrcKHR;
-                // Depth attachment
-                attachments[1] = new VkAttachmentDescription();
-                attachments[1].format = (VkFormat)DepthFormat;
-                attachments[1].samples = VkSampleCountFlags.Count1;
-                attachments[1].loadOp = VkAttachmentLoadOp.Clear;
-                attachments[1].storeOp = VkAttachmentStoreOp.Store;
-                attachments[1].stencilLoadOp = VkAttachmentLoadOp.DontCare;
-                attachments[1].stencilStoreOp = VkAttachmentStoreOp.DontCare;
-                attachments[1].initialLayout = VkImageLayout.Undefined;
-                attachments[1].finalLayout = VkImageLayout.DepthStencilAttachmentOptimal;
-
-                VkAttachmentReference colorReference = new VkAttachmentReference();
-                colorReference.attachment = 0;
-                colorReference.layout = VkImageLayout.ColorAttachmentOptimal;
-
-                VkAttachmentReference depthReference = new VkAttachmentReference();
-                depthReference.attachment = 1;
-                depthReference.layout = VkImageLayout.DepthStencilAttachmentOptimal;
-
-                VkSubpassDescription subpassDescription = new VkSubpassDescription();
-                subpassDescription.pipelineBindPoint = VkPipelineBindPoint.Graphics;
-                subpassDescription.colorAttachmentCount = 1;
-                subpassDescription.pColorAttachments = &colorReference;
-                subpassDescription.pDepthStencilAttachment = &depthReference;
-                subpassDescription.inputAttachmentCount = 0;
-                subpassDescription.pInputAttachments = null;
-                subpassDescription.preserveAttachmentCount = 0;
-                subpassDescription.pPreserveAttachments = null;
-                subpassDescription.pResolveAttachments = null;
-
-                // Subpass dependencies for layout transitions
-                using (NativeList<VkSubpassDependency> dependencies = new NativeList<VkSubpassDependency>(2))
+                new VkAttachmentDescription
                 {
-                    dependencies.Count = 2;
+                    format = Swapchain.ColorFormat,
+                    samples = VkSampleCountFlags.Count1,
+                    loadOp = VkAttachmentLoadOp.Clear,
+                    storeOp = VkAttachmentStoreOp.Store,
+                    stencilLoadOp = VkAttachmentLoadOp.DontCare,
+                    stencilStoreOp = VkAttachmentStoreOp.DontCare,
+                    initialLayout = VkImageLayout.Undefined,
+                    finalLayout = VkImageLayout.PresentSrcKHR
+                },
 
-                    dependencies[0].srcSubpass = SubpassExternal;
-                    dependencies[0].dstSubpass = 0;
-                    dependencies[0].srcStageMask = VkPipelineStageFlags.BottomOfPipe;
-                    dependencies[0].dstStageMask = VkPipelineStageFlags.ColorAttachmentOutput;
-                    dependencies[0].srcAccessMask = VkAccessFlags.MemoryRead;
-                    dependencies[0].dstAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite);
-                    dependencies[0].dependencyFlags = VkDependencyFlags.ByRegion;
-
-                    dependencies[1].srcSubpass = 0;
-                    dependencies[1].dstSubpass = SubpassExternal;
-                    dependencies[1].srcStageMask = VkPipelineStageFlags.ColorAttachmentOutput;
-                    dependencies[1].dstStageMask = VkPipelineStageFlags.BottomOfPipe;
-                    dependencies[1].srcAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite);
-                    dependencies[1].dstAccessMask = VkAccessFlags.MemoryRead;
-                    dependencies[1].dependencyFlags = VkDependencyFlags.ByRegion;
-
-                    VkRenderPassCreateInfo renderPassInfo = new VkRenderPassCreateInfo();
-                    renderPassInfo.sType = VkStructureType.RenderPassCreateInfo;
-                    renderPassInfo.attachmentCount = attachments.Count;
-                    renderPassInfo.pAttachments = (VkAttachmentDescription*)attachments.Data.ToPointer();
-                    renderPassInfo.subpassCount = 1;
-                    renderPassInfo.pSubpasses = &subpassDescription;
-                    renderPassInfo.dependencyCount = dependencies.Count;
-                    renderPassInfo.pDependencies = (VkSubpassDependency*)dependencies.Data;
-
-                    Util.CheckResult(vkCreateRenderPass(device, &renderPassInfo, null, out _renderPass));
+                // Depth attachment
+                new VkAttachmentDescription
+                {
+                    format = (VkFormat)DepthFormat,
+                    samples = VkSampleCountFlags.Count1,
+                    loadOp = VkAttachmentLoadOp.Clear,
+                    storeOp = VkAttachmentStoreOp.Store,
+                    stencilLoadOp = VkAttachmentLoadOp.DontCare,
+                    stencilStoreOp = VkAttachmentStoreOp.DontCare,
+                    initialLayout = VkImageLayout.Undefined,
+                    finalLayout = VkImageLayout.DepthStencilAttachmentOptimal
                 }
-            }
+            };
+
+            VkAttachmentReference colorReference = new VkAttachmentReference
+            {
+                attachment = 0,
+                layout = VkImageLayout.ColorAttachmentOptimal
+            };
+
+            VkAttachmentReference depthReference = new VkAttachmentReference
+            {
+                attachment = 1,
+                layout = VkImageLayout.DepthStencilAttachmentOptimal
+            };
+
+            VkSubpassDescription subpassDescription = new VkSubpassDescription
+            {
+                pipelineBindPoint = VkPipelineBindPoint.Graphics,
+                colorAttachmentCount = 1,
+                pColorAttachments = &colorReference,
+                pDepthStencilAttachment = &depthReference,
+                inputAttachmentCount = 0,
+                pInputAttachments = null,
+                preserveAttachmentCount = 0,
+                pPreserveAttachments = null,
+                pResolveAttachments = null
+            };
+
+            // Subpass dependencies for layout transitions
+            VkSubpassDependency[] dependencies = 
+            {
+                new VkSubpassDependency
+                {
+                    srcSubpass = SubpassExternal,
+                    dstSubpass = 0,
+                    srcStageMask = VkPipelineStageFlags.BottomOfPipe,
+                    dstStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+                    srcAccessMask = VkAccessFlags.MemoryRead,
+                    dstAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite),
+                    dependencyFlags = VkDependencyFlags.ByRegion
+                },
+
+                new VkSubpassDependency
+                {
+                    srcSubpass = 0,
+                    dstSubpass = SubpassExternal,
+                    srcStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+                    dstStageMask = VkPipelineStageFlags.BottomOfPipe,
+                    srcAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite),
+                    dstAccessMask = VkAccessFlags.MemoryRead,
+                    dependencyFlags = VkDependencyFlags.ByRegion
+                },
+            };
+
+            VkRenderPassCreateInfo renderPassInfo = new VkRenderPassCreateInfo
+            {
+                sType = VkStructureType.RenderPassCreateInfo,
+                attachmentCount = (uint)attachments.Length,
+                pAttachments = (VkAttachmentDescription*)Utilities.AsPointer(ref attachments[0]),
+                subpassCount = 1,
+                pSubpasses = &subpassDescription,
+                dependencyCount = (uint)dependencies.Length,
+                pDependencies = (VkSubpassDependency*)Utilities.AsPointer(ref dependencies[0])
+            };
+
+            Util.CheckResult(vkCreateRenderPass(device, &renderPassInfo, null, out _renderPass));
+               
         }
 
-        public void CreateSwapchain(IntPtr wnd)
+        private void CreateCommandPool()
         {
-            Swapchain.InitSurface(wnd);
-
-            if (Device.EnableDebugMarkers)
-            {
-                // vks::debugmarker::setup(Device);
-            }
-
-            DescriptorPoolManager = new DescriptorPoolManager();
-
-            CreateCommandPool();
-            SetupSwapChain();
-            CreateCommandBuffers();
-            SetupDepthStencil();
-            SetupRenderPass();
-            SetupFrameBuffer();
+            commandBufferPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
         }
 
-        public void Resize(int w, int h)
+        protected void CreateCommandBuffers()
         {
-            Width = w;
-            Height = h;
+            commandBufferPool.Free();
+            commandBufferPool.Allocate(Swapchain.ImageCount);
+        }
 
-            // Ensure all operations on the device have been finished before destroying resources
-            WaitIdle();
-
-            SetupSwapChain();
-            // Recreate the frame buffers
-            SetupDepthStencil();
-
-            for (uint i = 0; i < frameBuffers.Count; i++)
+        protected void CreateDepthStencil()
+        {
+            if (depthStencil != null)
             {
-                vkDestroyFramebuffer(device, frameBuffers[i], null);
+                depthStencil.Dispose();
+                depthStencil = null;
             }
 
-            SetupFrameBuffer();
-
-            // Command buffers need to be recreated as they may store
-            // references to the recreated frame buffer
-            DestroyCommandBuffers();
-            CreateCommandBuffers();
+            depthStencil = new DepthStencil(Width, Height, DepthFormat);
 
         }
 
@@ -287,42 +324,6 @@ namespace SharpGame
             Util.CheckResult(vkQueueWaitIdle(queue));
         }
 
-        private void CreateCommandPool()
-        {
-            commandBufferPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
-        }
-
-        protected void CreateCommandBuffers()
-        {
-            commandBufferPool.Allocate(Swapchain.ImageCount);
-        }
-
-        protected void DestroyCommandBuffers()
-        {
-            commandBufferPool.Free();
-        }
-
-        protected void SetupDepthStencil()
-        {
-            if(depthStencil != null)
-            {
-                depthStencil.Dispose();
-                depthStencil = null;
-            }
-
-            depthStencil = new DepthStencil(Width, Height, DepthFormat);
-
-        }
-
-        public static VkPipelineShaderStageCreateInfo loadShader(string fileName, VkShaderStageFlags stage)
-        {
-            VkPipelineShaderStageCreateInfo shaderStage = VkPipelineShaderStageCreateInfo.New();
-            shaderStage.stage = stage;
-            shaderStage.module = Tools.loadShader(fileName, device, stage);
-            shaderStage.pName = Strings.main; // todo : make param
-            Debug.Assert(shaderStage.module.Handle != 0);
-            return shaderStage;
-        }
 
 
     }

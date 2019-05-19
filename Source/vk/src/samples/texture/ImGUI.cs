@@ -178,7 +178,7 @@ namespace SharpGame
             var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
             {
                 // Set target frame buffer
-                renderPassBeginInfo.framebuffer = Graphics.frameBuffers[graphics.currentBuffer];
+                renderPassBeginInfo.framebuffer = Graphics.FrameBuffers[graphics.currentBuffer];
 
                 cmdBuffer.Begin();
                 cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);

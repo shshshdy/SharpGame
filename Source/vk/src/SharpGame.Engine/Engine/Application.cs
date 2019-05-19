@@ -96,7 +96,7 @@ namespace SharpGame
 
             CreateWindow();
 
-            graphics.CreateSwapchain(NativeWindow.SdlWindowHandle);
+            graphics.Init(NativeWindow.SdlWindowHandle);
 
             Init();
 
