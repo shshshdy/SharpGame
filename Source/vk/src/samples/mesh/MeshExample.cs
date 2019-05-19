@@ -69,6 +69,8 @@ namespace SharpGame
             CreateUniformBuffers();
             SetupResourceSet();
 
+            this.SubscribeToEvent<BeginRender>(Handle);
+
             prepared = true;
         }
 
@@ -272,8 +274,10 @@ namespace SharpGame
             graphics.EndRender();
         }
 
-        protected override void BuildCommandBuffers()
+        void Handle(BeginRender e)
         {
+            UpdateUniformBuffers();
+
             FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
             clearValues.First.color = defaultClearColor;
             clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
@@ -294,7 +298,7 @@ namespace SharpGame
                 // Set target frame buffer
                 renderPassBeginInfo.framebuffer = Graphics.FrameBuffers[graphics.currentBuffer];
 
-                cmdBuffer.Begin();
+                //cmdBuffer.Begin();
                 cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
 
                 cmdBuffer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
@@ -304,7 +308,7 @@ namespace SharpGame
                 cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);
 
                 cmdBuffer.EndRenderPass();
-                cmdBuffer.End();
+               // cmdBuffer.End();
             }
         }
 

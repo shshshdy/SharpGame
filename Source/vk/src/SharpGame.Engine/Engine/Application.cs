@@ -14,7 +14,7 @@ namespace SharpGame
 {
     public unsafe partial class Application : System<Application>
     {
-        public static string DataPath => Path.Combine(AppContext.BaseDirectory, "data/");
+        public static string DataPath => Path.Combine(AppContext.BaseDirectory, "../../../../../data/");
 
         public FixedUtf8String Title { get; set; } = "Vulkan Example";
         public FixedUtf8String Name { get; set; } = "VulkanExample";
@@ -30,7 +30,7 @@ namespace SharpGame
         protected ResourceCache cache;
         protected Graphics graphics;
         protected Renderer renderer;
-
+        protected Input input;
         protected bool paused = false;
         protected bool prepared;
 
@@ -52,10 +52,13 @@ namespace SharpGame
             graphics = context.CreateSubsystem<Graphics>();
             cache = context.CreateSubsystem<ResourceCache>(DataPath);
             renderer = context.CreateSubsystem<Renderer>();
+            input = context.CreateSubsystem<Input>();
+          
         }
 
         public virtual void Init()
         {
+            context.CreateSubsystem<GUI>();
         }
 
         protected override void Destroy()
@@ -107,6 +110,7 @@ namespace SharpGame
                 var tStart = DateTime.Now;
 
                 snapshot = NativeWindow.PumpEvents();
+                input.snapshot = snapshot;
 
                 if (!NativeWindow.Exists)
                 {
@@ -118,7 +122,9 @@ namespace SharpGame
 
                 UpdateFrame();
 
-                Render();
+                renderer.Render();
+
+                //Render();
             }
 
             timer.Stop();
@@ -162,7 +168,7 @@ namespace SharpGame
                 timeDelta_ = timer.DeltaTime
             };
 
-            this.SendGlobalEvent(ref beginFrame);
+            this.SendGlobalEvent(beginFrame);
 
             var update = new Update
             {
@@ -170,7 +176,7 @@ namespace SharpGame
                 timeDelta_ = timer.DeltaTime
             };
 
-            this.SendGlobalEvent(ref update);
+            this.SendGlobalEvent(update);
 
             Update();
 
@@ -180,13 +186,13 @@ namespace SharpGame
                 timeDelta_ = timer.DeltaTime
             };
 
-            this.SendGlobalEvent(ref postUpdate);
+            this.SendGlobalEvent(postUpdate);
 
             //renderer.RenderUpdate();
 
             var endFrame = new EndFrame { };
 
-            this.SendGlobalEvent(ref endFrame);
+            this.SendGlobalEvent(endFrame);
 
             CalculateFrameRateStats();
 

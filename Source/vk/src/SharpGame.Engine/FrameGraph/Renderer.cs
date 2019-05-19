@@ -25,8 +25,6 @@ namespace SharpGame
 
         public void RenderUpdate()
         {
-            this.SendGlobalEvent(new BeginRender());
-            
             FrameInfo frameInfo = new FrameInfo
             {
                 timeStep_ = Time.Delta,
@@ -38,9 +36,6 @@ namespace SharpGame
                 viewport.Update(ref frameInfo);
             }
 
-            var endFrame = new EndRender();
-
-            this.SendGlobalEvent(ref endFrame);
         }
 
         public void Render()
@@ -49,7 +44,17 @@ namespace SharpGame
 
             graphics.BeginRender();
 
+            CommandBuffer cmdBuffer = graphics.RenderCmdBuffer;
+            cmdBuffer.Begin();
 
+            this.SendGlobalEvent(new BeginRender());
+
+
+
+
+            this.SendGlobalEvent(new EndRender());
+
+            cmdBuffer.End();
 
             graphics.EndRender();
             /*
