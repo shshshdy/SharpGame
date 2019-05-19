@@ -21,6 +21,37 @@ namespace SharpGame
         {
             base.Init();
 
+            Node node = new Node
+            {
+                Position = new Vector3(),
+
+                Rotation = new Quaternion(),
+
+                Components = new []
+                {
+                    new Camera
+                    {
+
+                    }
+                },
+
+                Children = new[]
+                {
+                    new Node
+                    {
+
+                    }
+                }
+            };
+
+
+
+
+
+
+
+
+
             this.SubscribeToEvent<GUIEvent>(Handle);
 
             prepared = true;

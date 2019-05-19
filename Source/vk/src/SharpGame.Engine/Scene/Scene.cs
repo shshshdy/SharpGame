@@ -82,12 +82,12 @@ namespace SharpGame
 
             localNodes_[id] = node;
             
-            foreach (var c in node.Components)
+            foreach (var c in node.ComponentList)
             {
                 ComponentAdded(c);
             }
 
-            foreach (var c in node.Children)
+            foreach (var c in node.ChildList)
             {
                 NodeAdded(c);
             }
@@ -104,12 +104,12 @@ namespace SharpGame
             int id = node.ID;        
             localNodes_.Remove(id);
 
-            foreach (var c in node.Components)
+            foreach (var c in node.ComponentList)
             {
                 ComponentRemoved(c);
             }
 
-            foreach (var c in node.Children)
+            foreach (var c in node.ChildList)
             {
                 NodeRemoved(c);
             }

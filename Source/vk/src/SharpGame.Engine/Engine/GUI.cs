@@ -162,10 +162,6 @@ namespace SharpGame
 
         unsafe void Handle(EndRender e)
         {
-            //FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
-            //clearValues.First.color = defaultClearColor;
-            //clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
-
             VkClearValue[] clearValues =
             {
                 new VkClearValue
@@ -189,7 +185,6 @@ namespace SharpGame
 
             var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
             {
-                //cmdBuffer.Begin();
                 // Set target frame buffer
                 renderPassBeginInfo.framebuffer = Graphics.FrameBuffers[graphics.currentBuffer];
 
@@ -201,7 +196,6 @@ namespace SharpGame
                 RenderImDrawData(ImGui.GetDrawData());
 
                 cmdBuffer.EndRenderPass();
-                //cmdBuffer.End();
             }
         }
 
@@ -255,8 +249,8 @@ namespace SharpGame
 
             var pipelines_solid = pipeline.GetGraphicsPipeline(Graphics.renderPass, uiShader.Main, null);
 
-            cmdBuffer.BindDescriptorSets(VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
-            cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipelines_solid);
+            cmdBuffer.BindDescriptorSets(PipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
+            cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelines_solid);
             cmdBuffer.BindVertexBuffer(0, vertexBuffer);
             cmdBuffer.BindIndexBuffer(indexBuffer, 0, IndexType.Uint16);
 

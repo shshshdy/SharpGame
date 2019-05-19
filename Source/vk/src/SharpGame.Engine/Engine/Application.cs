@@ -16,8 +16,8 @@ namespace SharpGame
     {
         public static string DataPath => Path.Combine(AppContext.BaseDirectory, "../../../../../data/");
 
-        public FixedUtf8String Title { get; set; } = "Vulkan Example";
-        public FixedUtf8String Name { get; set; } = "VulkanExample";
+        public CString Title { get; set; } = "Vulkan Example";
+        public CString Name { get; set; } = "VulkanExample";
         public int width { get; protected set; } = 1280;
         public int height { get; protected set; } = 720;
         public IntPtr Window { get; protected set; }
@@ -188,7 +188,7 @@ namespace SharpGame
 
             this.SendGlobalEvent(postUpdate);
 
-            //renderer.RenderUpdate();
+            renderer.RenderUpdate();
 
             var endFrame = new EndFrame { };
 

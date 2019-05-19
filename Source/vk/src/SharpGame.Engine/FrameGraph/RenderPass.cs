@@ -176,7 +176,7 @@ namespace SharpGame
         {
             this.SendGlobalEvent(new EndRenderPass { renderPass = this });
 
-            cmdBuffer_.End();
+            cmdBuffer_?.End();
             cmdBuffer_ = null;
         }
 

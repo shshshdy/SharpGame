@@ -43,16 +43,41 @@ namespace SharpGame
         public Dictionary<string, object> Tag { get; set; } = new Dictionary<string, object>();
 
         [DataMember(Order = 11)]
-        public List<Component> Components { get => components_; set => components_ = value; }
+        public List<Component> ComponentList => components_;
         protected List<Component> components_ = new List<Component>();
 
+        [IgnoreDataMember]
+        public Component[] Components
+        {
+            set
+            {
+                foreach (var c in value)
+                {
+                    AddComponent(c);
+                }
+            }
+        }
+
         [DataMember(Order = 12)]
-        public List<Node> Children { get => children_; set => children_ = value; }
+        public List<Node> ChildList => children_;
         protected List<Node> children_ = new List<Node>();
+
+        [IgnoreDataMember]
+        public Node[] Children
+        {
+            set
+            {
+                foreach (var c in value)
+                {
+                    AddChild(c);
+                }
+            }
+        }
+
 
         #endregion
 
- 
+
         protected bool dirty_ = true;
 
         /// Node listeners

@@ -91,8 +91,7 @@ namespace SharpGame
             return bufCreateInfo;
         }
 
-        public static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo(
-            ref VkDescriptorSetLayout pSetLayouts, uint setLayoutCount = 1)
+        public static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo(ref VkDescriptorSetLayout pSetLayouts, uint setLayoutCount = 1)
         {
             VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo.New();
             pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
@@ -100,8 +99,7 @@ namespace SharpGame
             return pipelineLayoutCreateInfo;
         }
 
-        public static VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo(
-            VkDescriptorPool descriptorPool, VkDescriptorSetLayout* pSetLayouts, uint descriptorSetCount)
+        public static VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo(VkDescriptorPool descriptorPool, VkDescriptorSetLayout* pSetLayouts, uint descriptorSetCount)
         {
             VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo.New();
             descriptorSetAllocateInfo.descriptorPool = descriptorPool;
