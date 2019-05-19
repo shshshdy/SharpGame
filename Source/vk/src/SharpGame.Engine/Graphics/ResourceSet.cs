@@ -30,7 +30,7 @@ namespace SharpGame
                 resourceLayout = resLayout;
             }
 
-            writeDescriptorSets = new VkWriteDescriptorSet[resLayout.numBindings];
+            writeDescriptorSets = new VkWriteDescriptorSet[resLayout.NumBindings];
         }
 
         public ResourceSet(ResourceLayout resLayout, params IBindable[] bindables)
@@ -45,11 +45,11 @@ namespace SharpGame
                 resourceLayout = resLayout;
             }
 
-            System.Diagnostics.Debug.Assert(bindables.Length == resLayout.numBindings);
+            System.Diagnostics.Debug.Assert(bindables.Length == resLayout.NumBindings);
 
-            writeDescriptorSets = new VkWriteDescriptorSet[resLayout.numBindings];
+            writeDescriptorSets = new VkWriteDescriptorSet[resLayout.NumBindings];
 
-            for(uint i = 0; i < resLayout.numBindings; i++)
+            for(uint i = 0; i < resLayout.NumBindings; i++)
             {
                 Bind(i, bindables[i]);
             }

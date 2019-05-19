@@ -37,8 +37,8 @@ namespace SharpGame
         public static Format DepthFormat { get; protected set; }
         public Swapchain Swapchain { get; } = new Swapchain();
 
-        public static uint Width { get; private set; }
-        public static uint Height { get; private set; }
+        public static int Width { get; private set; }
+        public static int Height { get; private set; }
 
         public static NativeList<VkFramebuffer> frameBuffers { get; protected set; } = new NativeList<VkFramebuffer>();
 
@@ -113,8 +113,8 @@ namespace SharpGame
                 frameBufferCreateInfo.renderPass = renderPass;
                 frameBufferCreateInfo.attachmentCount = 2;
                 frameBufferCreateInfo.pAttachments = (VkImageView*)attachments.Data;
-                frameBufferCreateInfo.width = Width;
-                frameBufferCreateInfo.height = Height;
+                frameBufferCreateInfo.width = (uint)Width;
+                frameBufferCreateInfo.height = (uint)Height;
                 frameBufferCreateInfo.layers = 1;
 
                 // Create frame buffers for every swap chain image
@@ -133,8 +133,8 @@ namespace SharpGame
             uint width, height;
             Swapchain.Create(&width, &height, Settings.VSync);
 
-            Width = width;
-            Height = height;
+            Width = (int)width;
+            Height = (int)height;
         }
 
         protected virtual void SetupRenderPass()
@@ -236,7 +236,7 @@ namespace SharpGame
             SetupFrameBuffer();
         }
 
-        public void Resize(uint w, uint h)
+        public void Resize(int w, int h)
         {
             Width = w;
             Height = h;

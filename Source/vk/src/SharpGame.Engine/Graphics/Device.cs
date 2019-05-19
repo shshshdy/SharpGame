@@ -402,15 +402,6 @@ namespace SharpGame
             vkDestroyImageView(device, imageView, null);
         }
 
-        public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
-        {
-            VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
-            cmdPoolInfo.queueFamilyIndex = queueFamilyIndex;
-            cmdPoolInfo.flags = createFlags;
-            Util.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out VkCommandPool cmdPool));
-            return cmdPool;
-        }
-        
         public static VkResult CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
         {
             // Create the buffer handle
@@ -420,7 +411,7 @@ namespace SharpGame
 
             // Create the memory backing up the buffer handle
             VkMemoryRequirements memReqs;
-            VkMemoryAllocateInfo memAlloc = Builder.MemoryAllocateInfo();
+            VkMemoryAllocateInfo memAlloc = VkMemoryAllocateInfo.New();
             vkGetBufferMemoryRequirements(LogicalDevice, *buffer, &memReqs);
             memAlloc.allocationSize = memReqs.size;
             // Find a memory type index that fits the properties of the buffer
@@ -459,6 +450,15 @@ namespace SharpGame
             buffer = b;
             memory = dm;
             return result;
+        }
+
+        public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
+        {
+            VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
+            cmdPoolInfo.queueFamilyIndex = queueFamilyIndex;
+            cmdPoolInfo.flags = createFlags;
+            Util.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out VkCommandPool cmdPool));
+            return cmdPool;
         }
 
         public static VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, bool begin = false)
@@ -566,6 +566,11 @@ namespace SharpGame
             return pPipelines;
         }
 
+        public static void DestroyPipeline(VkPipeline pipeline)
+        {
+            vkDestroyPipeline(device, pipeline, null);
+        }
+
         public static void DestroyBuffer(VkBuffer buffer)
         {
             vkDestroyBuffer(device, buffer, null);
@@ -574,11 +579,6 @@ namespace SharpGame
         public static void FreeMemory(VkDeviceMemory memory)
         {
             vkFreeMemory(device, memory, null);
-        }
-
-        public static void DestroyPipeline(VkPipeline pipeline)
-        {
-            vkDestroyPipeline(device, pipeline, null);
         }
 
         public static void DestroyPipelineLayout(VkPipelineLayout pipelineLayout)

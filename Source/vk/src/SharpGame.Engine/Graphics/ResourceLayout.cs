@@ -48,8 +48,8 @@ namespace SharpGame
 
         internal VkDescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
-        internal int numBindings => Bindings.Count;
-        bool builded = false;
+        internal int NumBindings => Bindings.Count;
+        bool needRebuild = true;
         public ResourceLayout()
         {
         }
@@ -70,12 +70,12 @@ namespace SharpGame
 
         public unsafe ResourceLayout Build()
         {
-            if(builded)
+            if(!needRebuild)
             {
                 return this;
             }
 
-            builded = true;
+            needRebuild = false;
             Destroy();
             bindings = new VkDescriptorSetLayoutBinding[Bindings.Count];
             for (int i = 0; i < Bindings.Count; i++)
@@ -122,7 +122,7 @@ namespace SharpGame
             }
 
             Bindings.Add(binding);
-            builded = false;
+            needRebuild = true;
         }
     }
 

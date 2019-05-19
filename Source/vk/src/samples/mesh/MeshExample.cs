@@ -64,9 +64,9 @@ namespace SharpGame
         {
             base.Init();
 
-            CreateUniformBuffers();
-            CreatePipelines();
             LoadAssets();
+            CreatePipelines();
+            CreateUniformBuffers();
             SetupResourceSet();
 
             prepared = true;
@@ -238,7 +238,6 @@ namespace SharpGame
             resourceSet = new ResourceSet(resourceLayout, uniformBufferScene, colorMap);
         }
 
-
         // Prepare and initialize uniform buffer containing shader uniforms
         void CreateUniformBuffers()
         {
@@ -283,14 +282,14 @@ namespace SharpGame
             renderPassBeginInfo.renderPass = Graphics.renderPass;
             renderPassBeginInfo.renderArea.offset.x = 0;
             renderPassBeginInfo.renderArea.offset.y = 0;
-            renderPassBeginInfo.renderArea.extent.width = width;
-            renderPassBeginInfo.renderArea.extent.height = height;
+            renderPassBeginInfo.renderArea.extent.width = (uint)width;
+            renderPassBeginInfo.renderArea.extent.height = (uint)height;
             renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = &clearValues.First;
 
             var graphics = Graphics.Instance;
-            //for (int i = 0; i < Graphics.drawCmdBuffers.Count; ++i)
             var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
+
             {
                 // Set target frame buffer
                 renderPassBeginInfo.framebuffer = Graphics.frameBuffers[graphics.currentBuffer];
@@ -298,8 +297,8 @@ namespace SharpGame
                 cmdBuffer.Begin();
                 cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
 
-                cmdBuffer.SetViewport(new Viewport(0, 0, (float)width, (float)height, 0.0f, 1.0f));
-                cmdBuffer.SetScissor(new Rect2D(0, 0, (int)width, (int)height));
+                cmdBuffer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
+                cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
 
                 var pipe = wireframe ? pipelineWireframe : pipelineSolid;
                 cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);

@@ -11,7 +11,18 @@ namespace SharpGame
         public RenderTarget[] RenderTargets { get; set; }
 
 
-        public List<RenderPass> RenderPasses { get; set; } = new List<RenderPass>();
+        public List<RenderPass> RenderPassList { get; set; } = new List<RenderPass>();
+
+        public RenderPass[] RenderPasses
+        {
+            set
+            {
+                foreach(var rp in value)
+                {
+                    AddRenderPass(rp);
+                }
+            }
+        }
 
         public FrameGraph()
         {
@@ -20,12 +31,12 @@ namespace SharpGame
         public void AddRenderPass(RenderPass renderPass)
         {
             renderPass.RenderPath = this;
-            RenderPasses.Add(renderPass);
+            RenderPassList.Add(renderPass);
         }
 
         public void Draw(RenderView view)
         {
-            foreach (var renderPass in RenderPasses)
+            foreach (var renderPass in RenderPassList)
             {
                 renderPass.Draw(view);
             }
@@ -34,7 +45,7 @@ namespace SharpGame
 
         public void Summit(int imageIndex)
         {
-            foreach (var renderPass in RenderPasses)
+            foreach (var renderPass in RenderPassList)
             {
                 renderPass.Summit(imageIndex);
             }

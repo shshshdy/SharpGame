@@ -170,8 +170,8 @@ namespace SharpGame
             renderPassBeginInfo.renderPass = Graphics.renderPass;
             renderPassBeginInfo.renderArea.offset.x = 0;
             renderPassBeginInfo.renderArea.offset.y = 0;
-            renderPassBeginInfo.renderArea.extent.width = width;
-            renderPassBeginInfo.renderArea.extent.height = height;
+            renderPassBeginInfo.renderArea.extent.width = (uint)width;
+            renderPassBeginInfo.renderArea.extent.height = (uint)height;
             renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues);
 
@@ -183,11 +183,8 @@ namespace SharpGame
                 cmdBuffer.Begin();
                 cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
 
-                Viewport viewport = new Viewport(0, 0, width, height);
-                cmdBuffer.SetViewport(ref viewport);
-
-                Rect2D scissor = new Rect2D(0, 0, (int)width, (int)height);
-                cmdBuffer.SetScissor(ref scissor);
+                cmdBuffer.SetViewport(new Viewport(0, 0, width, height));
+                cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
 
                 RenderImDrawData(ImGui.GetDrawData());
 

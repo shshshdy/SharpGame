@@ -79,8 +79,6 @@ namespace SharpGame
             return writeDescriptorSet;
         }
 
-
-        /** @brief Initialize an image memory barrier with no image transfer ownership */
         public static VkImageMemoryBarrier ImageMemoryBarrier()
         {
             VkImageMemoryBarrier imageMemoryBarrier = VkImageMemoryBarrier.New();
@@ -88,51 +86,13 @@ namespace SharpGame
             imageMemoryBarrier.dstQueueFamilyIndex = QueueFamilyIgnored;
             return imageMemoryBarrier;
         }
-
-        public static VkImageCreateInfo ImageCreateInfo()
-        {
-            VkImageCreateInfo imageCreateInfo = VkImageCreateInfo.New();
-            return imageCreateInfo;
-        }
-
-        public static VkMemoryAllocateInfo MemoryAllocateInfo()
-        {
-            VkMemoryAllocateInfo memAllocInfo = new VkMemoryAllocateInfo();
-            memAllocInfo.sType = VkStructureType.MemoryAllocateInfo;
-            return memAllocInfo;
-        }
-
-
-        public static VkBufferCreateInfo BufferCreateInfo()
-        {
-            VkBufferCreateInfo bufCreateInfo = VkBufferCreateInfo.New();
-            return bufCreateInfo;
-        }
-
+        
         public static VkBufferCreateInfo BufferCreateInfo(VkBufferUsageFlags usage, ulong size)
         {
             VkBufferCreateInfo bufCreateInfo = VkBufferCreateInfo.New();
             bufCreateInfo.usage = usage;
             bufCreateInfo.size = size;
             return bufCreateInfo;
-        }
-
-        public static VkSamplerCreateInfo SamplerCreateInfo()
-        {
-            VkSamplerCreateInfo samplerCreateInfo = VkSamplerCreateInfo.New();
-            return samplerCreateInfo;
-        }
-
-        public static VkImageViewCreateInfo ImageViewCreateInfo()
-        {
-            VkImageViewCreateInfo imageViewCreateInfo = VkImageViewCreateInfo.New();
-            return imageViewCreateInfo;
-        }
-
-        public static VkFramebufferCreateInfo FramebufferCreateInfo()
-        {
-            VkFramebufferCreateInfo framebufferCreateInfo = VkFramebufferCreateInfo.New();
-            return framebufferCreateInfo;
         }
 
         public static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo(

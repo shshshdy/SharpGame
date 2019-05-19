@@ -12,12 +12,12 @@ namespace SharpGame
         public VkDeviceMemory mem;
         public VkImageView view;
 
-        public unsafe DepthStencil(uint width, uint height, Format format)
+        public unsafe DepthStencil(int width, int height, Format format)
         {
             VkImageCreateInfo imageInfo = VkImageCreateInfo.New();
             imageInfo.imageType = VkImageType.Image2D;
             imageInfo.format = (VkFormat)format;
-            imageInfo.extent = new VkExtent3D() { width = width, height = height, depth = 1 };
+            imageInfo.extent = new VkExtent3D() { width = (uint)width, height = (uint)height, depth = 1 };
             imageInfo.mipLevels = 1;
             imageInfo.arrayLayers = 1;
             imageInfo.samples = VkSampleCountFlags.Count1;

@@ -18,8 +18,8 @@ namespace SharpGame
 
         public FixedUtf8String Title { get; set; } = "Vulkan Example";
         public FixedUtf8String Name { get; set; } = "VulkanExample";
-        public uint width { get; protected set; } = 1280;
-        public uint height { get; protected set; } = 720;
+        public int width { get; protected set; } = 1280;
+        public int height { get; protected set; } = 720;
         public IntPtr Window { get; protected set; }
         public Sdl2Window NativeWindow { get; private set; }
         public IntPtr WindowInstance { get; protected set; }
@@ -141,8 +141,8 @@ namespace SharpGame
             prepared = false;
 
             // Recreate swap chain
-            width = (uint)NativeWindow.Width;
-            height = (uint)NativeWindow.Width;
+            width = NativeWindow.Width;
+            height = NativeWindow.Width;
 
             graphics.Resize(width, height);
 

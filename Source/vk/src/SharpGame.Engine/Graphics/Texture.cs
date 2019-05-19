@@ -62,7 +62,7 @@ namespace SharpGame
 
             uint useStaging = 1;
 
-            VkMemoryAllocateInfo memAllocInfo = Builder.MemoryAllocateInfo();
+            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
             VkMemoryRequirements memReqs = new VkMemoryRequirements();
 
             if (useStaging == 1)
@@ -71,7 +71,7 @@ namespace SharpGame
                 VkBuffer stagingBuffer;
                 VkDeviceMemory stagingMemory;
 
-                VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo();
+                VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
                 bufferCreateInfo.size = totalBytes;
                 // This buffer is used as a transfer source for the buffer copy
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
@@ -117,7 +117,7 @@ namespace SharpGame
                 }
 
                 // Create optimal tiled target image
-                VkImageCreateInfo imageCreateInfo = Builder.ImageCreateInfo();
+                VkImageCreateInfo imageCreateInfo = VkImageCreateInfo.New();
                 imageCreateInfo.imageType = VkImageType.Image2D;
                 imageCreateInfo.format = format;
                 imageCreateInfo.mipLevels = texture.mipLevels;
@@ -191,7 +191,7 @@ namespace SharpGame
                 vkDestroyBuffer(Graphics.device, stagingBuffer, null);
             }
 
-            VkSamplerCreateInfo sampler = Builder.SamplerCreateInfo();
+            VkSamplerCreateInfo sampler = VkSamplerCreateInfo.New();
             sampler.magFilter = VkFilter.Linear;
             sampler.minFilter = VkFilter.Linear;
             sampler.mipmapMode = VkSamplerMipmapMode.Linear;
@@ -224,7 +224,7 @@ namespace SharpGame
             // Textures are not directly accessed by the shaders and
             // are abstracted by image views containing additional
             // information and sub resource ranges
-            VkImageViewCreateInfo view = Builder.ImageViewCreateInfo();
+            VkImageViewCreateInfo view = VkImageViewCreateInfo.New();
             view.viewType = VkImageViewType.Image2D;
             view.format = format;
             view.components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A };
@@ -349,7 +349,7 @@ namespace SharpGame
             // limited amount of formats and features (mip maps, cubemaps, arrays, etc.)
             bool useStaging = !forceLinear;
 
-            VkMemoryAllocateInfo memAllocInfo = Builder.MemoryAllocateInfo();
+            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
             VkMemoryRequirements memReqs;
 
             // Use a separate command buffer for texture loading
@@ -361,7 +361,7 @@ namespace SharpGame
                 VkBuffer stagingBuffer;
                 VkDeviceMemory stagingMemory;
 
-                VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo();
+                VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
                 bufferCreateInfo.size = tex2D.GetTotalSize();
                 // This buffer is used as a transfer source for the buffer copy
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
@@ -411,7 +411,7 @@ namespace SharpGame
                 }
 
                 // Create optimal tiled target image
-                VkImageCreateInfo imageCreateInfo = Builder.ImageCreateInfo();
+                VkImageCreateInfo imageCreateInfo = VkImageCreateInfo.New();
                 imageCreateInfo.imageType = VkImageType.Image2D;
                 imageCreateInfo.format = format;
                 imageCreateInfo.mipLevels = mipLevels;
