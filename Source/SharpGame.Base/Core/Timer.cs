@@ -7,13 +7,13 @@ namespace SharpGame
         public static double SecondsPerCount { get; }
         public static double MilliSecondsPerCount { get; }
 
-        private double _deltaTime;
-        private long _baseTime;
-        private long _pausedTime;
-        private long _stopTime;
-        private long _prevTime;
-        private long _currTime;
-        private bool _stopped;
+        private double deltaTime;
+        private long baseTime;
+        private long pausedTime;
+        private long stopTime;
+        private long prevTime;
+        private long currTime;
+        private bool stopped;
         private int frameNum_ = 0;
 
         static Timer()
@@ -29,12 +29,12 @@ namespace SharpGame
             Debug.Assert(Stopwatch.IsHighResolution,
                 "System does not support high-resolution performance counter.");
 
-            _deltaTime = -1.0;
-            _baseTime = 0;
-            _pausedTime = 0;
-            _prevTime = 0;
-            _currTime = 0;
-            _stopped = false;
+            deltaTime = -1.0;
+            baseTime = 0;
+            pausedTime = 0;
+            prevTime = 0;
+            currTime = 0;
+            stopped = false;
 
         }
 
@@ -42,64 +42,64 @@ namespace SharpGame
         {
             get
             {
-                if (_stopped)
-                    return (float)((_stopTime - _pausedTime - _baseTime) * SecondsPerCount);
+                if (stopped)
+                    return (float)((stopTime - pausedTime - baseTime) * SecondsPerCount);
 
-                return (float)((_currTime - _pausedTime - _baseTime) * SecondsPerCount);
+                return (float)((currTime - pausedTime - baseTime) * SecondsPerCount);
             }
         }
 
-        public float DeltaTime => (float)_deltaTime;
+        public float DeltaTime => (float)deltaTime;
 
         public int FrameNum => frameNum_;
 
         public void Reset()
         {
             long curTime = Stopwatch.GetTimestamp();
-            _baseTime = curTime;
-            _prevTime = curTime;
-            _stopTime = 0;
-            _stopped = false;
+            baseTime = curTime;
+            prevTime = curTime;
+            stopTime = 0;
+            stopped = false;
             frameNum_ = 0;
         }
 
         public void Start()
         {
             long startTime = Stopwatch.GetTimestamp();
-            if (_stopped)
+            if (stopped)
             {
-                _pausedTime += (startTime - _stopTime);
-                _prevTime = startTime;
-                _stopTime = 0;
-                _stopped = false;
+                pausedTime += (startTime - stopTime);
+                prevTime = startTime;
+                stopTime = 0;
+                stopped = false;
             }
         }
 
         public void Stop()
         {
-            if (!_stopped)
+            if (!stopped)
             {
                 long curTime = Stopwatch.GetTimestamp();
-                _stopTime = curTime;
-                _stopped = true;
+                stopTime = curTime;
+                stopped = true;
             }
         }
 
         public void Tick()
         {
-            if (_stopped)
+            if (stopped)
             {
-                _deltaTime = 0.0;
+                deltaTime = 0.0;
                 return;
             }
 
             long curTime = Stopwatch.GetTimestamp();
-            _currTime = curTime;
-            _deltaTime = (_currTime - _prevTime) * SecondsPerCount;
+            currTime = curTime;
+            deltaTime = (currTime - prevTime) * SecondsPerCount;
 
-            _prevTime = _currTime;
-            if (_deltaTime < 0.0)
-                _deltaTime = 0.0;
+            prevTime = currTime;
+            if (deltaTime < 0.0)
+                deltaTime = 0.0;
 
             frameNum_ ++;
         }
