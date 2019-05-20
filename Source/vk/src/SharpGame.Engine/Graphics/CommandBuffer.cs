@@ -16,6 +16,7 @@ namespace SharpGame
     {
         public VkCommandBuffer commandBuffer;
         private VkRenderPass renderPass;
+
         public CommandBuffer(VkCommandBuffer cmdBuffer)
         {
             commandBuffer = cmdBuffer;

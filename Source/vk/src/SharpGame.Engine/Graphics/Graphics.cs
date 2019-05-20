@@ -34,7 +34,7 @@ namespace SharpGame
 
         public static VkDevice device { get; protected set; }
         public static VkQueue queue { get; protected set; }
-        public static Format DepthFormat { get; protected set; }
+        public Format DepthFormat { get; protected set; }
         public Swapchain Swapchain { get; } = new Swapchain();
 
         public static int Width { get; private set; }
@@ -44,12 +44,13 @@ namespace SharpGame
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
-        private CommandBufferPool commandBufferPool;
+        private CommandBufferPool primaryCmdBufferPool;
+        private CommandBufferPool[] secondaryCmdBufferPool;
 
-        public CommandBuffer RenderCmdBuffer => commandBufferPool.CommandBuffers[currentBuffer];
+        public CommandBuffer RenderCmdBuffer => primaryCmdBufferPool.CommandBuffers[currentBuffer];
 
-        private static VkRenderPass _renderPass;
-        public static VkRenderPass renderPass => _renderPass;
+        private static VkRenderPass renderPass;
+        public static VkRenderPass RenderPass => renderPass;
 
         public uint currentBuffer;
 
@@ -58,12 +59,11 @@ namespace SharpGame
 
         public NativeList<VkPipelineStageFlags> submitPipelineStages = new NativeList<VkPipelineStageFlags>() { VkPipelineStageFlags.ColorAttachmentOutput };
 
-
         private VkSubmitInfo submitInfo;
 
         public Graphics()
         {
-            Settings.Validation = false;
+            Settings.Validation = true;
 
             VkInstance = Device.CreateInstance(Settings);
             device = Device.Init(enabledFeatures, EnabledExtensions);
@@ -96,7 +96,6 @@ namespace SharpGame
             Device.Shutdown();
 
             base.Destroy();
-
         }
 
         public void Init(IntPtr wnd)
@@ -110,12 +109,14 @@ namespace SharpGame
 
             DescriptorPoolManager = new DescriptorPoolManager();
 
-            CreateCommandPool();
             CreateSwapChain();
-            CreateCommandBuffers();
             CreateDepthStencil();
-            SetupRenderPass();
             CreateFrameBuffer();
+
+            CreateCommandPool();
+            CreateCommandBuffers();
+
+            CreateRenderPass();
         }
 
         public void Resize(int w, int h)
@@ -152,7 +153,7 @@ namespace SharpGame
                 attachments[1] = depthStencil.view;
 
                 VkFramebufferCreateInfo frameBufferCreateInfo = VkFramebufferCreateInfo.New();
-                frameBufferCreateInfo.renderPass = renderPass;
+                frameBufferCreateInfo.renderPass = RenderPass;
                 frameBufferCreateInfo.attachmentCount = 2;
                 frameBufferCreateInfo.pAttachments = (VkImageView*)attachments.Data;
                 frameBufferCreateInfo.width = (uint)Width;
@@ -179,7 +180,7 @@ namespace SharpGame
             Height = (int)height;
         }
 
-        protected void SetupRenderPass()
+        public void CreateRenderPass()
         {
             VkAttachmentDescription[] attachments =
             {
@@ -272,19 +273,18 @@ namespace SharpGame
                 pDependencies = (VkSubpassDependency*)Utilities.AsPointer(ref dependencies[0])
             };
 
-            Util.CheckResult(vkCreateRenderPass(device, &renderPassInfo, null, out _renderPass));
-               
+            renderPass = Device.CreateRenderPass(ref renderPassInfo);           
         }
 
         private void CreateCommandPool()
         {
-            commandBufferPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
+            primaryCmdBufferPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
         }
 
         protected void CreateCommandBuffers()
         {
-            commandBufferPool.Free();
-            commandBufferPool.Allocate(Swapchain.ImageCount);
+            primaryCmdBufferPool.Free();
+            primaryCmdBufferPool.Allocate(Swapchain.ImageCount);
         }
 
         protected void CreateDepthStencil()
@@ -314,7 +314,7 @@ namespace SharpGame
         {
             // Command buffer to be sumitted to the queue
             submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = (VkCommandBuffer*)commandBufferPool.GetAddress(currentBuffer); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
+            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdBufferPool.GetAddress(currentBuffer); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
 
             // Submit to queue
             Util.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));

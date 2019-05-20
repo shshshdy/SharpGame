@@ -283,7 +283,7 @@ namespace SharpGame
             clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
 
             var renderPassBeginInfo = VkRenderPassBeginInfo.New();
-            renderPassBeginInfo.renderPass = Graphics.renderPass;
+            renderPassBeginInfo.renderPass = Graphics.RenderPass;
             renderPassBeginInfo.renderArea.offset.x = 0;
             renderPassBeginInfo.renderArea.offset.y = 0;
             renderPassBeginInfo.renderArea.extent.width = (uint)width;

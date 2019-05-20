@@ -85,6 +85,7 @@ namespace SharpGame
             {
                 debugReportCallbackExt = CreateDebugReportCallback();
             }
+
             return instance;
         }
 
@@ -116,7 +117,7 @@ namespace SharpGame
             // TODO: Implement arg parsing, etc.
 
             var physicalDevice = ((VkPhysicalDevice*)physicalDevices)[selectedDevice];
-          
+
             Debug.Assert(physicalDevice.Handle != IntPtr.Zero);
             PhysicalDevice = physicalDevice;
 
@@ -277,9 +278,9 @@ namespace SharpGame
         {
             // Attach debug callback.
             var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
-                VkDebugReportFlagsEXT.InformationEXT |
+                //VkDebugReportFlagsEXT.InformationEXT |
                 VkDebugReportFlagsEXT.WarningEXT |
-                VkDebugReportFlagsEXT.PerformanceWarningEXT |
+                //VkDebugReportFlagsEXT.PerformanceWarningEXT |
                 VkDebugReportFlagsEXT.ErrorEXT |
                 VkDebugReportFlagsEXT.DebugEXT,
                 (args) =>
@@ -391,7 +392,7 @@ namespace SharpGame
             vkDestroyImage(device, image, null);
         }
 
-        public static VkImageView CreateImageView( ref VkImageViewCreateInfo pCreateInfo)
+        public static VkImageView CreateImageView(ref VkImageViewCreateInfo pCreateInfo)
         {
             Util.CheckResult(vkCreateImageView(device, ref pCreateInfo, null, out VkImageView pView));
             return pView;
@@ -411,6 +412,17 @@ namespace SharpGame
         public static void Destroy(VkFramebuffer framebuffer)
         {
             vkDestroyFramebuffer(device, framebuffer, null);
+        }
+
+        public static VkRenderPass CreateRenderPass(ref VkRenderPassCreateInfo createInfo)
+        {
+            Util.CheckResult(vkCreateRenderPass(device, ref createInfo, null, out VkRenderPass pRenderPass));
+            return pRenderPass;
+        }
+
+        public static void Destroy(VkRenderPass renderPass)
+        {
+            vkDestroyRenderPass(device, renderPass, null);
         }
 
         public static VkResult CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
@@ -451,16 +463,6 @@ namespace SharpGame
             Util.CheckResult(vkBindBufferMemory(LogicalDevice, *buffer, *memory, 0));
 
             return VkResult.Success;
-        }
-
-        public static VkResult CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, out VkBuffer buffer, out VkDeviceMemory memory, void* data = null)
-        {
-            VkBuffer b;
-            VkDeviceMemory dm;
-            VkResult result = CreateBuffer(usageFlags, memoryPropertyFlags, size, &b, &dm, data);
-            buffer = b;
-            memory = dm;
-            return result;
         }
 
         public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)

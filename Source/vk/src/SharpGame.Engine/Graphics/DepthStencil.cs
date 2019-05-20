@@ -49,6 +49,7 @@ namespace SharpGame
             Util.CheckResult(vkBindImageMemory(Graphics.device, image, mem, 0));
 
             depthStencilView.image = image;
+
             view = Device.CreateImageView(ref depthStencilView);
 
         }

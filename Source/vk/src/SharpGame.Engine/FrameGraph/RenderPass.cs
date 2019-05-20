@@ -123,13 +123,6 @@ namespace SharpGame
         public RenderPass()
         {
         }
-        /*
-        public Framebuffer CreateFramebuffer(ImageView[] attachments, int width, int height, int layers = 1)
-        {
-            return renderPass_.CreateFramebuffer(
-                    new FramebufferCreateInfo(attachments, width, height)
-                );
-        }*/
 
         public void DrawBatch(SourceBatch batch, Pipeline pipeline, ResourceSet resourceSet)
         {/*

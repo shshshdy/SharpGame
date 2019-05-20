@@ -7,6 +7,8 @@ namespace SharpGame
 {
     public class RenderTarget : DisposeBase
     {
-
+        public VkImage image;
+        public VkDeviceMemory mem;
+        public VkImageView view;
     }
 }

@@ -31,6 +31,8 @@ namespace SharpGame
         ResourceSet resourceSet;
         private IntPtr fontAtlasID = (IntPtr)1;
 
+        VkRenderPass renderPass;
+
         protected Vulkan.VkClearColorValue defaultClearColor => new Vulkan.VkClearColorValue(0.025f, 0.025f, 0.025f, 1.0f);
 
         public GUI()
@@ -69,7 +71,7 @@ namespace SharpGame
         }
 
 
-        void CreateGraphicsResources()
+        unsafe void CreateGraphicsResources()
         {
             vertexBuffer = GraphicsBuffer.CreateDynamic<Pos2dTexColorVertex>(BufferUsage.VertexBuffer, 4096);
             indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, 4096);
@@ -89,6 +91,8 @@ namespace SharpGame
                 }
             };
 
+            var graphics = Graphics.Instance;
+
             pipeline = new Pipeline
             {
                 CullMode = CullMode.None,
@@ -98,10 +102,99 @@ namespace SharpGame
                 DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
                 VertexLayout = Pos2dTexColorVertex.Layout
             };
-        }
 
-        void updateUniformBuffers()
-        {
+            VkAttachmentDescription[] attachments =
+            {
+                // Color attachment
+                new VkAttachmentDescription
+                {
+                    format = graphics.Swapchain.ColorFormat,
+                    samples = VkSampleCountFlags.Count1,
+                    loadOp = VkAttachmentLoadOp.Load,
+                    storeOp = VkAttachmentStoreOp.Store,
+                    stencilLoadOp = VkAttachmentLoadOp.DontCare,
+                    stencilStoreOp = VkAttachmentStoreOp.DontCare,
+                    initialLayout = VkImageLayout.Undefined,
+                    finalLayout = VkImageLayout.PresentSrcKHR
+                },
+
+                // Depth attachment
+                new VkAttachmentDescription
+                {
+                    format = (VkFormat)graphics.DepthFormat,
+                    samples = VkSampleCountFlags.Count1,
+                    loadOp = VkAttachmentLoadOp.DontCare,
+                    storeOp = VkAttachmentStoreOp.DontCare,
+                    stencilLoadOp = VkAttachmentLoadOp.DontCare,
+                    stencilStoreOp = VkAttachmentStoreOp.DontCare,
+                    initialLayout = VkImageLayout.Undefined,
+                    finalLayout = VkImageLayout.DepthStencilAttachmentOptimal
+                }
+            };
+
+            VkAttachmentReference colorReference = new VkAttachmentReference
+            {
+                attachment = 0,
+                layout = VkImageLayout.ColorAttachmentOptimal
+            };
+
+            VkAttachmentReference depthReference = new VkAttachmentReference
+            {
+                attachment = 1,
+                layout = VkImageLayout.DepthStencilAttachmentOptimal
+            };
+
+            VkSubpassDescription subpassDescription = new VkSubpassDescription
+            {
+                pipelineBindPoint = VkPipelineBindPoint.Graphics,
+                colorAttachmentCount = 1,
+                pColorAttachments = &colorReference,
+                pDepthStencilAttachment = &depthReference,
+                inputAttachmentCount = 0,
+                pInputAttachments = null,
+                preserveAttachmentCount = 0,
+                pPreserveAttachments = null,
+                pResolveAttachments = null
+            };
+
+            // Subpass dependencies for layout transitions
+            VkSubpassDependency[] dependencies =
+            {
+                new VkSubpassDependency
+                {
+                    srcSubpass = VulkanNative.SubpassExternal,
+                    dstSubpass = 0,
+                    srcStageMask = VkPipelineStageFlags.BottomOfPipe,
+                    dstStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+                    srcAccessMask = VkAccessFlags.MemoryRead,
+                    dstAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite),
+                    dependencyFlags = VkDependencyFlags.ByRegion
+                },
+
+                new VkSubpassDependency
+                {
+                    srcSubpass = 0,
+                    dstSubpass = VulkanNative.SubpassExternal,
+                    srcStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+                    dstStageMask = VkPipelineStageFlags.BottomOfPipe,
+                    srcAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite),
+                    dstAccessMask = VkAccessFlags.MemoryRead,
+                    dependencyFlags = VkDependencyFlags.ByRegion
+                },
+            };
+
+            VkRenderPassCreateInfo renderPassInfo = new VkRenderPassCreateInfo
+            {
+                sType = VkStructureType.RenderPassCreateInfo,
+                attachmentCount = (uint)attachments.Length,
+                pAttachments = (VkAttachmentDescription*)Utilities.AsPointer(ref attachments[0]),
+                subpassCount = 1,
+                pSubpasses = &subpassDescription,
+                dependencyCount = (uint)dependencies.Length,
+                pDependencies = (VkSubpassDependency*)Utilities.AsPointer(ref dependencies[0])
+            };
+
+            renderPass = Device.CreateRenderPass(ref renderPassInfo);
         }
 
         private unsafe void RecreateFontDeviceTexture()
@@ -175,13 +268,13 @@ namespace SharpGame
             var height = Graphics.Height;
 
             var renderPassBeginInfo = VkRenderPassBeginInfo.New();
-            renderPassBeginInfo.renderPass = Graphics.renderPass;
+            renderPassBeginInfo.renderPass = renderPass;
             renderPassBeginInfo.renderArea.offset.x = 0;
             renderPassBeginInfo.renderArea.offset.y = 0;
             renderPassBeginInfo.renderArea.extent.width = (uint)width;
             renderPassBeginInfo.renderArea.extent.height = (uint)height;
             renderPassBeginInfo.clearValueCount = 0;// (uint)clearValues.Length;
-            renderPassBeginInfo.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues[0]);
+            renderPassBeginInfo.pClearValues = null;// (VkClearValue*)Unsafe.AsPointer(ref clearValues[0]);
 
             var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
             {
@@ -247,7 +340,7 @@ namespace SharpGame
 
             var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
 
-            var pipelines_solid = pipeline.GetGraphicsPipeline(Graphics.renderPass, uiShader.Main, null);
+            var pipelines_solid = pipeline.GetGraphicsPipeline(Graphics.RenderPass, uiShader.Main, null);
 
             cmdBuffer.BindDescriptorSets(PipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
             cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelines_solid);
