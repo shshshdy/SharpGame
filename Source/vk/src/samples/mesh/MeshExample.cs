@@ -261,20 +261,6 @@ namespace SharpGame
             uniformBufferScene.SetData(ref uboVS);
         }
         
-        protected override void Render()
-        {
-            if (!prepared)
-                return;
-
-            UpdateUniformBuffers();
-
-            graphics.BeginRender();
-
-            BuildCommandBuffers();
-
-            graphics.EndRender();
-        }
-
         void Handle(BeginRender e)
         {
             UpdateUniformBuffers();

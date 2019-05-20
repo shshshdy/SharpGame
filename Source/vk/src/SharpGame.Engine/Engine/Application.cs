@@ -35,9 +35,13 @@ namespace SharpGame
 
         protected InputSnapshot snapshot;
 
+        bool singleThreaded = true;
+
         private int frameNumber;
         private float timeElapsed = 0.0f;
-        bool singleThreaded = true;
+
+        float fps;
+        public float Fps => fps;
 
         public Application()
         {
@@ -124,7 +128,6 @@ namespace SharpGame
 
                 renderer.Render();
 
-                //Render();
             }
 
             timer.Stop();
@@ -178,8 +181,6 @@ namespace SharpGame
 
             this.SendGlobalEvent(update);
 
-            Update();
-
             var postUpdate = new PostUpdate
             {
                 timeTotal_ = timer.TotalTime,
@@ -198,9 +199,6 @@ namespace SharpGame
 
         }
 
-        float fps;
-        public float Fps => fps;
-
         private void CalculateFrameRateStats()
         {
             frameNumber++;
@@ -217,17 +215,7 @@ namespace SharpGame
             }
         }
 
-        protected virtual void Update()
-        {
-        }
 
-        protected virtual void Render()
-        {
-        }
-
-        protected virtual void BuildCommandBuffers()
-        {
-        }
     }
 
 }
