@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Renderer : Object
+    public class Renderer : System<Renderer>
     {
         public RenderView MainView { get; private set; }
 

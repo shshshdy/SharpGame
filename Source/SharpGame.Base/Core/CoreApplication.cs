@@ -5,12 +5,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class System<T> : Object
-    {
-        public static T Instance => InstanceHoler<T>.inst;
-    }
-
-    public class CoreApplication : System<CoreApplication>
+    public class CoreApplication : Object
     {
         Stack<Object> subsystems = new Stack<Object>();
         public CoreApplication()
@@ -51,6 +46,11 @@ namespace SharpGame
     internal class InstanceHoler<T>
     {
         internal static T inst;
+    }
+
+    public class System<T> : Object
+    {
+        public static T Instance => InstanceHoler<T>.inst;
     }
 
 }

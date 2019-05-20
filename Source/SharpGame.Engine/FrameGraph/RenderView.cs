@@ -21,7 +21,12 @@ namespace SharpGame
 
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
-            Scene = scene;            
+            Attach(camera, scene, renderPath);
+        }
+
+        public void Attach(Camera camera, Scene scene, FrameGraph renderPath = null)
+        {
+            Scene = scene;
             Camera = camera;
             RenderPath = renderPath;
 
@@ -30,14 +35,13 @@ namespace SharpGame
                 RenderPath = new FrameGraph();
                 RenderPath.AddRenderPass(new ScenePass());
             }
-
         }
 
         public void Update(ref FrameInfo frameInfo)
         {
             frame_ = frameInfo;
             frame_.camera_ = Camera;
-            frame_.viewSize_ = new Int2((int)Graphics.Width, (int)Graphics.Height);
+            frame_.viewSize_ = new Int2(Graphics.Width, Graphics.Height);
 
             this.SendGlobalEvent(new BeginView { view = this });
 
@@ -58,7 +62,7 @@ namespace SharpGame
             {
                 return;
             }
-            /*
+        
             FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery
             {
                 view = this,
@@ -76,8 +80,7 @@ namespace SharpGame
             foreach (var drawable in drawables_)
             {
                 drawable.UpdateBatches(ref frame_);
-            }
-           */
+            }         
 
         }
 

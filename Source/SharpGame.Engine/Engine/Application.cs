@@ -56,8 +56,9 @@ namespace SharpGame
         {
             timer = CreateSubsystem<Timer>();
             fileSystem = CreateSubsystem<FileSystem>();
-            graphics = CreateSubsystem<Graphics>();
             cache = CreateSubsystem<ResourceCache>(DataPath);
+
+            graphics = CreateSubsystem<Graphics>();
             renderer = CreateSubsystem<Renderer>();
             input = CreateSubsystem<Input>();
           

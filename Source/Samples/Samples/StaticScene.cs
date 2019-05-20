@@ -7,29 +7,16 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = 1)]
     public class StaticScene : Sample
     {
+
         public override void Init()
         {
-            Node node = new Node
-            {
-                Position = new Vector3(),
+            scene = new Scene();
 
-                Rotation = new Quaternion(),
+            var cameraNode = scene.CreateChild("Camera");
+            cameraNode.Position = new Vector3(0, 0, -5);
+            camera = cameraNode.CreateComponent<Camera>();
 
-                Components = new[]
-                {
-                    new Camera
-                    {
-                    }
-                },
-
-                Children = new[]
-                {
-                    new Node
-                    {
-                    }
-                }
-            };
-
+            Renderer.Instance.MainView.Attach(camera, scene);
 
         }
     }

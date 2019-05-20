@@ -14,17 +14,15 @@ namespace SharpGame.Samples
 
     public class Sample : Object
     {
-        protected Scene scene_;
-        protected Camera camera_;
-
-        Vector2 mousePos_ = Vector2.Zero;
-        float yaw_;
-        float pitch_;
-        float rotSpeed_ = 0.5f;
-        float wheelSpeed_ = 150.0f;
-        float moveSpeed_ = 15.0f;
-        Vector3 offset_;
-
+        protected Scene scene;
+        protected Camera camera;
+        private Vector2 mousePos = Vector2.Zero;
+        private float yaw;
+        private float pitch;
+        private float rotSpeed = 0.5f;
+        private float wheelSpeed = 150.0f;
+        private float moveSpeed = 15.0f;
+        private Vector3 offset;
 
         public Sample()
         {
@@ -36,57 +34,57 @@ namespace SharpGame.Samples
 
         public virtual void Update()
         {
-            if(camera_ == null)
+            if(camera == null)
             {
                 return;
             }
 
             var input = Input.Instance;
 
-            if (mousePos_ == Vector2.Zero)
-                mousePos_ = input.MousePosition;
+            if (mousePos == Vector2.Zero)
+                mousePos = input.MousePosition;
 
-            offset_ = Vector3.Zero;
+            offset = Vector3.Zero;
             if (input.IsMouseDown(MouseButton.Right))
             {
-                Vector2 delta = (input.MousePosition - mousePos_) * Time.Delta * rotSpeed_ * camera_.AspectRatio;
+                Vector2 delta = (input.MousePosition - mousePos) * Time.Delta * rotSpeed * camera.AspectRatio;
 
-                yaw_ += delta.X;
-                pitch_ += delta.Y;
+                yaw += delta.X;
+                pitch += delta.Y;
 
-                camera_.Node.Rotation = Quaternion.RotationYawPitchRoll(yaw_, pitch_, 0);
+                camera.Node.Rotation = Quaternion.RotationYawPitchRoll(yaw, pitch, 0);
 
                 if (input.IsKeyPressed(Key.W))
                 {
-                    offset_.Z += 1.0f;
+                    offset.Z += 1.0f;
                 }
 
                 if (input.IsKeyPressed(Key.S))
                 {
-                    offset_.Z -= 1.0f;
+                    offset.Z -= 1.0f;
                 }
 
                 if (input.IsKeyPressed(Key.A))
                 {
-                    offset_.X -= 1.0f;
+                    offset.X -= 1.0f;
                 }
 
                 if (input.IsKeyPressed(Key.D))
                 {
-                    offset_.X += 1.0f;
+                    offset.X += 1.0f;
                 }
             }
 
             if (input.IsMouseDown(MouseButton.Middle))
             {
-                Vector2 delta = input.MousePosition - mousePos_;
-                offset_.X = -delta.X;
-                offset_.Y = delta.Y;
+                Vector2 delta = input.MousePosition - mousePos;
+                offset.X = -delta.X;
+                offset.Y = delta.Y;
             }
 
-            camera_.Node.Translate(offset_ * Time.Delta * moveSpeed_ + new Vector3(0, 0, input.WheelDelta * Time.Delta * wheelSpeed_), TransformSpace.LOCAL);
+            camera.Node.Translate(offset * Time.Delta * moveSpeed + new Vector3(0, 0, input.WheelDelta * Time.Delta * wheelSpeed), TransformSpace.LOCAL);
 
-            mousePos_ = input.MousePosition;
+            mousePos = input.MousePosition;
             
         }
 
@@ -96,7 +94,7 @@ namespace SharpGame.Samples
 
         public virtual void Shutdown()
         {
-            scene_?.Dispose();
+            scene?.Dispose();
         }
     }
 
