@@ -313,10 +313,10 @@ namespace SharpGame
                 indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
             }
 
+            var graphics = Graphics.Instance;
+            var cmdBuffer = graphics.RenderCmdBuffer;
 
-            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
-
-            var pipelines_solid = pipeline.GetGraphicsPipeline(Graphics.RenderPass, uiShader.Main, null);
+            var pipelines_solid = pipeline.GetGraphicsPipeline(graphics.RenderPass, uiShader.Main, null);
 
             cmdBuffer.BindDescriptorSets(PipelineBindPoint.Graphics, pipeline.pipelineLayout, 0, 1, ref resourceSet.descriptorSet, 0, null);
             cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelines_solid);

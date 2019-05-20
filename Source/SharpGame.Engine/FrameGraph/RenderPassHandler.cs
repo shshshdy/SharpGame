@@ -3,25 +3,12 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
-
+using Vulkan;
 
 namespace SharpGame
 {
-    /*
-    public struct AttachmentDescription
-    {
-        public VkAttachmentDescriptionFlags flags;
-        public Format format;
-        public VkSampleCountFlags samples;
-        public VkAttachmentLoadOp loadOp;
-        public VkAttachmentStoreOp storeOp;
-        public VkAttachmentLoadOp stencilLoadOp;
-        public VkAttachmentStoreOp stencilStoreOp;
-        public ImageLayout initialLayout;
-        public ImageLayout finalLayout;
-    }*/
-
-    public class RenderPass : Object
+ 
+    public class RenderPassHandler : Object
     {
         private StringID name_;
         public StringID Name
@@ -37,19 +24,19 @@ namespace SharpGame
         public int passID;
 
         [IgnoreDataMember]
-        public FrameGraph RenderPath { get; set; }
+        public FrameGraph FrameGraph { get; set; }
 
         [IgnoreDataMember]
-        public Framebuffer[] framebuffer_;
+        public Framebuffer[] framebuffers;
 
-        protected CommandBuffer[] cmdBuffers_ = new CommandBuffer[2];
+        protected CommandBuffer[] cmdBuffers = new CommandBuffer[2];
 
         protected CommandBuffer cmdBuffer_;
-        //public CommandBuffer CommandBuffer => cmdBuffer_;
+        public CommandBuffer CmdBuffer => cmdBuffer_;
 
-        internal Vulkan.VkRenderPass renderPass_;
+        internal RenderPass renderPass;
 
-        public RenderPass()
+        public RenderPassHandler()
         {
         }
 
@@ -62,7 +49,7 @@ namespace SharpGame
             batch.geometry_.Draw(cmdBuffer_);*/
         }
 
-        protected virtual CommandBuffer BeginDraw()
+        protected CommandBuffer BeginDraw()
         {
             /*
             int workContext = Graphics.WorkContext;
@@ -95,7 +82,7 @@ namespace SharpGame
             EndDraw();
         }
 
-        protected virtual void EndDraw()
+        protected void EndDraw()
         {
             this.SendGlobalEvent(new EndRenderPass { renderPass = this });
 
@@ -113,7 +100,7 @@ namespace SharpGame
  
             CommandBuffer cmdBuffer = graphics.RenderCmdBuffer;
 
-            var fb = framebuffer_ ?? graphics.Framebuffers;
+            var fb = framebuffers ?? graphics.Framebuffers;
 
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
@@ -125,10 +112,10 @@ namespace SharpGame
 
             cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
         
-            if (cmdBuffers_[imageIndex] != null)
+            if (cmdBuffers[imageIndex] != null)
             {
-                cmdBuffer.ExecuteCommand(cmdBuffers_[imageIndex]);
-                cmdBuffers_[imageIndex] = null;
+                cmdBuffer.ExecuteCommand(cmdBuffers[imageIndex]);
+                cmdBuffers[imageIndex] = null;
             }
 
             cmdBuffer.EndRenderPass();

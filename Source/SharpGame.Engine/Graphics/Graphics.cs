@@ -50,8 +50,8 @@ namespace SharpGame
         public CommandBuffer RenderCmdBuffer => primaryCommandPool.CommandBuffers[currentBuffer];
         public CommandBuffer WorkCmdBuffer => secondaryCommandPool[0].CommandBuffers[currentBuffer];
 
-        private static VkRenderPass renderPass;
-        public static VkRenderPass RenderPass => renderPass;
+        private VkRenderPass renderPass;
+        public VkRenderPass RenderPass => renderPass;
 
         public uint currentBuffer;
 
@@ -260,9 +260,7 @@ namespace SharpGame
 
         public Framebuffer[] CreateSwapChainFramebuffers()
         {
-
             VkImageView* attachments = stackalloc VkImageView[2];
-
             // Depth/Stencil attachment is the same for all frame buffers
             attachments[1] = depthStencil.view;
 
@@ -278,7 +276,6 @@ namespace SharpGame
 
             // Create frame buffers for every swap chain image
             var framebuffers = new Framebuffer[Swapchain.ImageCount];
-
             for (uint i = 0; i < framebuffers.Length; i++)
             {
                 attachments[0] = Swapchain.Buffers[i].View;

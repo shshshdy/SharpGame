@@ -28,11 +28,11 @@ namespace SharpGame
 
     public struct BeginRenderPass
     {
-        public RenderPass renderPass;
+        public RenderPassHandler renderPass;
     }
 
     public struct EndRenderPass
     {
-        public RenderPass renderPass;
+        public RenderPassHandler renderPass;
     }
 }
