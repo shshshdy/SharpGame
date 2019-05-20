@@ -42,8 +42,7 @@ namespace SharpGame
             }
 
             var input = Input.Instance;
-            /*
-            
+
             if (mousePos_ == Vector2.Zero)
                 mousePos_ = input.MousePosition;
 
@@ -88,7 +87,7 @@ namespace SharpGame
             camera_.Node.Translate(offset_ * Time.Delta * moveSpeed_ + new Vector3(0, 0, input.WheelDelta * Time.Delta * wheelSpeed_), TransformSpace.LOCAL);
 
             mousePos_ = input.MousePosition;
-            */
+            
         }
 
         public virtual void OnGUI()
@@ -107,18 +106,16 @@ namespace SharpGame
         int selected = 0;
         string[] sampleNames;
 
-        public SampleApplication()// : base("../Content")
+        public SampleApplication()
         {
         }
 
         protected override void Setup()
         {
             base.Setup();
-
-            context.CreateSubsystem<ImGUI>();
-
-            this.SubscribeToEvent<GUIEvent>(HandleGUI);
-            this.SubscribeToEvent<Update>(HandleUpdate);
+            
+            this.Subscribe<GUIEvent>(HandleGUI);
+            this.Subscribe<Update>(HandleUpdate);
 
         }
 
@@ -172,7 +169,7 @@ namespace SharpGame
 
         }
 
-        private void HandleUpdate(ref Update e)
+        private void HandleUpdate(Update e)
         {
             if (current)
             {
@@ -212,15 +209,6 @@ namespace SharpGame
                 ImGUI.End();
             }
 
-
-            if (ImGUI.Begin("Sample", graphics.Width - 220, 55, 200, 200, nk_panel_flags.NK_WINDOW_TITLE))
-            {
-                ImGUI.LayoutRowStatic(20, 80, 1);
-                ImGUI.Label("FPS:");
-               
-            }
-
-            ImGUI.End();
             */
             if (current)
             {
@@ -249,6 +237,9 @@ namespace SharpGame
 
         }
 
+        public static void Main() => new SampleApplication().Run();
+
     }
+
 
 }

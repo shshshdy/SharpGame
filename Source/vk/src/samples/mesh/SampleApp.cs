@@ -100,13 +100,13 @@ namespace SharpGame
         protected Scene scene_;
         protected Camera camera_;
 
-        System.Numerics.Vector2 mousePos_ = System.Numerics.Vector2.Zero;
+        Vector2 mousePos_ = Vector2.Zero;
         float yaw_;
         float pitch_;
         float rotSpeed_ = 0.5f;
         float wheelSpeed_ = 150.0f;
         float moveSpeed_ = 15.0f;
-        System.Numerics.Vector3 offset_;
+        Vector3 offset_;
 
 
         public Sample()
@@ -126,13 +126,13 @@ namespace SharpGame
 
             var input = Input.Instance;
 
-            if (mousePos_ == System.Numerics.Vector2.Zero)
+            if (mousePos_ == Vector2.Zero)
                 mousePos_ = input.MousePosition;
 
-            offset_ = System.Numerics.Vector3.Zero;
+            offset_ = Vector3.Zero;
             if (input.IsMouseDown(MouseButton.Right))
             {
-                System.Numerics.Vector2 delta = (input.MousePosition - mousePos_) * Time.Delta * rotSpeed_ * camera_.AspectRatio;
+                Vector2 delta = (input.MousePosition - mousePos_) * Time.Delta * rotSpeed_ * camera_.AspectRatio;
 
                 yaw_ += delta.X;
                 pitch_ += delta.Y;

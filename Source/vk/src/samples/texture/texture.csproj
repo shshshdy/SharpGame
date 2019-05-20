@@ -39,6 +39,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\Sdl2\native\win-x64\SDL2.dll" Link="SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.70.0" />
     <PackageReference Include="Vk" Version="1.0.21" />
   </ItemGroup>

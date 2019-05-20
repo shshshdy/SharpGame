@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Input : System<Input>, InputSnapshot
+    public class Input : System<Input>
     {
         public InputSnapshot snapshot;
 
@@ -15,7 +15,7 @@ namespace SharpGame
 
         public IReadOnlyList<char> KeyCharPresses => snapshot.KeyCharPresses;
 
-        public System.Numerics.Vector2 MousePosition => snapshot.MousePosition;
+        public Vector2 MousePosition => (Vector2)snapshot.MousePosition;
 
         public float WheelDelta => snapshot.WheelDelta;
 

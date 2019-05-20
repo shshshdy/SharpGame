@@ -69,9 +69,9 @@ namespace SharpGame
             CreateUniformBuffers();
             SetupResourceSet();
 
-            this.SubscribeToEvent<BeginRender>(Handle);
+            this.Subscribe<BeginRender>(Handle);
 
-            this.SubscribeToEvent<GUIEvent>(Handle);
+            this.Subscribe<GUIEvent>(Handle);
             prepared = true;
         }
 

@@ -13,42 +13,42 @@ namespace SharpGame
 
     public static class ObserverExtensions
     {
-        public static void SubscribeToEvent<T>(this IObserver self, Observable observable, Action<T> action)
+        public static void Subscribe<T>(this IObserver self, Observable observable, Action<T> action)
         {
             EventSystem.Instance.SubscribeEvent(self, observable, action);
         }
 
-        public static void SubscribeToEvent<T>(this IObserver self, Observable observable, RefAction<T> action)
+        public static void Subscribe<T>(this IObserver self, Observable observable, RefAction<T> action)
         {
             EventSystem.Instance.SubscribeEvent(self, observable, action);
         }
 
-        public static void UnsubscribeFromEvent<T>(this IObserver self, Observable observable, Action<T> action)
+        public static void Unsubscribe<T>(this IObserver self, Observable observable, Action<T> action)
         {
             EventSystem.Instance.UnsubscribeEvent(self, observable, action);
         }
 
-        public static void UnsubscribeFromEvent<T>(this IObserver self, Observable observable, RefAction<T> action)
+        public static void Unsubscribe<T>(this IObserver self, Observable observable, RefAction<T> action)
         {
             EventSystem.Instance.UnsubscribeEvent(self, observable, action);
         }
 
-        public static void SubscribeToEvent<T>(this IObserver self, Action<T> action)
+        public static void Subscribe<T>(this IObserver self, Action<T> action)
         {
             EventSystem.Instance.SubscribeEvent(self, EventSystem.Instance, action);
         }
 
-        public static void SubscribeToEvent<T>(this IObserver self, RefAction<T> action)
+        public static void Subscribe<T>(this IObserver self, RefAction<T> action)
         {
             EventSystem.Instance.SubscribeEvent(self, EventSystem.Instance, action);
         }
 
-        public static void UnsubscribeFromEvent<T>(this IObserver self, Action<T> action)
+        public static void Unsubscribe<T>(this IObserver self, Action<T> action)
         {
             EventSystem.Instance.UnsubscribeEvent(self, EventSystem.Instance, action);
         }
 
-        public static void UnsubscribeFromEvent<T>(this IObserver self, RefAction<T> action)
+        public static void Unsubscribe<T>(this IObserver self, RefAction<T> action)
         {
             EventSystem.Instance.UnsubscribeEvent(self, EventSystem.Instance, action);
         }

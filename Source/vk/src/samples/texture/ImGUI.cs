@@ -9,16 +9,14 @@ using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    public unsafe class ImGUI : Application
+    public unsafe class ImGUI : Sample
     {
         public ImGUI()
         {
         }
 
-        protected override void Init()
+        public override void Init()
         {
-            base.Init();
-
             Node node = new Node
             {
                 Position = new Vector3(),
@@ -41,18 +39,13 @@ namespace SharpGame
             };
 
 
-            this.SubscribeToEvent<GUIEvent>(Handle);
-
         }
 
-
-        void Handle(GUIEvent e)
+        public override void OnGUI()
         {
-
             ImGui.ShowDemoWindow();
         }
 
 
-        public static void Main() => new SampleApplication().Run();
     }
 }
