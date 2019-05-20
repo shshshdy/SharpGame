@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "UniqueStudio": {
-      "commandName": "Project",
-      "workingDirectory": "../../bin"
-    }
-  }
-}

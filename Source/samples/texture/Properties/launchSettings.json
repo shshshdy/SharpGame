@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "UniqueStudio": {
+    "Samples": {
       "commandName": "Project",
-      "workingDirectory": "../../bin"
+      "workingDirectory": "../../../bin"
     }
   }
 }

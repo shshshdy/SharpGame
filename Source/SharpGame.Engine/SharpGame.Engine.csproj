@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Build;Publish">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>SharpGame</AssemblyName>
+    <AssemblyName>SharpGame.Engine</AssemblyName>
     <RootNamespace>SharpGame</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -15,7 +15,7 @@
     <PackageReference Include="Vk" Version="1.0.21" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Sdl2\SharpGame.Sdl2.csproj" />
-    <ProjectReference Include="..\..\..\SharpGame.Base\SharpGame.Base.csproj" />
+    <ProjectReference Include="..\Sdl2\SharpGame.Sdl2.csproj" />
+    <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
   </ItemGroup>
 </Project>
