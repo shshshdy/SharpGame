@@ -14,10 +14,10 @@ namespace SharpGame
         public uint ViewMask { get; set; }
         public RenderPass OverlayPass { get; set; }
 
-        internal FastList<Drawable> drawables_ = new FastList<Drawable>();
-        internal FastList<Light> lights_ = new FastList<Light>();
+        internal FastList<Drawable> drawables = new FastList<Drawable>();
+        internal FastList<Light> lights = new FastList<Light>();
 
-        private FrameInfo frame_;
+        private FrameInfo frameInfo;
 
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
@@ -39,9 +39,9 @@ namespace SharpGame
 
         public void Update(ref FrameInfo frameInfo)
         {
-            frame_ = frameInfo;
-            frame_.camera_ = Camera;
-            frame_.viewSize_ = new Int2(Graphics.Width, Graphics.Height);
+            this.frameInfo = frameInfo;
+            this.frameInfo.camera_ = Camera;
+            this.frameInfo.viewSize_ = new Int2(Graphics.Width, Graphics.Height);
 
             this.SendGlobalEvent(new BeginView { view = this });
 
@@ -56,7 +56,7 @@ namespace SharpGame
 
         private void UpdateDrawables()
         {
-            drawables_.Clear();
+            drawables.Clear();
 
             if (Scene == null || Camera == null)
             {
@@ -69,17 +69,17 @@ namespace SharpGame
                 camera = Camera
             };
 
-            Scene.GetDrawables(frustumOctreeQuery, drawables_);
+            Scene.GetDrawables(frustumOctreeQuery, drawables);
 
             //todo:multi thread
-            foreach(var drawable in drawables_)
+            foreach(var drawable in drawables)
             {
-                drawable.UpdateGeometry(ref frame_);
+                drawable.UpdateGeometry(ref frameInfo);
             }
 
-            foreach (var drawable in drawables_)
+            foreach (var drawable in drawables)
             {
-                drawable.UpdateBatches(ref frame_);
+                drawable.UpdateBatches(ref frameInfo);
             }         
 
         }

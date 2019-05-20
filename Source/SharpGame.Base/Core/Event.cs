@@ -13,45 +13,45 @@ namespace SharpGame
 
     public struct TEventHandler<T> : IEventHandler
     {
-        Action<T> action_;
+        Action<T> action;
         public TEventHandler(Action<T> action)
         {
-            action_ = action;
+            this.action = action;
         }
 
         public Type Type { get { return typeof(T); } }
         
         public void Invoke(T e)
         {
-            action_(e);
+            action(e);
         }
 
         public void Invoke(object e)
         {
-            action_((T)e);
+            action((T)e);
         }
     }
 
     public delegate void RefAction<T>(ref T e);
     public struct RefEventHandler<T> : IEventHandler
     {
-        RefAction<T> action_;
+        RefAction<T> action;
         public RefEventHandler(RefAction<T> action)
         {
-            action_ = action;
+            this.action = action;
         }
 
         public Type Type { get { return typeof(T); } }
 
         public void Invoke(ref T e)
         {
-            action_(ref e);
+            action(ref e);
         }
 
         public void Invoke(object e)
         {
             T data = (T)e;
-            action_(ref data);
+            action(ref data);
         }
     }
  

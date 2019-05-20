@@ -12,23 +12,23 @@ namespace SharpGame
         /// <summary>
         /// The number of items in the span.
         /// </summary>
-        public int Length => _length;
+        public int Length => length;
 
         /// <summary>
         /// Returns true if Length is 0.
         /// </summary>
-        public bool IsEmpty => _length == 0;
+        public bool IsEmpty => length == 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe Span(void* pointer, int length)
         {
-            _length = length;
+            this.length = length;
             _byteOffset = new IntPtr(pointer);
         }
 
         internal IntPtr ByteOffset => _byteOffset;
         private readonly IntPtr _byteOffset;
-        private readonly int _length;
+        private readonly int length;
 
         /// <summary>
         /// Returns a reference to specified element of the Span.
@@ -50,9 +50,9 @@ namespace SharpGame
 
     public unsafe class UnmanagedPool<T> : IDisposable where T : struct
     {
-        List<IntPtr> buckets_ = new List<IntPtr>();
-        List<int> bucketsSize_ = new List<int>();
-        int capacity_;
+        List<IntPtr> buckets = new List<IntPtr>();
+        List<int> bucketsSize = new List<int>();
+        int capacity;
         Dictionary<int, List<IntPtr>> freeList = new Dictionary<int, List<IntPtr>>();
 
         public static UnmanagedPool<T> Shared { get; }
@@ -68,12 +68,12 @@ namespace SharpGame
                 throw new ArgumentException("Capacity is too small.");
             }
 
-            capacity_ = capacity;
+            this.capacity = capacity;
         }
 
         public void Dispose()
         {
-            foreach(var ptr in buckets_)
+            foreach(var ptr in buckets)
                 Utilities.Free(ptr);
         }
 
@@ -98,18 +98,18 @@ namespace SharpGame
                 }
             }
 
-            for(int i = 0; i < bucketsSize_.Count; i++)
+            for(int i = 0; i < bucketsSize.Count; i++)
             {
-                if(bucketsSize_[i] + count <= capacity_)
+                if(bucketsSize[i] + count <= capacity)
                 {
-                    IntPtr ret = buckets_[i] + bucketsSize_[i] * Unsafe.SizeOf<T>();
-                    bucketsSize_[i] = bucketsSize_[i] + count;
+                    IntPtr ret = buckets[i] + bucketsSize[i] * Unsafe.SizeOf<T>();
+                    bucketsSize[i] = bucketsSize[i] + count;
                     return ret;
                 }
             }
 
             IntPtr ret1 = CreateBucket();
-            bucketsSize_[bucketsSize_.Count - 1] = bucketsSize_[bucketsSize_.Count - 1] + count;
+            bucketsSize[bucketsSize.Count - 1] = bucketsSize[bucketsSize.Count - 1] + count;
             return ret1;
         }
 
@@ -137,9 +137,9 @@ namespace SharpGame
 
         IntPtr CreateBucket()
         {
-            var ret = Utilities.Alloc(Unsafe.SizeOf<T>() * capacity_);
-            buckets_.Add(ret);
-            bucketsSize_.Add(0);
+            var ret = Utilities.Alloc(Unsafe.SizeOf<T>() * capacity);
+            buckets.Add(ret);
+            bucketsSize.Add(0);
             return ret;
         }
     }

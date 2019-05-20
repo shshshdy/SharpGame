@@ -12,14 +12,14 @@ namespace SharpGame
     public class FastList<T> : IList<T>, IReadOnlyList<T>, ICollection<T>, IEnumerable<T>, IEnumerable
     {
         // Fields
-        private const int defaultCapacity_ = 4;
+        private const int defaultCapacity = 4;
 
         /// <summary>
         /// Gets the items.
         /// </summary>
-        public T[] Items { get=>items_; private set => items_ = value; }
-        private T[] items_;
-        private int size_;
+        public T[] Items { get=>items; private set => items = value; }
+        private T[] items;
+        private int size;
         public static readonly T[] Empty = new T[0];
         public FastList()
         {
@@ -34,12 +34,12 @@ namespace SharpGame
                 int count = is2.Count;
                 Items = new T[count];
                 is2.CopyTo(Items, 0);
-                size_ = count;
+                size = count;
             }
             else
             {
-                size_ = 0;
-                Items = new T[defaultCapacity_];
+                size = 0;
+                Items = new T[defaultCapacity];
                 using (IEnumerator<T> enumerator = collection.GetEnumerator())
                 {
                     while (enumerator.MoveNext())
@@ -65,9 +65,9 @@ namespace SharpGame
                     if (value > 0)
                     {
                         var destinationArray = new T[value];
-                        if (size_ > 0)
+                        if (size > 0)
                         {
-                            Array.Copy(Items, 0, destinationArray, 0, size_);
+                            Array.Copy(Items, 0, destinationArray, 0, size);
                         }
                         Items = destinationArray;
                     }
@@ -83,17 +83,17 @@ namespace SharpGame
 
         public void Add(T item)
         {
-            if (size_ == Items.Length)
+            if (size == Items.Length)
             {
-                EnsureCapacity(size_ + 1);
+                EnsureCapacity(size + 1);
             }
-            Items[size_++] = item;
+            Items[size++] = item;
         }
 
         public void IncreaseCapacity(int index)
         {
-            EnsureCapacity(size_ + index);
-            size_ += index;
+            EnsureCapacity(size + index);
+            size += index;
         }
 
         public void Clear()
@@ -105,7 +105,7 @@ namespace SharpGame
         {
             if (item == null)
             {
-                for (int j = 0; j < size_; j++)
+                for (int j = 0; j < size; j++)
                 {
                     if (Items[j] == null)
                     {
@@ -115,7 +115,7 @@ namespace SharpGame
                 return false;
             }
             EqualityComparer<T> comparer = EqualityComparer<T>.Default;
-            for (int i = 0; i < size_; i++)
+            for (int i = 0; i < size; i++)
             {
                 if (comparer.Equals(Items[i], item))
                 {
@@ -127,26 +127,26 @@ namespace SharpGame
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            Array.Copy(Items, 0, array, arrayIndex, size_);
+            Array.Copy(Items, 0, array, arrayIndex, size);
         }
 
         public int IndexOf(T item)
         {
-            return Array.IndexOf(Items, item, 0, size_);
+            return Array.IndexOf(Items, item, 0, size);
         }
 
         public void Insert(int index, T item)
         {
-            if (size_ == Items.Length)
+            if (size == Items.Length)
             {
-                EnsureCapacity(size_ + 1);
+                EnsureCapacity(size + 1);
             }
-            if (index < size_)
+            if (index < size)
             {
-                Array.Copy(Items, index, Items, index + 1, size_ - index);
+                Array.Copy(Items, index, Items, index + 1, size - index);
             }
             Items[index] = item;
-            size_++;
+            size++;
         }
 
         public bool Remove(T item)
@@ -173,25 +173,25 @@ namespace SharpGame
 
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= size_) throw new ArgumentOutOfRangeException(nameof(index));
-            size_--;
-            if (index < size_)
+            if (index < 0 || index >= size) throw new ArgumentOutOfRangeException(nameof(index));
+            size--;
+            if (index < size)
             {
-                Array.Copy(Items, index + 1, Items, index, size_ - index);
+                Array.Copy(Items, index + 1, Items, index, size - index);
             }
-            Items[size_] = default(T);
+            Items[size] = default(T);
         }
 
         public void FastRemove(int index)
         {
-            if(index < 0 || index >= size_) throw new ArgumentOutOfRangeException(nameof(index));
-            size_--;
+            if(index < 0 || index >= size) throw new ArgumentOutOfRangeException(nameof(index));
+            size--;
             
-            if(index < size_)
+            if(index < size)
             {
-                Items[index] = Items[size_];
+                Items[index] = Items[size];
             }
-            Items[size_] = default(T);
+            Items[size] = default(T);
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
@@ -206,19 +206,19 @@ namespace SharpGame
 
         public int Count
         {
-            get { return size_; }
+            get { return size; }
         }
 
         public T this[int index]
         {
             get
             {
-                if (index < 0 || index >= size_) throw new ArgumentOutOfRangeException(nameof(index));
+                if (index < 0 || index >= size) throw new ArgumentOutOfRangeException(nameof(index));
                 return Items[index];
             }
             set
             {
-                if (index < 0 || index >= size_) throw new ArgumentOutOfRangeException(nameof(index));
+                if (index < 0 || index >= size) throw new ArgumentOutOfRangeException(nameof(index));
                 Items[index] = value;
             }
         }
@@ -232,7 +232,7 @@ namespace SharpGame
 
         public ref T At(int index)
         {
-            return ref items_[index];
+            return ref items[index];
         }
 
         /// <summary>
@@ -241,16 +241,16 @@ namespace SharpGame
         /// <param name="fastClear">if set to <c>true</c> this method only resets the count elements but doesn't clear items referenced already stored in the list.</param>
         public void Clear(bool fastClear)
         {
-            if (!fastClear && size_ > 0)
+            if (!fastClear && size > 0)
             {
-                Array.Clear(Items, 0, size_);
+                Array.Clear(Items, 0, size);
             }
-            size_ = 0;
+            size = 0;
         }
 
         public void AddRange(IEnumerable<T> collection)
         {
-            InsertRange(size_, collection);
+            InsertRange(size, collection);
         }
 
         public ReadOnlyCollection<T> AsReadOnly()
@@ -287,7 +287,7 @@ namespace SharpGame
         {
             if (Items.Length < min)
             {
-                int num = (Items.Length == 0) ? defaultCapacity_ : (Items.Length*2);
+                int num = (Items.Length == 0) ? defaultCapacity : (Items.Length*2);
                 if (num < min)
                 {
                     num = min;
@@ -303,7 +303,7 @@ namespace SharpGame
 
         public T Find(Predicate<T> match)
         {
-            for (int i = 0; i < size_; i++)
+            for (int i = 0; i < size; i++)
             {
                 if (match(Items[i]))
                 {
@@ -316,7 +316,7 @@ namespace SharpGame
         public FastList<T> FindAll(Predicate<T> match)
         {
             var list = new FastList<T>();
-            for (int i = 0; i < size_; i++)
+            for (int i = 0; i < size; i++)
             {
                 if (match(Items[i]))
                 {
@@ -328,12 +328,12 @@ namespace SharpGame
 
         public int FindIndex(Predicate<T> match)
         {
-            return FindIndex(0, size_, match);
+            return FindIndex(0, size, match);
         }
 
         public int FindIndex(int startIndex, Predicate<T> match)
         {
-            return FindIndex(startIndex, size_ - startIndex, match);
+            return FindIndex(startIndex, size - startIndex, match);
         }
 
         public int FindIndex(int startIndex, int count, Predicate<T> match)
@@ -351,7 +351,7 @@ namespace SharpGame
 
         public T FindLast(Predicate<T> match)
         {
-            for (int i = size_ - 1; i >= 0; i--)
+            for (int i = size - 1; i >= 0; i--)
             {
                 if (match(Items[i]))
                 {
@@ -363,7 +363,7 @@ namespace SharpGame
 
         public int FindLastIndex(Predicate<T> match)
         {
-            return FindLastIndex(size_ - 1, size_, match);
+            return FindLastIndex(size - 1, size, match);
         }
 
         public int FindLastIndex(int startIndex, Predicate<T> match)
@@ -386,7 +386,7 @@ namespace SharpGame
 
         public void ForEach(Action<T> action)
         {
-            for (int i = 0; i < size_; i++)
+            for (int i = 0; i < size; i++)
             {
                 action(Items[i]);
             }
@@ -401,13 +401,13 @@ namespace SharpGame
         {
             var list = new FastList<T>(count);
             Array.Copy(Items, index, list.Items, 0, count);
-            list.size_ = count;
+            list.size = count;
             return list;
         }
 
         public int IndexOf(T item, int index)
         {
-            return Array.IndexOf(Items, item, index, size_ - index);
+            return Array.IndexOf(Items, item, index, size - index);
         }
 
         public int IndexOf(T item, int index, int count)
@@ -423,21 +423,21 @@ namespace SharpGame
                 int count = is2.Count;
                 if (count > 0)
                 {
-                    EnsureCapacity(size_ + count);
-                    if (index < size_)
+                    EnsureCapacity(size + count);
+                    if (index < size)
                     {
-                        Array.Copy(Items, index, Items, index + count, size_ - index);
+                        Array.Copy(Items, index, Items, index + count, size - index);
                     }
                     if (this == is2)
                     {
                         Array.Copy(Items, 0, Items, index, index);
-                        Array.Copy(Items, (index + count), Items, (index*2), (size_ - index));
+                        Array.Copy(Items, (index + count), Items, (index*2), (size - index));
                     }
                     else
                     {
                         is2.CopyTo(Items, index);
                     }
-                    size_ += count;
+                    size += count;
                 }
             }
             else
@@ -459,11 +459,11 @@ namespace SharpGame
 
         public int LastIndexOf(T item)
         {
-            if (size_ == 0)
+            if (size == 0)
             {
                 return -1;
             }
-            return LastIndexOf(item, size_ - 1, size_);
+            return LastIndexOf(item, size - 1, size);
         }
 
         public int LastIndexOf(T item, int index)
@@ -473,7 +473,7 @@ namespace SharpGame
 
         public int LastIndexOf(T item, int index, int count)
         {
-            if (size_ == 0)
+            if (size == 0)
             {
                 return -1;
             }
@@ -483,29 +483,29 @@ namespace SharpGame
         public int RemoveAll(Predicate<T> match)
         {
             int index = 0;
-            while ((index < size_) && !match(Items[index]))
+            while ((index < size) && !match(Items[index]))
             {
                 index++;
             }
-            if (index >= size_)
+            if (index >= size)
             {
                 return 0;
             }
             int num2 = index + 1;
-            while (num2 < size_)
+            while (num2 < size)
             {
-                while ((num2 < size_) && match(Items[num2]))
+                while ((num2 < size) && match(Items[num2]))
                 {
                     num2++;
                 }
-                if (num2 < size_)
+                if (num2 < size)
                 {
                     Items[index++] = Items[num2++];
                 }
             }
-            Array.Clear(Items, index, size_ - index);
-            int num3 = size_ - index;
-            size_ = index;
+            Array.Clear(Items, index, size - index);
+            int num3 = size - index;
+            size = index;
             return num3;
         }
 
@@ -513,12 +513,12 @@ namespace SharpGame
         {
             if (count > 0)
             {
-                size_ -= count;
-                if (index < size_)
+                size -= count;
+                if (index < size)
                 {
-                    Array.Copy(Items, index + count, Items, index, size_ - index);
+                    Array.Copy(Items, index + count, Items, index, size - index);
                 }
-                Array.Clear(Items, size_, count);
+                Array.Clear(Items, size, count);
             }
         }
 
@@ -558,10 +558,10 @@ namespace SharpGame
 
         public void Sort(Comparison<T> comparison)
         {
-            if (this.size_ > 0)
+            if (this.size > 0)
             {
                 IComparer<T> comparer = new FunctorComparer<T>(comparison);
-                Array.Sort<T>(this.Items, 0, this.size_, comparer);
+                Array.Sort<T>(this.Items, 0, this.size, comparer);
             }
         }
 
@@ -572,23 +572,23 @@ namespace SharpGame
 
         public T[] ToArray()
         {
-            var destinationArray = new T[size_];
-            Array.Copy(Items, 0, destinationArray, 0, size_);
+            var destinationArray = new T[size];
+            Array.Copy(Items, 0, destinationArray, 0, size);
             return destinationArray;
         }
 
         public void TrimExcess()
         {
             var num = (int) (Items.Length*0.9);
-            if (size_ < num)
+            if (size < num)
             {
-                Capacity = size_;
+                Capacity = size;
             }
         }
 
         public bool TrueForAll(Predicate<T> match)
         {
-            for (int i = 0; i < size_; i++)
+            for (int i = 0; i < size; i++)
             {
                 if (!match(Items[i]))
                 {
@@ -625,7 +625,7 @@ namespace SharpGame
             public bool MoveNext()
             {
                 FastList<T> list = this.list;
-                if (index < list.size_)
+                if (index < list.size)
                 {
                     current = list.Items[index];
                     index++;
@@ -636,7 +636,7 @@ namespace SharpGame
 
             private bool MoveNextRare()
             {
-                index = list.size_ + 1;
+                index = list.size + 1;
                 current = default(T);
                 return false;
             }

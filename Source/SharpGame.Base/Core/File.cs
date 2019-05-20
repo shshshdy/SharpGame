@@ -8,17 +8,17 @@ namespace SharpGame
 {
     public class File : Object
     {
-        protected Stream stream_;
-        public Stream Stream => stream_;
+        protected Stream stream;
+        public Stream Stream => stream;
 
         public StringID Name { get; set; }
 
         public bool IsEof
         {
-            get { return stream_.Position >= stream_.Length; }
+            get { return stream.Position >= stream.Length; }
         }
 
-        public int Length => (int)stream_.Length;
+        public int Length => (int)stream.Length;
 
         // Helper buffer for classes needing it.
         // If null, it should be initialized with NativeStreamBufferSize constant.
@@ -27,7 +27,7 @@ namespace SharpGame
         
         public File(Stream stream, int bufferSize = 1024)
         {
-            stream_ = stream;
+            this.stream = stream;
             nativeStreamBuffer = new byte[bufferSize];
         }
 
@@ -35,33 +35,33 @@ namespace SharpGame
         {
             base.Destroy();
 
-            stream_?.Dispose();
+            stream?.Dispose();
         }
 
         public int Seek(int offset)
         {
-            return (int)stream_.Seek(offset, SeekOrigin.Begin);
+            return (int)stream.Seek(offset, SeekOrigin.Begin);
         }
 
         public void Skip(int bytes)
         {
-            stream_.Seek(bytes, SeekOrigin.Current);
+            stream.Seek(bytes, SeekOrigin.Current);
         }
 
         public byte[] ReadAllBytes()
         {
-            return ReadArray<byte>((int)stream_.Length);
+            return ReadArray<byte>((int)stream.Length);
         }
 
         public String ReadAllText()
         {
-            return Encoding.Default.GetString(ReadArray<byte>((int)stream_.Length));
+            return Encoding.Default.GetString(ReadArray<byte>((int)stream.Length));
         }
 
         public unsafe T Read<T>() where T : struct
         {
             int sizeOfT = Unsafe.SizeOf<T>();
-            int currentReadSize = stream_.Read(nativeStreamBuffer, 0, sizeOfT);
+            int currentReadSize = stream.Read(nativeStreamBuffer, 0, sizeOfT);
             if(currentReadSize != sizeOfT)
                 throw new InvalidOperationException("Reached end of stream.");
 
@@ -76,7 +76,7 @@ namespace SharpGame
             int count = 0;
             while(!IsEof)
             {
-                int c = stream_.ReadByte();// nativeStreamBuffer, count, 1);
+                int c = stream.ReadByte();// nativeStreamBuffer, count, 1);
                 if(c == 0)
                     break;
                 nativeStreamBuffer[count++] = (byte)c;
@@ -128,7 +128,7 @@ namespace SharpGame
                 if (blockSize > NativeStreamBufferSize)
                     blockSize = NativeStreamBufferSize;
 
-                int currentReadSize = stream_.Read(nativeStreamBuffer, 0, blockSize);
+                int currentReadSize = stream.Read(nativeStreamBuffer, 0, blockSize);
                 readSize += currentReadSize;
                 Utilities.Write(buffer, nativeStreamBuffer, 0, currentReadSize);
 
@@ -145,7 +145,7 @@ namespace SharpGame
             fixed (byte* temporaryBufferStart = nativeStreamBuffer)
                 Utilities.Write((IntPtr)temporaryBufferStart, ref v);
 
-            stream_.Write(nativeStreamBuffer, 0, Unsafe.SizeOf<T>());
+            stream.Write(nativeStreamBuffer, 0, Unsafe.SizeOf<T>());
         }
 
         public unsafe void WriteArray<T>(T[] val) where T : struct
@@ -172,7 +172,7 @@ namespace SharpGame
                 fixed (byte* temporaryBufferStart = nativeStreamBuffer)
                     Utilities.CopyMemory((IntPtr)temporaryBufferStart, buffer, blockSize);
 
-                stream_.Write(nativeStreamBuffer, 0, blockSize);
+                stream.Write(nativeStreamBuffer, 0, blockSize);
             }
         }
     }

@@ -6,19 +6,19 @@ namespace SharpGame
 {
     public class Observable : DisposeBase, IObserver
     {
-        protected Dictionary<Type, List<IEventHandler>> eventHandlers_;
+        protected Dictionary<Type, List<IEventHandler>> eventHandlers;
 
         internal void SubscribeEvent(IEventHandler handler)
         {
-            if(eventHandlers_ == null)
+            if(eventHandlers == null)
             {
-                eventHandlers_ = new Dictionary<Type, List<IEventHandler>>();
+                eventHandlers = new Dictionary<Type, List<IEventHandler>>();
             }
 
-            if (!eventHandlers_.TryGetValue(handler.Type, out List<IEventHandler> handlers))
+            if (!eventHandlers.TryGetValue(handler.Type, out List<IEventHandler> handlers))
             {
                 handlers = new List<IEventHandler>();
-                eventHandlers_[handler.Type] = handlers;
+                eventHandlers[handler.Type] = handlers;
             }
 
             handlers.Add(handler);
@@ -26,12 +26,12 @@ namespace SharpGame
 
         internal void UnsubscribeEvent(IEventHandler handler)
         {
-            if(eventHandlers_ == null)
+            if(eventHandlers == null)
             {
                 return;
             }
 
-            if (eventHandlers_.TryGetValue(handler.Type, out List<IEventHandler> handlers))
+            if (eventHandlers.TryGetValue(handler.Type, out List<IEventHandler> handlers))
             {
                 handlers.Remove(handler);
             }
@@ -40,12 +40,12 @@ namespace SharpGame
         
         public void SendEvent<T>(ref T e)
         {
-            if(eventHandlers_ == null)
+            if(eventHandlers == null)
             {
                 return;
             }
 
-            if (eventHandlers_.TryGetValue(typeof(T), out List<IEventHandler> handlers))
+            if (eventHandlers.TryGetValue(typeof(T), out List<IEventHandler> handlers))
             {
                 foreach (var handler in handlers)
                 {
@@ -56,12 +56,12 @@ namespace SharpGame
 
         public void SendEvent<T>(T e)
         {
-            if(eventHandlers_ == null)
+            if(eventHandlers == null)
             {
                 return;
             }
 
-            if (eventHandlers_.TryGetValue(typeof(T), out List<IEventHandler> handlers))
+            if (eventHandlers.TryGetValue(typeof(T), out List<IEventHandler> handlers))
             {
                 foreach (var handler in handlers)
                 {

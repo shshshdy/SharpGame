@@ -29,9 +29,9 @@ namespace SharpGame
     public struct FrameInfo
     {
         /// Frame number.
-        public int frameNumber_;
+        public int frameNumber;
         /// Time elapsed since last frame.
-        public float timeStep_;
+        public float timeStep;
         /// Viewport size.
         public Int2 viewSize_;
         /// Camera being used.
@@ -223,7 +223,7 @@ namespace SharpGame
 
         public virtual void Update(ref FrameInfo frameInfo)
         {
-            viewFrameNumber_ = frameInfo.frameNumber_;
+            viewFrameNumber_ = frameInfo.frameNumber;
         }
 
         public virtual void UpdateBatches(ref FrameInfo frame)
