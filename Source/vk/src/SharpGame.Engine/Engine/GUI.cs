@@ -9,11 +9,6 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public struct UboVS
-    {
-        public Matrix4x4 projection;
-    }
-
     public struct GUIEvent
     {
     }
@@ -24,7 +19,6 @@ namespace SharpGame
         GraphicsBuffer indexBuffer = new GraphicsBuffer();
         GraphicsBuffer uniformBufferVS = new GraphicsBuffer();
         Texture texture;
-        UboVS uboVS;
         Shader uiShader;
         Pipeline pipeline;
         ResourceLayout resourceLayout;
@@ -75,7 +69,7 @@ namespace SharpGame
         {
             vertexBuffer = GraphicsBuffer.CreateDynamic<Pos2dTexColorVertex>(BufferUsage.VertexBuffer, 4096);
             indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, 4096);
-            uniformBufferVS = GraphicsBuffer.CreateUniformBuffer<UboVS>();
+            uniformBufferVS = GraphicsBuffer.CreateUniformBuffer<Matrix4x4>();
 
             resourceLayout = new ResourceLayout
             {
@@ -306,8 +300,8 @@ namespace SharpGame
                 indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
             }
 
-            uboVS.projection = Matrix4x4.CreateOrthographicOffCenter(0f, width, height, 0.0f, -1.0f, 1.0f);
-            uniformBufferVS.SetData(ref uboVS);
+            var projection = Matrix4x4.CreateOrthographicOffCenter(0f, width, height, 0.0f, -1.0f, 1.0f);
+            uniformBufferVS.SetData(ref projection);
 
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
