@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharpGame", "SharpGame", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGame.Base", "SharpGame.Base\SharpGame.Base.csproj", "{53F81809-1833-44BE-9F0A-2738E1AC0638}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGame.Sdl2", "Sdl2\SharpGame.Sdl2.csproj", "{642A3C3D-4C2A-46C6-AD7F-4EEF755BA5E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGame.Sdl2", "SharpGame.Sdl2\SharpGame.Sdl2.csproj", "{642A3C3D-4C2A-46C6-AD7F-4EEF755BA5E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

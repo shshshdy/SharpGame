@@ -12,7 +12,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\Sdl2\native\win-x64\SDL2.dll" Link="SDL2.dll">
+    <None Include="..\SharpGame.Sdl2\native\win-x64\SDL2.dll" Link="SDL2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -21,7 +21,7 @@
     <PackageReference Include="Vk" Version="1.0.21" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sdl2\SharpGame.Sdl2.csproj" />
+    <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />
     <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
     <ProjectReference Include="..\SharpGame.Engine\SharpGame.Engine.csproj" />
   </ItemGroup>
