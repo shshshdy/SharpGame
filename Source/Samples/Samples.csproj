@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Build;Publish">
+  <PropertyGroup>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' And '$(OS)' == 'Windows_NT'">win7-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' And '$(OS)' == 'Unix'">ubuntu.16.04-x64</RuntimeIdentifier>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Samples</AssemblyName>
+    <RootNamespace>SharpGame.Samples</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\Sdl2\native\win-x64\SDL2.dll" Link="SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ImGui.NET" Version="1.70.0" />
+    <PackageReference Include="Vk" Version="1.0.21" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sdl2\SharpGame.Sdl2.csproj" />
+    <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
+    <ProjectReference Include="..\SharpGame.Engine\SharpGame.Engine.csproj" />
+  </ItemGroup>
+</Project>

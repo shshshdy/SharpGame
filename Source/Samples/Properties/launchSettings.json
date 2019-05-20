@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Samples": {
+      "commandName": "Project",
+      "workingDirectory": "../../bin"
+    }
+  }
+}
