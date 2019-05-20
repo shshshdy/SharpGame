@@ -5,10 +5,8 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class RenderTarget : DisposeBase
+    public class RenderTarget : Texture
     {
-        public VkImage image;
-        public VkDeviceMemory mem;
-        public VkImageView view;
+
     }
 }

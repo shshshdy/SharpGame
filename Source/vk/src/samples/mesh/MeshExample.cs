@@ -144,16 +144,16 @@ namespace SharpGame
 
             if (Device.Features.textureCompressionBC == 1)
             {
-                colorMap.loadFromFile(DataPath + "models/voyager/voyager_bc3_unorm.ktx",
+                colorMap.LoadFromFile(DataPath + "models/voyager/voyager_bc3_unorm.ktx",
                     VkFormat.Bc3UnormBlock, Graphics.queue);
             }
             else if (Device.Features.textureCompressionASTC_LDR == 1)
             {
-                colorMap.loadFromFile(DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, Graphics.queue);
+                colorMap.LoadFromFile(DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, Graphics.queue);
             }
             else if (Device.Features.textureCompressionETC2 == 1)
             {
-                colorMap.loadFromFile(DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, Graphics.queue);
+                colorMap.LoadFromFile(DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, Graphics.queue);
             }
             else
             {
@@ -311,9 +311,42 @@ namespace SharpGame
               
         }
 
+        static int corner = 3;
+        bool p_open;
         void Handle(GUIEvent e)
         {
-            ImGui.ShowDemoWindow();
+            const float DISTANCE = 10.0f;
+          
+            var io = ImGui.GetIO();
+            if (corner != -1)
+            {
+                System.Numerics.Vector2 window_pos = new System.Numerics.Vector2(((corner & 1) != 0) ? io.DisplaySize.X - DISTANCE
+                    : DISTANCE, (corner & 2) != 0 ? io.DisplaySize.Y - DISTANCE : DISTANCE);
+                System.Numerics.Vector2 window_pos_pivot = new System.Numerics.Vector2((corner & 1) != 0 ? 1.0f : 0.0f, (corner & 2) != 0 ? 1.0f : 0.0f);
+                ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+            }
+
+            ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+            if (ImGui.Begin("Example: Simple overlay", ref p_open, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            {
+                ImGui.Text("Simple overlay\nin the corner of the screen.\n(right-click to change position)");
+                ImGui.Separator();
+                if (ImGui.IsMousePosValid())
+                    ImGui.Text(string.Format("Mouse Position: ({0:#.#},{1:#.#})", io.MousePos.X, io.MousePos.Y));
+                else
+                    ImGui.Text("Mouse Position: <invalid>");
+                if (ImGui.BeginPopupContextWindow())
+                {
+                    if (ImGui.MenuItem("Custom", "", corner == -1)) corner = -1;
+                    if (ImGui.MenuItem("Top-left", "", corner == 0)) corner = 0;
+                    if (ImGui.MenuItem("Top-right", "", corner == 1)) corner = 1;
+                    if (ImGui.MenuItem("Bottom-left", "", corner == 2)) corner = 2;
+                    if (ImGui.MenuItem("Bottom-right", "", corner == 3)) corner = 3;
+                    if (p_open && ImGui.MenuItem("Close")) p_open = false;
+                    ImGui.EndPopup();
+                }
+            }
+            ImGui.End();
         }
 
         protected override void KeyPressed(Key keyCode)

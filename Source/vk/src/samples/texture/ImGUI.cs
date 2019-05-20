@@ -31,7 +31,6 @@ namespace SharpGame
                 {
                     new Camera
                     {
-
                     }
                 },
 
@@ -39,22 +38,13 @@ namespace SharpGame
                 {
                     new Node
                     {
-
                     }
                 }
             };
 
 
-
-
-
-
-
-
-
             this.SubscribeToEvent<GUIEvent>(Handle);
 
-            prepared = true;
         }
 
 

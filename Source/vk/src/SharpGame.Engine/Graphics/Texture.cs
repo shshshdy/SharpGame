@@ -19,13 +19,8 @@ namespace SharpGame
         public VkImageLayout imageLayout;
         public VkDescriptorImageInfo descriptor;
 
-
-        /** @brief Update image descriptor from current sampler, view and image layout */
-        internal void updateDescriptor()
+        public Texture()
         {
-            descriptor.sampler = sampler;
-            descriptor.imageView = view;
-            descriptor.imageLayout = imageLayout;
         }
 
         protected override void Destroy()
@@ -37,6 +32,13 @@ namespace SharpGame
             vkFreeMemory(Graphics.device, deviceMemory, IntPtr.Zero);
 
             base.Destroy();
+        }
+
+        internal void updateDescriptor()
+        {
+            descriptor.sampler = sampler;
+            descriptor.imageView = view;
+            descriptor.imageLayout = imageLayout;
         }
 
     }
@@ -157,7 +159,7 @@ namespace SharpGame
 
                 // Optimal image will be used as destination for the copy, so we must transfer from our
                 // initial undefined image layout to the transfer destination layout
-                setImageLayout(
+                Tools.setImageLayout(
                     copyCmd,
                     texture.image,
                      VkImageAspectFlags.Color,
@@ -176,7 +178,7 @@ namespace SharpGame
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 texture.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
-                setImageLayout(
+                Tools.setImageLayout(
                     copyCmd,
                     texture.image,
                     VkImageAspectFlags.Color,
@@ -244,82 +246,8 @@ namespace SharpGame
             return texture;
         }
 
-        // Create an image memory barrier for changing the layout of
-        // an image and put it into an active command buffer
-        static void setImageLayout(
-            VkCommandBuffer cmdBuffer,
-            VkImage image,
-            VkImageAspectFlags aspectMask,
-            VkImageLayout oldImageLayout,
-            VkImageLayout newImageLayout,
-            VkImageSubresourceRange subresourceRange)
-        {
-            // Create an image barrier object
-            VkImageMemoryBarrier imageMemoryBarrier = Builder.ImageMemoryBarrier(); ;
-            imageMemoryBarrier.oldLayout = oldImageLayout;
-            imageMemoryBarrier.newLayout = newImageLayout;
-            imageMemoryBarrier.image = image;
-            imageMemoryBarrier.subresourceRange = subresourceRange;
 
-            // Only sets masks for layouts used in this example
-            // For a more complete version that can be used with other layouts see vks::tools::setImageLayout
-
-            // Source layouts (old)
-            switch (oldImageLayout)
-            {
-                case VkImageLayout.Undefined:
-                    // Only valid as initial layout, memory contents are not preserved
-                    // Can be accessed directly, no source dependency required
-                    imageMemoryBarrier.srcAccessMask = 0;
-                    break;
-                case VkImageLayout.Preinitialized:
-                    // Only valid as initial layout for linear images, preserves memory contents
-                    // Make sure host writes to the image have been finished
-                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.HostWrite;
-                    break;
-                case VkImageLayout.TransferDstOptimal:
-                    // Old layout is transfer destination
-                    // Make sure any writes to the image have been finished
-                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.TransferWrite;
-                    break;
-            }
-
-            // Target layouts (new)
-            switch (newImageLayout)
-            {
-                case VkImageLayout.TransferSrcOptimal:
-                    // Transfer source (copy, blit)
-                    // Make sure any reads from the image have been finished
-                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferRead;
-                    break;
-                case VkImageLayout.TransferDstOptimal:
-                    // Transfer destination (copy, blit)
-                    // Make sure any writes to the image have been finished
-                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferWrite;
-                    break;
-                case VkImageLayout.ShaderReadOnlyOptimal:
-                    // Shader read (sampler, input attachment)
-                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.ShaderRead;
-                    break;
-            }
-
-            // Put barrier on top of pipeline
-            VkPipelineStageFlags srcStageFlags = VkPipelineStageFlags.TopOfPipe;
-            VkPipelineStageFlags destStageFlags = VkPipelineStageFlags.TopOfPipe;
-
-            // Put barrier inside setup command buffer
-            vkCmdPipelineBarrier(
-                cmdBuffer,
-                srcStageFlags,
-                destStageFlags,
-                VkDependencyFlags.None,
-                0, null,
-                0, null,
-                1, &imageMemoryBarrier);
-        }
-
-
-        public void loadFromFile(
+        public void LoadFromFile(
             string filename,
             VkFormat format,
             VkQueue copyQueue,
@@ -335,7 +263,10 @@ namespace SharpGame
 
             width = tex2D.Header.PixelWidth;
             height = tex2D.Header.PixelHeight;
-            if (height == 0) height = width;
+
+            if (height == 0)
+                height = width;
+
             mipLevels = tex2D.Header.NumberOfMipmapLevels;
 
             // Get device properites for the requested texture format
@@ -422,11 +353,13 @@ namespace SharpGame
                 imageCreateInfo.initialLayout = VkImageLayout.Undefined;
                 imageCreateInfo.extent = new VkExtent3D { width = width, height = height, depth = 1 };
                 imageCreateInfo.usage = imageUsageFlags;
+
                 // Ensure that the TRANSFER_DST bit is set for staging
                 if ((imageCreateInfo.usage & VkImageUsageFlags.TransferDst) == 0)
                 {
                     imageCreateInfo.usage |= VkImageUsageFlags.TransferDst;
                 }
+
                 Util.CheckResult(vkCreateImage(Device.LogicalDevice, &imageCreateInfo, null, out image));
 
                 vkGetImageMemoryRequirements(Device.LogicalDevice, image, &memReqs);
