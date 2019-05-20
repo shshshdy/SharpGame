@@ -56,7 +56,7 @@ namespace SharpGame
         public VkSharingMode sharingMode;
         //public uint queueFamilyIndexCount;
         //public uint* pQueueFamilyIndices;
-        public VkImageLayout initialLayout;
+        public ImageLayout initialLayout;
 
     }
 

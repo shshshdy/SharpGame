@@ -6,6 +6,7 @@ using Vulkan;
 using Veldrid.Sdl2;
 using static Vulkan.VulkanNative;
 using Veldrid;
+using ImGuiNET;
 
 namespace SharpGame
 {
@@ -71,6 +72,7 @@ namespace SharpGame
 
             this.SubscribeToEvent<BeginRender>(Handle);
 
+            this.SubscribeToEvent<GUIEvent>(Handle);
             prepared = true;
         }
 
@@ -278,6 +280,9 @@ namespace SharpGame
         {
             UpdateUniformBuffers();
 
+            var graphics = Graphics.Instance;
+            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
+
             FixedArray2<VkClearValue> clearValues = new FixedArray2<VkClearValue>();
             clearValues.First.color = defaultClearColor;
             clearValues.Second.depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 };
@@ -291,25 +296,24 @@ namespace SharpGame
             renderPassBeginInfo.clearValueCount = 2;
             renderPassBeginInfo.pClearValues = &clearValues.First;
 
-            var graphics = Graphics.Instance;
-            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
+            // Set target frame buffer
+            renderPassBeginInfo.framebuffer = Graphics.FrameBuffers[graphics.currentBuffer];
 
-            {
-                // Set target frame buffer
-                renderPassBeginInfo.framebuffer = Graphics.FrameBuffers[graphics.currentBuffer];
+            cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
 
-                //cmdBuffer.Begin();
-                cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
+            cmdBuffer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
+            cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
 
-                cmdBuffer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
-                cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
+            var pipe = wireframe ? pipelineWireframe : pipelineSolid;
+            cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);
 
-                var pipe = wireframe ? pipelineWireframe : pipelineSolid;
-                cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);
+            cmdBuffer.EndRenderPass();
+              
+        }
 
-                cmdBuffer.EndRenderPass();
-               // cmdBuffer.End();
-            }
+        void Handle(GUIEvent e)
+        {
+            ImGui.ShowDemoWindow();
         }
 
         protected override void KeyPressed(Key keyCode)

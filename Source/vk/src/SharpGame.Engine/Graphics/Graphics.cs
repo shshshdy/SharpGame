@@ -44,10 +44,11 @@ namespace SharpGame
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
-        private CommandBufferPool primaryCmdBufferPool;
-        private CommandBufferPool[] secondaryCmdBufferPool;
+        private CommandBufferPool primaryCommandPool;
+        private CommandBufferPool[] secondaryCommandPool;
 
-        public CommandBuffer RenderCmdBuffer => primaryCmdBufferPool.CommandBuffers[currentBuffer];
+        public CommandBuffer RenderCmdBuffer => primaryCommandPool.CommandBuffers[currentBuffer];
+        public CommandBuffer WorkCmdBuffer => secondaryCommandPool[0].CommandBuffers[currentBuffer];
 
         private static VkRenderPass renderPass;
         public static VkRenderPass RenderPass => renderPass;
@@ -63,7 +64,7 @@ namespace SharpGame
 
         public Graphics()
         {
-            Settings.Validation = true;
+            Settings.Validation = false;
 
             VkInstance = Device.CreateInstance(Settings);
             device = Device.Init(enabledFeatures, EnabledExtensions);
@@ -278,13 +279,23 @@ namespace SharpGame
 
         private void CreateCommandPool()
         {
-            primaryCmdBufferPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
+            primaryCommandPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
+            secondaryCommandPool = new CommandBufferPool[2]
+            {
+                new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer),
+                new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer)
+            };
+            
         }
 
         protected void CreateCommandBuffers()
         {
-            primaryCmdBufferPool.Free();
-            primaryCmdBufferPool.Allocate(Swapchain.ImageCount);
+            primaryCommandPool.Allocate(CommandBufferLevel.Primary, Swapchain.ImageCount);
+
+            foreach (var cmdPool in secondaryCommandPool)
+            {
+                cmdPool.Allocate(CommandBufferLevel.Secondary, 8);
+            }
         }
 
         protected void CreateDepthStencil()
@@ -314,7 +325,7 @@ namespace SharpGame
         {
             // Command buffer to be sumitted to the queue
             submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdBufferPool.GetAddress(currentBuffer); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
+            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCommandPool.GetAddress(currentBuffer); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
 
             // Submit to queue
             Util.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));

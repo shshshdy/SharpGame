@@ -13,5 +13,7 @@ namespace SharpGame
     public class Framebuffer : DisposeBase
     {
         VkFramebuffer framebuffer;
+
+        public RenderPass renderPass;
     }
 }

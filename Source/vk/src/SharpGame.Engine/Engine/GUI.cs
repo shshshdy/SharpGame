@@ -250,22 +250,14 @@ namespace SharpGame
 
             ImGui.Render();
 
-
         }
 
         unsafe void Handle(EndRender e)
         {
-            VkClearValue[] clearValues =
-            {
-                new VkClearValue
-                {
-                    depthStencil = new VkClearDepthStencilValue() { depth = 1.0f, stencil = 0 }
-                }
-            };
-
             var graphics = Graphics.Instance;
             var width = Graphics.Width;
             var height = Graphics.Height;
+            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
 
             var renderPassBeginInfo = VkRenderPassBeginInfo.New();
             renderPassBeginInfo.renderPass = renderPass;
@@ -273,23 +265,20 @@ namespace SharpGame
             renderPassBeginInfo.renderArea.offset.y = 0;
             renderPassBeginInfo.renderArea.extent.width = (uint)width;
             renderPassBeginInfo.renderArea.extent.height = (uint)height;
-            renderPassBeginInfo.clearValueCount = 0;// (uint)clearValues.Length;
-            renderPassBeginInfo.pClearValues = null;// (VkClearValue*)Unsafe.AsPointer(ref clearValues[0]);
+            renderPassBeginInfo.clearValueCount = 0;
+            renderPassBeginInfo.pClearValues = null;
+            // Set target frame buffer
+            renderPassBeginInfo.framebuffer = Graphics.FrameBuffers[graphics.currentBuffer];
 
-            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
-            {
-                // Set target frame buffer
-                renderPassBeginInfo.framebuffer = Graphics.FrameBuffers[graphics.currentBuffer];
+            cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
 
-                cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
+            cmdBuffer.SetViewport(new Viewport(0, 0, width, height));
+            cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
 
-                cmdBuffer.SetViewport(new Viewport(0, 0, width, height));
-                cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
+            RenderImDrawData(ImGui.GetDrawData());
 
-                RenderImDrawData(ImGui.GetDrawData());
-
-                cmdBuffer.EndRenderPass();
-            }
+            cmdBuffer.EndRenderPass();
+            
         }
 
 

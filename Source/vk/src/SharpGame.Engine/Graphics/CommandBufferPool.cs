@@ -36,7 +36,7 @@ namespace SharpGame
             base.Destroy();
         }
 
-        public void Allocate(uint count)
+        public void Allocate(CommandBufferLevel commandBufferLevel, uint count)
         {
             if(cmdBuffers.Count > 0)
             {
@@ -48,7 +48,7 @@ namespace SharpGame
 
             var cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
             cmdBufAllocateInfo.commandPool = cmdPool;
-            cmdBufAllocateInfo.level = VkCommandBufferLevel.Primary;
+            cmdBufAllocateInfo.level = (VkCommandBufferLevel)commandBufferLevel;
             cmdBufAllocateInfo.commandBufferCount = count;
 
             unsafe
