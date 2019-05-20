@@ -87,7 +87,7 @@ namespace SharpGame
                 ComponentAdded(c);
             }
 
-            foreach (var c in node.ChildList)
+            foreach (var c in node.Children)
             {
                 NodeAdded(c);
             }
@@ -109,7 +109,7 @@ namespace SharpGame
                 ComponentRemoved(c);
             }
 
-            foreach (var c in node.ChildList)
+            foreach (var c in node.Children)
             {
                 NodeRemoved(c);
             }

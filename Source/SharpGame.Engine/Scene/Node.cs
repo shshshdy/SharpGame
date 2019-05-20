@@ -59,20 +59,8 @@ namespace SharpGame
         }
 
         [DataMember(Order = 12)]
-        public List<Node> ChildList => children_;
+        public List<Node> Children => children_;
         protected List<Node> children_ = new List<Node>();
-
-        [IgnoreDataMember]
-        public Node[] Children
-        {
-            set
-            {
-                foreach (var c in value)
-                {
-                    AddChild(c);
-                }
-            }
-        }
 
 
         #endregion
