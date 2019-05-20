@@ -198,13 +198,16 @@ namespace SharpGame
 
         }
 
+        float fps;
+        public float Fps => fps;
+
         private void CalculateFrameRateStats()
         {
             frameNumber++;
 
             if (timer.TotalTime - timeElapsed >= 1.0f)
             {
-                float fps = frameNumber;
+                fps = frameNumber;
                 float mspf = 1000.0f / fps;
                 NativeWindow.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
                

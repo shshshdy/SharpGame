@@ -1,20 +1,11 @@
-﻿using ImGuiNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using Vulkan;
-using static Vulkan.VulkanNative;
+using System.Text;
 
-namespace SharpGame
+namespace SharpGame.Samples
 {
-    public unsafe class ImGUI : Sample
+    public class StaticScene : Sample
     {
-        public ImGUI()
-        {
-        }
-
         public override void Init()
         {
             Node node = new Node
@@ -23,7 +14,7 @@ namespace SharpGame
 
                 Rotation = new Quaternion(),
 
-                Components = new []
+                Components = new[]
                 {
                     new Camera
                     {
@@ -40,12 +31,5 @@ namespace SharpGame
 
 
         }
-
-        public override void OnGUI()
-        {
-            ImGui.ShowDemoWindow();
-        }
-
-
     }
 }

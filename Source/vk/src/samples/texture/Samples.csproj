@@ -6,8 +6,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <OutputType>Exe</OutputType>
-    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>Vk.Samples</RootNamespace>
+    <AssemblyName>Samples</AssemblyName>
+    <RootNamespace>SharpGame.Samples</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>

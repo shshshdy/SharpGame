@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{2B0F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGame.Engine", "SharpGame.Engine\SharpGame.Engine.csproj", "{4DCC64BC-32D5-4B60-89F2-06D11B91FBE4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "texture", "samples\texture\texture.csproj", "{DB543F36-B4AF-491F-83B2-B07F43C0A64A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples", "samples\texture\Samples.csproj", "{DB543F36-B4AF-491F-83B2-B07F43C0A64A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mesh", "samples\mesh\mesh.csproj", "{57986356-88D2-497B-8D29-670CA6BD82CC}"
 EndProject
