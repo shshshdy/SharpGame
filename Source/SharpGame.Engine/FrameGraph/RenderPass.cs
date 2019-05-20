@@ -6,7 +6,21 @@ using System.Text;
 
 
 namespace SharpGame
-{   
+{
+    /*
+    public struct AttachmentDescription
+    {
+        public VkAttachmentDescriptionFlags flags;
+        public Format format;
+        public VkSampleCountFlags samples;
+        public VkAttachmentLoadOp loadOp;
+        public VkAttachmentStoreOp storeOp;
+        public VkAttachmentLoadOp stencilLoadOp;
+        public VkAttachmentStoreOp stencilStoreOp;
+        public ImageLayout initialLayout;
+        public ImageLayout finalLayout;
+    }*/
+
     public class RenderPass : Object
     {
         private StringID name_;
