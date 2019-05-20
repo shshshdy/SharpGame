@@ -3,9 +3,8 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Vulkan;
-using Veldrid.Sdl2;
 using static Vulkan.VulkanNative;
-using Veldrid;
+
 using ImGuiNET;
 
 namespace SharpGame
@@ -61,7 +60,7 @@ namespace SharpGame
             Title = "Vulkan Example - Model rendering";
         }
 
-        public override void Init()
+        protected override void Init()
         {
             base.Init();
 

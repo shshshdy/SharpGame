@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using Veldrid.Sdl2;
 using Vulkan;
 
 using static Vulkan.VulkanNative;

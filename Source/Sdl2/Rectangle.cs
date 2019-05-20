@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace SharpGame
-{/*
+{
     public struct Rectangle : IEquatable<Rectangle>
     {
         public int X;
@@ -51,5 +51,5 @@ namespace SharpGame
 
         public static bool operator ==(Rectangle left, Rectangle right) => left.Equals(right);
         public static bool operator !=(Rectangle left, Rectangle right) => !left.Equals(right);
-    }*/
+    }
 }

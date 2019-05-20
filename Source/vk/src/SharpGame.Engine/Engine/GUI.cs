@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Veldrid;
 using Vulkan;
 
 namespace SharpGame

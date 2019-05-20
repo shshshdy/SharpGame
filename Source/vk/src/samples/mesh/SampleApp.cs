@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SharpGame.Sdl2;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using Veldrid;
-using Veldrid.Sdl2;
+
 
 namespace SharpGame
 {

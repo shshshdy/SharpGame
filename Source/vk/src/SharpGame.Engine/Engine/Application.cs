@@ -7,8 +7,7 @@ using Vulkan;
 using static Vulkan.VulkanNative;
 using System.Numerics;
 using System.IO;
-using Veldrid;
-using Veldrid.Sdl2;
+using SharpGame.Sdl2;
 
 namespace SharpGame
 {
@@ -56,7 +55,7 @@ namespace SharpGame
           
         }
 
-        public virtual void Init()
+        protected virtual void Init()
         {
             context.CreateSubsystem<GUI>();
         }
@@ -76,8 +75,9 @@ namespace SharpGame
                 Visible = true
             };
 
-            Window = NativeWindow.Handle;
+            NativeWindow.Create();
 
+            Window = NativeWindow.Handle;
             NativeWindow.Resized += WindowResize;
         }
 

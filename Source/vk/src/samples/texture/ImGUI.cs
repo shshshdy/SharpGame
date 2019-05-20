@@ -4,20 +4,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using Veldrid;
-using Veldrid.Sdl2;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    public unsafe class ImGUI : SampleApp
+    public unsafe class ImGUI : Application
     {
         public ImGUI()
         {
         }
 
-        public override void Init()
+        protected override void Init()
         {
             base.Init();
 
@@ -55,6 +53,6 @@ namespace SharpGame
         }
 
 
-        public static void Main() => new ImGUI().Run();
+        public static void Main() => new SampleApplication().Run();
     }
 }

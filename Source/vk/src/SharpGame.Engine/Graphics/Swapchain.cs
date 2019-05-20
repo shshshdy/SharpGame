@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SharpGame.Sdl2;
+using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Vulkan;
-using Veldrid.Sdl2;
 using static Vulkan.VulkanNative;
-using static Veldrid.Sdl2.Sdl2Native;
+using static SharpGame.Sdl2.Sdl2Native;
 
 namespace SharpGame
 {

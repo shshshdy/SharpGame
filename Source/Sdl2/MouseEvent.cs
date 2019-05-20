@@ -1,6 +1,5 @@
 ﻿namespace SharpGame
 {
-    /*
     public struct MouseEvent
     {
         public MouseButton MouseButton { get; }
@@ -67,5 +66,5 @@
         // Summary:
         //     Indicates the last available mouse button.
         LastButton = 12
-    }*/
+    }
 }

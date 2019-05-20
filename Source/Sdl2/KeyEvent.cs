@@ -1,6 +1,5 @@
 ﻿namespace SharpGame
 {
-    /*
     public struct KeyEvent
     {
         public Key Key { get; }
@@ -607,5 +606,4 @@
         //     Indicates the last available keyboard key.
         LastKey = 131
     }
-    */
 }
