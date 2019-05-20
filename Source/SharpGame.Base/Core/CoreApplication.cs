@@ -5,12 +5,15 @@ using System.Text;
 
 namespace SharpGame
 {
-
-
-    public class Context : IDisposable
+    public class System<T> : Object
     {
-        Stack<Object> _subsystems = new Stack<Object>();
-        public Context()
+        public static T Instance => InstanceHoler<T>.inst;
+    }
+
+    public class CoreApplication : System<CoreApplication>
+    {
+        Stack<Object> subsystems = new Stack<Object>();
+        public CoreApplication()
         {
         }
 
@@ -29,7 +32,7 @@ namespace SharpGame
         public T RegisterSubsystem<T>(T sub) where T : Object
         {
             InstanceHoler<T>.inst = sub;
-            _subsystems.Push(sub);
+            subsystems.Push(sub);
             return InstanceHoler<T>.inst;
         }
 
@@ -38,10 +41,10 @@ namespace SharpGame
             return InstanceHoler<T>.inst;
         }
 
-        public void Dispose()
+        protected override void Destroy()
         {
-            while (_subsystems.Count > 0)
-                _subsystems.Pop().Dispose();
+            while (subsystems.Count > 0)
+                subsystems.Pop().Dispose();
         }
     }
 
@@ -50,8 +53,4 @@ namespace SharpGame
         internal static T inst;
     }
 
-    public class System<T> : Object
-    {
-        public static T Instance => InstanceHoler<T>.inst;
-    }
 }

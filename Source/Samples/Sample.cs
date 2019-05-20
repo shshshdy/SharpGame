@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ImGuiNET;
 using SharpGame;
 
-namespace SharpGame
+namespace SharpGame.Samples
 {
     public class SampleDescAttribute : System.Attribute
     {

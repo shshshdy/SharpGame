@@ -7,8 +7,9 @@ using System.Runtime.CompilerServices;
 using Vulkan;
 using static Vulkan.VulkanNative;
 
-namespace SharpGame
+namespace SharpGame.Samples
 {
+    [SampleDesc(sortOrder = 4)]
     public unsafe class ImGUI : Sample
     {
         public ImGUI()

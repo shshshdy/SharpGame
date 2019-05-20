@@ -5,6 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
+    using global::System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
     using static VulkanNative;
     public enum PipelineBindPoint
@@ -21,7 +22,7 @@ namespace SharpGame
 
     public struct RenderPassBeginInfo
     {
-        public RenderPass renderPass;
+        public VkRenderPass renderPass;
         public Framebuffer framebuffer;
         public Rect2D renderArea;
         public ClearValue[] clearValues;
@@ -32,6 +33,25 @@ namespace SharpGame
             this.framebuffer = framebuffer;
             this.renderArea = renderArea;
             this.clearValues = clearValues;
+        }
+
+        public unsafe void ToNative(out VkRenderPassBeginInfo native)
+        {
+            native = VkRenderPassBeginInfo.New();
+            native.renderPass = framebuffer.renderPass;
+            native.framebuffer = framebuffer.handle;
+            native.renderArea = new VkRect2D(renderArea.x, renderArea.y, renderArea.width, renderArea.height);
+
+            if (clearValues != null && clearValues.Length > 0)
+            {
+                native.clearValueCount = (uint)clearValues.Length;
+                native.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues[0]);
+            }
+            else
+            {
+                native.clearValueCount = 0;
+                native.pClearValues = null;
+            }
         }
 
 
@@ -58,9 +78,10 @@ namespace SharpGame
             Util.CheckResult(vkEndCommandBuffer(commandBuffer));
         }
 
-        public void BeginRenderPass(ref VkRenderPassBeginInfo renderPassBeginInfo, VkSubpassContents contents)
+        public void BeginRenderPass(ref RenderPassBeginInfo renderPassBeginInfo, SubpassContents contents)
         {
-            vkCmdBeginRenderPass(commandBuffer, ref renderPassBeginInfo, contents);
+            renderPassBeginInfo.ToNative(out VkRenderPassBeginInfo vkRenderPassBeginInfo);
+            vkCmdBeginRenderPass(commandBuffer, ref vkRenderPassBeginInfo, (VkSubpassContents)contents);
             renderPass = renderPassBeginInfo.renderPass;
         }
 
@@ -150,6 +171,11 @@ namespace SharpGame
             BindPipeline(PipelineBindPoint.Graphics, pipe);
             BindResourceSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout, resourceSet, 0, null);
             geometry.Draw(this);
+        }
+
+        public void ExecuteCommand(CommandBuffer cmdBuffer)
+        {
+            vkCmdExecuteCommands(commandBuffer, 1, ref cmdBuffer.commandBuffer);
         }
 
     }

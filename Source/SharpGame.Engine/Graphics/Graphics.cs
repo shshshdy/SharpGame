@@ -39,7 +39,8 @@ namespace SharpGame
         public static int Width { get; private set; }
         public static int Height { get; private set; }
 
-        public static NativeList<VkFramebuffer> FrameBuffers { get; protected set; } = new NativeList<VkFramebuffer>();
+        private Framebuffer[] framebuffers;
+        public Framebuffer[] Framebuffers => framebuffers;
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
@@ -111,12 +112,12 @@ namespace SharpGame
 
             CreateSwapChain();
             CreateDepthStencil();
+            CreateRenderPass();
             CreateFrameBuffer();
 
             CreateCommandPool();
             CreateCommandBuffers();
 
-            CreateRenderPass();
         }
 
         public void Resize(int w, int h)
@@ -141,34 +142,15 @@ namespace SharpGame
 
         protected void CreateFrameBuffer()
         {
-            for (uint i = 0; i < FrameBuffers.Count; i++)
+            if(Framebuffers != null)
             {
-                Device.Destroy(FrameBuffers[i]);
-            }
-
-            using (NativeList<VkImageView> attachments = new NativeList<VkImageView>(2))
-            {
-                attachments.Count = 2;
-                // Depth/Stencil attachment is the same for all frame buffers
-                attachments[1] = depthStencil.view;
-
-                VkFramebufferCreateInfo frameBufferCreateInfo = VkFramebufferCreateInfo.New();
-                frameBufferCreateInfo.renderPass = RenderPass;
-                frameBufferCreateInfo.attachmentCount = 2;
-                frameBufferCreateInfo.pAttachments = (VkImageView*)attachments.Data;
-                frameBufferCreateInfo.width = (uint)Width;
-                frameBufferCreateInfo.height = (uint)Height;
-                frameBufferCreateInfo.layers = 1;
-
-                // Create frame buffers for every swap chain image
-                FrameBuffers.Count = Swapchain.ImageCount;
-
-                for (uint i = 0; i < FrameBuffers.Count; i++)
+                for (int i = 0; i < Framebuffers.Length; i++)
                 {
-                    attachments[0] = Swapchain.Buffers[i].View;
-                    FrameBuffers[i] = Device.CreateFramebuffer(ref frameBufferCreateInfo);
+                    Framebuffers[i].Dispose();
                 }
             }
+
+            framebuffers = CreateSwapChainFramebuffers();
         }
 
         private void CreateSwapChain()
@@ -276,6 +258,45 @@ namespace SharpGame
             renderPass = Device.CreateRenderPass(ref renderPassInfo);           
         }
 
+        public Framebuffer[] CreateSwapChainFramebuffers()
+        {
+
+            VkImageView* attachments = stackalloc VkImageView[2];
+
+            // Depth/Stencil attachment is the same for all frame buffers
+            attachments[1] = depthStencil.view;
+
+            var frameBufferCreateInfo = new FramebufferCreateInfo
+            {
+                renderPass = RenderPass,
+                attachmentCount = 2,
+                pAttachments = attachments,
+                width = Width,
+                height = Height,
+                layers = 1
+            };
+
+            // Create frame buffers for every swap chain image
+            var framebuffers = new Framebuffer[Swapchain.ImageCount];
+
+            for (uint i = 0; i < framebuffers.Length; i++)
+            {
+                attachments[0] = Swapchain.Buffers[i].View;
+                framebuffers[i] = CreateFramebuffer(ref frameBufferCreateInfo);
+            }
+
+            return framebuffers;
+        }
+
+        public Framebuffer CreateFramebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
+        {
+            framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
+            var vkFb = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);
+            var fb = new Framebuffer(vkFb);
+            fb.renderPass = framebufferCreateInfo.renderPass;
+            return fb;
+        }
+
         private void CreateCommandPool()
         {
             primaryCommandPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
@@ -289,7 +310,7 @@ namespace SharpGame
 
         protected void CreateCommandBuffers()
         {
-            primaryCommandPool.Allocate(CommandBufferLevel.Primary, Swapchain.ImageCount);
+            primaryCommandPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
 
             foreach (var cmdPool in secondaryCommandPool)
             {

@@ -11,19 +11,19 @@ using SharpGame.Sdl2;
 
 namespace SharpGame
 {
-    public unsafe partial class Application : System<Application>
+    public unsafe partial class Application : CoreApplication
     {
-        public static string DataPath => Path.Combine(AppContext.BaseDirectory, "../../../../../data/");
+        protected static Application instance;
+        public static string DataPath => instance.dataPath;
 
-        public CString Title { get; set; } = "Vulkan Example";
-        public CString Name { get; set; } = "VulkanExample";
+        public string Title { get; set; } = "SharpGame";
+        public CString Name { get; set; } = "SharpGame";
         public int width { get; protected set; } = 1280;
         public int height { get; protected set; } = 720;
         public IntPtr Window { get; protected set; }
         public Sdl2Window NativeWindow { get; private set; }
         public IntPtr WindowInstance { get; protected set; }
 
-        protected Context context;
         protected Timer timer;
         protected FileSystem fileSystem;
         protected ResourceCache cache;
@@ -36,37 +36,36 @@ namespace SharpGame
         protected InputSnapshot snapshot;
 
         bool singleThreaded = true;
-
+        string dataPath;
         private int frameNumber;
         private float timeElapsed = 0.0f;
 
         float fps;
         public float Fps => fps;
+        float mspf;
+        public float Msec => mspf;
 
-        public Application()
+        public Application(string dataPath)
         {
-            context = new Context();
+            instance = this;
+
+            this.dataPath = Path.Combine(AppContext.BaseDirectory, dataPath);
         }
 
         protected virtual void Setup()
         {
-            timer = context.CreateSubsystem<Timer>();
-            fileSystem = context.CreateSubsystem<FileSystem>();
-            graphics = context.CreateSubsystem<Graphics>();
-            cache = context.CreateSubsystem<ResourceCache>(DataPath);
-            renderer = context.CreateSubsystem<Renderer>();
-            input = context.CreateSubsystem<Input>();
+            timer = CreateSubsystem<Timer>();
+            fileSystem = CreateSubsystem<FileSystem>();
+            graphics = CreateSubsystem<Graphics>();
+            cache = CreateSubsystem<ResourceCache>(DataPath);
+            renderer = CreateSubsystem<Renderer>();
+            input = CreateSubsystem<Input>();
           
         }
 
         protected virtual void Init()
         {
-            context.CreateSubsystem<GUI>();
-        }
-
-        protected override void Destroy()
-        {
-            context.Dispose();
+            CreateSubsystem<GUI>();
         }
 
         protected virtual void CreateWindow()
@@ -133,6 +132,9 @@ namespace SharpGame
             timer.Stop();
             // Flush device to make sure all resources can be freed 
             graphics.WaitIdle();
+
+            Destroy();
+
         }
 
         private void DoubleLoop()
@@ -198,9 +200,8 @@ namespace SharpGame
             if (timer.TotalTime - timeElapsed >= 1.0f)
             {
                 fps = frameNumber;
-                float mspf = 1000.0f / fps;
-                NativeWindow.Title = $"{Name}    Fps: {fps}    Mspf: {mspf}";
-               
+                mspf = 1000.0f / fps;
+
                 // Reset for next average.
                 frameNumber = 0;
                 timeElapsed += 1.0f;

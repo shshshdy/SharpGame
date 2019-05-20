@@ -252,18 +252,12 @@ namespace SharpGame
             var height = Graphics.Height;
             var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
 
-            var renderPassBeginInfo = VkRenderPassBeginInfo.New();
-            renderPassBeginInfo.renderPass = renderPass;
-            renderPassBeginInfo.renderArea.offset.x = 0;
-            renderPassBeginInfo.renderArea.offset.y = 0;
-            renderPassBeginInfo.renderArea.extent.width = (uint)width;
-            renderPassBeginInfo.renderArea.extent.height = (uint)height;
-            renderPassBeginInfo.clearValueCount = 0;
-            renderPassBeginInfo.pClearValues = null;
-            // Set target frame buffer
-            renderPassBeginInfo.framebuffer = Graphics.FrameBuffers[graphics.currentBuffer];
+            var renderPassBeginInfo = new RenderPassBeginInfo
+            (
+                graphics.Framebuffers[graphics.currentBuffer],  new Rect2D(0, 0, width, height)
+            );
 
-            cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, VkSubpassContents.Inline);
+            cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.Inline);
 
             cmdBuffer.SetViewport(new Viewport(0, 0, width, height));
             cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));

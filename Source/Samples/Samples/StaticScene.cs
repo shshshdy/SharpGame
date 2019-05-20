@@ -4,6 +4,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
+    [SampleDesc(sortOrder = 1)]
     public class StaticScene : Sample
     {
         public override void Init()

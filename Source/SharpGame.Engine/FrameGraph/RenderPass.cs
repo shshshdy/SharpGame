@@ -96,29 +96,28 @@ namespace SharpGame
         public void Summit(int imageIndex)
         {
             var graphics = Graphics.Instance;
-       
-   /*
-            CommandBuffer cmdBuffer = Graphics.Instance.RenderCmdBuffer;
+ 
+            CommandBuffer cmdBuffer = graphics.RenderCmdBuffer;
+
+            var fb = framebuffer_ ?? graphics.Framebuffers;
 
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
-                framebuffer_[imageIndex],
+                fb[imageIndex],
                 new Rect2D(0, 0, Graphics.Width, Graphics.Height),
-                new ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f),
+                new ClearColorValue(0.25f, 0.25f, 0.25f, 1.0f),
                 new ClearDepthStencilValue(1.0f, 0)
             );
 
- 
             cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-         
+        
             if (cmdBuffers_[imageIndex] != null)
             {
-                cmdBuffer.CmdExecuteCommand(cmdBuffers_[imageIndex]);
-               // cmdBuffers_[imageIndex].Reset();
+                cmdBuffer.ExecuteCommand(cmdBuffers_[imageIndex]);
                 cmdBuffers_[imageIndex] = null;
             }
 
-            cmdBuffer.EndRenderPass();*/
+            cmdBuffer.EndRenderPass();
         }
     }
 

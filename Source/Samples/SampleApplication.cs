@@ -12,7 +12,7 @@ namespace SharpGame.Samples
         int selected = 0;
         string[] sampleNames;
 
-        public SampleApplication()
+        public SampleApplication() : base("../../../../../data/")
         {
         }
 
@@ -84,32 +84,15 @@ namespace SharpGame.Samples
 
         }
 
+
+        static int corner = 1;
         bool p_open;
+        const float DISTANCE = 10.0f;
+
         private void HandleGUI(GUIEvent e)
         {
-            if (ImGui.Begin("About Dear ImGui", ref p_open, ImGuiWindowFlags.AlwaysAutoResize))
-            {
-                ImGui.Combo("", ref selected, sampleNames, sampleNames.Length);
-            }
-
-            ImGui.End();
-
-            if (current)
-            {
-                current.OnGUI();
-            }
-
-            ShowPerfHUD();
-        }
-
-
-        static int corner = 3;
-        bool showPerfHUD;
-        void ShowPerfHUD()
-        {
-            const float DISTANCE = 10.0f;
-
             var io = ImGui.GetIO();
+
             if (corner != -1)
             {
                 System.Numerics.Vector2 window_pos = new System.Numerics.Vector2(((corner & 1) != 0) ? io.DisplaySize.X - DISTANCE
@@ -119,12 +102,20 @@ namespace SharpGame.Samples
             }
 
             ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
-            if (ImGui.Begin("Perf HUD", ref showPerfHUD, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            if (ImGui.Begin("Perf HUD", ref p_open, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
+                ImGui.Text(string.Format("Fps : {0}", Fps));
+                ImGui.Text(string.Format("Msec : {0}", Msec));
+
                 ImGui.Text("Simple overlay\nin the corner of the screen.\n(right-click to change position)");
+
                 ImGui.Separator();
 
-                ImGui.Text(string.Format("Fps : {0}", Fps));
+                if (ImGui.Combo("Sample", ref selected, sampleNames, sampleNames.Length))
+                {
+                    SetSample(sampleNames[selected]);
+                }
+
 
                 if (ImGui.BeginPopupContextWindow())
                 {
@@ -136,11 +127,30 @@ namespace SharpGame.Samples
                     if (p_open && ImGui.MenuItem("Close")) p_open = false;
                     ImGui.EndPopup();
                 }
+
             }
+
             ImGui.End();
+
+            if (current)
+            {
+                current.OnGUI();
+            }
+
+
         }
 
+        void SetSample(string typeName)
+        {
+            var type = Type.GetType("SharpGame.Samples." + typeName);
+            if(type == null)
+            {
+                return;
+            }
 
+            var sample = Activator.CreateInstance(type); 
+            SetSample(sample as Sample);
+        }
 
         void SetSample(Sample sample)
         {
