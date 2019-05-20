@@ -163,37 +163,29 @@ namespace SharpGame
         void UpdateFrame()
         {
             timer.Tick();
-
-            var beginFrame = new BeginFrame
+           
+            this.SendGlobalEvent(new BeginFrame
             {
-                frameNum_ = frameNumber,
-                timeTotal_ = timer.TotalTime,
-                timeDelta_ = timer.DeltaTime
-            };
+                frameNum = frameNumber,
+                timeTotal = timer.TotalTime,
+                timeDelta = timer.DeltaTime
+            });
 
-            this.SendGlobalEvent(beginFrame);
-
-            var update = new Update
+            this.SendGlobalEvent(new Update
             {
-                timeTotal_ = timer.TotalTime,
-                timeDelta_ = timer.DeltaTime
-            };
+                timeTotal = timer.TotalTime,
+                timeDelta = timer.DeltaTime
+            });
 
-            this.SendGlobalEvent(update);
-
-            var postUpdate = new PostUpdate
+            this.SendGlobalEvent(new PostUpdate
             {
-                timeTotal_ = timer.TotalTime,
-                timeDelta_ = timer.DeltaTime
-            };
-
-            this.SendGlobalEvent(postUpdate);
+                timeTotal = timer.TotalTime,
+                timeDelta = timer.DeltaTime
+            });
 
             renderer.RenderUpdate();
 
-            var endFrame = new EndFrame { };
-
-            this.SendGlobalEvent(endFrame);
+            this.SendGlobalEvent(new EndFrame());
 
             CalculateFrameRateStats();
 
