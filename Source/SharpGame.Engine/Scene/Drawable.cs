@@ -33,9 +33,9 @@ namespace SharpGame
         /// Time elapsed since last frame.
         public float timeStep;
         /// Viewport size.
-        public Int2 viewSize_;
+        public Int2 viewSize;
         /// Camera being used.
-        public Camera camera_;
+        public Camera camera;
     };
 
     /// Source data for a 3D geometry draw call.
@@ -230,7 +230,7 @@ namespace SharpGame
         {
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
             IntPtr worldTransform = node_.worldTransform_;
-            distance_ = frame.camera_.GetDistance(worldBoundingBox.Center);
+            distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
 
             for (int i = 0; i< batches_.Length; ++i)
             {
@@ -239,7 +239,7 @@ namespace SharpGame
             }
 
             float scale = Vector3.Dot(worldBoundingBox.Size, MathUtil.DotScale);
-            float newLodDistance = frame.camera_.GetLodDistance(distance_, scale, lodBias_);
+            float newLodDistance = frame.camera.GetLodDistance(distance_, scale, lodBias_);
 
             if (newLodDistance != lodDistance_)
                 lodDistance_ = newLodDistance;

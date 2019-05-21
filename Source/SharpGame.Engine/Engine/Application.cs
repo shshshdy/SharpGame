@@ -32,17 +32,15 @@ namespace SharpGame
         protected Input input;
         protected bool paused = false;
         protected bool prepared;
-
         protected InputSnapshot snapshot;
-
-        bool singleThreaded = true;
-        string dataPath;
+        private bool singleThreaded = true;
+        private string dataPath;
         private int frameNumber;
         private float timeElapsed = 0.0f;
 
-        float fps;
+        private float fps;
         public float Fps => fps;
-        float mspf;
+        private float mspf;
         public float Msec => mspf;
 
         public Application(string dataPath)
@@ -72,7 +70,7 @@ namespace SharpGame
         protected virtual void CreateWindow()
         {
             WindowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            NativeWindow = new Sdl2Window(Name, 50, 50, (int)width, (int)height, SDL_WindowFlags.Resizable, threadedProcessing : false)
+            NativeWindow = new Sdl2Window(Name, 50, 50, width, height, SDL_WindowFlags.Resizable, threadedProcessing : false)
             {
                 X = 50,
                 Y = 50,

@@ -8,6 +8,7 @@ namespace SharpGame
     using global::System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
     using static VulkanNative;
+
     public enum PipelineBindPoint
     {
         Graphics = 0,
@@ -54,7 +55,63 @@ namespace SharpGame
             }
         }
 
+    }
 
+    [Flags]
+    public enum CommandBufferUsageFlags
+    {
+        None = 0,
+        OneTimeSubmit = 1,
+        RenderPassContinue = 2,
+        SimultaneousUse = 4
+    }
+
+    public enum QueryControlFlags
+    {
+        None = 0,
+        Precise = 1
+    }
+
+    public enum QueryPipelineStatisticFlags
+    {
+        None = 0,
+        InputAssemblyVertices = 1,
+        InputAssemblyPrimitives = 2,
+        VertexShaderInvocations = 4,
+        GeometryShaderInvocations = 8,
+        GeometryShaderPrimitives = 16,
+        ClippingInvocations = 32,
+        ClippingPrimitives = 64,
+        FragmentShaderInvocations = 128,
+        TessellationControlShaderPatches = 256,
+        TessellationEvaluationShaderInvocations = 512,
+        ComputeShaderInvocations = 1024
+    }
+
+    public struct CommandBufferInheritanceInfo
+    {
+        public RenderPass renderPass;
+        public uint subpass;
+        public Framebuffer framebuffer;
+        public bool occlusionQueryEnable;
+        public QueryControlFlags queryFlags;
+        public QueryPipelineStatisticFlags pipelineStatistics;
+
+        public unsafe void ToNative(out VkCommandBufferInheritanceInfo native)
+        {
+            native = VkCommandBufferInheritanceInfo.New();
+        }
+    }
+
+    public struct CommandBufferBeginInfo
+    {
+        public CommandBufferUsageFlags flags;
+        public CommandBufferInheritanceInfo pInheritanceInfo;
+
+        public unsafe void ToNative(out VkCommandBufferBeginInfo native)
+        {
+            native = VkCommandBufferBeginInfo.New();
+        }
     }
 
     public class CommandBuffer : DisposeBase

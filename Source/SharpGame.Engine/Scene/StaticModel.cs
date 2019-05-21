@@ -107,7 +107,7 @@ namespace SharpGame
         public override void UpdateBatches(ref FrameInfo frame)
         {
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
-            distance_ = frame.camera_.GetDistance(worldBoundingBox.Center);
+            distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
 
             if (batches_.Length == 1)
                 batches_[0].distance_ = distance_;
@@ -117,12 +117,12 @@ namespace SharpGame
                 for (int i = 0; i < batches_.Length; ++i)
                 {
                     Vector3.Transform(ref geometryData_[i].center_, ref worldTransform, out Vector3 worldCenter);
-                    batches_[i].distance_ = frame.camera_.GetDistance(worldCenter);
+                    batches_[i].distance_ = frame.camera.GetDistance(worldCenter);
                 }
             }
 
             float scale = Vector3.Dot(worldBoundingBox.Size, MathUtil.DotScale);
-            float newLodDistance = frame.camera_.GetLodDistance(distance_, scale, lodBias_);
+            float newLodDistance = frame.camera.GetLodDistance(distance_, scale, lodBias_);
 
             if (newLodDistance != lodDistance_)
             {

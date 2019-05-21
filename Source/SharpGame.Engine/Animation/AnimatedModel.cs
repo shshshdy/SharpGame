@@ -106,7 +106,7 @@ namespace SharpGame
         {
             // If node was invisible last frame, need to decide animation LOD distance here
             // If headless, retain the current animation distance (should be 0)
-            if(frame.camera_ && Math.Abs((int)frame.frameNumber - (int)viewFrameNumber_) > 1)
+            if(frame.camera && Math.Abs((int)frame.frameNumber - (int)viewFrameNumber_) > 1)
             {
                 // First check for no update at all when invisible. In that case reset LOD timer to ensure update
                 // next time the model is in view
@@ -119,12 +119,12 @@ namespace SharpGame
                     }
                     return;
                 }
-                float distance = frame.camera_.GetDistance(node_.WorldPosition);
+                float distance = frame.camera.GetDistance(node_.WorldPosition);
                 // If distance is greater than draw distance, no need to update at all
                 if(drawDistance_ > 0.0f && distance > drawDistance_)
                     return;
                 float scale = Vector3.Dot(WorldBoundingBox.Size, MathUtil.DotScale);
-                animationLodDistance_ = frame.camera_.GetLodDistance(distance, scale, lodBias_);
+                animationLodDistance_ = frame.camera.GetLodDistance(distance, scale, lodBias_);
             }
 
             if(animationDirty_ || animationOrderDirty_)
@@ -137,7 +137,7 @@ namespace SharpGame
         {
             ref Matrix worldTransform = ref node_.WorldTransform;
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
-            distance_ = frame.camera_.GetDistance(worldBoundingBox.Center);
+            distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
 
             // Note: per-geometry distances do not take skinning into account. Especially in case of a ragdoll they may be
             // much off base if the node's own transform is not updated
@@ -148,7 +148,7 @@ namespace SharpGame
                 for(int i = 0; i < batches_.Length; ++i)
                 {
                     Vector3.Transform(ref geometryData_[i].center_, ref worldTransform, out Vector3 worldCenter);
-                    batches_[i].distance_ = frame.camera_.GetDistance(worldCenter);
+                    batches_[i].distance_ = frame.camera.GetDistance(worldCenter);
                 }
             }
 
@@ -156,7 +156,7 @@ namespace SharpGame
             // determination so that animation does not change the scale
             BoundingBox transformedBoundingBox = boundingBox_.Transformed(ref worldTransform);
             float scale = Vector3.Dot(transformedBoundingBox.Size, MathUtil.DotScale);
-            float newLodDistance = frame.camera_.GetLodDistance(distance_, scale, lodBias_);
+            float newLodDistance = frame.camera.GetLodDistance(distance_, scale, lodBias_);
 
             // If model is rendered from several views, use the minimum LOD distance for animation LOD
             if(frame.frameNumber != animationLodFrameNumber_)

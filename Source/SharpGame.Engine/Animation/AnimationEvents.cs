@@ -6,13 +6,13 @@ namespace SharpGame
 {
 
     /// AnimatedModel bone hierarchy created.
-    public struct BoneHierarchyCreated //: IEvent
+    public struct BoneHierarchyCreated 
     {
         public Node Node { get; set; }
     };
 
     /// AnimatedModel animation trigger.
-    public struct AnimationTrigger //: IEvent
+    public struct AnimationTrigger 
     {
         public Node Node { get; set; }
         public Animation Animation { get; set; }
@@ -23,7 +23,7 @@ namespace SharpGame
     };
 
     /// AnimatedModel animation finished or looped.
-    public struct AnimationFinished //: IEvent
+    public struct AnimationFinished 
     {
         public Node Node { get; set; }
         public Animation Animation { get; set; }
