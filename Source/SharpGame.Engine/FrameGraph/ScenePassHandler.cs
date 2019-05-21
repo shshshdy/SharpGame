@@ -22,11 +22,6 @@ namespace SharpGame
         private ResourceLayout resourceLayout;
         private ResourceSet resourceSet;
 
-        /*
-        private Texture _cubeTexture;
-        private GraphicsBuffer _uniformBuffer;
-        private WorldViewProjection _wvp;
-        */
         public ScenePassHandler(string name = "main")
         {
             Name = name;
@@ -50,70 +45,7 @@ namespace SharpGame
         protected void Recreate()
         {
             var renderer = Renderer.Instance;
-            /*
-            attachments = new[]
-            {
-                // Color attachment.
-                new AttachmentDescription
-                {
-                    Format = Graphics.Swapchain.Format,
-                    Samples = SampleCounts.Count1,
-                    LoadOp = AttachmentLoadOp.Clear,
-                    StoreOp = AttachmentStoreOp.Store,
-                    StencilLoadOp = AttachmentLoadOp.DontCare,
-                    StencilStoreOp = AttachmentStoreOp.DontCare,
-                    InitialLayout = ImageLayout.Undefined,
-                    FinalLayout = ImageLayout.PresentSrcKhr
-                },
-                // Depth attachment.
-                new AttachmentDescription
-                {
-                    Format = Graphics.DepthStencilBuffer.Format,
-                    Samples = SampleCounts.Count1,
-                    LoadOp = AttachmentLoadOp.Clear,
-                    StoreOp = AttachmentStoreOp.DontCare,
-                    StencilLoadOp = AttachmentLoadOp.DontCare,
-                    StencilStoreOp = AttachmentStoreOp.DontCare,
-                    InitialLayout = ImageLayout.Undefined,
-                    FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
-                }
-            };
-
-            subpasses = new[]
-            {
-                new SubpassDescription(
-                    new[] { new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal) },
-                    new AttachmentReference(1, ImageLayout.DepthStencilAttachmentOptimal))
-            };
-
-            var dependencies = new[]
-            {
-                new SubpassDependency
-                {
-                    SrcSubpass = Constant.SubpassExternal,
-                    DstSubpass = 0,
-                    SrcStageMask = PipelineStages.BottomOfPipe,
-                    DstStageMask = PipelineStages.ColorAttachmentOutput,
-                    SrcAccessMask = Accesses.MemoryRead,
-                    DstAccessMask = Accesses.ColorAttachmentRead | Accesses.ColorAttachmentWrite,
-                    DependencyFlags = Dependencies.ByRegion
-                },
-                new SubpassDependency
-                {
-                    SrcSubpass = 0,
-                    DstSubpass = Constant.SubpassExternal,
-                    SrcStageMask = PipelineStages.ColorAttachmentOutput,
-                    DstStageMask = PipelineStages.BottomOfPipe,
-                    SrcAccessMask = Accesses.ColorAttachmentRead | Accesses.ColorAttachmentWrite,
-                    DstAccessMask = Accesses.MemoryRead,
-                    DependencyFlags = Dependencies.ByRegion
-                }
-            };
-
-            var createInfo = new RenderPassCreateInfo(subpasses, attachments, dependencies);
-            renderPass_ = Graphics.ToDisposeFrame(Graphics.Device.CreateRenderPass(createInfo));
-            framebuffer_ = Graphics.ToDisposeFrame(CreateFramebuffers());
-*/
+           
         }
 
         protected override void OnDraw(RenderView view)

@@ -42,14 +42,14 @@ namespace SharpGame
 
         public void DrawBatch(SourceBatch batch, Pipeline pipeline, ResourceSet resourceSet)
         {
-            var shader = batch.material_.Shader;
+            var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
             {
                 return;
             }
 
             var pass = shader.GetPass(passID);
-            cmdBuffer_.DrawGeometry(batch.geometry_, pipeline, pass, resourceSet);
+            cmdBuffer_.DrawGeometry(batch.geometry, pipeline, pass, resourceSet);
         }
 
         protected void BeginDraw()

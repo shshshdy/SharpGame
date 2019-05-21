@@ -42,19 +42,19 @@ namespace SharpGame
     public class SourceBatch
     {
         /// Distance from camera.
-        public float distance_;
+        public float distance;
         /// Geometry.
-        public Geometry geometry_;
+        public Geometry geometry;
         /// Material.
-        public Material material_;
+        public Material material;
         /// World transform(s). For a skinned model, these are the bone transforms.
-        public IntPtr worldTransform_;
+        public IntPtr worldTransform;
         /// Number of world transforms.
-        public int numWorldTransforms_;
+        public int numWorldTransforms;
         /// Per-instance data. If not null, must contain enough data to fill instancing buffer.
-        public IntPtr instancingData_;
+        public IntPtr instancingData;
         /// %Geometry type.
-        public GeometryType geometryType_;
+        public GeometryType geometryType;
     };
 
     public unsafe abstract class Drawable : Component
@@ -214,7 +214,7 @@ namespace SharpGame
         {
             // By default return the visible batch geometry
             if (batchIndex < batches_.Length)
-                return batches_[batchIndex].geometry_;
+                return batches_[batchIndex].geometry;
             else
                 return null;
         }
@@ -234,8 +234,8 @@ namespace SharpGame
 
             for (int i = 0; i< batches_.Length; ++i)
             {
-                batches_[i].distance_ = distance_;
-                batches_[i].worldTransform_ = worldTransform;
+                batches_[i].distance = distance_;
+                batches_[i].worldTransform = worldTransform;
             }
 
             float scale = Vector3.Dot(worldBoundingBox.Size, MathUtil.DotScale);

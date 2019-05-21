@@ -142,13 +142,13 @@ namespace SharpGame
             // Note: per-geometry distances do not take skinning into account. Especially in case of a ragdoll they may be
             // much off base if the node's own transform is not updated
             if(batches_.Length == 1)
-                batches_[0].distance_ = distance_;
+                batches_[0].distance = distance_;
             else
             {
                 for(int i = 0; i < batches_.Length; ++i)
                 {
                     Vector3.Transform(ref geometryData_[i].center_, ref worldTransform, out Vector3 worldCenter);
-                    batches_[i].distance_ = frame.camera.GetDistance(worldCenter);
+                    batches_[i].distance = frame.camera.GetDistance(worldCenter);
                 }
             }
 
@@ -281,25 +281,25 @@ namespace SharpGame
                 {
                     if(numSkinMatrices > 0)
                     {
-                        batches_[i].geometryType_ = GeometryType.GEOM_SKINNED;
+                        batches_[i].geometryType = GeometryType.GEOM_SKINNED;
                         // Check if model has per-geometry bone mappings
                         if(geometrySkinMatrices_.Length > 0 && geometrySkinMatrices_[i].Length > 0)
                         {
-                            batches_[i].worldTransform_ = (IntPtr)Unsafe.AsPointer(ref geometrySkinMatrices_[i][0]);
-                            batches_[i].numWorldTransforms_ = geometrySkinMatrices_[i].Length;
+                            batches_[i].worldTransform = (IntPtr)Unsafe.AsPointer(ref geometrySkinMatrices_[i][0]);
+                            batches_[i].numWorldTransforms = geometrySkinMatrices_[i].Length;
                         }
                         // If not, use the global skin matrices
                         else
                         {
-                            batches_[i].worldTransform_ = (IntPtr)Unsafe.AsPointer(ref skinMatrices_[0]);
-                            batches_[i].numWorldTransforms_ = numSkinMatrices;
+                            batches_[i].worldTransform = (IntPtr)Unsafe.AsPointer(ref skinMatrices_[0]);
+                            batches_[i].numWorldTransforms = numSkinMatrices;
                         }
                     }
                     else
                     {
-                        batches_[i].geometryType_ = GeometryType.GEOM_STATIC;
-                        batches_[i].worldTransform_ = node_.worldTransform_;
-                        batches_[i].numWorldTransforms_ = 1;
+                        batches_[i].geometryType = GeometryType.GEOM_STATIC;
+                        batches_[i].worldTransform = node_.worldTransform_;
+                        batches_[i].numWorldTransforms = 1;
                     }
                 }
             }
