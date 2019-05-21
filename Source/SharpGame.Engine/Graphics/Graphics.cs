@@ -36,8 +36,8 @@ namespace SharpGame
         public Format DepthFormat { get; protected set; }
         public Swapchain Swapchain { get; } = new Swapchain();
 
-        public static int Width { get; private set; }
-        public static int Height { get; private set; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
         private Framebuffer[] framebuffers;
         public Framebuffer[] Framebuffers => framebuffers;
@@ -150,7 +150,7 @@ namespace SharpGame
                 }
             }
 
-            framebuffers = CreateSwapChainFramebuffers();
+            framebuffers = CreateSwapChainFramebuffers(renderPass);
         }
 
         private void CreateSwapChain()
@@ -258,7 +258,7 @@ namespace SharpGame
             renderPass = Device.CreateRenderPass(ref renderPassInfo);           
         }
 
-        public Framebuffer[] CreateSwapChainFramebuffers()
+        public Framebuffer[] CreateSwapChainFramebuffers(VkRenderPass vkRenderPass)
         {
             VkImageView* attachments = stackalloc VkImageView[2];
             // Depth/Stencil attachment is the same for all frame buffers
@@ -266,7 +266,7 @@ namespace SharpGame
 
             var frameBufferCreateInfo = new FramebufferCreateInfo
             {
-                renderPass = RenderPass,
+                renderPass = vkRenderPass,
                 attachmentCount = 2,
                 pAttachments = attachments,
                 width = Width,

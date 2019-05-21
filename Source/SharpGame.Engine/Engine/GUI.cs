@@ -25,7 +25,7 @@ namespace SharpGame
         private IntPtr fontAtlasID = (IntPtr)1;
 
         VkRenderPass renderPass;
-
+        Framebuffer[] framebuffers;
         protected Vulkan.VkClearColorValue defaultClearColor => new Vulkan.VkClearColorValue(0.025f, 0.025f, 0.025f, 1.0f);
 
         public GUI()
@@ -188,6 +188,8 @@ namespace SharpGame
             };
 
             renderPass = Device.CreateRenderPass(ref renderPassInfo);
+
+            framebuffers = Graphics.Instance.CreateSwapChainFramebuffers(renderPass);
         }
 
         private unsafe void RecreateFontDeviceTexture()
@@ -226,7 +228,7 @@ namespace SharpGame
         private unsafe void SetPerFrameImGuiData(float deltaSeconds)
         {
             ImGuiIOPtr io = ImGui.GetIO();
-            io.DisplaySize = new System.Numerics.Vector2(Graphics.Width, Graphics.Height);
+            io.DisplaySize = new System.Numerics.Vector2(Graphics.Instance.Width, Graphics.Instance.Height);
             io.DisplayFramebufferScale = System.Numerics.Vector2.One;// window.ScaleFactor;
             io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
         }
@@ -248,13 +250,14 @@ namespace SharpGame
         unsafe void Handle(EndRender e)
         {
             var graphics = Graphics.Instance;
-            var width = Graphics.Width;
-            var height = Graphics.Height;
+            var width = graphics.Width;
+            var height = graphics.Height;
             var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
 
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
-                graphics.Framebuffers[graphics.currentBuffer],  new Rect2D(0, 0, width, height)
+                renderPass, framebuffers[graphics.currentBuffer],
+                new Rect2D(0, 0, width, height)
             );
 
             cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.Inline);

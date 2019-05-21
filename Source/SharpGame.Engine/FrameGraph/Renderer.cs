@@ -50,13 +50,14 @@ namespace SharpGame
 
             this.SendGlobalEvent(new BeginRender());
 
+            /*
             int imageIndex = (int)graphics.currentBuffer;
 
             foreach (var viewport in views)
             {
                 viewport.Render(imageIndex);
             }
-
+            */
             this.SendGlobalEvent(new EndRender());
 
             cmdBuffer.End();

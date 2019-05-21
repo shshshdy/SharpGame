@@ -105,8 +105,9 @@ namespace SharpGame
 
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
+                fb[imageIndex].renderPass,
                 fb[imageIndex],
-                new Rect2D(0, 0, Graphics.Width, Graphics.Height),
+                new Rect2D(0, 0, graphics.Width, graphics.Height),
                 new ClearColorValue(0.25f, 0.25f, 0.25f, 1.0f),
                 new ClearDepthStencilValue(1.0f, 0)
             );

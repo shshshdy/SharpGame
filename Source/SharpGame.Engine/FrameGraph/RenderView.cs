@@ -39,9 +39,10 @@ namespace SharpGame
 
         public void Update(ref FrameInfo frameInfo)
         {
+            var graphics = Graphics.Instance;
             this.frameInfo = frameInfo;
             this.frameInfo.camera_ = Camera;
-            this.frameInfo.viewSize_ = new Int2(Graphics.Width, Graphics.Height);
+            this.frameInfo.viewSize_ = new Int2(graphics.Width, graphics.Height);
 
             this.SendGlobalEvent(new BeginView { view = this });
 
