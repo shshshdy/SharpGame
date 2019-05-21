@@ -49,7 +49,8 @@ namespace SharpGame
         internal VkDescriptorSetLayout descriptorSetLayout;
         internal DescriptorResourceCounts descriptorResourceCounts;
         internal int NumBindings => Bindings.Count;
-        bool needRebuild = true;
+        private bool needRebuild = true;
+
         public ResourceLayout()
         {
         }

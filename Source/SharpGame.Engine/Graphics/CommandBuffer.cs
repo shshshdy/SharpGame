@@ -59,7 +59,7 @@ namespace SharpGame
 
     public class CommandBuffer : DisposeBase
     {
-        public VkCommandBuffer commandBuffer;
+        internal VkCommandBuffer commandBuffer;
         private RenderPass renderPass;
 
         public CommandBuffer(VkCommandBuffer cmdBuffer)

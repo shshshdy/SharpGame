@@ -66,6 +66,28 @@ namespace SharpGame
         public AttachmentStoreOp stencilStoreOp;
         public ImageLayout initialLayout;
         public ImageLayout finalLayout;
+
+        public AttachmentDescription(
+            Format format,
+            SampleCountFlags samples,
+            AttachmentLoadOp loadOp,
+            AttachmentStoreOp storeOp,
+            AttachmentLoadOp stencilLoadOp = AttachmentLoadOp.DontCare,
+            AttachmentStoreOp stencilStoreOp = AttachmentStoreOp.DontCare,
+            ImageLayout initialLayout = ImageLayout.Undefined,
+            ImageLayout finalLayout = ImageLayout.PresentSrcKHR,
+            AttachmentDescriptionFlags flags =  AttachmentDescriptionFlags.None)
+        {
+            this.format = format;
+            this.samples = samples;
+            this.loadOp = loadOp;
+            this.storeOp = storeOp;
+            this.stencilLoadOp = stencilLoadOp;
+            this.stencilStoreOp = stencilStoreOp;
+            this.initialLayout = initialLayout;
+            this.finalLayout = finalLayout;
+            this.flags = flags;
+        }
     }
 
     public struct AttachmentReference

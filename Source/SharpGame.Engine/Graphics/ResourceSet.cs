@@ -11,7 +11,7 @@ namespace SharpGame
 
     public class ResourceSet : IDisposable
     {
-        public VkDescriptorSet descriptorSet;
+        internal VkDescriptorSet descriptorSet;
 
         internal VkDescriptorPool descriptorPool;
         internal ResourceLayout resourceLayout;
