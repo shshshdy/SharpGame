@@ -16,7 +16,7 @@ namespace SharpGame
         public Matrix ViewProj;
     }
 
-    public class ScenePassHandler : RenderPassHandler
+    public class ScenePassHandler : PassHandler
     {
         /*
         public AttachmentDescription[] attachments { get; set; }

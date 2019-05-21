@@ -17,13 +17,13 @@ namespace SharpGame
         public RenderTarget[] RenderTargets { get; set; }
 
 
-        public List<RenderPassHandler> RenderPassList { get; set; } = new List<RenderPassHandler>();
+        public List<PassHandler> RenderPassList { get; set; } = new List<PassHandler>();
 
         public FrameGraph()
         {
         }
 
-        public void AddRenderPass(RenderPassHandler renderPass)
+        public void AddRenderPass(PassHandler renderPass)
         {
             renderPass.FrameGraph = this;
             RenderPassList.Add(renderPass);

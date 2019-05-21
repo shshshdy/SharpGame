@@ -8,7 +8,7 @@ using Vulkan;
 namespace SharpGame
 {
  
-    public class RenderPassHandler : Object
+    public class PassHandler : Object
     {
         private StringID name_;
         public StringID Name
@@ -21,7 +21,7 @@ namespace SharpGame
             }
         }
 
-        public int passID;
+        public ulong passID;
 
         [IgnoreDataMember]
         public FrameGraph FrameGraph { get; set; }
@@ -34,22 +34,25 @@ namespace SharpGame
         protected CommandBuffer cmdBuffer_;
         public CommandBuffer CmdBuffer => cmdBuffer_;
 
-        internal RenderPass renderPass;
+        protected RenderPass renderPass;
 
-        public RenderPassHandler()
+        public PassHandler()
         {
         }
 
         public void DrawBatch(SourceBatch batch, Pipeline pipeline, ResourceSet resourceSet)
-        {/*
+        {
             var shader = batch.material_.Shader;
-            var pipe = pipeline.GetGraphicsPipeline(this, shader, batch.geometry_);
-            cmdBuffer_.CmdBindDescriptorSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout, resourceSet.descriptorSet);
-            cmdBuffer_.CmdBindPipeline(PipelineBindPoint.Graphics, pipe);
-            batch.geometry_.Draw(cmdBuffer_);*/
+            if ((passID & shader.passFlags) == 0)
+            {
+                return;
+            }
+
+            var pass = shader.GetPass(passID);
+            cmdBuffer_.DrawGeometry(batch.geometry_, pipeline, pass, resourceSet);
         }
 
-        protected CommandBuffer BeginDraw()
+        protected void BeginDraw()
         {
             /*
             int workContext = Graphics.WorkContext;
@@ -69,8 +72,6 @@ namespace SharpGame
             //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
             cmdBuffers_[workContext] = cmdBuffer_;
             */
-
-            return cmdBuffer_;
         }
 
         public void Draw(RenderView view)
@@ -111,12 +112,12 @@ namespace SharpGame
             );
 
             cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-        
+        /*
             if (cmdBuffers[imageIndex] != null)
             {
                 cmdBuffer.ExecuteCommand(cmdBuffers[imageIndex]);
                 cmdBuffers[imageIndex] = null;
-            }
+            }*/
 
             cmdBuffer.EndRenderPass();
         }

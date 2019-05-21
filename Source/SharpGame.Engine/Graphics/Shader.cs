@@ -22,6 +22,9 @@ namespace SharpGame
         [DataMember]
         public List<Pass> Passes { get; set; } = new List<Pass>();
 
+        [IgnoreDataMember]
+        public ulong passFlags = 0;
+
         public Shader()
         {
         }
@@ -73,7 +76,7 @@ namespace SharpGame
             }
         }
 
-        public Pass GetPass(int id)
+        public Pass GetPass(ulong id)
         {
             foreach (var pass in Passes)
             {
@@ -149,7 +152,7 @@ namespace SharpGame
         }
 
         [IgnoreDataMember]
-        public int passID;
+        public ulong passID;
 
         [DataMember]
         public ShaderModule VertexShader { get; set; }
@@ -177,22 +180,29 @@ namespace SharpGame
             passList.Add(Main);
         }
 
-        public static int GetID(StringID pass)
+        public static ulong GetID(StringID pass)
         {
             if(pass.IsNullOrEmpty)
             {
                 return 0;
             }
 
+
             for(int i = 0; i < passList.Count; i++)
             {
                 if(passList[i] == pass)
                 {
-                    return i;
+                    return (ulong)(1 << i);
                 }
             }
+
+            if (passList.Count >= 64)
+            {
+                return 0;
+            }
+
             passList.Add(pass);
-            return passList.Count - 1;
+            return (ulong)(1 << (passList.Count - 1));
         }
 
         public Pass()

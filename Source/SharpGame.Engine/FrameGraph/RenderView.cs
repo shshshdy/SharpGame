@@ -12,7 +12,7 @@ namespace SharpGame
         public FrameGraph RenderPath { get; set; }
         public Viewport Viewport { get; set; }
         public uint ViewMask { get; set; }
-        public RenderPassHandler OverlayPass { get; set; }
+        public PassHandler OverlayPass { get; set; }
 
         internal FastList<Drawable> drawables = new FastList<Drawable>();
         internal FastList<Light> lights = new FastList<Light>();

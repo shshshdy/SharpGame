@@ -25,7 +25,7 @@ namespace SharpGame
 
         public void RenderUpdate()
         {
-            FrameInfo frameInfo = new FrameInfo
+            var frameInfo = new FrameInfo
             {
                 timeStep = Time.Delta,
                 frameNumber = Time.FrameNum
