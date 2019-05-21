@@ -10,8 +10,10 @@ namespace SharpGame
     {
         public VkRenderPass handle;
 
-        public RenderPass()
+        public RenderPass(ref RenderPassCreateInfo renderPassCreateInfo)
         {
+            renderPassCreateInfo.ToNative(out VkRenderPassCreateInfo vkRenderPassCreateInfo);
+            handle = Device.CreateRenderPass(ref vkRenderPassCreateInfo);
         }
 
         public Framebuffer CreateFramebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
@@ -79,6 +81,12 @@ namespace SharpGame
     {
         public uint attachment;
         public ImageLayout layout;
+
+        public AttachmentReference(uint attachment, ImageLayout layout)
+        {
+            this.attachment = attachment;
+            this.layout = layout;
+        }
     }
 
     [Flags]
@@ -103,14 +111,58 @@ namespace SharpGame
         {
             native->flags = (VkSubpassDescriptionFlags)flags;
             native->pipelineBindPoint = (VkPipelineBindPoint)pipelineBindPoint;
-            native->inputAttachmentCount = (uint)pInputAttachments.Length;
-            native->pInputAttachments = (VkAttachmentReference*)Unsafe.AsPointer(ref pInputAttachments[0]);
-            native->colorAttachmentCount = (uint)pColorAttachments.Length;
-            native->pColorAttachments = (VkAttachmentReference*)Unsafe.AsPointer(ref pColorAttachments[0]);
-            native->pResolveAttachments = (VkAttachmentReference*)Unsafe.AsPointer(ref pResolveAttachments[0]);
-            native->pDepthStencilAttachment = (VkAttachmentReference*)Unsafe.AsPointer(ref pDepthStencilAttachment[0]);
-            native->preserveAttachmentCount = (uint)pPreserveAttachments.Length;
-            native->pPreserveAttachments = (uint*)Unsafe.AsPointer(ref pPreserveAttachments[0]);
+
+            if(!pInputAttachments.IsNullOrEmpty())
+            {
+                native->inputAttachmentCount = (uint)pInputAttachments.Length;
+                native->pInputAttachments = (VkAttachmentReference*)Unsafe.AsPointer(ref pInputAttachments[0]);
+            }
+            else
+            {
+                native->inputAttachmentCount = 0;
+                native->pInputAttachments = null;
+            }
+
+            if (!pColorAttachments.IsNullOrEmpty())
+            {
+                native->colorAttachmentCount = (uint)pColorAttachments.Length;
+                native->pColorAttachments = (VkAttachmentReference*)Unsafe.AsPointer(ref pColorAttachments[0]);
+            }
+            else
+            {
+                native->colorAttachmentCount = 0;
+                native->pColorAttachments = null;
+            }
+
+            if (!pResolveAttachments.IsNullOrEmpty())
+            {
+                native->pResolveAttachments = (VkAttachmentReference*)Unsafe.AsPointer(ref pResolveAttachments[0]);
+            }
+            else
+            {
+                native->pResolveAttachments = null;
+            }
+
+            if (!pDepthStencilAttachment.IsNullOrEmpty())
+            {
+                native->pDepthStencilAttachment = (VkAttachmentReference*)Unsafe.AsPointer(ref pDepthStencilAttachment[0]);
+            }
+            else
+            {
+                native->pDepthStencilAttachment = null;
+            }
+
+            if (!pPreserveAttachments.IsNullOrEmpty())
+            {
+                native->preserveAttachmentCount = (uint)pPreserveAttachments.Length;
+                native->pPreserveAttachments = (uint*)Unsafe.AsPointer(ref pPreserveAttachments[0]);
+            }
+            else
+            {
+                native->preserveAttachmentCount = 0;
+                native->pPreserveAttachments = null;
+            }
+
         }
 
     }
@@ -196,8 +248,10 @@ namespace SharpGame
             this.pSubpasses = pSubpasses;
             this.pDependencies = pDependencies;
             this.flags = flags;
+            subPasses = null;
         }
 
+        NativeList<VkSubpassDescription> subPasses;
         public unsafe void ToNative(out VkRenderPassCreateInfo native)
         {
             native = VkRenderPassCreateInfo.New();
@@ -206,13 +260,15 @@ namespace SharpGame
             native.pAttachments = (VkAttachmentDescription*)Unsafe.AsPointer(ref pAttachments[0]);
             native.subpassCount = (uint)pSubpasses.Length;
 
-            VkSubpassDescription* subPasses = stackalloc VkSubpassDescription[pSubpasses.Length];
-            for(int i = 0; i < pSubpasses.Length; i++)
+            subPasses = new NativeList<VkSubpassDescription>((uint)pSubpasses.Length, (uint)pSubpasses.Length);
+
+            //VkSubpassDescription* subPasses = stackalloc VkSubpassDescription[pSubpasses.Length];
+            for(uint i = 0; i < pSubpasses.Length; i++)
             {
-                pSubpasses[i].ToNative(&subPasses[i]);
+                pSubpasses[i].ToNative((VkSubpassDescription*)subPasses.GetAddress(i));
             }
 
-            native.pSubpasses = subPasses;
+            native.pSubpasses = (VkSubpassDescription*)subPasses.Data;
 
             native.dependencyCount = (uint)pDependencies.Length;
             native.pDependencies = (VkSubpassDependency*)Unsafe.AsPointer(ref pDependencies[0]);

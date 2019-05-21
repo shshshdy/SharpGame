@@ -18,7 +18,7 @@ namespace SharpGame
     {
         public VkSurfaceKHR Surface { get; private set; }
         public uint QueueNodeIndex { get; private set; } = uint.MaxValue;
-        public VkFormat ColorFormat { get; private set; }
+        public Format ColorFormat { get; private set; }
         public VkColorSpaceKHR ColorSpace { get; private set; }
         public VkSwapchainKHR swapchain;
         public int ImageCount { get; private set; }
@@ -150,7 +150,7 @@ namespace SharpGame
                     // there is no preferered format, so we assume VK_FORMAT_B8G8R8A8_UNORM
                     if ((formatCount == 1) && (surfaceFormats[0].format == VkFormat.Undefined))
                     {
-                        ColorFormat = VkFormat.B8g8r8a8Unorm;
+                        ColorFormat = Format.B8g8r8a8Unorm;
                         ColorSpace = surfaceFormats[0].colorSpace;
                     }
                     else
@@ -162,7 +162,7 @@ namespace SharpGame
                         {
                             if (surfaceFormat.format == VkFormat.B8g8r8a8Unorm)
                             {
-                                ColorFormat = surfaceFormat.format;
+                                ColorFormat = (Format)surfaceFormat.format;
                                 ColorSpace = surfaceFormat.colorSpace;
                                 found_B8G8R8A8_UNORM = true;
                                 break;
@@ -173,7 +173,7 @@ namespace SharpGame
                         // select the first available color format
                         if (!found_B8G8R8A8_UNORM)
                         {
-                            ColorFormat = surfaceFormats[0].format;
+                            ColorFormat = (Format)surfaceFormats[0].format;
                             ColorSpace = surfaceFormats[0].colorSpace;
                         }
                     }
@@ -275,7 +275,7 @@ namespace SharpGame
                 swapchainCI.pNext = null;
                 swapchainCI.surface = Surface;
                 swapchainCI.minImageCount = desiredNumberOfSwapchainImages;
-                swapchainCI.imageFormat = ColorFormat;
+                swapchainCI.imageFormat = (VkFormat)ColorFormat;
                 swapchainCI.imageColorSpace = ColorSpace;
                 swapchainCI.imageExtent = new VkExtent2D() { width = swapchainExtent.width, height = swapchainExtent.height };
                 swapchainCI.imageUsage = VkImageUsageFlags.ColorAttachment;
@@ -292,7 +292,7 @@ namespace SharpGame
 
                 // Set additional usage flag for blitting from the swapchain Images if supported
                 VkFormatProperties formatProps;
-                vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, ColorFormat, out formatProps);
+                vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, (VkFormat)ColorFormat, out formatProps);
                 if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.BlitDst) != 0)
                 {
                     swapchainCI.imageUsage |= VkImageUsageFlags.TransferSrc;
@@ -333,7 +333,7 @@ namespace SharpGame
                     VkImageViewCreateInfo colorAttachmentView = new VkImageViewCreateInfo();
                     colorAttachmentView.sType = VkStructureType.ImageViewCreateInfo;
                     colorAttachmentView.pNext = null;
-                    colorAttachmentView.format = ColorFormat;
+                    colorAttachmentView.format = (VkFormat)ColorFormat;
                     colorAttachmentView.components = new VkComponentMapping()
                     {
                         r = VkComponentSwizzle.R,

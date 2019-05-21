@@ -22,12 +22,12 @@ namespace SharpGame
 
     public struct RenderPassBeginInfo
     {
-        public VkRenderPass renderPass;
+        public RenderPass renderPass;
         public Framebuffer framebuffer;
         public Rect2D renderArea;
         public ClearValue[] clearValues;
 
-        public RenderPassBeginInfo(VkRenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
+        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
         {
             this.renderPass = renderPass;
             this.framebuffer = framebuffer;
@@ -38,7 +38,7 @@ namespace SharpGame
         public unsafe void ToNative(out VkRenderPassBeginInfo native)
         {
             native = VkRenderPassBeginInfo.New();
-            native.renderPass = framebuffer.renderPass;
+            native.renderPass = framebuffer.renderPass.handle;
             native.framebuffer = framebuffer.handle;
             native.renderArea = new VkRect2D(renderArea.x, renderArea.y, renderArea.width, renderArea.height);
 
@@ -60,7 +60,7 @@ namespace SharpGame
     public class CommandBuffer : DisposeBase
     {
         public VkCommandBuffer commandBuffer;
-        private VkRenderPass renderPass;
+        private RenderPass renderPass;
 
         public CommandBuffer(VkCommandBuffer cmdBuffer)
         {

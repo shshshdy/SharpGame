@@ -9,7 +9,7 @@ namespace SharpGame
     public unsafe struct FramebufferCreateInfo
     {
         public uint flags;
-        public VkRenderPass renderPass;
+        public RenderPass renderPass;
         public int attachmentCount;
         public VkImageView* pAttachments;
         public int width;
@@ -20,7 +20,7 @@ namespace SharpGame
         {
             native = VkFramebufferCreateInfo.New();
             native.flags = flags;
-            native.renderPass = renderPass;
+            native.renderPass = renderPass.handle;
             native.attachmentCount = (uint)attachmentCount;
             native.pAttachments = (VkImageView*)pAttachments;
             native.width = (uint)width;
@@ -33,7 +33,7 @@ namespace SharpGame
     {
         public VkFramebuffer handle;
 
-        public VkRenderPass renderPass;
+        public RenderPass renderPass;
 
         public Framebuffer(VkFramebuffer handle)
         {
@@ -42,7 +42,7 @@ namespace SharpGame
 
         public Framebuffer(RenderPass renderPass,  ref FramebufferCreateInfo framebufferCreateInfo)
         {
-            this.renderPass = renderPass.handle;
+            this.renderPass = renderPass;
             framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
             handle = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);       
         }

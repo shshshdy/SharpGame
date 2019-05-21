@@ -206,7 +206,7 @@ namespace SharpGame
             pipeline = 0;
         }
 
-        public VkPipeline GetGraphicsPipeline(VkRenderPass renderPass, Pass pass, Geometry geometry)
+        public VkPipeline GetGraphicsPipeline(RenderPass renderPass, Pass pass, Geometry geometry)
         {
             if(pipeline != 0)
             {
@@ -223,7 +223,7 @@ namespace SharpGame
 
             unsafe
             {
-                var pipelineCreateInfo = GraphicsPipelineCreateInfo(pipelineLayout, renderPass, 0);//,
+                var pipelineCreateInfo = GraphicsPipelineCreateInfo(pipelineLayout, renderPass.handle, 0);//,
 
                 vertexlayout.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
                 pipelineCreateInfo.pVertexInputState = &vertexInputState;

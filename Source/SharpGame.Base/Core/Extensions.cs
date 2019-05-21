@@ -13,7 +13,12 @@ namespace SharpGame
         {
             return string.IsNullOrEmpty(str);
         }
-        
+
+        public static bool IsNullOrEmpty<T>(this IList<T> list)
+        {
+            return list == null || list.Count == 0;
+        }
+
         public static bool Empty<T>(this IList<T> list)
         {
             return list.Count == 0;

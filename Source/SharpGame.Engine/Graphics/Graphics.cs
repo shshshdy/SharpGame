@@ -49,8 +49,8 @@ namespace SharpGame
         public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[currentBuffer];
         public CommandBuffer WorkCmdBuffer => secondaryCmdPool[0].CommandBuffers[currentBuffer];
 
-        private VkRenderPass renderPass;
-        public VkRenderPass RenderPass => renderPass;
+        private RenderPass renderPass;
+        public RenderPass RenderPass => renderPass;
 
         public uint currentBuffer;
 
@@ -162,101 +162,86 @@ namespace SharpGame
 
         public void CreateRenderPass()
         {
-            VkAttachmentDescription[] attachments =
+            AttachmentDescription[] attachments =
             {
                 // Color attachment
-                new VkAttachmentDescription
+                new AttachmentDescription
                 {
                     format = Swapchain.ColorFormat,
-                    samples = VkSampleCountFlags.Count1,
-                    loadOp = VkAttachmentLoadOp.Clear,
-                    storeOp = VkAttachmentStoreOp.Store,
-                    stencilLoadOp = VkAttachmentLoadOp.DontCare,
-                    stencilStoreOp = VkAttachmentStoreOp.DontCare,
-                    initialLayout = VkImageLayout.Undefined,
-                    finalLayout = VkImageLayout.PresentSrcKHR
+                    samples = SampleCountFlags.Count1,
+                    loadOp = AttachmentLoadOp.Clear,
+                    storeOp = AttachmentStoreOp.Store,
+                    stencilLoadOp = AttachmentLoadOp.DontCare,
+                    stencilStoreOp = AttachmentStoreOp.DontCare,
+                    initialLayout = ImageLayout.Undefined,
+                    finalLayout = ImageLayout.PresentSrcKHR
                 },
 
                 // Depth attachment
-                new VkAttachmentDescription
+                new AttachmentDescription
                 {
-                    format = (VkFormat)DepthFormat,
-                    samples = VkSampleCountFlags.Count1,
-                    loadOp = VkAttachmentLoadOp.Clear,
-                    storeOp = VkAttachmentStoreOp.Store,
-                    stencilLoadOp = VkAttachmentLoadOp.DontCare,
-                    stencilStoreOp = VkAttachmentStoreOp.DontCare,
-                    initialLayout = VkImageLayout.Undefined,
-                    finalLayout = VkImageLayout.DepthStencilAttachmentOptimal
+                    format = DepthFormat,
+                    samples = SampleCountFlags.Count1,
+                    loadOp = AttachmentLoadOp.Clear,
+                    storeOp = AttachmentStoreOp.Store,
+                    stencilLoadOp = AttachmentLoadOp.DontCare,
+                    stencilStoreOp = AttachmentStoreOp.DontCare,
+                    initialLayout = ImageLayout.Undefined,
+                    finalLayout = ImageLayout.DepthStencilAttachmentOptimal
                 }
             };
 
-            VkAttachmentReference colorReference = new VkAttachmentReference
+            SubpassDescription[] subpassDescription =
             {
-                attachment = 0,
-                layout = VkImageLayout.ColorAttachmentOptimal
-            };
+                new SubpassDescription
+                {
+                    pipelineBindPoint = PipelineBindPoint.Graphics,
 
-            VkAttachmentReference depthReference = new VkAttachmentReference
-            {
-                attachment = 1,
-                layout = VkImageLayout.DepthStencilAttachmentOptimal
-            };
+                    pColorAttachments = new []
+                    {
+                        new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal)
+                    },
 
-            VkSubpassDescription subpassDescription = new VkSubpassDescription
-            {
-                pipelineBindPoint = VkPipelineBindPoint.Graphics,
-                colorAttachmentCount = 1,
-                pColorAttachments = &colorReference,
-                pDepthStencilAttachment = &depthReference,
-                inputAttachmentCount = 0,
-                pInputAttachments = null,
-                preserveAttachmentCount = 0,
-                pPreserveAttachments = null,
-                pResolveAttachments = null
+                    pDepthStencilAttachment = new []
+                    {
+                        new AttachmentReference(1, ImageLayout.DepthStencilAttachmentOptimal)
+                    },
+
+                }
             };
 
             // Subpass dependencies for layout transitions
-            VkSubpassDependency[] dependencies = 
+            SubpassDependency[] dependencies = 
             {
-                new VkSubpassDependency
+                new SubpassDependency
                 {
                     srcSubpass = SubpassExternal,
                     dstSubpass = 0,
-                    srcStageMask = VkPipelineStageFlags.BottomOfPipe,
-                    dstStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
-                    srcAccessMask = VkAccessFlags.MemoryRead,
-                    dstAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite),
-                    dependencyFlags = VkDependencyFlags.ByRegion
+                    srcStageMask = PipelineStageFlags.BottomOfPipe,
+                    dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
+                    srcAccessMask = AccessFlags.MemoryRead,
+                    dstAccessMask = (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
+                    dependencyFlags = DependencyFlags.ByRegion
                 },
 
-                new VkSubpassDependency
+                new SubpassDependency
                 {
                     srcSubpass = 0,
                     dstSubpass = SubpassExternal,
-                    srcStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
-                    dstStageMask = VkPipelineStageFlags.BottomOfPipe,
-                    srcAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite),
-                    dstAccessMask = VkAccessFlags.MemoryRead,
-                    dependencyFlags = VkDependencyFlags.ByRegion
+                    srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
+                    dstStageMask = PipelineStageFlags.BottomOfPipe,
+                    srcAccessMask = (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
+                    dstAccessMask = AccessFlags.MemoryRead,
+                    dependencyFlags = DependencyFlags.ByRegion
                 },
             };
 
-            VkRenderPassCreateInfo renderPassInfo = new VkRenderPassCreateInfo
-            {
-                sType = VkStructureType.RenderPassCreateInfo,
-                attachmentCount = (uint)attachments.Length,
-                pAttachments = (VkAttachmentDescription*)Utilities.AsPointer(ref attachments[0]),
-                subpassCount = 1,
-                pSubpasses = &subpassDescription,
-                dependencyCount = (uint)dependencies.Length,
-                pDependencies = (VkSubpassDependency*)Utilities.AsPointer(ref dependencies[0])
-            };
-
-            renderPass = Device.CreateRenderPass(ref renderPassInfo);           
+            RenderPassCreateInfo renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
+            
+            renderPass = new RenderPass(ref renderPassInfo);           
         }
 
-        public Framebuffer[] CreateSwapChainFramebuffers(VkRenderPass vkRenderPass)
+        public Framebuffer[] CreateSwapChainFramebuffers(RenderPass vkRenderPass)
         {
             VkImageView* attachments = stackalloc VkImageView[2];
             // Depth/Stencil attachment is the same for all frame buffers
