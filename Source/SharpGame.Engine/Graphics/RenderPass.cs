@@ -167,6 +167,15 @@ namespace SharpGame
         public SubpassDescription[] pSubpasses;
         public SubpassDependency[] pDependencies;
 
+        public RenderPassCreateInfo(AttachmentDescription[] pAttachments,
+            SubpassDescription[] pSubpasses, SubpassDependency[] pDependencies, uint flags = 0)
+        {
+            this.pAttachments = pAttachments;
+            this.pSubpasses = pSubpasses;
+            this.pDependencies = pDependencies;
+            this.flags = flags;
+        }
+
         public unsafe void ToNative(out VkRenderPassCreateInfo native)
         {
             native = VkRenderPassCreateInfo.New();

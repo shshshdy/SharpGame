@@ -110,15 +110,15 @@ namespace SharpGame
             vkCmdSetViewport(commandBuffer, 0, 1, Utilities.AsPointer(ref pViewports));
         }
 
-        public unsafe void BindDescriptorSets(PipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint firstSet, uint descriptorSetCount, ref VkDescriptorSet pDescriptorSets, uint dynamicOffsetCount, uint* pDynamicOffsets)
+        public unsafe void BindDescriptorSets(PipelineBindPoint pipelineBindPoint, Pipeline pipeline, uint firstSet, uint descriptorSetCount, ref VkDescriptorSet pDescriptorSets, uint dynamicOffsetCount, uint* pDynamicOffsets)
         {
-            vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, layout, firstSet, descriptorSetCount, ref pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
+            vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.pipelineLayout, firstSet, descriptorSetCount, ref pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
         }
 
         public unsafe void BindResourceSet(PipelineBindPoint pipelineBindPoint,
-            VkPipelineLayout layout, ResourceSet pDescriptorSets, uint dynamicOffsetCount, uint* pDynamicOffsets)
+            Pipeline pipeline, ResourceSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
         {
-            vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, layout, 0, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
+            vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.pipelineLayout, 0, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
         public void BindPipeline(PipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
@@ -161,7 +161,7 @@ namespace SharpGame
         {
             var pipe = pipeline.GetGraphicsPipeline(renderPass, material.Shader.Main, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
-            BindResourceSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout, material.ResourceSet, 0, null);
+            BindResourceSet(PipelineBindPoint.Graphics, pipeline, material.ResourceSet, 0, null);
             geometry.Draw(this);
         }
 
@@ -169,7 +169,7 @@ namespace SharpGame
         {
             var pipe = pipeline.GetGraphicsPipeline(renderPass, shader, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
-            BindResourceSet(PipelineBindPoint.Graphics, pipeline.pipelineLayout, resourceSet, 0, null);
+            BindResourceSet(PipelineBindPoint.Graphics, pipeline, resourceSet, 0, null);
             geometry.Draw(this);
         }
 
