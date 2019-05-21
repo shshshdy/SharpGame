@@ -16,7 +16,7 @@ namespace SharpGame.Samples
     }
 
     [SampleDesc(sortOrder = 2)]
-    public unsafe class MeshExample : Sample
+    public unsafe class AssimpMesh : Sample
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
         bool wireframe = false;
@@ -54,7 +54,7 @@ namespace SharpGame.Samples
         float rotationSpeed = 0.5f;
         Vector3 rotation = new Vector3(-0.5f, -112.75f, 0.0f);
         Vector3 cameraPos = new Vector3(0.1f, 1.1f, 0.0f);
-        public MeshExample()
+        public AssimpMesh()
         {
         }
 
