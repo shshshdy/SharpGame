@@ -43,7 +43,7 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct PosColorVertex
+    public struct VertexPosColor
     {
         public Vector3 Position;
         public uint Color;
@@ -53,7 +53,7 @@ namespace SharpGame
         (
             new[]
             {
-                new VertexInputBinding(0, (uint)Utilities.SizeOf<PosColorVertex>(), VertexInputRate.Vertex)
+                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosColor>(), VertexInputRate.Vertex)
             },
             new[]
             {
@@ -64,7 +64,7 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pos2dTexColorVertex
+    public struct VertexPos2dTexColor
     {
         public Vector2 Position;
         public Vector2 TexCoord;
@@ -75,7 +75,7 @@ namespace SharpGame
         (
             new[]
             {
-                new VertexInputBinding(0, (uint)Utilities.SizeOf<Pos2dTexColorVertex>(), VertexInputRate.Vertex)
+                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPos2dTexColor>(), VertexInputRate.Vertex)
             },
             new[]
             {

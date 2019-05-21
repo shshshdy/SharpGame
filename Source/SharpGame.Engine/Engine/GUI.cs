@@ -66,7 +66,7 @@ namespace SharpGame
 
         unsafe void CreateGraphicsResources()
         {
-            vertexBuffer = GraphicsBuffer.CreateDynamic<Pos2dTexColorVertex>(BufferUsage.VertexBuffer, 4096);
+            vertexBuffer = GraphicsBuffer.CreateDynamic<VertexPos2dTexColor>(BufferUsage.VertexBuffer, 4096);
             indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, 4096);
             uniformBufferVS = GraphicsBuffer.CreateUniformBuffer<Matrix4x4>();
 
@@ -93,7 +93,7 @@ namespace SharpGame
                 DepthWriteEnable = false,
                 BlendMode = BlendMode.Alpha,
                 DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-                VertexLayout = Pos2dTexColorVertex.Layout
+                VertexLayout = VertexPos2dTexColor.Layout
             };
 
             VkAttachmentDescription[] attachments =

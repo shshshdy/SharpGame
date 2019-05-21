@@ -366,7 +366,7 @@ namespace SharpGame
         {
             Dictionary<FaceVertex, ushort> vertexMap = new Dictionary<FaceVertex, ushort>();
             ushort[] indices = new ushort[group.Faces.Length * 3];
-            List<VertexPositionNormalTexture> vertices = new List<VertexPositionNormalTexture>();
+            List<VertexPosNormTex> vertices = new List<VertexPosNormTex>();
 
             for (int i = 0; i < group.Faces.Length; i++)
             {
@@ -395,7 +395,7 @@ namespace SharpGame
 
         private ushort GetOrCreate(
             Dictionary<FaceVertex, ushort> vertexMap,
-            List<VertexPositionNormalTexture> vertices,
+            List<VertexPosNormTex> vertices,
             FaceVertex key,
             FaceVertex adjacent1,
             FaceVertex adjacent2)
@@ -403,7 +403,7 @@ namespace SharpGame
             ushort index;
             if (!vertexMap.TryGetValue(key, out index))
             {
-                VertexPositionNormalTexture vertex = ConstructVertex(key, adjacent1, adjacent2);
+                VertexPosNormTex vertex = ConstructVertex(key, adjacent1, adjacent2);
                 vertices.Add(vertex);
                 index = checked((ushort)(vertices.Count - 1));
                 vertexMap.Add(key, index);
@@ -412,7 +412,7 @@ namespace SharpGame
             return index;
         }
 
-        private VertexPositionNormalTexture ConstructVertex(FaceVertex key, FaceVertex adjacent1, FaceVertex adjacent2)
+        private VertexPosNormTex ConstructVertex(FaceVertex key, FaceVertex adjacent1, FaceVertex adjacent2)
         {
             Vector3 position = Positions[key.PositionIndex - 1];
             Vector3 normal;
@@ -428,7 +428,7 @@ namespace SharpGame
 
             Vector2 texCoord = key.TexCoordIndex == -1 ? Vector2.Zero : TexCoords[key.TexCoordIndex - 1];
 
-            return new VertexPositionNormalTexture(position, normal, texCoord);
+            return new VertexPosNormTex(position, normal, texCoord);
         }
 
         private Vector3 ComputeNormal(FaceVertex v1, FaceVertex v2, FaceVertex v3)
@@ -544,7 +544,7 @@ namespace SharpGame
         /// <summary>
         /// The vertices of the mesh.
         /// </summary>
-        public VertexPositionNormalTexture[] Vertices { get; }
+        public VertexPosNormTex[] Vertices { get; }
 
         /// <summary>
         /// The indices of the mesh.
@@ -562,7 +562,7 @@ namespace SharpGame
         /// <param name="vertices">The vertices.</param>
         /// <param name="indices">The indices.</param>
         /// <param name="materialName">The name of the associated MTL <see cref="MaterialDefinition"/>.</param>
-        public ConstructedMeshInfo(VertexPositionNormalTexture[] vertices, ushort[] indices, string materialName)
+        public ConstructedMeshInfo(VertexPosNormTex[] vertices, ushort[] indices, string materialName)
         {
             Vertices = vertices;
             Indices = indices;
@@ -571,7 +571,7 @@ namespace SharpGame
 
         public Vector3[] GetVertexPositions()
         {
-            return Vertices.Select(vpnt => vpnt.Position).ToArray();
+            return Vertices.Select(vpnt => vpnt.position).ToArray();
         }
 
         public ushort[] GetIndices()
