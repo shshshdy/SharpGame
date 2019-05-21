@@ -42,9 +42,9 @@ namespace SharpGame
 
         public Framebuffer(RenderPass renderPass,  ref FramebufferCreateInfo framebufferCreateInfo)
         {
-            framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
-            handle = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);
             this.renderPass = renderPass.handle;
+            framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
+            handle = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);       
         }
 
         protected override void Destroy()

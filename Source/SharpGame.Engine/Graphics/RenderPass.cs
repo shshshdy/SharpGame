@@ -14,11 +14,6 @@ namespace SharpGame
         {
         }
 
-        protected override void Destroy()
-        {
-            Device.Destroy(handle);
-        }
-
         public Framebuffer CreateFramebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
         {
             framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
@@ -27,6 +22,12 @@ namespace SharpGame
             fb.renderPass = framebufferCreateInfo.renderPass;
             return fb;
         }
+
+        protected override void Destroy()
+        {
+            Device.Destroy(handle);
+        }
+
     }
 
     [Flags]

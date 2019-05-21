@@ -43,11 +43,11 @@ namespace SharpGame
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
-        private CommandBufferPool primaryCommandPool;
-        private CommandBufferPool[] secondaryCommandPool;
+        private CommandBufferPool primaryCmdPool;
+        private CommandBufferPool[] secondaryCmdPool;
 
-        public CommandBuffer RenderCmdBuffer => primaryCommandPool.CommandBuffers[currentBuffer];
-        public CommandBuffer WorkCmdBuffer => secondaryCommandPool[0].CommandBuffers[currentBuffer];
+        public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[currentBuffer];
+        public CommandBuffer WorkCmdBuffer => secondaryCmdPool[0].CommandBuffers[currentBuffer];
 
         private VkRenderPass renderPass;
         public VkRenderPass RenderPass => renderPass;
@@ -294,8 +294,8 @@ namespace SharpGame
 
         private void CreateCommandPool()
         {
-            primaryCommandPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
-            secondaryCommandPool = new CommandBufferPool[2]
+            primaryCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
+            secondaryCmdPool = new CommandBufferPool[2]
             {
                 new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer),
                 new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer)
@@ -305,9 +305,9 @@ namespace SharpGame
 
         protected void CreateCommandBuffers()
         {
-            primaryCommandPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
+            primaryCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
 
-            foreach (var cmdPool in secondaryCommandPool)
+            foreach (var cmdPool in secondaryCmdPool)
             {
                 cmdPool.Allocate(CommandBufferLevel.Secondary, 8);
             }
@@ -340,7 +340,7 @@ namespace SharpGame
         {
             // Command buffer to be sumitted to the queue
             submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCommandPool.GetAddress(currentBuffer); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
+            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress(currentBuffer); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
 
             // Submit to queue
             Util.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
