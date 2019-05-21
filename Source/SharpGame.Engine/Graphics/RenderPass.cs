@@ -18,6 +18,15 @@ namespace SharpGame
         {
             Device.Destroy(handle);
         }
+
+        public Framebuffer CreateFramebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
+        {
+            framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
+            var vkFb = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);
+            var fb = new Framebuffer(vkFb);
+            fb.renderPass = framebufferCreateInfo.renderPass;
+            return fb;
+        }
     }
 
     [Flags]
@@ -83,14 +92,26 @@ namespace SharpGame
     {
         public SubpassDescriptionFlags flags;
         public PipelineBindPoint pipelineBindPoint;
-        public uint inputAttachmentCount;
-        public AttachmentReference* pInputAttachments;
-        public uint colorAttachmentCount;
-        public AttachmentReference* pColorAttachments;
-        public AttachmentReference* pResolveAttachments;
-        public AttachmentReference* pDepthStencilAttachment;
-        public uint preserveAttachmentCount;
-        public uint* pPreserveAttachments;
+        public AttachmentReference[] pInputAttachments;
+        public AttachmentReference[] pColorAttachments;
+        public AttachmentReference[] pResolveAttachments;
+        public AttachmentReference[] pDepthStencilAttachment;
+        public uint[]pPreserveAttachments;
+
+        public unsafe void ToNative(VkSubpassDescription* native)
+        {
+            native->flags = (VkSubpassDescriptionFlags)flags;
+            native->pipelineBindPoint = (VkPipelineBindPoint)pipelineBindPoint;
+            native->inputAttachmentCount = (uint)pInputAttachments.Length;
+            native->pInputAttachments = (VkAttachmentReference*)Unsafe.AsPointer(ref pInputAttachments[0]);
+            native->colorAttachmentCount = (uint)pColorAttachments.Length;
+            native->pColorAttachments = (VkAttachmentReference*)Unsafe.AsPointer(ref pColorAttachments[0]);
+            native->pResolveAttachments = (VkAttachmentReference*)Unsafe.AsPointer(ref pResolveAttachments[0]);
+            native->pDepthStencilAttachment = (VkAttachmentReference*)Unsafe.AsPointer(ref pDepthStencilAttachment[0]);
+            native->preserveAttachmentCount = (uint)pPreserveAttachments.Length;
+            native->pPreserveAttachments = (uint*)Unsafe.AsPointer(ref pPreserveAttachments[0]);
+        }
+
     }
 
     public enum PipelineStageFlags
@@ -183,7 +204,15 @@ namespace SharpGame
             native.attachmentCount = (uint)pAttachments.Length;
             native.pAttachments = (VkAttachmentDescription*)Unsafe.AsPointer(ref pAttachments[0]);
             native.subpassCount = (uint)pSubpasses.Length;
-            native.pSubpasses = (VkSubpassDescription*)Unsafe.AsPointer(ref pSubpasses[0]);
+
+            VkSubpassDescription* subPasses = stackalloc VkSubpassDescription[pSubpasses.Length];
+            for(int i = 0; i < pSubpasses.Length; i++)
+            {
+                pSubpasses[i].ToNative(&subPasses[i]);
+            }
+
+            native.pSubpasses = subPasses;
+
             native.dependencyCount = (uint)pDependencies.Length;
             native.pDependencies = (VkSubpassDependency*)Unsafe.AsPointer(ref pDependencies[0]);
         }

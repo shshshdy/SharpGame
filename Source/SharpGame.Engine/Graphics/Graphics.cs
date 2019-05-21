@@ -14,7 +14,6 @@ namespace SharpGame
     {
         public VkSemaphore PresentComplete;
         public VkSemaphore RenderComplete;
-        public VkSemaphore TextOverlayComplete;
     }
 
     public class Settings
@@ -78,7 +77,6 @@ namespace SharpGame
             Semaphores* pSem = (Semaphores*)semaphores.GetAddress(0);
             pSem->PresentComplete = Device.CreateSemaphore();
             pSem->RenderComplete = Device.CreateSemaphore();
-            pSem->TextOverlayComplete = Device.CreateSemaphore();
 
             // Set up submit info structure
             // Semaphores will stay the same during application lifetime
