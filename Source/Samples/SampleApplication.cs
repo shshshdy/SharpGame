@@ -85,7 +85,7 @@ namespace SharpGame.Samples
         }
 
 
-        static int corner = 1;
+        static int corner = 0;
         bool p_open;
         const float DISTANCE = 10.0f;
 
@@ -106,12 +106,10 @@ namespace SharpGame.Samples
             {
                 ImGui.Text(string.Format("Fps : {0}", Fps));
                 ImGui.Text(string.Format("Msec : {0}", Msec));
-
-                ImGui.Text("Simple overlay\nin the corner of the screen.\n(right-click to change position)");
-
+                
                 ImGui.Separator();
-
-                if (ImGui.Combo("Sample", ref selected, sampleNames, sampleNames.Length))
+                ImGui.Text("Selected Sample:");
+                if (ImGui.Combo("", ref selected, sampleNames, sampleNames.Length))
                 {
                     SetSample(sampleNames[selected]);
                 }
