@@ -270,10 +270,7 @@ namespace SharpGame
 
         public Framebuffer CreateFramebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
         {
-            framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
-            var vkFb = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);
-            var fb = new Framebuffer(vkFb);
-            fb.renderPass = framebufferCreateInfo.renderPass;
+            var fb = new Framebuffer(ref framebufferCreateInfo);
             return fb;
         }
 

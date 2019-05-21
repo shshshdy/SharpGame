@@ -8,21 +8,12 @@ namespace SharpGame
 {
     public class RenderPass : DisposeBase
     {
-        public VkRenderPass handle;
+        internal VkRenderPass handle;
 
         public RenderPass(ref RenderPassCreateInfo renderPassCreateInfo)
         {
             renderPassCreateInfo.ToNative(out VkRenderPassCreateInfo vkRenderPassCreateInfo);
             handle = Device.CreateRenderPass(ref vkRenderPassCreateInfo);
-        }
-
-        public Framebuffer CreateFramebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
-        {
-            framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
-            var vkFb = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);
-            var fb = new Framebuffer(vkFb);
-            fb.renderPass = framebufferCreateInfo.renderPass;
-            return fb;
         }
 
         protected override void Destroy()
