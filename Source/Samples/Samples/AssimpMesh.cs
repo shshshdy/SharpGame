@@ -67,9 +67,10 @@ namespace SharpGame.Samples
             CreateUniformBuffers();
             SetupResourceSet();
 
-            this.Subscribe<BeginRender>(Handle);
+            this.Subscribe<BeginRenderPass>(Handle);
          
         }
+
 
         protected override void Destroy()
         {
@@ -245,12 +246,12 @@ namespace SharpGame.Samples
             uniformBufferScene = GraphicsBuffer.CreateUniformBuffer<UboVS>();
         }
                 
-        void Handle(BeginRender e)
+        void Handle(BeginRenderPass e)
         {
             var graphics = Graphics.Instance;
             var width = graphics.Width;
             var height = graphics.Height;
-            var cmdBuffer = graphics.RenderCmdBuffer;
+            var cmdBuffer = e.renderPass.CmdBuffer;
 
             uboVS.projection = Matrix4x4.CreatePerspectiveFieldOfView(Util.DegreesToRadians(60.0f), (float)width / (float)height, 0.1f, 256.0f);
             Matrix4x4 viewMatrix = Matrix4x4.CreateTranslation(0.0f, 0.0f, zoom);
@@ -270,14 +271,14 @@ namespace SharpGame.Samples
                 new ClearDepthStencilValue(1.0f, 0)
             );
 
-            cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.Inline);
+            //cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.Inline);
             cmdBuffer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
             cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
 
             var pipe = wireframe ? pipelineWireframe : pipelineSolid;
             cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);
 
-            cmdBuffer.EndRenderPass();
+           // cmdBuffer.EndRenderPass();
               
         }
 

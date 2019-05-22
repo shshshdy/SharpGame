@@ -47,10 +47,14 @@ namespace SharpGame
         private CommandBufferPool[] secondaryCmdPool;
 
         public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[currentBuffer];
-        public CommandBuffer WorkCmdBuffer => secondaryCmdPool[0].CommandBuffers[currentBuffer];
+
+        //todo: multithread
+        public CommandBufferPool WorkCmdPool => secondaryCmdPool[workThread];
 
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
+
+        public int workThread = 0;
 
         public uint currentBuffer;
 

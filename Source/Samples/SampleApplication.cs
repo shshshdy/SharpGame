@@ -106,7 +106,8 @@ namespace SharpGame.Samples
             {
                 ImGui.Text(string.Format("Fps : {0}", Fps));
                 ImGui.Text(string.Format("Msec : {0}", Msec));
-                
+                ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentBuffer));
+
                 ImGui.Separator();
                 ImGui.Text("Selected Sample:");
                 if (ImGui.Combo("", ref selected, sampleNames, sampleNames.Length))
@@ -156,7 +157,7 @@ namespace SharpGame.Samples
             {
                 if (current)
                 {
-                    current.Shutdown();
+                    current.Dispose();
                 }
 
                 current = sample;

@@ -112,20 +112,26 @@ namespace SharpGame
     public struct CommandBufferBeginInfo
     {
         public CommandBufferUsageFlags flags;
-        public CommandBufferInheritanceInfo pInheritanceInfo;
+        public CommandBufferInheritanceInfo inheritanceInfo;
+
+        public CommandBufferBeginInfo(CommandBufferUsageFlags flags, CommandBufferInheritanceInfo inheritanceInfo)
+        {
+            this.flags = flags;
+            this.inheritanceInfo = inheritanceInfo;
+        }
 
         public unsafe void ToNative(out VkCommandBufferBeginInfo native)
         {
             native = VkCommandBufferBeginInfo.New();
             native.flags = (VkCommandBufferUsageFlags)flags;
-            native.pInheritanceInfo = (VkCommandBufferInheritanceInfo*)Unsafe.AsPointer(ref pInheritanceInfo);
+            native.pInheritanceInfo = (VkCommandBufferInheritanceInfo*)Unsafe.AsPointer(ref inheritanceInfo);
         }
     }
 
     public class CommandBuffer : DisposeBase
     {
         internal VkCommandBuffer commandBuffer;
-        private RenderPass renderPass;
+        public RenderPass renderPass;
 
         public CommandBuffer(VkCommandBuffer cmdBuffer)
         {

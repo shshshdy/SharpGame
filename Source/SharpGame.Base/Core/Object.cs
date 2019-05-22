@@ -13,8 +13,5 @@ namespace SharpGame
             return obj != null;
         }
 
-        protected override void Destroy()
-        {
-        }
     }
 }

@@ -69,6 +69,11 @@ namespace SharpGame
                 }
             }
         }
+
+        protected override void Destroy()
+        {
+            this.UnsubscribeAllEvents();
+        }
     }
 
 }

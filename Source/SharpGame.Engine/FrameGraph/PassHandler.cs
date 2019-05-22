@@ -54,25 +54,36 @@ namespace SharpGame
 
         protected void BeginDraw()
         {
+            var graphics = Graphics.Instance;
+            int workContext = graphics.workThread;
 
-            /*
-            int workContext = Graphics.WorkContext;
+            if(renderPass == null)
+            {
+                renderPass = graphics.RenderPass;
+            }
+
+            if(framebuffers.IsNullOrEmpty())
+            {
+                framebuffers = graphics.Framebuffers;
+            }
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                framebuffer = framebuffers[0],
+                framebuffer = framebuffers[graphics.currentBuffer],
                 renderPass = renderPass
             };
 
-            cmdBuffer_ = Graphics.SecondaryCmdBuffers[workContext].Get();
-            cmdBuffer_.Begin(new CommandBufferBeginInfo(CommandBufferUsages.OneTimeSubmit | CommandBufferUsages.RenderPassContinue
-                | CommandBufferUsages.SimultaneousUse, inherit));
+            cmdBuffer = graphics.WorkCmdPool.Get();
+            cmdBuffer.renderPass = renderPass;
+            var cmdBeginInfo = new CommandBufferBeginInfo(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
+                | CommandBufferUsageFlags.SimultaneousUse, inherit);
+            cmdBuffer.Begin(ref cmdBeginInfo);
 
             this.SendGlobalEvent(new BeginRenderPass { renderPass = this});
 
             //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
-            cmdBuffers_[workContext] = cmdBuffer_;
-            */
+            cmdBuffers[graphics.currentBuffer] = cmdBuffer;
+            
         }
 
         public void Draw(RenderView view)
@@ -114,12 +125,12 @@ namespace SharpGame
             );
 
             cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-        /*
+      
             if (cmdBuffers[imageIndex] != null)
             {
                 cmdBuffer.ExecuteCommand(cmdBuffers[imageIndex]);
                 cmdBuffers[imageIndex] = null;
-            }*/
+            }
 
             cmdBuffer.EndRenderPass();
         }
