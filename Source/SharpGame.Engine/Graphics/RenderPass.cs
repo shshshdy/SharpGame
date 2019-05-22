@@ -69,9 +69,9 @@ namespace SharpGame
 
         public AttachmentDescription(
             Format format,
-            SampleCountFlags samples,
-            AttachmentLoadOp loadOp,
-            AttachmentStoreOp storeOp,
+            SampleCountFlags samples = SampleCountFlags.Count1,
+            AttachmentLoadOp loadOp = AttachmentLoadOp.Clear,
+            AttachmentStoreOp storeOp = AttachmentStoreOp.Store,
             AttachmentLoadOp stencilLoadOp = AttachmentLoadOp.DontCare,
             AttachmentStoreOp stencilStoreOp = AttachmentStoreOp.DontCare,
             ImageLayout initialLayout = ImageLayout.Undefined,
@@ -274,15 +274,12 @@ namespace SharpGame
             native.subpassCount = (uint)pSubpasses.Length;
 
             subPasses = new NativeList<VkSubpassDescription>((uint)pSubpasses.Length, (uint)pSubpasses.Length);
-
-            //VkSubpassDescription* subPasses = stackalloc VkSubpassDescription[pSubpasses.Length];
-            for(uint i = 0; i < pSubpasses.Length; i++)
+            for (uint i = 0; i < pSubpasses.Length; i++)
             {
                 pSubpasses[i].ToNative((VkSubpassDescription*)subPasses.GetAddress(i));
             }
 
             native.pSubpasses = (VkSubpassDescription*)subPasses.Data;
-
             native.dependencyCount = (uint)pDependencies.Length;
             native.pDependencies = (VkSubpassDependency*)Unsafe.AsPointer(ref pDependencies[0]);
         }

@@ -63,7 +63,7 @@ namespace SharpGame
 
         public Graphics()
         {
-            Settings.Validation = false;
+            Settings.Validation = true;
 
             VkInstance = Device.CreateInstance(Settings);
             device = Device.Init(enabledFeatures, EnabledExtensions);
@@ -166,29 +166,15 @@ namespace SharpGame
             {
                 // Color attachment
                 new AttachmentDescription
-                {
-                    format = Swapchain.ColorFormat,
-                    samples = SampleCountFlags.Count1,
-                    loadOp = AttachmentLoadOp.Clear,
-                    storeOp = AttachmentStoreOp.Store,
-                    stencilLoadOp = AttachmentLoadOp.DontCare,
-                    stencilStoreOp = AttachmentStoreOp.DontCare,
-                    initialLayout = ImageLayout.Undefined,
-                    finalLayout = ImageLayout.PresentSrcKHR
-                },
+                (
+                    Swapchain.ColorFormat, finalLayout : ImageLayout.PresentSrcKHR
+                ),
 
                 // Depth attachment
                 new AttachmentDescription
-                {
-                    format = DepthFormat,
-                    samples = SampleCountFlags.Count1,
-                    loadOp = AttachmentLoadOp.Clear,
-                    storeOp = AttachmentStoreOp.Store,
-                    stencilLoadOp = AttachmentLoadOp.DontCare,
-                    stencilStoreOp = AttachmentStoreOp.DontCare,
-                    initialLayout = ImageLayout.Undefined,
-                    finalLayout = ImageLayout.DepthStencilAttachmentOptimal
-                }
+                (
+                    DepthFormat, finalLayout : ImageLayout.DepthStencilAttachmentOptimal
+                )
             };
 
             SubpassDescription[] subpassDescription =

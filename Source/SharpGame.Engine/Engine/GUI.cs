@@ -101,7 +101,7 @@ namespace SharpGame
                 {
                     format = graphics.Swapchain.ColorFormat,
                     samples = SampleCountFlags.Count1,
-                    loadOp = AttachmentLoadOp.Load,
+                    loadOp = AttachmentLoadOp.DontCare,
                     storeOp = AttachmentStoreOp.Store,
                     stencilLoadOp = AttachmentLoadOp.DontCare,
                     stencilStoreOp = AttachmentStoreOp.DontCare,

@@ -10,14 +10,14 @@ namespace SharpGame
  
     public class PassHandler : Object
     {
-        private StringID name_;
+        private StringID name;
         public StringID Name
         {
-            get => name_;
+            get => name;
             set
             {
-                name_ = value;
-                passID = Pass.GetID(name_);
+                name = value;
+                passID = Pass.GetID(name);
             }
         }
 
@@ -31,8 +31,8 @@ namespace SharpGame
 
         protected CommandBuffer[] cmdBuffers = new CommandBuffer[2];
 
-        protected CommandBuffer cmdBuffer_;
-        public CommandBuffer CmdBuffer => cmdBuffer_;
+        protected CommandBuffer cmdBuffer;
+        public CommandBuffer CmdBuffer => cmdBuffer;
 
         protected RenderPass renderPass;
 
@@ -49,18 +49,19 @@ namespace SharpGame
             }
 
             var pass = shader.GetPass(passID);
-            cmdBuffer_.DrawGeometry(batch.geometry, pipeline, pass, resourceSet);
+            cmdBuffer.DrawGeometry(batch.geometry, pipeline, pass, resourceSet);
         }
 
         protected void BeginDraw()
         {
+
             /*
             int workContext = Graphics.WorkContext;
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                Framebuffer = framebuffer_[workContext],
-                RenderPass = renderPass_
+                framebuffer = framebuffers[0],
+                renderPass = renderPass
             };
 
             cmdBuffer_ = Graphics.SecondaryCmdBuffers[workContext].Get();
@@ -87,8 +88,8 @@ namespace SharpGame
         {
             this.SendGlobalEvent(new EndRenderPass { renderPass = this });
 
-            cmdBuffer_?.End();
-            cmdBuffer_ = null;
+            cmdBuffer?.End();
+            cmdBuffer = null;
         }
 
         protected virtual void OnDraw(RenderView view)

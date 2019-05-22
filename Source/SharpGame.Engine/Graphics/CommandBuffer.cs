@@ -100,6 +100,12 @@ namespace SharpGame
         public unsafe void ToNative(out VkCommandBufferInheritanceInfo native)
         {
             native = VkCommandBufferInheritanceInfo.New();
+            native.renderPass = renderPass.handle;
+            native.subpass = subpass;
+            native.framebuffer = framebuffer.handle;
+            native.occlusionQueryEnable = occlusionQueryEnable;
+            native.queryFlags = (VkQueryControlFlags)queryFlags;
+            native.pipelineStatistics = (VkQueryPipelineStatisticFlags)pipelineStatistics;
         }
     }
 
@@ -111,6 +117,8 @@ namespace SharpGame
         public unsafe void ToNative(out VkCommandBufferBeginInfo native)
         {
             native = VkCommandBufferBeginInfo.New();
+            native.flags = (VkCommandBufferUsageFlags)flags;
+            native.pInheritanceInfo = (VkCommandBufferInheritanceInfo*)Unsafe.AsPointer(ref pInheritanceInfo);
         }
     }
 
@@ -124,9 +132,16 @@ namespace SharpGame
             commandBuffer = cmdBuffer;
         }
 
-        public void Begin()
+        public void Begin(CommandBufferUsageFlags flags = CommandBufferUsageFlags.None)
         {
             var cmdBufInfo = VkCommandBufferBeginInfo.New();
+            cmdBufInfo.flags = (VkCommandBufferUsageFlags)flags;
+            Util.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
+        }
+
+        public void Begin(ref CommandBufferBeginInfo commandBufferBeginInfo)
+        {
+            commandBufferBeginInfo.ToNative(out VkCommandBufferBeginInfo cmdBufInfo);
             Util.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
         }
 
