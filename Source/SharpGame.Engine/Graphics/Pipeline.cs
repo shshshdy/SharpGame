@@ -206,7 +206,7 @@ namespace SharpGame
             pipeline = 0;
         }
 
-        public unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, Pass pass, Geometry geometry)
+        public unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, ShaderPass pass, Geometry geometry)
         {
             if(pipeline != 0)
             {
@@ -270,7 +270,7 @@ namespace SharpGame
             return pipeline;
         }
 
-        public unsafe VkPipeline GetComputePipeline(Pass pass)
+        public unsafe VkPipeline GetComputePipeline(ShaderPass pass)
         {
             if(!pass.IsComputeShader)
             {

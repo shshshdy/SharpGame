@@ -17,7 +17,7 @@ namespace SharpGame
             set
             {
                 name = value;
-                passID = Pass.GetID(name);
+                passID = ShaderPass.GetID(name);
             }
         }
 

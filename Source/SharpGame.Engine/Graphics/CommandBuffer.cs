@@ -243,7 +243,7 @@ namespace SharpGame
             geometry.Draw(this);
         }
 
-        public unsafe void DrawGeometry(Geometry geometry, Pipeline pipeline, Pass shader, ResourceSet resourceSet)
+        public unsafe void DrawGeometry(Geometry geometry, Pipeline pipeline, ShaderPass shader, ResourceSet resourceSet)
         {
             var pipe = pipeline.GetGraphicsPipeline(renderPass, shader, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
