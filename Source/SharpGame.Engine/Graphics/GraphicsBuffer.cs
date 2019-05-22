@@ -140,6 +140,12 @@ namespace SharpGame
             VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
             bufferCreateInfo.usage = (VkBufferUsageFlags)usageFlags;
             bufferCreateInfo.size = size;
+
+            if (data != null && (memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
+            {
+                bufferCreateInfo.usage |= VkBufferUsageFlags.TransferDst;
+            }
+
             Util.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, out buffer.buffer));
 
             // Create the memory backing up the buffer handle

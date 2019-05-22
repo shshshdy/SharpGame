@@ -27,7 +27,7 @@ namespace SharpGame
     {
         public Settings Settings { get; } = new Settings();
         public VkInstance VkInstance { get; protected set; }
-        public VkPhysicalDeviceFeatures enabledFeatures { get; protected set; }
+        public VkPhysicalDeviceFeatures enabledFeatures;
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
 
         public static VkDevice device { get; protected set; }
@@ -63,8 +63,9 @@ namespace SharpGame
 
         public Graphics()
         {
-            Settings.Validation = true;
+            //Settings.Validation = false;
 
+            enabledFeatures.samplerAnisotropy = True;
             VkInstance = Device.CreateInstance(Settings);
             device = Device.Init(enabledFeatures, EnabledExtensions);
            
