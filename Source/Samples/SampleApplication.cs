@@ -145,6 +145,16 @@ namespace SharpGame.Samples
             var type = Type.GetType("SharpGame.Samples." + typeName);
             if(type == null)
             {
+                type = Type.GetType("SharpGame." + typeName);
+            }
+
+            if (type == null)
+            {
+                type = Type.GetType(typeName);
+            }
+
+            if (type == null)
+            {
                 return;
             }
 

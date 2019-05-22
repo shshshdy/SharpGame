@@ -91,11 +91,19 @@ namespace SharpGame
             return bufCreateInfo;
         }
 
-        public static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo(ref VkDescriptorSetLayout pSetLayouts, uint setLayoutCount = 1)
+        public static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo(ref VkDescriptorSetLayout pSetLayouts, int setLayoutCount = 1)
         {
             VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo.New();
-            pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
+            pipelineLayoutCreateInfo.setLayoutCount = (uint)setLayoutCount;
             pipelineLayoutCreateInfo.pSetLayouts = (VkDescriptorSetLayout*)Unsafe.AsPointer(ref pSetLayouts);
+            return pipelineLayoutCreateInfo;
+        }
+
+        public unsafe static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo( VkDescriptorSetLayout* pSetLayouts, int setLayoutCount = 1)
+        {
+            VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo.New();
+            pipelineLayoutCreateInfo.setLayoutCount = (uint)setLayoutCount;
+            pipelineLayoutCreateInfo.pSetLayouts = pSetLayouts;
             return pipelineLayoutCreateInfo;
         }
 

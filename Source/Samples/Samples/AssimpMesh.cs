@@ -112,7 +112,10 @@ namespace SharpGame.Samples
             {
                 new Pass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
                 {
-                    ResourceLayout = resourceLayout
+                    ResourceLayout = new []
+                    {
+                        resourceLayout
+                    }
                 }
             };
 

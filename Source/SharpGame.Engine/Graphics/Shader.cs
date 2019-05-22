@@ -168,7 +168,7 @@ namespace SharpGame
         public ShaderModule ComputeShader { get; set; }
 
         //[IgnoreDataMember]
-        public ResourceLayout ResourceLayout { get; set; }
+        public ResourceLayout[] ResourceLayout { get; set; }
 
         [IgnoreDataMember]
         public bool IsComputeShader => ComputeShader != null;

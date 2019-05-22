@@ -206,7 +206,7 @@ namespace SharpGame
             pipeline = 0;
         }
 
-        public VkPipeline GetGraphicsPipeline(RenderPass renderPass, Pass pass, Geometry geometry)
+        public unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, Pass pass, Geometry geometry)
         {
             if(pipeline != 0)
             {
@@ -217,8 +217,14 @@ namespace SharpGame
             {
                 return 0;
             }
-      
-            var pipelineLayoutInfo = PipelineLayoutCreateInfo(ref pass.ResourceLayout.descriptorSetLayout, 1);
+
+            VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[pass.ResourceLayout.Length];
+            for(int i = 0; i < pass.ResourceLayout.Length; i++)
+            {
+                pSetLayouts[i] = pass.ResourceLayout[i].descriptorSetLayout;
+            }
+
+            var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, pass.ResourceLayout.Length);
             vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
             unsafe
@@ -264,18 +270,25 @@ namespace SharpGame
             return pipeline;
         }
 
-        public VkPipeline GetComputePipeline(Pass shaderPass)
+        public unsafe VkPipeline GetComputePipeline(Pass pass)
         {
-            if(!shaderPass.IsComputeShader)
+            if(!pass.IsComputeShader)
             {
                 return 0;
             }
 
-            var pipelineLayoutInfo = PipelineLayoutCreateInfo(ref shaderPass.ResourceLayout.descriptorSetLayout, 1);
+
+            VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[pass.ResourceLayout.Length];
+            for (int i = 0; i < pass.ResourceLayout.Length; i++)
+            {
+                pSetLayouts[i] = pass.ResourceLayout[i].descriptorSetLayout;
+            }
+
+            var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, pass.ResourceLayout.Length);
             vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
             var pipelineCreateInfo = VkComputePipelineCreateInfo.New();
-            pipelineCreateInfo.stage = shaderPass.GetComputeStageCreateInfo();
+            pipelineCreateInfo.stage = pass.GetComputeStageCreateInfo();
             pipelineCreateInfo.layout = pipelineLayout;
 
             pipeline = Device.CreateComputePipeline(ref pipelineCreateInfo);

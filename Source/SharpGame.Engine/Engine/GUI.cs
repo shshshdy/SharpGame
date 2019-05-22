@@ -78,7 +78,10 @@ namespace SharpGame
             {
                 new Pass("shaders/texture/ImGui.vert.spv", "shaders/texture/ImGui.frag.spv")
                 {
-                    ResourceLayout = resourceLayout
+                    ResourceLayout = new []
+                    {
+                        resourceLayout
+                    }
                 }
             };
 
