@@ -236,7 +236,7 @@ namespace SharpGame
 
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
-                renderPass, framebuffers[graphics.currentBuffer],
+                renderPass, framebuffers[graphics.currentImage],
                 new Rect2D(0, 0, width, height)
             );
 

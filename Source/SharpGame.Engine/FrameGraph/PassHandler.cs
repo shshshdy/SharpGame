@@ -52,7 +52,7 @@ namespace SharpGame
             cmdBuffer.DrawGeometry(batch.geometry, pipeline, pass, resourceSet);
         }
 
-        protected void BeginDraw()
+        protected void BeginDraw(RenderView view)
         {
             var graphics = Graphics.Instance;
             int workContext = graphics.workThread;
@@ -69,7 +69,7 @@ namespace SharpGame
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                framebuffer = framebuffers[graphics.currentBuffer],
+                framebuffer = framebuffers[graphics.currentImage],
                 renderPass = renderPass
             };
 
@@ -79,16 +79,20 @@ namespace SharpGame
                 | CommandBufferUsageFlags.SimultaneousUse, inherit);
             cmdBuffer.Begin(ref cmdBeginInfo);
 
+
+            cmdBuffer.SetViewport(ref view.Viewport);
+            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+
             this.SendGlobalEvent(new BeginRenderPass { renderPass = this});
 
             //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
-            cmdBuffers[graphics.currentBuffer] = cmdBuffer;
+            cmdBuffers[graphics.currentImage] = cmdBuffer;
             
         }
 
         public void Draw(RenderView view)
         {
-            BeginDraw();
+            BeginDraw(view);
 
             OnDraw(view);
 

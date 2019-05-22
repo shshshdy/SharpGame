@@ -363,6 +363,16 @@ namespace SharpGame
             this.maxDepth = maxDepth;
         }
 
+        public void Define(float x, float y, float width, float height, float minDepth = 0, float maxDepth = 1.0f)
+        {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.minDepth = minDepth;
+            this.maxDepth = maxDepth;
+        }
+
     }
 
     public struct Extent3D

@@ -262,23 +262,9 @@ namespace SharpGame.Samples
             uboVS.model = Matrix4x4.CreateRotationZ(Util.DegreesToRadians(rotation.Z)) * uboVS.model;
 
             uniformBufferScene.SetData(ref uboVS);
-            var fb = graphics.Framebuffers[graphics.currentBuffer];
-            var renderPassBeginInfo = new RenderPassBeginInfo
-            (
-                fb.renderPass, fb,
-                new Rect2D(0, 0, graphics.Width, graphics.Height),
-                new ClearColorValue(0.25f, 0.25f, 0.25f, 1.0f),
-                new ClearDepthStencilValue(1.0f, 0)
-            );
-
-            //cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.Inline);
-            cmdBuffer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
-            cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
-
+            
             var pipe = wireframe ? pipelineWireframe : pipelineSolid;
             cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);
-
-           // cmdBuffer.EndRenderPass();
               
         }
 

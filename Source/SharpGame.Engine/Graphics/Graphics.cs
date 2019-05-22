@@ -38,6 +38,8 @@ namespace SharpGame
         public int Width { get; private set; }
         public int Height { get; private set; }
 
+        public int ImageCount => Swapchain.ImageCount;
+
         private Framebuffer[] framebuffers;
         public Framebuffer[] Framebuffers => framebuffers;
 
@@ -46,7 +48,7 @@ namespace SharpGame
         private CommandBufferPool primaryCmdPool;
         private CommandBufferPool[] secondaryCmdPool;
 
-        public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[currentBuffer];
+        public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[currentImage];
 
         //todo: multithread
         public CommandBufferPool WorkCmdPool => secondaryCmdPool[workThread];
@@ -56,7 +58,7 @@ namespace SharpGame
 
         public int workThread = 0;
 
-        public uint currentBuffer;
+        public uint currentImage;
 
         private NativeList<Semaphores> semaphores = new NativeList<Semaphores>(1, 1);
         private DepthStencil depthStencil;
@@ -306,19 +308,19 @@ namespace SharpGame
         public void BeginRender()
         {
             // Acquire the next image from the swap chaing
-            Util.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentBuffer));
+            Util.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
         }
 
         public void EndRender()
         {
             // Command buffer to be sumitted to the queue
             submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress(currentBuffer); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
+            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress(currentImage); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
 
             // Submit to queue
             Util.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
 
-            Util.CheckResult(Swapchain.QueuePresent(queue, currentBuffer, semaphores[0].RenderComplete));
+            Util.CheckResult(Swapchain.QueuePresent(queue, currentImage, semaphores[0].RenderComplete));
 
             Util.CheckResult(vkQueueWaitIdle(queue));
         }

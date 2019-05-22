@@ -10,8 +10,12 @@ namespace SharpGame
         public Scene Scene { get; set; }
         public Camera Camera { get; set; }
         public FrameGraph RenderPath { get; set; }
-        public Viewport Viewport { get; set; }
+
+        private Viewport viewport;
+        public ref Viewport Viewport => ref viewport;
+
         public uint ViewMask { get; set; }
+
         public PassHandler OverlayPass { get; set; }
 
         internal FastList<Drawable> drawables = new FastList<Drawable>();
@@ -40,9 +44,12 @@ namespace SharpGame
         public void Update(ref FrameInfo frameInfo)
         {
             var graphics = Graphics.Instance;
+
             this.frameInfo = frameInfo;
             this.frameInfo.camera = Camera;
             this.frameInfo.viewSize = new Int2(graphics.Width, graphics.Height);
+
+            Viewport.Define(0, 0, graphics.Width, graphics.Height);
 
             this.SendGlobalEvent(new BeginView { view = this });
 
