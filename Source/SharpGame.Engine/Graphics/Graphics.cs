@@ -67,6 +67,10 @@ namespace SharpGame
 
         private VkSubmitInfo submitInfo;
 
+        GraphicsBuffer[] positionBuffer = new GraphicsBuffer[2];
+        GraphicsBuffer[] instanceBuffer = new GraphicsBuffer[2];
+        GraphicsBuffer[] transistBuffer = new GraphicsBuffer[2];
+
         public Graphics()
         {
             //Settings.Validation = false;
@@ -172,16 +176,9 @@ namespace SharpGame
             AttachmentDescription[] attachments =
             {
                 // Color attachment
-                new AttachmentDescription
-                (
-                    Swapchain.ColorFormat, finalLayout : ImageLayout.PresentSrcKHR
-                ),
-
+                new AttachmentDescription(Swapchain.ColorFormat, finalLayout : ImageLayout.PresentSrcKHR),
                 // Depth attachment
-                new AttachmentDescription
-                (
-                    DepthFormat, finalLayout : ImageLayout.DepthStencilAttachmentOptimal
-                )
+                new AttachmentDescription(DepthFormat, finalLayout : ImageLayout.DepthStencilAttachmentOptimal)
             };
 
             SubpassDescription[] subpassDescription =

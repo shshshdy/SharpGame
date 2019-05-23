@@ -9,7 +9,7 @@ namespace SharpGame
         public RenderView MainView { get; private set; }
 
         private List<RenderView> views = new List<RenderView>();
-        
+
 
         public Renderer()
         {

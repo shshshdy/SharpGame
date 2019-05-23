@@ -15,14 +15,14 @@ namespace SharpGame
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
         public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
 
-        private Shader shader_;
+        private Shader shader;
         public Shader Shader
         {
-            get => shader_;
+            get => shader;
             set
             {
-                shader_ = value;
-                //resourceSet_ = new ResourceSet(shader_.Main.ResourceLayout);
+                shader = value;
+                resourceSet_ = new ResourceSet(shader.Main.ResourceLayout[0]);
             }
         }
 
