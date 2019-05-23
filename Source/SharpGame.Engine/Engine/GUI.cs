@@ -31,7 +31,10 @@ namespace SharpGame
         {
             IntPtr context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
-            ImGui.GetIO().Fonts.AddFontDefault();
+            //ImGui.GetIO().Fonts.AddFontDefault();
+            File file = ResourceCache.Instance.Open("fonts/arial.ttf");
+            var bytes = file.ReadAllBytes();
+            ImGui.GetIO().Fonts.AddFontFromMemoryTTF(Utilities.AsPointer(ref bytes[0]), 32, 15);
 
             CreateGraphicsResources();
             RecreateFontDeviceTexture();

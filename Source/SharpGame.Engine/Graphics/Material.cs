@@ -22,7 +22,7 @@ namespace SharpGame
             set
             {
                 shader = value;
-                resourceSet_ = new ResourceSet(shader.Main.ResourceLayout[0]);
+                //resourceSet_ = new ResourceSet(shader.Main.ResourceLayout[0]);
             }
         }
 

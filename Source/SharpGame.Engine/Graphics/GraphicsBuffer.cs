@@ -56,7 +56,7 @@ namespace SharpGame
 
         public void SetData(void* data, uint offset, uint size)
         {
-            void* mapped = Map(size, offset);
+            void* mapped = Map(offset, size);
             Unsafe.CopyBlock(mapped, data, (uint)size);
             Unmap();
         }

@@ -215,9 +215,9 @@ namespace SharpGame
         public vec2 ShadowMapInvSize;
         public vec4 ShadowSplits;
         /*
-        mat4 cLightMatricesPS [4];
+        mat4 LightMatricesPS [4];
         */
-        //    vec2 cVSMShadowParams;
+        //    vec2 VSMShadowParams;
 
         public float LightRad;
         public float LightLength;

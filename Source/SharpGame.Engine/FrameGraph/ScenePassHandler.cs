@@ -34,7 +34,7 @@ namespace SharpGame
                 new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
-            resourceSet = new ResourceSet(resourceLayout);
+            //resourceSet = new ResourceSet(resourceLayout);
             pipeline = new Pipeline();
 
         }
