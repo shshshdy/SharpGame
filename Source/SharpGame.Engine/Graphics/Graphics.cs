@@ -32,6 +32,7 @@ namespace SharpGame
 
         public static VkDevice device { get; protected set; }
         public static VkQueue queue { get; protected set; }
+        public Format ColorFormat => Swapchain.ColorFormat;
         public Format DepthFormat { get; protected set; }
         public Swapchain Swapchain { get; } = new Swapchain();
 

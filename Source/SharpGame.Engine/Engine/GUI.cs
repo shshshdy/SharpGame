@@ -104,29 +104,21 @@ namespace SharpGame
             {
                 // Color attachment
                 new AttachmentDescription
-                {
-                    format = graphics.Swapchain.ColorFormat,
-                    samples = SampleCountFlags.Count1,
-                    loadOp = AttachmentLoadOp.DontCare,
-                    storeOp = AttachmentStoreOp.Store,
-                    stencilLoadOp = AttachmentLoadOp.DontCare,
-                    stencilStoreOp = AttachmentStoreOp.DontCare,
-                    initialLayout = ImageLayout.Undefined,
-                    finalLayout = ImageLayout.PresentSrcKHR
-                },
+                (                
+                    graphics.ColorFormat,
+                    loadOp : AttachmentLoadOp.DontCare,
+                    storeOp : AttachmentStoreOp.Store,
+                    finalLayout : ImageLayout.PresentSrcKHR
+                ),
 
                 // Depth attachment
                 new AttachmentDescription
-                {
-                    format = graphics.DepthFormat,
-                    samples = SampleCountFlags.Count1,
-                    loadOp = AttachmentLoadOp.DontCare,
-                    storeOp = AttachmentStoreOp.DontCare,
-                    stencilLoadOp = AttachmentLoadOp.DontCare,
-                    stencilStoreOp = AttachmentStoreOp.DontCare,
-                    initialLayout = ImageLayout.Undefined,
-                    finalLayout = ImageLayout.DepthStencilAttachmentOptimal
-                }
+                (
+                    graphics.DepthFormat,
+                    loadOp : AttachmentLoadOp.DontCare,
+                    storeOp : AttachmentStoreOp.DontCare,
+                    finalLayout : ImageLayout.DepthStencilAttachmentOptimal
+                )
             };
 
             SubpassDescription[] subpassDescription =

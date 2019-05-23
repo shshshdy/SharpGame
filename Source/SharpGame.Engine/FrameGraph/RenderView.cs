@@ -43,6 +43,9 @@ namespace SharpGame
         internal GraphicsBuffer ubCameraPS;
         internal GraphicsBuffer ubLight;
 
+        ResourceSet perViewResourceSet;
+        ResourceSet perObjectResourceSet;
+
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
             Attach(camera, scene, renderPath);
