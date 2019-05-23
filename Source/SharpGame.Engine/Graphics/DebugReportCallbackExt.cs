@@ -248,103 +248,103 @@ namespace Vulkan
         /// </summary>
         Unknown = 0,
         /// <summary>
-        /// Specifies an <see cref="VulkanCore.Instance"/>.
+        /// Specifies an <see cref="Vulkan.Instance"/>.
         /// </summary>
         Instance = 1,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.PhysicalDevice"/>.
+        /// Specifies a <see cref="Vulkan.PhysicalDevice"/>.
         /// </summary>
         PhysicalDevice = 2,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.Device"/>.
+        /// Specifies a <see cref="Vulkan.Device"/>.
         /// </summary>
         Device = 3,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.Queue"/>.
+        /// Specifies a <see cref="Vulkan.Queue"/>.
         /// </summary>
         Queue = 4,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.Semaphore"/>.
+        /// Specifies a <see cref="Vulkan.Semaphore"/>.
         /// </summary>
         Semaphore = 5,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.CommandBuffer"/>.
+        /// Specifies a <see cref="Vulkan.CommandBuffer"/>.
         /// </summary>
         CommandBuffer = 6,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.Fence"/>.
+        /// Specifies a <see cref="Vulkan.Fence"/>.
         /// </summary>
         Fence = 7,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.DeviceMemory"/>.
+        /// Specifies a <see cref="Vulkan.DeviceMemory"/>.
         /// </summary>
         DeviceMemory = 8,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.Buffer"/>.
+        /// Specifies a <see cref="Vulkan.Buffer"/>.
         /// </summary>
         Buffer = 9,
         /// <summary>
-        /// Specifies an <see cref="VulkanCore.Image"/>.
+        /// Specifies an <see cref="Vulkan.Image"/>.
         /// </summary>
         Image = 10,
         /// <summary>
-        /// Specifies an <see cref="VulkanCore.Event"/>.
+        /// Specifies an <see cref="Vulkan.Event"/>.
         /// </summary>
         Event = 11,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.QueryPool"/>.
+        /// Specifies a <see cref="Vulkan.QueryPool"/>.
         /// </summary>
         QueryPool = 12,
         /// <summary>
-        /// Specifies an <see cref="VulkanCore.BufferView"/>.
+        /// Specifies an <see cref="Vulkan.BufferView"/>.
         /// </summary>
         BufferView = 13,
         /// <summary>
-        /// Specifies an <see cref="VulkanCore.ImageView"/>.
+        /// Specifies an <see cref="Vulkan.ImageView"/>.
         /// </summary>
         ImageView = 14,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.ShaderModule"/>.
+        /// Specifies a <see cref="Vulkan.ShaderModule"/>.
         /// </summary>
         ShaderModule = 15,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.PipelineCache"/>.
+        /// Specifies a <see cref="Vulkan.PipelineCache"/>.
         /// </summary>
         PipelineCache = 16,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.PipelineLayout"/>.
+        /// Specifies a <see cref="Vulkan.PipelineLayout"/>.
         /// </summary>
         PipelineLayout = 17,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.RenderPass"/>.
+        /// Specifies a <see cref="Vulkan.RenderPass"/>.
         /// </summary>
         RenderPass = 18,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.Pipeline"/>.
+        /// Specifies a <see cref="Vulkan.Pipeline"/>.
         /// </summary>
         Pipeline = 19,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.DescriptorSetLayout"/>.
+        /// Specifies a <see cref="Vulkan.DescriptorSetLayout"/>.
         /// </summary>
         DescriptorSetLayout = 20,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.Sampler"/>.
+        /// Specifies a <see cref="Vulkan.Sampler"/>.
         /// </summary>
         Sampler = 21,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.DescriptorPool"/>.
+        /// Specifies a <see cref="Vulkan.DescriptorPool"/>.
         /// </summary>
         DescriptorPool = 22,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.DescriptorSet"/>.
+        /// Specifies a <see cref="Vulkan.DescriptorSet"/>.
         /// </summary>
         DescriptorSet = 23,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.Framebuffer"/>.
+        /// Specifies a <see cref="Vulkan.Framebuffer"/>.
         /// </summary>
         Framebuffer = 24,
         /// <summary>
-        /// Specifies a <see cref="VulkanCore.CommandPool"/>.
+        /// Specifies a <see cref="Vulkan.CommandPool"/>.
         /// </summary>
         CommandPool = 25,
         /// <summary>

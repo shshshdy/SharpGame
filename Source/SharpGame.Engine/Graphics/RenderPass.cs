@@ -8,10 +8,6 @@ namespace SharpGame
 {
     public class RenderPass : DisposeBase
     {
-        public AttachmentDescription[] pAttachments;
-        public SubpassDescription[] pSubpasses;
-        public SubpassDependency[] pDependencies;
-
         internal VkRenderPass handle;
 
         public RenderPass(ref RenderPassCreateInfo renderPassCreateInfo)

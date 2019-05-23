@@ -29,7 +29,7 @@ namespace SharpGame
         public int offset;
     }
 
-    public struct InputBlock
+    public struct UniformBlock
     {
         public string name;
         public int size;
@@ -41,8 +41,8 @@ namespace SharpGame
 
     public class ShaderReflection
     {
-        public InputBlock pushConstants;
-        public List<InputBlock> descriptorSets;
+        public UniformBlock pushConstants;
+        public List<UniformBlock> descriptorSets;
 
         public List<uint> dynamicSets;
         public List<uint> globalSets;
