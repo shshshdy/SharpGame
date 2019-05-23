@@ -12,8 +12,12 @@ namespace SharpGame
 
     public class RenderView : Object
     {
-        public Scene Scene { get; set; }
-        public Camera Camera { get; set; }
+        private Scene scene;
+        public Scene Scene => scene;
+
+        private Camera camera;
+        public Camera Camera => camera;
+
         public FrameGraph RenderPath { get; set; }
 
         private Viewport viewport;
@@ -34,10 +38,10 @@ namespace SharpGame
         private CameraPS cameraPS = new CameraPS();
         private LightPS light = new LightPS();
 
-        GraphicsBuffer ubFrameInfo;
-        GraphicsBuffer ubCameraVS;
-        GraphicsBuffer ubCameraPS;
-        GraphicsBuffer ubLight;
+        internal GraphicsBuffer ubFrameInfo;
+        internal GraphicsBuffer ubCameraVS;
+        internal GraphicsBuffer ubCameraPS;
+        internal GraphicsBuffer ubLight;
 
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
@@ -46,8 +50,8 @@ namespace SharpGame
 
         public void Attach(Camera camera, Scene scene, FrameGraph renderPath = null)
         {
-            Scene = scene;
-            Camera = camera;
+            this.scene = scene;
+            this.camera = camera;
             RenderPath = renderPath;
 
             if (RenderPath == null)
@@ -93,9 +97,20 @@ namespace SharpGame
 
             Viewport.Define(0, 0, graphics.Width, graphics.Height);
 
+            frameUniform.DeltaTime = Time.Delta;
+            frameUniform.ElapsedTime = Time.Total;
+            ubFrameInfo.SetData(ref frameUniform);
+
             this.SendGlobalEvent(new BeginView { view = this });
 
             UpdateDrawables();
+
+            if(camera != null)
+            {
+                UpdateViewParameters();
+            }
+
+            UpdateLightParameters();
 
             RenderPath.Draw(this);
 
@@ -130,8 +145,21 @@ namespace SharpGame
             foreach (var drawable in drawables)
             {
                 drawable.UpdateBatches(ref frameInfo);
-            }         
+            }
 
+        }
+
+        private void UpdateViewParameters()
+        {
+            ref CameraVS cameraVS = ref ubCameraVS.Map<CameraVS>();
+            cameraVS.View = camera.View;
+            Matrix.Invert(ref camera.View, out cameraVS.ViewInv);
+            cameraVS.ViewProj = camera.View*camera.Projection;
+            cameraVS.CameraPos = camera.Node.Position;
+        }
+
+        private void UpdateLightParameters()
+        {
         }
 
         public void Render(int imageIndex)
@@ -152,50 +180,47 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraVS
     {
-        public vec3 CameraPos;
-        public float NearClip;
-        public vec4 DepthMode;
-        public vec3 FrustumSize;
-        public float FarClip;
-        public vec4 GBufferOffsets;
         public mat4 View;
         public mat4 ViewInv;
         public mat4 ViewProj;
-        public vec4 ClipPlane;
+        public vec3 CameraPos;
+        public float NearClip;
+        public vec3 FrustumSize;
+        public float FarClip;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraPS
     {
-        public vec3 CameraPosPS;
+        public vec3 CameraPos;
         float pading1;
         public vec4 DepthReconstruct;
         public vec2 GBufferInvSize;
-        public float NearClipPS;
-        public float FarClipPS;
+        public float NearClip;
+        public float FarClip;
     }
 
 
     [StructLayout(LayoutKind.Sequential)]
     public struct LightPS
     {
-        public vec4 cLightColor;
-        public vec4 cLightPosPS;
-        public vec3 cLightDirPS;
+        public vec4 LightColor;
+        public vec4 LightPos;
+        public vec3 LightDir;
         float pading1;
-        public vec4 cNormalOffsetScalePS;
-        public vec4 cShadowCubeAdjust;
-        public vec4 cShadowDepthFade;
-        public vec2 cShadowIntensity;
-        public vec2 cShadowMapInvSize;
-        public vec4 cShadowSplits;
+        public vec4 NormalOffsetScale;
+        public vec4 ShadowCubeAdjust;
+        public vec4 ShadowDepthFade;
+        public vec2 ShadowIntensity;
+        public vec2 ShadowMapInvSize;
+        public vec4 ShadowSplits;
         /*
         mat4 cLightMatricesPS [4];
         */
         //    vec2 cVSMShadowParams;
 
-        public float cLightRad;
-        public float cLightLength;
+        public float LightRad;
+        public float LightLength;
 
     }
 

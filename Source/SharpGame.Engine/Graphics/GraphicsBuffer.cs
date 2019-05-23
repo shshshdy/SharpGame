@@ -20,47 +20,33 @@ namespace SharpGame
 
         public VkDeviceSize size = 0;
         public VkDeviceSize alignment = 0;
-        public void* mapped = null;
 
         /** @brief Usage flags to be filled by external source at buffer creation (to query at some later point) */
         public BufferUsage usageFlags;
         /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
         public VkMemoryPropertyFlags memoryPropertyFlags;
 
-        public VkResult map(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
+        public ref T Map<T>(int offset = 0) where T : struct
         {
-            void* mappedLocal;
-            var result = vkMapMemory(Graphics.device, memory, offset, size, 0, &mappedLocal);
-            mapped = mappedLocal;
-            return result;
+            void* mapped = Device.MapMemory(memory, (ulong)offset, size, 0);
+            return ref Unsafe.AsRef<T>(mapped);
         }
 
-        public void unmap()
+        public void* Map(VkDeviceSize offset = 0, VkDeviceSize size = WholeSize)
         {
-            if (mapped != null)
-            {
-                vkUnmapMemory(Graphics.device, memory);
-                mapped = null;
-            }
+            return Device.MapMemory(memory, offset, size, 0);
+        }
+               
+        public void Unmap()
+        {
+            Device.UnmapMemory(memory);            
         }
 
-        public VkResult bind(VkDeviceSize offset = 0)
-        {
-            return vkBindBufferMemory(Graphics.device, buffer, memory, offset);
-        }
-
-        public void setupDescriptor(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
+        public void SetupDescriptor(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
         {
             descriptor.offset = offset;
             descriptor.buffer = buffer;
             descriptor.range = size;
-        }
-
-        public void copyTo(void* data, VkDeviceSize size)
-        {
-            Debug.Assert(mapped != null);
-            Debug.Assert(size <= uint.MaxValue);
-            Unsafe.CopyBlock(mapped, data, (uint)size);
         }
 
         public void SetData<T>(ref T data, int offset = 0) where T : struct
@@ -70,12 +56,12 @@ namespace SharpGame
 
         public void SetData(void* data, uint offset, uint size)
         {
-            map(size, offset);
-            copyTo(data, size);
-            unmap();
+            void* mapped = Map(size, offset);
+            Unsafe.CopyBlock(mapped, data, (uint)size);
+            Unmap();
         }
 
-        public VkResult flush(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
+        public VkResult Flush(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
         {
             VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
             mappedRange.memory = memory;
@@ -84,7 +70,7 @@ namespace SharpGame
             return vkFlushMappedMemoryRanges(Graphics.device, 1, &mappedRange);
         }
 
-        public VkResult invalidate(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
+        public VkResult Invalidate(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
         {
             VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
             mappedRange.memory = memory;
@@ -187,15 +173,15 @@ namespace SharpGame
                 }
                 else
                 {
-                    Util.CheckResult(buffer.map());
-                    Unsafe.CopyBlock(buffer.mapped, data, (uint)size);
-                    buffer.unmap();
+                    var mapped = buffer.Map();
+                    Unsafe.CopyBlock(mapped, data, (uint)size);
+                    buffer.Unmap();
                 }
 
             }
 
             // Initialize a default descriptor that covers the whole buffer size
-            buffer.setupDescriptor();
+            buffer.SetupDescriptor();
 
             // Attach the memory to the buffer object
             return buffer;

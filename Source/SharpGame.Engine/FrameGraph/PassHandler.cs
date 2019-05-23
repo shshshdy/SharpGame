@@ -86,7 +86,8 @@ namespace SharpGame
 
             //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
             cmdBuffers[graphics.currentImage] = cmdBuffer;
-            
+
+            OnBeginDraw(view);
         }
 
         public void Draw(RenderView view)
@@ -95,18 +96,28 @@ namespace SharpGame
 
             OnDraw(view);
 
-            EndDraw();
+            EndDraw(view);
         }
 
-        protected void EndDraw()
+        protected void EndDraw(RenderView view)
         {
+            OnEndDraw(view);
+
             this.SendGlobalEvent(new EndRenderPass { renderPass = this });
 
             cmdBuffer?.End();
             cmdBuffer = null;
         }
 
+        protected virtual void OnBeginDraw(RenderView view)
+        {
+        }
+
         protected virtual void OnDraw(RenderView view)
+        {
+        }
+
+        protected virtual void OnEndDraw(RenderView view)
         {
         }
 

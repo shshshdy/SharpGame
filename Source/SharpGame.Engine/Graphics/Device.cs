@@ -526,6 +526,18 @@ namespace SharpGame
             }
         }
 
+        public static void* MapMemory(VkDeviceMemory memory, ulong offset, ulong size, uint flags)
+        {
+            void* mappedLocal;
+            vkMapMemory(device, memory, offset, size, flags, &mappedLocal);
+            return mappedLocal;
+        }
+
+        public static void UnmapMemory(VkDeviceMemory memory)
+        {
+            vkUnmapMemory(device, memory);
+        }
+
         public static uint GetMemoryType(uint typeBits, VkMemoryPropertyFlags properties, uint* memTypeFound = null)
         {
             for (uint i = 0; i < MemoryProperties.memoryTypeCount; i++)

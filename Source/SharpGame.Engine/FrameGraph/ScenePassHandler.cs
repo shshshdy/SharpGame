@@ -45,6 +45,10 @@ namespace SharpGame
            
         }
 
+        protected override void OnBeginDraw(RenderView view)
+        {
+        }
+
         protected override void OnDraw(RenderView view)
         {/*
             if(view.Camera)

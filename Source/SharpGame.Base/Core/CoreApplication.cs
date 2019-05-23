@@ -30,12 +30,7 @@ namespace SharpGame
             subsystems.Push(sub);
             return InstanceHoler<T>.inst;
         }
-
-        public T Get<T>()
-        {
-            return InstanceHoler<T>.inst;
-        }
-
+        
         protected override void Destroy()
         {
             while (subsystems.Count > 0)
@@ -43,7 +38,7 @@ namespace SharpGame
         }
     }
 
-    internal class InstanceHoler<T>
+    internal struct InstanceHoler<T>
     {
         internal static T inst;
     }
