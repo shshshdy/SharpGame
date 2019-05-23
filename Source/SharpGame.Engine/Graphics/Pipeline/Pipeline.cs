@@ -46,10 +46,10 @@ namespace SharpGame
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
         public BlendMode BlendMode { set => SetBlendMode(value); }
-        public DynamicStateInfo? DynamicState {get; set;}
+        public DynamicStateInfo DynamicState {get; set;}
 
-        public VkPipelineLayout pipelineLayout;
-        public VkPipeline pipeline;
+        internal VkPipelineLayout pipelineLayout;
+        internal VkPipeline pipeline;
 
         public Pipeline()
         {
@@ -70,7 +70,7 @@ namespace SharpGame
 
             MultisampleState = new MultisampleStateInfo
             {
-                rasterizationSamples = VkSampleCountFlags.Count1,
+                rasterizationSamples = SampleCountFlags.Count1,
                 minSampleShading = 1.0f
             };
 
@@ -78,18 +78,18 @@ namespace SharpGame
             {
                 depthTestEnable = true,
                 depthWriteEnable = true,
-                depthCompareOp = VkCompareOp.LessOrEqual,
-                back = new VkStencilOpState
+                depthCompareOp = CompareOp.LessOrEqual,
+                back = new StencilOpState
                 {
-                    failOp = VkStencilOp.Keep,
-                    passOp = VkStencilOp.Keep,
-                    compareOp = VkCompareOp.Always
+                    failOp = StencilOp.Keep,
+                    passOp = StencilOp.Keep,
+                    compareOp = CompareOp.Always
                 },
-                front = new VkStencilOpState
+                front = new StencilOpState
                 {
-                    failOp = VkStencilOp.Keep,
-                    passOp = VkStencilOp.Keep,
-                    compareOp = VkCompareOp.Always
+                    failOp = StencilOp.Keep,
+                    passOp = StencilOp.Keep,
+                    compareOp = CompareOp.Always
                 }
             };
 
@@ -116,13 +116,13 @@ namespace SharpGame
                         {
                             new ColorBlendAttachment
                             {
-                                srcColorBlendFactor = VkBlendFactor.One,
-                                dstColorBlendFactor = VkBlendFactor.Zero,
-                                colorBlendOp = VkBlendOp.Add,
-                                srcAlphaBlendFactor = VkBlendFactor.One,
-                                dstAlphaBlendFactor = VkBlendFactor.Zero,
-                                alphaBlendOp = VkBlendOp.Add,
-                                colorWriteMask = (VkColorComponentFlags)0xf
+                                srcColorBlendFactor = BlendFactor.One,
+                                dstColorBlendFactor = BlendFactor.Zero,
+                                colorBlendOp = BlendOp.Add,
+                                srcAlphaBlendFactor = BlendFactor.One,
+                                dstAlphaBlendFactor = BlendFactor.Zero,
+                                alphaBlendOp = BlendOp.Add,
+                                colorWriteMask = ColorComponentFlags.All
                             }
                         }
                     };
@@ -135,13 +135,13 @@ namespace SharpGame
                         {
                             new ColorBlendAttachment
                             {
-                                srcColorBlendFactor = VkBlendFactor.One,
-                                dstColorBlendFactor = VkBlendFactor.One,
-                                colorBlendOp = VkBlendOp.Add,
-                                srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
-                                dstAlphaBlendFactor = VkBlendFactor.DstAlpha,
-                                alphaBlendOp = VkBlendOp.Add,
-                                colorWriteMask = (VkColorComponentFlags)0xf
+                                srcColorBlendFactor = BlendFactor.One,
+                                dstColorBlendFactor = BlendFactor.One,
+                                colorBlendOp = BlendOp.Add,
+                                srcAlphaBlendFactor = BlendFactor.SrcAlpha,
+                                dstAlphaBlendFactor = BlendFactor.DstAlpha,
+                                alphaBlendOp = BlendOp.Add,
+                                colorWriteMask = ColorComponentFlags.All
                             }
                         }
                     };
@@ -158,13 +158,13 @@ namespace SharpGame
                             new ColorBlendAttachment
                             {
                                 blendEnable = true,
-                                srcColorBlendFactor = VkBlendFactor.SrcAlpha,
-                                dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                                colorBlendOp = VkBlendOp.Add,
-                                srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
-                                dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                                alphaBlendOp = VkBlendOp.Add,
-                                colorWriteMask = (VkColorComponentFlags)0xf
+                                srcColorBlendFactor = BlendFactor.SrcAlpha,
+                                dstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                                colorBlendOp = BlendOp.Add,
+                                srcAlphaBlendFactor = BlendFactor.SrcAlpha,
+                                dstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                                alphaBlendOp = BlendOp.Add,
+                                colorWriteMask = ColorComponentFlags.All
                             }
                         }
                     };
@@ -180,13 +180,13 @@ namespace SharpGame
                             new ColorBlendAttachment
                             {
                                 blendEnable = true,
-                                srcColorBlendFactor = VkBlendFactor.One,
-                                dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                                colorBlendOp = VkBlendOp.Add,
-                                srcAlphaBlendFactor = VkBlendFactor.One,
-                                dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                                alphaBlendOp = VkBlendOp.Add,
-                                colorWriteMask = (VkColorComponentFlags)0xf
+                                srcColorBlendFactor = BlendFactor.One,
+                                dstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                                colorBlendOp = BlendOp.Add,
+                                srcAlphaBlendFactor = BlendFactor.One,
+                                dstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                                alphaBlendOp = BlendOp.Add,
+                                colorWriteMask = ColorComponentFlags.All
                             }
                         }
                     };
@@ -206,7 +206,7 @@ namespace SharpGame
             pipeline = 0;
         }
 
-        public unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, ShaderPass pass, Geometry geometry)
+        public unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, Pass pass, Geometry geometry)
         {
             if(pipeline != 0)
             {
@@ -260,7 +260,7 @@ namespace SharpGame
                 VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
                 if (DynamicState.HasValue)
                 {
-                    DynamicState.Value.ToNative(out dynamicStateCreateInfo);
+                    DynamicState.ToNative(out dynamicStateCreateInfo);
                     pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
                 }
 
@@ -270,7 +270,7 @@ namespace SharpGame
             return pipeline;
         }
 
-        public unsafe VkPipeline GetComputePipeline(ShaderPass pass)
+        public unsafe VkPipeline GetComputePipeline(Pass pass)
         {
             if(!pass.IsComputeShader)
             {

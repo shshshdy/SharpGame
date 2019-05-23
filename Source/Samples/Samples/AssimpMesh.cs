@@ -110,7 +110,7 @@ namespace SharpGame.Samples
 
             shader = new Shader
             {
-                new ShaderPass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
+                new Pass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
                 {
                     ResourceLayout = new []
                     {
@@ -144,15 +144,15 @@ namespace SharpGame.Samples
             if (Device.Features.textureCompressionBC == 1)
             {
                 colorMap.LoadFromFile(Application.DataPath + "models/voyager/voyager_bc3_unorm.ktx",
-                    VkFormat.Bc3UnormBlock, Graphics.queue);
+                    VkFormat.Bc3UnormBlock);
             }
             else if (Device.Features.textureCompressionASTC_LDR == 1)
             {
-                colorMap.LoadFromFile(Application.DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock, Graphics.queue);
+                colorMap.LoadFromFile(Application.DataPath + "models/voyager/voyager_astc_8x8_unorm.ktx", VkFormat.Astc8x8UnormBlock);
             }
             else if (Device.Features.textureCompressionETC2 == 1)
             {
-                colorMap.LoadFromFile(Application.DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock, Graphics.queue);
+                colorMap.LoadFromFile(Application.DataPath + "models/voyager/voyager_etc2_unorm.ktx", VkFormat.Etc2R8g8b8a8UnormBlock);
             }
             else
             {

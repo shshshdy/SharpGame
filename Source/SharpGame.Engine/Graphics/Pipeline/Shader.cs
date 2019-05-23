@@ -11,7 +11,7 @@ namespace SharpGame
     using static Builder;
 
     [DataContract]
-    public class Shader : Resource, IEnumerable<ShaderPass>
+    public class Shader : Resource, IEnumerable<Pass>
     {
         [DataMember]
         public string Name { get; set; }
@@ -20,7 +20,7 @@ namespace SharpGame
         public List<ShaderParameter> Properties { get; set; }
 
         [DataMember]
-        public List<ShaderPass> Passes { get; set; } = new List<ShaderPass>();
+        public List<Pass> Passes { get; set; } = new List<Pass>();
 
         [IgnoreDataMember]
         public ulong passFlags = 0;
@@ -34,7 +34,7 @@ namespace SharpGame
             Name = name;
         }
 
-        public Shader(params ShaderPass[] passes)
+        public Shader(params Pass[] passes)
         {
             foreach(var pass in passes)
             {
@@ -42,13 +42,13 @@ namespace SharpGame
             }
         }
 
-        public void Add(ShaderPass pass)
+        public void Add(Pass pass)
         {
             Passes.Add(pass);
         }
 
         [IgnoreDataMember]
-        public ShaderPass Main
+        public Pass Main
         {
             get
             {
@@ -76,7 +76,7 @@ namespace SharpGame
             }
         }
 
-        public ShaderPass GetPass(ulong id)
+        public Pass GetPass(ulong id)
         {
             foreach (var pass in Passes)
             {
@@ -89,7 +89,7 @@ namespace SharpGame
             return null;
         }
 
-        public ShaderPass GetPass(StringID name)
+        public Pass GetPass(StringID name)
         {
             foreach(var pass in Passes)
             {
@@ -122,14 +122,14 @@ namespace SharpGame
             base.Destroy();
         }
 
-        public IEnumerator<ShaderPass> GetEnumerator()
+        public IEnumerator<Pass> GetEnumerator()
         {
-            return ((IEnumerable<ShaderPass>)Passes).GetEnumerator();
+            return ((IEnumerable<Pass>)Passes).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<ShaderPass>)Passes).GetEnumerator();
+            return ((IEnumerable<Pass>)Passes).GetEnumerator();
         }
     }
 

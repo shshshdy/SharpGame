@@ -7,13 +7,8 @@ using Vulkan;
 namespace SharpGame
 {
 
-    public class ShaderPass : DisposeBase
+    public class Pass : DisposeBase
     {
-        public static readonly StringID Shadow = "shadow";
-        public static readonly StringID Depth = "depth";
-        public static readonly StringID Clear = "clear";
-        public static readonly StringID Main = "main";
-
         private StringID name_;
         public StringID Name
         {
@@ -30,27 +25,42 @@ namespace SharpGame
 
         [DataMember]
         public ShaderModule VertexShader { get; set; }
+
         [DataMember]
         public ShaderModule GeometryShader { get; set; }
+
         [DataMember]
         public ShaderModule PixelShader { get; set; }
+
         [DataMember]
         public ShaderModule HullShader { get; set; }
+
         [DataMember]
         public ShaderModule DomainShader { get; set; }
+
         [DataMember]
         public ShaderModule ComputeShader { get; set; }
 
-        //[IgnoreDataMember]
+        [DataMember]
         public ResourceLayout[] ResourceLayout { get; set; }
+
+        [IgnoreDataMember]
         public ResourceSet[] ResourceSet { get; set; }
 
         [IgnoreDataMember]
         public bool IsComputeShader => ComputeShader != null;
+
         private bool builded_ = false;
 
-        static List<StringID> passList = new List<StringID>();
-        static ShaderPass()
+
+        public static readonly StringID Shadow = "shadow";
+        public static readonly StringID Depth = "depth";
+        public static readonly StringID Clear = "clear";
+        public static readonly StringID Main = "main";
+
+        private static List<StringID> passList = new List<StringID>();
+
+        static Pass()
         {
             passList.Add(Main);
         }
@@ -80,11 +90,11 @@ namespace SharpGame
             return (ulong)(1 << (passList.Count - 1));
         }
 
-        public ShaderPass()
+        public Pass()
         {
         }
 
-        public ShaderPass(string vertexShader = null, string pixelShader = null, string geometryShader = null,
+        public Pass(string vertexShader = null, string pixelShader = null, string geometryShader = null,
             string hullShader = null, string domainShader = null, string computeShader = null)
         {
             if (!string.IsNullOrEmpty(vertexShader))
@@ -120,7 +130,7 @@ namespace SharpGame
             Build();
         }
 
-        public ShaderPass(string name, params ShaderModule[] shaderModules)
+        public Pass(string name, params ShaderModule[] shaderModules)
         {
             foreach (var sm in shaderModules)
             {
@@ -180,7 +190,7 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            foreach (var stage in this.GetShaderModules())
+            foreach (var stage in GetShaderModules())
             {
                 stage?.Dispose();
             }

@@ -17,7 +17,7 @@ namespace SharpGame
             set
             {
                 name = value;
-                passID = ShaderPass.GetID(name);
+                passID = Pass.GetID(name);
             }
         }
 
@@ -29,7 +29,7 @@ namespace SharpGame
         [IgnoreDataMember]
         public Framebuffer[] framebuffers;
 
-        protected CommandBuffer[] cmdBuffers = new CommandBuffer[2];
+        protected CommandBuffer[] cmdBuffers = new CommandBuffer[3];
 
         protected CommandBuffer cmdBuffer;
         public CommandBuffer CmdBuffer => cmdBuffer;
@@ -75,10 +75,9 @@ namespace SharpGame
 
             cmdBuffer = graphics.WorkCmdPool.Get();
             cmdBuffer.renderPass = renderPass;
-            var cmdBeginInfo = new CommandBufferBeginInfo(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
-                | CommandBufferUsageFlags.SimultaneousUse, inherit);
-            cmdBuffer.Begin(ref cmdBeginInfo);
 
+            cmdBuffer.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
+                | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
 
             cmdBuffer.SetViewport(ref view.Viewport);
             cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));

@@ -250,7 +250,6 @@ namespace SharpGame
         public void LoadFromFile(
             string filename,
             VkFormat format,
-            VkQueue copyQueue,
             VkImageUsageFlags imageUsageFlags = VkImageUsageFlags.Sampled,
             VkImageLayout imageLayout = VkImageLayout.ShaderReadOnlyOptimal,
             bool forceLinear = false)
@@ -405,7 +404,7 @@ namespace SharpGame
                     imageLayout,
                     subresourceRange);
 
-                Device.FlushCommandBuffer(copyCmd, copyQueue);
+                Device.FlushCommandBuffer(copyCmd, Graphics.queue);
 
                 // Clean up staging resources
                 vkFreeMemory(Device.LogicalDevice, stagingMemory, null);

@@ -109,25 +109,6 @@ namespace SharpGame
         }
     }
 
-    public struct CommandBufferBeginInfo
-    {
-        public CommandBufferUsageFlags flags;
-        public CommandBufferInheritanceInfo inheritanceInfo;
-
-        public CommandBufferBeginInfo(CommandBufferUsageFlags flags, CommandBufferInheritanceInfo inheritanceInfo)
-        {
-            this.flags = flags;
-            this.inheritanceInfo = inheritanceInfo;
-        }
-
-        public unsafe void ToNative(out VkCommandBufferBeginInfo native)
-        {
-            native = VkCommandBufferBeginInfo.New();
-            native.flags = (VkCommandBufferUsageFlags)flags;
-            native.pInheritanceInfo = (VkCommandBufferInheritanceInfo*)Unsafe.AsPointer(ref inheritanceInfo);
-        }
-    }
-
     public class CommandBuffer : DisposeBase
     {
         internal VkCommandBuffer commandBuffer;
@@ -145,10 +126,16 @@ namespace SharpGame
             Util.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
         }
 
-        public void Begin(ref CommandBufferBeginInfo commandBufferBeginInfo)
+        public void Begin(CommandBufferUsageFlags flags, ref CommandBufferInheritanceInfo commandBufferInheritanceInfo)
         {
-            commandBufferBeginInfo.ToNative(out VkCommandBufferBeginInfo cmdBufInfo);
-            Util.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
+            commandBufferInheritanceInfo.ToNative(out VkCommandBufferInheritanceInfo cmdBufInfo);
+            var cmdBufBeginInfo = VkCommandBufferBeginInfo.New();
+            cmdBufBeginInfo.flags = (VkCommandBufferUsageFlags)flags;
+            unsafe
+            {
+                cmdBufBeginInfo.pInheritanceInfo = &cmdBufInfo;
+                Util.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufBeginInfo));
+            }
         }
 
         public void End()
@@ -243,7 +230,7 @@ namespace SharpGame
             geometry.Draw(this);
         }
 
-        public unsafe void DrawGeometry(Geometry geometry, Pipeline pipeline, ShaderPass shader, ResourceSet resourceSet)
+        public unsafe void DrawGeometry(Geometry geometry, Pipeline pipeline, Pass shader, ResourceSet resourceSet)
         {
             var pipe = pipeline.GetGraphicsPipeline(renderPass, shader, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
