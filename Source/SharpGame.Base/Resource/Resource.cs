@@ -35,7 +35,9 @@ namespace SharpGame
 
         protected bool builded_ = false;
 
-        public async virtual Task<bool> LoadAsync(File stream)
+#pragma warning disable CS1998 // 异步方法缺少 "await" 运算符，将以同步方式运行
+        public virtual async Task<bool> LoadAsync(File stream)
+#pragma warning restore CS1998 // 异步方法缺少 "await" 运算符，将以同步方式运行
         {
             return false;
         }

@@ -8,7 +8,7 @@ using System.Text;
 namespace SharpGame
 {
     [DataContract]
-    public class Serializable : Object, IMessagePackSerializationCallbackReceiver
+    public class Serializable : System.Object, IMessagePackSerializationCallbackReceiver
     {
         public bool IsResource { get; set; }
 

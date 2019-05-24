@@ -10,6 +10,7 @@ namespace SharpGame
         Stack<Object> subsystems = new Stack<Object>();
         public CoreApplication()
         {
+            CreateSubsystem<EventSystem>();
         }
 
         public T CreateSubsystem<T>() where T : Object, new()

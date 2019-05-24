@@ -17,7 +17,7 @@ namespace SharpGame
     };
 
     [DataContract]
-    public partial class Node : Object// Serializable
+    public partial class Node : Object
     {
         #region ATTRIBUTE
 
@@ -39,25 +39,10 @@ namespace SharpGame
         public byte Layer { get => layer_; set => SetLayer(value, false); }
         byte layer_ = 0;
 
-        [DataMember(Order = 5)]
-        public Dictionary<string, object> Tag { get; set; } = new Dictionary<string, object>();
-
         [DataMember(Order = 11)]
         public List<Component> ComponentList => components_;
         protected List<Component> components_ = new List<Component>();
-
-        [IgnoreDataMember]
-        public Component[] Components
-        {
-            set
-            {
-                foreach (var c in value)
-                {
-                    AddComponent(c);
-                }
-            }
-        }
-
+        
         [DataMember(Order = 12)]
         public List<Node> Children => children_;
         protected List<Node> children_ = new List<Node>();

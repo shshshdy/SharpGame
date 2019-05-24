@@ -5,20 +5,13 @@ using System.Collections.Generic;
 
 namespace SharpGame
 {
-    using EventSet = HashSet<(Observable, IEventHandler)>;
-    using EventMap = Dictionary<IObserver, HashSet<(Observable, IEventHandler)>>;
+    using EventSet = HashSet<(Object, IEventHandler)>;
+    using EventMap = Dictionary<IObserver, HashSet<(Object, IEventHandler)>>;
 
-    public class EventSystem : Observable
+    public class EventSystem : System<EventSystem>
     {
-        static EventSystem()
-        {
-            Instance = new EventSystem();
-        }
-
-        public static EventSystem Instance { get; }
-
         private EventMap subscribedEvents = new EventMap();
-        internal void SubscribeEvent<T>(IObserver oberver, Observable observable, System.Action<T> action)
+        internal void SubscribeEvent<T>(IObserver oberver, Object observable, System.Action<T> action)
         {
             TEventHandler<T> handler = new TEventHandler<T>(action);
             if (this.subscribedEvents.TryGetValue(oberver, out EventSet subscribedEvents))
@@ -38,7 +31,7 @@ namespace SharpGame
             subscribedEvents.Add((observable, handler));
         }
 
-        internal void SubscribeEvent<T>(IObserver oberver, Observable observable, RefAction<T> action)
+        internal void SubscribeEvent<T>(IObserver oberver, Object observable, RefAction<T> action)
         {
             RefEventHandler<T> handler = new RefEventHandler<T>(action);
 
@@ -59,7 +52,7 @@ namespace SharpGame
             subscribedEvents.Add((observable, handler));
         }
 
-        internal void UnsubscribeEvent<T>(IObserver oberver, Observable observable, System.Action<T> action)
+        internal void UnsubscribeEvent<T>(IObserver oberver, Object observable, System.Action<T> action)
         {
             if (this.subscribedEvents.TryGetValue(oberver, out EventSet subscribedEvents))
             {
@@ -75,7 +68,7 @@ namespace SharpGame
 
         }
 
-        internal void UnsubscribeEvent<T>(IObserver oberver, Observable observable, RefAction<T> action)
+        internal void UnsubscribeEvent<T>(IObserver oberver, Object observable, RefAction<T> action)
         {
             if (this.subscribedEvents.TryGetValue(oberver, out EventSet subscribedEvents))
             {

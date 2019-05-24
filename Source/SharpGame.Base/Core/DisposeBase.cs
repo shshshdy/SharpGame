@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SharpGame
@@ -36,6 +37,12 @@ namespace SharpGame
 
         protected virtual void Destroy()
         {
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator bool(DisposeBase obj)
+        {
+            return obj != null && !obj.disposed;
         }
     }
 }
