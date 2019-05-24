@@ -15,7 +15,7 @@ namespace SharpGame.Samples
         public Vector4 lightPos;
     }
 
-    [SampleDesc(sortOrder = 0)]
+    [SampleDesc(sortOrder = 2)]
     public unsafe class AssimpMesh : Sample
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;

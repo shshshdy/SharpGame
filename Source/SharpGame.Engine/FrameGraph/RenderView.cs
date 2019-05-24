@@ -154,11 +154,12 @@ namespace SharpGame
 
         private void UpdateViewParameters()
         {
-            ref CameraVS cameraVS = ref ubCameraVS.Map<CameraVS>();
+            //ref CameraVS cameraVS = ref ubCameraVS.Map<CameraVS>();
             cameraVS.View = camera.View;
             Matrix.Invert(ref camera.View, out cameraVS.ViewInv);
             cameraVS.ViewProj = camera.View*camera.Projection;
             cameraVS.CameraPos = camera.Node.Position;
+            ubCameraPS.SetData(ref cameraVS);
         }
 
         private void UpdateLightParameters()
