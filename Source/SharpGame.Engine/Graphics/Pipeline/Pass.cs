@@ -40,15 +40,11 @@ namespace SharpGame
 
         [DataMember]
         public ShaderModule ComputeShader { get; set; }
-        /*
-        [DataMember]
-        public ResourceLayout[] ResourceLayout { get; set; }
-        */
+
         [IgnoreDataMember]
         public bool IsComputeShader => ComputeShader != null;
 
         private bool builded_ = false;
-
 
         public static readonly StringID Shadow = "shadow";
         public static readonly StringID Depth = "depth";

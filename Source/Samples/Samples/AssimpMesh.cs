@@ -134,7 +134,7 @@ namespace SharpGame.Samples
             resourceLayout = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
+             //   new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
             };
 
             shader = new Shader
@@ -267,7 +267,7 @@ namespace SharpGame.Samples
 
         void SetupResourceSet()
         {
-            resourceSet = new ResourceSet(resourceLayout, uniformBufferScene, colorMap);
+            resourceSet = new ResourceSet(resourceLayout, uniformBufferScene/*, colorMap*/);
         }
 
         // Prepare and initialize uniform buffer containing shader uniforms

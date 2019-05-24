@@ -44,12 +44,6 @@ namespace SharpGame
         [IgnoreDataMember]
         public ref ColorBlendStateInfo ColorBlendState => ref colorBlendState;
 
-        [IgnoreDataMember]
-        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
-
-        private VertexLayout vertexlayout;
-        [IgnoreDataMember]
-        public ref VertexLayout VertexLayout => ref vertexlayout;
 
         public PolygonMode FillMode { get => rasterizationState.polygonMode; set => rasterizationState.polygonMode = value; }
         public CullMode CullMode { get => rasterizationState.cullMode; set => rasterizationState.cullMode = value; }
@@ -58,6 +52,13 @@ namespace SharpGame
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
         public BlendMode BlendMode { set => SetBlendMode(value); }
         public DynamicStateInfo DynamicState {get; set;}
+
+        [IgnoreDataMember]
+        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
+
+        private VertexLayout vertexlayout;
+        [IgnoreDataMember]
+        public ref VertexLayout VertexLayout => ref vertexlayout;
 
         public ResourceLayout[] ResourceLayout { get; set; }
 
