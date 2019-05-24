@@ -79,7 +79,7 @@ namespace SharpGame
 
             uiShader = new Shader("UI")
             {
-                new Pass("shaders/texture/ImGui.vert.spv", "shaders/texture/ImGui.frag.spv")
+                new Pass("shaders/ImGui.vert.spv", "shaders/ImGui.frag.spv")
                 {
                     ResourceLayout = new []
                     {

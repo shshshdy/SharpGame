@@ -253,18 +253,12 @@ namespace SharpGame
             for (uint i = 0; i < framebuffers.Length; i++)
             {
                 attachments[0] = Swapchain.Buffers[i].View;
-                framebuffers[i] = CreateFramebuffer(ref frameBufferCreateInfo);
+                framebuffers[i] = new Framebuffer(ref frameBufferCreateInfo);
             }
 
             return framebuffers;
         }
-
-        public Framebuffer CreateFramebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
-        {
-            var fb = new Framebuffer(ref framebufferCreateInfo);
-            return fb;
-        }
-
+        
         private void CreateCommandPool()
         {
             primaryCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
