@@ -111,12 +111,6 @@ namespace SharpGame.Samples
             shader = new Shader
             {
                 new Pass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
-                {
-                    ResourceLayout = new []
-                    {
-                        resourceLayout
-                    }
-                }
             };
 
             pipelineSolid = new Pipeline
@@ -124,7 +118,11 @@ namespace SharpGame.Samples
                 CullMode = CullMode.Back,
                 FrontFace = FrontFace.Clockwise,
                 DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-                VertexLayout = vertexLayout
+                VertexLayout = vertexLayout,
+                ResourceLayout = new[]
+                {
+                    resourceLayout
+                }
             };
 
             pipelineWireframe = new Pipeline

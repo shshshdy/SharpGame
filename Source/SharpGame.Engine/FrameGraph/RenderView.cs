@@ -55,13 +55,9 @@ namespace SharpGame
         {
             this.scene = scene;
             this.camera = camera;
+                        
             RenderPath = renderPath;
 
-            if (RenderPath == null)
-            {
-                RenderPath = new FrameGraph();
-                RenderPath.AddRenderPass(new ScenePassHandler());
-            }
 
             CreateBuffers();
         }
@@ -103,6 +99,12 @@ namespace SharpGame
             frameUniform.DeltaTime = Time.Delta;
             frameUniform.ElapsedTime = Time.Total;
             ubFrameInfo.SetData(ref frameUniform);
+
+            if (RenderPath == null)
+            {
+                RenderPath = new FrameGraph();
+                RenderPath.AddRenderPass(new ScenePassHandler());
+            }
 
             this.SendGlobalEvent(new BeginView { view = this });
 

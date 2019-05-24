@@ -15,7 +15,9 @@ namespace SharpGame.Samples
             scene = new Scene();
 
             var cameraNode = scene.CreateChild("Camera");
-            cameraNode.Position = new Vector3(0, 0, -5);
+            cameraNode.Position = new Vector3(0, 0, -3);
+            cameraNode.LookAt(Vector3.Zero);
+
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)graphics.Width / graphics.Height;
 
@@ -27,19 +29,11 @@ namespace SharpGame.Samples
 
             //_cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
 
-            var mat = new Material();
-            mat.Shader = new Shader
+            var mat = new Material
             {
-                new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
+                Shader = new Shader
                 {
-                    ResourceLayout = new []
-                    {
-                        new ResourceLayout
-                        {
-                            new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-                            new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
-                        }
-                    }
+                    new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
                 }
             };
             //mat.SetTexture("sampler_Color", _cubeTexture);

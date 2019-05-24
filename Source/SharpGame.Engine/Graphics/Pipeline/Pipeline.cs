@@ -48,6 +48,8 @@ namespace SharpGame
         public BlendMode BlendMode { set => SetBlendMode(value); }
         public DynamicStateInfo DynamicState {get; set;}
 
+        public ResourceLayout[] ResourceLayout { get; set; }
+
         internal VkPipelineLayout pipelineLayout;
         internal VkPipeline pipeline;
 
@@ -218,20 +220,20 @@ namespace SharpGame
                 return 0;
             }
 
-            VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[pass.ResourceLayout.Length];
-            for(int i = 0; i < pass.ResourceLayout.Length; i++)
+            VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
+            for(int i = 0; i < ResourceLayout.Length; i++)
             {
-                pSetLayouts[i] = pass.ResourceLayout[i].descriptorSetLayout;
+                pSetLayouts[i] = ResourceLayout[i].descriptorSetLayout;
             }
 
-            var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, pass.ResourceLayout.Length);
+            var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);
             vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
             unsafe
             {
                 var pipelineCreateInfo = GraphicsPipelineCreateInfo(pipelineLayout, renderPass.handle, 0);//,
-
-                vertexlayout.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
+                var vertexInput = geometry != null ? geometry.VertexLayout : vertexlayout;
+                vertexInput.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
                 pipelineCreateInfo.pVertexInputState = &vertexInputState;
 
                 VkPipelineShaderStageCreateInfo* shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];
@@ -278,13 +280,13 @@ namespace SharpGame
             }
 
 
-            VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[pass.ResourceLayout.Length];
-            for (int i = 0; i < pass.ResourceLayout.Length; i++)
+            VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
+            for (int i = 0; i < ResourceLayout.Length; i++)
             {
-                pSetLayouts[i] = pass.ResourceLayout[i].descriptorSetLayout;
+                pSetLayouts[i] = ResourceLayout[i].descriptorSetLayout;
             }
 
-            var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, pass.ResourceLayout.Length);
+            var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);
             vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
             var pipelineCreateInfo = VkComputePipelineCreateInfo.New();

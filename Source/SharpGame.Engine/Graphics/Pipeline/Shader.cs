@@ -45,6 +45,7 @@ namespace SharpGame
         public void Add(Pass pass)
         {
             Passes.Add(pass);
+            passFlags |= pass.passID;
         }
 
         [IgnoreDataMember]
@@ -52,12 +53,12 @@ namespace SharpGame
         {
             get
             {
-                return GetPass(0);
+                return GetPass(1);
             }
 
             set
             {
-                if(value.passID != 0)
+                if(value.passID != 1)
                 {
                     Log.Warn("Not a main pass.");
                     return;
@@ -65,7 +66,7 @@ namespace SharpGame
 
                 for (int i = 0; i < Passes.Count; i++)
                 {
-                    if(Passes[i].passID == 0)
+                    if(Passes[i].passID == 1)
                     {
                         Passes[i].Dispose();
                         Passes[i] = value;

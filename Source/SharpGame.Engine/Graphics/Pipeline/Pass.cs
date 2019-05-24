@@ -40,13 +40,10 @@ namespace SharpGame
 
         [DataMember]
         public ShaderModule ComputeShader { get; set; }
-
+        /*
         [DataMember]
         public ResourceLayout[] ResourceLayout { get; set; }
-
-        [IgnoreDataMember]
-        public ResourceSet[] ResourceSet { get; set; }
-
+        */
         [IgnoreDataMember]
         public bool IsComputeShader => ComputeShader != null;
 
@@ -69,7 +66,7 @@ namespace SharpGame
         {
             if (pass.IsNullOrEmpty)
             {
-                return 0;
+                return 1;
             }
 
 
@@ -83,7 +80,7 @@ namespace SharpGame
 
             if (passList.Count >= 64)
             {
-                return 0;
+                return 1;
             }
 
             passList.Add(pass);
@@ -179,7 +176,7 @@ namespace SharpGame
             }
 
             builded_ = true;
-
+            passID = GetID(Name);
             VertexShader?.Build();
             GeometryShader?.Build();
             PixelShader?.Build();

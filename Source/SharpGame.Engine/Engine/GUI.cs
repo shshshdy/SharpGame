@@ -80,12 +80,6 @@ namespace SharpGame
             uiShader = new Shader("UI")
             {
                 new Pass("shaders/ImGui.vert.spv", "shaders/ImGui.frag.spv")
-                {
-                    ResourceLayout = new []
-                    {
-                        resourceLayout
-                    }
-                }
             };
 
             var graphics = Graphics.Instance;
@@ -97,7 +91,13 @@ namespace SharpGame
                 DepthWriteEnable = false,
                 BlendMode = BlendMode.Alpha,
                 DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-                VertexLayout = VertexPos2dTexColor.Layout
+
+                VertexLayout = VertexPos2dTexColor.Layout,
+
+                ResourceLayout = new[]
+                {
+                    resourceLayout
+                }
             };
 
             AttachmentDescription[] attachments =

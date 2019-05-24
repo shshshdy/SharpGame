@@ -55,8 +55,9 @@ namespace SharpGame
             timer = CreateSubsystem<Timer>();
             fileSystem = CreateSubsystem<FileSystem>();
             cache = CreateSubsystem<ResourceCache>(DataPath);
-
+            CreateWindow();
             graphics = CreateSubsystem<Graphics>();
+            graphics.Init(NativeWindow.SdlWindowHandle);
             renderer = CreateSubsystem<Renderer>();
             input = CreateSubsystem<Input>();
           
@@ -98,10 +99,6 @@ namespace SharpGame
         public void SingleLoop()
         {
             Setup();
-
-            CreateWindow();
-
-            graphics.Init(NativeWindow.SdlWindowHandle);
 
             Init();
 
