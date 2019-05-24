@@ -10,12 +10,13 @@ namespace SharpGame.Samples
 {
     struct UboVS
     {
-        public Matrix4x4 projection;
-        public Matrix4x4 model;
+        public Matrix model;
+        public Matrix view;
+        public Matrix projection;
         public Vector4 lightPos;
     }
 
-    [SampleDesc(sortOrder = 2)]
+    [SampleDesc(sortOrder = 0)]
     public unsafe class AssimpMesh : Sample
     {
         private const uint VERTEX_BUFFER_BIND_ID = 0;
@@ -52,7 +53,7 @@ namespace SharpGame.Samples
         float zoom = -5.5f;
         float zoomSpeed = 20.5f;
         float rotationSpeed = 0.5f;
-        Vector3 rotation = new Vector3(-0.5f, -112.75f, 0.0f);
+        Vector3 rotation = new Vector3(-0.5f, 112.75f + 180, 0.0f);
         Vector3 cameraPos = new Vector3(0.1f, 1.1f, 0.0f);
         public AssimpMesh()
         {
@@ -61,6 +62,35 @@ namespace SharpGame.Samples
         public override void Init()
         {
             base.Init();
+
+
+            var graphics = Graphics.Instance;
+            scene = new Scene();
+
+            var cameraNode = scene.CreateChild("Camera");
+            cameraNode.Position = new Vector3(0.1f, 1.1f, -5);
+            cameraNode.LookAt(Vector3.Zero);
+
+            camera = cameraNode.CreateComponent<Camera>();
+            camera.Fov = MathUtil.DegreesToRadians(60);
+            camera.AspectRatio = (float)graphics.Width / graphics.Height;
+
+            vertexLayout = new VertexLayout
+            {
+                bindings = new[]
+                {
+                    new VertexInputBinding(0, (uint)sizeof(Vertex), VertexInputRate.Vertex)
+                },
+
+                attributes = new[]
+                {
+                    new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, Vertex.PositionOffset),
+                    new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, Vertex.NormalOffset),
+                    new VertexInputAttribute(0, 2, Format.R32g32Sfloat, Vertex.UvOffset),
+                    new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, Vertex.ColorOffset)
+                }
+
+            };
 
             LoadAssets();
             CreatePipelines();
@@ -85,23 +115,6 @@ namespace SharpGame.Samples
 
         void CreatePipelines()
         {
-            vertexLayout = new VertexLayout
-            {
-                bindings = new[]
-                {
-                    new VertexInputBinding(0, (uint)sizeof(Vertex), VertexInputRate.Vertex)
-                },
-
-                attributes = new[]
-                {
-                    new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, Vertex.PositionOffset),
-                    new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, Vertex.NormalOffset),
-                    new VertexInputAttribute(0, 2, Format.R32g32Sfloat, Vertex.UvOffset),
-                    new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, Vertex.ColorOffset)
-                }
-
-            };
-
             resourceLayout = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
@@ -116,7 +129,7 @@ namespace SharpGame.Samples
             pipelineSolid = new Pipeline
             {
                 CullMode = CullMode.Back,
-                FrontFace = FrontFace.Clockwise,
+                FrontFace = FrontFace.CounterClockwise,
                 DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
                 VertexLayout = vertexLayout,
                 ResourceLayout = new[]
@@ -129,7 +142,7 @@ namespace SharpGame.Samples
             {
                 FillMode = PolygonMode.Line,
                 CullMode = CullMode.Back,
-                FrontFace = FrontFace.Clockwise,
+                FrontFace = FrontFace.CounterClockwise,
                 DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
                 VertexLayout = vertexLayout
             };
@@ -198,7 +211,7 @@ namespace SharpGame.Samples
                     }
 
                     // Vulkan uses a right-handed NDC (contrary to OpenGL), so simply flip Y-Axis
-                    vertex.pos.Y *= -1.0f;
+                    //vertex.pos.Y *= -1.0f;
 
                     vertexBuffer.Add(vertex);
                 }
@@ -254,14 +267,14 @@ namespace SharpGame.Samples
             var height = graphics.Height;
             var cmdBuffer = e.renderPass.CmdBuffer;
 
-            uboVS.projection = Matrix4x4.CreatePerspectiveFieldOfView(Util.DegreesToRadians(60.0f), (float)width / (float)height, 0.1f, 256.0f);
-            Matrix4x4 viewMatrix = Matrix4x4.CreateTranslation(0.0f, 0.0f, zoom);
+            rotation.Y += Time.Delta * 10;
 
-            uboVS.model = viewMatrix * Matrix4x4.CreateTranslation((System.Numerics.Vector3)cameraPos);
-            uboVS.model = Matrix4x4.CreateRotationX(Util.DegreesToRadians(rotation.X)) * uboVS.model;
-            uboVS.model = Matrix4x4.CreateRotationY(Util.DegreesToRadians(rotation.Y)) * uboVS.model;
-            uboVS.model = Matrix4x4.CreateRotationZ(Util.DegreesToRadians(rotation.Z)) * uboVS.model;
+            uboVS.model = Matrix.RotationYawPitchRoll(MathUtil.DegreesToRadians(rotation.Y),
+                MathUtil.DegreesToRadians(rotation.X), MathUtil.DegreesToRadians(rotation.Z));// * uboVS.model;
+        
 
+            uboVS.projection = camera.Projection;
+            uboVS.view = camera.View;
             uniformBufferScene.SetData(ref uboVS);
             
             var pipe = wireframe ? pipelineWireframe : pipelineSolid;

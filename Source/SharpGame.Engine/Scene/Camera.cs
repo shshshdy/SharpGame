@@ -10,7 +10,7 @@ namespace SharpGame
     {
         const float M_LARGE_EPSILON = 0.00005f;
         const float M_MIN_NEARCLIP = 0.01f;
-        const float M_MAX_FOV = 160.0f;
+        const float M_MAX_FOV = 160.0f* (MathUtil.Pi / 180.0f);
 
         const float DEFAULT_NEARCLIP = 0.1f;
         const float DEFAULT_FARCLIP = 1000.0f;
@@ -267,7 +267,7 @@ namespace SharpGame
         public float GetHalfViewSize()
         {
             if(!orthographic_)
-                return (float)Math.Tan(fov_/** MathUtil.DegreesToRadians*/ * 0.5f) / zoom_;
+                return (float)Math.Tan(fov_ * 0.5f) / zoom_;
             else
                 return orthoSize_ * 0.5f / zoom_;
         }

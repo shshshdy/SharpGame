@@ -96,8 +96,8 @@ namespace SharpGame
 
             Viewport.Define(0, 0, graphics.Width, graphics.Height);
 
-            frameUniform.DeltaTime = Time.Delta;
-            frameUniform.ElapsedTime = Time.Total;
+            frameUniform.DeltaTime = (float)Time.Delta;
+            frameUniform.ElapsedTime = (float)Time.Elapsed;
             ubFrameInfo.SetData(ref frameUniform);
 
             if (RenderPath == null)
@@ -159,7 +159,7 @@ namespace SharpGame
             //ref CameraVS cameraVS = ref ubCameraVS.Map<CameraVS>();
             cameraVS.View = camera.View;
             Matrix.Invert(ref camera.View, out cameraVS.ViewInv);
-            cameraVS.ViewProj = camera.View*camera.Projection;
+            cameraVS.ViewProj = camera.Projection*camera.View;
             cameraVS.CameraPos = camera.Node.Position;
             ubCameraPS.SetData(ref cameraVS);
         }

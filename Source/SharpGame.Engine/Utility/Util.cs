@@ -13,9 +13,5 @@ namespace SharpGame
             }
         }
 
-        public static float DegreesToRadians(float degrees)
-        {
-            return degrees * (float)Math.PI / 180f;
-        }
     }
 }

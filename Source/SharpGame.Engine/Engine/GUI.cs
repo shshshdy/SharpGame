@@ -213,7 +213,7 @@ namespace SharpGame
 
         void Handle(BeginFrame e)
         {
-            SetPerFrameImGuiData(Time.Delta);
+            SetPerFrameImGuiData((float)Time.Delta);
 
             UpdateImGuiInput();
 

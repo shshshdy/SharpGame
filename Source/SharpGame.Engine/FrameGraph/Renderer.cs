@@ -27,7 +27,7 @@ namespace SharpGame
         {
             var frameInfo = new FrameInfo
             {
-                timeStep = Time.Delta,
+                timeStep = (float)Time.Delta,
                 frameNumber = Time.FrameNum
             };
 

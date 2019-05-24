@@ -47,7 +47,7 @@ namespace SharpGame.Samples
             offset = Vector3.Zero;
             if (input.IsMouseDown(MouseButton.Right))
             {
-                Vector2 delta = (input.MousePosition - mousePos) * Time.Delta * rotSpeed * camera.AspectRatio;
+                Vector2 delta = (input.MousePosition - mousePos) * (float)(Time.Delta * rotSpeed * camera.AspectRatio);
 
                 yaw += delta.X;
                 pitch += delta.Y;
@@ -82,7 +82,7 @@ namespace SharpGame.Samples
                 offset.Y = delta.Y;
             }
 
-            camera.Node.Translate(offset * Time.Delta * moveSpeed + new Vector3(0, 0, input.WheelDelta * Time.Delta * wheelSpeed), TransformSpace.LOCAL);
+            camera.Node.Translate(offset * (float)(Time.Delta * moveSpeed) + new Vector3(0, 0, input.WheelDelta * (float)(Time.Delta * wheelSpeed)), TransformSpace.LOCAL);
 
             mousePos = input.MousePosition;
             

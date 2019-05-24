@@ -8,6 +8,7 @@ using static Vulkan.VulkanNative;
 using System.Numerics;
 using System.IO;
 using SharpGame.Sdl2;
+using System.Collections.Generic;
 
 namespace SharpGame
 {
@@ -32,16 +33,26 @@ namespace SharpGame
         protected Input input;
         protected bool paused = false;
         protected bool prepared;
-        protected InputSnapshot snapshot;
         private bool singleThreaded = true;
         private string dataPath;
-        private int frameNumber;
-        private float timeElapsed = 0.0f;
 
         private float fps;
-        public float Fps => fps;
+        public float Fps => 1 / Time.Delta;
         private float mspf;
-        public float Msec => mspf;
+        public float Msec => Time.Delta;
+
+        /// Previous timesteps for smoothing.
+        List<float> lastTimeSteps_ = new List<float>();
+        /// Next frame timestep in seconds.
+        float timeStep_;
+        /// How many frames to average for the smoothed timestep.
+        int timeStepSmoothing_ = 2;
+        /// Minimum frames per second.
+        uint minFps_ = 10;
+        /// Maximum frames per second.
+        uint maxFps_ = 2000;
+        /// Maximum frames per second when the application does not have input focus.
+        uint maxInactiveFps_ = 60;
 
         public Application(string dataPath)
         {
@@ -60,7 +71,7 @@ namespace SharpGame
             graphics.Init(NativeWindow.SdlWindowHandle);
             renderer = CreateSubsystem<Renderer>();
             input = CreateSubsystem<Input>();
-          
+
         }
 
         protected virtual void Init()
@@ -71,7 +82,7 @@ namespace SharpGame
         protected virtual void CreateWindow()
         {
             WindowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            NativeWindow = new Sdl2Window(Name, 50, 50, width, height, SDL_WindowFlags.Resizable, threadedProcessing : false)
+            NativeWindow = new Sdl2Window(Name, 50, 50, width, height, SDL_WindowFlags.Resizable, threadedProcessing: false)
             {
                 X = 50,
                 Y = 50,
@@ -86,7 +97,7 @@ namespace SharpGame
 
         public void Run()
         {
-            if(singleThreaded)
+            if (singleThreaded)
             {
                 SingleLoop();
             }
@@ -103,13 +114,13 @@ namespace SharpGame
             Init();
 
             timer.Reset();
+            timer.Start();
 
             while (NativeWindow.Exists)
             {
-                var tStart = DateTime.Now;
+                Time.Tick(timeStep_);
 
-                snapshot = NativeWindow.PumpEvents();
-                input.snapshot = snapshot;
+                input.snapshot = NativeWindow.PumpEvents();
 
                 if (!NativeWindow.Exists)
                 {
@@ -117,12 +128,11 @@ namespace SharpGame
                     break;
                 }
 
-                timer.Tick();
-
                 UpdateFrame();
 
                 renderer.Render();
 
+                ApplyFrameLimit();
             }
 
             timer.Stop();
@@ -137,7 +147,7 @@ namespace SharpGame
         {
 
         }
-        
+
         void WindowResize()
         {
             if (!prepared)
@@ -157,53 +167,86 @@ namespace SharpGame
 
             prepared = true;
         }
-        
+
         void UpdateFrame()
         {
-            timer.Tick();
-           
             this.SendGlobalEvent(new BeginFrame
             {
-                frameNum = frameNumber,
-                timeTotal = timer.TotalTime,
-                timeDelta = timer.DeltaTime
+                frameNum = Time.FrameNum,
+                timeTotal = Time.Elapsed,
+                timeDelta = Time.Delta
             });
 
             this.SendGlobalEvent(new Update
             {
-                timeTotal = timer.TotalTime,
-                timeDelta = timer.DeltaTime
+                timeTotal = Time.Elapsed,
+                timeDelta = Time.Delta
             });
 
             this.SendGlobalEvent(new PostUpdate
             {
-                timeTotal = timer.TotalTime,
-                timeDelta = timer.DeltaTime
+                timeTotal = Time.Elapsed,
+                timeDelta = Time.Delta
             });
 
             renderer.RenderUpdate();
 
             this.SendGlobalEvent(new EndFrame());
 
-            CalculateFrameRateStats();
-
         }
 
-        private void CalculateFrameRateStats()
+        void ApplyFrameLimit()
         {
-            frameNumber++;
+            uint maxFps = maxFps_;
 
-            if (timer.TotalTime - timeElapsed >= 1.0f)
+            long elapsed = 0;
+
+            if (maxFps > 0)
             {
-                fps = frameNumber;
-                mspf = 1000.0f / fps;
+                long targetMax = 1000000L / maxFps;
 
-                // Reset for next average.
-                frameNumber = 0;
-                timeElapsed += 1.0f;
+                for (; ; )
+                {
+                    elapsed = timer.ElapsedMicroseconds;
+                    if (elapsed >= targetMax)
+                        break;
+
+                    // Sleep if 1 ms or more off the frame limiting goal
+                    if (targetMax - elapsed >= 1000L)
+                    {
+                        int sleepTime = (int)((targetMax - elapsed) / 1000L);
+                        System.Threading.Thread.Sleep(sleepTime);
+                    }
+                }
             }
-        }
 
+
+            elapsed = timer.ElapsedMicroseconds;
+            timer.Restart();
+
+            // If FPS lower than minimum, clamp elapsed time
+            if (minFps_ > 0)
+            {
+                long targetMin = 1000000L / minFps_;
+                if (elapsed > targetMin)
+                    elapsed = targetMin;
+            }
+
+            // Perform timestep smoothing
+            timeStep_ = 0.0f;
+            
+            lastTimeSteps_.Add(elapsed / 1000000.0f);
+            if (lastTimeSteps_.Count > timeStepSmoothing_)
+            {
+                // If the smoothing configuration was changed, ensure correct amount of samples
+                lastTimeSteps_.RemoveRange(0, lastTimeSteps_.Count - timeStepSmoothing_);
+                for (int i = 0; i < lastTimeSteps_.Count; ++i)
+                    timeStep_ += lastTimeSteps_[i];
+                timeStep_ /= lastTimeSteps_.Count;
+            }
+            else
+                timeStep_ = lastTimeSteps_[lastTimeSteps_.Count - 1];
+        }
 
     }
 
