@@ -49,7 +49,7 @@ namespace SharpGame
             }
 
             var pass = shader.GetPass(passID);
-            cmdBuffer.DrawGeometry(batch.geometry, pipeline, pass, resourceSet);
+            cmdBuffer.DrawGeometry(batch.geometry, batch.material.Pipeline ?? pipeline, pass, batch.material.ResourceSet ?? resourceSet);
         }
 
         protected void BeginDraw(RenderView view)
@@ -79,15 +79,13 @@ namespace SharpGame
             cmdBuffer.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                 | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
 
-            cmdBuffer.SetViewport(ref view.Viewport);
-            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+            OnBeginDraw(view);
 
             this.SendGlobalEvent(new BeginRenderPass { renderPass = this});
 
             //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
             cmdBuffers[graphics.currentImage] = cmdBuffer;
 
-            OnBeginDraw(view);
         }
 
         public void Draw(RenderView view)
@@ -101,9 +99,9 @@ namespace SharpGame
 
         protected void EndDraw(RenderView view)
         {
-            OnEndDraw(view);
-
             this.SendGlobalEvent(new EndRenderPass { renderPass = this });
+
+            OnEndDraw(view);
 
             cmdBuffer?.End();
             cmdBuffer = null;

@@ -247,8 +247,8 @@ namespace SharpGame
                 rasterizationState.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo);
                 pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 
-                var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
-                pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+                //var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
+               // pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
 
                 this.multisampleState.ToNative(out VkPipelineMultisampleStateCreateInfo multisampleState);
                 pipelineCreateInfo.pMultisampleState = &multisampleState;

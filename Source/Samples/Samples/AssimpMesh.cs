@@ -75,6 +75,10 @@ namespace SharpGame.Samples
             camera.Fov = MathUtil.DegreesToRadians(60);
             camera.AspectRatio = (float)graphics.Width / graphics.Height;
 
+            var node = scene.CreateChild("Mesh");
+            var drawable = node.AddComponent<Drawable>();
+            
+
             vertexLayout = new VertexLayout
             {
                 bindings = new[]
@@ -97,8 +101,20 @@ namespace SharpGame.Samples
             CreateUniformBuffers();
             SetupResourceSet();
 
-            this.Subscribe<BeginRenderPass>(Handle);
-         
+            drawable.SetNumGeometries(1);
+            drawable.SetGeometry(0, geometry);
+
+            var mat = new Material
+            {
+                Shader = shader,
+                ResourceSet = resourceSet,
+                Pipeline = pipelineSolid
+            };
+
+            drawable.SetMaterial(0, mat);
+            //this.Subscribe<BeginRenderPass>(Handle);
+
+            Renderer.Instance.MainView.Attach(camera, scene);
         }
 
 
@@ -123,15 +139,15 @@ namespace SharpGame.Samples
 
             shader = new Shader
             {
-                new Pass("shaders/mesh/mesh.vert.spv", "shaders/mesh/mesh.frag.spv")
+                new Pass("shaders/mesh.vert.spv", "shaders/mesh.frag.spv")
             };
 
             pipelineSolid = new Pipeline
             {
                 CullMode = CullMode.Back,
                 FrontFace = FrontFace.CounterClockwise,
-                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-                VertexLayout = vertexLayout,
+                //DynamicState = new DynamicStateInfo(DynamicState.Viewport),
+                //VertexLayout = vertexLayout,
                 ResourceLayout = new[]
                 {
                     resourceLayout
@@ -143,7 +159,7 @@ namespace SharpGame.Samples
                 FillMode = PolygonMode.Line,
                 CullMode = CullMode.Back,
                 FrontFace = FrontFace.CounterClockwise,
-                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
+                DynamicState = new DynamicStateInfo(DynamicState.Viewport/*, DynamicState.Scissor*/),
                 VertexLayout = vertexLayout
             };
         }
@@ -259,23 +275,26 @@ namespace SharpGame.Samples
         {
             uniformBufferScene = GraphicsBuffer.CreateUniformBuffer<UboVS>();
         }
-                
-        void Handle(BeginRenderPass e)
+
+        public override void Update()
         {
-            var graphics = Graphics.Instance;
-            var width = graphics.Width;
-            var height = graphics.Height;
-            var cmdBuffer = e.renderPass.CmdBuffer;
+            base.Update();
+
 
             rotation.Y += Time.Delta * 10;
 
             uboVS.model = Matrix.RotationYawPitchRoll(MathUtil.DegreesToRadians(rotation.Y),
                 MathUtil.DegreesToRadians(rotation.X), MathUtil.DegreesToRadians(rotation.Z));// * uboVS.model;
-        
+
 
             uboVS.projection = camera.Projection;
             uboVS.view = camera.View;
             uniformBufferScene.SetData(ref uboVS);
+        }
+
+        void Handle(BeginRenderPass e)
+        {
+            var cmdBuffer = e.renderPass.CmdBuffer;
             
             var pipe = wireframe ? pipelineWireframe : pipelineSolid;
             cmdBuffer.DrawGeometry(geometry, pipe, shader.Main, resourceSet);

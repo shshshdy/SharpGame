@@ -57,7 +57,7 @@ namespace SharpGame
         public GeometryType geometryType;
     };
 
-    public unsafe abstract class Drawable : Component
+    public class Drawable : Component
     {
         public const uint DRAWABLE_GEOMETRY = 0x1;
         public const uint DRAWABLE_LIGHT = 0x2;
@@ -116,7 +116,7 @@ namespace SharpGame
         {
         }
 
-        protected virtual void SetNumGeometries(int num)
+        public virtual void SetNumGeometries(int num)
         {
             Array.Resize(ref batches_, num);
 
@@ -127,6 +127,30 @@ namespace SharpGame
                     batches_[i] = new SourceBatch();
                 }
             }
+        }
+
+        public void SetGeometry(int index, Geometry geometry)
+        {
+            batches_[index].geometry = geometry;
+            batches_[index].worldTransform = node_.worldTransform_;
+            batches_[index].numWorldTransforms = 1;
+        }
+
+        public bool SetMaterial(int index, Material mat)
+        {
+            if (index >= batches_.Length)
+            {
+                Log.Error("Material index out of bounds");
+                return false;
+            }
+
+            batches_[index].material = mat;
+            return true;
+        }
+
+        public Material GetMaterial(int idx)
+        {
+            return idx < batches_.Length ? batches_[idx].material : null;
         }
 
         public override void OnSetEnabled()
@@ -219,7 +243,10 @@ namespace SharpGame
                 return null;
         }
 
-        protected abstract void OnWorldBoundingBoxUpdate();
+        protected virtual void OnWorldBoundingBoxUpdate()
+        {
+            worldBoundingBox_ = boundingBox_.Transformed(ref node_.WorldTransform);
+        }
 
         public virtual void Update(ref FrameInfo frameInfo)
         {

@@ -11,6 +11,12 @@ namespace SharpGame
 
     public class ResourceSet : IDisposable
     {
+        public const int PerFrame = 0;
+        public const int PerShader = 1;
+        public const int PerMaterial = 2;
+        public const int PerObject = 3;
+
+
         internal VkDescriptorSet descriptorSet;
 
         internal VkDescriptorPool descriptorPool;

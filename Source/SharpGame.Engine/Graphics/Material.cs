@@ -27,9 +27,9 @@ namespace SharpGame
         }
 
         private ResourceSet resourceSet_;
-        public ResourceSet ResourceSet => resourceSet_;
+        public ResourceSet ResourceSet { get => resourceSet_; set => resourceSet_ = value; }
 
-        internal MaterialRenderData materialRenderData;
+        public Pipeline Pipeline { get; set; }
 
         public Material()
         {
@@ -106,10 +106,4 @@ namespace SharpGame
 
     }
 
-    public class MaterialRenderData
-    {
-        public Shader shader;
-        public ResourceSet[] resourceSets;
-
-    }
 }

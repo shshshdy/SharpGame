@@ -9,6 +9,7 @@ namespace SharpGame
         {
             if (result != VkResult.Success)
             {
+                Log.Error(result.ToString());
                 throw new InvalidOperationException("Call failed.");
             }
         }

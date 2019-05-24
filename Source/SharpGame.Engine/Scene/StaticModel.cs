@@ -35,7 +35,7 @@ namespace SharpGame
             OnMarkedDirty(node_);
         }
 
-        protected override void SetNumGeometries(int num)
+        public override void SetNumGeometries(int num)
         {
             base.SetNumGeometries(num);
             
@@ -87,23 +87,6 @@ namespace SharpGame
 
         }
 
-        public bool SetMaterial(int index, Material mat)
-        {
-            if (index >= batches_.Length)
-            {
-                Log.Error("Material index out of bounds");
-                return false;
-            }
-
-            batches_[index].material = mat;
-            return true;
-        }
-
-        public Material GetMaterial(int idx)
-        {
-            return idx < batches_.Length ? batches_[idx].material : null;
-        }
-
         public override void UpdateBatches(ref FrameInfo frame)
         {
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
@@ -143,10 +126,6 @@ namespace SharpGame
                 return batches_[batchIndex].geometry;
         }
 
-        protected override void OnWorldBoundingBoxUpdate()
-        {
-            worldBoundingBox_ = boundingBox_.Transformed(ref node_.WorldTransform);
-        }
 
         protected void ResetLodLevels()
         {

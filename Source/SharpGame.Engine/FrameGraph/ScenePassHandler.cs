@@ -25,7 +25,6 @@ namespace SharpGame
                 //new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
-
             pipeline = new Pipeline
             {
                 CullMode = CullMode.None,
@@ -50,7 +49,10 @@ namespace SharpGame
             {
                 resourceSet = new ResourceSet(resourceLayout, view.ubCameraVS);
             }
-            
+
+            //cmdBuffer.SetViewport(ref view.Viewport);
+            //cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+
         }
 
         protected override void OnDraw(RenderView view)

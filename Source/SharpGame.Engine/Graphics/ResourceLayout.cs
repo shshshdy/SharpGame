@@ -42,6 +42,8 @@ namespace SharpGame
 
     public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
+        public int Set { get; set; }
+
         public List<ResourceLayoutBinding> Bindings { get; set; }
 
         private VkDescriptorSetLayoutBinding[] bindings;
