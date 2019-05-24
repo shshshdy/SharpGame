@@ -1,4 +1,5 @@
-$fileNames = Get-ChildItem -Path $scriptPath -Recurse
+$fileNames = Get-ChildItem -Path $scriptPath
+# -Recurse
 
 foreach ($file in $fileNames)
 {

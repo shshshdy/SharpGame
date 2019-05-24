@@ -40,6 +40,14 @@ namespace SharpGame
         }
     }
 
+    public enum LayoutSet : int
+    {
+        PerFrame = 0,
+        PerShader = 1,
+        PerMaterial = 2,
+        PerObject = 3,
+    }
+
     public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
         public int Set { get; set; }
@@ -53,8 +61,9 @@ namespace SharpGame
         internal int NumBindings => Bindings.Count;
         private bool needRebuild = true;
 
-        public ResourceLayout()
+        public ResourceLayout(int set = 0)
         {
+            Set = set;
         }
 
         public ResourceLayout(params ResourceLayoutBinding[] bindings)

@@ -5,6 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
+    using global::System.Runtime.Serialization;
     using System.Runtime.CompilerServices;
     using static Builder;
     using static VulkanNative;
@@ -24,20 +25,30 @@ namespace SharpGame
 
     public class Pipeline : Resource
     {
+        [IgnoreDataMember]
+        public Shader Shader { get; set; }
+
         private RasterizationStateInfo rasterizationState;
+        [IgnoreDataMember]
         public ref RasterizationStateInfo RasterizationState => ref rasterizationState;
 
         private MultisampleStateInfo multisampleState;
+        [IgnoreDataMember]
         public ref MultisampleStateInfo MultisampleState => ref multisampleState;
 
         private DepthStencilStateInfo depthStencilState_;
+        [IgnoreDataMember]
         public ref DepthStencilStateInfo DepthStencilState => ref depthStencilState_;
 
         private ColorBlendStateInfo colorBlendState;
+        [IgnoreDataMember]
         public ref ColorBlendStateInfo ColorBlendState => ref colorBlendState;
+
+        [IgnoreDataMember]
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
 
         private VertexLayout vertexlayout;
+        [IgnoreDataMember]
         public ref VertexLayout VertexLayout => ref vertexlayout;
 
         public PolygonMode FillMode { get => rasterizationState.polygonMode; set => rasterizationState.polygonMode = value; }
@@ -208,7 +219,7 @@ namespace SharpGame
             pipeline = 0;
         }
 
-        public unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, Pass pass, Geometry geometry)
+        internal unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, Pass pass, Geometry geometry)
         {
             if(pipeline != 0)
             {
@@ -272,13 +283,12 @@ namespace SharpGame
             return pipeline;
         }
 
-        public unsafe VkPipeline GetComputePipeline(Pass pass)
+        internal unsafe VkPipeline GetComputePipeline(Pass pass)
         {
             if(!pass.IsComputeShader)
             {
                 return 0;
             }
-
 
             VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
             for (int i = 0; i < ResourceLayout.Length; i++)
