@@ -7,7 +7,7 @@ using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    public class Texture : DisposeBase, IBindable
+    public class Texture : Resource, IBindable
     {
         public VkImageView view;
         public VkImage image;
@@ -16,11 +16,18 @@ namespace SharpGame
         public uint width;
         public uint height;
         public uint mipLevels;
-        public VkImageLayout imageLayout;
+        public ImageLayout imageLayout;
         public VkDescriptorImageInfo descriptor;
 
         public Texture()
         {
+        }
+
+        internal void UpdateDescriptor()
+        {
+            descriptor.sampler = sampler;
+            descriptor.imageView = view;
+            descriptor.imageLayout = (VkImageLayout)imageLayout;
         }
 
         protected override void Destroy()
@@ -34,17 +41,17 @@ namespace SharpGame
             base.Destroy();
         }
 
-        internal void updateDescriptor()
-        {
-            descriptor.sampler = sampler;
-            descriptor.imageView = view;
-            descriptor.imageLayout = imageLayout;
-        }
-
     }
 
     public unsafe class Texture2D : Texture
     {
+        public override bool Load(File stream)
+        {
+            var tex2D = KtxFile.Load(stream, false);
+
+            //LoadKtxFile(tex2D);
+            return true;
+        }
 
         public static Texture Create(uint w, uint h, uint bytesPerPixel, byte* tex2DDataPtr, bool dynamic = false)
         {
@@ -99,23 +106,19 @@ namespace SharpGame
 
                 // Setup buffer copy regions for each mip level
                 NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
-                uint offset = 0;
 
-                for (uint i = 0; i < texture.mipLevels; i++)
+                uint offset = 0;
                 {
                     VkBufferImageCopy bufferCopyRegion = new VkBufferImageCopy();
                     bufferCopyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
-                    bufferCopyRegion.imageSubresource.mipLevel = i;
+                    bufferCopyRegion.imageSubresource.mipLevel = 0;
                     bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
                     bufferCopyRegion.imageSubresource.layerCount = 1;
                     bufferCopyRegion.imageExtent.width = w;// tex2D.Faces[0].Mipmaps[i].Width;
                     bufferCopyRegion.imageExtent.height = h;// tex2D.Faces[0].Mipmaps[i].Height;
                     bufferCopyRegion.imageExtent.depth = 1;
                     bufferCopyRegion.bufferOffset = offset;
-
                     bufferCopyRegions.Add(bufferCopyRegion);
-
-                    //   offset += tex2D.Faces[0].Mipmaps[i].SizeInBytes;
                 }
 
                 // Create optimal tiled target image
@@ -177,13 +180,13 @@ namespace SharpGame
                     bufferCopyRegions.Data);
 
                 // Change texture image layout to shader read after all mip levels have been copied
-                texture.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
+                texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
                 Tools.setImageLayout(
                     copyCmd,
                     texture.image,
                     VkImageAspectFlags.Color,
                     VkImageLayout.TransferDstOptimal,
-                    texture.imageLayout,
+                    (VkImageLayout)texture.imageLayout,
                     subresourceRange);
 
                 Device.FlushCommandBuffer(copyCmd, Graphics.queue, true);
@@ -242,24 +245,35 @@ namespace SharpGame
             // The view will be based on the texture's image
             view.image = texture.image;
             Util.CheckResult(vkCreateImageView(Graphics.device, &view, null, out texture.view));
-            texture.updateDescriptor();
+            texture.UpdateDescriptor();
             return texture;
         }
 
 
         public void LoadFromFile(
             string filename,
-            VkFormat format,
-            VkImageUsageFlags imageUsageFlags = VkImageUsageFlags.Sampled,
-            VkImageLayout imageLayout = VkImageLayout.ShaderReadOnlyOptimal,
+            Format format,
+            ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled,
+            ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal,
             bool forceLinear = false)
         {
             KtxFile tex2D;
-            using (var fs = System.IO.File.OpenRead(filename))
+
+            using (var file = ResourceCache.Instance.Open(filename))
             {
-                tex2D = KtxFile.Load(fs, false);
+                tex2D = KtxFile.Load(file, false);
+
+                LoadKtxFile(tex2D, format, imageUsageFlags, imageLayout, forceLinear);
             }
 
+        }
+
+        void LoadKtxFile(KtxFile tex2D,
+            Format format,
+            ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled,
+            ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal,
+            bool forceLinear = false)
+        {
             width = tex2D.Header.PixelWidth;
             height = tex2D.Header.PixelHeight;
 
@@ -270,7 +284,8 @@ namespace SharpGame
 
             // Get device properites for the requested texture format
             VkFormatProperties formatProperties;
-            vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, format, out formatProperties);
+            vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, (VkFormat)format,
+                out formatProperties);
 
             // Only use linear tiling if requested (and supported by the device)
             // Support for linear tiling is mostly limited, so prefer to use
@@ -343,7 +358,7 @@ namespace SharpGame
                 // Create optimal tiled target image
                 VkImageCreateInfo imageCreateInfo = VkImageCreateInfo.New();
                 imageCreateInfo.imageType = VkImageType.Image2D;
-                imageCreateInfo.format = format;
+                imageCreateInfo.format = (VkFormat)format;
                 imageCreateInfo.mipLevels = mipLevels;
                 imageCreateInfo.arrayLayers = 1;
                 imageCreateInfo.samples = VkSampleCountFlags.Count1;
@@ -351,7 +366,7 @@ namespace SharpGame
                 imageCreateInfo.sharingMode = VkSharingMode.Exclusive;
                 imageCreateInfo.initialLayout = VkImageLayout.Undefined;
                 imageCreateInfo.extent = new VkExtent3D { width = width, height = height, depth = 1 };
-                imageCreateInfo.usage = imageUsageFlags;
+                imageCreateInfo.usage = (VkImageUsageFlags)imageUsageFlags;
 
                 // Ensure that the TRANSFER_DST bit is set for staging
                 if ((imageCreateInfo.usage & VkImageUsageFlags.TransferDst) == 0)
@@ -401,7 +416,7 @@ namespace SharpGame
                     image,
                     VkImageAspectFlags.Color,
                     VkImageLayout.TransferDstOptimal,
-                    imageLayout,
+                    (VkImageLayout)imageLayout,
                     subresourceRange);
 
                 Device.FlushCommandBuffer(copyCmd, Graphics.queue);
@@ -412,7 +427,7 @@ namespace SharpGame
             }
             else
             {
-                throw new NotImplementedException();                
+                throw new NotImplementedException();
             }
 
             // Create a defaultsampler
@@ -440,7 +455,7 @@ namespace SharpGame
             // information and sub resource ranges
             VkImageViewCreateInfo viewCreateInfo = VkImageViewCreateInfo.New();
             viewCreateInfo.viewType = VkImageViewType.Image2D;
-            viewCreateInfo.format = format;
+            viewCreateInfo.format = (VkFormat)format;
             viewCreateInfo.components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A };
             viewCreateInfo.subresourceRange = new VkImageSubresourceRange { aspectMask = VkImageAspectFlags.Color, baseMipLevel = 0, levelCount = 1, baseArrayLayer = 0, layerCount = 1 };
             // Linear tiling usually won't support mip maps
@@ -450,9 +465,7 @@ namespace SharpGame
             Util.CheckResult(vkCreateImageView(Device.LogicalDevice, &viewCreateInfo, null, out view));
 
             // Update descriptor image info member that can be used for setting up descriptor sets
-            updateDescriptor();
+            UpdateDescriptor();
         }
-
-
     }
 }

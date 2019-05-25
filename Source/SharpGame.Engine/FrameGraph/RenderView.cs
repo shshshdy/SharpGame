@@ -156,10 +156,9 @@ namespace SharpGame
 
         private void UpdateViewParameters()
         {
-            //ref CameraVS cameraVS = ref ubCameraVS.Map<CameraVS>();
             cameraVS.View = camera.View;
             Matrix.Invert(ref camera.View, out cameraVS.ViewInv);
-            cameraVS.ViewProj = camera.Projection*camera.View;
+            cameraVS.ViewProj = camera.View*camera.Projection;
             cameraVS.CameraPos = camera.Node.Position;
             ubCameraPS.SetData(ref cameraVS);
         }

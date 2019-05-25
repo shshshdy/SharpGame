@@ -25,7 +25,7 @@ namespace SharpGame
         protected byte[] nativeStreamBuffer;
         protected int NativeStreamBufferSize => nativeStreamBuffer.Length;
         
-        public File(Stream stream, int bufferSize = 1024)
+        public File(Stream stream, int bufferSize = 4096)
         {
             this.stream = stream;
             nativeStreamBuffer = new byte[bufferSize];

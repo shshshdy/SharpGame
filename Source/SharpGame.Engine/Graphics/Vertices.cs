@@ -43,6 +43,37 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    public struct VertexPosNormTexColor
+    {
+        public Vector3 position;
+        public Vector3 normal;
+        public Vector2 texcoord;
+        public Color color;
+        public VertexPosNormTexColor(Vector3 p, Vector3 n, Vector2 uv, Color color)
+        {
+            position = p;
+            normal = n;
+            texcoord = uv;
+            this.color = color;
+        }
+
+        public static VertexLayout Layout = new VertexLayout
+        (
+            new[]
+            {
+                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosNormTexColor>(), VertexInputRate.Vertex)
+            },
+            new[]
+            {
+                new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+                new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
+                new VertexInputAttribute(0, 2, Format.R32g32Sfloat, 24),
+                new VertexInputAttribute(0, 3, Format.R8g8b8a8Unorm, 32)
+            }
+        );
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct VertexPosColor
     {
         public Vector3 Position;

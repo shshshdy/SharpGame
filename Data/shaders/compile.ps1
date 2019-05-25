@@ -9,3 +9,5 @@ foreach ($file in $fileNames)
         glslangvalidator -V $file -o $file".spv"
     }
 }
+
+Pause
