@@ -25,6 +25,7 @@ namespace SharpGame
 
         public static QueueFamilyIndices QFIndices;
         private static VkDevice device;
+        private static VkQueue queue;
         private static VkCommandPool commandPool;
         private static VkPipelineCache pipelineCache;
         private static DebugReportCallbackExt debugReportCallbackExt;
@@ -163,6 +164,7 @@ namespace SharpGame
             }
 
             Util.CheckResult(CreateLogicalDevice(enabledFeatures, enabledExtensions));
+            queue = GetDeviceQueue(Device.QFIndices.Graphics, 0);
             return device;
         }
 
@@ -485,6 +487,184 @@ namespace SharpGame
             Util.CheckResult(vkBindBufferMemory(LogicalDevice, *buffer, *memory, 0));
 
         }
+
+
+        public static void CreateImage(
+            uint width,
+            uint height,
+            Format format,
+            VkImageTiling tiling,
+            VkImageUsageFlags usage,
+            VkMemoryPropertyFlags properties,
+            out VkImage image,
+            out VkDeviceMemory memory)
+        {
+            VkImageCreateInfo imageCI = VkImageCreateInfo.New();
+            imageCI.imageType = VkImageType.Image2D;
+            imageCI.extent.width = width;
+            imageCI.extent.height = height;
+            imageCI.extent.depth = 1;
+            imageCI.mipLevels = 1;
+            imageCI.arrayLayers = 1;
+            imageCI.format = (VkFormat)format;
+            imageCI.tiling = tiling;
+            imageCI.initialLayout = VkImageLayout.Preinitialized;
+            imageCI.usage = usage;
+            imageCI.sharingMode = VkSharingMode.Exclusive;
+            imageCI.samples = VkSampleCountFlags.Count1;
+
+            vkCreateImage(device, ref imageCI, null, out image);
+
+            vkGetImageMemoryRequirements(device, image, out VkMemoryRequirements memRequirements);
+            VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.New();
+            allocInfo.allocationSize = memRequirements.size;
+            allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
+            vkAllocateMemory(device, ref allocInfo, null, out memory);
+
+            vkBindImageMemory(device, image, memory, 0);
+        }
+
+        private static uint FindMemoryType(uint typeFilter, VkMemoryPropertyFlags properties)
+        {
+            vkGetPhysicalDeviceMemoryProperties(PhysicalDevice, out VkPhysicalDeviceMemoryProperties memProperties);
+            for (int i = 0; i < memProperties.memoryTypeCount; i++)
+            {
+                if (((typeFilter & (1 << i)) != 0)
+                    && (memProperties.GetMemoryType((uint)i).propertyFlags & properties) == properties)
+                {
+                    return (uint)i;
+                }
+            }
+
+            throw new InvalidOperationException("No suitable memory type.");
+        }
+
+
+        public static void CopyImage(VkImage srcImage, VkImage dstImage, uint width, uint height, uint level = 0)
+        {
+            VkImageSubresourceLayers subresource = new VkImageSubresourceLayers
+            {
+                mipLevel = level,
+                layerCount = 1,
+                aspectMask = VkImageAspectFlags.Color,
+                baseArrayLayer = 0
+            };
+
+            VkImageCopy region = new VkImageCopy
+            {
+                dstSubresource = subresource,
+                srcSubresource = subresource
+            };
+            region.extent.width = width;
+            region.extent.height = height;
+            region.extent.depth = 1;
+
+            VkCommandBuffer copyCmd = BeginOneTimeCommands();
+            vkCmdCopyImage(copyCmd, srcImage, VkImageLayout.TransferSrcOptimal, dstImage, VkImageLayout.TransferDstOptimal, 1, ref region);
+            EndOneTimeCommands(copyCmd);
+        }
+
+        public static void CreateImageView(VkImage image, VkFormat format, out VkImageView imageView)
+        {
+            VkImageViewCreateInfo imageViewCI = VkImageViewCreateInfo.New();
+            imageViewCI.image = image;
+            imageViewCI.viewType = VkImageViewType.Image2D;
+            imageViewCI.format = format;
+            imageViewCI.subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            imageViewCI.subresourceRange.baseMipLevel = 0;
+            imageViewCI.subresourceRange.levelCount = 1;
+            imageViewCI.subresourceRange.baseArrayLayer = 0;
+            imageViewCI.subresourceRange.layerCount = 1;
+
+            vkCreateImageView(device, ref imageViewCI, null, out imageView);
+        }
+
+        public static void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+        {
+            VkCommandBuffer cb = BeginOneTimeCommands();
+
+            VkImageMemoryBarrier barrier = VkImageMemoryBarrier.New();
+            barrier.oldLayout = oldLayout;
+            barrier.newLayout = newLayout;
+            barrier.srcQueueFamilyIndex = QueueFamilyIgnored;
+            barrier.dstQueueFamilyIndex = QueueFamilyIgnored;
+            barrier.image = image;
+            barrier.subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            barrier.subresourceRange.baseMipLevel = 0;
+            barrier.subresourceRange.levelCount = 1;
+            barrier.subresourceRange.baseArrayLayer = 0;
+            barrier.subresourceRange.layerCount = 1;
+
+            vkCmdPipelineBarrier(
+                cb,
+                VkPipelineStageFlags.TopOfPipe,
+                VkPipelineStageFlags.TopOfPipe,
+                VkDependencyFlags.None,
+                0, null,
+                0, null,
+                1, &barrier);
+
+            EndOneTimeCommands(cb);
+        }
+
+
+        public static void TransitionImageLayout(VkCommandBuffer cb, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+        {
+            VkImageMemoryBarrier barrier = VkImageMemoryBarrier.New();
+            barrier.oldLayout = oldLayout;
+            barrier.newLayout = newLayout;
+            barrier.srcQueueFamilyIndex = QueueFamilyIgnored;
+            barrier.dstQueueFamilyIndex = QueueFamilyIgnored;
+            barrier.image = image;
+            barrier.subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            barrier.subresourceRange.baseMipLevel = 0;
+            barrier.subresourceRange.levelCount = 1;
+            barrier.subresourceRange.baseArrayLayer = 0;
+            barrier.subresourceRange.layerCount = 1;
+
+            vkCmdPipelineBarrier(
+                cb,
+                VkPipelineStageFlags.TopOfPipe,
+                VkPipelineStageFlags.TopOfPipe,
+                VkDependencyFlags.None,
+                0, null,
+                0, null,
+                1, &barrier);
+
+        }
+
+
+        public static VkCommandBuffer BeginOneTimeCommands()
+        {
+            VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.New();
+            allocInfo.commandBufferCount = 1;
+            allocInfo.commandPool = commandPool;
+            allocInfo.level = VkCommandBufferLevel.Primary;
+
+            vkAllocateCommandBuffers(device, ref allocInfo, out VkCommandBuffer cb);
+
+            VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.New();
+            beginInfo.flags = VkCommandBufferUsageFlags.OneTimeSubmit;
+
+            vkBeginCommandBuffer(cb, ref beginInfo);
+
+            return cb;
+        }
+
+        public static void EndOneTimeCommands(VkCommandBuffer cb)
+        {
+            vkEndCommandBuffer(cb);
+
+            VkSubmitInfo submitInfo = VkSubmitInfo.New();
+            submitInfo.commandBufferCount = 1;
+            submitInfo.pCommandBuffers = &cb;
+
+            vkQueueSubmit(queue, 1, &submitInfo, VkFence.Null);
+            vkQueueWaitIdle(queue);
+
+            vkFreeCommandBuffers(device, commandPool, 1, ref cb);
+        }
+
 
         public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
         {

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Vulkan;
 
 namespace SharpGame.ImageSharp
 {
@@ -68,56 +69,108 @@ namespace SharpGame.ImageSharp
   
         public unsafe Texture CreateDeviceTexture()
         {
-            return CreateTextureViaUpdate();
+            return CreateTextureViaStaging();
+         //   return CreateTextureViaUpdate();
         }
-      /*
-        private unsafe Texture CreateTextureViaStaging(GraphicsDevice gd, ResourceFactory factory)
+     
+        private unsafe Texture CreateTextureViaStaging()
         {
-            Texture staging = factory.CreateTexture(
-                TextureDescription.Texture2D(Width, Height, MipLevels, 1, Format, TextureUsage.Staging));
+            //Texture staging = factory.CreateTexture(
+            //    TextureDescription.Texture2D(Width, Height, MipLevels, 1, Format, TextureUsage.Staging));
 
-            Texture ret = factory.CreateTexture(
-                TextureDescription.Texture2D(Width, Height, MipLevels, 1, Format, TextureUsage.Sampled));
+            Texture staging = new Texture2D
+            {
+                width = Width,
+                height = Height,
+                mipLevels = MipLevels,
+                depth = 1,
+                format = Format
+            };
 
-            CommandList cl = gd.ResourceFactory.CreateCommandList();
-            cl.Begin();
+            Device.CreateImage(Width, Height, Format, VkImageTiling.Linear, VkImageUsageFlags.TransferSrc,
+                VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, out VkImage stagingImage,
+                out VkDeviceMemory stagingImageMemory);
+
+            Texture ret 
+                //= factory.CreateTexture(
+                //TextureDescription.Texture2D(Width, Height, MipLevels, 1, Format, TextureUsage.Sampled));
+            = new Texture2D
+            {
+                width = Width,
+                height = Height,
+                mipLevels = MipLevels,
+                depth = 1,
+                format = Format
+            };
+
+            Device.CreateImage(Width, Height, Format, VkImageTiling.Optimal, VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled,
+                VkMemoryPropertyFlags.DeviceLocal, out VkImage retImage,
+                out VkDeviceMemory retImageMemory);
+
+            var cl = Device.BeginOneTimeCommands();
+            ulong offset = 0;
+            
             for (uint level = 0; level < MipLevels; level++)
             {
                 Image<Rgba32> image = Images[level];
                 fixed (void* pin = &MemoryMarshal.GetReference(image.GetPixelSpan()))
                 {
-                    MappedResource map = gd.Map(staging, MapMode.Write, level);
+                    VkImageSubresource subresource = new VkImageSubresource();
+                    subresource.aspectMask = VkImageAspectFlags.Color;
+                    subresource.mipLevel = level;
+                    subresource.arrayLayer = 0;
+
+                    VulkanNative.vkGetImageSubresourceLayout(Graphics.device, stagingImage, ref subresource, out VkSubresourceLayout stagingImageLayout);
+                    ulong rowPitch = stagingImageLayout.rowPitch;
+                    ulong imageSize = (ulong)(image.Width * image.Height * Unsafe.SizeOf<Rgba32>());
+
+                    void* mappedPtr = Device.MapMemory(stagingImageMemory, offset, imageSize, 0);
                     uint rowWidth = (uint)(image.Width * 4);
-                    if (rowWidth == map.RowPitch)
+                    if (rowWidth == rowPitch)
                     {
-                        Unsafe.CopyBlock(map.Data.ToPointer(), pin, (uint)(image.Width * image.Height * 4));
+                        Unsafe.CopyBlock(mappedPtr, pin, (uint)(image.Width * image.Height * 4));
                     }
                     else
                     {
                         for (uint y = 0; y < image.Height; y++)
                         {
-                            byte* dstStart = (byte*)map.Data.ToPointer() + y * map.RowPitch;
+                            byte* dstStart = (byte*)mappedPtr + y * rowPitch;
                             byte* srcStart = (byte*)pin + y * rowWidth;
                             Unsafe.CopyBlock(dstStart, srcStart, rowWidth);
                         }
                     }
-                    gd.Unmap(staging, level);
 
-                    cl.CopyTexture(
+                    Device.UnmapMemory(stagingImageMemory);
+                    offset += imageSize;
+                    /*
+                    Tools.SetImageLayout(
+                            cl,
+                            image,
+                            VkImageAspectFlags.Color,
+                            VkImageLayout.Undefined,
+                            VkImageLayout.TransferDstOptimal,
+                            subresource);*/
+
+
+                    //VulkanNative.vkCmdCopyImage(cl, stagingImage, re)
+                    /*
+                        cl.CopyTexture(
                         staging, 0, 0, 0, level, 0,
                         ret, 0, 0, 0, level, 0,
-                        (uint)image.Width, (uint)image.Height, 1, 1);
+                        (uint)image.Width, (uint)image.Height, 1, 1);*/
+
 
                 }
             }
-            cl.End();
 
-            gd.SubmitCommands(cl);
+            Device.EndOneTimeCommands(cl);
+
+            Device.TransitionImageLayout(retImage, VkFormat.R8g8b8a8Unorm, VkImageLayout.TransferDstOptimal, VkImageLayout.ShaderReadOnlyOptimal);
+
             staging.Dispose();
-            cl.Dispose();
-
+            
             return ret;
-        }*/
+        }
 
         private unsafe Texture CreateTextureViaUpdate()
         {

@@ -38,7 +38,11 @@ namespace SharpGame
             uint mipLevel,
             uint arrayLayer)
         {
-
+            this.width = width;
+            this.height = height;
+            this.mipLevels = mipLevel;
+            this.depth = depth;
+            //    format = Format.R8g8b8a8Unorm
         }
 
         internal void UpdateDescriptor()
