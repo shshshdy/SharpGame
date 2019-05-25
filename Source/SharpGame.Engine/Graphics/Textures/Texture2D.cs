@@ -239,21 +239,22 @@ namespace SharpGame
             using (var file = FileSystem.Instance.OpenFile(filename))
             {
                 tex2D = KtxFile.Load(file, false);
-
-                LoadKtxFile(tex2D, forceLinear);
+                tex2D.Faces[0].Width = tex2D.Header.PixelWidth;
+                tex2D.Faces[0].Height = tex2D.Header.PixelWidth;
+                LoadKtxFile(tex2D.Faces[0], forceLinear);
             }
 
         }
 
-        void LoadKtxFile(KtxFile tex2D, bool forceLinear = false)
+        void LoadKtxFile(KtxFace tex2D, bool forceLinear = false)
         {
-            width = tex2D.Header.PixelWidth;
-            height = tex2D.Header.PixelHeight;
+            width = tex2D.Width;
+            height = tex2D.Height;
 
             if (height == 0)
                 height = width;
 
-            mipLevels = tex2D.Header.NumberOfMipmapLevels;
+            mipLevels = (uint)tex2D.Mipmaps.Length;
 
             // Get device properites for the requested texture format
             VkFormatProperties formatProperties;
@@ -318,14 +319,14 @@ namespace SharpGame
                     bufferCopyRegion.imageSubresource.mipLevel = i;
                     bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
                     bufferCopyRegion.imageSubresource.layerCount = 1;
-                    bufferCopyRegion.imageExtent.width = tex2D.Faces[0].Mipmaps[i].Width;
-                    bufferCopyRegion.imageExtent.height = tex2D.Faces[0].Mipmaps[i].Height;
+                    bufferCopyRegion.imageExtent.width = tex2D.Mipmaps[i].Width;
+                    bufferCopyRegion.imageExtent.height = tex2D.Mipmaps[i].Height;
                     bufferCopyRegion.imageExtent.depth = 1;
                     bufferCopyRegion.bufferOffset = offset;
 
                     bufferCopyRegions.Add(bufferCopyRegion);
 
-                    offset += tex2D.Faces[0].Mipmaps[i].SizeInBytes;
+                    offset += tex2D.Mipmaps[i].SizeInBytes;
                 }
 
                 // Create optimal tiled target image

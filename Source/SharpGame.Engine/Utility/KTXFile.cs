@@ -219,6 +219,38 @@ namespace SharpGame
             NumberOfMipmapLevels = numberOfMipmapLevels;
             Mipmaps = new KtxMipmap[numberOfMipmapLevels];
         }
+
+
+        public ulong GetTotalSize()
+        {
+            ulong totalSize = 0;
+
+            for (int mipLevel = 0; mipLevel < Mipmaps.Length; mipLevel++)
+            {
+                KtxMipmap mipmap = Mipmaps[mipLevel];
+                totalSize += mipmap.SizeInBytes;
+                
+            }
+
+            return totalSize;
+        }
+
+
+        public byte[] GetAllTextureData()
+        {
+            byte[] result = new byte[GetTotalSize()];
+            uint start = 0;
+            
+            for (int mipLevel = 0; mipLevel < Mipmaps.Length; mipLevel++)
+            {
+                KtxMipmap mipmap = Mipmaps[mipLevel];
+                mipmap.Data.CopyTo(result, (int)start);
+                start += mipmap.SizeInBytes;
+            }
+           
+
+            return result;
+        }
     }
 
     public class KtxMipmap
