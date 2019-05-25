@@ -10,6 +10,10 @@ namespace SharpGame
 
     public unsafe class Texture2D : Texture
     {
+        public Texture2D()
+        {
+        }
+
         public override bool Load(File stream)
         {
             var tex2D = KtxFile.Load(stream, false);
@@ -24,7 +28,9 @@ namespace SharpGame
             {
                 width = w,
                 height = h,
-                mipLevels = 1
+                mipLevels = 1,
+                depth = 1,
+                format = Format.R8g8b8a8Unorm
             };
 
             uint totalBytes = bytesPerPixel * w * h;
@@ -224,17 +230,19 @@ namespace SharpGame
         {
             KtxFile tex2D;
 
-            using (var file = ResourceCache.Instance.Open(filename))
+            this.format = format;
+            
+
+            using (var file = FileSystem.Instance.OpenFile(filename))
             {
                 tex2D = KtxFile.Load(file, false);
 
-                LoadKtxFile(tex2D, format, imageUsageFlags, imageLayout, forceLinear);
+                LoadKtxFile(tex2D, imageUsageFlags, imageLayout, forceLinear);
             }
 
         }
 
         void LoadKtxFile(KtxFile tex2D,
-            Format format,
             ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled,
             ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal,
             bool forceLinear = false)

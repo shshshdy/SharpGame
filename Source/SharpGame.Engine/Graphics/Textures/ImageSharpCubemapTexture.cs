@@ -5,8 +5,9 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Veldrid.ImageSharp
+namespace SharpGame.ImageSharp
 {
+    using Image = SixLabors.ImageSharp.Image;
     public class ImageSharpCubemapTexture
     {
         /// <summary>
@@ -28,7 +29,7 @@ namespace Veldrid.ImageSharp
         /// <summary>
         /// The pixel format cubemap textures.
         /// </summary>
-        public PixelFormat Format => PixelFormat.R8_G8_B8_A8_UNorm;
+        public Format Format => Format.R8g8b8a8Unorm;
 
         /// <summary>
         /// The size of each pixel, in bytes.
@@ -57,12 +58,12 @@ namespace Veldrid.ImageSharp
             string negativeYPath,
             string positiveZPath,
             string negativeZPath) : this(
-                Image.Load(positiveXPath),
-                Image.Load(negativeXPath),
-                Image.Load(positiveYPath),
-                Image.Load(negativeYPath),
-                Image.Load(positiveZPath), 
-                Image.Load(negativeZPath),
+                Image.Load<Rgba32>(positiveXPath),
+                Image.Load<Rgba32>(negativeXPath),
+                Image.Load<Rgba32>(positiveYPath),
+                Image.Load<Rgba32>(negativeYPath),
+                Image.Load<Rgba32>(positiveZPath), 
+                Image.Load<Rgba32>(negativeZPath),
                 true) { }
 
         public ImageSharpCubemapTexture(
@@ -73,12 +74,12 @@ namespace Veldrid.ImageSharp
             string positiveZPath,
             string negativeZPath,
             bool mipmap) : this(
-                Image.Load(positiveXPath),
-                Image.Load(negativeXPath),
-                Image.Load(positiveYPath),
-                Image.Load(negativeYPath),
-                Image.Load(positiveZPath),
-                Image.Load(negativeZPath),
+                Image.Load<Rgba32>(positiveXPath),
+                Image.Load<Rgba32>(negativeXPath),
+                Image.Load<Rgba32>(positiveYPath),
+                Image.Load<Rgba32>(negativeYPath),
+                Image.Load<Rgba32>(positiveZPath),
+                Image.Load<Rgba32>(negativeZPath),
                 mipmap)
         { }
 
@@ -90,12 +91,12 @@ namespace Veldrid.ImageSharp
             Stream positiveZStream,
             Stream negativeZStream,
             bool mipmap) : this(
-                Image.Load(positiveXStream),
-                Image.Load(negativeXStream),
-                Image.Load(positiveYStream),
-                Image.Load(negativeYStream),
-                Image.Load(positiveZStream),
-                Image.Load(negativeZStream),
+                Image.Load<Rgba32>(positiveXStream),
+                Image.Load<Rgba32>(negativeXStream),
+                Image.Load<Rgba32>(positiveYStream),
+                Image.Load<Rgba32>(negativeYStream),
+                Image.Load<Rgba32>(positiveZStream),
+                Image.Load<Rgba32>(negativeZStream),
                 mipmap)
         { }
 

@@ -13,6 +13,7 @@ namespace SharpGame
     {
         public int Stride { get; set; }
         public int Count { get; set; }
+        public int Size => Stride * Count;
 
         public VkBuffer buffer;
         public VkDeviceMemory memory;

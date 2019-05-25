@@ -8,7 +8,7 @@ using Vulkan;
 namespace SharpGame
 {
  
-    public class PassHandler : Object
+    public class FrameGraphPass : Object
     {
         private StringID name;
         public StringID Name
@@ -36,7 +36,7 @@ namespace SharpGame
 
         protected RenderPass renderPass;
 
-        public PassHandler()
+        public FrameGraphPass()
         {
         }
 

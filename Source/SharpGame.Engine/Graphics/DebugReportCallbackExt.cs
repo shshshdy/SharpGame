@@ -220,7 +220,7 @@ namespace Vulkan
         Warning = 1 << 1,
         /// <summary>
         /// Specifies a potentially non-optimal use of Vulkan. E.g. using <see
-        /// cref="CommandBuffer.CmdClearColorImage"/> when a <see cref="PassHandler"/> load op would
+        /// cref="CommandBuffer.CmdClearColorImage"/> when a <see cref="FrameGraphPass"/> load op would
         /// have worked.
         /// </summary>
         PerformanceWarning = 1 << 2,

@@ -17,33 +17,18 @@ namespace SharpGame
     {
         public FileSystem FileSystem => FileSystem.Instance;
         
-        public static string ContentRoot { get; set; }
         private readonly ConcurrentDictionary<string, Resource> cachedContent_ = new ConcurrentDictionary<string, Resource>();
 
-        public ResourceCache(string contentRoot)
+        public ResourceCache()
         {
-            ContentRoot = contentRoot;
         }
-
-        public File Open(string file)
-        {
-            string filePath = Path.Combine(ContentRoot, file);
-            return new File(FileSystem.Open(filePath));
-        }
-
-        public StreamReader OpenText(string file)
-        {
-            string filePath = Path.Combine(ContentRoot, file);
-            var stream = FileSystem.Open(filePath);
-            return new StreamReader(stream);
-        }
-
+        
         public T Load<T>(string contentName) where T : Resource, new()
         {
             if (cachedContent_.TryGetValue(contentName, out Resource value))
                 return (T)value;
 
-            File stream = Open(contentName);
+            File stream = FileSystem.OpenFile(contentName);
 
             var res = new T();
 
@@ -62,7 +47,7 @@ namespace SharpGame
             if (cachedContent_.TryGetValue(contentName, out Resource value))
                 return (T)value;
 
-            File stream = Open(contentName);
+            File stream = FileSystem.OpenFile(contentName);
 
             var res = new T();
 

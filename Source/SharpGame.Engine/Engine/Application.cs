@@ -60,8 +60,8 @@ namespace SharpGame
         protected virtual void Setup()
         {
             timer = CreateSubsystem<Timer>();
-            fileSystem = CreateSubsystem<FileSystem>();
-            cache = CreateSubsystem<ResourceCache>(DataPath);
+            fileSystem = CreateSubsystem<FileSystem>(DataPath);
+            cache = CreateSubsystem<ResourceCache>();
             CreateWindow();
             graphics = CreateSubsystem<Graphics>();
             graphics.Init(nativeWindow.SdlWindowHandle);

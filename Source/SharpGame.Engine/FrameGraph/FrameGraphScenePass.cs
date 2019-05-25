@@ -7,12 +7,12 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class ScenePassHandler : PassHandler
+    public class FrameGraphScenePass : FrameGraphPass
     {
         private ResourceLayout perFrameResLayout;
         private ResourceSet perFrameResSet;
 
-        public ScenePassHandler(string name = "main")
+        public FrameGraphScenePass(string name = "main")
         {
             Name = name;
 

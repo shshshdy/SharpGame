@@ -25,7 +25,7 @@ namespace SharpGame
 
         public uint ViewMask { get; set; }
 
-        public PassHandler OverlayPass { get; set; }
+        public FrameGraphPass OverlayPass { get; set; }
 
         internal FastList<Drawable> drawables = new FastList<Drawable>();
         internal FastList<Light> lights = new FastList<Light>();
@@ -103,7 +103,7 @@ namespace SharpGame
             if (RenderPath == null)
             {
                 RenderPath = new FrameGraph();
-                RenderPath.AddRenderPass(new ScenePassHandler());
+                RenderPath.AddRenderPass(new FrameGraphScenePass());
             }
 
             this.SendGlobalEvent(new BeginView { view = this });
