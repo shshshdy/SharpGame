@@ -128,7 +128,7 @@ namespace SharpGame
         {
             drawables.Clear();
 
-            if (Scene == null || Camera == null)
+            if (!Scene || !Camera)
             {
                 return;
             }

@@ -92,9 +92,11 @@ namespace SharpGame.Samples
         {
         }
 
-        public virtual void Shutdown()
+        protected override void Destroy()
         {
             scene?.Dispose();
+
+            base.Destroy();
         }
     }
 

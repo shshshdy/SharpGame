@@ -70,7 +70,7 @@ namespace SharpGame.Samples
         {
             if (current)
             {
-                current.Shutdown();
+                current.Dispose();
             }
 
         }
