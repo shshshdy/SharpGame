@@ -17,7 +17,7 @@ namespace SharpGame.Samples
         float pading1;
     }
 
-    [SampleDesc(sortOrder = 0)]
+    [SampleDesc(sortOrder = 2)]
     public unsafe class AssimpMesh : Sample
     {
         Texture2D colorMap = new Texture2D();
@@ -59,16 +59,15 @@ namespace SharpGame.Samples
             LoadMesh();
             CreatePipelines();
             CreateUniformBuffers();
-            SetupResourceSet();
-
+          
             drawable.SetNumGeometries(1);
             drawable.SetGeometry(0, geometry);
 
             var mat = new Material
             {
                 Shader = shader,
-                ResourceSet = resourceSet,
-                Pipeline = pipelineSolid
+                Pipeline = pipelineSolid,
+                ResourceSet = new ResourceSet(resourceLayout, uniformBufferScene, colorMap)
             };
 
             drawable.SetMaterial(0, mat);
@@ -104,8 +103,14 @@ namespace SharpGame.Samples
             {
                 CullMode = CullMode.Back,
                 FrontFace = FrontFace.CounterClockwise,
+
                 ResourceLayout = new[]
                 {
+                    new ResourceLayout
+                    {
+                        new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                    },
+
                     resourceLayout
                 }
             };
@@ -210,11 +215,6 @@ namespace SharpGame.Samples
             geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, ib.Count);
             vertexBuffer.Dispose();
             indexBuffer.Dispose();
-        }
-
-        void SetupResourceSet()
-        {
-            resourceSet = new ResourceSet(resourceLayout, uniformBufferScene, colorMap);
         }
 
         // Prepare and initialize uniform buffer containing shader uniforms

@@ -197,7 +197,7 @@ namespace SharpGame
             VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
             for(int i = 0; i < ResourceLayout.Length; i++)
             {
-                pSetLayouts[i] = ResourceLayout[i].descriptorSetLayout;
+                pSetLayouts[i] = ResourceLayout[i].DescriptorSetLayout;
             }
 
             var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);
@@ -256,7 +256,7 @@ namespace SharpGame
             VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
             for (int i = 0; i < ResourceLayout.Length; i++)
             {
-                pSetLayouts[i] = ResourceLayout[i].descriptorSetLayout;
+                pSetLayouts[i] = ResourceLayout[i].DescriptorSetLayout;
             }
 
             var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);

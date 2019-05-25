@@ -160,7 +160,7 @@ namespace SharpGame
             Matrix.Invert(ref camera.View, out cameraVS.ViewInv);
             cameraVS.ViewProj = camera.View*camera.Projection;
             cameraVS.CameraPos = camera.Node.Position;
-            ubCameraPS.SetData(ref cameraVS);
+            ubCameraVS.SetData(ref cameraVS);
         }
 
         private void UpdateLightParameters()

@@ -7,7 +7,6 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = 1)]
     public class StaticScene : Sample
     {
-
         public override void Init()
         {
             var graphics = Graphics.Instance;
@@ -27,15 +26,38 @@ namespace SharpGame.Samples
             var staticModel = node.AddComponent<StaticModel>();
             staticModel.SetModel(model);
 
-            //_cubeTexture = ResourceCache.Load<Texture>("IndustryForgedDark512.ktx").Result;
+            var colorMap = new Texture2D();
+            colorMap.LoadFromFile("models/voyager/voyager_bc3_unorm.ktx",
+                    Format.Bc3UnormBlock);
+
+            var resourceLayout = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+            };
+
+            var resourceLayoutTex = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
+            };
 
             var mat = new Material
             {
                 Shader = new Shader
                 {
                     new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-                }
+                },
+
+                Pipeline = new Pipeline
+                {
+                    CullMode = CullMode.None,
+                    FrontFace = FrontFace.Clockwise,
+
+                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex }
+                },
+
+                ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
             };
+
             //mat.SetTexture("sampler_Color", _cubeTexture);
             staticModel.SetMaterial(0, mat);
 

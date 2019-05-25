@@ -9,9 +9,8 @@ namespace SharpGame
 {
     public class ScenePassHandler : PassHandler
     {
-        protected Pipeline pipeline;
-        private ResourceLayout resourceLayout;
-        private ResourceSet resourceSet;
+        private ResourceLayout perFrameResLayout;
+        private ResourceSet perFrameResSet;
 
         public ScenePassHandler(string name = "main")
         {
@@ -19,20 +18,10 @@ namespace SharpGame
 
             Recreate();
 
-            resourceLayout = new ResourceLayout
+            perFrameResLayout = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-                //new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
-            };
 
-            pipeline = new Pipeline
-            {
-                CullMode = CullMode.None,
-                FrontFace = FrontFace.Clockwise,
-                DynamicStates = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-                VertexLayout = VertexPosNormTex.Layout,
-
-                ResourceLayout = new[]{ resourceLayout}
             };
 
         }
@@ -45,9 +34,9 @@ namespace SharpGame
 
         protected override void OnBeginDraw(RenderView view)
         {
-            if(resourceSet == null)
+            if(perFrameResSet == null)
             {
-                resourceSet = new ResourceSet(resourceLayout, view.ubCameraVS);
+                perFrameResSet = new ResourceSet(perFrameResLayout, view.ubCameraVS);
             }
 
             cmdBuffer.SetViewport(ref view.Viewport);
@@ -62,7 +51,7 @@ namespace SharpGame
                 for(int i = 0; i < drawable.Batches.Length; i++)
                 {
                     SourceBatch batch = drawable.Batches[i];
-                    DrawBatch(batch, pipeline, resourceSet);
+                    DrawBatch(batch, perFrameResSet);
                 }
             }
         }

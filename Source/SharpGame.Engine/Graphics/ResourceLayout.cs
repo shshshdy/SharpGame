@@ -56,7 +56,15 @@ namespace SharpGame
 
         private VkDescriptorSetLayoutBinding[] bindings;
 
-        internal VkDescriptorSetLayout descriptorSetLayout;
+        private VkDescriptorSetLayout descriptorSetLayout;
+        internal ref VkDescriptorSetLayout DescriptorSetLayout
+        {
+            get
+            {
+                Build();
+                return ref descriptorSetLayout;
+            }
+        }
         internal DescriptorResourceCounts descriptorResourceCounts;
         internal int NumBindings => Bindings.Count;
         private bool needRebuild = true;

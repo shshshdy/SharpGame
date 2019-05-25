@@ -1,47 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Text;
 using Vulkan;
-using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    public class Texture : Resource, IBindable
-    {
-        public VkImageView view;
-        public VkImage image;
-        public VkSampler sampler;
-        public VkDeviceMemory deviceMemory;
-        public uint width;
-        public uint height;
-        public uint mipLevels;
-        public ImageLayout imageLayout;
-        public VkDescriptorImageInfo descriptor;
-
-        public Texture()
-        {
-        }
-
-        internal void UpdateDescriptor()
-        {
-            descriptor.sampler = sampler;
-            descriptor.imageView = view;
-            descriptor.imageLayout = (VkImageLayout)imageLayout;
-        }
-
-        protected override void Destroy()
-        {
-
-            vkDestroyImageView(Graphics.device, view, IntPtr.Zero);
-            vkDestroyImage(Graphics.device, image, IntPtr.Zero);
-            vkDestroySampler(Graphics.device, sampler, IntPtr.Zero);
-            vkFreeMemory(Graphics.device, deviceMemory, IntPtr.Zero);
-
-            base.Destroy();
-        }
-
-    }
+    using global::System.Runtime.CompilerServices;
+    using static Vulkan.VulkanNative;
 
     public unsafe class Texture2D : Texture
     {

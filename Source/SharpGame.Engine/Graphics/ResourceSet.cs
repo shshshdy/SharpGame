@@ -30,7 +30,7 @@ namespace SharpGame
             VkDescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
             unsafe
             {
-                var dsAI = DescriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.descriptorSetLayout), 1);
+                var dsAI = DescriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.DescriptorSetLayout), 1);
                 VulkanNative.vkAllocateDescriptorSets(Graphics.device, ref dsAI, out descriptorSet);
                 descriptorPool = pool;
                 resourceLayout = resLayout;
@@ -45,7 +45,7 @@ namespace SharpGame
             VkDescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
             unsafe
             {
-                var dsAI = DescriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.descriptorSetLayout), 1);
+                var dsAI = DescriptorSetAllocateInfo(pool, (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.DescriptorSetLayout), 1);
                 VulkanNative.vkAllocateDescriptorSets(Graphics.device, ref dsAI, out descriptorSet);
                 descriptorPool = pool;
                 resourceLayout = resLayout;

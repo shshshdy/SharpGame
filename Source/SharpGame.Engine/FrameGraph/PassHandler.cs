@@ -40,7 +40,7 @@ namespace SharpGame
         {
         }
 
-        public void DrawBatch(SourceBatch batch, Pipeline pipeline, ResourceSet resourceSet)
+        public void DrawBatch(SourceBatch batch, ResourceSet resourceSet)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
@@ -49,7 +49,15 @@ namespace SharpGame
             }
 
             var pass = shader.GetPass(passID);
-            cmdBuffer.DrawGeometry(batch.geometry, batch.material.Pipeline ?? pipeline, pass, batch.material.ResourceSet ?? resourceSet);
+            var pipeline = batch.material.Pipeline;
+
+            var pipe = pipeline.GetGraphicsPipeline(renderPass, pass, batch.geometry);
+            cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipe);
+
+            cmdBuffer.BindGraphicsResourceSet(pipeline, 0, resourceSet);
+            cmdBuffer.BindGraphicsResourceSet(pipeline, 1, batch.material.ResourceSet);
+
+            batch.geometry.Draw(cmdBuffer);
         }
 
         protected void BeginDraw(RenderView view)
