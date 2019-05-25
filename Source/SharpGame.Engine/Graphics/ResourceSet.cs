@@ -13,16 +13,17 @@ namespace SharpGame
     {
         public const int PerFrame = 0;
         public const int PerShader = 1;
-        public const int PerMaterial = 2;
-        public const int PerObject = 3;
+        public const int PerObject = 2;
+        public const int PerMaterial = 3;
 
+        public int Set => resourceLayout.Set;
 
-        internal VkDescriptorSet descriptorSet;
-
-        internal VkDescriptorPool descriptorPool;
         internal ResourceLayout resourceLayout;
+
         internal ref DescriptorResourceCounts Counts => ref resourceLayout.descriptorResourceCounts;
 
+        internal VkDescriptorSet descriptorSet;
+        internal VkDescriptorPool descriptorPool;
         private VkWriteDescriptorSet[] writeDescriptorSets;
         public ResourceSet(ResourceLayout resLayout)
         {

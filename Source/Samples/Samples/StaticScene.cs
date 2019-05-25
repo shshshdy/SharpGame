@@ -58,7 +58,6 @@ namespace SharpGame.Samples
                 ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
             };
 
-            //mat.SetTexture("sampler_Color", _cubeTexture);
             staticModel.SetMaterial(0, mat);
 
             Renderer.Instance.MainView.Attach(camera, scene);

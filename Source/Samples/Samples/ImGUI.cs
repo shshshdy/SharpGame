@@ -16,12 +16,9 @@ namespace SharpGame.Samples
         {
         }
 
-
         public override void OnGUI()
         {
             ImGui.ShowDemoWindow();
         }
-
-
     }
 }
