@@ -121,19 +121,21 @@ namespace SharpGame
                 // Image barrier for optimal image
 
                 // The sub resource range describes the regions of the image we will be transition
-                VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
-                // Image only contains color data
-                subresourceRange.aspectMask = VkImageAspectFlags.Color;
-                // Start at first mip level
-                subresourceRange.baseMipLevel = 0;
-                // We will transition on all mip levels
-                subresourceRange.levelCount = texture.mipLevels;
-                // The 2D texture only has one layer
-                subresourceRange.layerCount = 1;
+                VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange
+                {
+                    // Image only contains color data
+                    aspectMask = VkImageAspectFlags.Color,
+                    // Start at first mip level
+                    baseMipLevel = 0,
+                    // We will transition on all mip levels
+                    levelCount = texture.mipLevels,
+                    // The 2D texture only has one layer
+                    layerCount = 1
+                };
 
                 // Optimal image will be used as destination for the copy, so we must transfer from our
                 // initial undefined image layout to the transfer destination layout
-                Tools.setImageLayout(
+                Tools.SetImageLayout(
                     copyCmd,
                     texture.image,
                      VkImageAspectFlags.Color,
@@ -152,7 +154,7 @@ namespace SharpGame
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
-                Tools.setImageLayout(
+                Tools.SetImageLayout(
                     copyCmd,
                     texture.image,
                     VkImageAspectFlags.Color,
@@ -231,21 +233,19 @@ namespace SharpGame
             KtxFile tex2D;
 
             this.format = format;
-            
+            this.imageUsageFlags = imageUsageFlags;
+            this.imageLayout = imageLayout;
 
             using (var file = FileSystem.Instance.OpenFile(filename))
             {
                 tex2D = KtxFile.Load(file, false);
 
-                LoadKtxFile(tex2D, imageUsageFlags, imageLayout, forceLinear);
+                LoadKtxFile(tex2D, forceLinear);
             }
 
         }
 
-        void LoadKtxFile(KtxFile tex2D,
-            ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled,
-            ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal,
-            bool forceLinear = false)
+        void LoadKtxFile(KtxFile tex2D, bool forceLinear = false)
         {
             width = tex2D.Header.PixelWidth;
             height = tex2D.Header.PixelHeight;
@@ -285,27 +285,27 @@ namespace SharpGame
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
                 bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
 
-                Util.CheckResult(vkCreateBuffer(Device.LogicalDevice, &bufferCreateInfo, null, &stagingBuffer));
+                stagingBuffer = Device.CreateBuffer(ref bufferCreateInfo);
 
                 // Get memory requirements for the staging buffer (alignment, memory type bits)
-                vkGetBufferMemoryRequirements(Device.LogicalDevice, stagingBuffer, &memReqs);
+                Device.GetBufferMemoryRequirements(stagingBuffer, out memReqs);
 
                 memAllocInfo.allocationSize = memReqs.size;
                 // Get memory type index for a host visible buffer
                 memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
 
-                Util.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, &stagingMemory));
-                Util.CheckResult(vkBindBufferMemory(Device.LogicalDevice, stagingBuffer, stagingMemory, 0));
+                stagingMemory = Device.AllocateMemory(ref memAllocInfo);
+
+                Device.BindBufferMemory(stagingBuffer, stagingMemory, 0);
 
                 // Copy texture data into staging buffer
-                byte* data;
-                Util.CheckResult(vkMapMemory(Device.LogicalDevice, stagingMemory, 0, memReqs.size, 0, (void**)&data));
+                void* data = Device.MapMemory( stagingMemory, 0, memReqs.size, 0);
                 byte[] pixelData = tex2D.GetAllTextureData();
                 fixed (byte* pixelDataPtr = &pixelData[0])
                 {
                     Unsafe.CopyBlock(data, pixelDataPtr, (uint)pixelData.Length);
                 }
-                vkUnmapMemory(Device.LogicalDevice, stagingMemory);
+                Device.UnmapMemory(stagingMemory);
 
                 // Setup buffer copy regions for each mip level
                 NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
@@ -365,7 +365,7 @@ namespace SharpGame
 
                 // Image barrier for optimal image (target)
                 // Optimal image will be used as destination for the copy
-                Tools.setImageLayout(
+                Tools.SetImageLayout(
                     copyCmd,
                     image,
                     VkImageAspectFlags.Color,
@@ -383,8 +383,8 @@ namespace SharpGame
                     bufferCopyRegions.Data);
 
                 // Change texture image layout to shader read after all mip levels have been copied
-                this.imageLayout = imageLayout;
-                Tools.setImageLayout(
+                //this.imageLayout = imageLayout;
+                Tools.SetImageLayout(
                     copyCmd,
                     image,
                     VkImageAspectFlags.Color,
@@ -395,8 +395,8 @@ namespace SharpGame
                 Device.FlushCommandBuffer(copyCmd, Graphics.queue);
 
                 // Clean up staging resources
-                vkFreeMemory(Device.LogicalDevice, stagingMemory, null);
-                vkDestroyBuffer(Device.LogicalDevice, stagingBuffer, null);
+                Device.FreeMemory(stagingMemory);
+                Device.DestroyBuffer(stagingBuffer);
             }
             else
             {

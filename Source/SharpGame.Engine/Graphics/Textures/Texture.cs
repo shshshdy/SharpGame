@@ -10,17 +10,19 @@ namespace SharpGame
 
     public class Texture : Resource, IBindable
     {
-        public VkImageView view;
-        public VkImage image;
-        public VkSampler sampler;
-        public VkDeviceMemory deviceMemory;
         public uint width;
         public uint height;
         public uint mipLevels;
         public uint depth;
         public Format format;
+        public ImageUsageFlags imageUsageFlags;
         public ImageLayout imageLayout;
-        public VkDescriptorImageInfo descriptor;
+
+        internal VkImageView view;
+        internal VkImage image;
+        internal VkSampler sampler;
+        internal VkDeviceMemory deviceMemory;
+        internal VkDescriptorImageInfo descriptor;
 
         public Texture()
         {

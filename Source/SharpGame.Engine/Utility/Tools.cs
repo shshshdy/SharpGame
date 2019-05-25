@@ -26,14 +26,14 @@ namespace SharpGame
             subresourceRange.baseMipLevel = 0;
             subresourceRange.levelCount = 1;
             subresourceRange.layerCount = 1;
-            setImageLayout(cmdbuffer, image, aspectMask, oldImageLayout, newImageLayout, subresourceRange);
+            SetImageLayout(cmdbuffer, image, aspectMask, oldImageLayout, newImageLayout, subresourceRange);
         }
 
         // Create an image memory barrier for changing the layout of
         // an image and put it into an active command buffer
         // See chapter 11.4 "Image Layout" for details
 
-        public static void setImageLayout(
+        public static void SetImageLayout(
             VkCommandBuffer cmdbuffer,
             VkImage image,
             VkImageAspectFlags aspectMask,

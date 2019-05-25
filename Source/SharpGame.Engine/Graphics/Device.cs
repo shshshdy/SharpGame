@@ -425,7 +425,29 @@ namespace SharpGame
             vkDestroyRenderPass(device, renderPass, null);
         }
 
-        public static VkResult CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
+        public static VkBuffer CreateBuffer(ref VkBufferCreateInfo pCreateInfo)
+        {
+            Util.CheckResult(vkCreateBuffer(device, ref pCreateInfo, null, out VkBuffer buffer));
+            return buffer;
+        }
+
+        public static void GetBufferMemoryRequirements(VkBuffer buffer, out VkMemoryRequirements pMemoryRequirements)
+        {
+            vkGetBufferMemoryRequirements(device, buffer, out pMemoryRequirements);
+        }
+
+        public static VkDeviceMemory AllocateMemory(ref VkMemoryAllocateInfo pAllocateInfo)
+        {
+            Util.CheckResult(vkAllocateMemory(device, ref pAllocateInfo, null, out VkDeviceMemory pMemory));
+            return pMemory;
+        }
+
+        public static void BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, ulong memoryOffset)
+        {
+            Util.CheckResult(vkBindBufferMemory(device, buffer, memory, memoryOffset));
+        }
+
+        public static void CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
         {
             // Create the buffer handle
             VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo(usageFlags, size);
@@ -462,7 +484,6 @@ namespace SharpGame
             // Attach the memory to the buffer object
             Util.CheckResult(vkBindBufferMemory(LogicalDevice, *buffer, *memory, 0));
 
-            return VkResult.Success;
         }
 
         public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)

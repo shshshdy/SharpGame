@@ -133,23 +133,22 @@ namespace SharpGame
                 bufferCreateInfo.usage |= VkBufferUsageFlags.TransferDst;
             }
 
-            Util.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, out buffer.buffer));
+            buffer.buffer = Device.CreateBuffer(ref bufferCreateInfo);
 
             // Create the memory backing up the buffer handle
-            VkMemoryRequirements memReqs;
             VkMemoryAllocateInfo memAlloc = VkMemoryAllocateInfo.New();
-            vkGetBufferMemoryRequirements(Graphics.device, buffer.buffer, &memReqs);
+            Device.GetBufferMemoryRequirements(buffer.buffer, out VkMemoryRequirements memReqs);
             memAlloc.allocationSize = memReqs.size;
             // Find a memory type index that fits the properties of the buffer
             memAlloc.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
-            Util.CheckResult(vkAllocateMemory(Graphics.device, &memAlloc, null, out buffer.memory));
+            buffer.memory = Device.AllocateMemory(ref memAlloc);
 
             buffer.alignment = memReqs.alignment;
             buffer.size = memAlloc.allocationSize;
             buffer.usageFlags = usageFlags;
             buffer.memoryPropertyFlags = memoryPropertyFlags;
 
-            vkBindBufferMemory(Graphics.device, buffer.buffer, buffer.memory, 0);
+            Device.BindBufferMemory(buffer.buffer, buffer.memory, 0);
 
             // If a pointer to the buffer data has been passed, map the buffer and copy over the data
             if (data != null)
@@ -159,13 +158,12 @@ namespace SharpGame
                     VkBuffer stagingBuffer;
                     VkDeviceMemory stagingMemory;
 
-                    Util.CheckResult(Device.CreateBuffer(VkBufferUsageFlags.TransferSrc,
-                        VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, size, &stagingBuffer, &stagingMemory, data));
+                    Device.CreateBuffer(VkBufferUsageFlags.TransferSrc, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
+                        size, &stagingBuffer, &stagingMemory, data);
 
                     // Copy from staging buffers
                     VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
-                    VkBufferCopy copyRegion = new VkBufferCopy();
-                    copyRegion.size = size;
+                    VkBufferCopy copyRegion = new VkBufferCopy { size = size };
                     vkCmdCopyBuffer(copyCmd, stagingBuffer, buffer.buffer, 1, &copyRegion);
 
                     Device.FlushCommandBuffer(copyCmd, Graphics.queue, true);

@@ -113,11 +113,18 @@ namespace SharpGame
     {
         internal VkCommandBuffer commandBuffer;
         public RenderPass renderPass;
-
-        public CommandBuffer(VkCommandBuffer cmdBuffer)
+        bool owner = false;
+        internal CommandBuffer(VkCommandBuffer cmdBuffer)
         {
             commandBuffer = cmdBuffer;
+            owner = true;
         }
+
+        protected override void Destroy()
+        {
+            base.Destroy();
+        }
+
 
         public void Begin(CommandBufferUsageFlags flags = CommandBufferUsageFlags.None)
         {
