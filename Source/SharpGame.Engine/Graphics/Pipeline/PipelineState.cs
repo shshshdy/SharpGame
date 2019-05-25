@@ -20,6 +20,14 @@ namespace SharpGame
         public float depthBiasSlopeFactor;
         public float lineWidth;
 
+        public static RasterizationStateInfo Default = new RasterizationStateInfo
+        {
+            polygonMode = PolygonMode.Fill,
+            cullMode = CullMode.Back,
+            frontFace = FrontFace.CounterClockwise,
+            lineWidth = 1.0f
+        };
+
         public void ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo)
         {
             rasterizationStateCreateInfo = VkPipelineRasterizationStateCreateInfo.New();
@@ -57,6 +65,12 @@ namespace SharpGame
         public uint[] pSampleMask;
         public bool alphaToCoverageEnable;
         public bool alphaToOneEnable;
+
+        public static MultisampleStateInfo Default = new MultisampleStateInfo
+        {
+            rasterizationSamples = SampleCountFlags.Count1,
+            minSampleShading = 1.0f
+        };
 
         public unsafe void ToNative(out VkPipelineMultisampleStateCreateInfo native)
         {
@@ -123,6 +137,26 @@ namespace SharpGame
         public StencilOpState back;
         public float minDepthBounds;
         public float maxDepthBounds;
+
+        public static DepthStencilStateInfo Solid = new DepthStencilStateInfo
+        {
+            depthTestEnable = true,
+            depthWriteEnable = true,
+            depthCompareOp = CompareOp.LessOrEqual,
+            back = new StencilOpState
+            {
+                failOp = StencilOp.Keep,
+                passOp = StencilOp.Keep,
+                compareOp = CompareOp.Always
+            },
+            front = new StencilOpState
+            {
+                failOp = StencilOp.Keep,
+                passOp = StencilOp.Keep,
+                compareOp = CompareOp.Always
+            }
+
+        };
 
         public unsafe void ToNative(out VkPipelineDepthStencilStateCreateInfo native)
         {
@@ -293,6 +327,18 @@ namespace SharpGame
         {
             this.dynamicStates = dynamicStates;
             this.flags = 0;
+        }
+
+        public bool HasState(DynamicState dynamicState)
+        {
+            foreach(var ds in dynamicStates)
+            {
+                if(ds == dynamicState)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public unsafe void ToNative(out VkPipelineDynamicStateCreateInfo native)

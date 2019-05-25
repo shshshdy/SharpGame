@@ -90,7 +90,7 @@ namespace SharpGame
                 DepthTestEnable = false,
                 DepthWriteEnable = false,
                 BlendMode = BlendMode.Alpha,
-                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
+                DynamicStates = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
 
                 VertexLayout = VertexPos2dTexColor.Layout,
 

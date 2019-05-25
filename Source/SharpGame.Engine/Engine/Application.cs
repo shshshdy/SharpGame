@@ -37,10 +37,11 @@ namespace SharpGame
         private string dataPath;
 
         private float fps;
-        public float Fps => 1 / Time.Delta;
+        public float Fps => fps;
         private float mspf;
-        public float Msec => Time.Delta;
-
+        public float Msec => mspf;
+        private long elapsedTime;
+        private int frameNum;
         /// Previous timesteps for smoothing.
         List<float> lastTimeSteps_ = new List<float>();
         /// Next frame timestep in seconds.
@@ -222,6 +223,16 @@ namespace SharpGame
 
 
             elapsed = timer.ElapsedMicroseconds;
+            elapsedTime += elapsed;
+            frameNum++;
+            if (elapsedTime >= 1000000L)
+            {
+                fps = frameNum;
+                mspf = elapsedTime*0.001f / frameNum;
+                frameNum = 0;
+                elapsedTime = 0;
+            }
+
             timer.Restart();
 
             // If FPS lower than minimum, clamp elapsed time

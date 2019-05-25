@@ -51,7 +51,7 @@ namespace SharpGame
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
         public BlendMode BlendMode { set => SetBlendMode(value); }
-        public DynamicStateInfo DynamicState {get; set;}
+        public DynamicStateInfo DynamicStates {get; set;}
 
         [IgnoreDataMember]
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
@@ -72,43 +72,11 @@ namespace SharpGame
         
         public void Init()
         {
-            vertexlayout = new VertexLayout();
-
-            RasterizationState = new RasterizationStateInfo
-            {
-                polygonMode = PolygonMode.Fill,
-                cullMode = CullMode.Back,
-                frontFace = FrontFace.CounterClockwise,
-                lineWidth = 1.0f
-            };
-
-            MultisampleState = new MultisampleStateInfo
-            {
-                rasterizationSamples = SampleCountFlags.Count1,
-                minSampleShading = 1.0f
-            };
-
-            DepthStencilState = new DepthStencilStateInfo
-            {
-                depthTestEnable = true,
-                depthWriteEnable = true,
-                depthCompareOp = CompareOp.LessOrEqual,
-                back = new StencilOpState
-                {
-                    failOp = StencilOp.Keep,
-                    passOp = StencilOp.Keep,
-                    compareOp = CompareOp.Always
-                },
-                front = new StencilOpState
-                {
-                    failOp = StencilOp.Keep,
-                    passOp = StencilOp.Keep,
-                    compareOp = CompareOp.Always
-                }
-            };
-
+            RasterizationState = RasterizationStateInfo.Default;
+            MultisampleState = MultisampleStateInfo.Default;
+            DepthStencilState = DepthStencilStateInfo.Solid;
             BlendMode = BlendMode.Replace;
-
+            DynamicStates = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor);
         }
 
         protected override void Destroy()
@@ -214,12 +182,6 @@ namespace SharpGame
             }
         }
 
-        protected /*override*/ void Recreate()
-        {
-            Device.DestroyPipeline(pipeline);
-            pipeline = 0;
-        }
-
         internal unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, Pass pass, Geometry geometry)
         {
             if(pipeline != 0)
@@ -259,8 +221,8 @@ namespace SharpGame
                 rasterizationState.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo);
                 pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 
-                //var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
-               // pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+                var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
+                pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
 
                 this.multisampleState.ToNative(out VkPipelineMultisampleStateCreateInfo multisampleState);
                 pipelineCreateInfo.pMultisampleState = &multisampleState;
@@ -272,9 +234,9 @@ namespace SharpGame
                 pipelineCreateInfo.pColorBlendState = &colorBlendState;
 
                 VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
-                if (DynamicState.HasValue)
+                if (DynamicStates.HasValue)
                 {
-                    DynamicState.ToNative(out dynamicStateCreateInfo);
+                    DynamicStates.ToNative(out dynamicStateCreateInfo);
                     pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
                 }
 

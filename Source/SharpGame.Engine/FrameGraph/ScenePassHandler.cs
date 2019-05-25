@@ -29,7 +29,7 @@ namespace SharpGame
             {
                 CullMode = CullMode.None,
                 FrontFace = FrontFace.Clockwise,
-                DynamicState = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
+                DynamicStates = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
                 VertexLayout = VertexPosNormTex.Layout,
 
                 ResourceLayout = new[]{ resourceLayout}
@@ -50,8 +50,8 @@ namespace SharpGame
                 resourceSet = new ResourceSet(resourceLayout, view.ubCameraVS);
             }
 
-            //cmdBuffer.SetViewport(ref view.Viewport);
-            //cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+            cmdBuffer.SetViewport(ref view.Viewport);
+            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
 
         }
 
