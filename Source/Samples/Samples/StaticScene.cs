@@ -27,7 +27,7 @@ namespace SharpGame.Samples
             staticModel.SetModel(model);
 
             var colorMap = new Texture2D();
-            colorMap.LoadFromFile("models/voyager/voyager_bc3_unorm.ktx",
+            colorMap.LoadFromFile("textures/darkmetal_bc3_unorm.ktx",
                     Format.Bc3UnormBlock);
 
             var resourceLayout = new ResourceLayout
