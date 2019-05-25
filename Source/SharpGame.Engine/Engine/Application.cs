@@ -21,9 +21,10 @@ namespace SharpGame
         public CString Name { get; set; } = "SharpGame";
         public int width { get; protected set; } = 1280;
         public int height { get; protected set; } = 720;
-        public IntPtr Window { get; protected set; }
-        public Sdl2Window NativeWindow { get; private set; }
-        public IntPtr WindowInstance { get; protected set; }
+
+        protected IntPtr window;
+        protected Sdl2Window nativeWindow;
+        protected IntPtr windowInstance;
 
         protected Timer timer;
         protected FileSystem fileSystem;
@@ -38,22 +39,16 @@ namespace SharpGame
 
         private float fps;
         public float Fps => fps;
-        private float mspf;
-        public float Msec => mspf;
+        private float msec;
+        public float Msec => msec;
+
         private long elapsedTime;
         private int frameNum;
-        /// Previous timesteps for smoothing.
-        List<float> lastTimeSteps_ = new List<float>();
-        /// Next frame timestep in seconds.
-        float timeStep_;
-        /// How many frames to average for the smoothed timestep.
-        int timeStepSmoothing_ = 2;
-        /// Minimum frames per second.
-        uint minFps_ = 10;
-        /// Maximum frames per second.
-        uint maxFps_ = 2000;
-        /// Maximum frames per second when the application does not have input focus.
-        uint maxInactiveFps_ = 60;
+        private List<float> lastTimeSteps = new List<float>();
+        private float timeStep;
+        private int timeStepSmoothing = 2;
+        private uint minFps = 10;
+        private uint maxFps = 2000;
 
         public Application(string dataPath)
         {
@@ -69,7 +64,7 @@ namespace SharpGame
             cache = CreateSubsystem<ResourceCache>(DataPath);
             CreateWindow();
             graphics = CreateSubsystem<Graphics>();
-            graphics.Init(NativeWindow.SdlWindowHandle);
+            graphics.Init(nativeWindow.SdlWindowHandle);
             renderer = CreateSubsystem<Renderer>();
             input = CreateSubsystem<Input>();
 
@@ -82,18 +77,18 @@ namespace SharpGame
 
         protected virtual void CreateWindow()
         {
-            WindowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            NativeWindow = new Sdl2Window(Name, 50, 50, width, height, SDL_WindowFlags.Resizable, threadedProcessing: false)
+            windowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
+            nativeWindow = new Sdl2Window(Name, 50, 50, width, height, SDL_WindowFlags.Resizable, threadedProcessing: false)
             {
                 X = 50,
                 Y = 50,
                 Visible = true
             };
 
-            NativeWindow.Create();
+            nativeWindow.Create();
 
-            Window = NativeWindow.Handle;
-            NativeWindow.Resized += WindowResize;
+            window = nativeWindow.Handle;
+            nativeWindow.Resized += WindowResize;
         }
 
         public void Run()
@@ -117,13 +112,13 @@ namespace SharpGame
             timer.Reset();
             timer.Start();
 
-            while (NativeWindow.Exists)
+            while (nativeWindow.Exists)
             {
-                Time.Tick(timeStep_);
+                Time.Tick(timeStep);
 
-                input.snapshot = NativeWindow.PumpEvents();
+                input.snapshot = nativeWindow.PumpEvents();
 
-                if (!NativeWindow.Exists)
+                if (!nativeWindow.Exists)
                 {
                     // Exit early if the window was closed this frame.
                     break;
@@ -159,8 +154,8 @@ namespace SharpGame
             prepared = false;
 
             // Recreate swap chain
-            width = NativeWindow.Width;
-            height = NativeWindow.Width;
+            width = nativeWindow.Width;
+            height = nativeWindow.Width;
 
             graphics.Resize(width, height);
 
@@ -198,7 +193,7 @@ namespace SharpGame
 
         void ApplyFrameLimit()
         {
-            uint maxFps = maxFps_;
+            uint maxFps = this.maxFps;
 
             long elapsed = 0;
 
@@ -228,7 +223,7 @@ namespace SharpGame
             if (elapsedTime >= 1000000L)
             {
                 fps = frameNum;
-                mspf = elapsedTime*0.001f / frameNum;
+                msec = elapsedTime*0.001f / frameNum;
                 frameNum = 0;
                 elapsedTime = 0;
             }
@@ -236,27 +231,27 @@ namespace SharpGame
             timer.Restart();
 
             // If FPS lower than minimum, clamp elapsed time
-            if (minFps_ > 0)
+            if (minFps > 0)
             {
-                long targetMin = 1000000L / minFps_;
+                long targetMin = 1000000L / minFps;
                 if (elapsed > targetMin)
                     elapsed = targetMin;
             }
 
             // Perform timestep smoothing
-            timeStep_ = 0.0f;
+            timeStep = 0.0f;
             
-            lastTimeSteps_.Add(elapsed / 1000000.0f);
-            if (lastTimeSteps_.Count > timeStepSmoothing_)
+            lastTimeSteps.Add(elapsed / 1000000.0f);
+            if (lastTimeSteps.Count > timeStepSmoothing)
             {
                 // If the smoothing configuration was changed, ensure correct amount of samples
-                lastTimeSteps_.RemoveRange(0, lastTimeSteps_.Count - timeStepSmoothing_);
-                for (int i = 0; i < lastTimeSteps_.Count; ++i)
-                    timeStep_ += lastTimeSteps_[i];
-                timeStep_ /= lastTimeSteps_.Count;
+                lastTimeSteps.RemoveRange(0, lastTimeSteps.Count - timeStepSmoothing);
+                for (int i = 0; i < lastTimeSteps.Count; ++i)
+                    timeStep += lastTimeSteps[i];
+                timeStep /= lastTimeSteps.Count;
             }
             else
-                timeStep_ = lastTimeSteps_[lastTimeSteps_.Count - 1];
+                timeStep = lastTimeSteps[lastTimeSteps.Count - 1];
         }
 
     }
