@@ -10,16 +10,16 @@ namespace SharpGame
 
     public class Texture : Resource, IBindable
     {
-        public uint width;
-        public uint height;
-        public uint mipLevels;
-        public uint depth;
+        public int width;
+        public int height;
+        public int mipLevels;
+        public int depth;
         public Format format;
         public ImageUsageFlags imageUsageFlags;
         public ImageLayout imageLayout;
 
         internal ImageView view;
-        internal VkImage image;
+        internal Image image;
         internal Sampler sampler;
 
         internal VkDeviceMemory deviceMemory;
@@ -27,23 +27,6 @@ namespace SharpGame
 
         public Texture()
         {
-        }
-
-        public void UpdateTexture(IntPtr pixel, uint sizeInBytes,
-            uint x,
-            uint y,
-            uint z,
-            uint width,
-            uint height,
-            uint depth,
-            uint mipLevel,
-            uint arrayLayer)
-        {
-            this.width = width;
-            this.height = height;
-            this.mipLevels = mipLevel;
-            this.depth = depth;
-            //    format = Format.R8g8b8a8Unorm
         }
 
         internal void UpdateDescriptor()
@@ -56,7 +39,7 @@ namespace SharpGame
         protected override void Destroy()
         {
             view.Dispose();
-            vkDestroyImage(Graphics.device, image, IntPtr.Zero);
+            image.Dispose();
             sampler.Dispose();
             Device.FreeMemory(deviceMemory);
 
@@ -67,12 +50,12 @@ namespace SharpGame
 
     public class ImageData
     {
-        public uint Width { get; set; }
-        public uint Height { get; set; }
-        public uint NumberOfMipmapLevels { get; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public int NumberOfMipmapLevels { get; }
         public MipmapData[] Mipmaps { get; }
 
-        public ImageData(uint width, uint height, uint numberOfMipmapLevels, MipmapData[] mipmaps)
+        public ImageData(int width, int height, int numberOfMipmapLevels, MipmapData[] mipmaps)
         {
             Width = width;
             Height = height;
@@ -80,7 +63,7 @@ namespace SharpGame
             Mipmaps = mipmaps;
         }
 
-        public ImageData(uint numberOfMipmapLevels)
+        public ImageData(int numberOfMipmapLevels)
         {
             NumberOfMipmapLevels = numberOfMipmapLevels;
             Mipmaps = new MipmapData[numberOfMipmapLevels];

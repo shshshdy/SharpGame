@@ -499,30 +499,32 @@ namespace SharpGame
 
         }
 
-
+        /*
         public static void CreateImage(
-            uint width,
-            uint height,
+            int width,
+            int height,
             Format format,
             VkImageTiling tiling,
-            VkImageUsageFlags usage,
+            ImageUsageFlags usage,
             VkMemoryPropertyFlags properties,
-            out VkImage image,
+            out Image image,
             out VkDeviceMemory memory)
         {
-            VkImageCreateInfo imageCI = VkImageCreateInfo.New();
-            imageCI.imageType = VkImageType.Image2D;
+            ImageCreateInfo imageCI = new ImageCreateInfo
+            {
+                imageType = ImageType.Image2D
+            };
             imageCI.extent.width = width;
             imageCI.extent.height = height;
             imageCI.extent.depth = 1;
             imageCI.mipLevels = 1;
             imageCI.arrayLayers = 1;
-            imageCI.format = (VkFormat)format;
+            imageCI.format = format;
             imageCI.tiling = tiling;
-            imageCI.initialLayout = VkImageLayout.Preinitialized;
+            imageCI.initialLayout = ImageLayout.Preinitialized;
             imageCI.usage = usage;
             imageCI.sharingMode = VkSharingMode.Exclusive;
-            imageCI.samples = VkSampleCountFlags.Count1;
+            imageCI.samples = SampleCountFlags.Count1;
 
             vkCreateImage(device, ref imageCI, null, out image);
 
@@ -534,7 +536,7 @@ namespace SharpGame
 
             vkBindImageMemory(device, image, memory, 0);
         }
-
+        */
         private static uint FindMemoryType(uint typeFilter, VkMemoryPropertyFlags properties)
         {
             vkGetPhysicalDeviceMemoryProperties(PhysicalDevice, out VkPhysicalDeviceMemoryProperties memProperties);

@@ -25,12 +25,12 @@ namespace SharpGame.ImageSharp
         /// <summary>
         /// The width of the largest image in the chain.
         /// </summary>
-        public uint Width => (uint)Images[0].Width;
+        public int Width => Images[0].Width;
 
         /// <summary>
         /// The height of the largest image in the chain.
         /// </summary>
-        public uint Height => (uint)Images[0].Height;
+        public int Height => Images[0].Height;
 
         /// <summary>
         /// The pixel format of all images.
@@ -45,7 +45,7 @@ namespace SharpGame.ImageSharp
         /// <summary>
         /// The number of levels in the mipmap chain. This is equal to the length of the Images array.
         /// </summary>
-        public uint MipLevels => (uint)Images.Length;
+        public int MipLevels => Images.Length;
 
         public ImageSharpTexture(string path) : this(Image.Load<Rgba32>(path), true) { }
         public ImageSharpTexture(string path, bool mipmap) : this(Image.Load<Rgba32>(path), mipmap) { }
@@ -77,7 +77,7 @@ namespace SharpGame.ImageSharp
                 mipmaps[i] = new MipmapData(imageSize, MemoryMarshal.AsBytes(image.GetPixelSpan()).ToArray(), (uint)image.Width, (uint)image.Height);
             }
 
-            ImageData face = new ImageData(Width, Height, (uint)Images.Length, mipmaps);
+            ImageData face = new ImageData(Width, Height, Images.Length, mipmaps);
             Texture2D tex = new Texture2D
             {
                 width = Width,
@@ -92,7 +92,8 @@ namespace SharpGame.ImageSharp
             return tex;
 
         }
-     
+
+#if false
         private unsafe Texture CreateTextureViaStaging()
         {
             //Texture staging = factory.CreateTexture(
@@ -107,7 +108,7 @@ namespace SharpGame.ImageSharp
                 format = Format
             };
 
-            Device.CreateImage(Width, Height, Format, VkImageTiling.Linear, VkImageUsageFlags.TransferSrc,
+            Device.CreateImage(Width, Height, Format, VkImageTiling.Linear, ImageUsageFlags.TransferSrc,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, out VkImage stagingImage,
                 out VkDeviceMemory stagingImageMemory);
 
@@ -123,7 +124,7 @@ namespace SharpGame.ImageSharp
                 format = Format
             };
 
-            Device.CreateImage(Width, Height, Format, VkImageTiling.Optimal, VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled,
+            Device.CreateImage(Width, Height, Format, VkImageTiling.Optimal, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled,
                 VkMemoryPropertyFlags.DeviceLocal, out VkImage retImage,
                 out VkDeviceMemory retImageMemory);
 
@@ -209,7 +210,7 @@ namespace SharpGame.ImageSharp
             {
                 Image<Rgba32> image = Images[level];
                 fixed (void* pin = &MemoryMarshal.GetReference(image.GetPixelSpan()))
-                {
+                {/*
                     tex.UpdateTexture(                        
                         (IntPtr)pin,
                         (uint)(PixelSizeInBytes * image.Width * image.Height),
@@ -220,11 +221,13 @@ namespace SharpGame.ImageSharp
                         (uint)image.Height,
                         1,
                         (uint)level,
-                        0);
+                        0);*/
                 }
             }
 
             return tex;
         }
+
+#endif
     }
 }

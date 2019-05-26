@@ -174,7 +174,7 @@ namespace SharpGame
         {
             var io = ImGui.GetIO();
             io.Fonts.GetTexDataAsRGBA32(out byte* out_pixels, out int out_width, out int out_height, out int out_bytes_per_pixel);
-            this.texture = Texture2D.Create((uint)out_width, (uint)out_height, (uint)out_bytes_per_pixel, out_pixels);
+            this.texture = Texture2D.Create(out_width, out_height, out_bytes_per_pixel, out_pixels);
             io.Fonts.SetTexID(fontAtlasID);
             io.Fonts.ClearTexData();
         }

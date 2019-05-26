@@ -23,9 +23,9 @@ namespace SharpGame
     public struct ImageViewCreateInfo
     {
         public uint flags;
-        public VkImage image;
+        public Image image;
         public VkImageViewType viewType;
-        public VkFormat format;
+        public Format format;
         public VkComponentMapping components;
         public VkImageSubresourceRange subresourceRange;
 
@@ -33,9 +33,9 @@ namespace SharpGame
         {
             native = VkImageViewCreateInfo.New();
             native.flags = flags;
-            native.image = image;
+            native.image = image.handle;
             native.viewType = viewType;
-            native.format = format;
+            native.format = (VkFormat)format;
             native.components = components;
             native.subresourceRange = subresourceRange;            
         }

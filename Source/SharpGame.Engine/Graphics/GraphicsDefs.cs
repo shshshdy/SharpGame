@@ -377,8 +377,8 @@ namespace SharpGame
 
     public struct Extent3D
     {
-        public uint width;
-        public uint height;
-        public uint depth;
+        public int width;
+        public int height;
+        public int depth;
     }
 }

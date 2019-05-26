@@ -98,7 +98,7 @@ namespace SharpGame
             native.flags = (VkImageCreateFlags)flags;
             native.imageType = (VkImageType)imageType;
             native.format = (VkFormat)format;
-            native.extent = new VkExtent3D { width = extent.width, height = extent.height, depth = extent.depth };
+            native.extent = new VkExtent3D { width = (uint)extent.width, height = (uint)extent.height, depth = (uint)extent.depth };
             native.mipLevels = (uint)mipLevels;
             native.arrayLayers = (uint)arrayLayers;
             native.samples = (VkSampleCountFlags)samples;
