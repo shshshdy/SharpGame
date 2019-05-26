@@ -19,4 +19,7 @@
     <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />
     <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resource\" />
+  </ItemGroup>
 </Project>

@@ -19,6 +19,9 @@ namespace SharpGame
         
         private readonly ConcurrentDictionary<string, Resource> cachedContent_ = new ConcurrentDictionary<string, Resource>();
 
+
+        Dictionary<Type, IResourceReader> assetReaders_ = new Dictionary<Type, IResourceReader>();
+
         public ResourceCache()
         {
         }
@@ -27,6 +30,12 @@ namespace SharpGame
         {
             if (cachedContent_.TryGetValue(contentName, out Resource value))
                 return (T)value;
+
+            Type type = typeof(T);
+            if (assetReaders_.TryGetValue(type, out IResourceReader reader))
+            {
+                return reader.Load(contentName) as T;
+            }
 
             File stream = FileSystem.OpenFile(contentName);
 

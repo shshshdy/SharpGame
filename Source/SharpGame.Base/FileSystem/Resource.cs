@@ -8,16 +8,21 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    public struct ResourceRef
+    [DataContract]
+    public class ResourceRef
     {
-        public Guid guid;
-        public Resource resource;
+        [DataMember]
+        public Guid Guid { get; set; }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Resource(ResourceRef obj)
-        {
-            return obj.resource;
-        }
+        [IgnoreDataMember]
+        public Resource value;
+    }
+
+    [DataContract]
+    public class ResourceRef<T> : ResourceRef where T : Resource
+    {
+        [IgnoreDataMember]
+        public T Value => (T)value;
     }
 
     public class Resource : Object
