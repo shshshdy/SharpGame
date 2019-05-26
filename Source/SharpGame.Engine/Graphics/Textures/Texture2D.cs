@@ -165,22 +165,24 @@ namespace SharpGame
                 Device.FlushCommandBuffer(copyCmd, Graphics.queue, true);
 
                 // Clean up staging resources
-                vkFreeMemory(Graphics.device, stagingMemory, null);
-                vkDestroyBuffer(Graphics.device, stagingBuffer, null);
+                Device.FreeMemory(stagingMemory);
+                Device.DestroyBuffer(stagingBuffer);
             }
 
-            VkSamplerCreateInfo sampler = VkSamplerCreateInfo.New();
-            sampler.magFilter = VkFilter.Linear;
-            sampler.minFilter = VkFilter.Linear;
-            sampler.mipmapMode = VkSamplerMipmapMode.Linear;
-            sampler.addressModeU = VkSamplerAddressMode.ClampToEdge;
-            sampler.addressModeV = VkSamplerAddressMode.ClampToEdge;
-            sampler.addressModeW = VkSamplerAddressMode.ClampToEdge;
-            sampler.mipLodBias = 0.0f;
-            sampler.compareOp = VkCompareOp.Never;
-            sampler.minLod = 0.0f;
-            // Set max level-of-detail to mip level count of the texture
-            sampler.maxLod = (useStaging == 1) ? (float)texture.mipLevels : 0.0f;
+            SamplerCreateInfo sampler = new SamplerCreateInfo
+            {
+                magFilter = VkFilter.Linear,
+                minFilter = VkFilter.Linear,
+                mipmapMode = VkSamplerMipmapMode.Linear,
+                addressModeU = VkSamplerAddressMode.ClampToEdge,
+                addressModeV = VkSamplerAddressMode.ClampToEdge,
+                addressModeW = VkSamplerAddressMode.ClampToEdge,
+                mipLodBias = 0.0f,
+                compareOp = VkCompareOp.Never,
+                minLod = 0.0f,
+                // Set max level-of-detail to mip level count of the texture
+                maxLod = (useStaging == 1) ? (float)texture.mipLevels : 0.0f
+            };
             // Enable anisotropic filtering
             // This feature is optional, so we must check if it's supported on the Device
             if (Device.Features.samplerAnisotropy == 1)
@@ -195,17 +197,20 @@ namespace SharpGame
                 sampler.maxAnisotropy = 1.0f;
                 sampler.anisotropyEnable = False;
             }
+
             sampler.borderColor = VkBorderColor.FloatOpaqueWhite;
-            Util.CheckResult(vkCreateSampler(Graphics.device, ref sampler, null, out texture.sampler));
+            texture.sampler = new Sampler(ref sampler);
 
             // Create image view
             // Textures are not directly accessed by the shaders and
             // are abstracted by image views containing additional
             // information and sub resource ranges
-            VkImageViewCreateInfo view = VkImageViewCreateInfo.New();
-            view.viewType = VkImageViewType.Image2D;
-            view.format = format;
-            view.components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A };
+            ImageViewCreateInfo view = new ImageViewCreateInfo
+            {
+                viewType = VkImageViewType.Image2D,
+                format = format,
+                components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A }
+            };
             // The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
             // It's possible to create multiple image views for a single image referring to different (and/or overlapping) ranges of the image
             view.subresourceRange.aspectMask = VkImageAspectFlags.Color;
@@ -217,7 +222,7 @@ namespace SharpGame
             view.subresourceRange.levelCount = (useStaging == 1) ? texture.mipLevels : 1;
             // The view will be based on the texture's image
             view.image = texture.image;
-            Util.CheckResult(vkCreateImageView(Graphics.device, &view, null, out texture.view));
+            texture.view = new ImageView(ref view);
             texture.UpdateDescriptor();
             return texture;
         }
@@ -403,38 +408,42 @@ namespace SharpGame
             }
 
             // Create a defaultsampler
-            VkSamplerCreateInfo samplerCreateInfo = VkSamplerCreateInfo.New();
-            samplerCreateInfo.magFilter = VkFilter.Linear;
-            samplerCreateInfo.minFilter = VkFilter.Linear;
-            samplerCreateInfo.mipmapMode = VkSamplerMipmapMode.Linear;
-            samplerCreateInfo.addressModeU = VkSamplerAddressMode.Repeat;
-            samplerCreateInfo.addressModeV = VkSamplerAddressMode.Repeat;
-            samplerCreateInfo.addressModeW = VkSamplerAddressMode.Repeat;
-            samplerCreateInfo.mipLodBias = 0.0f;
-            samplerCreateInfo.compareOp = VkCompareOp.Never;
-            samplerCreateInfo.minLod = 0.0f;
-            // Max level-of-detail should match mip level count
-            samplerCreateInfo.maxLod = (useStaging) ? (float)mipLevels : 0.0f;
-            // Enable anisotropic filtering
-            samplerCreateInfo.maxAnisotropy = 8;
-            samplerCreateInfo.anisotropyEnable = True;
-            samplerCreateInfo.borderColor = VkBorderColor.FloatOpaqueWhite;
-            Util.CheckResult(vkCreateSampler(Device.LogicalDevice, &samplerCreateInfo, null, out sampler));
+            SamplerCreateInfo samplerCreateInfo = new SamplerCreateInfo
+            {
+                magFilter = VkFilter.Linear,
+                minFilter = VkFilter.Linear,
+                mipmapMode = VkSamplerMipmapMode.Linear,
+                addressModeU = VkSamplerAddressMode.Repeat,
+                addressModeV = VkSamplerAddressMode.Repeat,
+                addressModeW = VkSamplerAddressMode.Repeat,
+                mipLodBias = 0.0f,
+                compareOp = VkCompareOp.Never,
+                minLod = 0.0f,
+                // Max level-of-detail should match mip level count
+                maxLod = (useStaging) ? (float)mipLevels : 0.0f,
+                // Enable anisotropic filtering
+                maxAnisotropy = 8,
+                anisotropyEnable = True,
+                borderColor = VkBorderColor.FloatOpaqueWhite
+            };
+            sampler = new Sampler(ref samplerCreateInfo);
 
             // Create image view
             // Textures are not directly accessed by the shaders and
             // are abstracted by image views containing additional
             // information and sub resource ranges
-            VkImageViewCreateInfo viewCreateInfo = VkImageViewCreateInfo.New();
-            viewCreateInfo.viewType = VkImageViewType.Image2D;
-            viewCreateInfo.format = (VkFormat)format;
-            viewCreateInfo.components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A };
-            viewCreateInfo.subresourceRange = new VkImageSubresourceRange { aspectMask = VkImageAspectFlags.Color, baseMipLevel = 0, levelCount = 1, baseArrayLayer = 0, layerCount = 1 };
+            ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
+            {
+                viewType = VkImageViewType.Image2D,
+                format = (VkFormat)format,
+                components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A },
+                subresourceRange = new VkImageSubresourceRange { aspectMask = VkImageAspectFlags.Color, baseMipLevel = 0, levelCount = 1, baseArrayLayer = 0, layerCount = 1 }
+            };
             // Linear tiling usually won't support mip maps
             // Only set mip map count if optimal tiling is used
             viewCreateInfo.subresourceRange.levelCount = (useStaging) ? mipLevels : 1;
             viewCreateInfo.image = image;
-            Util.CheckResult(vkCreateImageView(Device.LogicalDevice, &viewCreateInfo, null, out view));
+            view = new ImageView(ref viewCreateInfo);
 
             // Update descriptor image info member that can be used for setting up descriptor sets
             UpdateDescriptor();

@@ -18,9 +18,10 @@ namespace SharpGame
         public ImageUsageFlags imageUsageFlags;
         public ImageLayout imageLayout;
 
-        internal VkImageView view;
+        internal ImageView view;
         internal VkImage image;
-        internal VkSampler sampler;
+        internal Sampler sampler;
+
         internal VkDeviceMemory deviceMemory;
         internal VkDescriptorImageInfo descriptor;
 
@@ -47,17 +48,16 @@ namespace SharpGame
 
         internal void UpdateDescriptor()
         {
-            descriptor.sampler = sampler;
-            descriptor.imageView = view;
+            descriptor.sampler = sampler.handle;
+            descriptor.imageView = view.handle;
             descriptor.imageLayout = (VkImageLayout)imageLayout;
         }
 
         protected override void Destroy()
         {
-
-            vkDestroyImageView(Graphics.device, view, IntPtr.Zero);
+            view.Dispose();
             vkDestroyImage(Graphics.device, image, IntPtr.Zero);
-            vkDestroySampler(Graphics.device, sampler, IntPtr.Zero);
+            sampler.Dispose();
             Device.FreeMemory(deviceMemory);
 
             base.Destroy();

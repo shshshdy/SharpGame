@@ -86,10 +86,11 @@ namespace SharpGame.ImageSharp
                 depth = 1,
                 format = Format
             };
+
             tex.SetImage2D(face);
 
             return tex;
-         //   return CreateTextureViaUpdate();
+
         }
      
         private unsafe Texture CreateTextureViaStaging()

@@ -405,6 +405,17 @@ namespace SharpGame
             vkDestroyImageView(device, imageView, null);
         }
 
+        public static VkSampler CreateSampler(ref VkSamplerCreateInfo vkSamplerCreateInfo)
+        {
+            Util.CheckResult(vkCreateSampler(device, ref vkSamplerCreateInfo, null, out VkSampler vkSampler));
+            return vkSampler;
+        }
+
+        public static void Destroy(VkSampler sampler)
+        {
+            vkDestroySampler(device, sampler, null);
+        }
+
         public static VkFramebuffer CreateFramebuffer(ref VkFramebufferCreateInfo framebufferCreateInfo)
         {
             Util.CheckResult(vkCreateFramebuffer(device, ref framebufferCreateInfo, null, out VkFramebuffer framebuffer));
