@@ -18,7 +18,7 @@ namespace SharpGame
         {
             var tex2D = KtxFile.Load(stream, false);
 
-            //LoadKtxFile(tex2D);
+            SetImage2D(tex2D.Faces[0]);
             return true;
         }
 
@@ -239,14 +239,12 @@ namespace SharpGame
             using (var file = FileSystem.Instance.OpenFile(filename))
             {
                 tex2D = KtxFile.Load(file, false);
-                tex2D.Faces[0].Width = tex2D.Header.PixelWidth;
-                tex2D.Faces[0].Height = tex2D.Header.PixelWidth;
-                LoadKtxFile(tex2D.Faces[0], forceLinear);
+                SetImage2D(tex2D.Faces[0], forceLinear);
             }
 
         }
 
-        void LoadKtxFile(KtxFace tex2D, bool forceLinear = false)
+        public void SetImage2D(ImageData tex2D, bool forceLinear = false)
         {
             width = tex2D.Width;
             height = tex2D.Height;

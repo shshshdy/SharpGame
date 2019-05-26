@@ -14,9 +14,9 @@ namespace SharpGame
     {
         public KtxHeader Header { get; }
         public KtxKeyValuePair[] KeyValuePairs { get; }
-        public KtxFace[] Faces { get; }
+        public ImageData[] Faces { get; }
 
-        public KtxFile(KtxHeader header, KtxKeyValuePair[] keyValuePairs, KtxFace[] faces)
+        public KtxFile(KtxHeader header, KtxKeyValuePair[] keyValuePairs, ImageData[] faces)
         {
             Header = header;
             KeyValuePairs = keyValuePairs;
@@ -49,10 +49,10 @@ namespace SharpGame
             }
 
             uint numberOfFaces = Math.Max(1, header.NumberOfFaces);
-            List<KtxFace> faces = new List<KtxFace>((int)numberOfFaces);
+            List<ImageData> faces = new List<ImageData>((int)numberOfFaces);
             for (int i = 0; i < numberOfFaces; i++)
             {
-                faces.Add(new KtxFace(header.NumberOfMipmapLevels));
+                faces.Add(new ImageData(header.NumberOfMipmapLevels) { Width = header.PixelWidth, Height = header.PixelHeight});
             }
             for (uint mipLevel = 0; mipLevel < header.NumberOfMipmapLevels; mipLevel++)
             {
@@ -62,7 +62,7 @@ namespace SharpGame
                 for (uint face = 0; face < numberOfFaces; face++)
                 {
                     byte[] faceData = file.ReadArray<byte>((int)imageSize);
-                    faces[(int)face].Mipmaps[mipLevel] = new KtxMipmap(imageSize, faceData, header.PixelWidth / (uint)(Math.Pow(2, mipLevel)), header.PixelHeight / (uint)(Math.Pow(2, mipLevel)));
+                    faces[(int)face].Mipmaps[mipLevel] = new MipmapData(imageSize, faceData, header.PixelWidth / (uint)(Math.Pow(2, mipLevel)), header.PixelHeight / (uint)(Math.Pow(2, mipLevel)));
                     uint cubePadding = 0u;
                     if (isCubemap)
                     {
@@ -142,7 +142,7 @@ namespace SharpGame
             {
                 for (int face = 0; face < Header.NumberOfFaces; face++)
                 {
-                    KtxMipmap mipmap = Faces[face].Mipmaps[mipLevel];
+                    MipmapData mipmap = Faces[face].Mipmaps[mipLevel];
                     totalSize += mipmap.SizeInBytes;
                 }
             }
@@ -158,7 +158,7 @@ namespace SharpGame
             {
                 for (int mipLevel = 0; mipLevel < Header.NumberOfMipmapLevels; mipLevel++)
                 {
-                    KtxMipmap mipmap = Faces[face].Mipmaps[mipLevel];
+                    MipmapData mipmap = Faces[face].Mipmaps[mipLevel];
                     mipmap.Data.CopyTo(result, (int)start);
                     start += mipmap.SizeInBytes;
                 }
@@ -199,72 +199,4 @@ namespace SharpGame
         public readonly uint BytesOfKeyValueData;
     }
 
-    public class KtxFace
-    {
-        public uint Width { get; set; }
-        public uint Height { get; set; }
-        public uint NumberOfMipmapLevels { get; }
-        public KtxMipmap[] Mipmaps { get; }
-
-        public KtxFace(uint width, uint height, uint numberOfMipmapLevels, KtxMipmap[] mipmaps)
-        {
-            Width = width;
-            Height = height;
-            NumberOfMipmapLevels = numberOfMipmapLevels;
-            Mipmaps = mipmaps;
-        }
-
-        public KtxFace(uint numberOfMipmapLevels)
-        {
-            NumberOfMipmapLevels = numberOfMipmapLevels;
-            Mipmaps = new KtxMipmap[numberOfMipmapLevels];
-        }
-
-
-        public ulong GetTotalSize()
-        {
-            ulong totalSize = 0;
-
-            for (int mipLevel = 0; mipLevel < Mipmaps.Length; mipLevel++)
-            {
-                KtxMipmap mipmap = Mipmaps[mipLevel];
-                totalSize += mipmap.SizeInBytes;
-                
-            }
-
-            return totalSize;
-        }
-
-
-        public byte[] GetAllTextureData()
-        {
-            byte[] result = new byte[GetTotalSize()];
-            uint start = 0;
-            
-            for (int mipLevel = 0; mipLevel < Mipmaps.Length; mipLevel++)
-            {
-                KtxMipmap mipmap = Mipmaps[mipLevel];
-                mipmap.Data.CopyTo(result, (int)start);
-                start += mipmap.SizeInBytes;
-            }
-           
-
-            return result;
-        }
-    }
-
-    public class KtxMipmap
-    {
-        public uint SizeInBytes { get; }
-        public byte[] Data { get; }
-        public uint Width { get; }
-        public uint Height { get; }
-        public KtxMipmap(uint sizeInBytes, byte[] data, uint width, uint height)
-        {
-            SizeInBytes = sizeInBytes;
-            Data = data;
-            Width = Math.Max(1, width);
-            Height = Math.Max(1, height);
-        }
-    }
 }
