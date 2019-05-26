@@ -49,22 +49,33 @@ namespace SharpGame
 
         public virtual bool Load(File stream)
         {
-            return false;
-        }
-
-        public virtual void Build()
-        {
-            if(!builded_)
+            if (!OnLoad(stream))
             {
-                builded_ = true;
+                return false;
             }
 
-            OnBuild();
+            return Build();
         }
-        
-        protected virtual void OnBuild()
-        {
 
+        public virtual bool Build()
+        {
+            if(builded_)
+            {
+                return true;
+            }
+
+            builded_ = true;
+            return OnBuild();
+         }
+
+        protected virtual bool OnLoad(File stream)
+        {
+            return true;
+        }
+
+        protected virtual bool OnBuild()
+        {
+            return true;
         }
     }
 }

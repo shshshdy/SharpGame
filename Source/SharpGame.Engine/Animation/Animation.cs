@@ -156,7 +156,7 @@ namespace SharpGame
             return index < Triggers.Count ? new AnimationTriggerPoint?(Triggers[index]) : null;
         }
 
-        public override bool Load(File source)
+        protected override bool OnLoad(File source)
         {
             int memoryUse = Unsafe.SizeOf<Animation>();
 

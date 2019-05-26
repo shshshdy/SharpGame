@@ -257,7 +257,7 @@ namespace SharpGame
             return new VertexLayout(vertexInputBinding.ToArray(), vertexInputAttributes.ToArray());
         }
 
-        public override bool Load(File source)
+        protected override bool OnLoad(File source)
         {
             String fileID = source.ReadFileID();
             if (fileID != "UMDL" && fileID != "UMD2")
@@ -447,7 +447,7 @@ namespace SharpGame
             return true;
         }
     
-        protected override void OnBuild()
+        protected override bool OnBuild()
         {
             // Upload vertex buffer data
             for (int i = 0; i < vertexBuffers_.Length; ++i)
@@ -490,7 +490,7 @@ namespace SharpGame
             loadVBData_ = null;
             loadIBData_ = null;
             loadGeometries_ = null;
-
+            return true;
         }
     }
 

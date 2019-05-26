@@ -88,7 +88,7 @@ namespace SharpGame
             Build();
         }
         
-        public override bool Load(File stream)
+        protected override bool OnLoad(File stream)
         {
             Code = stream.ReadAllBytes();
 
@@ -97,7 +97,7 @@ namespace SharpGame
             return true;
         }
 
-        protected override void OnBuild()
+        protected override bool OnBuild()
         {
             if (Code == null)
             {
@@ -119,6 +119,8 @@ namespace SharpGame
 
                 shaderModule = Device.CreateShaderModule(ref sm);
             }
+
+            return shaderModule != null;
         }
 
         protected override void Destroy()

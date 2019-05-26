@@ -17,72 +17,90 @@ namespace SharpGame
     {
         public FileSystem FileSystem => FileSystem.Instance;
         
-        private readonly ConcurrentDictionary<string, Resource> cachedContent_ = new ConcurrentDictionary<string, Resource>();
+        private readonly Dictionary<string, Resource> cachedContent = new Dictionary<string, Resource>();
 
-
-        Dictionary<Type, IResourceReader> assetReaders_ = new Dictionary<Type, IResourceReader>();
+        private Dictionary<Type, List<IResourceReader>> resourceReaders = new Dictionary<Type, List<IResourceReader>>();
 
         public ResourceCache()
         {
         }
-        
+
+        public void RegisterAssertReader(IResourceReader reader)
+        {
+            if(!resourceReaders.TryGetValue(reader.ResourceType, out List<IResourceReader> readers))
+            {
+                readers = new List<IResourceReader>();
+                resourceReaders[reader.ResourceType] = readers;
+            }
+
+            readers.Add(reader);
+        }
+
         public T Load<T>(string contentName) where T : Resource, new()
         {
-            if (cachedContent_.TryGetValue(contentName, out Resource value))
+            if (cachedContent.TryGetValue(contentName, out Resource value))
                 return (T)value;
 
             Type type = typeof(T);
-            if (assetReaders_.TryGetValue(type, out IResourceReader reader))
+            if (resourceReaders.TryGetValue(type, out List<IResourceReader> readers))
             {
-                return reader.Load(contentName) as T;
+                foreach (var reader in readers)
+                {
+                    var res = reader.Load(contentName);
+                    if(res != null)
+                    {
+                        cachedContent.Add(contentName, res);
+                        return res as T;
+                    }
+
+                }
             }
 
             File stream = FileSystem.OpenFile(contentName);
 
-            var res = new T();
+            var resource = new T();
 
-            if(res.Load(stream))
+            if(!resource.Load(stream))
             {
-                res.Build();
+                return null;
             }
 
-            cachedContent_.TryAdd(contentName, res);
-
-            return res;
+            cachedContent.Add(contentName, resource);
+            return resource;
         }
 
         public async Task<T> LoadAsync<T>(string contentName) where T : Resource, new()
         {
-            if (cachedContent_.TryGetValue(contentName, out Resource value))
+            if (cachedContent.TryGetValue(contentName, out Resource value))
                 return (T)value;
 
             File stream = FileSystem.OpenFile(contentName);
 
             var res = new T();
 
-            if (await res.LoadAsync(stream))
+            if (!await res.LoadAsync(stream))
             {
-                res.Build();
+                return null;
             }
 
-            cachedContent_.TryAdd(contentName, res);
+            cachedContent.Add(contentName, res);
 
             return res;
         }
 
         public Resource GetExistingResource(Type type, string contentName)
         {
-            if (cachedContent_.TryGetValue(contentName, out Resource value))
+            if (cachedContent.TryGetValue(contentName, out Resource value))
                 return value;
             return null;
         }
 
         protected override void Destroy()
         {
-            foreach (IDisposable value in cachedContent_.Values)
+            foreach (IDisposable value in cachedContent.Values)
                 value.Dispose();
 
-            cachedContent_.Clear();
+            cachedContent.Clear();
         }
     }
 }

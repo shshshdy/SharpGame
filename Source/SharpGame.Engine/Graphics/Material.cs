@@ -35,12 +35,11 @@ namespace SharpGame
         {
         }
 
-        protected override void OnBuild()
+        protected override bool OnBuild()
         {
-            base.OnBuild();
-
             Shader = ResourceCache.Instance.Load<Shader>(ShaderName);
             //materialRenderData = new MaterialRenderData();
+            return shader != null;
         }
 
         public ref ShaderParameter GetShaderParameter(StringID name)

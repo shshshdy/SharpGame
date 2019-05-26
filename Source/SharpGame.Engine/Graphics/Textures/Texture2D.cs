@@ -14,7 +14,7 @@ namespace SharpGame
         {
         }
 
-        public override bool Load(File stream)
+        protected override bool OnLoad(File stream)
         {
             var tex2D = KtxFile.Load(stream, false);
 

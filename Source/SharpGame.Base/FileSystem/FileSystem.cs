@@ -72,20 +72,6 @@ namespace SharpGame
             return new StreamReader(stream);
         }
 
-        public byte[] ReadBytes(string path)
-        {
-            //return platform.Open()
-            return null;
-        }
-
-        public byte[] ReadBytesAsync(string path)
-        {
-            return null;
-                
-        }
-
-
-
         public bool AddResourceDir(string pathName, int priority = int.MaxValue)
         {
             lock (resourceMutex_)

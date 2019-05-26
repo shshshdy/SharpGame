@@ -103,12 +103,14 @@ namespace SharpGame
             return null;
         }
 
-        protected override void OnBuild()
+        protected override bool OnBuild()
         {
             foreach (var pass in Passes)
             {
                 pass.Build();
             }
+
+            return true;
         }
 
         protected override void Destroy()
