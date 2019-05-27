@@ -96,7 +96,7 @@ namespace SharpGame
                 case DescriptorType.StorageBuffer:
                 case DescriptorType.UniformBufferDynamic:
                 case DescriptorType.StorageBufferDynamic:
-                    var buffer = bindable as GraphicsBuffer;                    
+                    var buffer = bindable as DeviceBuffer;                    
                     writeDescriptorSets[dstBinding] = WriteDescriptorSet(dstBinding, descriptorSet,
                         (VkDescriptorType)descriptorType, ref buffer.descriptor, 1);
                     

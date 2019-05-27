@@ -38,10 +38,10 @@ namespace SharpGame
         private CameraPS cameraPS = new CameraPS();
         private LightPS light = new LightPS();
 
-        internal GraphicsBuffer ubFrameInfo;
-        internal GraphicsBuffer ubCameraVS;
-        internal GraphicsBuffer ubCameraPS;
-        internal GraphicsBuffer ubLight;
+        internal DeviceBuffer ubFrameInfo;
+        internal DeviceBuffer ubCameraVS;
+        internal DeviceBuffer ubCameraPS;
+        internal DeviceBuffer ubLight;
 
         ResourceSet perViewResourceSet;
         ResourceSet perObjectResourceSet;
@@ -66,22 +66,22 @@ namespace SharpGame
         {
             if (ubFrameInfo == null)
             {
-                ubFrameInfo = GraphicsBuffer.CreateUniformBuffer<FrameUniform>();
+                ubFrameInfo = DeviceBuffer.CreateUniformBuffer<FrameUniform>();
             }
 
             if (ubCameraVS == null)
             {
-                ubCameraVS = GraphicsBuffer.CreateUniformBuffer<CameraVS>();
+                ubCameraVS = DeviceBuffer.CreateUniformBuffer<CameraVS>();
             }
 
             if (ubCameraPS == null)
             {
-                ubCameraPS = GraphicsBuffer.CreateUniformBuffer<CameraPS>();
+                ubCameraPS = DeviceBuffer.CreateUniformBuffer<CameraPS>();
             }
 
             if (ubLight == null)
             {
-                ubLight = GraphicsBuffer.CreateUniformBuffer<LightPS>();
+                ubLight = DeviceBuffer.CreateUniformBuffer<LightPS>();
             }
 
         }

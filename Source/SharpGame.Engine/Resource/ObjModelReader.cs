@@ -27,14 +27,17 @@ namespace SharpGame
 
             int vertexCount = Math.Max(objFile.Positions.Length, objFile.Normals.Length);
             vertexCount = Math.Max(vertexCount, objFile.TexCoords.Length);
-            GraphicsBuffer[] ibs = new GraphicsBuffer[objFile.MeshGroups.Length];
+
+
+            DeviceBuffer[] ibs = new DeviceBuffer[objFile.MeshGroups.Length];
             List<VertexPosNormTex> vertices = new List<VertexPosNormTex>();
             int index = 0;
             foreach(MeshGroup group in objFile.MeshGroups)
             {
-                if(vertexCount > ushort.MaxValue)
+                int indexCount = group.Faces.Length * 3;
+                if (vertexCount > ushort.MaxValue)
                 {
-                    uint[] indices = new uint[group.Faces.Length * 3];
+                    uint[] indices = new uint[indexCount];
                     for (int i = 0; i < group.Faces.Length; i++)
                     {
                         Face face = group.Faces[i];
@@ -48,11 +51,11 @@ namespace SharpGame
                         indices[(i * 3) + 1] = index2;
                     }
 
-                    ibs[index] = GraphicsBuffer.Create(BufferUsage.IndexBuffer, indices, false);
+                    ibs[index] = DeviceBuffer.Create(BufferUsage.IndexBuffer, indices, false);
                 }
                 else
                 {
-                    ushort[] indices = new ushort[group.Faces.Length * 3];
+                    ushort[] indices = new ushort[indexCount];
                     for (int i = 0; i < group.Faces.Length; i++)
                     {
                         Face face = group.Faces[i];
@@ -66,13 +69,16 @@ namespace SharpGame
                         indices[(i * 3) + 1] = (ushort)index2;
                     }
 
-                    ibs[index] = GraphicsBuffer.Create(BufferUsage.IndexBuffer, indices, false);
+                    ibs[index] = DeviceBuffer.Create(BufferUsage.IndexBuffer, indices, false);
                 }
+
+
 
                 index++;
 
             }
-            GraphicsBuffer vb = GraphicsBuffer.Create(BufferUsage.VertexBuffer, vertices.ToArray(), false);
+
+            DeviceBuffer vb = DeviceBuffer.Create(BufferUsage.VertexBuffer, vertices.ToArray(), false);
 
             Model model = new Model
             {
@@ -80,6 +86,20 @@ namespace SharpGame
                 IndexBuffers = ibs          
             };
 
+            model.Geometries = new Geometry[objFile.MeshGroups.Length][];
+            for(int i = 0; i < objFile.MeshGroups.Length; i++)
+            {
+                var geom = new Geometry
+                {
+                    VertexBuffers = new DeviceBuffer[] { vb },
+                    IndexBuffer = ibs[i]
+                };
+
+                geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, ibs[i].Size);
+
+                model.Geometries[i] = new Geometry[] { geom };
+
+            }
             
 
 

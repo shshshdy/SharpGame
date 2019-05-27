@@ -38,18 +38,20 @@ namespace SharpGame
 
         public object Clone()
         {
-            Bone bone = new Bone();
-            bone.name_ = name_;
-            bone.parentIndex_ = parentIndex_;
-            bone.initialPosition_ = initialPosition_;
-            bone.initialRotation_ = initialRotation_;
-            bone.initialScale_ = initialScale_;
-            bone.offsetMatrix_ = offsetMatrix_;
-            bone.animated_ = animated_;
-            bone.collisionMask_ = collisionMask_;
-            bone.radius_ = radius_;
-            bone.boundingBox_ = boundingBox_;
-            bone.node_ = node_;
+            Bone bone = new Bone
+            {
+                name_ = name_,
+                parentIndex_ = parentIndex_,
+                initialPosition_ = initialPosition_,
+                initialRotation_ = initialRotation_,
+                initialScale_ = initialScale_,
+                offsetMatrix_ = offsetMatrix_,
+                animated_ = animated_,
+                collisionMask_ = collisionMask_,
+                radius_ = radius_,
+                boundingBox_ = boundingBox_,
+                node_ = node_
+            };
             return bone;
         }
     };

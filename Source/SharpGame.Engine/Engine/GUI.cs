@@ -14,9 +14,9 @@ namespace SharpGame
 
     public class GUI : System<GUI>
     {
-        GraphicsBuffer vertexBuffer = new GraphicsBuffer();
-        GraphicsBuffer indexBuffer = new GraphicsBuffer();
-        GraphicsBuffer uniformBufferVS = new GraphicsBuffer();
+        DeviceBuffer vertexBuffer = new DeviceBuffer();
+        DeviceBuffer indexBuffer = new DeviceBuffer();
+        DeviceBuffer uniformBufferVS = new DeviceBuffer();
         Texture texture;
         Shader uiShader;
         Pipeline pipeline;
@@ -67,9 +67,9 @@ namespace SharpGame
 
         unsafe void CreateGraphicsResources()
         {
-            vertexBuffer = GraphicsBuffer.CreateDynamic<VertexPos2dTexColor>(BufferUsage.VertexBuffer, 4096);
-            indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, 4096);
-            uniformBufferVS = GraphicsBuffer.CreateUniformBuffer<Matrix4x4>();
+            vertexBuffer = DeviceBuffer.CreateDynamic<VertexPos2dTexColor>(BufferUsage.VertexBuffer, 4096);
+            indexBuffer = DeviceBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, 4096);
+            uniformBufferVS = DeviceBuffer.CreateUniformBuffer<Matrix4x4>();
 
             resourceLayout = new ResourceLayout
             {
@@ -265,13 +265,13 @@ namespace SharpGame
             if (draw_data.TotalVtxCount * sizeof(ImDrawVert) > (int)vertexBuffer.size)
             {
                 vertexBuffer.Dispose();
-                vertexBuffer = GraphicsBuffer.CreateDynamic<ImDrawVert>(BufferUsage.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
+                vertexBuffer = DeviceBuffer.CreateDynamic<ImDrawVert>(BufferUsage.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
             }
 
             if (draw_data.TotalIdxCount * sizeof(ushort) > (int)indexBuffer.size)
             {
                 indexBuffer.Dispose();
-                indexBuffer = GraphicsBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
+                indexBuffer = DeviceBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
             }
 
             var projection = Matrix4x4.CreateOrthographicOffCenter(0f, width, height, 0.0f, -1.0f, 1.0f);

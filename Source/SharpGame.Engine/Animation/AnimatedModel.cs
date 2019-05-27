@@ -18,7 +18,7 @@ namespace SharpGame
         Skeleton skeleton_ = new Skeleton();
 
         /// Morph vertex buffers.
-        GraphicsBuffer[] morphVertexBuffers_;
+        DeviceBuffer[] morphVertexBuffers_;
 
         /// Vertex morphs.
         ModelMorph[] morphs_;
@@ -244,7 +244,7 @@ namespace SharpGame
                 morphVertexBuffers_.Clear();
                 //morphs_.Clear();
 
-                ModelMorph[] morphs = model.Morphs;
+                ModelMorph[] morphs = new ModelMorph[0];// model.Morphs;
                 morphElementMask_ = 0;
                 Array.Resize(ref morphs_, morphs.Length);
                 for(int i = 0; i < morphs.Length; ++i)
@@ -281,7 +281,7 @@ namespace SharpGame
                 {
                     if(numSkinMatrices > 0)
                     {
-                        batches_[i].geometryType = GeometryType.GEOM_SKINNED;
+                        batches_[i].geometryType = GeometryType.Skinned;
                         // Check if model has per-geometry bone mappings
                         if(geometrySkinMatrices_.Length > 0 && geometrySkinMatrices_[i].Length > 0)
                         {
@@ -297,7 +297,7 @@ namespace SharpGame
                     }
                     else
                     {
-                        batches_[i].geometryType = GeometryType.GEOM_STATIC;
+                        batches_[i].geometryType = GeometryType.Static;
                         batches_[i].worldTransform = node_.worldTransform_;
                         batches_[i].numWorldTransforms = 1;
                     }

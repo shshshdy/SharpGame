@@ -23,7 +23,7 @@ namespace SharpGame.Samples
         Texture2D colorMap = new Texture2D();
 
         Geometry geometry;
-        GraphicsBuffer uniformBufferScene = new GraphicsBuffer();
+        DeviceBuffer uniformBufferScene = new DeviceBuffer();
 
         UboVS uboVS = new UboVS() { lightPos = new Vector4(0.0f, 1.0f, -5.0f, 1.0f) };
 
@@ -184,7 +184,7 @@ namespace SharpGame.Samples
                 }
             }
 
-            var vb = GraphicsBuffer.Create(BufferUsage.VertexBuffer, false,
+            var vb = DeviceBuffer.Create(BufferUsage.VertexBuffer, false,
                 sizeof(VertexPosNormTexColor), (int)vertexBuffer.Count, vertexBuffer.Data);
             
             // Generate index buffer from ASSIMP scene data
@@ -202,7 +202,7 @@ namespace SharpGame.Samples
                 }
             }
 
-            var ib = GraphicsBuffer.Create(BufferUsage.IndexBuffer, false, sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
+            var ib = DeviceBuffer.Create(BufferUsage.IndexBuffer, false, sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
             
             geometry = new Geometry
             {
@@ -219,7 +219,7 @@ namespace SharpGame.Samples
         // Prepare and initialize uniform buffer containing shader uniforms
         void CreateUniformBuffers()
         {
-            uniformBufferScene = GraphicsBuffer.CreateUniformBuffer<UboVS>();
+            uniformBufferScene = DeviceBuffer.CreateUniformBuffer<UboVS>();
         }
 
         public override void Update()

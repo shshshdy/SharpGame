@@ -13,16 +13,16 @@ namespace SharpGame
 {
     public enum GeometryType : byte
     {
-        GEOM_STATIC = 0,
-        GEOM_SKINNED = 1,
-        GEOM_INSTANCED = 2,
-        GEOM_BILLBOARD = 3,
-        GEOM_DIRBILLBOARD = 4,
-        GEOM_TRAIL_FACE_CAMERA = 5,
-        GEOM_TRAIL_BONE = 6,
-        MAX_GEOMETRYTYPES = 7,
+        Static = 0,
+        Skinned = 1,
+        Instanced = 2,
+        Billboard = 3,
+        DirBillboard = 4,
+        TrailFaceCamera = 5,
+        TrailBone = 6,
+        Count = 7,
         // This is not a real geometry type for VS, but used to mark objects that do not desire to be instanced
-        GEOM_STATIC_NOINSTANCING = 7,
+        StaticNoInstancing = 7,
     }
 
     /// Rendering frame update parameters.

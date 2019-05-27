@@ -48,6 +48,30 @@ namespace SharpGame
         public int indexCount_;
     };
 
+    /// Vertex buffer morph data.
+    public struct VertexBufferMorph
+    {
+        /// Vertex elements.
+        public uint elementMask_;
+        /// Number of vertices.
+        public int vertexCount_;
+        /// Morphed vertices data size as bytes.
+        public int dataSize_;
+        /// Morphed vertices. Stored packed as <index, data> pairs.
+        public byte[] morphData_;
+    };
+
+    /// Definition of a model's vertex morph.
+    public struct ModelMorph
+    {
+        /// Morph name.
+        public StringID name_;
+        /// Current morph weight.
+        public float weight_;
+        /// Morph data per vertex buffer.
+        public Dictionary<int, VertexBufferMorph> buffers_;
+    };
+
     public class MdlModelReader : ResourceReader<Model>
     {
         public MdlModelReader() : base(".mdl")
@@ -67,8 +91,8 @@ namespace SharpGame
 
             int memoryUse = Unsafe.SizeOf<Model>();
 
-            GraphicsBuffer[] vertexBuffers_;
-            GraphicsBuffer[] indexBuffers_;
+            DeviceBuffer[] vertexBuffers_;
+            DeviceBuffer[] indexBuffers_;
             Geometry[][] geometries_ = new Geometry[0][];
 
             VertexBufferDesc[] loadVBData_;
@@ -77,7 +101,7 @@ namespace SharpGame
 
             // Read vertex buffers
             int numVertexBuffers = (int)stream.Read<uint>();
-            vertexBuffers_ = new GraphicsBuffer[numVertexBuffers];
+            vertexBuffers_ = new DeviceBuffer[numVertexBuffers];
             var morphRangeStarts_ = new int[numVertexBuffers];
             var morphRangeCounts_ = new int[numVertexBuffers];
             loadVBData_ = new VertexBufferDesc[numVertexBuffers];
@@ -107,7 +131,7 @@ namespace SharpGame
 
             // Read index buffers
             int numIndexBuffers = (int)stream.Read<uint>();
-            indexBuffers_ = new GraphicsBuffer[numIndexBuffers];
+            indexBuffers_ = new DeviceBuffer[numIndexBuffers];
             loadIBData_ = new IndexBufferDesc[numIndexBuffers];
             for (int i = 0; i < numIndexBuffers; ++i)
             {
@@ -257,17 +281,17 @@ namespace SharpGame
             model.Geometries = geometries_;
             model.GeometryBoneMappings = GeometryBoneMappings;
             model.GeometryCenters = GeometryCenters;
-            model.morphRangeStarts_ = morphRangeStarts_;
-            model.morphRangeCounts_ = morphRangeCounts_;
+            //model.morphRangeStarts_ = morphRangeStarts_;
+            //model.morphRangeCounts_ = morphRangeCounts_;
             model.MemoryUse = memoryUse;
 
             for (int i = 0; i < vertexBuffers_.Length; ++i)
             {
-                ref GraphicsBuffer buffer = ref vertexBuffers_[i];
+                ref DeviceBuffer buffer = ref vertexBuffers_[i];
                 ref VertexBufferDesc desc = ref loadVBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = GraphicsBuffer.Create(BufferUsage.VertexBuffer, false
+                    buffer = DeviceBuffer.Create(BufferUsage.VertexBuffer, false
                         , desc.vertexSize_, desc.vertexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
@@ -275,11 +299,11 @@ namespace SharpGame
             // Upload index buffer data
             for (int i = 0; i < indexBuffers_.Length; ++i)
             {
-                ref GraphicsBuffer buffer = ref indexBuffers_[i];
+                ref DeviceBuffer buffer = ref indexBuffers_[i];
                 ref IndexBufferDesc desc = ref loadIBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = GraphicsBuffer.Create(BufferUsage.IndexBuffer, false, desc.indexSize_, desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
+                    buffer = DeviceBuffer.Create(BufferUsage.IndexBuffer, false, desc.indexSize_, desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
 

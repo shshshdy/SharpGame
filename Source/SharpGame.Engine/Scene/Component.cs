@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace SharpGame
 {
     [DataContract]
-    public class Component : Object//, IComponentUnion
+    public class Component : Object
     {
         [IgnoreDataMember]
         public Node Node => node_;

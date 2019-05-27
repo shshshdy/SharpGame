@@ -7,8 +7,8 @@ namespace SharpGame
 {
     public class Geometry : Object
     {
-        private GraphicsBuffer[] vertexBuffers_;
-        public GraphicsBuffer[] VertexBuffers
+        private DeviceBuffer[] vertexBuffers_;
+        public DeviceBuffer[] VertexBuffers
         {
             get => vertexBuffers_;
             set
@@ -25,7 +25,7 @@ namespace SharpGame
             }
         }
 
-        public GraphicsBuffer IndexBuffer { get; set; }
+        public DeviceBuffer IndexBuffer { get; set; }
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
         public int VertexStart { get; set; }
         public int VertexCount { get; set; }
@@ -40,23 +40,6 @@ namespace SharpGame
 
         public Geometry()
         {
-        }
-
-        protected override void Destroy()
-        {
-            foreach(var vb in VertexBuffers)
-            {
-                vb.Dispose();
-            }
-
-            IndexBuffer?.Dispose();
-
-            base.Destroy();
-        }
-
-        public void SetNumVertexBuffers(int num)
-        {
-            Array.Resize(ref vertexBuffers_, num);
         }
 
         public bool SetDrawRange(PrimitiveTopology type, int indexStart, int indexCount)
@@ -130,5 +113,18 @@ namespace SharpGame
                 cmdBuffer.Draw((uint)VertexCount, 1, (uint)VertexStart, 0);
             }
         }
+
+        protected override void Destroy()
+        {
+            foreach (var vb in VertexBuffers)
+            {
+                vb.Dispose();
+            }
+
+            IndexBuffer?.Dispose();
+
+            base.Destroy();
+        }
+
     }
 }

@@ -9,7 +9,7 @@ namespace SharpGame
 {
     public interface IBindable { }
 
-    public unsafe class GraphicsBuffer : DisposeBase, IBindable
+    public unsafe class DeviceBuffer : DisposeBase, IBindable
     {
         public int Stride { get; set; }
         public int Count { get; set; }
@@ -93,29 +93,29 @@ namespace SharpGame
             }
         }
 
-        public static GraphicsBuffer CreateDynamic<T>(BufferUsage bufferUsages, int count = 1) where T : struct
+        public static DeviceBuffer CreateDynamic<T>(BufferUsage bufferUsages, int count = 1) where T : struct
         {
             return Create(bufferUsages, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, Unsafe.SizeOf<T>(), count);
         }
 
-        public static GraphicsBuffer CreateUniformBuffer<T>(int count = 1) where T : struct
+        public static DeviceBuffer CreateUniformBuffer<T>(int count = 1) where T : struct
         {
             return CreateDynamic<T>(BufferUsage.UniformBuffer, count);
         }
 
-        public static GraphicsBuffer Create<T>(BufferUsage bufferUsages, T[] data, bool dynamic = false) where T : struct
+        public static DeviceBuffer Create<T>(BufferUsage bufferUsages, T[] data, bool dynamic = false) where T : struct
         {
             return Create(bufferUsages, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, Unsafe.SizeOf<T>(), data.Length);
         }
 
-        public static GraphicsBuffer Create(BufferUsage usageFlags, bool dynamic, int stride, int count, IntPtr data = default)
+        public static DeviceBuffer Create(BufferUsage usageFlags, bool dynamic, int stride, int count, IntPtr data = default)
         {
             return Create(usageFlags, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, stride, count, (void*)data);
         }
 
-        public static GraphicsBuffer Create(BufferUsage usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
+        public static DeviceBuffer Create(BufferUsage usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
         {
-            GraphicsBuffer buffer = new GraphicsBuffer
+            DeviceBuffer buffer = new DeviceBuffer
             {
                 Stride = stride,
                 Count = count

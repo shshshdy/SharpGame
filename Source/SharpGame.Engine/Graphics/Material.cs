@@ -9,7 +9,6 @@ namespace SharpGame
 
     public class Material : Resource
     {
-        public string Name { get; set; }
         public string ShaderName { get; set; }
 
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
@@ -38,7 +37,6 @@ namespace SharpGame
         protected override bool OnBuild()
         {
             Shader = ResourceCache.Instance.Load<Shader>(ShaderName);
-            //materialRenderData = new MaterialRenderData();
             return shader != null;
         }
 

@@ -12,7 +12,7 @@ namespace SharpGame
     {
 
         // Fixed sub resource on first mip level and layer
-        public static void setImageLayout(
+        public static void SetImageLayout(
             VkCommandBuffer cmdbuffer,
             VkImage image,
             VkImageAspectFlags aspectMask,
@@ -21,11 +21,13 @@ namespace SharpGame
             VkPipelineStageFlags srcStageMask = VkPipelineStageFlags.AllCommands,
             VkPipelineStageFlags dstStageMask = VkPipelineStageFlags.AllCommands)
         {
-            VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
-            subresourceRange.aspectMask = aspectMask;
-            subresourceRange.baseMipLevel = 0;
-            subresourceRange.levelCount = 1;
-            subresourceRange.layerCount = 1;
+            VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange
+            {
+                aspectMask = aspectMask,
+                baseMipLevel = 0,
+                levelCount = 1,
+                layerCount = 1
+            };
             SetImageLayout(cmdbuffer, image, aspectMask, oldImageLayout, newImageLayout, subresourceRange);
         }
 

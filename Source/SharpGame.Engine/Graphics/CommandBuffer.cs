@@ -238,13 +238,13 @@ namespace SharpGame
             vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount, pBuffers, ref pOffsets);
         }
 
-        public void BindVertexBuffer(uint firstBinding, GraphicsBuffer buffer)
+        public void BindVertexBuffer(uint firstBinding, DeviceBuffer buffer)
         {
             ulong pOffsets = 0;
             vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, ref buffer.buffer, ref pOffsets);
         }
 
-        public unsafe void BindIndexBuffer(GraphicsBuffer buffer, ulong offset, IndexType indexType)
+        public unsafe void BindIndexBuffer(DeviceBuffer buffer, ulong offset, IndexType indexType)
         {
             vkCmdBindIndexBuffer(commandBuffer, buffer.buffer, offset, (VkIndexType)indexType);
         }

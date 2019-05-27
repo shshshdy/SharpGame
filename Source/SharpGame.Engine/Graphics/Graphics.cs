@@ -68,9 +68,9 @@ namespace SharpGame
 
         private VkSubmitInfo submitInfo;
 
-        GraphicsBuffer[] positionBuffer = new GraphicsBuffer[2];
-        GraphicsBuffer[] instanceBuffer = new GraphicsBuffer[2];
-        GraphicsBuffer[] transistBuffer = new GraphicsBuffer[2];
+        DeviceBuffer[] positionBuffer = new DeviceBuffer[2];
+        DeviceBuffer[] instanceBuffer = new DeviceBuffer[2];
+        DeviceBuffer[] transistBuffer = new DeviceBuffer[2];
 
         public Graphics()
         {
@@ -323,14 +323,14 @@ namespace SharpGame
 
         private readonly object _stagingResourcesLock = new object();
         private readonly List<Texture> _availableStagingTextures = new List<Texture>();
-        private readonly List<GraphicsBuffer> _availableStagingBuffers = new List<GraphicsBuffer>();
-        private GraphicsBuffer GetFreeStagingBuffer(int size)
+        private readonly List<DeviceBuffer> _availableStagingBuffers = new List<DeviceBuffer>();
+        private DeviceBuffer GetFreeStagingBuffer(int size)
         {
             lock (_stagingResourcesLock)
             {
                 for (int i = 0; i < _availableStagingBuffers.Count; i++)
                 {
-                    GraphicsBuffer buffer = _availableStagingBuffers[i];
+                    DeviceBuffer buffer = _availableStagingBuffers[i];
                     if (buffer.Size >= size)
                     {
                         _availableStagingBuffers.RemoveAt(i);
@@ -340,7 +340,7 @@ namespace SharpGame
             }
 
             int newBufferSize = Math.Max(MinStagingBufferSize, size);
-            GraphicsBuffer newBuffer = GraphicsBuffer.Create(BufferUsage.TransferSrc | BufferUsage.TransferDst,
+            DeviceBuffer newBuffer = DeviceBuffer.Create(BufferUsage.TransferSrc | BufferUsage.TransferDst,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, size, 1);
             return newBuffer;
         }
