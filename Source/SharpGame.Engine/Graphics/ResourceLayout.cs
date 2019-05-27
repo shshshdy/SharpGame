@@ -65,6 +65,7 @@ namespace SharpGame
                 return ref descriptorSetLayout;
             }
         }
+
         internal DescriptorResourceCounts descriptorResourceCounts;
         internal int NumBindings => Bindings.Count;
         private bool needRebuild = true;

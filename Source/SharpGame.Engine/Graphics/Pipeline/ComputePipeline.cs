@@ -51,5 +51,21 @@ namespace SharpGame
             return handle;
 
         }
+
+        protected override void Destroy()
+        {
+            if (handle != 0)
+            {
+                Device.Destroy(ref handle);
+            }
+
+            if (pipelineLayout != 0)
+            {
+                Device.DestroyPipelineLayout(pipelineLayout);
+                pipelineLayout = 0;
+            }
+
+            base.Destroy();
+        }
     }
 }

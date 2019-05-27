@@ -96,7 +96,7 @@ namespace SharpGame
                 };
 
                 geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, ibs[i].Size);
-
+                geom.VertexLayout = VertexPosNormTex.Layout;
                 model.Geometries[i] = new Geometry[] { geom };
 
             }

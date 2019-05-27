@@ -10,19 +10,6 @@ namespace SharpGame
     using static Builder;
     using static VulkanNative;
 
-    public enum BlendMode
-    {
-        Replace = 0,
-        Add,
-        Multiply,
-        Alpha,
-        AddAlpha,
-        PremulAlpha,
-        InvdestAlpha,
-        Subtract,
-        SubtractAlpha,
-    }
-
     public struct PushConstantRange
     {
         public ShaderStage stageFlags;

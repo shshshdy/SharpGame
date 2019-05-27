@@ -6,6 +6,11 @@ namespace SharpGame
 {
     public class GeometricPrimitive
     {
+        public static Geometry CreatePlane(float width, float height)
+        {
+            return null;
+        }
+
         public static Geometry CreateCube(float width, float height, float depth)
         {
             float w2 = 0.5f * width;

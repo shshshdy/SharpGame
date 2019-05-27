@@ -48,7 +48,8 @@ namespace SharpGame
         public List<int[]> GeometryBoneMappings { get; set; }
         /// Geometry centers.
         public List<Vector3> GeometryCenters { get; set; }
-        
+        public List<Material> Materials { get; set; } = new List<Material>();
+
         public Model()
         {
         }
