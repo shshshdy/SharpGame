@@ -31,7 +31,7 @@ namespace SharpGame
         public string FileName { get; set; }
 
         [IgnoreDataMember]
-        public int MemoryUse { get; protected set; }
+        public int MemoryUse { get; set; }
 
         [IgnoreDataMember]
         public bool Modified { get; set; }

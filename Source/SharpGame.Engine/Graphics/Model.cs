@@ -9,7 +9,6 @@ using Vulkan;
 
 namespace SharpGame
 {
-
     /// Vertex buffer morph data.
     public struct VertexBufferMorph
     {
@@ -38,16 +37,20 @@ namespace SharpGame
     public class Model : Resource
     {
         /// Vertex buffers.
-        public GraphicsBuffer[] VertexBuffers => vertexBuffers_;
-        GraphicsBuffer[] vertexBuffers_;
+        private GraphicsBuffer[] vertexBuffers_;
+        public GraphicsBuffer[] VertexBuffers { get => vertexBuffers_; set => vertexBuffers_ = value; }
 
         /// Index buffers.
-        public GraphicsBuffer[] IndexBuffers => indexBuffers_;
-        GraphicsBuffer[] indexBuffers_;
+        private GraphicsBuffer[] indexBuffers_;
+        public GraphicsBuffer[] IndexBuffers
+        {
+            get => indexBuffers_; set => indexBuffers_ = value;
+        }
+
 
         /// Bounding box.
         [DataMember]
-        public BoundingBox BoundingBox { get => boundingBox_; }
+        public BoundingBox BoundingBox { get => boundingBox_; set => boundingBox_ = value; }
         private BoundingBox boundingBox_;
 
         /// Skeleton.
@@ -67,13 +70,13 @@ namespace SharpGame
         public List<Vector3> GeometryCenters { get; set; }
 
         /// Vertex morphs.
-        public ModelMorph[] Morphs => morphs_;
+        public ModelMorph[] Morphs { get => morphs_; set => morphs_ = value; }
         ModelMorph[] morphs_;
 
         /// Vertex buffer morph range start.
-        int[] morphRangeStarts_;
+        public int[] morphRangeStarts_;
         /// Vertex buffer morph range vertex count.
-        int[] morphRangeCounts_;
+        public int[] morphRangeCounts_;
 
 
         public Model()
@@ -126,370 +129,13 @@ namespace SharpGame
             return bufferIndex < vertexBuffers_.Length ? morphRangeCounts_[bufferIndex] : 0;
         }
 
-        /// Description of vertex buffer data for asynchronous loading.
-        struct VertexBufferDesc
-        {
-            /// Vertex count.
-            public int vertexCount_;
-            public int vertexSize_;
-            /// Vertex declaration.
-            //public List<VertexElement> vertexElements_;
-            public VertexLayout layout;
-            /// Vertex data size.
-            public int dataSize_;
-            /// Vertex data.
-            public byte[] data_;
-        };
-
-        /// Description of index buffer data for asynchronous loading.
-        struct IndexBufferDesc
-        {
-            /// Index count.
-            public int indexCount_;
-            /// Index size.
-            public int indexSize_;
-            /// Index data size.
-            public int dataSize_;
-            /// Index data.
-            public byte[] data_;
-        };
-
-        /// Description of a geometry for asynchronous loading.
-        struct GeometryDesc
-        {
-            /// Primitive type.
-            public PrimitiveTopology type_;
-            /// Vertex buffer ref.
-            public int vbRef_;
-            /// Index buffer ref.
-            public int ibRef_;
-            /// Index start.
-            public int indexStart_;
-            /// Index count.
-            public int indexCount_;
-        };
-
-        /// Vertex buffer data for asynchronous loading.
-        VertexBufferDesc[] loadVBData_;
-        /// Index buffer data for asynchronous loading.
-        IndexBufferDesc[] loadIBData_;
-        /// Geometry definitions for asynchronous loading.
-        List<GeometryDesc[]> loadGeometries_;
-
-        static PrimitiveTopology[] primitiveType2Topology = new[]
-        {
-            PrimitiveTopology.TriangleList, PrimitiveTopology.TriangleStrip, PrimitiveTopology.LineList, PrimitiveTopology.LineStrip, PrimitiveTopology.PointList
-        };
-
-        const uint MASK_NONE = 0x0;
-        const uint MASK_POSITION = 0x1;
-        const uint MASK_NORMAL = 0x2;
-        const uint MASK_COLOR = 0x4;
-        const uint MASK_TEXCOORD1 = 0x8;
-        const uint MASK_TEXCOORD2 = 0x10;
-        const uint MASK_CUBETEXCOORD1 = 0x20;
-        const uint MASK_CUBETEXCOORD2 = 0x40;
-        const uint MASK_TANGENT = 0x80;
-        const uint MASK_BLENDWEIGHTS = 0x100;
-        const uint MASK_BLENDINDICES = 0x200;
-        const uint MASK_INSTANCEMATRIX4 = 0x400;
-        const uint MASK_INSTANCEMATRIX3 = 0x800;
-        const uint MASK_INSTANCEMATRIX2 = 0x1000;
-        const uint MASK_INSTANCEMATRIX1 = 0x2000;
-        
-        static VertexLayout CreateVertexInputStateCreateInfo(uint mask, out uint stride)
-        {
-            List<VertexInputBinding> vertexInputBinding = new List<VertexInputBinding>();
-            List<VertexInputAttribute> vertexInputAttributes = new List<VertexInputAttribute>();
-            stride = 0;
-            uint location = 0;
-            if ((mask & MASK_POSITION) != 0)
-            {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32b32Sfloat, stride));
-                stride += 12;
-                location++;
-            }
-            if ((mask & MASK_NORMAL) != 0)
-            {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32b32Sfloat, stride));
-                stride += 12;
-                location++;
-            }
-            if ((mask & MASK_COLOR) != 0)
-            {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R8g8b8a8Unorm, stride));
-                stride += 4;
-                location++;
-            }
-            if ((mask & MASK_TEXCOORD1) != 0)
-            {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32Sfloat, stride));
-                stride += 8;
-                location++;
-            }
-            if ((mask & MASK_TEXCOORD2) != 0)
-            {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32Sfloat, stride));
-                stride += 8;
-                location++;
-            }
-            if ((mask & MASK_TANGENT) != 0)
-            {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32b32a32Sfloat, stride));
-                stride += 16;
-                location++;
-            }
-            if ((mask & MASK_BLENDWEIGHTS) != 0)
-            {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32b32a32Sfloat, stride));
-                stride += 16;
-                location++;
-            }
-            if ((mask & MASK_BLENDINDICES) != 0)
-            {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R8g8b8a8Uint, stride));
-                stride += 4;
-                location++;
-            }
-
-            vertexInputBinding.Add(new VertexInputBinding(0, stride, VertexInputRate.Vertex));
-            //todo:
-            return new VertexLayout(vertexInputBinding.ToArray(), vertexInputAttributes.ToArray());
-        }
-
         protected override bool OnLoad(File source)
         {
-            String fileID = source.ReadFileID();
-            if (fileID != "UMDL" && fileID != "UMD2")
-            {
-                Log.Error("Invalid model file");
-                return false;
-            }
-
-            bool hasVertexDeclarations = (fileID == "UMD2");
-
-            int memoryUse = Unsafe.SizeOf<Model>();
-
-            // Read vertex buffers
-            int numVertexBuffers = (int)source.Read<uint>();
-            vertexBuffers_ = new GraphicsBuffer[numVertexBuffers];
-            morphRangeStarts_ = new int[numVertexBuffers];
-            morphRangeCounts_ = new int[numVertexBuffers];
-            loadVBData_ = new VertexBufferDesc[numVertexBuffers];
-            GeometryBoneMappings = new List<int[]>();
-            GeometryCenters = new List<Vector3>();
-
-            for (int i = 0; i < numVertexBuffers; ++i)
-            {
-                loadVBData_[i].vertexCount_ = source.Read<int>();
-                uint vertexSize = 0;
-                if (!hasVertexDeclarations)
-                {
-                    uint elementMask = source.Read<uint>();
-                    loadVBData_[i].layout = CreateVertexInputStateCreateInfo(elementMask, out vertexSize);
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-
-                morphRangeStarts_[i] = source.Read<int>();
-                morphRangeCounts_[i] = source.Read<int>();
-                loadVBData_[i].vertexSize_ = (int)vertexSize;
-                loadVBData_[i].dataSize_ = loadVBData_[i].vertexCount_ * (int)vertexSize;
-                loadVBData_[i].data_ = source.ReadArray<byte>(loadVBData_[i].dataSize_);
-            }
-
-            // Read index buffers
-            int numIndexBuffers = (int)source.Read<uint>();
-            indexBuffers_ = new GraphicsBuffer[numIndexBuffers];
-            loadIBData_ = new IndexBufferDesc[numIndexBuffers];
-            for (int i = 0; i < numIndexBuffers; ++i)
-            {
-                int indexCount = source.Read<int>();
-                int indexSize = source.Read<int>();
-
-                loadIBData_[i].indexCount_ = indexCount;
-                loadIBData_[i].indexSize_ = indexSize;
-                loadIBData_[i].dataSize_ = indexCount * indexSize;
-                loadIBData_[i].data_ = source.ReadArray<byte>(loadIBData_[i].dataSize_);
-            }
-
-            // Read geometries
-            int numGeometries = source.Read<int>();
-            loadGeometries_ = new List<GeometryDesc[]>(numGeometries);
-            Array.Resize(ref geometries_, numGeometries);
-
-            for (int i = 0; i < numGeometries; ++i)
-            {
-                // Read bone mappings
-                int boneMappingCount = source.Read<int>();
-                int[] boneMapping = new int[boneMappingCount];
-                for (uint j = 0; j < boneMappingCount; ++j)
-                    boneMapping[j] = source.Read<int>();
-
-                GeometryBoneMappings.Add(boneMapping);
-
-                int numLodLevels = source.Read<int>();
-                Geometry[] geometryLodLevels = new Geometry[numLodLevels];
-                GeometryDesc[] deoDesc = new GeometryDesc[numLodLevels];
-                loadGeometries_.Add(deoDesc);
-                for (int j = 0; j < numLodLevels; ++j)
-                {
-                    float distance = source.Read<float>();
-
-                    /*
-                     *  public enum PrimitiveType : ushort
-                        {
-                            TRIANGLE_LIST = 0,
-                            TRIANGLE_STRIP,
-                            LINE_LIST,
-                            LINE_STRIP,
-                            POINT_LIST
-                        }
-                    */
-
-                    PrimitiveTopology type = primitiveType2Topology[source.Read<int>()];
-                    int vbRef = source.Read<int>();
-                    int ibRef = source.Read<int>();
-                    int indexStart = source.Read<int>();
-                    int indexCount = source.Read<int>();
-
-                    if (vbRef >= vertexBuffers_.Length)
-                    {
-                        Log.Error("Vertex buffer index out of bounds");
-                        loadVBData_ = null;
-                        loadIBData_ = null;
-                        loadGeometries_.Clear();
-                        return false;
-                    }
-
-                    if (ibRef >= indexBuffers_.Length)
-                    {
-                        Log.Error("Index buffer index out of bounds");
-                        loadVBData_ = null;
-                        loadIBData_ = null;
-                        loadGeometries_.Clear();
-                        return false;
-                    }
-
-                    Geometry geometry = new Geometry();
-                    geometry.LodDistance = distance;
-
-                    // Prepare geometry to be defined during EndLoad()
-                    deoDesc[j].type_ = type;
-                    deoDesc[j].vbRef_ = vbRef;
-                    deoDesc[j].ibRef_ = ibRef;
-                    deoDesc[j].indexStart_ = indexStart;
-                    deoDesc[j].indexCount_ = indexCount;
-
-                    geometryLodLevels[j] = geometry;
-                    memoryUse += Unsafe.SizeOf<Geometry>();
-                }
-
-                geometries_[i] = geometryLodLevels;
-            }
-
-            // Read morphs
-            uint numMorphs = source.Read<uint>();
-            morphs_ = new ModelMorph[(int)numMorphs];
-            for (int i = 0; i < numMorphs; ++i)
-            {
-                morphs_[i].name_ = source.ReadCString();
-                morphs_[i].weight_ = 0.0f;
-                uint numBuffers = source.Read<uint>();
-
-                for (int j = 0; j < numBuffers; ++j)
-                {
-                    VertexBufferMorph newBuffer;
-                    int bufferIndex = source.Read<int>();
-
-                    newBuffer.elementMask_ = source.Read<uint>();
-                    newBuffer.vertexCount_ = source.Read<int>();
-
-                    // Base size: size of each vertex index
-                    int vertexSize = sizeof(int);
-                    // Add size of individual elements
-                    unsafe
-                    {
-                        if ((newBuffer.elementMask_ & MASK_POSITION) != 0)
-                            vertexSize += sizeof(Vector3);
-                        if ((newBuffer.elementMask_ & MASK_NORMAL) != 0)
-                            vertexSize += sizeof(Vector3);
-                        if ((newBuffer.elementMask_ & MASK_TANGENT) != 0)
-                            vertexSize += sizeof(Vector3);
-                   
-                    }
-
-                    newBuffer.dataSize_ = newBuffer.vertexCount_ * (int)vertexSize;
-                        newBuffer.morphData_ = source.ReadArray<byte>((int)newBuffer.dataSize_);
-                        morphs_[i].buffers_[bufferIndex] = newBuffer;
-                        memoryUse += Unsafe.SizeOf<VertexBufferMorph>() + newBuffer.vertexCount_ * vertexSize;
-                }
-
-                memoryUse += Unsafe.SizeOf<ModelMorph>();
-            }
-
-            // Read skeleton
-            skeleton_.Load(source);
-            memoryUse += Skeleton.NumBones * Unsafe.SizeOf<Bone>();
-
-            // Read bounding box
-            boundingBox_ = source.Read<BoundingBox>();
-
-            // Read geometry centers
-            for (int i = 0; i < geometries_.Length && !source.IsEof; ++i)
-                GeometryCenters.Add(source.Read<Vector3>());
-            while (GeometryCenters.Count < geometries_.Length)
-                GeometryCenters.Add(Vector3.Zero);
-
-            MemoryUse = memoryUse;
             return true;
         }
     
         protected override bool OnBuild()
-        {
-            // Upload vertex buffer data
-            for (int i = 0; i < vertexBuffers_.Length; ++i)
-            {
-                ref GraphicsBuffer buffer = ref vertexBuffers_[i];
-                ref VertexBufferDesc desc = ref loadVBData_[i];
-                if (desc.data_ != null)
-                {
-                    buffer = GraphicsBuffer.Create(BufferUsage.VertexBuffer, false
-                        , desc.vertexSize_, desc.vertexCount_, Utilities.AsPointer(ref desc.data_[0]));
-                }
-            }
-           
-            // Upload index buffer data
-            for (int i = 0; i < indexBuffers_.Length; ++i)
-            {
-                ref GraphicsBuffer buffer = ref indexBuffers_[i];
-                ref IndexBufferDesc desc = ref loadIBData_[i];
-                if (desc.data_ != null)
-                {
-                    buffer = GraphicsBuffer.Create(BufferUsage.IndexBuffer, false, desc.indexSize_, desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
-                }
-            }
-
-            // Set up geometries
-            for (int i = 0; i < geometries_.Length; ++i)
-            {
-                for (int j = 0; j < geometries_[i].Length; ++j)
-                {
-                    Geometry geometry = geometries_[i][j];
-                    ref GeometryDesc desc = ref loadGeometries_[i][j];
-                    
-                    geometry.VertexBuffers = new[] { vertexBuffers_[desc.vbRef_] };
-                    geometry.VertexLayout = loadVBData_[desc.vbRef_].layout;
-                    geometry.IndexBuffer = indexBuffers_[desc.ibRef_];
-                    geometry.SetDrawRange(desc.type_, desc.indexStart_, desc.indexCount_, 0, -1);
-                }
-            }
-
-            loadVBData_ = null;
-            loadIBData_ = null;
-            loadGeometries_ = null;
+        {            
             return true;
         }
     }
