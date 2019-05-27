@@ -53,6 +53,13 @@ namespace SharpGame.Samples
             {
                 Vector2 delta = (input.MousePosition - mousePos) * (float)(Time.Delta * rotSpeed * camera.AspectRatio);
 
+                if(pitch == 0)
+                {
+                    var rot = camera.Node.Rotation.ToEuler();
+                    yaw = rot.Y;
+                    pitch = rot.X;
+                }
+
                 yaw += delta.X;
                 pitch += delta.Y;
 

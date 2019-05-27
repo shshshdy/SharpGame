@@ -12,8 +12,9 @@ namespace SharpGame.Samples
             scene = new Scene();
 
             var cameraNode = scene.CreateChild("Camera");
-            cameraNode.Position = new Vector3(0, 0, -3);
-            cameraNode.LookAt(Vector3.Zero);
+            cameraNode.Position = new Vector3(0, 20, -30);
+            //cameraNode.LookAt(Vector3.Zero);
+            cameraNode.Rotation = Quaternion.FromEuler(MathUtil.DegreesToRadians(30), 0, 0);
 
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
@@ -70,16 +71,10 @@ namespace SharpGame.Samples
 
                 var model = ResourceCache.Load<Model>("Models/Mushroom.mdl");
 
+                for(int i = 0; i < 100; i++)
                 {
                     var node = scene.CreateChild("Model");
-                    var staticModel = node.AddComponent<StaticModel>();
-                    staticModel.SetModel(model);
-                    staticModel.SetMaterial(0, mat);
-                }
-
-                {
-                    var node = scene.CreateChild("Model");
-                    node.Position = new Vector3(2, 0, 2);
+                    node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-10, 10));
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(0, mat);
