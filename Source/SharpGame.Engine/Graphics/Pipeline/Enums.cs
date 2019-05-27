@@ -5,6 +5,28 @@ using System.Text;
 namespace SharpGame
 {
 
+    public enum PolygonMode
+    {
+        Fill = 0,
+        Line = 1,
+        Point = 2,
+        FillRectangleNV = 1000153000
+    }
+
+    public enum CullMode
+    {
+        None = 0,
+        Front = 1,
+        Back = 2,
+        FrontAndBack = 3
+    }
+
+    public enum FrontFace
+    {
+        CounterClockwise = 0,
+        Clockwise = 1
+    }
+
     public enum SampleCountFlags
     {
         None = 0,

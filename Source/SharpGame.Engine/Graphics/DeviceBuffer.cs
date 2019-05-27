@@ -105,7 +105,7 @@ namespace SharpGame
 
         public static DeviceBuffer Create<T>(BufferUsage bufferUsages, T[] data, bool dynamic = false) where T : struct
         {
-            return Create(bufferUsages, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, Unsafe.SizeOf<T>(), data.Length);
+            return Create(bufferUsages, dynamic,  Unsafe.SizeOf<T>(), data.Length, Utilities.AsPointer(ref data[0]));
         }
 
         public static DeviceBuffer Create(BufferUsage usageFlags, bool dynamic, int stride, int count, IntPtr data = default)

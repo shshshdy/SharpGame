@@ -5,7 +5,7 @@ using static SharpGame.ObjFile;
 
 namespace SharpGame
 {
-    public class ObjModelReader : ResourceReader<Texture>
+    public class ObjModelReader : ResourceReader<Model>
     {
         public ObjModelReader() : base(".obj")
         {
@@ -87,7 +87,7 @@ namespace SharpGame
             };
 
             model.Geometries = new Geometry[objFile.MeshGroups.Length][];
-            for(int i = 0; i < objFile.MeshGroups.Length; i++)
+            for (int i = 0; i < objFile.MeshGroups.Length; i++)
             {
                 var geom = new Geometry
                 {
@@ -95,10 +95,10 @@ namespace SharpGame
                     IndexBuffer = ibs[i]
                 };
 
-                geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, ibs[i].Size);
+                geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, ibs[i].Count);
                 geom.VertexLayout = VertexPosNormTex.Layout;
                 model.Geometries[i] = new Geometry[] { geom };
-
+                model.GeometryCenters.Add(Vector3.Zero);
             }
 
             if(!string.IsNullOrEmpty(objFile.MaterialLibName))

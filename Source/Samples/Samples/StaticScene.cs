@@ -31,6 +31,7 @@ namespace SharpGame.Samples
 
             var pipeline = new GraphicsPipeline
             {
+                CullMode = CullMode.None,
                 FrontFace = FrontFace.Clockwise,
                 ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
                 PushConstantRanges = new []
@@ -43,10 +44,12 @@ namespace SharpGame.Samples
             {
                 new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
             };
-            /*
+           /*
             {
-                var model = ResourceCache.Load<Model>("Models/Plane.mdl");
-                var staticModel = scene.CreateChild("Plane").AddComponent<StaticModel>();
+                var model = ResourceCache.Load<Model>("Models/Plane.obj");
+                var node = scene.CreateChild("Plane");
+                node.Scaling = new Vector3(2, 2, 2);
+                var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
 
                 var colorMap = ResourceCache.Load<Texture>("textures/StoneDiffuse.png");
@@ -58,8 +61,8 @@ namespace SharpGame.Samples
                 };
 
                 staticModel.SetMaterial(0, mat);
-            }
-            */
+            }*/
+
             {
                 var colorMap = ResourceCache.Load<Texture>("textures/Mushroom.png");
                 var mat = new Material

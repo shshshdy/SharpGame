@@ -118,7 +118,7 @@ namespace SharpGame.Samples
 
         void LoadMesh()
         {
-            LoadModel(Application.DataPath + "models/voyager/voyager.dae");
+            LoadModel("models/voyager/voyager.dae");
 
             if (Device.Features.textureCompressionBC == 1)
             {
@@ -149,7 +149,9 @@ namespace SharpGame.Samples
                 | Assimp.PostProcessSteps.Triangulate
                 | Assimp.PostProcessSteps.PreTransformVertices;
 
-            var scene = new Assimp.AssimpContext().ImportFile(filename, assimpFlags);
+            string ext = FileUtil.GetExtension(filename);
+            File stream = FileSystem.GetFile(filename);
+            var scene = new Assimp.AssimpContext().ImportFileFromStream(stream, assimpFlags, ext);
 
             // Generate vertex buffer from ASSIMP scene data
             float scale = 1.0f;
