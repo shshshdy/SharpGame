@@ -12,7 +12,7 @@ namespace SharpGame.Samples
         int selected = 0;
         string[] sampleNames;
 
-        public SampleApplication() : base("../../../../../data/")
+        public SampleApplication() : base("../../../../../")
         {
         }
 

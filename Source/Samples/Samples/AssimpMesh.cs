@@ -29,7 +29,6 @@ namespace SharpGame.Samples
 
         Shader shader;
         ResourceLayout resourceLayout;
-        ResourceSet resourceSet;
         Pipeline pipelineSolid;
 
         Vector3 rotation = new Vector3(-0.5f, 112.75f + 180, 0.0f);

@@ -9,40 +9,27 @@ namespace SharpGame
     {
         public override Resource Load(string name)
         {
-            String cachedAsset = FileUtil.ReplaceExtension(name, ".ktx");
+            string ext = FileUtil.GetExtension(name);
+            switch(ext)
+            {
+                case ".ktx":
+                    return LoadKTX(name);
+                   
+                case ".tga":
+                case ".png":
+                case ".jpg":
+                case ".gif":
+                case ".bmp":
+                    return LoadImageSharp(name);
+                  
+            }
+
+            string cachedAsset = FileUtil.ReplaceExtension(name, ".asset");
             // Attempt to load the resource
-            File stream = FileSystem.Instance.OpenFile(cachedAsset);
+            File stream = FileSystem.OpenFile(cachedAsset);
          
             if(stream == null)
             {
-                string exeFileName = "tools\\texturec.exe";
-                StringBuilder args = new StringBuilder();
-
-                string sourceFile = FileSystem.Instance.GetResourceFileName(name);
-                string destFile = "cache/" + cachedAsset;
-                args.Append(" -f ").Append(sourceFile);
-
-                args.Append(" -o ").Append(destFile);
-
-                //args.Append(" -t ").Append("");
-
-                Process process = new Process();
-                try
-                {
-                    System.IO.Directory.CreateDirectory(FileUtil.GetPath(destFile));
-
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.FileName = exeFileName;
-                    process.StartInfo.Arguments = args.ToString();
-                    process.StartInfo.CreateNoWindow = false;
-                    process.Start();
-                    process.WaitForExit();
-                }
-                catch(Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-
                 stream = FileSystem.Instance.OpenFile(cachedAsset);
             }
 
@@ -54,26 +41,33 @@ namespace SharpGame
             if(stream == null)
                 return null;
 
-            var resource = Activator.CreateInstance<Texture>();
-
-            if(!resource)
-            {
-                Log.Error("Could not load unknown resource type " + ResourceType.ToString());
-                return null;
-            }
-           
+            var resource = new Texture2D();          
             if(!OnLoad(resource, stream))
             {
                 stream.Dispose();
                 resource.Dispose();
-                return null;
-                
+                return null;                
             }
 
             stream.Dispose();
             return resource;
         }
-        
+
+        Texture LoadKTX(string name)
+        {
+            var resource = new Texture2D();
+            resource.LoadFromFile(name, Format.Bc3UnormBlock);
+            return resource;
+        }
+
+        Texture LoadImageSharp(string name)
+        {
+            using (File stream = FileSystem.OpenFile(name))
+            using (ImageSharp.ImageSharpTexture imageSharpTexture
+                 = new ImageSharp.ImageSharpTexture(stream))
+                return imageSharpTexture.CreateDeviceTexture();
+        }
+
 
     }
 }

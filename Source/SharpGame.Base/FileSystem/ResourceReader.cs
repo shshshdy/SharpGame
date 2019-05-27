@@ -14,6 +14,8 @@ namespace SharpGame
     {
         public Type ResourceType => typeof(T);
 
+        protected FileSystem FileSystem => FileSystem.Instance;
+
         public virtual Resource Load(string name)
         {
             // Attempt to load the resource

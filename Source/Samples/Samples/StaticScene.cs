@@ -9,8 +9,6 @@ namespace SharpGame.Samples
     {
         public override void Init()
         {
-            var graphics = Graphics.Instance;
-
             scene = new Scene();
 
             var cameraNode = scene.CreateChild("Camera");
@@ -18,47 +16,60 @@ namespace SharpGame.Samples
             cameraNode.LookAt(Vector3.Zero);
 
             camera = cameraNode.CreateComponent<Camera>();
-            camera.AspectRatio = (float)graphics.Width / graphics.Height;
+            camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
 
-            var model = ResourceCache.Instance.Load<Model>("Models/Mushroom.mdl");
-
-            var node = scene.CreateChild("Model");
-            var staticModel = node.AddComponent<StaticModel>();
-            staticModel.SetModel(model);
-
-            var colorMap = new Texture2D();
-            colorMap.LoadFromFile("textures/darkmetal_bc3_unorm.ktx",
-                    Format.Bc3UnormBlock);
-
-            var resourceLayout = new ResourceLayout
+            var resourceLayout = new ResourceLayout(0)
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
             };
 
-            var resourceLayoutTex = new ResourceLayout
+            var resourceLayoutTex = new ResourceLayout(1)
             {
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
-            var mat = new Material
+            var pipeline = new Pipeline
             {
-                Shader = new Shader
-                {
-                    new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-                },
-
-                Pipeline = new Pipeline
-                {
-                    CullMode = CullMode.None,
-                    FrontFace = FrontFace.Clockwise,
-
-                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex }
-                },
-
-                ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
+                FrontFace = FrontFace.Clockwise,
+                ResourceLayout = new[] { resourceLayout, resourceLayoutTex }
             };
 
-            staticModel.SetMaterial(0, mat);
+            var shader = new Shader
+            {
+                new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
+            };
+            /*
+            {
+                var model = ResourceCache.Load<Model>("Models/Plane.mdl");
+                var staticModel = scene.CreateChild("Plane").AddComponent<StaticModel>();
+                staticModel.SetModel(model);
+
+                var colorMap = ResourceCache.Load<Texture>("textures/StoneDiffuse.png");
+                var mat = new Material
+                {
+                    Shader = shader,
+                    Pipeline = pipeline,
+                    ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
+                };
+
+                staticModel.SetMaterial(0, mat);
+            }
+            */
+            {
+                var model = ResourceCache.Load<Model>("Models/Mushroom.mdl");
+                var staticModel = scene.CreateChild("Model").AddComponent<StaticModel>();
+                staticModel.SetModel(model);
+
+                var colorMap = ResourceCache.Load<Texture>("textures/Mushroom.png");
+                var mat = new Material
+                {
+                    Shader = shader,
+                    Pipeline = pipeline,
+                    ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
+                };
+
+                staticModel.SetMaterial(0, mat);
+            }
 
             Renderer.Instance.MainView.Attach(camera, scene);
 

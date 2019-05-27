@@ -57,6 +57,10 @@ namespace SharpGame
             }
 
             File stream = FileSystem.OpenFile(contentName);
+            if(stream == null)
+            {
+                return null;
+            }
 
             var resource = new T();
 

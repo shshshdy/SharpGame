@@ -13,7 +13,7 @@ namespace SharpGame.ImageSharp
 {
     using Image = SixLabors.ImageSharp.Image;
 
-    public class ImageSharpTexture
+    public class ImageSharpTexture : IDisposable
     {
         /// <summary>
         /// An array of images, each a single element in the mipmap chain.
@@ -84,13 +84,23 @@ namespace SharpGame.ImageSharp
                 height = Height,
                 mipLevels = MipLevels,
                 depth = 1,
-                format = Format
+                format = Format,
+                imageUsageFlags = ImageUsageFlags.Sampled,
+                imageLayout = ImageLayout.ShaderReadOnlyOptimal,
             };
 
             tex.SetImage2D(face);
 
             return tex;
 
+        }
+
+        public void Dispose()
+        {
+            foreach(var img in Images)
+            {
+                img.Dispose();
+            }
         }
 
 #if false

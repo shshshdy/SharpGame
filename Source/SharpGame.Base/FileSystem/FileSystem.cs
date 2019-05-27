@@ -27,9 +27,9 @@ namespace SharpGame
         {
             ContentRoot = contentRoot;
 
-            AddResourceDir(DataPath);
-            AddResourceDir(CoreDataPath);
-            AddResourceDir(CachePath);
+            AddResourceDir(contentRoot+DataPath);
+            AddResourceDir(contentRoot + CoreDataPath);
+            AddResourceDir(contentRoot + CachePath);
         }
 
         public string CurrentDir
@@ -53,23 +53,10 @@ namespace SharpGame
 
         public File OpenFile(string file)
         {
+            return GetFile(file);
             string filePath = Path.Combine(ContentRoot, file);
             var stream = OpenStream(filePath);
             return new File(stream);
-        }
-
-        public BinaryReader Open(string file)
-        {
-            string filePath = Path.Combine(ContentRoot, file);
-            var stream = OpenStream(filePath);
-            return new BinaryReader(stream);
-        }
-
-        public StreamReader OpenText(string file)
-        {
-            string filePath = Path.Combine(ContentRoot, file);
-            var stream = OpenStream(filePath);
-            return new StreamReader(stream);
         }
 
         public bool AddResourceDir(string pathName, int priority = int.MaxValue)

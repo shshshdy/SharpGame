@@ -9,6 +9,8 @@ using System.Numerics;
 using System.IO;
 using SharpGame.Sdl2;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace SharpGame
 {
@@ -62,7 +64,11 @@ namespace SharpGame
             timer = CreateSubsystem<Timer>();
             fileSystem = CreateSubsystem<FileSystem>(DataPath);
             cache = CreateSubsystem<ResourceCache>();
+
+            cache.RegisterAssertReader(new TextureReader());
+
             CreateWindow();
+
             graphics = CreateSubsystem<Graphics>();
             graphics.Init(nativeWindow.SdlWindowHandle);
             renderer = CreateSubsystem<Renderer>();
@@ -141,6 +147,14 @@ namespace SharpGame
 
         private void DoubleLoop()
         {
+            new Thread(SingleLoop).Start();
+
+
+            while(true)
+            {
+                Thread.Sleep(1);
+            }
+
 
         }
 

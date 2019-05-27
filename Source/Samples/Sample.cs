@@ -24,6 +24,10 @@ namespace SharpGame.Samples
         private float moveSpeed = 15.0f;
         private Vector3 offset;
 
+        public Graphics Graphics => Graphics.Instance;
+        public FileSystem FileSystem => FileSystem.Instance;
+        public ResourceCache ResourceCache => ResourceCache.Instance;
+
         public Sample()
         {
         }
