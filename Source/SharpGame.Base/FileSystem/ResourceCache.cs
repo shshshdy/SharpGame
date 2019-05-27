@@ -56,7 +56,7 @@ namespace SharpGame
                 }
             }
 
-            File stream = FileSystem.OpenFile(contentName);
+            File stream = FileSystem.GetFile(contentName);
             if(stream == null)
             {
                 return null;
@@ -78,7 +78,7 @@ namespace SharpGame
             if (cachedContent.TryGetValue(contentName, out Resource value))
                 return (T)value;
 
-            File stream = FileSystem.OpenFile(contentName);
+            File stream = FileSystem.GetFile(contentName);
 
             var res = new T();
 

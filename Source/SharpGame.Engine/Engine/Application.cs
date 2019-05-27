@@ -66,8 +66,12 @@ namespace SharpGame
             cache = CreateSubsystem<ResourceCache>();
 
             cache.RegisterAssertReader(new ShaderReader());
-            cache.RegisterAssertReader(new ModelReader());
-            cache.RegisterAssertReader(new TextureReader());
+
+            cache.RegisterAssertReader(new MdlModelReader());
+            cache.RegisterAssertReader(new ObjModelReader());
+
+            cache.RegisterAssertReader(new SharpTextureReader());
+            cache.RegisterAssertReader(new KtxTextureReader());
 
             CreateWindow();
 

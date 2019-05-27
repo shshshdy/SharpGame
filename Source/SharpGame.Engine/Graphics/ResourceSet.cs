@@ -24,7 +24,7 @@ namespace SharpGame
 
         internal VkDescriptorSet descriptorSet;
         internal VkDescriptorPool descriptorPool;
-        private VkWriteDescriptorSet[] writeDescriptorSets;
+        internal VkWriteDescriptorSet[] writeDescriptorSets;
         public ResourceSet(ResourceLayout resLayout)
         {
             resLayout.Build();

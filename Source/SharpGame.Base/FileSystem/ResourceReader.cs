@@ -15,11 +15,32 @@ namespace SharpGame
         public Type ResourceType => typeof(T);
 
         protected FileSystem FileSystem => FileSystem.Instance;
+        protected string extension = "";
+        public ResourceReader(string ext)
+        {
+            extension = ext;
+        }
+
+        protected bool MatchExtension(string name)
+        {
+            if(string.IsNullOrEmpty(extension))
+            {
+                return true;
+            }
+
+            string ext = FileUtil.GetExtension(name);
+            return extension.IndexOf(ext, StringComparison.CurrentCultureIgnoreCase) != -1;
+        }
 
         public virtual Resource Load(string name)
         {
+            if(!MatchExtension(name))
+            {
+                return null;
+            }
+            
             // Attempt to load the resource
-            File stream = FileSystem.Instance.OpenFile(name);
+            File stream = FileSystem.Instance.GetFile(name);
             if(stream == null)
                 return null;
 

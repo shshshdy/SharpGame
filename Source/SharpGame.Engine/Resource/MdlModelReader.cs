@@ -48,8 +48,12 @@ namespace SharpGame
         public int indexCount_;
     };
 
-    public class ModelReader : ResourceReader<Model>
+    public class MdlModelReader : ResourceReader<Model>
     {
+        public MdlModelReader() : base(".mdl")
+        {
+        }
+
         protected override bool OnLoad(Model model, File stream)
         {
             String fileID = stream.ReadFileID();

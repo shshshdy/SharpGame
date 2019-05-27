@@ -6,5 +6,8 @@ namespace SharpGame
 {
     public class AnimationReader : ResourceReader<Animation>
     {
+        public AnimationReader() : base(".anim")
+        {
+        }
     }
 }

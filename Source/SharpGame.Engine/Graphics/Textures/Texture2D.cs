@@ -243,7 +243,7 @@ namespace SharpGame
             this.imageUsageFlags = imageUsageFlags;
             this.imageLayout = imageLayout;
 
-            using (var file = FileSystem.Instance.OpenFile(filename))
+            using (var file = FileSystem.Instance.GetFile(filename))
             {
                 tex2D = KtxFile.Load(file, false);
                 SetImage2D(tex2D.Faces[0], forceLinear);

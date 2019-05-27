@@ -261,6 +261,12 @@ namespace SharpGame
                 (uint)offset, (uint)size, (void*)value);
         }
 
+        public void PushDescriptorSet(Pipeline pipeline, int set, ResourceSet resourceSet)
+        {
+            vkCmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, (uint)set,
+                (uint)resourceSet.writeDescriptorSets.Length, ref resourceSet.writeDescriptorSets[0]);
+        }
+
         public void Draw(uint vertexCount, uint instanceCount, uint firstVertex, uint firstInstance)
         {
             vkCmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);

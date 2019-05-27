@@ -50,15 +50,7 @@ namespace SharpGame
         }
 
         public Stream OpenStream(string path) => new FileStream(path, FileMode.Open);
-
-        public File OpenFile(string file)
-        {
-            return GetFile(file);
-            string filePath = Path.Combine(ContentRoot, file);
-            var stream = OpenStream(filePath);
-            return new File(stream);
-        }
-
+        
         public bool AddResourceDir(string pathName, int priority = int.MaxValue)
         {
             lock (resourceMutex_)

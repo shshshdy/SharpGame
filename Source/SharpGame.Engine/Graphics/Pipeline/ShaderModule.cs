@@ -80,7 +80,7 @@ namespace SharpGame
             FileName = fileName;
             FuncName = funcName;
                         
-            using (File stream = FileSystem.Instance.OpenFile(fileName))
+            using (File stream = FileSystem.Instance.GetFile(fileName))
             {
                 Code = stream.ReadAllBytes();
             }
@@ -101,7 +101,7 @@ namespace SharpGame
         {
             if (Code == null)
             {
-                using (File stream = FileSystem.Instance.OpenFile(FileName))
+                using (File stream = FileSystem.Instance.GetFile(FileName))
                 {
                     Code = stream.ReadAllBytes();
                 }
