@@ -6,7 +6,6 @@ using Vulkan;
 
 namespace SharpGame
 {
-
     public class Pass : DisposeBase
     {
         private StringID name_;

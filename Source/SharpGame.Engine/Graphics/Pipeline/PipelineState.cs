@@ -286,6 +286,76 @@ namespace SharpGame
         public float blendConstants_2;
         public float blendConstants_3;
 
+        public static ColorBlendStateInfo Replace = new ColorBlendStateInfo
+        {
+            attachments = new[]
+            {
+                new ColorBlendAttachment
+                {
+                    srcColorBlendFactor = BlendFactor.One,
+                    dstColorBlendFactor = BlendFactor.Zero,
+                    colorBlendOp = BlendOp.Add,
+                    srcAlphaBlendFactor = BlendFactor.One,
+                    dstAlphaBlendFactor = BlendFactor.Zero,
+                    alphaBlendOp = BlendOp.Add,
+                    colorWriteMask = ColorComponentFlags.All
+                }
+            }
+        };
+
+        public static ColorBlendStateInfo Add = new ColorBlendStateInfo
+        {
+            attachments = new[]
+            {
+                new ColorBlendAttachment
+                {
+                    srcColorBlendFactor = BlendFactor.One,
+                    dstColorBlendFactor = BlendFactor.One,
+                    colorBlendOp = BlendOp.Add,
+                    srcAlphaBlendFactor = BlendFactor.SrcAlpha,
+                    dstAlphaBlendFactor = BlendFactor.DstAlpha,
+                    alphaBlendOp = BlendOp.Add,
+                    colorWriteMask = ColorComponentFlags.All
+                }
+            }
+        };
+
+        public static ColorBlendStateInfo AlphaBlend = new ColorBlendStateInfo
+        {
+            attachments = new[]
+            {
+                new ColorBlendAttachment
+                {
+                    blendEnable = true,
+                    srcColorBlendFactor = BlendFactor.SrcAlpha,
+                    dstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                    colorBlendOp = BlendOp.Add,
+                    srcAlphaBlendFactor = BlendFactor.SrcAlpha,
+                    dstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                    alphaBlendOp = BlendOp.Add,
+                    colorWriteMask = ColorComponentFlags.All
+                }
+            }
+        };
+
+        public static ColorBlendStateInfo PremulAlpha = new ColorBlendStateInfo
+        {
+            attachments = new[]
+            {
+                new ColorBlendAttachment
+                {
+                    blendEnable = true,
+                    srcColorBlendFactor = BlendFactor.One,
+                    dstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                    colorBlendOp = BlendOp.Add,
+                    srcAlphaBlendFactor = BlendFactor.One,
+                    dstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
+                    alphaBlendOp = BlendOp.Add,
+                    colorWriteMask = ColorComponentFlags.All
+                }
+            }
+        };
+
         public unsafe void ToNative(out VkPipelineColorBlendStateCreateInfo native)
         {
             native = VkPipelineColorBlendStateCreateInfo.New();

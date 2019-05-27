@@ -36,158 +36,72 @@ namespace SharpGame
         }
     }
 
-    public class Pipeline : Resource
+    public class GraphicsPipeline : Resource
     {
         [IgnoreDataMember]
         public Shader Shader { get; set; }
 
-        private RasterizationStateInfo rasterizationState;
+        private RasterizationStateInfo rasterizationState = RasterizationStateInfo.Default;
         [IgnoreDataMember]
         public ref RasterizationStateInfo RasterizationState => ref rasterizationState;
 
-        private MultisampleStateInfo multisampleState;
+        private MultisampleStateInfo multisampleState = MultisampleStateInfo.Default;
         [IgnoreDataMember]
         public ref MultisampleStateInfo MultisampleState => ref multisampleState;
 
-        private DepthStencilStateInfo depthStencilState_;
+        private DepthStencilStateInfo depthStencilState_ = DepthStencilStateInfo.Solid;
         [IgnoreDataMember]
         public ref DepthStencilStateInfo DepthStencilState => ref depthStencilState_;
 
-        private ColorBlendStateInfo colorBlendState;
+        private ColorBlendStateInfo colorBlendState = ColorBlendStateInfo.Replace;
         [IgnoreDataMember]
         public ref ColorBlendStateInfo ColorBlendState => ref colorBlendState;
-
 
         public PolygonMode FillMode { get => rasterizationState.polygonMode; set => rasterizationState.polygonMode = value; }
         public CullMode CullMode { get => rasterizationState.cullMode; set => rasterizationState.cullMode = value; }
         public FrontFace FrontFace { get => rasterizationState.frontFace; set => rasterizationState.frontFace = value; }
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
-        public BlendMode BlendMode { set => SetBlendMode(value); }
-        public DynamicStateInfo DynamicStates {get; set;}
 
-        [IgnoreDataMember]
-        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
-
-        private VertexLayout vertexlayout;
-        [IgnoreDataMember]
-        public ref VertexLayout VertexLayout => ref vertexlayout;
-
+        private BlendMode blendMode = BlendMode.Replace;
+        public BlendMode BlendMode { get => blendMode; set { blendMode = value; SetBlendMode(value); } } 
+        public DynamicStateInfo DynamicStates {get; set;} = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor);
         public ResourceLayout[] ResourceLayout { get; set; }
 
         private PushConstantRange[] pushConstantRanges;
         public PushConstantRange[] PushConstantRanges { get => pushConstantRanges; set => pushConstantRanges = value; }
 
-        internal VkPipelineLayout pipelineLayout;
-        internal VkPipeline pipeline;
+        [IgnoreDataMember]
+        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
+        [IgnoreDataMember]
+        public VertexLayout VertexLayout { get; set; }
 
-        public Pipeline()
+        internal VkPipelineLayout pipelineLayout;
+        internal VkPipeline handle;
+
+        public GraphicsPipeline()
         {
-            Init();
         }
         
-        public void Init()
-        {
-            RasterizationState = RasterizationStateInfo.Default;
-            MultisampleState = MultisampleStateInfo.Default;
-            DepthStencilState = DepthStencilStateInfo.Solid;
-            BlendMode = BlendMode.Replace;
-            DynamicStates = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor);
-        }
-
-        protected override void Destroy()
-        {
-            Device.DestroyPipeline(pipeline);
-            pipeline = 0;
-            base.Destroy();
-        }
-
         public unsafe void SetBlendMode(BlendMode blendMode)
         {
             switch (blendMode)
             {
                 case BlendMode.Replace:
-
-                    ColorBlendState = new ColorBlendStateInfo
-                    {
-                        attachments = new[]
-                        {
-                            new ColorBlendAttachment
-                            {
-                                srcColorBlendFactor = BlendFactor.One,
-                                dstColorBlendFactor = BlendFactor.Zero,
-                                colorBlendOp = BlendOp.Add,
-                                srcAlphaBlendFactor = BlendFactor.One,
-                                dstAlphaBlendFactor = BlendFactor.Zero,
-                                alphaBlendOp = BlendOp.Add,
-                                colorWriteMask = ColorComponentFlags.All
-                            }
-                        }
-                    };
+                    ColorBlendState = ColorBlendStateInfo.Replace;
                     break;
                 case BlendMode.Add:
-
-                    ColorBlendState = new ColorBlendStateInfo
-                    {
-                        attachments = new[]
-                        {
-                            new ColorBlendAttachment
-                            {
-                                srcColorBlendFactor = BlendFactor.One,
-                                dstColorBlendFactor = BlendFactor.One,
-                                colorBlendOp = BlendOp.Add,
-                                srcAlphaBlendFactor = BlendFactor.SrcAlpha,
-                                dstAlphaBlendFactor = BlendFactor.DstAlpha,
-                                alphaBlendOp = BlendOp.Add,
-                                colorWriteMask = ColorComponentFlags.All
-                            }
-                        }
-                    };
-
+                    ColorBlendState = ColorBlendStateInfo.Add;
                     break;
                 case BlendMode.Multiply:
                     break;
                 case BlendMode.Alpha:
-                   
-                    ColorBlendState = new ColorBlendStateInfo
-                    {
-                        attachments = new[]
-                        {
-                            new ColorBlendAttachment
-                            {
-                                blendEnable = true,
-                                srcColorBlendFactor = BlendFactor.SrcAlpha,
-                                dstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                                colorBlendOp = BlendOp.Add,
-                                srcAlphaBlendFactor = BlendFactor.SrcAlpha,
-                                dstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                                alphaBlendOp = BlendOp.Add,
-                                colorWriteMask = ColorComponentFlags.All
-                            }
-                        }
-                    };
+                    ColorBlendState = ColorBlendStateInfo.AlphaBlend;
                     break;
                 case BlendMode.AddAlpha:
                     break;
                 case BlendMode.PremulAlpha:
-                   
-                    ColorBlendState = new ColorBlendStateInfo
-                    {
-                        attachments = new[]
-                        {
-                            new ColorBlendAttachment
-                            {
-                                blendEnable = true,
-                                srcColorBlendFactor = BlendFactor.One,
-                                dstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                                colorBlendOp = BlendOp.Add,
-                                srcAlphaBlendFactor = BlendFactor.One,
-                                dstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                                alphaBlendOp = BlendOp.Add,
-                                colorWriteMask = ColorComponentFlags.All
-                            }
-                        }
-                    };
+                    ColorBlendState = ColorBlendStateInfo.PremulAlpha;
                     break;
                 case BlendMode.InvdestAlpha:
                     break;
@@ -200,9 +114,9 @@ namespace SharpGame
 
         internal unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, Pass pass, Geometry geometry)
         {
-            if(pipeline != 0)
+            if(handle != 0)
             {
-                return pipeline;
+                return handle;
             }
 
             if(pass == null)
@@ -227,7 +141,7 @@ namespace SharpGame
             unsafe
             {
                 var pipelineCreateInfo = GraphicsPipelineCreateInfo(pipelineLayout, renderPass.handle, 0);//,
-                var vertexInput = geometry != null ? geometry.VertexLayout : vertexlayout;
+                var vertexInput = geometry != null ? geometry.VertexLayout : VertexLayout;
                 vertexInput.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
                 pipelineCreateInfo.pVertexInputState = &vertexInputState;
 
@@ -261,36 +175,28 @@ namespace SharpGame
                     pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
                 }
 
-                pipeline = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
+                handle = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
             }
 
-            return pipeline;
+            return handle;
         }
 
-        internal unsafe VkPipeline GetComputePipeline(Pass pass)
+        protected override void Destroy()
         {
-            if(!pass.IsComputeShader)
+            if(handle != 0)
             {
-                return 0;
+                Device.Destroy(ref handle);                
             }
 
-            VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
-            for (int i = 0; i < ResourceLayout.Length; i++)
+            if(pipelineLayout != 0)
             {
-                pSetLayouts[i] = ResourceLayout[i].DescriptorSetLayout;
+                Device.DestroyPipelineLayout(pipelineLayout);
+                pipelineLayout = 0;
             }
 
-            var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);
-            vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
-
-            var pipelineCreateInfo = VkComputePipelineCreateInfo.New();
-            pipelineCreateInfo.stage = pass.GetComputeStageCreateInfo();
-            pipelineCreateInfo.layout = pipelineLayout;
-
-            pipeline = Device.CreateComputePipeline(ref pipelineCreateInfo);
-            return pipeline;
-            
+            base.Destroy();
         }
-        
+
+
     }
 }

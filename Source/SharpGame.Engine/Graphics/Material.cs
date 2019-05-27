@@ -28,7 +28,7 @@ namespace SharpGame
         private ResourceSet resourceSet_;
         public ResourceSet ResourceSet { get => resourceSet_; set => resourceSet_ = value; }
 
-        public Pipeline Pipeline { get; set; }
+        public GraphicsPipeline Pipeline { get; set; }
 
         public Material()
         {

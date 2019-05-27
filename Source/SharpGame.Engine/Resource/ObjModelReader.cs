@@ -100,8 +100,14 @@ namespace SharpGame
                 model.Geometries[i] = new Geometry[] { geom };
 
             }
-            
 
+            if(!string.IsNullOrEmpty(objFile.MaterialLibName))
+            {
+                string path = FileUtil.GetPath(name);
+                File file = FileSystem.GetFile(path + objFile.MaterialLibName);
+                MtlParser mtlParser = new MtlParser();
+                var mtlFile = mtlParser.Parse(file);
+            }
 
             return model;
         }

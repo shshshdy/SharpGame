@@ -29,7 +29,7 @@ namespace SharpGame.Samples
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
-            var pipeline = new Pipeline
+            var pipeline = new GraphicsPipeline
             {
                 FrontFace = FrontFace.Clockwise,
                 ResourceLayout = new[] { resourceLayout, resourceLayoutTex },

@@ -19,7 +19,7 @@ namespace SharpGame
         DeviceBuffer uniformBufferVS = new DeviceBuffer();
         Texture texture;
         Shader uiShader;
-        Pipeline pipeline;
+        GraphicsPipeline pipeline;
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
         private IntPtr fontAtlasID = (IntPtr)1;
@@ -84,7 +84,7 @@ namespace SharpGame
 
             var graphics = Graphics.Instance;
 
-            pipeline = new Pipeline
+            pipeline = new GraphicsPipeline
             {
                 CullMode = CullMode.None,
                 DepthTestEnable = false,

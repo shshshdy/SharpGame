@@ -805,11 +805,32 @@ namespace SharpGame
             return pPipelines;
         }
 
+        public static void Destroy<T>(ref T handle) where T : struct
+        {
+            switch (handle)
+            {
+                case VkPipeline pipeline:
+                    if(pipeline != 0)
+                    {
+                        vkDestroyPipeline(device, pipeline, null);
+                        handle = default;
+                    }
+                    break;
+                case VkPipelineLayout pipelineLayout:
+                    if (pipelineLayout != 0)
+                    {
+                        vkDestroyPipelineLayout(device, pipelineLayout, null);
+                        handle = default;
+                    }
+                    break;
+            }
+        }
+
         public static void DestroyPipeline(VkPipeline pipeline)
         {
             vkDestroyPipeline(device, pipeline, null);
         }
-
+        
         public static void DestroyBuffer(VkBuffer buffer)
         {
             vkDestroyBuffer(device, buffer, null);

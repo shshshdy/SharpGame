@@ -29,7 +29,7 @@ namespace SharpGame.Samples
 
         Shader shader;
         ResourceLayout resourceLayout;
-        Pipeline pipelineSolid;
+        GraphicsPipeline pipelineSolid;
 
         Vector3 rotation = new Vector3(-0.5f, 112.75f + 180, 0.0f);
      
@@ -98,7 +98,7 @@ namespace SharpGame.Samples
                 new Pass("shaders/mesh.vert.spv", "shaders/mesh.frag.spv")
             };
 
-            pipelineSolid = new Pipeline
+            pipelineSolid = new GraphicsPipeline
             {
                 CullMode = CullMode.Back,
                 FrontFace = FrontFace.CounterClockwise,
