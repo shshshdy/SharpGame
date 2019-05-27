@@ -249,6 +249,18 @@ namespace SharpGame
             vkCmdBindIndexBuffer(commandBuffer, buffer.buffer, offset, (VkIndexType)indexType);
         }
 
+        public unsafe void PushConstants<T>(Pipeline pipeline, ShaderStage shaderStage, int offset, ref T value) where T : struct
+        {
+            vkCmdPushConstants(commandBuffer, pipeline.pipelineLayout, (VkShaderStageFlags)shaderStage,
+                (uint)offset, (uint)Utilities.SizeOf<T>(), Unsafe.AsPointer(ref value));
+        }
+
+        public unsafe void PushConstants(Pipeline pipeline, ShaderStage shaderStage, int offset, int size, IntPtr value)
+        {
+            vkCmdPushConstants(commandBuffer, pipeline.pipelineLayout, (VkShaderStageFlags)shaderStage,
+                (uint)offset, (uint)size, (void*)value);
+        }
+
         public void Draw(uint vertexCount, uint instanceCount, uint firstVertex, uint firstInstance)
         {
             vkCmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);

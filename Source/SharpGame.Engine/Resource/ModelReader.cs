@@ -10,9 +10,9 @@ namespace SharpGame
     {
         /// Vertex count.
         public int vertexCount_;
+
         public int vertexSize_;
         /// Vertex declaration.
-        //public List<VertexElement> vertexElements_;
         public VertexLayout layout;
         /// Vertex data size.
         public int dataSize_;

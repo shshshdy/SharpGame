@@ -23,6 +23,19 @@ namespace SharpGame
         SubtractAlpha,
     }
 
+    public struct PushConstantRange
+    {
+        public ShaderStage stageFlags;
+        public int offset;
+        public int size;
+        public PushConstantRange(ShaderStage shaderStage, int offset, int size)
+        {
+            this.stageFlags = shaderStage;
+            this.offset = offset;
+            this.size = size;
+        }
+    }
+
     public class Pipeline : Resource
     {
         [IgnoreDataMember]
@@ -61,6 +74,9 @@ namespace SharpGame
         public ref VertexLayout VertexLayout => ref vertexlayout;
 
         public ResourceLayout[] ResourceLayout { get; set; }
+
+        private PushConstantRange[] pushConstantRanges;
+        public PushConstantRange[] PushConstantRanges { get => pushConstantRanges; set => pushConstantRanges = value; }
 
         internal VkPipelineLayout pipelineLayout;
         internal VkPipeline pipeline;
@@ -201,6 +217,11 @@ namespace SharpGame
             }
 
             var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);
+            if(!pushConstantRanges.IsNullOrEmpty())
+            {
+                pipelineLayoutInfo.pushConstantRangeCount = (uint)pushConstantRanges.Length;
+                pipelineLayoutInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref pushConstantRanges[0]);
+            }
             vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
             unsafe

@@ -15,6 +15,10 @@ layout (binding = 0) uniform CameraVS
 	float FarClip;
 };
 
+layout(push_constant) uniform PushConsts {
+	mat4 model;
+};
+
 layout (location = 0) out vec2 out_TexCoord;
 
 out gl_PerVertex
@@ -24,5 +28,5 @@ out gl_PerVertex
 
 void main() {
     out_TexCoord = in_TexCoord;
-    gl_Position = ViewProj /** World*/ * vec4(in_Position.xyz, 1.0);
+    gl_Position = ViewProj * model* vec4(in_Position.xyz, 1.0);
 }

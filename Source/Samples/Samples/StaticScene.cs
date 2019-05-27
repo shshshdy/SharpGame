@@ -31,7 +31,11 @@ namespace SharpGame.Samples
             var pipeline = new Pipeline
             {
                 FrontFace = FrontFace.Clockwise,
-                ResourceLayout = new[] { resourceLayout, resourceLayoutTex }
+                ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
+                PushConstantRanges = new []
+                {
+                    new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                }
             };
 
             var shader = new Shader
@@ -56,10 +60,6 @@ namespace SharpGame.Samples
             }
             */
             {
-                var model = ResourceCache.Load<Model>("Models/Mushroom.mdl");
-                var staticModel = scene.CreateChild("Model").AddComponent<StaticModel>();
-                staticModel.SetModel(model);
-
                 var colorMap = ResourceCache.Load<Texture>("textures/Mushroom.png");
                 var mat = new Material
                 {
@@ -68,7 +68,22 @@ namespace SharpGame.Samples
                     ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
                 };
 
-                staticModel.SetMaterial(0, mat);
+                var model = ResourceCache.Load<Model>("Models/Mushroom.mdl");
+
+                {
+                    var node = scene.CreateChild("Model");
+                    var staticModel = node.AddComponent<StaticModel>();
+                    staticModel.SetModel(model);
+                    staticModel.SetMaterial(0, mat);
+                }
+
+                {
+                    var node = scene.CreateChild("Model");
+                    node.Position = new Vector3(2, 0, 2);
+                    var staticModel = node.AddComponent<StaticModel>();
+                    staticModel.SetModel(model);
+                    staticModel.SetMaterial(0, mat);
+                }
             }
 
             Renderer.Instance.MainView.Attach(camera, scene);
