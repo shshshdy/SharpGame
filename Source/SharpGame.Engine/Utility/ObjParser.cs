@@ -364,21 +364,21 @@ namespace SharpGame
         /// <returns>A new <see cref="ConstructedMeshInfo"/>.</returns>
         public ConstructedMeshInfo GetMesh(MeshGroup group)
         {
-            Dictionary<FaceVertex, ushort> vertexMap = new Dictionary<FaceVertex, ushort>();
+            Dictionary<FaceVertex, uint> vertexMap = new Dictionary<FaceVertex, uint>();
             ushort[] indices = new ushort[group.Faces.Length * 3];
             List<VertexPosNormTex> vertices = new List<VertexPosNormTex>();
 
             for (int i = 0; i < group.Faces.Length; i++)
             {
                 Face face = group.Faces[i];
-                ushort index0 = GetOrCreate(vertexMap, vertices, face.Vertex0, face.Vertex1, face.Vertex2);
-                ushort index1 = GetOrCreate(vertexMap, vertices, face.Vertex1, face.Vertex2, face.Vertex0);
-                ushort index2 = GetOrCreate(vertexMap, vertices, face.Vertex2, face.Vertex0, face.Vertex1);
+                uint index0 = GetOrCreate(vertexMap, vertices, face.Vertex0, face.Vertex1, face.Vertex2);
+                uint index1 = GetOrCreate(vertexMap, vertices, face.Vertex1, face.Vertex2, face.Vertex0);
+                uint index2 = GetOrCreate(vertexMap, vertices, face.Vertex2, face.Vertex0, face.Vertex1);
 
                 // Reverse winding order here.
-                indices[(i * 3)] = index0;
-                indices[(i * 3) + 2] = index1;
-                indices[(i * 3) + 1] = index2;
+                indices[(i * 3)] = (ushort)index0;
+                indices[(i * 3) + 2] = (ushort)index1;
+                indices[(i * 3) + 1] = (ushort)index2;
             }
 
             return new ConstructedMeshInfo(vertices.ToArray(), indices, group.Material);
@@ -393,19 +393,19 @@ namespace SharpGame
             return GetMesh(MeshGroups[0]);
         }
 
-        private ushort GetOrCreate(
-            Dictionary<FaceVertex, ushort> vertexMap,
+        public uint GetOrCreate(
+            Dictionary<FaceVertex, uint> vertexMap,
             List<VertexPosNormTex> vertices,
             FaceVertex key,
             FaceVertex adjacent1,
             FaceVertex adjacent2)
         {
-            ushort index;
+            uint index;
             if (!vertexMap.TryGetValue(key, out index))
             {
                 VertexPosNormTex vertex = ConstructVertex(key, adjacent1, adjacent2);
                 vertices.Add(vertex);
-                index = checked((ushort)(vertices.Count - 1));
+                index = checked((uint)(vertices.Count - 1));
                 vertexMap.Add(key, index);
             }
 

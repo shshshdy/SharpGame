@@ -74,7 +74,7 @@ namespace SharpGame.Samples
                 for(int i = 0; i < 100; i++)
                 {
                     var node = scene.CreateChild("Model");
-                    node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-10, 10));
+                    node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20));
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(0, mat);

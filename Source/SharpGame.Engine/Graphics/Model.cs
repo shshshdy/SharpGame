@@ -38,24 +38,31 @@ namespace SharpGame
     {
         /// Vertex buffers.
         private GraphicsBuffer[] vertexBuffers_;
-        public GraphicsBuffer[] VertexBuffers { get => vertexBuffers_; set => vertexBuffers_ = value; }
+        [DataMember]
+        public GraphicsBuffer[] VertexBuffers
+        {
+            get => vertexBuffers_; set => vertexBuffers_ = value;
+        }
 
         /// Index buffers.
         private GraphicsBuffer[] indexBuffers_;
+        [DataMember]
         public GraphicsBuffer[] IndexBuffers
         {
             get => indexBuffers_; set => indexBuffers_ = value;
         }
 
-
+        private BoundingBox boundingBox_;
         /// Bounding box.
         [DataMember]
         public BoundingBox BoundingBox { get => boundingBox_; set => boundingBox_ = value; }
-        private BoundingBox boundingBox_;
+
 
         /// Skeleton.
-        public Skeleton Skeleton { get => skeleton_; set => skeleton_ = value; }
         private Skeleton skeleton_ = new Skeleton();
+        [DataMember]
+        public Skeleton Skeleton { get => skeleton_; set => skeleton_ = value; }
+
         /// Geometries.
         [IgnoreDataMember]
         public Geometry[][] Geometries { get => geometries_; set => geometries_ = value; }
@@ -89,12 +96,14 @@ namespace SharpGame
             {
                 vb.Dispose();
             }
+
             Array.Clear(vertexBuffers_, 0, vertexBuffers_.Length);
 
             foreach (var ib in indexBuffers_)
             {
                 ib.Dispose();
             }
+
             Array.Clear(indexBuffers_, 0, indexBuffers_.Length);
 
             Geometries.Clear();
