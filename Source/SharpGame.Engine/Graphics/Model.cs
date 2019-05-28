@@ -10,7 +10,7 @@ using Vulkan;
 namespace SharpGame
 {
     [DataContract]
-    public class Model : Resource
+    public class Model : Resource<Model>
     {
         /// Vertex buffers.
         private DeviceBuffer[] vertexBuffers_;
@@ -49,21 +49,12 @@ namespace SharpGame
         /// Geometry centers.
         public List<Vector3> GeometryCenters { get; set; } = new List<Vector3>();
         public List<Material> Materials { get; set; } = new List<Material>();
+        public ResourceRefList MaterialList { get; set; }
 
         public Model()
         {
         }
-
-        protected override bool OnLoad(File source)
-        {
-            return true;
-        }
-
-        protected override bool OnBuild()
-        {
-            return true;
-        }
-
+        
         public int GetNumGeometryLodLevels(int index)
         {
             return index < geometries_.Length ? geometries_[index].Length : 0;

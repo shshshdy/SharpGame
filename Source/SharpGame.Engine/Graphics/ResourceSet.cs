@@ -40,7 +40,7 @@ namespace SharpGame
             writeDescriptorSets = new VkWriteDescriptorSet[resLayout.NumBindings];
         }
 
-        public ResourceSet(ResourceLayout resLayout, params IBindable[] bindables)
+        public ResourceSet(ResourceLayout resLayout, params IBindableResource[] bindables)
         {
             resLayout.Build();
             VkDescriptorPool pool = Graphics.DescriptorPoolManager.Allocate(resLayout);
@@ -70,7 +70,7 @@ namespace SharpGame
             Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
         }
 
-        public ResourceSet Bind(uint dstBinding, IBindable bindable)
+        public ResourceSet Bind(uint dstBinding, IBindableResource bindable)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             switch(descriptorType)

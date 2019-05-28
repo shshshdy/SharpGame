@@ -26,7 +26,7 @@ namespace SharpGame.Samples
 
         public Graphics Graphics => Graphics.Instance;
         public FileSystem FileSystem => FileSystem.Instance;
-        public ResourceCache ResourceCache => ResourceCache.Instance;
+        public Resources Resources => Resources.Instance;
 
         public Sample()
         {

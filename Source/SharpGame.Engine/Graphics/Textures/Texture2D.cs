@@ -165,14 +165,14 @@ namespace SharpGame
 
             SamplerCreateInfo sampler = new SamplerCreateInfo
             {
-                magFilter = VkFilter.Linear,
-                minFilter = VkFilter.Linear,
-                mipmapMode = VkSamplerMipmapMode.Linear,
-                addressModeU = VkSamplerAddressMode.ClampToEdge,
-                addressModeV = VkSamplerAddressMode.ClampToEdge,
-                addressModeW = VkSamplerAddressMode.ClampToEdge,
+                magFilter = Filter.Linear,
+                minFilter = Filter.Linear,
+                mipmapMode = SamplerMipmapMode.Linear,
+                addressModeU = SamplerAddressMode.ClampToEdge,
+                addressModeV = SamplerAddressMode.ClampToEdge,
+                addressModeW = SamplerAddressMode.ClampToEdge,
                 mipLodBias = 0.0f,
-                compareOp = VkCompareOp.Never,
+                compareOp = CompareOp.Never,
                 minLod = 0.0f,
                 // Set max level-of-detail to mip level count of the texture
                 maxLod = (useStaging == 1) ? (float)texture.mipLevels : 0.0f
@@ -183,16 +183,16 @@ namespace SharpGame
             {
                 // Use max. level of anisotropy for this example
                 sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;
-                sampler.anisotropyEnable = True;
+                sampler.anisotropyEnable = true;
             }
             else
             {
                 // The Device does not support anisotropic filtering
                 sampler.maxAnisotropy = 1.0f;
-                sampler.anisotropyEnable = False;
+                sampler.anisotropyEnable = false;
             }
 
-            sampler.borderColor = VkBorderColor.FloatOpaqueWhite;
+            sampler.borderColor = BorderColor.FloatOpaqueWhite;
             texture.sampler = new Sampler(ref sampler);
 
             // Create image view
@@ -406,21 +406,21 @@ namespace SharpGame
             // Create a defaultsampler
             SamplerCreateInfo samplerCreateInfo = new SamplerCreateInfo
             {
-                magFilter = VkFilter.Linear,
-                minFilter = VkFilter.Linear,
-                mipmapMode = VkSamplerMipmapMode.Linear,
-                addressModeU = VkSamplerAddressMode.Repeat,
-                addressModeV = VkSamplerAddressMode.Repeat,
-                addressModeW = VkSamplerAddressMode.Repeat,
+                magFilter = Filter.Linear,
+                minFilter = Filter.Linear,
+                mipmapMode = SamplerMipmapMode.Linear,
+                addressModeU = SamplerAddressMode.Repeat,
+                addressModeV = SamplerAddressMode.Repeat,
+                addressModeW = SamplerAddressMode.Repeat,
                 mipLodBias = 0.0f,
-                compareOp = VkCompareOp.Never,
+                compareOp = CompareOp.Never,
                 minLod = 0.0f,
                 // Max level-of-detail should match mip level count
                 maxLod = (useStaging) ? (float)mipLevels : 0.0f,
                 // Enable anisotropic filtering
                 maxAnisotropy = 8,
-                anisotropyEnable = True,
-                borderColor = VkBorderColor.FloatOpaqueWhite
+                anisotropyEnable = true,
+                borderColor = BorderColor.FloatOpaqueWhite
             };
             sampler = new Sampler(ref samplerCreateInfo);
 

@@ -47,13 +47,13 @@ namespace SharpGame.Samples
                     }
                 };
 
-                var model = ResourceCache.Load<Model>("Models/Plane.obj");
+                var model = Resources.Load<Model>("Models/Plane.obj");
                 var node = scene.CreateChild("Plane");
                 node.Scaling = new Vector3(2.5f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
 
-                var colorMap = ResourceCache.Load<Texture>("textures/StoneDiffuse.png");
+                var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material
                 {
                     Shader = shader,
@@ -76,7 +76,7 @@ namespace SharpGame.Samples
                     }
                 };
 
-                var colorMap = ResourceCache.Load<Texture>("textures/Mushroom.png");
+                var colorMap = Resources.Load<Texture>("textures/Mushroom.png");
                 var mat = new Material
                 {
                     Shader = shader,
@@ -84,7 +84,7 @@ namespace SharpGame.Samples
                     ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
                 };
 
-                var model = ResourceCache.Load<Model>("Models/Mushroom.mdl");
+                var model = Resources.Load<Model>("Models/Mushroom.mdl");
 
                 for(int i = 0; i < 100; i++)
                 {

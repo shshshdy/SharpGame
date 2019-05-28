@@ -8,7 +8,7 @@ namespace SharpGame
 {
     using static Vulkan.VulkanNative;
 
-    public class Texture : Resource, IBindable
+    public class Texture : Resource<Texture>, IBindableResource
     {
         public int width;
         public int height;

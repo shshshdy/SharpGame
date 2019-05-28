@@ -7,7 +7,7 @@ namespace SharpGame
 {
     using global::System.Runtime.CompilerServices;
     using static VulkanNative;
-    public class ComputePipeline : Resource
+    public class ComputePipeline : Resource<ComputePipeline>
     {
         public ResourceLayout[] ResourceLayout { get; set; }
 

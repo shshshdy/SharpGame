@@ -17,7 +17,6 @@ namespace SharpGame
     public unsafe partial class Application : CoreApplication
     {
         protected static Application instance;
-        public static string DataPath => instance.dataPath;
 
         public string Title { get; set; } = "SharpGame";
         public CString Name { get; set; } = "SharpGame";
@@ -30,14 +29,14 @@ namespace SharpGame
 
         protected Timer timer;
         protected FileSystem fileSystem;
-        protected ResourceCache cache;
+        protected Resources cache;
         protected Graphics graphics;
         protected Renderer renderer;
         protected Input input;
         protected bool paused = false;
         protected bool prepared;
-        private bool singleThreaded = true;
-        private string dataPath;
+        protected bool singleThreaded = true;
+        protected string workSpace;
 
         private float fps;
         public float Fps => fps;
@@ -55,15 +54,14 @@ namespace SharpGame
         public Application(string dataPath)
         {
             instance = this;
-
-            this.dataPath = Path.Combine(AppContext.BaseDirectory, dataPath);
+            workSpace = Path.Combine(AppContext.BaseDirectory, dataPath);
         }
 
         protected virtual void Setup()
         {
             timer = CreateSubsystem<Timer>();
-            fileSystem = CreateSubsystem<FileSystem>(DataPath);
-            cache = CreateSubsystem<ResourceCache>();
+            fileSystem = CreateSubsystem<FileSystem>(workSpace);
+            cache = CreateSubsystem<Resources>();
 
             cache.RegisterAssertReader(new ShaderReader());
 

@@ -5,7 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class Sampler : DisposeBase
+    public class Sampler : DisposeBase, IBindableResource
     {
         internal VkSampler handle;
         public Sampler(ref SamplerCreateInfo samplerCreateInfo)
@@ -25,41 +25,41 @@ namespace SharpGame
 
     public struct SamplerCreateInfo
     {
-        public VkBorderColor borderColor;
+        public BorderColor borderColor;
         public float maxLod;
         public float minLod;
-        public VkCompareOp compareOp;
-        public VkBool32 compareEnable;
+        public CompareOp compareOp;
+        public bool compareEnable;
         public float maxAnisotropy;
-        public VkBool32 anisotropyEnable;
-        public VkBool32 unnormalizedCoordinates;
+        public bool anisotropyEnable;
+        public bool unnormalizedCoordinates;
         public float mipLodBias;
-        public VkSamplerAddressMode addressModeV;
-        public VkSamplerAddressMode addressModeU;
-        public VkSamplerMipmapMode mipmapMode;
-        public VkFilter minFilter;
-        public VkFilter magFilter;
+        public SamplerAddressMode addressModeV;
+        public SamplerAddressMode addressModeU;
+        public SamplerMipmapMode mipmapMode;
+        public Filter minFilter;
+        public Filter magFilter;
         public uint flags;
-        public VkSamplerAddressMode addressModeW;
+        public SamplerAddressMode addressModeW;
 
         public void ToNative(out VkSamplerCreateInfo native)
         {
             native = VkSamplerCreateInfo.New();
             native.maxLod = maxLod;
             native.minLod = minLod;
-            native.compareOp = compareOp;
+            native.compareOp = (VkCompareOp)compareOp;
             native.compareEnable = compareEnable;
             native.maxAnisotropy = maxAnisotropy;
             native.anisotropyEnable = anisotropyEnable;
             native.unnormalizedCoordinates = unnormalizedCoordinates;
             native.mipLodBias = mipLodBias;
-            native.addressModeV = addressModeV;
-            native.addressModeU = addressModeU;
-            native.mipmapMode = mipmapMode;
-            native.minFilter = minFilter;
-            native.magFilter = magFilter;
+            native.addressModeV = (VkSamplerAddressMode)addressModeV;
+            native.addressModeU = (VkSamplerAddressMode)addressModeU;
+            native.mipmapMode = (VkSamplerMipmapMode)mipmapMode;
+            native.minFilter = (VkFilter)minFilter;
+            native.magFilter = (VkFilter)magFilter;
             native.flags = flags;
-            native.addressModeW = addressModeW;
+            native.addressModeW = (VkSamplerAddressMode)addressModeW;
         }
     }
 

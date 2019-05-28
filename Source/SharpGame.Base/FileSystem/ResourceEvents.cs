@@ -17,9 +17,9 @@ namespace SharpGame
     /// Tracked file changed in the resource directories.
     public struct FileChanged
     {
-        public String FileName { get; }
-        public String ResourceName { get; }
-        public FileChanged(String fileName, String resourceName)
+        public string FileName { get; }
+        public string ResourceName { get; }
+        public FileChanged(string fileName, string resourceName)
         {
             FileName = fileName;
             ResourceName = resourceName;
@@ -29,8 +29,8 @@ namespace SharpGame
     /// Resource loading failed.
     public struct LoadFailed
     {
-        public String ResourceName { get; }
-        public LoadFailed(String resourceName)
+        public string ResourceName { get; }
+        public LoadFailed(string resourceName)
         {
             ResourceName = resourceName;
         }
@@ -39,8 +39,8 @@ namespace SharpGame
     /// Resource not found.
     public struct ResourceNotFound
     {
-        public String ResourceName { get; }
-        public ResourceNotFound(String resourceName)
+        public string ResourceName { get; }
+        public ResourceNotFound(string resourceName)
         {
             ResourceName = resourceName;
         }
@@ -59,11 +59,11 @@ namespace SharpGame
     /// Resource background loading finished.
     public struct ResourceBackgroundLoaded
     {
-        public String ResourceName { get; }
+        public string ResourceName { get; }
         public bool Success { get; }
         public Resource Resource { get; }
 
-        public ResourceBackgroundLoaded(String resourceName, bool success, Resource resource)
+        public ResourceBackgroundLoaded(string resourceName, bool success, Resource resource)
         {
             ResourceName = resourceName;
             Success = success;

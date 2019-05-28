@@ -23,7 +23,7 @@ namespace SharpGame
         }
     }
 
-    public class GraphicsPipeline : Resource
+    public class GraphicsPipeline : Resource<GraphicsPipeline>
     {
         [IgnoreDataMember]
         public Shader Shader { get; set; }

@@ -7,9 +7,9 @@ using System;
 
 namespace SharpGame
 {
-    public interface IBindable { }
+    public interface IBindableResource { }
 
-    public unsafe class DeviceBuffer : DisposeBase, IBindable
+    public unsafe class DeviceBuffer : RefCounted, IBindableResource
     {
         public int Stride { get; set; }
         public int Count { get; set; }

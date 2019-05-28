@@ -66,7 +66,7 @@ namespace SharpGame
         public const uint DRAWABLE_ANY = 0xff;
 
         [IgnoreDataMember]
-        public int Index { get; set; } = -1;
+        internal int index = -1;
 
         /// World-space bounding box.
         [IgnoreDataMember]
@@ -157,9 +157,9 @@ namespace SharpGame
         {
             bool enabled = IsEnabledEffective();
 
-            if(enabled && Index == -1)
+            if(enabled && index == -1)
                 AddToScene();
-            else if(!enabled && Index != -1)
+            else if(!enabled && index != -1)
                 RemoveFromScene();
         }
 
@@ -215,7 +215,7 @@ namespace SharpGame
 
         void RemoveFromScene()
         {
-            if(Index >= 0)
+            if(index >= 0)
             {
                 Scene scene = Scene;
                 /*

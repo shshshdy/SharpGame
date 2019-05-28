@@ -170,7 +170,7 @@ namespace SharpGame
 
         public void InsertDrawable(Drawable drawable)
         {
-            Debug.Assert(drawable.Index == -1);
+            Debug.Assert(drawable.index == -1);
 
             if(accumulator_ != null)
             {
@@ -179,13 +179,13 @@ namespace SharpGame
             else
             {
                 drawables_.Add(drawable);
-                drawable.Index = drawables_.Count - 1;
+                drawable.index = drawables_.Count - 1;
             }
         }
 
         public void RemoveDrawable(Drawable drawable)
         {
-            Debug.Assert(drawable.Index != -1);
+            Debug.Assert(drawable.index != -1);
 
             if(accumulator_ != null)
             {
@@ -193,18 +193,18 @@ namespace SharpGame
             }
             else
             {
-                if(drawables_.Count > 0 && drawable.Index < drawables_.Count - 1)
+                if(drawables_.Count > 0 && drawable.index < drawables_.Count - 1)
                 {
                     Drawable last = drawables_[drawables_.Count - 1];                
-                    drawables_.FastRemove(drawable.Index);
-                    last.Index = drawable.Index;               
+                    drawables_.FastRemove(drawable.index);
+                    last.index = drawable.index;               
                 }
                 else
                 {
-                    drawables_.FastRemove(drawable.Index);
+                    drawables_.FastRemove(drawable.index);
                 }
 
-                drawable.Index = -1;
+                drawable.index = -1;
             }
         }
         

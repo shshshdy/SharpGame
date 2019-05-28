@@ -8,8 +8,6 @@ namespace SharpGame
 {
     public class StaticModel : Drawable
     {
-        public Model resourceRef;
-
         /// All geometries.
         protected Geometry[][] geometries_;
         /// Extra per-geometry data.
@@ -17,16 +15,39 @@ namespace SharpGame
         /// Model.
         protected Model model_;
 
-        protected struct StaticModelGeometryData
-        {
-            /// Geometry center.
-            public Vector3 center_;
-            /// Current LOD level.
-            public int lodLevel_;
-        };
-
         public StaticModel()
         {
+        }
+
+        private ResourceRefList materialList;
+        public ResourceRefList MaterialList
+        {
+            get
+            {
+                return materialList;
+            }
+            set
+            {
+                SetMaterialAttr(value);
+            }
+        }
+
+        public ResourceRef ResourceRef
+        {
+            get
+            {
+                if(model_ == null)
+                {
+                    return ResourceRef.Null;
+                }
+
+                return  model_.ResourceRef;
+            }
+
+            set
+            {
+                SetModelAttr(value);
+            }
         }
 
         public void SetBoundingBox(BoundingBox box)
@@ -45,7 +66,7 @@ namespace SharpGame
             ResetLodLevels();
         }
 
-        public unsafe void SetModel(Model model)
+        public void SetModel(Model model)
         {
             if (model == model_)
                 return;
@@ -83,7 +104,24 @@ namespace SharpGame
             {
                 SetNumGeometries(0);
                 SetBoundingBox(BoundingBox.Empty);
-            }                      
+            }
+
+        }
+
+        public void SetModelAttr(ResourceRef resourceRef)
+        {
+            var model = Resources.Instance.Load<Model>(resourceRef.fileID);
+            SetModel(model);            
+        }
+
+        public void SetMaterialAttr(ResourceRefList resourceRef)
+        {
+            materialList = resourceRef;
+            for (int i = 0; i < resourceRef.fileIDs.Count; i++)
+            {
+                Material mat = Resources.Instance.Load<Material>(resourceRef.fileIDs[i]);
+                SetMaterial(i, mat);
+            }
 
         }
 
@@ -169,5 +207,14 @@ namespace SharpGame
             }
         }
 
+        protected struct StaticModelGeometryData
+        {
+            /// Geometry center.
+            public Vector3 center_;
+            /// Current LOD level.
+            public int lodLevel_;
+        };
+
     }
+
 }

@@ -93,4 +93,35 @@ namespace SharpGame
         A = 6
     }
 
+    public enum BorderColor
+    {
+        FloatTransparentBlack = 0,
+        IntTransparentBlack = 1,
+        FloatOpaqueBlack = 2,
+        IntOpaqueBlack = 3,
+        FloatOpaqueWhite = 4,
+        IntOpaqueWhite = 5
+    }
+
+    public enum SamplerAddressMode
+    {
+        Repeat = 0,
+        MirroredRepeat = 1,
+        ClampToEdge = 2,
+        ClampToBorder = 3,
+        MirrorClampToEdge = 4
+    }
+
+    public enum SamplerMipmapMode
+    {
+        Nearest = 0,
+        Linear = 1
+    }
+
+    public enum Filter
+    {
+        Nearest = 0,
+        Linear = 1,
+        CubicImg = 1000015000
+    }
 }

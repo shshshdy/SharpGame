@@ -112,7 +112,7 @@ namespace SharpGame
         public object data_;
     };
 
-    public class Animation : Resource
+    public class Animation : Resource<Animation>
     {
         public const byte CHANNEL_POSITION = 0x1;
         public const byte CHANNEL_ROTATION = 0x2;

@@ -56,7 +56,7 @@ namespace SharpGame
         public uint numStaticTextures;
     }
 
-    public class ShaderModule : Resource
+    public class ShaderModule : Resource<ShaderModule>
     {
         [DataMember]
         public ShaderStage Stage { get; set; }

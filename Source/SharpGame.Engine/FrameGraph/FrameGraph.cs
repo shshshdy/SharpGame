@@ -12,7 +12,7 @@ namespace SharpGame
     using vec4 = Vector4;
     using mat4 = Matrix;
 
-    public class FrameGraph : Resource
+    public class FrameGraph : Object
     {
         public RenderTarget[] RenderTargets { get; set; }
 

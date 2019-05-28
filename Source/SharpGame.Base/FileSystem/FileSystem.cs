@@ -8,49 +8,50 @@ namespace SharpGame
 {
     public class FileSystem : System<FileSystem>
     {
-        public static string ContentRoot { get; set; }
+        public static string WorkSpace { get; set; }
+        public static string CurrentDir => Directory.GetCurrentDirectory();
+        public static string ProgramDir => Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
         public static readonly string DataPath = "data/";
         public static readonly string CoreDataPath = "coredata/";
         public static readonly string CachePath = "cache/";
 
         /// Mutex for thread-safe access to the resource directories, resource packages and resource dependencies.
-        object resourceMutex_ = new object();
+        private object resourceMutex_ = new object();
         /// Resource load directories.
-        List<string> resourceDirs_ = new List<string>();
+        private List<string> resourceDirs_ = new List<string>();
         /// Package files.
-        List<PackageFile> packages_ = new List<PackageFile>();
+        private List<PackageFile> packages_ = new List<PackageFile>();
         /// Search priority flag.
-        bool searchPackagesFirst_ = false;
+        private bool searchPackagesFirst_ = false;
 
-        public FileSystem(string contentRoot)
+        public FileSystem(string workSpace)
         {
-            ContentRoot = contentRoot;
+            WorkSpace = workSpace;
 
-            AddResourceDir(contentRoot+DataPath);
-            AddResourceDir(contentRoot + CoreDataPath);
-            AddResourceDir(contentRoot + CachePath);
+            AddResourceDir(WorkSpace + DataPath);
+            AddResourceDir(WorkSpace + CoreDataPath);
+            AddResourceDir(WorkSpace + CachePath);
         }
 
-        public string CurrentDir
+        public static File OpenFile(string path)
         {
-            get
+            return Instance.GetFile(path);
+        }
+
+        public static byte[] ReadAllBytes(string path)
+        {
+            using (File file = OpenFile(path))
             {
-                return System.IO.Directory.GetCurrentDirectory();
+                if (file == null)
+                {
+                    return null;
+                }
+
+                return file.ReadAllBytes();
             }
         }
 
-        public string ProgramDir
-        {
-            get
-            {
-                string path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                return path;
-            }
-        }
-
-        public Stream OpenStream(string path) => new FileStream(path, FileMode.Open);
-        
         public bool AddResourceDir(string pathName, int priority = int.MaxValue)
         {
             lock (resourceMutex_)
@@ -275,7 +276,7 @@ namespace SharpGame
                         namePath = namePath.Substring(relativeResourcePath.Length);
                 }
 
-                name = System.IO.Path.Combine(namePath, FileUtil.GetFileNameAndExtension(name));
+                name = Path.Combine(namePath, FileUtil.GetFileNameAndExtension(name));
             }
 
             return name.Trim();
@@ -285,7 +286,7 @@ namespace SharpGame
         {
             string fixedPath = FileUtil.AddTrailingSlash(nameIn);
             if (!FileUtil.IsAbsolutePath(fixedPath))
-                fixedPath = System.IO.Path.Combine(CurrentDir, fixedPath);
+                fixedPath = Path.Combine(CurrentDir, fixedPath);
 
             // Sanitate away /./ construct
             fixedPath.Replace("/./", "/");
@@ -336,23 +337,6 @@ namespace SharpGame
             return null;
         }
 
-        public static File OpenRead(string path)
-        {
-            return Instance.GetFile(path);
-        }
-
-        public static byte[] ReadAllBytes(string path)
-        {
-            using (File file = OpenRead(path))
-            {
-                if (file == null)
-                {
-                    return null;
-                }
-
-                return file.ReadAllBytes();
-            }
-        }
 
     }
 }

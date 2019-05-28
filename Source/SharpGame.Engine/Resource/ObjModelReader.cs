@@ -24,10 +24,8 @@ namespace SharpGame
             ObjFile objFile = objParser.Parse(stream);
 
             Dictionary<FaceVertex, uint> vertexMap = new Dictionary<FaceVertex, uint>();
-
             int vertexCount = Math.Max(objFile.Positions.Length, objFile.Normals.Length);
             vertexCount = Math.Max(vertexCount, objFile.TexCoords.Length);
-
 
             DeviceBuffer[] ibs = new DeviceBuffer[objFile.MeshGroups.Length];
             List<VertexPosNormTex> vertices = new List<VertexPosNormTex>();
@@ -72,18 +70,15 @@ namespace SharpGame
                     ibs[index] = DeviceBuffer.Create(BufferUsage.IndexBuffer, indices, false);
                 }
 
-
-
                 index++;
-
             }
 
             DeviceBuffer vb = DeviceBuffer.Create(BufferUsage.VertexBuffer, vertices.ToArray(), false);
-
             Model model = new Model
             {
                 VertexBuffers = new[] { vb },
-                IndexBuffers = ibs          
+                IndexBuffers = ibs,
+                BoundingBox = BoundingBox.FromPoints(objFile.Positions)                
             };
 
             model.Geometries = new Geometry[objFile.MeshGroups.Length][];
@@ -91,6 +86,7 @@ namespace SharpGame
             {
                 var geom = new Geometry
                 {
+                    Name = objFile.MeshGroups[i].Name,
                     VertexBuffers = new DeviceBuffer[] { vb },
                     IndexBuffer = ibs[i]
                 };
@@ -101,18 +97,36 @@ namespace SharpGame
                 model.GeometryCenters.Add(Vector3.Zero);
             }
 
-            if(!string.IsNullOrEmpty(objFile.MaterialLibName))
+            if (!string.IsNullOrEmpty(objFile.MaterialLibName))
             {
                 string path = FileUtil.GetPath(name);
                 File file = FileSystem.GetFile(path + objFile.MaterialLibName);
                 MtlParser mtlParser = new MtlParser();
-                var mtlFile = mtlParser.Parse(file);
+                MtlFile mtlFile = mtlParser.Parse(file);
+
+                for (int i = 0; i < objFile.MeshGroups.Length; i++)
+                {
+                    if (!mtlFile.Definitions.TryGetValue(objFile.MeshGroups[i].Material, out MaterialDefinition materialDefinition))
+                    {
+                        continue;
+                    }
+
+                    Material mat = ConvertMaterial(materialDefinition);
+                    model.Materials.Add(mat);
+                }
             }
 
             return model;
         }
 
+        Material ConvertMaterial(MaterialDefinition materialDef)
+        {
+            Material material = new Material();
+            //material.SetTexture("DiffMap", materialDef.DiffuseTexture);
+            return material;
+        }
     }
+
 
 
 }

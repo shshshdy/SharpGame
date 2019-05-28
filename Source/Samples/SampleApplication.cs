@@ -52,7 +52,7 @@ namespace SharpGame.Samples
             }
 
             allSamples.Sort((v1, v2) => v1.Item3 - v2.Item3);
-
+           
             sampleNames = new string[allSamples.Count];
             for (int i = 0; i < allSamples.Count; i++)
             {
@@ -115,7 +115,6 @@ namespace SharpGame.Samples
                 {
                     SetSample(sampleNames[selected]);
                 }
-
 
                 if (ImGui.BeginPopupContextWindow())
                 {

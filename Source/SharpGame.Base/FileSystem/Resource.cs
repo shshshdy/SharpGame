@@ -8,25 +8,23 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    [DataContract]
-    public class ResourceRef
+    public class Resource<T> : Resource
     {
+        [IgnoreDataMember]
+        public override Type ResourceType => typeof(T);
+        static Resource()
+        {
+            nameToType[typeof(T).Name] = typeof(T);
+        }
+    }
+
+    public abstract class Resource : Object
+    {
+        public static Dictionary<string, Type> nameToType = new Dictionary<string, Type>();
+
         [DataMember]
         public Guid Guid { get; set; }
 
-        [IgnoreDataMember]
-        public Resource value;
-    }
-
-    [DataContract]
-    public class ResourceRef<T> : ResourceRef where T : Resource
-    {
-        [IgnoreDataMember]
-        public T Value => (T)value;
-    }
-
-    public class Resource : Object
-    {
         [IgnoreDataMember]
         public string FileName { get; set; }
 
@@ -35,6 +33,10 @@ namespace SharpGame
 
         [IgnoreDataMember]
         public bool Modified { get; set; }
+
+        [IgnoreDataMember]
+        public abstract Type ResourceType { get; }
+        public ResourceRef ResourceRef => new ResourceRef(GetType(), Guid, this);
 
         protected FileSystem FileSystem => FileSystem.Instance;
 

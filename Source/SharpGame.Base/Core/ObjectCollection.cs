@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class ObjectCollection<T> : List<T> where T : Object
+    public class ObjectCollection<T> : List<T> where T : RefCounted
     {
         public new void Add(T obj)
         {

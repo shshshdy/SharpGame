@@ -15,13 +15,13 @@ namespace SharpGame
         }
         
         /// Check if a file exists.
-        public static bool FileExists(String fileName)
+        public static bool FileExists(string fileName)
         {
             return System.IO.File.Exists(fileName);
         }
 
         /// Check if a directory exists.
-        public static bool DirExists(String pathName)
+        public static bool DirExists(string pathName)
         {
             return System.IO.Directory.Exists(pathName);
         }
@@ -46,9 +46,9 @@ namespace SharpGame
             System.IO.File.WriteAllText(path, contents);
         }
 
-        public static void SplitPath(String fullPath, out String pathName, out String fileName, out String extension, bool lowercaseExtension = true)
+        public static void SplitPath(string fullPath, out string pathName, out string fileName, out string extension, bool lowercaseExtension = true)
         {
-            String fullPathCopy = GetInternalPath(fullPath);
+            string fullPathCopy = GetInternalPath(fullPath);
 
             int extPos = fullPathCopy.LastIndexOf('.');
             int pathPos = fullPathCopy.LastIndexOf('/');
@@ -61,7 +61,7 @@ namespace SharpGame
                 fullPathCopy = fullPathCopy.Substring(0, extPos);
             }
             else
-                extension = String.Empty;
+                extension = string.Empty;
 
             pathPos = fullPathCopy.LastIndexOf('/');
             if(pathPos != -1)
@@ -72,70 +72,70 @@ namespace SharpGame
             else
             {
                 fileName = fullPathCopy;
-                pathName = String.Empty;
+                pathName = string.Empty;
             }
         }
 
-        public static String GetPath(String fullPath)
+        public static string GetPath(string fullPath)
         {
-            String path, file, extension;
+            string path, file, extension;
             SplitPath(fullPath, out path, out file, out extension);
             return path;
         }
 
-        public static String GetFileName(String fullPath)
+        public static string GetFileName(string fullPath)
         {
             return Path.GetFileNameWithoutExtension(fullPath);
         }
 
-        public static String GetExtension(String fullPath, bool lowercaseExtension = true)
+        public static string GetExtension(string fullPath, bool lowercaseExtension = true)
         {
             return Path.GetExtension(fullPath);
         }
 
-        public static String GetFileNameAndExtension(String fileName)
+        public static string GetFileNameAndExtension(string fileName)
         {
             return Path.GetFileName(fileName);
         }
 
-        public static String ReplaceExtension(String fullPath, String newExtension)
+        public static string ReplaceExtension(string fullPath, string newExtension)
         {
             return Path.ChangeExtension(fullPath, newExtension);
         }
 
-        public static String AddTrailingSlash(String pathName)
+        public static string AddTrailingSlash(string pathName)
         {
-            String ret = pathName.Trim();
+            string ret = pathName.Trim();
             ret.Replace('\\', '/');
             if(!string.IsNullOrEmpty(ret) && ret[ret.Length - 1] != '/')
                 ret += '/';
             return ret;
         }
 
-        public static String RemoveTrailingSlash(String pathName)
+        public static string RemoveTrailingSlash(string pathName)
         {
-            String ret = pathName.Trim();
+            string ret = pathName.Trim();
             ret.Replace('\\', '/');
             if(!string.IsNullOrEmpty(ret) && ret[ret.Length - 1] == '/')
                 ret = ret.Substring(0, ret.Length - 1);
             return ret;
         }
 
-        public static String GetParentPath(String path)
+        public static string GetParentPath(string path)
         {
             int pos = RemoveTrailingSlash(path).LastIndexOf('/');
             if(pos != -1)
                 return path.Substring(0, pos + 1);
             else
-                return String.Empty;
+                return string.Empty;
         }
 
-        public static String GetInternalPath(String pathName)
+        public static string GetInternalPath(string pathName)
         {
             return pathName.Replace('\\', '/');
         }
 
-        public static String GetNativePath(String pathName)
+        public static string GetNativePath(string pathName)
         {
 #if _WIN32
             return pathName.Replace('/', '\\');
@@ -144,12 +144,12 @@ namespace SharpGame
 #endif
         }
 
-        public static bool IsAbsolutePath(String pathName)
+        public static bool IsAbsolutePath(string pathName)
         {
             if(string.IsNullOrEmpty(pathName))
                 return false;
 
-            String path = GetInternalPath(pathName);
+            string path = GetInternalPath(pathName);
 
             if(path[0] == '/')
                 return true;

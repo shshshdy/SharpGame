@@ -11,7 +11,7 @@ namespace SharpGame
     using static Builder;
 
     [DataContract]
-    public class Shader : Resource, IEnumerable<Pass>
+    public class Shader : Resource<Shader>, IEnumerable<Pass>
     {
         [DataMember]
         public string Name { get; set; }

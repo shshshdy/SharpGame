@@ -7,6 +7,8 @@ namespace SharpGame
 {
     public class Geometry : Object
     {
+        public string Name { get; set; }
+
         private DeviceBuffer[] vertexBuffers_;
         public DeviceBuffer[] VertexBuffers
         {

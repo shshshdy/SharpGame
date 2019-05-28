@@ -52,7 +52,7 @@ namespace SharpGame
     public struct TexureParameter
     {
         public StringID name;
-        public Texture texture;
+        public ResourceRef texture;
         public Vector4 uvOffset;
 
         public bool IsNull => name.IsNullOrEmpty;

@@ -7,7 +7,7 @@ using Vulkan;
 namespace SharpGame
 {
 
-    public class Material : Resource
+    public class Material : Resource<Material>
     {
         public string ShaderName { get; set; }
 
@@ -36,7 +36,7 @@ namespace SharpGame
 
         protected override bool OnBuild()
         {
-            Shader = ResourceCache.Instance.Load<Shader>(ShaderName);
+            Shader = Resources.Instance.Load<Shader>(ShaderName);
             return shader != null;
         }
 
@@ -93,11 +93,11 @@ namespace SharpGame
                 ref TexureParameter param = ref TextureParameters.At(i);
                 if (param.name == name)
                 {
-                    param.texture = tex;
+                    param.texture = tex.ResourceRef;
                 }
             }
 
-            TextureParameters.Add(new TexureParameter { name = name, texture = tex });
+            TextureParameters.Add(new TexureParameter { name = name, texture = tex.ResourceRef });
 
         }
 
