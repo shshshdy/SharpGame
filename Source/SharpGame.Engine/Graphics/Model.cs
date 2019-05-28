@@ -71,6 +71,13 @@ namespace SharpGame
             return geometries_[index][lodLevel];
         }
 
+        public Material GetMaterial(int index)
+        {
+            if (index >= Materials.Count || Materials.Empty())
+                return null;
+            return Materials[index];
+        }
+
         protected override void Destroy()
         {
             foreach (var vb in vertexBuffers_)

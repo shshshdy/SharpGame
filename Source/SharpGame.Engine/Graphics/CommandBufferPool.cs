@@ -24,7 +24,7 @@ namespace SharpGame
 
             unsafe
             {
-                VkUtil.CheckResult(VulkanNative.vkCreateCommandPool(Graphics.device, &cmdPoolInfo, null, out cmdPool));
+                VulkanUtil.CheckResult(VulkanNative.vkCreateCommandPool(Graphics.device, &cmdPoolInfo, null, out cmdPool));
             }
 
         }
@@ -53,7 +53,7 @@ namespace SharpGame
 
             unsafe
             {
-                VkUtil.CheckResult(VulkanNative.vkAllocateCommandBuffers(Graphics.device, ref cmdBufAllocateInfo, (VkCommandBuffer*)cmdBuffers.Data));
+                VulkanUtil.CheckResult(VulkanNative.vkAllocateCommandBuffers(Graphics.device, ref cmdBufAllocateInfo, (VkCommandBuffer*)cmdBuffers.Data));
             }
 
             CommandBuffers = new CommandBuffer[count];

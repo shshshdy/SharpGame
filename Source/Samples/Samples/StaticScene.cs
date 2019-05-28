@@ -18,6 +18,7 @@ namespace SharpGame.Samples
 
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
+            camera.FarClip = 3000.0f;
 
             var resourceLayout = new ResourceLayout(0)
             {
@@ -38,6 +39,7 @@ namespace SharpGame.Samples
             {
                 var pipeline = new GraphicsPipeline
                 {
+                    Shader = shader,
                     CullMode = CullMode.Back,
                     FrontFace = FrontFace.CounterClockwise,
                     ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
@@ -47,26 +49,30 @@ namespace SharpGame.Samples
                     }
                 };
 
-                var model = Resources.Load<Model>("Models/Plane.obj");
+                var model = Resources.Load<Model>(
+                    "Models/crysponza_bubbles/sponza.obj"
+                    //"Models/Plane.obj"
+                    );
                 var node = scene.CreateChild("Plane");
-                node.Scaling = new Vector3(2.5f);
+                node.Scaling = new Vector3(1.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
-
+                /*
                 var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material
                 {
-                    Shader = shader,
                     Pipeline = pipeline,
                     ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
                 };
 
-                staticModel.SetMaterial(0, mat);
+                staticModel.SetMaterial(mat);*/
             }
 
+            if(false)
             {
                 var pipeline = new GraphicsPipeline
                 {
+                    Shader = shader,
                     CullMode = CullMode.Back,
                     FrontFace = FrontFace.Clockwise,
                     ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
@@ -79,7 +85,6 @@ namespace SharpGame.Samples
                 var colorMap = Resources.Load<Texture>("textures/Mushroom.png");
                 var mat = new Material
                 {
-                    Shader = shader,
                     Pipeline = pipeline,
                     ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
                 };
@@ -92,7 +97,7 @@ namespace SharpGame.Samples
                     node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20));
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
-                    staticModel.SetMaterial(0, mat);
+                    staticModel.SetMaterial(mat);
                 }
             }
 

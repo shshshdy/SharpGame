@@ -141,11 +141,11 @@ namespace SharpGame
 
 
                     default:
-                        throw new ObjParseException(
-                            string.Format("An unsupported line-type specifier, '{0}', was used on line {1}, \"{2}\"",
+                        Log.Error("An unsupported line-type specifier, '{0}', was used on line {1}, \"{2}\"",
                             pieces[0],
                             _currentLine,
-                            _currentLineText));
+                            _currentLineText);
+                        break;
                 }
             }
 

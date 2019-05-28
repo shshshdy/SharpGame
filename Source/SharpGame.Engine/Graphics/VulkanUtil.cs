@@ -3,7 +3,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public unsafe static class VkUtil
+    public unsafe static class VulkanUtil
     {
         public static void CheckResult(VkResult result)
         {

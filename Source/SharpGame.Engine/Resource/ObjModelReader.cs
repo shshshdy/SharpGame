@@ -27,12 +27,20 @@ namespace SharpGame
             int vertexCount = Math.Max(objFile.Positions.Length, objFile.Normals.Length);
             vertexCount = Math.Max(vertexCount, objFile.TexCoords.Length);
 
-            DeviceBuffer[] ibs = new DeviceBuffer[objFile.MeshGroups.Length];
+            List<DeviceBuffer> ibs = new List<DeviceBuffer>();
+            List<MeshGroup> meshGroups = new List<MeshGroup>();
             List<VertexPosNormTex> vertices = new List<VertexPosNormTex>();
-            int index = 0;
+  
             foreach(MeshGroup group in objFile.MeshGroups)
             {
                 int indexCount = group.Faces.Length * 3;
+                if(indexCount == 0)
+                {
+                    continue;
+                }
+
+                meshGroups.Add(group);
+
                 if (vertexCount > ushort.MaxValue)
                 {
                     uint[] indices = new uint[indexCount];
@@ -49,7 +57,7 @@ namespace SharpGame
                         indices[(i * 3) + 1] = index2;
                     }
 
-                    ibs[index] = DeviceBuffer.Create(BufferUsage.IndexBuffer, indices, false);
+                    ibs.Add(DeviceBuffer.Create(BufferUsage.IndexBuffer, indices, false));
                 }
                 else
                 {
@@ -67,26 +75,25 @@ namespace SharpGame
                         indices[(i * 3) + 1] = (ushort)index2;
                     }
 
-                    ibs[index] = DeviceBuffer.Create(BufferUsage.IndexBuffer, indices, false);
+                    ibs.Add(DeviceBuffer.Create(BufferUsage.IndexBuffer, indices, false));
                 }
 
-                index++;
             }
 
             DeviceBuffer vb = DeviceBuffer.Create(BufferUsage.VertexBuffer, vertices.ToArray(), false);
             Model model = new Model
             {
                 VertexBuffers = new[] { vb },
-                IndexBuffers = ibs,
+                IndexBuffers = ibs.ToArray(),
                 BoundingBox = BoundingBox.FromPoints(objFile.Positions)                
             };
 
-            model.Geometries = new Geometry[objFile.MeshGroups.Length][];
-            for (int i = 0; i < objFile.MeshGroups.Length; i++)
+            model.Geometries = new Geometry[meshGroups.Count][];
+            for (int i = 0; i < meshGroups.Count; i++)
             {
                 var geom = new Geometry
                 {
-                    Name = objFile.MeshGroups[i].Name,
+                    Name = meshGroups[i].Name,
                     VertexBuffers = new DeviceBuffer[] { vb },
                     IndexBuffer = ibs[i]
                 };
@@ -97,6 +104,34 @@ namespace SharpGame
                 model.GeometryCenters.Add(Vector3.Zero);
             }
 
+            var resourceLayout = new ResourceLayout(0)
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+            };
+
+            var resourceLayoutTex = new ResourceLayout(1)
+            {
+                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
+            };
+
+
+            var shader = new Shader
+            {
+                new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
+            };
+
+            var pipeline = new GraphicsPipeline
+            {
+                Shader = shader,
+                CullMode = CullMode.Back,
+                FrontFace = FrontFace.CounterClockwise,
+                ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
+                PushConstantRanges = new[]
+                {
+                    new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                }
+            };
+
             if (!string.IsNullOrEmpty(objFile.MaterialLibName))
             {
                 string path = FileUtil.GetPath(name);
@@ -104,14 +139,14 @@ namespace SharpGame
                 MtlParser mtlParser = new MtlParser();
                 MtlFile mtlFile = mtlParser.Parse(file);
 
-                for (int i = 0; i < objFile.MeshGroups.Length; i++)
+                for (int i = 0; i < meshGroups.Count; i++)
                 {
-                    if (!mtlFile.Definitions.TryGetValue(objFile.MeshGroups[i].Material, out MaterialDefinition materialDefinition))
+                    if (!mtlFile.Definitions.TryGetValue(meshGroups[i].Material, out MaterialDefinition materialDefinition))
                     {
                         continue;
                     }
 
-                    Material mat = ConvertMaterial(materialDefinition);
+                    Material mat = ConvertMaterial(path, materialDefinition, pipeline);
                     model.Materials.Add(mat);
                 }
             }
@@ -119,10 +154,17 @@ namespace SharpGame
             return model;
         }
 
-        Material ConvertMaterial(MaterialDefinition materialDef)
+        Material ConvertMaterial(string path, MaterialDefinition materialDef, GraphicsPipeline pipeline)
         {
-            Material material = new Material();
-            //material.SetTexture("DiffMap", materialDef.DiffuseTexture);
+            Material material = new Material(pipeline);
+            
+            if (!string.IsNullOrEmpty(materialDef.DiffuseTexture))
+            {
+                Texture tex = Resources.Instance.Load<Texture>(path + materialDef.DiffuseTexture);
+                material.SetTexture("DiffMap", tex.ResourceRef);
+                //test
+                material.ResourceSet.Bind(0, tex).UpdateSets();
+            }
             return material;
         }
     }

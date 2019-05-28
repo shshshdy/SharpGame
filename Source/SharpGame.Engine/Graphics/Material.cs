@@ -9,21 +9,10 @@ namespace SharpGame
 
     public class Material : Resource<Material>
     {
-        public string ShaderName { get; set; }
+        public ResourceRef PipelineName { get; set; }
 
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
         public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
-
-        private Shader shader;
-        public Shader Shader
-        {
-            get => shader;
-            set
-            {
-                shader = value;
-                //resourceSet_ = new ResourceSet(shader.Main.ResourceLayout[0]);
-            }
-        }
 
         private ResourceSet resourceSet_;
         public ResourceSet ResourceSet { get => resourceSet_; set => resourceSet_ = value; }
@@ -34,10 +23,26 @@ namespace SharpGame
         {
         }
 
+        public Material(string pipeline)
+        {
+            PipelineName = new ResourceRef("GraphicsPipeline", pipeline);
+            OnBuild();
+        }
+
+        public Material(GraphicsPipeline pipeline)
+        {
+            Pipeline = pipeline;
+            OnBuild();
+        }
+
         protected override bool OnBuild()
         {
-            Shader = Resources.Instance.Load<Shader>(ShaderName);
-            return shader != null;
+            if(PipelineName != null)
+            {
+                Pipeline = Resources.Instance.Load<GraphicsPipeline>(PipelineName);
+            }
+            resourceSet_ = new ResourceSet(Pipeline.ResourceLayout[1]);
+            return Pipeline != null;
         }
 
         public ref ShaderParameter GetShaderParameter(StringID name)
@@ -54,7 +59,7 @@ namespace SharpGame
             return ref ShaderParameter.Null;
         }
 
-        public void SetUniform<T>(StringID name, T val)
+        public void SetShaderParmaeter<T>(StringID name, T val)
         {
             ref ShaderParameter param = ref GetShaderParameter(name);
             if (!param.IsNull)
@@ -84,6 +89,22 @@ namespace SharpGame
             }
 
             return ref TexureParameter.Null;
+        }
+
+        public void SetTexture(StringID name, ResourceRef texRef)
+        {
+            for (int i = 0; i < TextureParameters.Count; i++)
+            {
+                ref TexureParameter param = ref TextureParameters.At(i);
+                if (param.name == name)
+                {
+                    param.texture = texRef;
+                    break;
+                }
+            }
+
+            TextureParameters.Add(new TexureParameter { name = name, texture = texRef });
+
         }
 
         public void SetTexture(StringID name, Texture tex)

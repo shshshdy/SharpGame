@@ -5,24 +5,27 @@ using System.Text;
 
 namespace SharpGame
 {
-
     [DataContract]
-    public struct ResourceRef
+    public class ResourceRef
     {
         [DataMember]
-        public string type;
+        public string Type { get => type.Name; set => type = Resource.nameToType[value]; }
         [DataMember]
-        public Guid fileID;
+        public Guid FileID;
 
         [IgnoreDataMember]
+        public Type type;
+        [IgnoreDataMember]
         public Resource resource;
-
-        public readonly static ResourceRef Null = new ResourceRef();
+        
+        public ResourceRef()
+        {
+        }
 
         public ResourceRef(string type, Guid guid, Resource resource = null)
         {
-            this.type = type;
-            this.fileID = guid;
+            this.Type = type;
+            this.FileID = guid;
             this.resource = resource;
         }
 
@@ -38,14 +41,16 @@ namespace SharpGame
     }
 
     [DataContract]
-    public struct ResourceRefList
+    public class ResourceRefList
     {
         [DataMember]
         public string type;
         [DataMember]
         public List<Guid> fileIDs;
-
-        public readonly static ResourceRefList Null = new ResourceRefList();
+        
+        public ResourceRefList()
+        {
+        }
 
         public ResourceRefList(string type, params Guid[] guids)
         {

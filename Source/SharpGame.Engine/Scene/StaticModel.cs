@@ -38,7 +38,7 @@ namespace SharpGame
             {
                 if(model_ == null)
                 {
-                    return ResourceRef.Null;
+                    return null;
                 }
 
                 return  model_.ResourceRef;
@@ -94,6 +94,12 @@ namespace SharpGame
                     batches_[i].geometry = geometries_[i][0];                    
                     batches_[i].worldTransform = node_.worldTransform_;
                     batches_[i].numWorldTransforms = 1;
+
+                    Material mat = model.GetMaterial(i);
+                    if(mat)
+                    {
+                        SetMaterial(i, mat);
+                    }
                 }
 
                 SetBoundingBox(model.BoundingBox);
@@ -110,7 +116,7 @@ namespace SharpGame
 
         public void SetModelAttr(ResourceRef resourceRef)
         {
-            var model = Resources.Instance.Load<Model>(resourceRef.fileID);
+            var model = Resources.Instance.Load<Model>(resourceRef.FileID);
             SetModel(model);            
         }
 

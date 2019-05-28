@@ -136,6 +136,14 @@ namespace SharpGame
             batches_[index].numWorldTransforms = 1;
         }
 
+        public void SetMaterial(Material mat)
+        {
+            foreach(var batch in batches_)
+            {
+                batch.material = mat;
+            }
+        }
+
         public bool SetMaterial(int index, Material mat)
         {
             if (index >= batches_.Length)

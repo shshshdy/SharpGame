@@ -45,8 +45,8 @@ namespace SharpGame
             mem_alloc.allocationSize = memReqs.size;
             mem_alloc.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
-            VkUtil.CheckResult(vkAllocateMemory(Graphics.device, &mem_alloc, null, out mem));
-            VkUtil.CheckResult(vkBindImageMemory(Graphics.device, image, mem, 0));
+            VulkanUtil.CheckResult(vkAllocateMemory(Graphics.device, &mem_alloc, null, out mem));
+            VulkanUtil.CheckResult(vkBindImageMemory(Graphics.device, image, mem, 0));
 
             depthStencilView.image = image;
 

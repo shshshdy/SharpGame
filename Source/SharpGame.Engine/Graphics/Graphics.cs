@@ -353,7 +353,7 @@ namespace SharpGame
         public void BeginRender()
         {
             // Acquire the next image from the swap chaing
-            VkUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
+            VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
         }
 
         public void EndRender()
@@ -363,11 +363,11 @@ namespace SharpGame
             submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress(currentImage); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
 
             // Submit to queue
-            VkUtil.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
+            VulkanUtil.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
 
-            VkUtil.CheckResult(Swapchain.QueuePresent(queue, currentImage, semaphores[0].RenderComplete));
+            VulkanUtil.CheckResult(Swapchain.QueuePresent(queue, currentImage, semaphores[0].RenderComplete));
 
-            VkUtil.CheckResult(vkQueueWaitIdle(queue));
+            VulkanUtil.CheckResult(vkQueueWaitIdle(queue));
         }
 
 

@@ -49,7 +49,7 @@ namespace SharpGame
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
                 bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
 
-                VkUtil.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, &stagingBuffer));
+                VulkanUtil.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, &stagingBuffer));
 
                 // Get memory requirements for the staging buffer (alignment, memory type bits)
                 vkGetBufferMemoryRequirements(Graphics.device, stagingBuffer, &memReqs);
@@ -58,12 +58,12 @@ namespace SharpGame
                 // Get memory type index for a host visible buffer
                 memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
 
-                VkUtil.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, &stagingMemory));
-                VkUtil.CheckResult(vkBindBufferMemory(Graphics.device, stagingBuffer, stagingMemory, 0));
+                VulkanUtil.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, &stagingMemory));
+                VulkanUtil.CheckResult(vkBindBufferMemory(Graphics.device, stagingBuffer, stagingMemory, 0));
 
                 // Copy texture data into staging buffer
                 byte* data;
-                VkUtil.CheckResult(vkMapMemory(Graphics.device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
+                VulkanUtil.CheckResult(vkMapMemory(Graphics.device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
                 Unsafe.CopyBlock(data, tex2DDataPtr, (uint)totalBytes);
                 vkUnmapMemory(Graphics.device, stagingMemory);
 
@@ -107,8 +107,8 @@ namespace SharpGame
                 memAllocInfo.allocationSize = memReqs.size;
                 memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
-                VkUtil.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, out texture.deviceMemory));
-                VkUtil.CheckResult(vkBindImageMemory(Graphics.device, texture.image.handle, texture.deviceMemory, 0));
+                VulkanUtil.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, out texture.deviceMemory));
+                VulkanUtil.CheckResult(vkBindImageMemory(Graphics.device, texture.image.handle, texture.deviceMemory, 0));
 
                 VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
 
@@ -129,7 +129,7 @@ namespace SharpGame
 
                 // Optimal image will be used as destination for the copy, so we must transfer from our
                 // initial undefined image layout to the transfer destination layout
-                VkUtil.SetImageLayout(
+                VulkanUtil.SetImageLayout(
                     copyCmd,
                     texture.image.handle,
                      VkImageAspectFlags.Color,
@@ -148,7 +148,7 @@ namespace SharpGame
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
-                VkUtil.SetImageLayout(
+                VulkanUtil.SetImageLayout(
                     copyCmd,
                     texture.image.handle,
                     VkImageAspectFlags.Color,
@@ -354,8 +354,8 @@ namespace SharpGame
                 memAllocInfo.allocationSize = memReqs.size;
 
                 memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-                VkUtil.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, out deviceMemory));
-                VkUtil.CheckResult(vkBindImageMemory(Device.LogicalDevice, image.handle, deviceMemory, 0));
+                VulkanUtil.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, out deviceMemory));
+                VulkanUtil.CheckResult(vkBindImageMemory(Device.LogicalDevice, image.handle, deviceMemory, 0));
 
                 VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
                 subresourceRange.aspectMask = VkImageAspectFlags.Color;
@@ -365,7 +365,7 @@ namespace SharpGame
 
                 // Image barrier for optimal image (target)
                 // Optimal image will be used as destination for the copy
-                VkUtil.SetImageLayout(
+                VulkanUtil.SetImageLayout(
                     copyCmd,
                     image.handle,
                     VkImageAspectFlags.Color,
@@ -384,7 +384,7 @@ namespace SharpGame
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 //this.imageLayout = imageLayout;
-                VkUtil.SetImageLayout(
+                VulkanUtil.SetImageLayout(
                     copyCmd,
                     image.handle,
                     VkImageAspectFlags.Color,

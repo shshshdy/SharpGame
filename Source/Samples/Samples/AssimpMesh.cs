@@ -64,7 +64,6 @@ namespace SharpGame.Samples
 
             var mat = new Material
             {
-                Shader = shader,
                 Pipeline = pipelineSolid,
                 ResourceSet = new ResourceSet(resourceLayout, uniformBufferScene, colorMap)
             };
@@ -100,6 +99,7 @@ namespace SharpGame.Samples
 
             pipelineSolid = new GraphicsPipeline
             {
+                Shader = shader,
                 CullMode = CullMode.Back,
                 FrontFace = FrontFace.CounterClockwise,
 

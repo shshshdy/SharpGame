@@ -130,7 +130,7 @@ namespace SharpGame
         {
             var cmdBufInfo = VkCommandBufferBeginInfo.New();
             cmdBufInfo.flags = (VkCommandBufferUsageFlags)flags;
-            VkUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
+            VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
         }
 
         public void Begin(CommandBufferUsageFlags flags, ref CommandBufferInheritanceInfo commandBufferInheritanceInfo)
@@ -141,13 +141,13 @@ namespace SharpGame
             unsafe
             {
                 cmdBufBeginInfo.pInheritanceInfo = &cmdBufInfo;
-                VkUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufBeginInfo));
+                VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufBeginInfo));
             }
         }
 
         public void End()
         {
-            VkUtil.CheckResult(vkEndCommandBuffer(commandBuffer));
+            VulkanUtil.CheckResult(vkEndCommandBuffer(commandBuffer));
         }
 
         public void BeginRenderPass(ref RenderPassBeginInfo renderPassBeginInfo, SubpassContents contents)
@@ -279,7 +279,7 @@ namespace SharpGame
 
         public unsafe void DrawGeometry(Geometry geometry, GraphicsPipeline pipeline, Material material)
         {
-            var pipe = pipeline.GetGraphicsPipeline(renderPass, material.Shader.Main, geometry);
+            var pipe = pipeline.GetGraphicsPipeline(renderPass, pipeline.Shader.Main, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
             BindResourceSet(PipelineBindPoint.Graphics, pipeline, 0, material.ResourceSet);
             geometry.Draw(this);
