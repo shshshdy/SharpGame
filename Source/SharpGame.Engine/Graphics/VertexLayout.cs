@@ -43,6 +43,7 @@ namespace SharpGame
             format = fmt;
             this.offset = offset;
         }
+
         
     }
 

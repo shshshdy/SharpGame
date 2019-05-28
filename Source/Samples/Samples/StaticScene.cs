@@ -29,26 +29,27 @@ namespace SharpGame.Samples
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
-            var pipeline = new GraphicsPipeline
-            {
-                CullMode = CullMode.None,
-                FrontFace = FrontFace.Clockwise,
-                ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                PushConstantRanges = new []
-                {
-                    new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
-                }
-            };
 
             var shader = new Shader
             {
                 new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
             };
-           /*
+
             {
+                var pipeline = new GraphicsPipeline
+                {
+                    CullMode = CullMode.Back,
+                    FrontFace = FrontFace.CounterClockwise,
+                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
+                    PushConstantRanges = new[]
+                    {
+                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                    }
+                };
+
                 var model = ResourceCache.Load<Model>("Models/Plane.obj");
                 var node = scene.CreateChild("Plane");
-                node.Scaling = new Vector3(2, 2, 2);
+                node.Scaling = new Vector3(2.5f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
 
@@ -61,9 +62,20 @@ namespace SharpGame.Samples
                 };
 
                 staticModel.SetMaterial(0, mat);
-            }*/
+            }
 
             {
+                var pipeline = new GraphicsPipeline
+                {
+                    CullMode = CullMode.Back,
+                    FrontFace = FrontFace.Clockwise,
+                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
+                    PushConstantRanges = new[]
+                    {
+                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                    }
+                };
+
                 var colorMap = ResourceCache.Load<Texture>("textures/Mushroom.png");
                 var mat = new Material
                 {

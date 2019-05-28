@@ -405,8 +405,14 @@ namespace SharpGame
                 location++;
             }
 
+            Log.Info("vertex attribute : ");
+            foreach(var attr in vertexInputAttributes)
+            {
+                Log.Info("{{{0}, {1}, {2}}}", attr.location, attr.format, attr.offset);                
+            }
+
             vertexInputBinding.Add(new VertexInputBinding(0, stride, VertexInputRate.Vertex));
-            //todo:
+            
             return new VertexLayout(vertexInputBinding.ToArray(), vertexInputAttributes.ToArray());
         }
     }
