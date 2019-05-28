@@ -37,7 +37,7 @@ namespace SharpGame
         }
     };
 
-    public class AnimationState //: DisposeBase
+    public class AnimationState : DisposeBase
     {
         public Animation Animation => animation_;
 

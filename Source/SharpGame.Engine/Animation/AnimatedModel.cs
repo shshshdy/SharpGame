@@ -184,10 +184,7 @@ namespace SharpGame
                 UpdateAnimation(ref frame);
                 forceAnimationUpdate_ = false;
             }
-
-            if(morphsDirty_)
-                UpdateMorphs();
-
+            
             if(skinningDirty_)
                 UpdateSkinning();
         }
@@ -417,51 +414,7 @@ namespace SharpGame
         {
             updateInvisible_ = enable;
         }
-
-        public void SetMorphWeight(int index, float weight)
-        {
-            if(index >= morphs_.Length)
-                return;
-
-            // If morph vertex buffers have not been created yet, create now
-            if(weight != 0.0f && morphVertexBuffers_.Empty())
-                CloneGeometries();
-
-            if(weight != morphs_[index].weight_)
-            {
-                morphs_[index].weight_ = weight;
-
-                // For a master model, set the same morph weight on non-master models
-                if(isMaster_)
-                {
-                    List<AnimatedModel> models = new List<AnimatedModel>();
-                    GetComponents<AnimatedModel>(models);
-
-                    // Indexing might not be the same, so use the name hash instead
-                    for(int i = 1; i < models.Count; ++i)
-                    {
-                        if(!models[i].isMaster_)
-                            models[i].SetMorphWeight(morphs_[index].name_, weight);
-                    }
-                }
-
-                MarkMorphsDirty();
-            }
-        }
-
-
-        void SetMorphWeight(StringID nameHash, float weight)
-        {
-            for(int i = 0; i < morphs_.Length; ++i)
-            {
-                if(morphs_[i].name_ == nameHash)
-                {
-                    SetMorphWeight(i, weight);
-                    return;
-                }
-            }
-        }
-
+        
         void ResetMorphWeights()
         {
             for(int i = 0; i < morphs_.Length; i++)
@@ -480,7 +433,6 @@ namespace SharpGame
                 }
             }
 
-            MarkMorphsDirty();
         }
 
         public float GetMorphWeight(int index)
@@ -956,132 +908,6 @@ namespace SharpGame
             }
         }
 
-        void MarkMorphsDirty()
-        {
-            morphsDirty_ = true;
-        }
-
-        void CloneGeometries()
-        {
-            /*
-            VertexBuffer[] originalVertexBuffers = model_.VertexBuffers;
-            Dictionary<VertexBuffer, VertexBuffer> clonedVertexBuffers = new Dictionary<VertexBuffer, VertexBuffer>();
-            Array.Resize(ref morphVertexBuffers_, originalVertexBuffers.Length);
-
-            for(int i = 0; i < originalVertexBuffers.Length; ++i)
-            {
-                VertexBuffer original = originalVertexBuffers[i];
-                if(model_.GetMorphRangeCount(i) > 0)
-                {
-                    VertexBuffer clone = new VertexBuffer(original.BufferUsage);
-                    clone.Create(original.Count, morphElementMask_ & original.ElementMask);
-                    IntPtr dest = clone.Lock(0, original.Count);
-                    IntPtr src = original.Lock(0, original.Count);
-                    if (dest != IntPtr.Zero)
-                    {
-                        CopyMorphVertices(dest, src, original.Count, clone, original);
-                        clone.Unlock();
-                    }
-                    original.Unlock();
-                    clonedVertexBuffers[original] = clone;
-                    morphVertexBuffers_[i] = clone;
-                }
-                else
-                    morphVertexBuffers_[i] = null;
-            }
-
-            // Geometries will always be cloned fully. They contain only references to buffer, so they are relatively light
-            for(int i = 0; i < geometries_.Length; ++i)
-            {
-                for(int j = 0; j < geometries_[i].Length; ++j)
-                {
-                    Geometry original = geometries_[i][j];
-                    Geometry clone = new Geometry();
-
-                    // Add an additional vertex stream into the clone, which supplies only the morphable vertex data, while the static
-                    // data comes from the original vertex buffer(s)
-                    VertexBuffer[] originalBuffers = original.VertexBuffers;
-                    int totalBuf = originalBuffers.Length;
-                    for(int k = 0; k < originalBuffers.Length; ++k)
-                    {
-                        VertexBuffer originalBuffer = originalBuffers[k];
-                        if(clonedVertexBuffers.ContainsKey(originalBuffer))
-                            ++totalBuf;
-                    }
-                    clone.SetNumVertexBuffers(totalBuf);
-
-                    int l = 0;
-                    for(int k = 0; k < originalBuffers.Length; ++k)
-                    {
-                        VertexBuffer originalBuffer = originalBuffers[k];
-
-                        if(clonedVertexBuffers.ContainsKey(originalBuffer))
-                        {
-                            VertexBuffer clonedBuffer = clonedVertexBuffers[originalBuffer];
-                            clone.SetVertexBuffer(l++, originalBuffer);
-                            // Specify the morph buffer at a greater index to override the model's original positions/normals/tangents
-                            clone.SetVertexBuffer(l++, clonedBuffer);
-                        }
-                        else
-                            clone.SetVertexBuffer(l++, originalBuffer);
-                    }
-
-                    clone.IndexBuffer = original.IndexBuffer;
-                    clone.SetDrawRange(original.PrimitiveType, original.IndexStart, original.IndexCount);
-                    clone.LodDistance = original.LodDistance;
-
-                    geometries_[i][j] = clone;
-                }
-            }
-
-            // Make sure the rendering batches use the new cloned geometries
-            ResetLodLevels();
-            MarkMorphsDirty();*/
-        }
-        /*
-        unsafe void CopyMorphVertices(IntPtr destVertexData, IntPtr srcVertexData, int vertexCount, VertexBuffer destBuffer,
-            VertexBuffer srcBuffer)
-        {
-            uint mask = destBuffer.ElementMask & srcBuffer.ElementMask;
-            int normalOffset = srcBuffer.GetElementOffset(VertexAttributeUsage.Normal);
-            int tangentOffset = srcBuffer.GetElementOffset(VertexAttributeUsage.Tangent);
-            int vertexSize = srcBuffer.VertexSize;
-
-            float* dest = (float*)destVertexData;
-            byte* src = (byte*)srcVertexData;
-
-            while(vertexCount-- > 0)
-            {
-                if((mask & VertexElement.MASK_POSITION) != 0)
-                {
-                    float* posSrc = (float*)src;
-                    dest[0] = posSrc[0];
-                    dest[1] = posSrc[1];
-                    dest[2] = posSrc[2];
-                    dest += 3;
-                }
-                if((mask & VertexElement.MASK_NORMAL) != 0)
-                {
-                    float* normalSrc = (float*)(src + normalOffset);
-                    dest[0] = normalSrc[0];
-                    dest[1] = normalSrc[1];
-                    dest[2] = normalSrc[2];
-                    dest += 3;
-                }
-                if((mask & VertexElement.MASK_TANGENT) != 0)
-                {
-                    float* tangentSrc = (float*)(src + tangentOffset);
-                    dest[0] = tangentSrc[0];
-                    dest[1] = tangentSrc[1];
-                    dest[2] = tangentSrc[2];
-                    dest[3] = tangentSrc[3];
-                    dest += 4;
-                }
-
-                src += vertexSize;
-            }
-        }*/
-
         void SetGeometryBoneMappings()
         {
             foreach(Span<Matrix> m in geometrySkinMatrices_)
@@ -1217,122 +1043,7 @@ namespace SharpGame
 
             skinningDirty_ = false;
         }
-
-        void UpdateMorphs()
-        {   
-            /*
-            Graphics graphics = GetSubsystem<Graphics>();
-            if(!graphics)
-                return;
-         
-            if(morphs_.Length > 0)
-            {
-                // Reset the morph data range from all morphable vertex buffers, then apply morphs
-                for(int i = 0; i < morphVertexBuffers_.Length; ++i)
-                {
-                    VertexBuffer buffer = morphVertexBuffers_[i];
-                    if(buffer != null)
-                    {
-                        VertexBuffer originalBuffer = model_.VertexBuffers[i];
-                        int morphStart = model_.GetMorphRangeStart(i);
-                        int morphCount = model_.GetMorphRangeCount(i);
-
-                        IntPtr dest = buffer.Lock(morphStart, morphCount);
-                        IntPtr src = originalBuffer.Lock(morphStart, morphCount);
-                        if (dest != IntPtr.Zero)
-                        {
-                            // Reset morph range by copying data from the original vertex buffer
-                            CopyMorphVertices(dest, src,//originalBuffer.Data + morphStart * originalBuffer.VertexSize,
-                                morphCount, buffer, originalBuffer);
-
-                            for(int j = 0; j < morphs_.Length; ++j)
-                            {
-                                if(morphs_[j].weight_ != 0.0f)
-                                {
-                                    if(morphs_[j].buffers_.TryGetValue(i, out var vertexBufferMorph))
-                                    {
-                                        ApplyMorph(buffer, dest, morphStart, ref vertexBufferMorph, morphs_[j].weight_);
-                                    }
-
-                                }
-                            }
-
-                            buffer.Unlock();
-                        }
-                        originalBuffer.Unlock();
-                    }
-                }
-            }*/
-
-            morphsDirty_ = false;
-        }
-        /*
-        void ApplyMorph(VertexBuffer buffer, IntPtr destVertexData, int morphRangeStart,
-            ref VertexBufferMorph morph, float weight)
-        {
-            uint elementMask = morph.elementMask_ & buffer.ElementMask;
-            int vertexCount = morph.vertexCount_;
-            int normalOffset = buffer.GetElementOffset(VertexAttributeUsage.Normal);
-            int tangentOffset = buffer.GetElementOffset(VertexAttributeUsage.Tangent);
-            int vertexSize = buffer.VertexSize;
-
-            byte* srcData = (byte*)Unsafe.AsPointer(ref morph.morphData_);
-            byte* destData = (byte*)destVertexData;
-
-            while(vertexCount-- > 0)
-            {
-                int vertexIndex = *((int*)srcData) - morphRangeStart;
-                srcData += sizeof(int);
-
-                if((elementMask & VertexElement.MASK_POSITION) != 0)
-                {
-                    float* dest = (float*)(destData + vertexIndex * vertexSize);
-                    float* src = (float*)srcData;
-                    dest[0] += src[0] * weight;
-                    dest[1] += src[1] * weight;
-                    dest[2] += src[2] * weight;
-                    srcData += 3 * sizeof(float);
-                }
-                if((elementMask & VertexElement.MASK_NORMAL) != 0)
-                {
-                    float* dest = (float*)(destData + vertexIndex * vertexSize + normalOffset);
-                    float* src = (float*)srcData;
-                    dest[0] += src[0] * weight;
-                    dest[1] += src[1] * weight;
-                    dest[2] += src[2] * weight;
-                    srcData += 3 * sizeof(float);
-                }
-                if((elementMask & VertexElement.MASK_TANGENT) != 0)
-                {
-                    float* dest = (float*)(destData + vertexIndex * vertexSize + tangentOffset);
-                    float* src = (float*)srcData;
-                    dest[0] += src[0] * weight;
-                    dest[1] += src[1] * weight;
-                    dest[2] += src[2] * weight;
-                    srcData += 3 * sizeof(float);
-                }
-
-            }
-        }
-        */
-
-        /*
-        void HandleModelReloadFinished(StringHash eventType, VariantMap& eventData)
-        {
-            Model* currentModel = model_;
-            model_.Reset(); // Set null to allow to be re-set
-            SetModel(currentModel);
-        }*/
-
-
-
-
-
-
-
-
-
-
+        
 
 
     }

@@ -131,10 +131,12 @@ namespace SharpGame
         [DataMember]
         public Dictionary<StringID, AnimationTrack> Tracks { get; set; } = new Dictionary<StringID, AnimationTrack>();
 
+        [IgnoreDataMember]
+        public int NumTracks => Tracks.Count;
+
         /// Animation trigger points.
         [DataMember]
         public List<AnimationTriggerPoint> Triggers { get; set; } = new List<AnimationTriggerPoint>();
-
 
         static int CompareTriggers(AnimationTriggerPoint lhs, AnimationTriggerPoint rhs)
         {
@@ -155,61 +157,7 @@ namespace SharpGame
         {
             return index < Triggers.Count ? new AnimationTriggerPoint?(Triggers[index]) : null;
         }
-
-        protected override bool OnLoad(File source)
-        {
-            int memoryUse = Unsafe.SizeOf<Animation>();
-
-            // Check ID
-            if (source.ReadFileID() != "UANI")
-            {
-             //   Log.Error(source.Name + " is not a valid animation file");
-                return false;
-            }
-
-            // Read name and length
-            AnimationName = source.ReadCString();
-            //animationNameHash_ = animationName_;
-            length_ = source.Read<float>();
-            Tracks.Clear();
-
-            int tracks = source.Read<int>();
-            memoryUse += tracks * Unsafe.SizeOf<AnimationTrack>();
-
-            // Read tracks
-            for (int i = 0; i < tracks; ++i)
-            {
-                AnimationTrack newTrack = CreateTrack(source.ReadCString());
-                newTrack.channelMask_ = source.Read<byte>();
-
-                int keyFrames = source.Read<int>();
-                newTrack.keyFrames_ = new FastList<AnimationKeyFrame>(keyFrames);
-                memoryUse += keyFrames * Unsafe.SizeOf<AnimationKeyFrame>();
-
-                // Read keyframes of the track
-                for (int j = 0; j < keyFrames; ++j)
-                {
-                    AnimationKeyFrame newKeyFrame = new AnimationKeyFrame();
-                    newKeyFrame.time_ = source.Read<float>();
-                    if ((newTrack.channelMask_ & CHANNEL_POSITION) != 0)
-                        newKeyFrame.position_ = source.Read<Vector3>();
-                    if((newTrack.channelMask_ & CHANNEL_ROTATION) != 0)
-                    {
-                        Quat r = source.Read<Quat>();
-                        newKeyFrame.rotation_ = new Quaternion(r.X, r.Y, r.Z, r.W);// source.Read<Quaternion>();
-                    }
-
-                    if ((newTrack.channelMask_ & CHANNEL_SCALE) != 0)
-                        newKeyFrame.scale_ = source.Read<Vector3>();
-                    newTrack.AddKeyFrame(ref newKeyFrame);
-                }
-            }
-
-            //MemoryUse = memoryUse;
-            return true;
-        }
-
-
+        
         public AnimationTrack CreateTrack(StringID name)
         {
             /// \todo When tracks / keyframes are created dynamically, memory use is not updated
@@ -219,7 +167,6 @@ namespace SharpGame
 
             AnimationTrack newTrack = new AnimationTrack { Name = name };
             Tracks[name] = newTrack;
-            // newTrack.nameHash_ = nameHash;
             return newTrack;
         }
 
@@ -278,43 +225,6 @@ namespace SharpGame
         {
             Triggers.Clear();
         }
-        /*
-        void SetNumTriggers(unsigned num)
-        {
-            triggers_.Resize(num);
-        }
-
-        SharedPtr<Animation> Clone(String cloneName) const
-    {
-        SharedPtr<Animation> ret(new Animation(context_));
-
-        ret->SetName(cloneName);
-        ret->SetAnimationName(animationName_);
-        ret->length_ = length_;
-        ret->tracks_ = tracks_;
-        ret->triggers_ = triggers_;
-        ret->CopyMetadata(*this);
-        ret->SetMemoryUse(GetMemoryUse());
-
-        return ret;
-    }*/
-        /*
-        AnimationTrack GetTrack(int index)
-        {
-            if (index >= GetNumTracks())
-                return null;
-
-            int j = 0;
-            for (HashMap<StringHash, AnimationTrack>::Iterator i = tracks_.Begin(); i != tracks_.End(); ++i)
-            {
-                if (j == index)
-                    return &i->second_;
-
-                ++j;
-            }
-
-            return null;
-        }*/
 
     }
 }
