@@ -73,6 +73,8 @@ namespace SharpGame
             cache.RegisterAssertReader(new SharpTextureReader());
             cache.RegisterAssertReader(new KtxTextureReader());
 
+            cache.RegisterAssertReader(new AnimationReader());
+
             CreateWindow();
 
             graphics = CreateSubsystem<Graphics>();

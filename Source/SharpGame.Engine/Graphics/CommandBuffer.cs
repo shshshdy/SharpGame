@@ -130,7 +130,7 @@ namespace SharpGame
         {
             var cmdBufInfo = VkCommandBufferBeginInfo.New();
             cmdBufInfo.flags = (VkCommandBufferUsageFlags)flags;
-            Util.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
+            VkUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
         }
 
         public void Begin(CommandBufferUsageFlags flags, ref CommandBufferInheritanceInfo commandBufferInheritanceInfo)
@@ -141,13 +141,13 @@ namespace SharpGame
             unsafe
             {
                 cmdBufBeginInfo.pInheritanceInfo = &cmdBufInfo;
-                Util.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufBeginInfo));
+                VkUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufBeginInfo));
             }
         }
 
         public void End()
         {
-            Util.CheckResult(vkEndCommandBuffer(commandBuffer));
+            VkUtil.CheckResult(vkEndCommandBuffer(commandBuffer));
         }
 
         public void BeginRenderPass(ref RenderPassBeginInfo renderPassBeginInfo, SubpassContents contents)

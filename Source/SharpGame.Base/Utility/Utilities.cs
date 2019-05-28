@@ -71,30 +71,7 @@ namespace SharpGame
                 pinAction(source == null ? IntPtr.Zero : (IntPtr)Unsafe.AsPointer(ref source));
             }
         }
-        /*
-        /// <summary>
-        /// Covnerts a structured array to an equivalent byte array.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source">The source.</param>
-        /// <returns></returns>
-        public static byte[] ToByteArray<T>(T[] source) where T : struct
-        {
-            if(source == null) return null;
-
-            var buffer = new byte[SizeOf<T>() * source.Length];
-
-            if(source.Length == 0)
-                return buffer;
-
-            unsafe
-            {
-                fixed (void* pBuffer = buffer)
-                    Unsafe.CopyBlockUnaligned(pBuffer, source, (uint)source.Length);
-            }
-            return buffer;
-        }*/
-
+        
         /// <summary>
         /// Reads the specified T data from a memory location.
         /// </summary>
@@ -124,36 +101,6 @@ namespace SharpGame
                 Unsafe.Copy(ref data, (void*)source);
             }
         }
-        /*
-        /// <summary>
-        /// Reads the specified T data from a memory location.
-        /// </summary>
-        /// <typeparam name="T">Type of a data to read</typeparam>
-        /// <param name="source">Memory location to read from.</param>
-        /// <param name="data">The data write to.</param>
-        /// <returns>source pointer + sizeof(T)</returns>
-        public static void ReadOut<T>(IntPtr source, out T data) where T : struct
-        {
-            unsafe
-            {
-                Unsafe.Copy<T>(out data, (void*)source);
-            }
-        }*/
-        /*
-        /// <summary>
-        /// Reads the specified T data from a memory location.
-        /// </summary>
-        /// <typeparam name="T">Type of a data to read</typeparam>
-        /// <param name="source">Memory location to read from.</param>
-        /// <param name="data">The data write to.</param>
-        /// <returns>source pointer + sizeof(T)</returns>
-        public static IntPtr ReadAndPosition<T>(IntPtr source, ref T data) where T : struct
-        {
-            unsafe
-            {
-                return (IntPtr)Unsafe.Copy((void*)source, ref data);
-            }
-        }*/
 
         /// <summary>
         /// Reads the specified array T[] data from a memory location.
@@ -194,22 +141,7 @@ namespace SharpGame
                 Unsafe.Copy((void*)destination, ref data);
             }
         }
-        /*
-        /// <summary>
-        /// Writes the specified T data to a memory location.
-        /// </summary>
-        /// <typeparam name="T">Type of a data to write</typeparam>
-        /// <param name="destination">Memory location to write to.</param>
-        /// <param name="data">The data to write.</param>
-        /// <returns>destination pointer + sizeof(T)</returns>
-        public static IntPtr WriteAndPosition<T>(IntPtr destination, ref T data) where T : struct
-        {
-            unsafe
-            {
-                return (IntPtr)Interop.Write<T>((void*)destination, ref data);
-            }
-        }*/
-
+        
         /// <summary>
         /// Writes the specified array T[] data to a memory location.
         /// </summary>

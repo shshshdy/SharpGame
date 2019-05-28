@@ -1,15 +1,18 @@
-﻿// This code has been adapted from the "Vulkan" C++ example repository, by Sascha Willems: https://github.com/SaschaWillems/Vulkan
-// It is a direct translation from the original C++ code and style, with as little transformation as possible.
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System;
 using Vulkan;
-using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    public unsafe class Tools
+    public unsafe static class VkUtil
     {
+        public static void CheckResult(VkResult result)
+        {
+            if (result != VkResult.Success)
+            {
+                Log.Error(result.ToString());
+                throw new InvalidOperationException("Call failed.");
+            }
+        }
 
         // Fixed sub resource on first mip level and layer
         public static void SetImageLayout(
@@ -144,7 +147,7 @@ namespace SharpGame
             }
 
             // Put barrier inside setup command buffer
-            vkCmdPipelineBarrier(
+            VulkanNative.vkCmdPipelineBarrier(
                 cmdbuffer,
                 srcStageMask,
                 dstStageMask,

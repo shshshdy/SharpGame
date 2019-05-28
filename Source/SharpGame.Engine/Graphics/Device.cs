@@ -79,7 +79,7 @@ namespace SharpGame
             }
 
             VkInstance instance;
-            Util.CheckResult(vkCreateInstance(&instanceCreateInfo, null, &instance));
+            VkUtil.CheckResult(vkCreateInstance(&instanceCreateInfo, null, &instance));
             VkInstance = instance;
 
             if (settings.Validation)
@@ -98,7 +98,7 @@ namespace SharpGame
         {
             // Physical Device
             uint gpuCount = 0;
-            Util.CheckResult(vkEnumeratePhysicalDevices(VkInstance, &gpuCount, null));
+            VkUtil.CheckResult(vkEnumeratePhysicalDevices(VkInstance, &gpuCount, null));
             Debug.Assert(gpuCount > 0);
             // Enumerate devices
             IntPtr* physicalDevices = stackalloc IntPtr[(int)gpuCount];
@@ -163,7 +163,7 @@ namespace SharpGame
                 }
             }
 
-            Util.CheckResult(CreateLogicalDevice(enabledFeatures, enabledExtensions));
+            VkUtil.CheckResult(CreateLogicalDevice(enabledFeatures, enabledExtensions));
             queue = GetDeviceQueue(Device.QFIndices.Graphics, 0);
             return device;
         }
@@ -269,7 +269,7 @@ namespace SharpGame
                     }
 
                     VkPipelineCacheCreateInfo pipelineCacheCreateInfo = VkPipelineCacheCreateInfo.New();
-                    Util.CheckResult(vkCreatePipelineCache(LogicalDevice, ref pipelineCacheCreateInfo, null, out pipelineCache));
+                    VkUtil.CheckResult(vkCreatePipelineCache(LogicalDevice, ref pipelineCacheCreateInfo, null, out pipelineCache));
                     return result;
                 }
             }
@@ -379,13 +379,13 @@ namespace SharpGame
         {
             var semaphoreCreateInfo = VkSemaphoreCreateInfo.New();
             semaphoreCreateInfo.flags = flags;
-            Util.CheckResult(vkCreateSemaphore(device, ref semaphoreCreateInfo, null, out VkSemaphore pSemaphore));
+            VkUtil.CheckResult(vkCreateSemaphore(device, ref semaphoreCreateInfo, null, out VkSemaphore pSemaphore));
             return pSemaphore;
         }
 
         public static VkImage CreateImage(ref VkImageCreateInfo pCreateInfo)
         {
-            Util.CheckResult(vkCreateImage(device, ref pCreateInfo, null, out VkImage pImage));
+            VkUtil.CheckResult(vkCreateImage(device, ref pCreateInfo, null, out VkImage pImage));
             return pImage;
         }
 
@@ -396,7 +396,7 @@ namespace SharpGame
 
         public static VkImageView CreateImageView(ref VkImageViewCreateInfo pCreateInfo)
         {
-            Util.CheckResult(vkCreateImageView(device, ref pCreateInfo, null, out VkImageView pView));
+            VkUtil.CheckResult(vkCreateImageView(device, ref pCreateInfo, null, out VkImageView pView));
             return pView;
         }
 
@@ -407,7 +407,7 @@ namespace SharpGame
 
         public static VkSampler CreateSampler(ref VkSamplerCreateInfo vkSamplerCreateInfo)
         {
-            Util.CheckResult(vkCreateSampler(device, ref vkSamplerCreateInfo, null, out VkSampler vkSampler));
+            VkUtil.CheckResult(vkCreateSampler(device, ref vkSamplerCreateInfo, null, out VkSampler vkSampler));
             return vkSampler;
         }
 
@@ -418,7 +418,7 @@ namespace SharpGame
 
         public static VkFramebuffer CreateFramebuffer(ref VkFramebufferCreateInfo framebufferCreateInfo)
         {
-            Util.CheckResult(vkCreateFramebuffer(device, ref framebufferCreateInfo, null, out VkFramebuffer framebuffer));
+            VkUtil.CheckResult(vkCreateFramebuffer(device, ref framebufferCreateInfo, null, out VkFramebuffer framebuffer));
             return framebuffer;
         }
 
@@ -429,7 +429,7 @@ namespace SharpGame
 
         public static VkRenderPass CreateRenderPass(ref VkRenderPassCreateInfo createInfo)
         {
-            Util.CheckResult(vkCreateRenderPass(device, ref createInfo, null, out VkRenderPass pRenderPass));
+            VkUtil.CheckResult(vkCreateRenderPass(device, ref createInfo, null, out VkRenderPass pRenderPass));
             return pRenderPass;
         }
 
@@ -440,7 +440,7 @@ namespace SharpGame
 
         public static VkBuffer CreateBuffer(ref VkBufferCreateInfo pCreateInfo)
         {
-            Util.CheckResult(vkCreateBuffer(device, ref pCreateInfo, null, out VkBuffer buffer));
+            VkUtil.CheckResult(vkCreateBuffer(device, ref pCreateInfo, null, out VkBuffer buffer));
             return buffer;
         }
 
@@ -451,13 +451,13 @@ namespace SharpGame
 
         public static VkDeviceMemory AllocateMemory(ref VkMemoryAllocateInfo pAllocateInfo)
         {
-            Util.CheckResult(vkAllocateMemory(device, ref pAllocateInfo, null, out VkDeviceMemory pMemory));
+            VkUtil.CheckResult(vkAllocateMemory(device, ref pAllocateInfo, null, out VkDeviceMemory pMemory));
             return pMemory;
         }
 
         public static void BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, ulong memoryOffset)
         {
-            Util.CheckResult(vkBindBufferMemory(device, buffer, memory, memoryOffset));
+            VkUtil.CheckResult(vkBindBufferMemory(device, buffer, memory, memoryOffset));
         }
 
         public static void CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
@@ -465,7 +465,7 @@ namespace SharpGame
             // Create the buffer handle
             VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo(usageFlags, size);
             bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
-            Util.CheckResult(vkCreateBuffer(LogicalDevice, &bufferCreateInfo, null, buffer));
+            VkUtil.CheckResult(vkCreateBuffer(LogicalDevice, &bufferCreateInfo, null, buffer));
 
             // Create the memory backing up the buffer handle
             VkMemoryRequirements memReqs;
@@ -474,13 +474,13 @@ namespace SharpGame
             memAlloc.allocationSize = memReqs.size;
             // Find a memory type index that fits the properties of the buffer
             memAlloc.memoryTypeIndex = GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
-            Util.CheckResult(vkAllocateMemory(LogicalDevice, &memAlloc, null, memory));
+            VkUtil.CheckResult(vkAllocateMemory(LogicalDevice, &memAlloc, null, memory));
 
             // If a pointer to the buffer data has been passed, map the buffer and copy over the data
             if (data != null)
             {
                 void* mapped;
-                Util.CheckResult(vkMapMemory(LogicalDevice, *memory, 0, size, 0, &mapped));
+                VkUtil.CheckResult(vkMapMemory(LogicalDevice, *memory, 0, size, 0, &mapped));
                 Unsafe.CopyBlock(mapped, data, (uint)size);
                 // If host coherency hasn't been requested, do a manual flush to make writes visible
                 if ((memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
@@ -495,7 +495,7 @@ namespace SharpGame
             }
 
             // Attach the memory to the buffer object
-            Util.CheckResult(vkBindBufferMemory(LogicalDevice, *buffer, *memory, 0));
+            VkUtil.CheckResult(vkBindBufferMemory(LogicalDevice, *buffer, *memory, 0));
 
         }
 
@@ -684,7 +684,7 @@ namespace SharpGame
             VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
             cmdPoolInfo.queueFamilyIndex = queueFamilyIndex;
             cmdPoolInfo.flags = createFlags;
-            Util.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out VkCommandPool cmdPool));
+            VkUtil.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out VkCommandPool cmdPool));
             return cmdPool;
         }
 
@@ -696,13 +696,13 @@ namespace SharpGame
             cmdBufAllocateInfo.commandBufferCount = 1;
 
             VkCommandBuffer cmdBuffer;
-            Util.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, out cmdBuffer));
+            VkUtil.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, out cmdBuffer));
 
             // If requested, also start recording for the new command buffer
             if (begin)
             {
                 VkCommandBufferBeginInfo cmdBufInfo = VkCommandBufferBeginInfo.New();
-                Util.CheckResult(vkBeginCommandBuffer(cmdBuffer, ref cmdBufInfo));
+                VkUtil.CheckResult(vkBeginCommandBuffer(cmdBuffer, ref cmdBufInfo));
             }
 
             return cmdBuffer;
@@ -715,7 +715,7 @@ namespace SharpGame
                 return;
             }
 
-            Util.CheckResult(vkEndCommandBuffer(commandBuffer));
+            VkUtil.CheckResult(vkEndCommandBuffer(commandBuffer));
 
             VkSubmitInfo submitInfo = VkSubmitInfo.New();
             submitInfo.commandBufferCount = 1;
@@ -725,12 +725,12 @@ namespace SharpGame
             VkFenceCreateInfo fenceInfo = VkFenceCreateInfo.New();
             fenceInfo.flags = VkFenceCreateFlags.None;
             VkFence fence;
-            Util.CheckResult(vkCreateFence(device, &fenceInfo, null, &fence));
+            VkUtil.CheckResult(vkCreateFence(device, &fenceInfo, null, &fence));
 
             // Submit to the queue
-            Util.CheckResult(vkQueueSubmit(queue, 1, &submitInfo, fence));
+            VkUtil.CheckResult(vkQueueSubmit(queue, 1, &submitInfo, fence));
             // Wait for the fence to signal that command buffer has finished executing
-            Util.CheckResult(vkWaitForFences(device, 1, &fence, True, DEFAULT_FENCE_TIMEOUT));
+            VkUtil.CheckResult(vkWaitForFences(device, 1, &fence, True, DEFAULT_FENCE_TIMEOUT));
 
             vkDestroyFence(device, fence, null);
 
@@ -783,7 +783,7 @@ namespace SharpGame
 
         public static VkShaderModule CreateShaderModule(ref VkShaderModuleCreateInfo shaderModuleCreateInfo)
         {
-            Util.CheckResult(vkCreateShaderModule(device, ref shaderModuleCreateInfo, null, out VkShaderModule shaderModule));
+            VkUtil.CheckResult(vkCreateShaderModule(device, ref shaderModuleCreateInfo, null, out VkShaderModule shaderModule));
             return shaderModule;
         }
 
@@ -794,14 +794,14 @@ namespace SharpGame
 
         public static VkPipeline CreateGraphicsPipeline(ref VkGraphicsPipelineCreateInfo pCreateInfos)
         {
-            Util.CheckResult(vkCreateGraphicsPipelines(device, pipelineCache,
+            VkUtil.CheckResult(vkCreateGraphicsPipelines(device, pipelineCache,
                 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
             return pPipelines;
         }
 
         public static VkPipeline CreateComputePipeline(ref VkComputePipelineCreateInfo pCreateInfos)
         {
-            Util.CheckResult(vkCreateComputePipelines(device, pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
+            VkUtil.CheckResult(vkCreateComputePipelines(device, pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
             return pPipelines;
         }
 

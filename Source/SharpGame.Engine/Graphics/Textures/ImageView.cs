@@ -20,13 +20,21 @@ namespace SharpGame
         }
     }
 
+    public struct ComponentMapping
+    {
+        public ComponentSwizzle r;
+        public ComponentSwizzle g;
+        public ComponentSwizzle b;
+        public ComponentSwizzle a;
+    }
+
     public struct ImageViewCreateInfo
     {
         public uint flags;
         public Image image;
-        public VkImageViewType viewType;
+        public ImageViewType viewType;
         public Format format;
-        public VkComponentMapping components;
+        public ComponentMapping components;
         public VkImageSubresourceRange subresourceRange;
 
         internal void ToNative(out VkImageViewCreateInfo native)
@@ -34,10 +42,12 @@ namespace SharpGame
             native = VkImageViewCreateInfo.New();
             native.flags = flags;
             native.image = image.handle;
-            native.viewType = viewType;
+            native.viewType = (VkImageViewType)viewType;
             native.format = (VkFormat)format;
-            native.components = components;
-            native.subresourceRange = subresourceRange;            
+            native.components = new VkComponentMapping { r = (VkComponentSwizzle)components.r, g = (VkComponentSwizzle)components.g, b = (VkComponentSwizzle)components.b, a = (VkComponentSwizzle)components.a };
+            native.subresourceRange = subresourceRange;
         }
     }
+
+
 }

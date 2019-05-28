@@ -76,7 +76,7 @@ namespace SharpGame
             poolCI.pPoolSizes = sizes;
 
             VkDescriptorPool descriptorPool;
-            Util.CheckResult(vkCreateDescriptorPool(Graphics.device, ref poolCI, null, out descriptorPool));
+            VkUtil.CheckResult(vkCreateDescriptorPool(Graphics.device, ref poolCI, null, out descriptorPool));
             return new PoolInfo(descriptorPool, totalSets, descriptorCount);
         }
 

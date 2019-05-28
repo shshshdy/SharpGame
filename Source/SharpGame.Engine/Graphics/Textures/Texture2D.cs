@@ -14,14 +14,6 @@ namespace SharpGame
         {
         }
 
-        protected override bool OnLoad(File stream)
-        {
-            var tex2D = KtxFile.Load(stream, false);
-
-            SetImage2D(tex2D.Faces[0]);
-            return true;
-        }
-
         public static Texture Create(int w, int h, int bytesPerPixel, byte* tex2DDataPtr, bool dynamic = false)
         {
             var texture = new Texture2D
@@ -57,7 +49,7 @@ namespace SharpGame
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
                 bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
 
-                Util.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, &stagingBuffer));
+                VkUtil.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, &stagingBuffer));
 
                 // Get memory requirements for the staging buffer (alignment, memory type bits)
                 vkGetBufferMemoryRequirements(Graphics.device, stagingBuffer, &memReqs);
@@ -66,12 +58,12 @@ namespace SharpGame
                 // Get memory type index for a host visible buffer
                 memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
 
-                Util.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, &stagingMemory));
-                Util.CheckResult(vkBindBufferMemory(Graphics.device, stagingBuffer, stagingMemory, 0));
+                VkUtil.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, &stagingMemory));
+                VkUtil.CheckResult(vkBindBufferMemory(Graphics.device, stagingBuffer, stagingMemory, 0));
 
                 // Copy texture data into staging buffer
                 byte* data;
-                Util.CheckResult(vkMapMemory(Graphics.device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
+                VkUtil.CheckResult(vkMapMemory(Graphics.device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
                 Unsafe.CopyBlock(data, tex2DDataPtr, (uint)totalBytes);
                 vkUnmapMemory(Graphics.device, stagingMemory);
 
@@ -100,8 +92,8 @@ namespace SharpGame
                     mipLevels = texture.mipLevels,
                     arrayLayers = 1,
                     samples = SampleCountFlags.Count1,
-                    tiling = VkImageTiling.Optimal,
-                    sharingMode = VkSharingMode.Exclusive,
+                    tiling = ImageTiling.Optimal,
+                    sharingMode = SharingMode.Exclusive,
                     // Set initial layout of the image to undefined
                     initialLayout = ImageLayout.Undefined,
                     extent = new Extent3D { width = texture.width, height = texture.height, depth = 1 },
@@ -115,8 +107,8 @@ namespace SharpGame
                 memAllocInfo.allocationSize = memReqs.size;
                 memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
-                Util.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, out texture.deviceMemory));
-                Util.CheckResult(vkBindImageMemory(Graphics.device, texture.image.handle, texture.deviceMemory, 0));
+                VkUtil.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, out texture.deviceMemory));
+                VkUtil.CheckResult(vkBindImageMemory(Graphics.device, texture.image.handle, texture.deviceMemory, 0));
 
                 VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
 
@@ -137,7 +129,7 @@ namespace SharpGame
 
                 // Optimal image will be used as destination for the copy, so we must transfer from our
                 // initial undefined image layout to the transfer destination layout
-                Tools.SetImageLayout(
+                VkUtil.SetImageLayout(
                     copyCmd,
                     texture.image.handle,
                      VkImageAspectFlags.Color,
@@ -156,7 +148,7 @@ namespace SharpGame
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
-                Tools.SetImageLayout(
+                VkUtil.SetImageLayout(
                     copyCmd,
                     texture.image.handle,
                     VkImageAspectFlags.Color,
@@ -209,9 +201,9 @@ namespace SharpGame
             // information and sub resource ranges
             ImageViewCreateInfo view = new ImageViewCreateInfo
             {
-                viewType = VkImageViewType.Image2D,
+                viewType = ImageViewType.Image2D,
                 format = format,
-                components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A }
+                components = new ComponentMapping { r = ComponentSwizzle.R, g = ComponentSwizzle.G, b = ComponentSwizzle.B, a = ComponentSwizzle.A }
             };
             // The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
             // It's possible to create multiple image views for a single image referring to different (and/or overlapping) ranges of the image
@@ -342,8 +334,8 @@ namespace SharpGame
                     mipLevels = mipLevels,
                     arrayLayers = 1,
                     samples = SampleCountFlags.Count1,
-                    tiling = VkImageTiling.Optimal,
-                    sharingMode = VkSharingMode.Exclusive,
+                    tiling = ImageTiling.Optimal,
+                    sharingMode = SharingMode.Exclusive,
                     initialLayout = ImageLayout.Undefined,
                     extent = new Extent3D { width = width, height = height, depth = 1 },
                     usage = imageUsageFlags
@@ -362,8 +354,8 @@ namespace SharpGame
                 memAllocInfo.allocationSize = memReqs.size;
 
                 memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-                Util.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, out deviceMemory));
-                Util.CheckResult(vkBindImageMemory(Device.LogicalDevice, image.handle, deviceMemory, 0));
+                VkUtil.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, out deviceMemory));
+                VkUtil.CheckResult(vkBindImageMemory(Device.LogicalDevice, image.handle, deviceMemory, 0));
 
                 VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
                 subresourceRange.aspectMask = VkImageAspectFlags.Color;
@@ -373,7 +365,7 @@ namespace SharpGame
 
                 // Image barrier for optimal image (target)
                 // Optimal image will be used as destination for the copy
-                Tools.SetImageLayout(
+                VkUtil.SetImageLayout(
                     copyCmd,
                     image.handle,
                     VkImageAspectFlags.Color,
@@ -392,7 +384,7 @@ namespace SharpGame
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 //this.imageLayout = imageLayout;
-                Tools.SetImageLayout(
+                VkUtil.SetImageLayout(
                     copyCmd,
                     image.handle,
                     VkImageAspectFlags.Color,
@@ -438,9 +430,9 @@ namespace SharpGame
             // information and sub resource ranges
             ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
             {
-                viewType = VkImageViewType.Image2D,
+                viewType = ImageViewType.Image2D,
                 format = format,
-                components = new VkComponentMapping { r = VkComponentSwizzle.R, g = VkComponentSwizzle.G, b = VkComponentSwizzle.B, a = VkComponentSwizzle.A },
+                components = new ComponentMapping { r = ComponentSwizzle.R, g = ComponentSwizzle.G, b = ComponentSwizzle.B, a = ComponentSwizzle.A },
                 subresourceRange = new VkImageSubresourceRange { aspectMask = VkImageAspectFlags.Color, baseMipLevel = 0, levelCount = 1, baseArrayLayer = 0, layerCount = 1 }
             };
             // Linear tiling usually won't support mip maps
