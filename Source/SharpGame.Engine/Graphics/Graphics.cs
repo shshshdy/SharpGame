@@ -22,6 +22,7 @@ namespace SharpGame
         public bool Validation { get; set; } = true;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
+        public bool DoubleLoop { get; set; }
     }
 
     public unsafe partial class Graphics : System<Graphics>
@@ -357,6 +358,8 @@ namespace SharpGame
         {
             // Acquire the next image from the swap chaing
             VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
+
+            MainSemWait();
         }
 
         public void EndRender()
@@ -371,9 +374,123 @@ namespace SharpGame
             VulkanUtil.CheckResult(Swapchain.QueuePresent(queue, currentImage, semaphores[0].RenderComplete));
 
             VulkanUtil.CheckResult(vkQueueWaitIdle(queue));
+
+            RenderSemPost();
         }
 
 
 
+        #region MULTITHREADED
+
+        private int currentContext_;
+        public int WorkContext => SingleThreaded ? imageIndex : currentContext_;
+        //public int RenderContext => 1 - currentContext_;
+
+        private int currentFrame_;
+        public int CurrentFrame => currentFrame_;
+
+        private int renderThreadID_;
+        public bool IsRenderThread => renderThreadID_ == System.Threading.Thread.CurrentThread.ManagedThreadId;
+
+        private System.Threading.Semaphore renderSem_ = new System.Threading.Semaphore(0, 1);
+        private System.Threading.Semaphore mainSem_ = new System.Threading.Semaphore(0, 1);
+        private long waitSubmit_;
+        private long waitRender_;
+
+        public bool SingleThreaded { get; set; } = false;
+
+        private List<Action> commands_ = new List<Action>();
+
+        public void Post(Action action) { commands_.Add(action); }
+
+        public void Frame()
+        {
+            RenderSemWait();
+            FrameNoRenderWait();
+        }
+
+        public void Close()
+        {
+            MainSemWait();
+            RenderSemPost();
+        }
+
+        int imageIndex = 0;
+        /*
+        public int BeginRender()
+        {
+            imageIndex = Swapchain.AcquireNextImage(semaphore: ImageAvailableSemaphore);
+
+            if (MainSemWait())
+            {
+                return imageIndex;
+            }
+
+            return imageIndex;
+        }
+
+        public void EndRender()
+        {
+            RenderSemPost();
+        }*/
+
+        void SwapContext()
+        {
+            currentFrame_++;
+            currentContext_ = 1 - currentContext_;
+            //Console.WriteLine("===============SwapContext : {0}", currentContext_);
+        }
+
+        public void FrameNoRenderWait()
+        {
+            SwapContext();
+            // release render thread
+            MainSemPost();
+        }
+
+        public void MainSemPost()
+        {
+            if (!SingleThreaded)
+            {
+                mainSem_.Release();
+            }
+        }
+
+        bool MainSemWait()
+        {
+            if (SingleThreaded)
+            {
+                return true;
+            }
+
+            long curTime = Stopwatch.GetTimestamp();
+            bool ok = mainSem_.WaitOne(-1);
+            if (ok)
+            {
+                waitSubmit_ = (long)((Stopwatch.GetTimestamp() - curTime) * Timer.MilliSecsPerTick);
+                return true;
+            }
+
+            return false;
+        }
+
+        void RenderSemPost()
+        {
+            if (!SingleThreaded)
+            {
+                renderSem_.Release();
+            }
+        }
+
+        void RenderSemWait()
+        {
+            if (!SingleThreaded)
+            {
+                long curTime = Stopwatch.GetTimestamp();
+                bool ok = renderSem_.WaitOne();
+                waitRender_ = (long)((Stopwatch.GetTimestamp() - curTime) * Timer.MilliSecsPerTick);
+            }
+        }
+        #endregion
     }
 }
