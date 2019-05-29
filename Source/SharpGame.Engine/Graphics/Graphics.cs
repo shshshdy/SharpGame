@@ -22,7 +22,7 @@ namespace SharpGame
         public bool Validation { get; set; } = true;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
-        public bool DoubleLoop { get; set; }
+        public bool SingleLoop { get; set; }
     }
 
     public unsafe partial class Graphics : System<Graphics>
@@ -62,6 +62,7 @@ namespace SharpGame
         public int workThread = 0;
 
         public uint currentImage;
+        public uint nextImage;
 
         private NativeList<Semaphores> semaphores = new NativeList<Semaphores>(1, 1);
         private DepthStencil depthStencil;
@@ -358,7 +359,7 @@ namespace SharpGame
         {
             // Acquire the next image from the swap chaing
             VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
-
+            nextImage = (currentImage + 1)%(uint)ImageCount;
             MainSemWait();
         }
 
@@ -383,7 +384,7 @@ namespace SharpGame
         #region MULTITHREADED
 
         private int currentContext_;
-        public int WorkContext => SingleThreaded ? imageIndex : currentContext_;
+        public int WorkContext => SingleLoop ? imageIndex : currentContext_;
         //public int RenderContext => 1 - currentContext_;
 
         private int currentFrame_;
@@ -397,7 +398,7 @@ namespace SharpGame
         private long waitSubmit_;
         private long waitRender_;
 
-        public bool SingleThreaded { get; set; } = false;
+        public bool SingleLoop => true;// Settings.SingleLoop;
 
         private List<Action> commands_ = new List<Action>();
 
@@ -450,7 +451,7 @@ namespace SharpGame
 
         public void MainSemPost()
         {
-            if (!SingleThreaded)
+            if (!SingleLoop)
             {
                 mainSem_.Release();
             }
@@ -458,7 +459,7 @@ namespace SharpGame
 
         bool MainSemWait()
         {
-            if (SingleThreaded)
+            if (SingleLoop)
             {
                 return true;
             }
@@ -476,7 +477,7 @@ namespace SharpGame
 
         void RenderSemPost()
         {
-            if (!SingleThreaded)
+            if (!SingleLoop)
             {
                 renderSem_.Release();
             }
@@ -484,7 +485,7 @@ namespace SharpGame
 
         void RenderSemWait()
         {
-            if (!SingleThreaded)
+            if (!SingleLoop)
             {
                 long curTime = Stopwatch.GetTimestamp();
                 bool ok = renderSem_.WaitOne();

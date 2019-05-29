@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
+
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 1)]
-    public class StaticScene : Sample
+    [SampleDesc(sortOrder = 3)]
+    public class Sponza : Sample
     {
         public override void Init()
         {
@@ -49,56 +50,16 @@ namespace SharpGame.Samples
                     }
                 };
 
-                var model = Resources.Load<Model>("Models/Plane.obj");
+                var model = Resources.Load<Model>("Models/crysponza_bubbles/sponza.obj");
                 var node = scene.CreateChild("Plane");
                 node.Scaling = new Vector3(1.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
-               
-                var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
-                var mat = new Material
-                {
-                    Pipeline = pipeline,
-                    ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
-                };
-
-                staticModel.SetMaterial(mat);
             }
-
-            {
-                var pipeline = new GraphicsPipeline
-                {
-                    Shader = shader,
-                    CullMode = CullMode.Back,
-                    FrontFace = FrontFace.Clockwise,
-                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                    PushConstantRanges = new[]
-                    {
-                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
-                    }
-                };
-
-                var colorMap = Resources.Load<Texture>("textures/Mushroom.png");
-                var mat = new Material
-                {
-                    Pipeline = pipeline,
-                    ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
-                };
-
-                var model = Resources.Load<Model>("Models/Mushroom.mdl");
-
-                for(int i = 0; i < 100; i++)
-                {
-                    var node = scene.CreateChild("Model");
-                    node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20));
-                    var staticModel = node.AddComponent<StaticModel>();
-                    staticModel.SetModel(model);
-                    staticModel.SetMaterial(mat);
-                }
-            }
-
-            Renderer.Instance.MainView.Attach(camera, scene);
+            
+            Renderer.MainView.Attach(camera, scene);
 
         }
     }
 }
+

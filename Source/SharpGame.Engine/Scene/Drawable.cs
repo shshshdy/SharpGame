@@ -90,8 +90,8 @@ namespace SharpGame
 
         /// Draw call source data.
         [IgnoreDataMember]
-        public SourceBatch[] Batches => batches_;
-        protected SourceBatch[] batches_ = new SourceBatch[0];
+        public SourceBatch[] Batches => batches;
+        protected SourceBatch[] batches = new SourceBatch[0];
 
         /// Drawable flags.
         protected byte drawableFlags_;
@@ -118,27 +118,27 @@ namespace SharpGame
 
         public virtual void SetNumGeometries(int num)
         {
-            Array.Resize(ref batches_, num);
+            Array.Resize(ref batches, num);
 
             for (int i = 0; i < num; i++)
             {
-                if (batches_[i] == null)
+                if (batches[i] == null)
                 {
-                    batches_[i] = new SourceBatch();
+                    batches[i] = new SourceBatch();
                 }
             }
         }
 
         public void SetGeometry(int index, Geometry geometry)
         {
-            batches_[index].geometry = geometry;
-            batches_[index].worldTransform = node_.worldTransform_;
-            batches_[index].numWorldTransforms = 1;
+            batches[index].geometry = geometry;
+            batches[index].worldTransform = node_.worldTransform_;
+            batches[index].numWorldTransforms = 1;
         }
 
         public void SetMaterial(Material mat)
         {
-            foreach(var batch in batches_)
+            foreach(var batch in batches)
             {
                 batch.material = mat;
             }
@@ -146,19 +146,19 @@ namespace SharpGame
 
         public bool SetMaterial(int index, Material mat)
         {
-            if (index >= batches_.Length)
+            if (index >= batches.Length)
             {
                 Log.Error("Material index out of bounds");
                 return false;
             }
 
-            batches_[index].material = mat;
+            batches[index].material = mat;
             return true;
         }
 
         public Material GetMaterial(int idx)
         {
-            return idx < batches_.Length ? batches_[idx].material : null;
+            return idx < batches.Length ? batches[idx].material : null;
         }
 
         public override void OnSetEnabled()
@@ -245,8 +245,8 @@ namespace SharpGame
         public virtual Geometry GetLodGeometry(int batchIndex, int level)
         {
             // By default return the visible batch geometry
-            if (batchIndex < batches_.Length)
-                return batches_[batchIndex].geometry;
+            if (batchIndex < batches.Length)
+                return batches[batchIndex].geometry;
             else
                 return null;
         }
@@ -267,10 +267,10 @@ namespace SharpGame
             IntPtr worldTransform = node_.worldTransform_;
             distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
 
-            for (int i = 0; i< batches_.Length; ++i)
+            for (int i = 0; i< batches.Length; ++i)
             {
-                batches_[i].distance = distance_;
-                batches_[i].worldTransform = worldTransform;
+                batches[i].distance = distance_;
+                batches[i].worldTransform = worldTransform;
             }
 
             float scale = Vector3.Dot(worldBoundingBox.Size, MathUtil.DotScale);

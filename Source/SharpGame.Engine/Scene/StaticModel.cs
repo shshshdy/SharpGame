@@ -91,9 +91,9 @@ namespace SharpGame
                     geometries_[i] = (Geometry[])geometries[i].Clone();
                     geometryData_[i].center_ = geometryCenters[i];
 
-                    batches_[i].geometry = geometries_[i][0];                    
-                    batches_[i].worldTransform = node_.worldTransform_;
-                    batches_[i].numWorldTransforms = 1;
+                    batches[i].geometry = geometries_[i][0];                    
+                    batches[i].worldTransform = node_.worldTransform_;
+                    batches[i].numWorldTransforms = 1;
 
                     Material mat = model.GetMaterial(i);
                     if(mat)
@@ -136,15 +136,15 @@ namespace SharpGame
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
             distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
 
-            if (batches_.Length == 1)
-                batches_[0].distance = distance_;
+            if (batches.Length == 1)
+                batches[0].distance = distance_;
             else
             {
                 ref Matrix worldTransform = ref node_.WorldTransform;
-                for (int i = 0; i < batches_.Length; ++i)
+                for (int i = 0; i < batches.Length; ++i)
                 {
                     Vector3.Transform(ref geometryData_[i].center_, ref worldTransform, out Vector3 worldCenter);
-                    batches_[i].distance = frame.camera.GetDistance(worldCenter);
+                    batches[i].distance = frame.camera.GetDistance(worldCenter);
                 }
             }
 
@@ -167,7 +167,7 @@ namespace SharpGame
             if (level < geometries_[batchIndex].Length)
                 return geometries_[batchIndex][level];
             else
-                return batches_[batchIndex].geometry;
+                return batches[batchIndex].geometry;
         }
 
 
@@ -179,7 +179,7 @@ namespace SharpGame
                 if (geometries_[i] == null ||　geometries_[i].Length == 0)
                     Array.Resize(ref geometries_[i], 1);
 
-                batches_[i].geometry = geometries_[i][0];
+                batches[i].geometry = geometries_[i][0];
                 geometryData_[i].lodLevel_ = 0;
             }
 
@@ -189,7 +189,7 @@ namespace SharpGame
 
         protected void CalculateLodLevels()
         {
-            for (int i = 0; i < batches_.Length; ++i)
+            for (int i = 0; i < batches.Length; ++i)
             {
                 Geometry[] batchGeometries = geometries_[i];
                 // If only one LOD geometry, no reason to go through the LOD calculation
@@ -208,7 +208,7 @@ namespace SharpGame
                 if (geoData.lodLevel_ != newLodLevel)
                 {
                     geoData.lodLevel_ = newLodLevel;
-                    batches_[i].geometry = batchGeometries[newLodLevel];
+                    batches[i].geometry = batchGeometries[newLodLevel];
                 }
             }
         }

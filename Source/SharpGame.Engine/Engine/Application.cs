@@ -37,7 +37,7 @@ namespace SharpGame
         protected Input input;
         protected bool paused = false;
         protected bool prepared;
-        protected bool singleThreaded = true;
+        protected bool singleLoop = true;
         protected string workSpace;
 
         private float fps;
@@ -67,8 +67,8 @@ namespace SharpGame
 
             cache.RegisterAssertReader(new ShaderReader());
 
-            cache.RegisterAssertReader(new AssimpModelReader());
             cache.RegisterAssertReader(new MdlModelReader());
+            cache.RegisterAssertReader(new AssimpModelReader());
             cache.RegisterAssertReader(new ObjModelReader());
             
             cache.RegisterAssertReader(new SharpTextureReader());
@@ -108,7 +108,7 @@ namespace SharpGame
 
         public void Run()
         {
-            if (singleThreaded)
+            if (singleLoop)
             {
                 SingleLoop();
             }
