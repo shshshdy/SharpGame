@@ -29,6 +29,25 @@ namespace SharpGame
         {
         }
 
+        public static Texture White;
+        public static Texture Gray;
+        public static Texture Black;
+        public static Texture Purple;
+
+        public unsafe static void Init()
+        {
+            Texture CreateTex(Color color)
+            {
+                byte* c = &color.R;
+                return Texture2D.Create(1, 1, 4, c);
+            }
+
+            White = CreateTex(Color.White);
+            Gray = CreateTex(Color.Gray);
+            Black = CreateTex(Color.Black);
+            Purple = CreateTex(Color.Purple);
+        }
+
         internal void UpdateDescriptor()
         {
             descriptor.sampler = sampler.handle;

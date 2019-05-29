@@ -10,7 +10,7 @@ namespace SharpGame
 {
     public class File : NativeStream
     {
-        public StringID Name { get; set; }
+        public string Name { get; set; }
 
         protected Stream stream;
         public Stream Stream => stream;

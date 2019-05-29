@@ -23,6 +23,8 @@ namespace SharpGame
         public int width { get; protected set; } = 1280;
         public int height { get; protected set; } = 720;
 
+        public Settings Settings { get; } = new Settings();
+
         protected IntPtr window;
         protected Sdl2Window nativeWindow;
         protected IntPtr windowInstance;
@@ -65,9 +67,10 @@ namespace SharpGame
 
             cache.RegisterAssertReader(new ShaderReader());
 
+            cache.RegisterAssertReader(new AssimpModelReader());
             cache.RegisterAssertReader(new MdlModelReader());
             cache.RegisterAssertReader(new ObjModelReader());
-
+            
             cache.RegisterAssertReader(new SharpTextureReader());
             cache.RegisterAssertReader(new KtxTextureReader());
 
@@ -75,7 +78,7 @@ namespace SharpGame
 
             CreateWindow();
 
-            graphics = CreateSubsystem<Graphics>();
+            graphics = CreateSubsystem<Graphics>(Settings);
             graphics.Init(nativeWindow.SdlWindowHandle);
             renderer = CreateSubsystem<Renderer>();
             input = CreateSubsystem<Input>();

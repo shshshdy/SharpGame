@@ -16,6 +16,7 @@ namespace SharpGame
 
         protected FileSystem FileSystem => FileSystem.Instance;
         protected string extension = "";
+        protected string loadingFile;
         public ResourceReader(string ext)
         {
             extension = ext;
@@ -34,7 +35,9 @@ namespace SharpGame
 
         public virtual Resource Load(string name)
         {
-            if(!MatchExtension(name))
+            loadingFile = name;
+
+            if (!MatchExtension(name))
             {
                 return null;
             }
@@ -44,14 +47,7 @@ namespace SharpGame
             if(stream == null)
                 return null;
 
-            T resource = Activator.CreateInstance<T>();
-
-            if (!resource)
-            {
-                Log.Error("Could not load unknown resource type " + ResourceType.ToString());
-                return null;
-            }
-         
+            T resource = Activator.CreateInstance<T>();        
             if (!OnLoad(resource, stream))
             {
                 stream.Dispose();

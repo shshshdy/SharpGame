@@ -553,6 +553,16 @@ namespace SharpGame
         }
 
 
+        public static void GetImageMemoryRequirements(VkImage image, out VkMemoryRequirements pMemoryRequirements)
+        {
+            vkGetImageMemoryRequirements(device, image, out pMemoryRequirements);
+        }
+
+        public static void BindImageMemory(VkImage image, VkDeviceMemory memory, ulong offset)
+        {
+            VulkanUtil.CheckResult(vkBindImageMemory(device, image, memory, offset));
+        }
+
         public static void CopyImage(VkImage srcImage, VkImage dstImage, uint width, uint height, uint level = 0)
         {
             VkImageSubresourceLayers subresource = new VkImageSubresourceLayers

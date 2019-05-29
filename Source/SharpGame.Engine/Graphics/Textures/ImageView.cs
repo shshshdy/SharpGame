@@ -26,6 +26,11 @@ namespace SharpGame
         public ComponentSwizzle g;
         public ComponentSwizzle b;
         public ComponentSwizzle a;
+
+        public ComponentMapping(ComponentSwizzle r, ComponentSwizzle g, ComponentSwizzle b, ComponentSwizzle a)
+        {
+            this.r = r; this.g = g; this.b = b; this.a = a;
+        }
     }
 
     public struct ImageViewCreateInfo

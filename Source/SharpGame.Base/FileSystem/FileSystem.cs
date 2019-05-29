@@ -301,7 +301,7 @@ namespace SharpGame
                 if (FileUtil.FileExists(resourceDirs_[i] + nameIn))
                 {
                     File file = new File(System.IO.File.OpenRead(resourceDirs_[i] + nameIn));
-                    file.Name = nameIn;
+                    file.Name = resourceDirs_[i] + nameIn;
                     return file;
                 }
             }

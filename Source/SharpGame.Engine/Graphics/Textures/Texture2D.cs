@@ -49,23 +49,22 @@ namespace SharpGame
                 bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
                 bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
 
-                VulkanUtil.CheckResult(vkCreateBuffer(Graphics.device, &bufferCreateInfo, null, &stagingBuffer));
+                stagingBuffer = Device.CreateBuffer(ref bufferCreateInfo);
 
                 // Get memory requirements for the staging buffer (alignment, memory type bits)
-                vkGetBufferMemoryRequirements(Graphics.device, stagingBuffer, &memReqs);
+                Device.GetBufferMemoryRequirements(stagingBuffer, out memReqs);
 
                 memAllocInfo.allocationSize = memReqs.size;
                 // Get memory type index for a host visible buffer
                 memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
 
-                VulkanUtil.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, &stagingMemory));
-                VulkanUtil.CheckResult(vkBindBufferMemory(Graphics.device, stagingBuffer, stagingMemory, 0));
+                stagingMemory = Device.AllocateMemory(ref memAllocInfo);
+                Device.BindBufferMemory(stagingBuffer, stagingMemory, 0);
 
                 // Copy texture data into staging buffer
-                byte* data;
-                VulkanUtil.CheckResult(vkMapMemory(Graphics.device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
+                void* data = Device.MapMemory(stagingMemory, 0, memReqs.size, 0);
                 Unsafe.CopyBlock(data, tex2DDataPtr, (uint)totalBytes);
-                vkUnmapMemory(Graphics.device, stagingMemory);
+                Device.UnmapMemory(stagingMemory);
 
                 // Setup buffer copy regions for each mip level
                 NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
@@ -101,34 +100,24 @@ namespace SharpGame
                 };
 
                 texture.image = new Image(ref imageCreateInfo);
-
-                vkGetImageMemoryRequirements(Graphics.device, texture.image.handle, &memReqs);
+                Device.GetImageMemoryRequirements(texture.image.handle, out memReqs);
 
                 memAllocInfo.allocationSize = memReqs.size;
                 memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
-                VulkanUtil.CheckResult(vkAllocateMemory(Graphics.device, &memAllocInfo, null, out texture.deviceMemory));
-                VulkanUtil.CheckResult(vkBindImageMemory(Graphics.device, texture.image.handle, texture.deviceMemory, 0));
+                texture.deviceMemory = Device.AllocateMemory(ref memAllocInfo);
+                Device.BindImageMemory(texture.image.handle, texture.deviceMemory, 0);
 
                 VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
-
-                // Image barrier for optimal image
-
                 // The sub resource range describes the regions of the image we will be transition
                 VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange
                 {
-                    // Image only contains color data
                     aspectMask = VkImageAspectFlags.Color,
-                    // Start at first mip level
                     baseMipLevel = 0,
-                    // We will transition on all mip levels
                     levelCount = (uint)texture.mipLevels,
-                    // The 2D texture only has one layer
                     layerCount = 1
                 };
 
-                // Optimal image will be used as destination for the copy, so we must transfer from our
-                // initial undefined image layout to the transfer destination layout
                 VulkanUtil.SetImageLayout(
                     copyCmd,
                     texture.image.handle,
@@ -137,7 +126,6 @@ namespace SharpGame
                      VkImageLayout.TransferDstOptimal,
                     subresourceRange);
 
-                // Copy mip levels from staging buffer
                 vkCmdCopyBufferToImage(
                     copyCmd,
                     stagingBuffer,
@@ -157,8 +145,6 @@ namespace SharpGame
                     subresourceRange);
 
                 Device.FlushCommandBuffer(copyCmd, Graphics.queue, true);
-
-                // Clean up staging resources
                 Device.FreeMemory(stagingMemory);
                 Device.DestroyBuffer(stagingBuffer);
             }
@@ -203,7 +189,7 @@ namespace SharpGame
             {
                 viewType = ImageViewType.Image2D,
                 format = format,
-                components = new ComponentMapping { r = ComponentSwizzle.R, g = ComponentSwizzle.G, b = ComponentSwizzle.B, a = ComponentSwizzle.A }
+                components = new ComponentMapping(ComponentSwizzle.R, ComponentSwizzle.G, ComponentSwizzle.B, ComponentSwizzle.A)
             };
             // The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
             // It's possible to create multiple image views for a single image referring to different (and/or overlapping) ranges of the image

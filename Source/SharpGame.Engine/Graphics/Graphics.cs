@@ -18,6 +18,7 @@ namespace SharpGame
 
     public class Settings
     {
+        public CString Name { get; set; }
         public bool Validation { get; set; } = true;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
@@ -72,9 +73,9 @@ namespace SharpGame
         DeviceBuffer[] instanceBuffer = new DeviceBuffer[2];
         DeviceBuffer[] transistBuffer = new DeviceBuffer[2];
 
-        public Graphics()
+        public Graphics(Settings settings)
         {
-            //Settings.Validation = false;
+            Settings = settings;
 
             enabledFeatures.samplerAnisotropy = True;
             VkInstance = Device.CreateInstance(Settings);
@@ -99,6 +100,8 @@ namespace SharpGame
             submitInfo.pWaitSemaphores = &pSem->PresentComplete;
             submitInfo.signalSemaphoreCount = 1;
             submitInfo.pSignalSemaphores = &pSem->RenderComplete;
+
+            Texture.Init();
         }
 
 
@@ -347,7 +350,7 @@ namespace SharpGame
 
         public void WaitIdle()
         {
-            vkDeviceWaitIdle(device);
+            device.WaitIdle();
         }
 
         public void BeginRender()

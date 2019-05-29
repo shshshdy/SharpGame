@@ -165,6 +165,10 @@ namespace SharpGame
                 //test
                 material.ResourceSet.Bind(0, tex).UpdateSets();
             }
+            else
+            {
+                material.ResourceSet.Bind(0, Texture.White).UpdateSets();
+            }
             return material;
         }
     }

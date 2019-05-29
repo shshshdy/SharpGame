@@ -28,7 +28,18 @@ namespace SharpGame
         {
             list.Add(item);
         }
-        
+
+        public static void Resize<T>(this List<T> list, int size)
+        {
+            for(int i = list.Count; i < size; i++)
+                list.Add(default(T));
+
+            while(list.Count > size)
+            {
+                list.Pop();
+            }
+        }
+
         public static T Pop<T>(this List<T> list)
         {
             T ret = list[list.Count - 1];

@@ -54,6 +54,12 @@ namespace SharpGame
         public Model()
         {
         }
+
+        public void SetNumGeometry(int count)
+        {
+            Array.Resize(ref geometries_, count);
+            GeometryCenters.Resize(count);
+        }
         
         public int GetNumGeometryLodLevels(int index)
         {
