@@ -49,9 +49,9 @@ namespace SharpGame.Samples
                     }
                 };
 
-                var model = Resources.Load<Model>("Models/Plane.obj");
+                var model = Resources.Load<Model>("Models/plane2.dae");
                 var node = scene.CreateChild("Plane");
-                node.Scaling = new Vector3(1.0f);
+                node.Scaling = new Vector3(3.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
                
@@ -87,10 +87,11 @@ namespace SharpGame.Samples
 
                 var model = Resources.Load<Model>("Models/Mushroom.mdl");
 
-                for(int i = 0; i < 100; i++)
+                for(int i = 0; i < 400; i++)
                 {
                     var node = scene.CreateChild("Model");
                     node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20));
+                    node.Rotation = Quaternion.FromEuler(0, MathUtil.DegreesToRadians(MathUtil.Random(0, 90)), 0);
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(mat);

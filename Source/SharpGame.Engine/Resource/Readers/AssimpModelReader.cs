@@ -79,10 +79,8 @@ namespace SharpGame
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 Assimp.Mesh mesh = scene.Meshes[m];
-                BoundingBox meshBoundingBox;
 
-                DeviceBuffer vb, ib;
-                ConvertGeom(scale, mesh, out meshBoundingBox, out vb, out ib);
+                ConvertGeom(scale, mesh, out BoundingBox meshBoundingBox, out DeviceBuffer vb, out DeviceBuffer ib);
                 model.VertexBuffers[m] = vb;
                 model.IndexBuffers[m] = ib;
 
@@ -91,7 +89,7 @@ namespace SharpGame
                     Name = mesh.Name,
                     VertexBuffers = new[] { vb },
                     IndexBuffer = ib,
-                    VertexLayout = VertexPosNormTexColor.Layout
+                    VertexLayout = VertexPosNormTex.Layout
                 };
 
                 geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], 0, ib.Count);
@@ -121,19 +119,19 @@ namespace SharpGame
 
         private static unsafe void ConvertGeom(float scale, Assimp.Mesh mesh, out BoundingBox meshBoundingBox, out DeviceBuffer vb, out DeviceBuffer ib)
         {
-            NativeList<VertexPosNormTexColor> vertexBuffer = new NativeList<VertexPosNormTexColor>();
+            NativeList<VertexPosNormTex> vertexBuffer = new NativeList<VertexPosNormTex>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
 
             meshBoundingBox = new BoundingBox();
             for (int v = 0; v < mesh.VertexCount; v++)
             {
-                VertexPosNormTexColor vertex;
+                VertexPosNormTex vertex;
 
                 vertex.position = new Vector3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new Vector3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 vertex.texcoord = new Vector2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
-
+                /*
                 // Mesh may not have vertex colors
                 if (mesh.HasVertexColors(0))
                 {
@@ -144,7 +142,7 @@ namespace SharpGame
                 else
                 {
                     vertex.color = new Color(1.0f);
-                }
+                }*/
 
                 vertexBuffer.Add(vertex);
 
@@ -161,8 +159,7 @@ namespace SharpGame
             }
 
 
-            vb = DeviceBuffer.Create(BufferUsage.VertexBuffer, false,
-                sizeof(VertexPosNormTexColor), (int)vertexBuffer.Count, vertexBuffer.Data);
+            vb = DeviceBuffer.Create(BufferUsage.VertexBuffer, false, sizeof(VertexPosNormTex), (int)vertexBuffer.Count, vertexBuffer.Data);
             ib = DeviceBuffer.Create(BufferUsage.IndexBuffer, false, sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
 
 
