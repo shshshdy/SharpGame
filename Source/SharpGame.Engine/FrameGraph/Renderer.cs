@@ -31,20 +31,20 @@ namespace SharpGame
                 frameNumber = Time.FrameNum
             };
 
-            Log.Info("    BeginUpdate : {0}", Time.FrameNum);
+            Log.Render("    BeginUpdate : {0}", Time.FrameNum);
             foreach (var viewport in views)
             {
                 viewport.Update(ref frameInfo);
             }
 
-            Log.Info("    EndUpdate : {0}", Time.FrameNum);
+            Log.Render("    EndUpdate : {0}", Time.FrameNum);
         }
 
         public void Render()
         {
             var graphics = Graphics.Instance;
 
-            Log.Info("    BeginRender : {0}", Time.FrameNum);
+            Log.Render("    BeginRender : {0}", Time.FrameNum);
             graphics.BeginRender();
 
             CommandBuffer cmdBuffer = graphics.RenderCmdBuffer;
@@ -66,7 +66,7 @@ namespace SharpGame
 
             graphics.EndRender();
 
-            Log.Info("    EndRender : {0}", Time.FrameNum);
+            Log.Render("    EndRender : {0}", Time.FrameNum);
         }
 
     }

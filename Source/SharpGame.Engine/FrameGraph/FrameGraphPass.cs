@@ -85,7 +85,7 @@ namespace SharpGame
 
             cmdBuffer = graphics.WorkCmdPool.Get();
             cmdBuffer.renderPass = renderPass;
-            Log.Info("[{0}]begin secondbuf:{1}, fb : {2}",
+            Log.Render("[{0}]begin secondbuf:{1}, fb : {2}",
                 graphics.WorkContext,
                 cmdBuffer.commandBuffer.Handle,
                 inherit.framebuffer.handle);
@@ -118,7 +118,7 @@ namespace SharpGame
             OnEndDraw(view);
 
             cmdBuffer?.End();
-            Log.Info("[{0}]begin secondbuf:{1}", workContext, cmdBuffer.commandBuffer.Handle);
+            Log.Render("[{0}]begin secondbuf:{1}", workContext, cmdBuffer.commandBuffer.Handle);
 
             cmdBuffer = null;
         }
@@ -153,7 +153,7 @@ namespace SharpGame
             );
 
             int renderContext = graphics.RenderContext;
-            Log.Info("[{0}]begin primbuf:{1}, fb : {2}",
+            Log.Render("[{0}]begin primbuf:{1}, fb : {2}",
                 renderContext,
                 cb.commandBuffer.Handle,
                 renderPassBeginInfo.framebuffer.handle);
@@ -162,7 +162,7 @@ namespace SharpGame
 
             if (cmdBuffers[renderContext] != null)
             {
-                Log.Info("[{0}]begin primbuf:{1}",
+                Log.Render("[{0}]begin primbuf:{1}",
                    renderContext,
                    cmdBuffers[renderContext].commandBuffer.Handle);
                    cb.ExecuteCommand(cmdBuffers[renderContext]);
@@ -170,7 +170,7 @@ namespace SharpGame
             }
 
             cb.EndRenderPass();
-            Log.Info("[{0}]end primbuf:{1}, fb : {2}",
+            Log.Render("[{0}]end primbuf:{1}, fb : {2}",
                 renderContext,
                 cb.commandBuffer.Handle,
                 renderPassBeginInfo.framebuffer.handle);

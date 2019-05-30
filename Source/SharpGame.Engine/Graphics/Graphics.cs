@@ -389,7 +389,7 @@ namespace SharpGame
         private long waitSubmit_;
         private long waitRender_;
 
-        public bool SingleLoop => true;// Settings.SingleLoop;
+        public bool SingleLoop => Settings.SingleLoop;
 
         private List<Action> commands_ = new List<Action>();
 

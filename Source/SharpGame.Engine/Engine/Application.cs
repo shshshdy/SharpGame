@@ -78,6 +78,8 @@ namespace SharpGame
 
             CreateWindow();
 
+            Settings.SingleLoop = singleLoop;
+
             graphics = CreateSubsystem<Graphics>(Settings);
             graphics.Init(nativeWindow.SdlWindowHandle);
             renderer = CreateSubsystem<Renderer>();
@@ -130,7 +132,7 @@ namespace SharpGame
             while (nativeWindow.Exists)
             {
                 Time.Tick(timeStep);
-
+                
                 input.snapshot = nativeWindow.PumpEvents();
 
                 if (!nativeWindow.Exists)
@@ -138,7 +140,7 @@ namespace SharpGame
                     // Exit early if the window was closed this frame.
                     break;
                 }
-
+               
                 UpdateFrame();
 
                 renderer.Render();
@@ -156,16 +158,67 @@ namespace SharpGame
 
         private void DoubleLoop()
         {
-            new Thread(SingleLoop).Start();
+            Setup();
 
+            Init();
+
+
+            new Thread(SecondLoop).Start();
 
             while(true)
             {
+                if(nativeWindow == null || renderer == null)
+                {
+                    continue;
+                }
+
+                if(!nativeWindow.Exists)
+                {
+                    break;
+                }
+
                 renderer.Render();
-            //    Thread.Sleep(1);
+
+                //Thread.Sleep(1);
             }
 
+            graphics.Close();
+        }
 
+        void SecondLoop()
+        {
+            timer.Reset();
+            timer.Start();
+
+            graphics.FrameNoRenderWait();
+            graphics.Frame();
+
+            while (nativeWindow.Exists)
+            {
+                Time.Tick(timeStep);
+                /*
+                input.snapshot = nativeWindow.PumpEvents();
+
+                if (!nativeWindow.Exists)
+                {
+                    // Exit early if the window was closed this frame.
+                    break;
+                }*/
+
+                //UpdateFrame();
+                
+                graphics.Frame();
+
+                //renderer.Render();
+
+                ApplyFrameLimit();
+            }
+
+            timer.Stop();
+            // Flush device to make sure all resources can be freed 
+            graphics.WaitIdle();
+
+            Destroy();
         }
 
         void WindowResize()

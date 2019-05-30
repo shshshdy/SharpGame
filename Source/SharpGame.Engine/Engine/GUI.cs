@@ -50,8 +50,8 @@ namespace SharpGame
 
             ImGui.NewFrame();
 
-            this.Subscribe<BeginFrame>(Handle);
-            this.Subscribe<EndRender>(Handle);
+            //this.Subscribe<BeginFrame>(Handle);
+            //this.Subscribe<EndRender>(Handle);
         }
 
         protected override void Destroy()
