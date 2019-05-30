@@ -18,7 +18,7 @@ namespace SharpGame
 
     public class Settings
     {
-        public CString Name { get; set; }
+        public CString ApplicationName { get; set; }
         public bool Validation { get; set; } = true;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
@@ -28,6 +28,8 @@ namespace SharpGame
     public unsafe partial class Graphics : System<Graphics>
     {
         public Settings Settings { get; } = new Settings();
+        internal Statistics stats = new Statistics();
+
         public VkInstance VkInstance { get; protected set; }
         public VkPhysicalDeviceFeatures enabledFeatures;
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
@@ -374,20 +376,18 @@ namespace SharpGame
 
         #region MULTITHREADED
 
-        private int currentContext_;
-        public int WorkContext => SingleLoop ? 0 : currentContext_;
-        public int RenderContext => SingleLoop ? 0 : 1 - currentContext_;
+        private int currentContext;
+        public int WorkContext => SingleLoop ? 0 : currentContext;
+        public int RenderContext => SingleLoop ? 0 : 1 - currentContext;
 
-        private int currentFrame_;
-        public int CurrentFrame => currentFrame_;
+        private int currentFrame;
+        public int CurrentFrame => currentFrame;
 
-        private int renderThreadID_;
-        public bool IsRenderThread => renderThreadID_ == System.Threading.Thread.CurrentThread.ManagedThreadId;
+        private int renderThreadID;
+        public bool IsRenderThread => renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
 
-        private System.Threading.Semaphore renderSem_ = new System.Threading.Semaphore(0, 1);
-        private System.Threading.Semaphore mainSem_ = new System.Threading.Semaphore(0, 1);
-        private long waitSubmit_;
-        private long waitRender_;
+        private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
+        private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);
 
         public bool SingleLoop => Settings.SingleLoop;
 
@@ -407,31 +407,15 @@ namespace SharpGame
             RenderSemPost();
         }
 
-        /*
-        int imageIndex = 0;
-        public int BeginRender()
-        {
-            imageIndex = Swapchain.AcquireNextImage(semaphore: ImageAvailableSemaphore);
-
-            if (MainSemWait())
-            {
-                return imageIndex;
-            }
-
-            return imageIndex;
-        }
-
-        public void EndRender()
-        {
-            RenderSemPost();
-        }*/
-
         void SwapContext()
         {
-            currentFrame_++;
+            currentFrame++;
+
             if(!SingleLoop)
-            currentContext_ = 1 - currentContext_;
-            //Console.WriteLine("===============SwapContext : {0}", currentContext_);
+            {
+                currentContext = 1 - currentContext;
+            }
+
         }
 
         public void FrameNoRenderWait()
@@ -445,7 +429,7 @@ namespace SharpGame
         {
             if (!SingleLoop)
             {
-                mainSem_.Release();
+                mainSem.Release();
             }
         }
 
@@ -457,10 +441,10 @@ namespace SharpGame
             }
 
             long curTime = Stopwatch.GetTimestamp();
-            bool ok = mainSem_.WaitOne(-1);
+            bool ok = mainSem.WaitOne(-1);
             if (ok)
             {
-                waitSubmit_ = (long)((Stopwatch.GetTimestamp() - curTime) * Timer.MilliSecsPerTick);
+                stats.logicWait = Stopwatch.GetTimestamp() - curTime;
                 return true;
             }
 
@@ -471,7 +455,7 @@ namespace SharpGame
         {
             if (!SingleLoop)
             {
-                renderSem_.Release();
+                renderSem.Release();
             }
         }
 
@@ -480,10 +464,32 @@ namespace SharpGame
             if (!SingleLoop)
             {
                 long curTime = Stopwatch.GetTimestamp();
-                bool ok = renderSem_.WaitOne();
-                waitRender_ = (long)((Stopwatch.GetTimestamp() - curTime) * Timer.MilliSecsPerTick);
+                bool ok = renderSem.WaitOne();
+                stats.renderWait = Stopwatch.GetTimestamp() - curTime;
             }
         }
         #endregion
+
+    }
+
+    public struct Statistics
+    {
+        public long frameBegin;
+        public double FrameBegin => frameBegin * Timer.MilliSecsPerTick;
+
+        public long frameEnd;
+        public double FrameEnd => frameEnd * Timer.MilliSecsPerTick;
+
+        public long renderBegin;
+        public double RenderBegin => renderBegin * Timer.MilliSecsPerTick;
+
+        public long renderEnd;
+        public double RenderEnd => renderEnd * Timer.MilliSecsPerTick;
+
+        public long logicWait;
+        public double LogicWait => logicWait * Timer.MilliSecsPerTick;
+
+        public long renderWait;
+        public double RenderWait => renderWait * Timer.MilliSecsPerTick;
     }
 }

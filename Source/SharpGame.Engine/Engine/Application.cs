@@ -24,11 +24,13 @@ namespace SharpGame
         public int height { get; protected set; } = 720;
 
         public Settings Settings { get; } = new Settings();
+        public ref Statistics Stats => ref graphics.stats;
 
         protected IntPtr window;
         protected Sdl2Window nativeWindow;
         protected IntPtr windowInstance;
 
+        protected string workSpace;
         protected Timer timer;
         protected FileSystem fileSystem;
         protected Resources cache;
@@ -38,7 +40,8 @@ namespace SharpGame
         protected bool paused = false;
         protected bool prepared;
         protected bool singleLoop = false;
-        protected string workSpace;
+        private bool mainThreadRender = false;
+        private bool shouldQuit = false;
 
         private float fps;
         public float Fps => fps;
@@ -52,8 +55,7 @@ namespace SharpGame
         private int timeStepSmoothing = 2;
         private uint minFps = 10;
         private uint maxFps = 2000;
-        private bool shouldQuit = false;
-        private bool mainThreadRender = false;
+
         public Application(string dataPath)
         {
             instance = this;
@@ -80,6 +82,7 @@ namespace SharpGame
             CreateWindow();
 
             Settings.SingleLoop = singleLoop;
+            Settings.ApplicationName = Name;
 
             graphics = CreateSubsystem<Graphics>(Settings);
             graphics.Init(nativeWindow.SdlWindowHandle);
@@ -106,20 +109,13 @@ namespace SharpGame
             nativeWindow.Create();
 
             window = nativeWindow.Handle;
-            nativeWindow.Resized += WindowResize;
-            nativeWindow.Closing += NativeWindow_Closing;
+            nativeWindow.Resized += OnWindowResize;
+            nativeWindow.Closing += OnWindowClosing;
         }
 
-        private void NativeWindow_Closing()
+        public static void Quit()
         {
-            if(singleLoop)
-            {
-                nativeWindow.Destroy();
-            }
-            else
-            {
-                shouldQuit = true;
-            }
+            instance.shouldQuit = true;
         }
 
         public void Run()
@@ -186,7 +182,7 @@ namespace SharpGame
             
         }
 
-        void SimulateLoop()
+        private void SimulateLoop()
         {
             Setup();
 
@@ -221,7 +217,7 @@ namespace SharpGame
             Destroy();
         }
 
-        void RenderLoop()
+        private void RenderLoop()
         {
             while (!shouldQuit)
             {
@@ -237,28 +233,10 @@ namespace SharpGame
             graphics.Close();
         }
 
-        void WindowResize()
+        private void UpdateFrame()
         {
-            if (!prepared)
-            {
-                return;
-            }
+            Stats.frameBegin = Stopwatch.GetTimestamp();
 
-            prepared = false;
-
-            // Recreate swap chain
-            width = nativeWindow.Width;
-            height = nativeWindow.Width;
-
-            graphics.Resize(width, height);
-
-            graphics.WaitIdle();
-
-            prepared = true;
-        }
-
-        void UpdateFrame()
-        {
             this.SendGlobalEvent(new BeginFrame
             {
                 frameNum = Time.FrameNum,
@@ -282,9 +260,10 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndFrame());
 
+            Stats.frameEnd = Stopwatch.GetTimestamp();
         }
 
-        void ApplyFrameLimit()
+        private void ApplyFrameLimit()
         {
             uint maxFps = this.maxFps;
 
@@ -345,6 +324,38 @@ namespace SharpGame
             }
             else
                 timeStep = lastTimeSteps[lastTimeSteps.Count - 1];
+        }
+
+        private void OnWindowResize()
+        {
+            if (!prepared)
+            {
+                return;
+            }
+
+            prepared = false;
+
+            // Recreate swap chain
+            width = nativeWindow.Width;
+            height = nativeWindow.Width;
+
+            graphics.Resize(width, height);
+
+            graphics.WaitIdle();
+
+            prepared = true;
+        }
+
+        private void OnWindowClosing()
+        {
+            if (singleLoop)
+            {
+                nativeWindow.Destroy();
+            }
+            else
+            {
+                Quit();
+            }
         }
 
     }

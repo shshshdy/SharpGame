@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace SharpGame
@@ -44,6 +45,9 @@ namespace SharpGame
         {
             var graphics = Graphics.Instance;
 
+            graphics.stats.renderBegin = Stopwatch.GetTimestamp();
+
+
             Log.Render("    BeginRender : {0}", Time.FrameNum);
             graphics.BeginRender();
 
@@ -67,6 +71,8 @@ namespace SharpGame
             graphics.EndRender();
 
             Log.Render("    EndRender : {0}", Time.FrameNum);
+
+            graphics.stats.renderEnd = Stopwatch.GetTimestamp();
         }
 
     }

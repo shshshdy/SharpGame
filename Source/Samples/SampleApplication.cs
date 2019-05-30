@@ -12,6 +12,8 @@ namespace SharpGame.Samples
         int selected = 0;
         string[] sampleNames;
 
+        Profiler profiler;
+
         public SampleApplication() : base("../../../../../")
         {
         }
@@ -19,6 +21,8 @@ namespace SharpGame.Samples
         protected override void Setup()
         {
             base.Setup();
+
+            profiler = CreateSubsystem<Profiler>();
 
             this.Subscribe<GUIEvent>(HandleGUI);
             this.Subscribe<Update>(HandleUpdate);
@@ -85,7 +89,7 @@ namespace SharpGame.Samples
         }
 
 
-        static int corner = 0;
+        static int corner = 1;
         bool p_open;
         const float DISTANCE = 10.0f;
 
@@ -104,29 +108,25 @@ namespace SharpGame.Samples
             ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
             if (ImGui.Begin("Perf HUD", ref p_open, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
-                ImGui.Text(string.Format("Fps : {0}", Fps));
-                ImGui.Text(string.Format("Msec : {0}", Msec));
-                ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
-                ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
-
-                ImGui.Separator();
                 ImGui.Text("Selected Sample:");
                 if (ImGui.Combo("", ref selected, sampleNames, sampleNames.Length))
                 {
                     SetSample(sampleNames[selected]);
                 }
 
-                if (ImGui.BeginPopupContextWindow())
-                {
-                    if (ImGui.MenuItem("Custom", "", corner == -1)) corner = -1;
-                    if (ImGui.MenuItem("Top-left", "", corner == 0)) corner = 0;
-                    if (ImGui.MenuItem("Top-right", "", corner == 1)) corner = 1;
-                    if (ImGui.MenuItem("Bottom-left", "", corner == 2)) corner = 2;
-                    if (ImGui.MenuItem("Bottom-right", "", corner == 3)) corner = 3;
-                    if (p_open && ImGui.MenuItem("Close")) p_open = false;
-                    ImGui.EndPopup();
-                }
+                ImGui.Separator();
 
+                ImGui.Text(string.Format("Fps : {0}", Fps));
+                ImGui.Text(string.Format("Msec : {0}", Msec));
+                ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
+                ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
+
+                ImGui.Text(string.Format("FrameBegin : {0}",this.Stats.FrameBegin));
+                ImGui.Text(string.Format("FrameEnd : {0}", this.Stats.FrameEnd));
+                ImGui.Text(string.Format("RenderBegin : {0}", this.Stats.RenderBegin));
+                ImGui.Text(string.Format("RenderEnd : {0}", this.Stats.RenderEnd));
+                ImGui.Text(string.Format("LogicWait : {0}", this.Stats.LogicWait));
+                ImGui.Text(string.Format("RenderWait : {0}", this.Stats.RenderWait));
             }
 
             ImGui.End();

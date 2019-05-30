@@ -29,7 +29,7 @@ namespace SharpGame
         private static VkCommandPool commandPool;
         private static VkPipelineCache pipelineCache;
         private static DebugReportCallbackExt debugReportCallbackExt;
-
+        private static CString engineName = "SharpGame";
         public static VkInstance CreateInstance(Settings settings)
         {
             bool enableValidation = settings.Validation;
@@ -38,8 +38,8 @@ namespace SharpGame
             {
                 sType = VkStructureType.ApplicationInfo,
                 apiVersion = new Version(1, 0, 0),
-                //pApplicationName = Name,
-                //pEngineName = Name,
+                pApplicationName = settings.ApplicationName,
+                pEngineName = engineName,
             };
 
             NativeList<IntPtr> instanceExtensions = new NativeList<IntPtr>(2);
@@ -72,8 +72,10 @@ namespace SharpGame
 
             if (enableValidation)
             {
-                NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr>(1);
-                enabledLayerNames.Add(Strings.StandardValidationLayeName);
+                NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr>(1)
+                {
+                    Strings.StandardValidationLayeName
+                };
                 instanceCreateInfo.enabledLayerCount = enabledLayerNames.Count;
                 instanceCreateInfo.ppEnabledLayerNames = (byte**)enabledLayerNames.Data;
             }
@@ -90,11 +92,8 @@ namespace SharpGame
             return instance;
         }
 
-        public static VkDevice Init(
-            VkPhysicalDeviceFeatures enabledFeatures,
-            NativeList<IntPtr> enabledExtensions,
-            bool useSwapChain = true,
-            VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute)
+        public static VkDevice Init(VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
+            bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute)
         {
             // Physical Device
             uint gpuCount = 0;
@@ -121,10 +120,6 @@ namespace SharpGame
 
             Debug.Assert(physicalDevice.Handle != IntPtr.Zero);
             PhysicalDevice = physicalDevice;
-
-            // Store Properties features, limits and properties of the physical device for later use
-            // Device properties also contain limits and sparse properties
-
             vkGetPhysicalDeviceProperties(physicalDevice, out VkPhysicalDeviceProperties properties);
             Properties = properties;
 
@@ -157,7 +152,9 @@ namespace SharpGame
                     for (uint i = 0; i < extCount; i++)
                     {
                         var ext = extensions[i];
-                        // supportedExtensions.push_back(ext.extensionName);
+                        //string strExt = CString.FromPointer(ext.extensionName);
+                        enabledExtensions.Add((IntPtr)ext.extensionName);
+                        //supportedExtensions.push_back(ext.extensionName);
                         // TODO: fixed-length char arrays are not being parsed correctly.
                     }
                 }
@@ -168,12 +165,8 @@ namespace SharpGame
             return device;
         }
 
-
-        static VkResult CreateLogicalDevice(
-            VkPhysicalDeviceFeatures enabledFeatures,
-            NativeList<IntPtr> enabledExtensions,
-            bool useSwapChain = true,
-            VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute)
+        static VkResult CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
+            bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute)
         {
             // Desired queues need to be requested upon logical device creation
             // Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if the application
@@ -187,11 +180,13 @@ namespace SharpGame
                 if ((requestedQueueTypes & VkQueueFlags.Graphics) != 0)
                 {
                     QFIndices.Graphics = GetQueueFamilyIndex(VkQueueFlags.Graphics);
-                    VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo();
-                    queueInfo.sType = VkStructureType.DeviceQueueCreateInfo;
-                    queueInfo.queueFamilyIndex = QFIndices.Graphics;
-                    queueInfo.queueCount = 1;
-                    queueInfo.pQueuePriorities = &defaultQueuePriority;
+                    VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
+                    {
+                        sType = VkStructureType.DeviceQueueCreateInfo,
+                        queueFamilyIndex = QFIndices.Graphics,
+                        queueCount = 1,
+                        pQueuePriorities = &defaultQueuePriority
+                    };
                     queueCreateInfos.Add(queueInfo);
                 }
                 else
@@ -206,11 +201,13 @@ namespace SharpGame
                     if (QFIndices.Compute != QFIndices.Graphics)
                     {
                         // If compute family index differs, we need an additional queue create info for the compute queue
-                        VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo();
-                        queueInfo.sType = VkStructureType.DeviceQueueCreateInfo;
-                        queueInfo.queueFamilyIndex = QFIndices.Compute;
-                        queueInfo.queueCount = 1;
-                        queueInfo.pQueuePriorities = &defaultQueuePriority;
+                        VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
+                        {
+                            sType = VkStructureType.DeviceQueueCreateInfo,
+                            queueFamilyIndex = QFIndices.Compute,
+                            queueCount = 1,
+                            pQueuePriorities = &defaultQueuePriority
+                        };
                         queueCreateInfos.Add(queueInfo);
                     }
                 }
@@ -227,11 +224,13 @@ namespace SharpGame
                     if (QFIndices.Transfer != QFIndices.Graphics && QFIndices.Transfer != QFIndices.Compute)
                     {
                         // If compute family index differs, we need an additional queue create info for the transfer queue
-                        VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo();
-                        queueInfo.sType = VkStructureType.DeviceQueueCreateInfo;
-                        queueInfo.queueFamilyIndex = QFIndices.Transfer;
-                        queueInfo.queueCount = 1;
-                        queueInfo.pQueuePriorities = &defaultQueuePriority;
+                        VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
+                        {
+                            sType = VkStructureType.DeviceQueueCreateInfo,
+                            queueFamilyIndex = QFIndices.Transfer,
+                            queueCount = 1,
+                            pQueuePriorities = &defaultQueuePriority
+                        };
                         queueCreateInfos.Add(queueInfo);
                     }
                 }
@@ -287,7 +286,7 @@ namespace SharpGame
                 VkDebugReportFlagsEXT.DebugEXT,
                 (args) =>
                 {
-                    Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}] {args.Message}");
+                    Log.Info($"[{args.Flags}][{args.LayerPrefix}] {args.Message}");
                     return args.Flags.HasFlag(DebugReportFlagsExt.Error);
                 }, IntPtr.Zero
             );
