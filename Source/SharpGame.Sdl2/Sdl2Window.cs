@@ -95,7 +95,7 @@ namespace SharpGame.Sdl2
                 WindowID = SDL_GetWindowID(_window);
                 Sdl2WindowRegistry.RegisterWindow(this);
                 PostWindowCreated(0);
-            }
+            }  
         }
 
         public void Show()
@@ -318,8 +318,10 @@ namespace SharpGame.Sdl2
             }
             else
             {
-            //    Application.Quit();
-                CloseCore();
+                Closing?.Invoke();
+
+                //Application.Quit();
+                //CloseCore();
             }
         }
 
@@ -332,7 +334,7 @@ namespace SharpGame.Sdl2
         private void CloseCore()
         {
             Sdl2WindowRegistry.RemoveWindow(this);
-            Closing?.Invoke();
+            //Closing?.Invoke();
             SDL_DestroyWindow(_window);
             _exists = false;
             Closed?.Invoke();

@@ -1,4 +1,4 @@
-﻿#define RENDER_LOG
+﻿//#define RENDER_LOG
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

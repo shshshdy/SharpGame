@@ -107,6 +107,19 @@ namespace SharpGame
 
             window = nativeWindow.Handle;
             nativeWindow.Resized += WindowResize;
+            nativeWindow.Closing += NativeWindow_Closing;
+        }
+
+        private void NativeWindow_Closing()
+        {
+            if(singleLoop)
+            {
+                nativeWindow.Destroy();
+            }
+            else
+            {
+                shouldQuit = true;
+            }
         }
 
         public void Run()
@@ -185,17 +198,11 @@ namespace SharpGame
             graphics.FrameNoRenderWait();
             graphics.Frame();
 
-            while (nativeWindow.Exists)
+            while (!shouldQuit)
             {
                 Time.Tick(timeStep);
                 
                 input.snapshot = nativeWindow.PumpEvents();
-
-                if (!nativeWindow.Exists)
-                {
-                    // Exit early if the window was closed this frame.
-                    break;
-                }
 
                 UpdateFrame();
                 
@@ -208,6 +215,8 @@ namespace SharpGame
             timer.Stop();
             // Flush device to make sure all resources can be freed 
             graphics.WaitIdle();
+
+            nativeWindow.Destroy();
 
             Destroy();
         }
