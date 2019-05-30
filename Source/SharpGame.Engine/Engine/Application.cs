@@ -39,7 +39,7 @@ namespace SharpGame
         protected Input input;
         protected bool paused = false;
         protected bool prepared;
-        protected bool singleLoop = false;
+        protected bool singleLoop = true;
         private bool mainThreadRender = false;
         private bool shouldQuit = false;
 
