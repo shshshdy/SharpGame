@@ -52,7 +52,8 @@ namespace SharpGame
         private int timeStepSmoothing = 2;
         private uint minFps = 10;
         private uint maxFps = 2000;
-
+        private bool shouldQuit = false;
+        private bool mainThreadRender = false;
         public Application(string dataPath)
         {
             instance = this;
@@ -158,33 +159,21 @@ namespace SharpGame
 
         private void DoubleLoop()
         {
-
-            new Thread(SecondLoop).Start();
-
-            while(true)
+            if(mainThreadRender)
             {
-                if(nativeWindow == null || renderer == null)
-                {
-                    continue;
-                }
-
-                //input.snapshot = nativeWindow.PumpEvents();
-
-                if (!nativeWindow.Exists)
-                {
-                    // Exit early if the window was closed this frame.
-                    break;
-                }
-
-                renderer.Render();
-
-                //Thread.Sleep(1);
+                new Thread(SimulateLoop).Start();
+                RenderLoop();
+            }
+            else
+            {
+                new Thread(RenderLoop).Start();
+                SimulateLoop();            
             }
 
-            graphics.Close();
+            
         }
 
-        void SecondLoop()
+        void SimulateLoop()
         {
             Setup();
 
@@ -201,27 +190,42 @@ namespace SharpGame
                 Time.Tick(timeStep);
                 
                 input.snapshot = nativeWindow.PumpEvents();
-/*
+
                 if (!nativeWindow.Exists)
                 {
                     // Exit early if the window was closed this frame.
                     break;
-                }*/
+                }
 
                 UpdateFrame();
                 
                 graphics.Frame();
-
-                //renderer.Render();
-
+                
                 ApplyFrameLimit();
             }
 
+            graphics.Frame();
             timer.Stop();
             // Flush device to make sure all resources can be freed 
             graphics.WaitIdle();
 
             Destroy();
+        }
+
+        void RenderLoop()
+        {
+            while (!shouldQuit)
+            {
+                if (nativeWindow == null || renderer == null)
+                {
+                    continue;
+                }
+
+                renderer.Render();
+
+            }
+
+            graphics.Close();
         }
 
         void WindowResize()
