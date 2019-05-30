@@ -16,20 +16,11 @@ namespace SharpGame
         {
             Name = name;
 
-            Recreate();
-
             perFrameResLayout = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-
             };
 
-        }
-
-        protected void Recreate()
-        {
-            var renderer = Renderer.Instance;
-           
         }
 
         protected override void OnBeginDraw(RenderView view)

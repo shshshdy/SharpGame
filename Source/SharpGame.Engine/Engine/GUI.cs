@@ -50,8 +50,8 @@ namespace SharpGame
 
             ImGui.NewFrame();
 
-            //this.Subscribe<BeginFrame>(Handle);
-            //this.Subscribe<EndRender>(Handle);
+            this.Subscribe<BeginFrame>(Handle);
+            this.Subscribe<EndRenderPass>(Handle);
         }
 
         protected override void Destroy()
@@ -225,13 +225,13 @@ namespace SharpGame
 
         }
 
-        unsafe void Handle(EndRender e)
+        unsafe void Handle(EndRenderPass e)
         {
             var graphics = Graphics.Instance;
             var width = graphics.Width;
             var height = graphics.Height;
-            var cmdBuffer = Graphics.Instance.RenderCmdBuffer;
-
+            var cmdBuffer = e.renderPass.CmdBuffer;
+            /*
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
                 renderPass, framebuffers[graphics.currentImage],
@@ -242,15 +242,15 @@ namespace SharpGame
 
             cmdBuffer.SetViewport(new Viewport(0, 0, width, height));
             cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
+            */
+            RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
 
-            RenderImDrawData(ImGui.GetDrawData());
-
-            cmdBuffer.EndRenderPass();
+            //cmdBuffer.EndRenderPass();
             
         }
 
 
-        private unsafe void RenderImDrawData(ImDrawDataPtr draw_data)
+        private unsafe void RenderImDrawData(CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
         {
             var io = ImGui.GetIO();
 
@@ -295,7 +295,6 @@ namespace SharpGame
             }
 
             var graphics = Graphics.Instance;
-            var cmdBuffer = graphics.RenderCmdBuffer;
 
             var pipelines_solid = pipeline.GetGraphicsPipeline(graphics.RenderPass, uiShader.Main, null);
 
