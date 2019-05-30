@@ -51,15 +51,13 @@ namespace SharpGame
         private CommandBufferPool primaryCmdPool;
         private CommandBufferPool[] secondaryCmdPool;
 
-        public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[currentImage];
+        public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[RenderContext];
 
         //todo: multithread
-        public CommandBufferPool WorkCmdPool => secondaryCmdPool[workThread];
+        public CommandBufferPool WorkCmdPool => secondaryCmdPool[WorkContext];
 
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
-
-        public int workThread = 0;
 
         public uint currentImage;
         public uint nextImage;
@@ -107,21 +105,9 @@ namespace SharpGame
         }
 
 
-        protected override void Destroy()
-        {
-            Device.Shutdown();
-
-            base.Destroy();
-        }
-
         public void Init(IntPtr wnd)
         {
             Swapchain.InitSurface(wnd);
-
-            if (Device.EnableDebugMarkers)
-            {
-                // vks::debugmarker::setup(Device);
-            }
 
             DescriptorPoolManager = new DescriptorPoolManager();
 
@@ -133,6 +119,13 @@ namespace SharpGame
             CreateCommandPool();
             CreateCommandBuffers();
 
+        }
+
+        protected override void Destroy()
+        {
+            Device.Shutdown();
+
+            base.Destroy();
         }
 
         public void Resize(int w, int h)
@@ -367,7 +360,7 @@ namespace SharpGame
         {
             // Command buffer to be sumitted to the queue
             submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress(currentImage); //(VkCommandBuffer*)drawCmdBuffers.GetAddress(currentBuffer);
+            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress((uint)RenderContext);
 
             // Submit to queue
             VulkanUtil.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
@@ -379,13 +372,11 @@ namespace SharpGame
             RenderSemPost();
         }
 
-
-
         #region MULTITHREADED
 
         private int currentContext_;
-        public int WorkContext => SingleLoop ? imageIndex : currentContext_;
-        //public int RenderContext => 1 - currentContext_;
+        public int WorkContext => SingleLoop ? 0 : currentContext_;
+        public int RenderContext => SingleLoop ? 0 : 1 - currentContext_;
 
         private int currentFrame_;
         public int CurrentFrame => currentFrame_;
@@ -416,8 +407,8 @@ namespace SharpGame
             RenderSemPost();
         }
 
-        int imageIndex = 0;
         /*
+        int imageIndex = 0;
         public int BeginRender()
         {
             imageIndex = Swapchain.AcquireNextImage(semaphore: ImageAvailableSemaphore);
@@ -438,6 +429,7 @@ namespace SharpGame
         void SwapContext()
         {
             currentFrame_++;
+            if(!SingleLoop)
             currentContext_ = 1 - currentContext_;
             //Console.WriteLine("===============SwapContext : {0}", currentContext_);
         }

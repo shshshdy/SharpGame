@@ -8,31 +8,30 @@ using System.Text;
 
 namespace SharpGame
 {
-    internal class ProfilerBlock
+    internal class ProfilerNode
     {
         public string name;
         public ThreadedProfiler profiler;
-        public ProfilerBlock parent;
-        public List<ProfilerBlock> children;
-        private Stopwatch stopwatch = new Stopwatch();
-        long time;
+        public ProfilerNode parent;
+        public List<ProfilerNode> children;
+        long beginTime;
+        long endTime;
 
-        public ProfilerBlock()
+        public ProfilerNode()
         {
         }
 
-        public void Reset(string name, ThreadedProfiler profiler, ProfilerBlock parent)
+        public void Reset(string name, ThreadedProfiler profiler, ProfilerNode parent)
         {
             this.name = name;
             this.profiler = profiler;
             this.parent = parent;
-            time = 0;
+            beginTime = endTime = 0;
         }
 
         public void Free()
         {
-            profiler.blockPool.Free(this);
-            stopwatch.Stop();
+            profiler.blockPool.Free(this);            
 
             foreach (var c in children)
             {
@@ -42,17 +41,15 @@ namespace SharpGame
 
         public void Begin()
         {
-            stopwatch.Reset();
-            stopwatch.Start();
+            beginTime = Stopwatch.GetTimestamp();
         }
 
         public void End()
         {
-            time = stopwatch.ElapsedTicks;
-
+            endTime = Stopwatch.GetTimestamp();
         }
 
-        public ProfilerBlock GetChild(string name)
+        public ProfilerNode GetChild(string name)
         {
             foreach (var c in children)
             {
@@ -62,24 +59,56 @@ namespace SharpGame
                 }
             }
 
-            ProfilerBlock child = profiler.blockPool.Request();
+            ProfilerNode child = profiler.blockPool.Request();
             child.Reset(name, profiler, this);            
             return child;
         }
     }
 
+
     internal class ThreadedProfiler
     {
         public string name;
-        public ProfilerBlock root;
-        public ProfilerBlock current;
+        public ProfilerNode root;
+        public ProfilerNode current;        
 
-        public FreeList<ProfilerBlock> blockPool = new FreeList<ProfilerBlock>();
+        public FreeList<ProfilerNode> blockPool = new FreeList<ProfilerNode>();
+        private bool profiling = false;
         public ThreadedProfiler()
         {
-            current = root = new ProfilerBlock();
-            root.profiler = this;
+            root = new ProfilerNode
+            {
+                profiler = this
+            };
         }
+
+        public void Begin()
+        {
+            if(profiling)
+            {
+                return;
+            }
+
+            current = root;
+            profiling = true;
+        }
+
+        public void End()
+        {
+            if(current != root)
+            {
+                Log.Warn("profiler error");
+                return;
+            }
+
+            foreach (var c in root.children)
+            {
+                c.Free();
+            }
+
+            profiling = false;
+        }
+       
 
         public void BeginSample(string name)
         {
@@ -90,6 +119,7 @@ namespace SharpGame
         public void EndSample()
         {
             current.End();
+
             if (current.parent != null)
                 current = current.parent;
         }
@@ -102,7 +132,6 @@ namespace SharpGame
 
         public Profiler()
         {
-
         }
 
         static Profiler self => Instance;
@@ -124,6 +153,18 @@ namespace SharpGame
 
                 return threadedProfiler;
             }
+        }
+
+        [Conditional("ENABLE_PROFILER")]
+        public static void Begin()
+        {
+            ThreadedProfiler.Begin();
+        }
+
+        [Conditional("ENABLE_PROFILER")]
+        public static void End()
+        {
+            ThreadedProfiler.End();
         }
 
         [Conditional("ENABLE_PROFILER")]

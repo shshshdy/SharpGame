@@ -161,7 +161,8 @@ namespace SharpGame
 
             while(true)
             {
-                Thread.Sleep(1);
+                renderer.Render();
+            //    Thread.Sleep(1);
             }
 
 
