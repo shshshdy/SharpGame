@@ -58,6 +58,11 @@ namespace SharpGame
                         
             RenderPath = renderPath;
 
+            if (RenderPath == null)
+            {
+                RenderPath = new FrameGraph();
+                RenderPath.AddRenderPass(new FrameGraphScenePass());
+            }
 
             CreateBuffers();
         }
@@ -100,11 +105,6 @@ namespace SharpGame
             frameUniform.ElapsedTime = (float)Time.Elapsed;
             ubFrameInfo.SetData(ref frameUniform);
 
-            if (RenderPath == null)
-            {
-                RenderPath = new FrameGraph();
-                RenderPath.AddRenderPass(new FrameGraphScenePass());
-            }
 
             this.SendGlobalEvent(new BeginView { view = this });
 

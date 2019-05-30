@@ -37,7 +37,7 @@ namespace SharpGame
         protected Input input;
         protected bool paused = false;
         protected bool prepared;
-        protected bool singleLoop = true;
+        protected bool singleLoop = false;
         protected string workSpace;
 
         private float fps;
@@ -158,10 +158,6 @@ namespace SharpGame
 
         private void DoubleLoop()
         {
-            Setup();
-
-            Init();
-
 
             new Thread(SecondLoop).Start();
 
@@ -172,8 +168,11 @@ namespace SharpGame
                     continue;
                 }
 
-                if(!nativeWindow.Exists)
+                //input.snapshot = nativeWindow.PumpEvents();
+
+                if (!nativeWindow.Exists)
                 {
+                    // Exit early if the window was closed this frame.
                     break;
                 }
 
@@ -187,6 +186,10 @@ namespace SharpGame
 
         void SecondLoop()
         {
+            Setup();
+
+            Init();
+
             timer.Reset();
             timer.Start();
 
@@ -196,16 +199,16 @@ namespace SharpGame
             while (nativeWindow.Exists)
             {
                 Time.Tick(timeStep);
-                /*
+                
                 input.snapshot = nativeWindow.PumpEvents();
-
+/*
                 if (!nativeWindow.Exists)
                 {
                     // Exit early if the window was closed this frame.
                     break;
                 }*/
 
-                //UpdateFrame();
+                UpdateFrame();
                 
                 graphics.Frame();
 

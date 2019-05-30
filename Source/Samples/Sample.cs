@@ -45,6 +45,10 @@ namespace SharpGame.Samples
             }
 
             var input = Input.Instance;
+            if(input.snapshot == null)
+            {
+                return;
+            }
 
             if (mousePos == Vector2.Zero)
                 mousePos = input.MousePosition;
