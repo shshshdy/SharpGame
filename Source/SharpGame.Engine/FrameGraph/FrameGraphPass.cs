@@ -79,7 +79,7 @@ namespace SharpGame
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                framebuffer = framebuffers[graphics.nextImage],
+                framebuffer = framebuffers[workContext],//[graphics.nextImage],
                 renderPass = renderPass
             };
 
@@ -140,19 +140,17 @@ namespace SharpGame
             var graphics = Graphics.Instance;
  
             CommandBuffer cb = graphics.RenderCmdBuffer;
-
-            var fb = framebuffers ?? graphics.Framebuffers;
-
+            var fbs = framebuffers ?? graphics.Framebuffers;
+            int renderContext = graphics.RenderContext;
+            var fb = fbs[renderContext]; //fbs[imageIndex];
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
-                fb[imageIndex].renderPass,
-                fb[imageIndex],
+                fb.renderPass, fb,
                 new Rect2D(0, 0, graphics.Width, graphics.Height),
                 new ClearColorValue(0.25f, 0.25f, 0.25f, 1.0f),
                 new ClearDepthStencilValue(1.0f, 0)
             );
 
-            int renderContext = graphics.RenderContext;
             Log.Render("[{0}]begin primbuf:{1}, fb : {2}",
                 renderContext,
                 cb.commandBuffer.Handle,

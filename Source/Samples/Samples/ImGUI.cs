@@ -9,7 +9,7 @@ using static Vulkan.VulkanNative;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 0)]
+    [SampleDesc(sortOrder = 5)]
     public unsafe class ImGUI : Sample
     {
         public override void OnGUI()

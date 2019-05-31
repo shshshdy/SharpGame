@@ -154,9 +154,9 @@ namespace SharpGame
                 magFilter = Filter.Linear,
                 minFilter = Filter.Linear,
                 mipmapMode = SamplerMipmapMode.Linear,
-                addressModeU = SamplerAddressMode.ClampToEdge,
-                addressModeV = SamplerAddressMode.ClampToEdge,
-                addressModeW = SamplerAddressMode.ClampToEdge,
+                addressModeU = SamplerAddressMode.Repeat,
+                addressModeV = SamplerAddressMode.Repeat,
+                addressModeW = SamplerAddressMode.Repeat,
                 mipLodBias = 0.0f,
                 compareOp = CompareOp.Never,
                 minLod = 0.0f,
@@ -240,9 +240,9 @@ namespace SharpGame
             mipLevels = tex2D.Mipmaps.Length;
 
             // Get device properites for the requested texture format
-            VkFormatProperties formatProperties;
-            vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, (VkFormat)format,
-                out formatProperties);
+            //VkFormatProperties formatProperties;
+            //vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, (VkFormat)format,
+            //    out formatProperties);
 
             // Only use linear tiling if requested (and supported by the device)
             // Support for linear tiling is mostly limited, so prefer to use
