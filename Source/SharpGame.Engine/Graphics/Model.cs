@@ -13,19 +13,19 @@ namespace SharpGame
     public class Model : Resource<Model>
     {
         /// Vertex buffers.
-        private DeviceBuffer[] vertexBuffers_;
+        private DeviceBuffer[] vertexBuffers;
         [DataMember]
         public DeviceBuffer[] VertexBuffers
         {
-            get => vertexBuffers_; set => vertexBuffers_ = value;
+            get => vertexBuffers; set => vertexBuffers = value;
         }
 
         /// Index buffers.
-        private DeviceBuffer[] indexBuffers_;
+        private DeviceBuffer[] indexBuffers;
         [DataMember]
         public DeviceBuffer[] IndexBuffers
         {
-            get => indexBuffers_; set => indexBuffers_ = value;
+            get => indexBuffers; set => indexBuffers = value;
         }
 
         /// Bounding box.
@@ -38,11 +38,11 @@ namespace SharpGame
 
         /// Geometries.
         [IgnoreDataMember]
-        public Geometry[][] Geometries { get => geometries_; set => geometries_ = value; }
-        private Geometry[][] geometries_ = new Geometry[0][];
+        public Geometry[][] Geometries { get => geometries; set => geometries = value; }
+        private Geometry[][] geometries = new Geometry[0][];
 
         [IgnoreDataMember]
-        public int NumGeometries => geometries_.Length;
+        public int NumGeometries => geometries.Length;
 
         /// Geometry bone mappings.
         public List<int[]> GeometryBoneMappings { get; set; }
@@ -57,24 +57,24 @@ namespace SharpGame
 
         public void SetNumGeometry(int count)
         {
-            Array.Resize(ref geometries_, count);
+            Array.Resize(ref geometries, count);
             GeometryCenters.Resize(count);
         }
         
         public int GetNumGeometryLodLevels(int index)
         {
-            return index < geometries_.Length ? geometries_[index].Length : 0;
+            return index < geometries.Length ? geometries[index].Length : 0;
         }
 
         public Geometry GetGeometry(int index, int lodLevel)
         {
-            if (index >= geometries_.Length || geometries_[index].Empty())
+            if (index >= geometries.Length || geometries[index].Empty())
                 return null;
 
-            if (lodLevel >= geometries_[index].Length)
-                lodLevel = geometries_[index].Length - 1;
+            if (lodLevel >= geometries[index].Length)
+                lodLevel = geometries[index].Length - 1;
 
-            return geometries_[index][lodLevel];
+            return geometries[index][lodLevel];
         }
 
         public Material GetMaterial(int index)
@@ -86,19 +86,19 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            foreach (var vb in vertexBuffers_)
+            foreach (var vb in vertexBuffers)
             {
                 vb.Dispose();
             }
 
-            Array.Clear(vertexBuffers_, 0, vertexBuffers_.Length);
+            Array.Clear(vertexBuffers, 0, vertexBuffers.Length);
 
-            foreach (var ib in indexBuffers_)
+            foreach (var ib in indexBuffers)
             {
                 ib.Dispose();
             }
 
-            Array.Clear(indexBuffers_, 0, indexBuffers_.Length);
+            Array.Clear(indexBuffers, 0, indexBuffers.Length);
 
             Geometries.Clear();
         }

@@ -340,7 +340,7 @@ namespace SharpGame
             }
 
             int newBufferSize = Math.Max(MinStagingBufferSize, size);
-            DeviceBuffer newBuffer = DeviceBuffer.Create(BufferUsage.TransferSrc | BufferUsage.TransferDst,
+            DeviceBuffer newBuffer = DeviceBuffer.Create(BufferUsageFlags.TransferSrc | BufferUsageFlags.TransferDst,
                 VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, size, 1);
             return newBuffer;
         }

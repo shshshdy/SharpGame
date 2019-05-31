@@ -14,8 +14,8 @@ namespace SharpGame
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
         public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
 
-        private ResourceSet resourceSet_;
-        public ResourceSet ResourceSet { get => resourceSet_; set => resourceSet_ = value; }
+        private ResourceSet resourceSet;
+        public ResourceSet ResourceSet { get => resourceSet; set => resourceSet = value; }
 
         public GraphicsPipeline Pipeline { get; set; }
 
@@ -41,7 +41,7 @@ namespace SharpGame
             {
                 Pipeline = Resources.Instance.Load<GraphicsPipeline>(PipelineName);
             }
-            resourceSet_ = new ResourceSet(Pipeline.ResourceLayout[1]);
+            resourceSet = new ResourceSet(Pipeline.ResourceLayout[1]);
             return Pipeline != null;
         }
 

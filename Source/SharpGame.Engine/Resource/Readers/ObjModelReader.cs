@@ -57,7 +57,7 @@ namespace SharpGame
                         indices[(i * 3) + 1] = index2;
                     }
 
-                    ibs.Add(DeviceBuffer.Create(BufferUsage.IndexBuffer, indices, false));
+                    ibs.Add(DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
                 }
                 else
                 {
@@ -75,12 +75,12 @@ namespace SharpGame
                         indices[(i * 3) + 1] = (ushort)index2;
                     }
 
-                    ibs.Add(DeviceBuffer.Create(BufferUsage.IndexBuffer, indices, false));
+                    ibs.Add(DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
                 }
 
             }
 
-            DeviceBuffer vb = DeviceBuffer.Create(BufferUsage.VertexBuffer, vertices.ToArray(), false);
+            DeviceBuffer vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices.ToArray(), false);
             Model model = new Model
             {
                 VertexBuffers = new[] { vb },

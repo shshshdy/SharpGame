@@ -159,8 +159,8 @@ namespace SharpGame
             }
 
 
-            vb = DeviceBuffer.Create(BufferUsage.VertexBuffer, false, sizeof(VertexPosNormTex), (int)vertexBuffer.Count, vertexBuffer.Data);
-            ib = DeviceBuffer.Create(BufferUsage.IndexBuffer, false, sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
+            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, sizeof(VertexPosNormTex), (int)vertexBuffer.Count, vertexBuffer.Data);
+            ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
 
 
             vertexBuffer.Dispose();

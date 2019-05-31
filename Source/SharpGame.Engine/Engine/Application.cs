@@ -20,8 +20,8 @@ namespace SharpGame
 
         public string Title { get; set; } = "SharpGame";
         public CString Name { get; set; } = "SharpGame";
-        public int width { get; protected set; } = 1280;
-        public int height { get; protected set; } = 720;
+        public int Width { get; protected set; } = 1280;
+        public int Height { get; protected set; } = 720;
 
         public Settings Settings { get; } = new Settings();
         public ref Statistics Stats => ref graphics.stats;
@@ -37,9 +37,10 @@ namespace SharpGame
         protected Graphics graphics;
         protected Renderer renderer;
         protected Input input;
+
         protected bool paused = false;
         protected bool prepared;
-        protected bool singleLoop = true;
+        protected bool singleLoop = false;
         private bool mainThreadRender = false;
         private bool shouldQuit = false;
 
@@ -99,7 +100,7 @@ namespace SharpGame
         protected virtual void CreateWindow()
         {
             windowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            nativeWindow = new Sdl2Window(Name, 50, 50, width, height, SDL_WindowFlags.Resizable, threadedProcessing: false)
+            nativeWindow = new Sdl2Window(Name, 50, 50, Width, Height, SDL_WindowFlags.Resizable, threadedProcessing: false)
             {
                 X = 50,
                 Y = 50,
@@ -221,7 +222,7 @@ namespace SharpGame
         {
             while (!shouldQuit)
             {
-                if (nativeWindow == null || renderer == null)
+                if (renderer == null)
                 {
                     continue;
                 }
@@ -336,10 +337,10 @@ namespace SharpGame
             prepared = false;
 
             // Recreate swap chain
-            width = nativeWindow.Width;
-            height = nativeWindow.Width;
+            Width = nativeWindow.Width;
+            Height = nativeWindow.Width;
 
-            graphics.Resize(width, height);
+            graphics.Resize(Width, Height);
 
             graphics.WaitIdle();
 

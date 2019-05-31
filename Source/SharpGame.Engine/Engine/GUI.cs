@@ -14,8 +14,8 @@ namespace SharpGame
 
     public class GUI : System<GUI>
     {
-        DeviceBuffer vertexBuffer = new DeviceBuffer();
-        DeviceBuffer indexBuffer = new DeviceBuffer();
+        DeviceBuffer[] vertexBuffer = new DeviceBuffer[2];
+        DeviceBuffer[] indexBuffer = new DeviceBuffer[2];
         DeviceBuffer uniformBufferVS = new DeviceBuffer();
         Texture texture;
         Shader uiShader;
@@ -58,8 +58,10 @@ namespace SharpGame
         {
             texture.Dispose();
 
-            vertexBuffer.Dispose();
-            indexBuffer.Dispose();
+            vertexBuffer[0]?.Dispose();
+            indexBuffer[0]?.Dispose();
+            vertexBuffer[1]?.Dispose();
+            indexBuffer[1]?.Dispose();
             uniformBufferVS.Dispose();
             pipeline.Dispose();
         }
@@ -67,8 +69,8 @@ namespace SharpGame
 
         unsafe void CreateGraphicsResources()
         {
-            vertexBuffer = DeviceBuffer.CreateDynamic<VertexPos2dTexColor>(BufferUsage.VertexBuffer, 4096);
-            indexBuffer = DeviceBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, 4096);
+            //vertexBuffer = DeviceBuffer.CreateDynamic<VertexPos2dTexColor>(BufferUsageFlags.VertexBuffer, 4096);
+            //indexBuffer = DeviceBuffer.CreateDynamic<ushort>(BufferUsageFlags.IndexBuffer, 4096);
             uniformBufferVS = DeviceBuffer.CreateUniformBuffer<Matrix4x4>();
 
             resourceLayout = new ResourceLayout
@@ -227,33 +229,15 @@ namespace SharpGame
 
         unsafe void Handle(EndRenderPass e)
         {
-            var graphics = Graphics.Instance;
-            var width = graphics.Width;
-            var height = graphics.Height;
             var cmdBuffer = e.renderPass.CmdBuffer;
-            /*
-            var renderPassBeginInfo = new RenderPassBeginInfo
-            (
-                renderPass, framebuffers[graphics.currentImage],
-                new Rect2D(0, 0, width, height)
-            );
-
-            cmdBuffer.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.Inline);
-
-            cmdBuffer.SetViewport(new Viewport(0, 0, width, height));
-            cmdBuffer.SetScissor(new Rect2D(0, 0, width, height));
-            */
             RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
-
-            //cmdBuffer.EndRenderPass();
-            
         }
 
 
         private unsafe void RenderImDrawData(CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
         {
             var io = ImGui.GetIO();
-
+            var graphics = Graphics.Instance;
             float width = io.DisplaySize.X;
             float height = io.DisplaySize.Y;
 
@@ -262,16 +246,18 @@ namespace SharpGame
                 return;
             }
 
-            if (draw_data.TotalVtxCount * sizeof(ImDrawVert) > (int)vertexBuffer.size)
+            ref DeviceBuffer vb = ref vertexBuffer[graphics.WorkContext];
+            ref DeviceBuffer ib = ref indexBuffer[graphics.WorkContext];
+            if (vb == null || draw_data.TotalVtxCount * sizeof(ImDrawVert) > (int)vb.size)
             {
-                vertexBuffer.Dispose();
-                vertexBuffer = DeviceBuffer.CreateDynamic<ImDrawVert>(BufferUsage.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
+                vb?.Dispose();
+                vb = DeviceBuffer.CreateDynamic<ImDrawVert>(BufferUsageFlags.VertexBuffer, (int)(1.5f * draw_data.TotalVtxCount));
             }
 
-            if (draw_data.TotalIdxCount * sizeof(ushort) > (int)indexBuffer.size)
+            if (ib == null || draw_data.TotalIdxCount * sizeof(ushort) > (int)ib.size)
             {
-                indexBuffer.Dispose();
-                indexBuffer = DeviceBuffer.CreateDynamic<ushort>(BufferUsage.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
+                ib?.Dispose();
+                ib = DeviceBuffer.CreateDynamic<ushort>(BufferUsageFlags.IndexBuffer, (int)(1.5f * draw_data.TotalIdxCount));
             }
 
             var projection = Matrix4x4.CreateOrthographicOffCenter(0f, width, height, 0.0f, -1.0f, 1.0f);
@@ -284,24 +270,22 @@ namespace SharpGame
             {
                 ImDrawListPtr cmd_list = draw_data.CmdListsRange[i];
 
-                vertexBuffer.SetData((void*)cmd_list.VtxBuffer.Data,
+                vb.SetData((void*)cmd_list.VtxBuffer.Data,
                     vertexOffsetInVertices * (uint)sizeof(ImDrawVert), (uint)cmd_list.VtxBuffer.Size * (uint)sizeof(ImDrawVert));
 
-                indexBuffer.SetData((void*)cmd_list.IdxBuffer.Data,
+                ib.SetData((void*)cmd_list.IdxBuffer.Data,
                     indexOffsetInElements * sizeof(ushort), (uint)cmd_list.IdxBuffer.Size * sizeof(ushort));
 
                 vertexOffsetInVertices += (uint)cmd_list.VtxBuffer.Size;
                 indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
             }
-
-            var graphics = Graphics.Instance;
-
+            
             var pipelines_solid = pipeline.GetGraphicsPipeline(graphics.RenderPass, uiShader.Main, null);
 
             cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pipeline, 0, resourceSet);
             cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelines_solid);
-            cmdBuffer.BindVertexBuffer(0, vertexBuffer);
-            cmdBuffer.BindIndexBuffer(indexBuffer, 0, IndexType.Uint16);
+            cmdBuffer.BindVertexBuffer(0, vb);
+            cmdBuffer.BindIndexBuffer(ib, 0, IndexType.Uint16);
 
             draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
 

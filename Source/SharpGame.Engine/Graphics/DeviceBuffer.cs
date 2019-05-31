@@ -8,24 +8,25 @@ using System;
 namespace SharpGame
 {
     public interface IBindableResource { }
-
+    
     public unsafe class DeviceBuffer : RefCounted, IBindableResource
     {
         public int Stride { get; set; }
         public int Count { get; set; }
         public int Size => Stride * Count;
 
-        public VkBuffer buffer;
-        public VkDeviceMemory memory;
-        public VkDescriptorBufferInfo descriptor;
-
-        public VkDeviceSize size = 0;
-        public VkDeviceSize alignment = 0;
-
         /** @brief Usage flags to be filled by external source at buffer creation (to query at some later point) */
-        public BufferUsage usageFlags;
+        public BufferUsageFlags usageFlags;
+
+        internal VkBuffer buffer;
+        internal VkDeviceMemory memory;
+        internal VkDescriptorBufferInfo descriptor;
+
+        internal ulong size = 0;
+        internal ulong alignment = 0;
+
         /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
-        public VkMemoryPropertyFlags memoryPropertyFlags;
+        internal VkMemoryPropertyFlags memoryPropertyFlags;
 
         public ref T Map<T>(int offset = 0) where T : struct
         {
@@ -33,7 +34,7 @@ namespace SharpGame
             return ref Unsafe.AsRef<T>(mapped);
         }
 
-        public void* Map(VkDeviceSize offset = 0, VkDeviceSize size = WholeSize)
+        public void* Map(ulong offset = 0, ulong size = WholeSize)
         {
             return Device.MapMemory(memory, offset, size, 0);
         }
@@ -43,7 +44,7 @@ namespace SharpGame
             Device.UnmapMemory(memory);            
         }
 
-        public void SetupDescriptor(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
+        public void SetupDescriptor(ulong size = WholeSize, ulong offset = 0)
         {
             descriptor.offset = offset;
             descriptor.buffer = buffer;
@@ -62,7 +63,7 @@ namespace SharpGame
             Unmap();
         }
 
-        public VkResult Flush(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
+        public VkResult Flush(ulong size = WholeSize, ulong offset = 0)
         {
             VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
             mappedRange.memory = memory;
@@ -93,27 +94,27 @@ namespace SharpGame
             }
         }
 
-        public static DeviceBuffer CreateDynamic<T>(BufferUsage bufferUsages, int count = 1) where T : struct
+        public static DeviceBuffer CreateDynamic<T>(BufferUsageFlags bufferUsages, int count = 1) where T : struct
         {
             return Create(bufferUsages, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, Unsafe.SizeOf<T>(), count);
         }
 
         public static DeviceBuffer CreateUniformBuffer<T>(int count = 1) where T : struct
         {
-            return CreateDynamic<T>(BufferUsage.UniformBuffer, count);
+            return CreateDynamic<T>(BufferUsageFlags.UniformBuffer, count);
         }
 
-        public static DeviceBuffer Create<T>(BufferUsage bufferUsages, T[] data, bool dynamic = false) where T : struct
+        public static DeviceBuffer Create<T>(BufferUsageFlags bufferUsages, T[] data, bool dynamic = false) where T : struct
         {
             return Create(bufferUsages, dynamic,  Unsafe.SizeOf<T>(), data.Length, Utilities.AsPointer(ref data[0]));
         }
 
-        public static DeviceBuffer Create(BufferUsage usageFlags, bool dynamic, int stride, int count, IntPtr data = default)
+        public static DeviceBuffer Create(BufferUsageFlags usageFlags, bool dynamic, int stride, int count, IntPtr data = default)
         {
             return Create(usageFlags, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, stride, count, (void*)data);
         }
 
-        public static DeviceBuffer Create(BufferUsage usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
+        public static DeviceBuffer Create(BufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
         {
             DeviceBuffer buffer = new DeviceBuffer
             {
@@ -124,24 +125,22 @@ namespace SharpGame
             ulong size = (ulong)(stride * count);
 
             // Create the buffer handle
-            VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
-            bufferCreateInfo.usage = (VkBufferUsageFlags)usageFlags;
-            bufferCreateInfo.size = size;
-
+            BufferCreateInfo bufferCreateInfo = new BufferCreateInfo(usageFlags, size);
             if (data != null && (memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
             {
-                bufferCreateInfo.usage |= VkBufferUsageFlags.TransferDst;
+                bufferCreateInfo.usage |= BufferUsageFlags.TransferDst;
             }
 
-            buffer.buffer = Device.CreateBuffer(ref bufferCreateInfo);
+            buffer.buffer = Device.CreateBuffer(ref bufferCreateInfo.native);
+            Device.GetBufferMemoryRequirements(buffer.buffer, out VkMemoryRequirements memReqs);
+
+            // Find a memory type index that fits the properties of the buffer
+            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
 
             // Create the memory backing up the buffer handle
-            VkMemoryAllocateInfo memAlloc = VkMemoryAllocateInfo.New();
-            Device.GetBufferMemoryRequirements(buffer.buffer, out VkMemoryRequirements memReqs);
-            memAlloc.allocationSize = memReqs.size;
-            // Find a memory type index that fits the properties of the buffer
-            memAlloc.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
-            buffer.memory = Device.AllocateMemory(ref memAlloc);
+            MemoryAllocateInfo memAlloc = new MemoryAllocateInfo(memReqs.size, memoryTypeIndex);
+            
+            buffer.memory = Device.AllocateMemory(ref memAlloc.native);
 
             buffer.alignment = memReqs.alignment;
             buffer.size = memAlloc.allocationSize;
@@ -187,6 +186,41 @@ namespace SharpGame
         }
 
 
+    }
 
+
+    public ref struct BufferCreateInfo
+    {
+        public BufferUsageFlags usage { get => (BufferUsageFlags)native.usage; set => native.usage = (VkBufferUsageFlags)value; }
+        public ulong size { get => native.size; set => native.size = value; }
+        public SharingMode sharingMode { get => (SharingMode)native.sharingMode; set => native.sharingMode = (VkSharingMode)value; }
+        //public uint[] pQueueFamilyIndices { get => native.flags; set => native.flags = value; }
+        public uint[] pQueueFamilyIndices;
+        public VkBufferCreateFlags flags { get => native.flags; set => native.flags = value; }
+
+        internal VkBufferCreateInfo native;
+
+        public BufferCreateInfo(BufferUsageFlags usage, ulong size)
+        {
+            native = VkBufferCreateInfo.New();
+            pQueueFamilyIndices = null;
+            this.usage = usage;
+            this.size = size;
+        }
+    }
+
+    public ref struct MemoryAllocateInfo
+    {
+        public ulong allocationSize => native.allocationSize;
+        public uint memoryTypeIndex => native.memoryTypeIndex;
+
+        internal VkMemoryAllocateInfo native;
+
+        public MemoryAllocateInfo(ulong allocationSize, uint memoryTypeIndex)
+        {
+            native = VkMemoryAllocateInfo.New();
+            native.allocationSize = allocationSize;
+            native.memoryTypeIndex = memoryTypeIndex;
+        }
     }
 }

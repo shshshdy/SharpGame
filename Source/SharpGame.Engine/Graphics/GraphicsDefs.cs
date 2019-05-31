@@ -25,7 +25,12 @@ namespace SharpGame
         Uint32 = 1
     }
 
-    public enum BufferUsage
+    public enum Usage
+    {
+
+    }
+
+    public enum BufferUsageFlags
     {
         None = 0,
         TransferSrc = 1,
