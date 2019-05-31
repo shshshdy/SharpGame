@@ -49,37 +49,17 @@ namespace SharpGame
             endTime = Stopwatch.GetTimestamp();
         }
 
-        public ProfilerNode GetChild(string name)
-        {
-            foreach (var c in children)
-            {
-                if(c.name == name)
-                {
-                    return c;
-                }
-            }
-
-            ProfilerNode child = profiler.blockPool.Request();
-            child.Reset(name, profiler, this);            
-            return child;
-        }
     }
 
 
     internal class ThreadedProfiler
     {
-        public string name;
-        public ProfilerNode root;
-        public ProfilerNode current;        
-
+        public string name;        
         public FreeList<ProfilerNode> blockPool = new FreeList<ProfilerNode>();
         private bool profiling = false;
+
         public ThreadedProfiler()
         {
-            root = new ProfilerNode
-            {
-                profiler = this
-            };
         }
 
         public void Begin()
@@ -89,39 +69,70 @@ namespace SharpGame
                 return;
             }
 
-            current = root;
             profiling = true;
         }
 
         public void End()
         {
-            if(current != root)
-            {
-                Log.Warn("profiler error");
-                return;
-            }
-
-            foreach (var c in root.children)
-            {
-                c.Free();
-            }
-
             profiling = false;
         }
        
 
         public void BeginSample(string name)
         {
-            current = current.GetChild(name);
-            current.Begin();
+            int id = GetChild(name);
+            cmdStack.Push(id);
+            commands.Add(new Cmd { type = CmdType.Begin, nodeId = id, time = Stopwatch.GetTimestamp() });
+
         }
 
         public void EndSample()
         {
-            current.End();
+            int id = cmdStack.Pop();
 
-            if (current.parent != null)
-                current = current.parent;
+            commands.Add(new Cmd { type = CmdType.End, nodeId = id, time = Stopwatch.GetTimestamp() });
+        }
+
+        struct Block
+        {
+            public StringID name;
+
+            public Block(StringID name)
+            {
+                this.name = name;
+            }
+
+        }
+
+        public enum CmdType
+        {
+            Begin,
+            End
+        }
+
+        public struct Cmd
+        {
+            public CmdType type;
+            public int nodeId;
+            public long time;
+        }
+
+        FastList<Cmd> commands = new FastList<Cmd>();
+        Stack<int> cmdStack = new Stack<int>();
+        FastList<Block> blocks = new FastList<Block>();
+        Dictionary<StringID, int> blockToID = new Dictionary<StringID, int>();
+
+        public int GetChild(StringID name)
+        {
+            if(blockToID.TryGetValue(name, out int id))
+            {
+                return id;
+            }
+
+            blocks.Add(new Block(name));
+            int newID = blocks.Count - 1;
+            blockToID[name] = newID;
+            return newID;
         }
     }
 

@@ -377,8 +377,11 @@ namespace SharpGame
         private int currentFrame;
         public int CurrentFrame => currentFrame;
 
-        private int renderThreadID;
-        public bool IsRenderThread => renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
+        static int mainThreadID;
+        public static bool IsMainThread => mainThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
+
+        static int renderThreadID;
+        public static bool IsRenderThread => renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
 
         private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
         private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);
@@ -386,6 +389,16 @@ namespace SharpGame
         public bool SingleLoop => Settings.SingleLoop;
 
         private List<Action> commands_ = new List<Action>();
+
+        public static void SetMainThread()
+        {
+            mainThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+        }
+
+        public static void SetRenderThread()
+        {
+            renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+        }
 
         public void Post(Action action) { commands_.Add(action); }
 
@@ -438,7 +451,7 @@ namespace SharpGame
             bool ok = mainSem.WaitOne(-1);
             if (ok)
             {
-                stats.logicWait = Stopwatch.GetTimestamp() - curTime;
+                stats.LogicWait = Stopwatch.GetTimestamp() - curTime;
                 return true;
             }
 
@@ -459,7 +472,7 @@ namespace SharpGame
             {
                 long curTime = Stopwatch.GetTimestamp();
                 bool ok = renderSem.WaitOne();
-                stats.renderWait = Stopwatch.GetTimestamp() - curTime;
+                stats.RenderWait = Stopwatch.GetTimestamp() - curTime;
             }
         }
         #endregion
@@ -468,21 +481,34 @@ namespace SharpGame
 
     public struct Statistics
     {
+        static long frameTick;
+
         public long frameBegin;
+        public float FrameBegin => (float)((frameBegin - frameTick) * Timer.MilliSecsPerTick);
+
         public long frameEnd;
+        
+       public float FrameEnd
+        {
+            get => (float)((frameEnd - frameTick) * Timer.MilliSecsPerTick);
+            set
+            {
+
+            }
+        }
+
         public float[] frameTime;
 
-        public long renderBegin;
-        public long renderEnd;
+        public long RenderBegin;
+        public long RenderEnd;
         public float[] renderTime;
 
-        public long logicWait;
-        public long renderWait;
-
-        public static long start;
-        public static void Start()
+        public long LogicWait;
+        public long RenderWait;
+        
+        public static void Tick(float timeStep)
         {
-            start = Stopwatch.GetTimestamp();
+            frameTick = Stopwatch.GetTimestamp();
         }
     }
 }

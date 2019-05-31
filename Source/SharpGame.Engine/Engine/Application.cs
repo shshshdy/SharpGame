@@ -133,6 +133,9 @@ namespace SharpGame
 
         public void SingleLoop()
         {
+            Graphics.SetMainThread();
+            Graphics.SetRenderThread();
+
             Setup();
 
             Init();
@@ -142,7 +145,8 @@ namespace SharpGame
             while (nativeWindow.Exists)
             {
                 Time.Tick(timeStep);
-                
+                Statistics.Tick(timeStep);
+
                 input.snapshot = nativeWindow.PumpEvents();
 
                 if (!nativeWindow.Exists)
@@ -184,6 +188,8 @@ namespace SharpGame
 
         private void SimulateLoop()
         {
+            Graphics.SetMainThread();
+
             Setup();
 
             Init();
@@ -196,7 +202,8 @@ namespace SharpGame
             while (!shouldQuit)
             {
                 Time.Tick(timeStep);
-                
+                Statistics.Tick(timeStep);
+
                 input.snapshot = nativeWindow.PumpEvents();
 
                 UpdateFrame();
@@ -218,6 +225,8 @@ namespace SharpGame
 
         private void RenderLoop()
         {
+            Graphics.SetRenderThread();
+
             while (!shouldQuit)
             {
                 if (renderer == null)
@@ -237,7 +246,6 @@ namespace SharpGame
             timer.Reset();
             timer.Start();
 
-            Statistics.Start();
         }
 
         private void UpdateFrame()

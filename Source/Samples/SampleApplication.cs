@@ -94,7 +94,7 @@ namespace SharpGame.Samples
         bool showStats = false;
         const float DISTANCE = 10.0f;
 
-        float[] fps = new float[100];
+        float[] fps = new float[1000];
 
         private void HandleGUI(GUIEvent e)
         {
@@ -124,17 +124,15 @@ namespace SharpGame.Samples
                 ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
                 ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
 
-                ImGui.Text(string.Format("FrameBegin : {0}",Stats.frameBegin));
-                ImGui.Text(string.Format("FrameEnd : {0}", Stats.frameEnd));
-                ImGui.Text(string.Format("RenderBegin : {0}", Stats.renderBegin));
-                ImGui.Text(string.Format("RenderEnd : {0}", Stats.renderEnd));
-                ImGui.Text(string.Format("LogicWait : {0}", Stats.logicWait));
-                ImGui.Text(string.Format("RenderWait : {0}", Stats.renderWait));
+                ImGui.Text(string.Format("FrameBegin : {0}",Stats.FrameBegin));
+                ImGui.Text(string.Format("FrameEnd : {0}", Stats.FrameEnd));
+                ImGui.Text(string.Format("RenderBegin : {0}", Stats.RenderBegin));
+                ImGui.Text(string.Format("RenderEnd : {0}", Stats.RenderEnd));
+                ImGui.Text(string.Format("LogicWait : {0}", Stats.LogicWait * Timer.MilliSecsPerTick));
+                ImGui.Text(string.Format("RenderWait : {0}", Stats.RenderWait * Timer.MilliSecsPerTick));
 
-                if(ImGui.Checkbox("Show stats", ref showStats))
-                {
+                ImGui.Checkbox("Show stats", ref showStats);
 
-                }
             }
 
             ImGui.End();
@@ -143,14 +141,14 @@ namespace SharpGame.Samples
             {
                 corner = 0;
                 System.Numerics.Vector2 window_pos = new System.Numerics.Vector2(io.DisplaySize.X / 2, io.DisplaySize.Y / 2);
-                System.Numerics.Vector2 window_pos_pivot = new System.Numerics.Vector2(0.5f, 0.5f);
+                System.Numerics.Vector2 window_pos_pivot = new System.Numerics.Vector2(0.5f, 0.0f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+                ImGui.SetNextWindowSize(io.DisplaySize * 0.8f);
                 ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
                 if (ImGui.Begin("Stats", ref showStats, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
                 {
-
                     fps[(Time.FrameNum / 10) % fps.Length] = Fps;
-                    ImGui.PlotLines("fps:", ref fps[0], fps.Length);
+                    ImGui.PlotLines("fps", ref fps[0], fps.Length, 0, "fps", 2, 4, new System.Numerics.Vector2(800, 200 ));
                 }
 
                 ImGui.End();

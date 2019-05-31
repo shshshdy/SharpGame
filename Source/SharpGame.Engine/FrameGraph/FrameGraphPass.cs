@@ -142,7 +142,7 @@ namespace SharpGame
             CommandBuffer cb = graphics.RenderCmdBuffer;
             var fbs = framebuffers ?? graphics.Framebuffers;
             int renderContext = graphics.RenderContext;
-            var fb = fbs[renderContext]; //fbs[imageIndex];
+            var fb = /*fbs[renderContext];*/ fbs[imageIndex];
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
                 fb.renderPass, fb,

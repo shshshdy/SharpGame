@@ -45,7 +45,7 @@ namespace SharpGame
         {
             var graphics = Graphics.Instance;
 
-            graphics.stats.renderBegin = Stopwatch.GetTimestamp();
+            graphics.stats.RenderBegin = Stopwatch.GetTimestamp();
 
 
             Log.Render("    BeginRender : {0}", Time.FrameNum);
@@ -72,7 +72,7 @@ namespace SharpGame
 
             Log.Render("    EndRender : {0}", Time.FrameNum);
 
-            graphics.stats.renderEnd = Stopwatch.GetTimestamp();
+            graphics.stats.RenderEnd = Stopwatch.GetTimestamp();
         }
 
     }
