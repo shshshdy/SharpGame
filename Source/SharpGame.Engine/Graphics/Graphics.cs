@@ -176,9 +176,7 @@ namespace SharpGame
         {
             AttachmentDescription[] attachments =
             {
-                // Color attachment
                 new AttachmentDescription(Swapchain.ColorFormat, finalLayout : ImageLayout.PresentSrcKHR),
-                // Depth attachment
                 new AttachmentDescription(DepthFormat, finalLayout : ImageLayout.DepthStencilAttachmentOptimal)
             };
 
@@ -187,12 +185,10 @@ namespace SharpGame
                 new SubpassDescription
                 {
                     pipelineBindPoint = PipelineBindPoint.Graphics,
-
                     pColorAttachments = new []
                     {
                         new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal)
                     },
-
                     pDepthStencilAttachment = new []
                     {
                         new AttachmentReference(1, ImageLayout.DepthStencilAttachmentOptimal)
@@ -201,7 +197,6 @@ namespace SharpGame
                 }
             };
 
-            // Subpass dependencies for layout transitions
             SubpassDependency[] dependencies = 
             {
                 new SubpassDependency
@@ -266,8 +261,7 @@ namespace SharpGame
             {
                 new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer),
                 new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer)
-            };
-            
+            };            
         }
 
         protected void CreateCommandBuffers()
@@ -475,21 +469,20 @@ namespace SharpGame
     public struct Statistics
     {
         public long frameBegin;
-        public double FrameBegin => frameBegin * Timer.MilliSecsPerTick;
-
         public long frameEnd;
-        public double FrameEnd => frameEnd * Timer.MilliSecsPerTick;
+        public float[] frameTime;
 
         public long renderBegin;
-        public double RenderBegin => renderBegin * Timer.MilliSecsPerTick;
-
         public long renderEnd;
-        public double RenderEnd => renderEnd * Timer.MilliSecsPerTick;
+        public float[] renderTime;
 
         public long logicWait;
-        public double LogicWait => logicWait * Timer.MilliSecsPerTick;
-
         public long renderWait;
-        public double RenderWait => renderWait * Timer.MilliSecsPerTick;
+
+        public static long start;
+        public static void Start()
+        {
+            start = Stopwatch.GetTimestamp();
+        }
     }
 }

@@ -137,8 +137,7 @@ namespace SharpGame
 
             Init();
 
-            timer.Reset();
-            timer.Start();
+            Start();
 
             while (nativeWindow.Exists)
             {
@@ -189,8 +188,7 @@ namespace SharpGame
 
             Init();
 
-            timer.Reset();
-            timer.Start();
+            Start();
 
             graphics.FrameNoRenderWait();
             graphics.Frame();
@@ -232,6 +230,14 @@ namespace SharpGame
             }
 
             graphics.Close();
+        }
+
+        void Start()
+        {
+            timer.Reset();
+            timer.Start();
+
+            Statistics.Start();
         }
 
         private void UpdateFrame()

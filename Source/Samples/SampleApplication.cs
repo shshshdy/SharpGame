@@ -124,12 +124,12 @@ namespace SharpGame.Samples
                 ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
                 ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
 
-                ImGui.Text(string.Format("FrameBegin : {0}",this.Stats.FrameBegin));
-                ImGui.Text(string.Format("FrameEnd : {0}", this.Stats.FrameEnd));
-                ImGui.Text(string.Format("RenderBegin : {0}", this.Stats.RenderBegin));
-                ImGui.Text(string.Format("RenderEnd : {0}", this.Stats.RenderEnd));
-                ImGui.Text(string.Format("LogicWait : {0}", this.Stats.LogicWait));
-                ImGui.Text(string.Format("RenderWait : {0}", this.Stats.RenderWait));
+                ImGui.Text(string.Format("FrameBegin : {0}",Stats.frameBegin));
+                ImGui.Text(string.Format("FrameEnd : {0}", Stats.frameEnd));
+                ImGui.Text(string.Format("RenderBegin : {0}", Stats.renderBegin));
+                ImGui.Text(string.Format("RenderEnd : {0}", Stats.renderEnd));
+                ImGui.Text(string.Format("LogicWait : {0}", Stats.logicWait));
+                ImGui.Text(string.Format("RenderWait : {0}", Stats.renderWait));
 
                 if(ImGui.Checkbox("Show stats", ref showStats))
                 {
@@ -145,7 +145,7 @@ namespace SharpGame.Samples
                 System.Numerics.Vector2 window_pos = new System.Numerics.Vector2(io.DisplaySize.X / 2, io.DisplaySize.Y / 2);
                 System.Numerics.Vector2 window_pos_pivot = new System.Numerics.Vector2(0.5f, 0.5f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
-               ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+                ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
                 if (ImGui.Begin("Stats", ref showStats, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
                 {
 
