@@ -28,17 +28,17 @@ namespace SharpGame
         {
             var frameInfo = new FrameInfo
             {
-                timeStep = (float)Time.Delta,
+                timeStep = Time.Delta,
                 frameNumber = Time.FrameNum
             };
 
-            Log.Render("    BeginUpdate : {0}", Time.FrameNum);
+            Profiler.BeginSample("RenderUpdate");
             foreach (var viewport in views)
             {
                 viewport.Update(ref frameInfo);
             }
 
-            Log.Render("    EndUpdate : {0}", Time.FrameNum);
+            Profiler.EndSample();
         }
 
         public void Render()
@@ -47,8 +47,7 @@ namespace SharpGame
 
             graphics.stats.RenderBegin = Stopwatch.GetTimestamp();
 
-
-            Log.Render("    BeginRender : {0}", Time.FrameNum);
+            Profiler.BeginSample("Render");
             graphics.BeginRender();
 
             CommandBuffer cmdBuffer = graphics.RenderCmdBuffer;
@@ -70,7 +69,7 @@ namespace SharpGame
 
             graphics.EndRender();
 
-            Log.Render("    EndRender : {0}", Time.FrameNum);
+            Profiler.EndSample();
 
             graphics.stats.RenderEnd = Stopwatch.GetTimestamp();
         }

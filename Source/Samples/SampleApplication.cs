@@ -123,7 +123,7 @@ namespace SharpGame.Samples
                 ImGui.Text(string.Format("Msec : {0}", Msec));
                 ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
                 ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
-
+                ImGui.Value("SingleLoop : ", singleLoop);
                 ImGui.Text(string.Format("FrameBegin : {0}",Stats.FrameBegin));
                 ImGui.Text(string.Format("FrameEnd : {0}", Stats.FrameEnd));
                 ImGui.Text(string.Format("RenderBegin : {0}", Stats.RenderBegin));
