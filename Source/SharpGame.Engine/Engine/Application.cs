@@ -175,6 +175,7 @@ namespace SharpGame
             if(mainThreadRender)
             {
                 new Thread(SimulateLoop).Start();
+               
                 RenderLoop();
             }
             else
@@ -195,13 +196,14 @@ namespace SharpGame
             Init();
 
             Start();
-
+            started = true;
             graphics.FrameNoRenderWait();
             graphics.Frame();
 
             while (!shouldQuit)
             {
                 Time.Tick(timeStep);
+
                 Statistics.Tick(timeStep);
 
                 input.snapshot = nativeWindow.PumpEvents();
@@ -223,13 +225,14 @@ namespace SharpGame
             Destroy();
         }
 
+        bool started = false;
         private void RenderLoop()
         {
             Graphics.SetRenderThread();
 
             while (!shouldQuit)
             {
-                if (renderer == null)
+                if (!started)
                 {
                     continue;
                 }

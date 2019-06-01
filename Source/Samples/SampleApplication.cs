@@ -12,7 +12,7 @@ namespace SharpGame.Samples
         int selected = 0;
         string[] sampleNames;
 
-        Profiler profiler;
+        PerfTree perfTree;
 
         public SampleApplication() : base("../../../../../")
         {
@@ -22,7 +22,8 @@ namespace SharpGame.Samples
         {
             base.Setup();
 
-            profiler = CreateSubsystem<Profiler>();
+            CreateSubsystem<Profiler>();
+            perfTree = CreateSubsystem<PerfTree>();
 
             this.Subscribe<GUIEvent>(HandleGUI);
             this.Subscribe<Update>(HandleUpdate);
@@ -137,7 +138,8 @@ namespace SharpGame.Samples
 
             ImGui.End();
 
-            if(showStats)
+
+            if (showStats)
             {
                 corner = 0;
                 System.Numerics.Vector2 window_pos = new System.Numerics.Vector2(io.DisplaySize.X / 2, io.DisplaySize.Y / 2);
@@ -147,6 +149,8 @@ namespace SharpGame.Samples
                 ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
                 if (ImGui.Begin("Stats", ref showStats, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
                 {
+                    perfTree.Draw();
+
                     fps[(Time.FrameNum / 10) % fps.Length] = Fps;
                     ImGui.PlotLines("fps", ref fps[0], fps.Length, 0, "fps", 2, 4, new System.Numerics.Vector2(800, 200 ));
                 }
