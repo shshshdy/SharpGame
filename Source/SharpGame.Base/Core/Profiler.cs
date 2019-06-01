@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace SharpGame
 {
@@ -14,6 +15,13 @@ namespace SharpGame
         public string name;
         public int threadID;
         private bool profiling = false;
+
+        FastList<Cmd> commands = new FastList<Cmd>();
+        Stack<int> cmdStack = new Stack<int>();
+        public FastList<Block> blocks = new FastList<Block>();
+        Dictionary<StringID, int> blockToID = new Dictionary<StringID, int>();
+
+        FastList<Cmd> publicCmds = new FastList<Cmd>();
 
         public ThreadedProfiler()
         {
@@ -32,6 +40,10 @@ namespace SharpGame
         public void End()
         {
             profiling = false;
+
+            publicCmds = Interlocked.Exchange(ref commands, publicCmds);
+
+            commands.Clear();
         }
        
         public void BeginSample(string name)
@@ -48,11 +60,6 @@ namespace SharpGame
             commands.Add(new Cmd { type = CmdType.EndBlock, nodeId = id, time = Stopwatch.GetTimestamp() });
         }
 
-        FastList<Cmd> commands = new FastList<Cmd>();
-        Stack<int> cmdStack = new Stack<int>();
-        public FastList<Block> blocks = new FastList<Block>();
-        Dictionary<StringID, int> blockToID = new Dictionary<StringID, int>();
-
         public int GetChild(StringID name)
         {
             if(blockToID.TryGetValue(name, out int id))
@@ -66,8 +73,8 @@ namespace SharpGame
             return newID;
         }
 
-        public ref Cmd this[int index] => ref commands.At(index);
-        public int NumCmds => commands.Count;
+        public ref Cmd this[int index] => ref publicCmds.At(index);
+        public int NumCmds => publicCmds.Count;
 
         public struct Block
         {
@@ -114,13 +121,15 @@ namespace SharpGame
         
         static Profiler self => Instance;
 
+        public static ConcurrentDictionary<int, ThreadedProfiler> Profilers => Instance.profilers;
+
         public static ThreadedProfiler ThreadedProfiler
         {
             get
             {
                 var thread = System.Threading.Thread.CurrentThread;
                 int threadID = thread.ManagedThreadId;
-                if (!Instance.profilers.TryGetValue(threadID, out ThreadedProfiler threadedProfiler))
+                if (!self.profilers.TryGetValue(threadID, out ThreadedProfiler threadedProfiler))
                 {
                     threadedProfiler = new ThreadedProfiler
                     {

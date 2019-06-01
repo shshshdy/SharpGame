@@ -144,6 +144,7 @@ namespace SharpGame
 
             while (nativeWindow.Exists)
             {
+                Profiler.Begin();
                 Time.Tick(timeStep);
                 Statistics.Tick(timeStep);
 
@@ -160,6 +161,7 @@ namespace SharpGame
                 renderer.Render();
 
                 ApplyFrameLimit();
+                Profiler.End();
             }
 
             timer.Stop();
@@ -202,6 +204,7 @@ namespace SharpGame
 
             while (!shouldQuit)
             {
+                Profiler.Begin();
                 Time.Tick(timeStep);
 
                 Statistics.Tick(timeStep);
@@ -213,6 +216,7 @@ namespace SharpGame
                 graphics.Frame();
                 
                 ApplyFrameLimit();
+                Profiler.End();
             }
 
             graphics.Frame();
@@ -237,7 +241,9 @@ namespace SharpGame
                     continue;
                 }
 
+                Profiler.Begin();
                 renderer.Render();
+                Profiler.End();
 
             }
 

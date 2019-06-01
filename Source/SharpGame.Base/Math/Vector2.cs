@@ -1423,12 +1423,12 @@ namespace SharpGame
             return new Vector4(value, 0.0f, 0.0f);
         }
 
-        public static explicit operator System.Numerics.Vector2(Vector2 value)
+        public static implicit operator System.Numerics.Vector2(Vector2 value)
         {
             return new System.Numerics.Vector2(value.X, value.Y);
         }
 
-        public static explicit operator Vector2(System.Numerics.Vector2 value)
+        public static implicit operator Vector2(System.Numerics.Vector2 value)
         {
             return new Vector2(value.X, value.Y);
         }

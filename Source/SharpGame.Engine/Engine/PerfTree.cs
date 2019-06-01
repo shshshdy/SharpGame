@@ -27,8 +27,12 @@ namespace SharpGame
 
         public void Draw()
         {
-            var profiler = Profiler.ThreadedProfiler;
-            Build(profiler);
+            var it = Profiler.Profilers.GetEnumerator();
+            while(it.MoveNext())
+            {
+                var profiler = it.Current.Value;
+                Build(profiler);
+            }
 
             root.Draw();
 

@@ -103,9 +103,9 @@ namespace SharpGame.Samples
             corner = 1;
             if (corner != -1)
             {
-                System.Numerics.Vector2 window_pos = new System.Numerics.Vector2(((corner & 1) != 0) ? io.DisplaySize.X - DISTANCE
+                Vector2 window_pos = new Vector2(((corner & 1) != 0) ? io.DisplaySize.X - DISTANCE
                     : DISTANCE, (corner & 2) != 0 ? io.DisplaySize.Y - DISTANCE : DISTANCE);
-                System.Numerics.Vector2 window_pos_pivot = new System.Numerics.Vector2((corner & 1) != 0 ? 1.0f : 0.0f, (corner & 2) != 0 ? 1.0f : 0.0f);
+                Vector2 window_pos_pivot = new Vector2((corner & 1) != 0 ? 1.0f : 0.0f, (corner & 2) != 0 ? 1.0f : 0.0f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
             }
 
@@ -142,8 +142,8 @@ namespace SharpGame.Samples
             if (showStats)
             {
                 corner = 0;
-                System.Numerics.Vector2 window_pos = new System.Numerics.Vector2(io.DisplaySize.X / 2, io.DisplaySize.Y / 2);
-                System.Numerics.Vector2 window_pos_pivot = new System.Numerics.Vector2(0.5f, 0.0f);
+                Vector2 window_pos = new Vector2(io.DisplaySize.X / 2, io.DisplaySize.Y / 2);
+                Vector2 window_pos_pivot = new Vector2(0.5f, 0.0f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
                 ImGui.SetNextWindowSize(io.DisplaySize * 0.8f);
                 ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
@@ -152,7 +152,7 @@ namespace SharpGame.Samples
                     perfTree.Draw();
 
                     fps[(Time.FrameNum / 10) % fps.Length] = Fps;
-                    ImGui.PlotLines("fps", ref fps[0], fps.Length, 0, "fps", 2, 4, new System.Numerics.Vector2(800, 200 ));
+                    ImGui.PlotLines("fps", ref fps[0], fps.Length, 0, "fps", 2, 4, new Vector2(800, 200 ));
                 }
 
                 ImGui.End();
