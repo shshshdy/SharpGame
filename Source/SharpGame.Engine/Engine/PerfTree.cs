@@ -72,9 +72,7 @@ namespace SharpGame
                 var n = iter.Current.Value;
 
                 n.averageSum -= n.averageBuffer[n.currentAverageSlot % PerfNode.NumAvgSlots];
-                // store new value to be part of average.
                 n.averageBuffer[n.currentAverageSlot % PerfNode.NumAvgSlots] = n.time;
-                // add new to sum to be averaged
                 n.averageSum += n.time;
                 n.average = n.averageSum / Math.Min(n.currentAverageSlot + 1, PerfNode.NumAvgSlots);
 

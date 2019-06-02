@@ -46,9 +46,8 @@ namespace SharpGame
         {
             var graphics = Graphics.Instance;
 
-            graphics.stats.RenderBegin = Stopwatch.GetTimestamp();
-
             Profiler.BeginSample("Render");
+
             graphics.BeginRender();
 
             CommandBuffer cmdBuffer = graphics.RenderCmdBuffer;
@@ -72,7 +71,6 @@ namespace SharpGame
 
             Profiler.EndSample();
 
-            graphics.stats.RenderEnd = Stopwatch.GetTimestamp();
         }
 
     }

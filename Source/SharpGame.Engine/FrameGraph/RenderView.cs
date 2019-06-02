@@ -107,7 +107,6 @@ namespace SharpGame
             frameUniform.ElapsedTime = (float)Time.Elapsed;
             ubFrameInfo.SetData(ref frameUniform);
 
-
             this.SendGlobalEvent(new BeginView { view = this });
 
             UpdateDrawables();
@@ -176,8 +175,10 @@ namespace SharpGame
 
         public void Render(int imageIndex)
         {
+            Profiler.BeginSample("ViewRender");
             RenderPath?.Summit(imageIndex);
             OverlayPass?.Summit(imageIndex);
+            Profiler.EndSample();
         }
     }
     
