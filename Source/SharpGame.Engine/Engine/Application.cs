@@ -259,8 +259,6 @@ namespace SharpGame
 
         private void UpdateFrame()
         {
-            Stats.frameBegin = Stopwatch.GetTimestamp();
-
             this.SendGlobalEvent(new BeginFrame
             {
                 frameNum = Time.FrameNum,
@@ -284,7 +282,6 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndFrame());
 
-            Stats.frameEnd = Stopwatch.GetTimestamp();
         }
 
         private void ApplyFrameLimit()

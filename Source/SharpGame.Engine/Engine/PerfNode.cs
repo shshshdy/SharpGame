@@ -13,13 +13,19 @@ namespace SharpGame
         public PerfNode parent;
 
         public List<PerfNode> children;
-        public double time;
+        public long time;
         public string label;
         public long count;
-        public double[] averageBuffer = new double[NumAvgSlots];
-        public double averageSum;
-        public double average;
+        public long[] averageBuffer = new long[NumAvgSlots];
+        public long averageSum;
+        public long average;
+        public double averageMS;
+        public float percent;
+        public float totalPercent;
+
         public int currentAverageSlot;
+
+        public bool IsRoot => parent == null;
 
         public PerfNode()
         {
@@ -46,15 +52,33 @@ namespace SharpGame
             return false;
         }
 
-        public void Draw()
+        public void Draw(int depth)
         {
-            ImGui.TreeNode(label);
-            ImGui.TreePush();
-            foreach (var c in children)
+            bool collapse = ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.FramePadding);
+            if(!IsRoot)   
             {
-                c.Draw();
+                ImGui.SameLine(400);
+                ImGui.Text(string.Format("{0:D}", count)); ImGui.SameLine(500);
+                ImGui.Text(string.Format("{0:F4}", averageMS)); ImGui.SameLine(600);
+                ImGui.Text(string.Format("{0:P1}%%", percent)); ImGui.SameLine(800);
+                ImGui.Text(string.Format("{0:P1}%%", totalPercent));
             }
-            ImGui.TreePop();
+
+            if(depth < 3 && !collapse)
+            {
+                ImGui.TreePush();
+            }            
+
+            if (collapse || depth < 3)
+            {
+                foreach (var c in children)
+                {
+                    c.Draw(depth + 1);
+                }
+
+                ImGui.TreePop();
+            }
+           
         }
 
         public void Free()

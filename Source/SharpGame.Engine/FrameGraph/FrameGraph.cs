@@ -30,11 +30,13 @@ namespace SharpGame
       
         public void Draw(RenderView view)
         {
+            Profiler.BeginSample("FrameGraph.Draw");
             foreach (var renderPass in RenderPassList)
             {
                 renderPass.Draw(view);
             }
-            
+
+            Profiler.EndSample();
         }
 
         public void Summit(int imageIndex)

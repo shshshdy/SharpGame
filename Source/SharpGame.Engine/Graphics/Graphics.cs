@@ -346,10 +346,13 @@ namespace SharpGame
 
         public void BeginRender()
         {
+            Profiler.BeginSample("Acquire");
             // Acquire the next image from the swap chaing
             VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
             nextImage = (currentImage + 1)%(uint)ImageCount;
             MainSemWait();
+
+            Profiler.EndSample();
         }
 
         public void EndRender()
@@ -358,14 +361,19 @@ namespace SharpGame
             submitInfo.commandBufferCount = 1;
             submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress((uint)RenderContext);
 
+            Profiler.BeginSample("Submit");
             // Submit to queue
             VulkanUtil.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
 
+            Profiler.EndSample();
+
+            Profiler.BeginSample("Present");
             VulkanUtil.CheckResult(Swapchain.QueuePresent(queue, currentImage, semaphores[0].RenderComplete));
 
             VulkanUtil.CheckResult(vkQueueWaitIdle(queue));
 
             RenderSemPost();
+            Profiler.EndSample();
         }
 
         #region MULTITHREADED

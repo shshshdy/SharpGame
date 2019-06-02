@@ -119,16 +119,12 @@ namespace SharpGame.Samples
                 }
 
                 ImGui.Separator();
-
+                ImGui.Value("SingleLoop : ", singleLoop);
                 ImGui.Text(string.Format("Fps : {0}", Fps));
                 ImGui.Text(string.Format("Msec : {0}", Msec));
-                ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
-                ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
-                ImGui.Value("SingleLoop : ", singleLoop);
-                ImGui.Text(string.Format("FrameBegin : {0}",Stats.FrameBegin));
-                ImGui.Text(string.Format("FrameEnd : {0}", Stats.FrameEnd));
-                ImGui.Text(string.Format("RenderBegin : {0}", Stats.RenderBegin));
-                ImGui.Text(string.Format("RenderEnd : {0}", Stats.RenderEnd));
+                //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
+                //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
+         
                 ImGui.Text(string.Format("LogicWait : {0}", Stats.LogicWait * Timer.MilliSecsPerTick));
                 ImGui.Text(string.Format("RenderWait : {0}", Stats.RenderWait * Timer.MilliSecsPerTick));
 
@@ -151,8 +147,8 @@ namespace SharpGame.Samples
                 {
                     perfTree.Draw();
 
-                    fps[(Time.FrameNum / 10) % fps.Length] = Fps;
-                    ImGui.PlotLines("fps", ref fps[0], fps.Length, 0, "fps", 2, 4, new Vector2(800, 200 ));
+                    //fps[(Time.FrameNum / 10) % fps.Length] = Fps;
+                    //ImGui.PlotLines("fps", ref fps[0], fps.Length, 0, "fps", 2, 4, new Vector2(800, 200 ));
                 }
 
                 ImGui.End();

@@ -26,13 +26,14 @@ namespace SharpGame
 
         public void RenderUpdate()
         {
+            Profiler.BeginSample("RenderUpdate");
+
             var frameInfo = new FrameInfo
             {
                 timeStep = Time.Delta,
                 frameNumber = Time.FrameNum
             };
 
-            Profiler.BeginSample("RenderUpdate");
             foreach (var viewport in views)
             {
                 viewport.Update(ref frameInfo);

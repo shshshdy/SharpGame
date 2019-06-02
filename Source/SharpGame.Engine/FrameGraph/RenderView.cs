@@ -93,6 +93,8 @@ namespace SharpGame
 
         public void Update(ref FrameInfo frameInfo)
         {
+            Profiler.BeginSample("ViewUpdate");
+
             var graphics = Graphics.Instance;
 
             this.frameInfo = frameInfo;
@@ -122,10 +124,14 @@ namespace SharpGame
             OverlayPass?.Draw(this);
 
             this.SendGlobalEvent(new EndView { view = this });
+
+            Profiler.EndSample();
         }
 
         private void UpdateDrawables()
         {
+            Profiler.BeginSample("UpdateDrawables");
+
             drawables.Clear();
 
             if (!Scene || !Camera)
@@ -152,6 +158,7 @@ namespace SharpGame
                 drawable.UpdateBatches(ref frameInfo);
             }
 
+            Profiler.EndSample();
         }
 
         private void UpdateViewParameters()

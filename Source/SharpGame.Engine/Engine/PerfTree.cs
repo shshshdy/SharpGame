@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -11,6 +12,9 @@ namespace SharpGame
         Dictionary<string, PerfNode> m_pathItemMap = new Dictionary<string, PerfNode>();
         PerfNode root = new PerfNode();
         public FreeList<PerfNode> blockPool = new FreeList<PerfNode>();
+
+        const float sampleTime = 2;
+        float timer = sampleTime;
 
         public PerfTree()
         {
@@ -27,21 +31,38 @@ namespace SharpGame
 
         public void Draw()
         {
+            ImGui.SameLine(400);
+            ImGui.Text("Count"); ImGui.SameLine(500);
+            ImGui.Text("Time(ms)"); ImGui.SameLine(600);
+            ImGui.Text("Percent"); ImGui.SameLine(800);
+            ImGui.Text("Total Percent");
+
+            ImGui.Separator();
+            timer += Time.Delta;
+
+            bool sample = false;
+            if(timer >= sampleTime)
+            {
+                sample = true;
+                timer = 0;
+            }
+
             var it = Profiler.Profilers.GetEnumerator();
             while(it.MoveNext())
             {
                 var profiler = it.Current.Value;
-                Build(profiler);
+                Build(profiler, sample);
             }
 
-            root.Draw();
+            root.Draw(0);
 
             root.Free();
         }
 
-        void Build(ThreadedProfiler profiler)
+        void Build(ThreadedProfiler profiler, bool sample)
         {
             StringBuilder path = new StringBuilder();
+            path.Append(profiler.threadID);
 
             int idx = 0;
 
@@ -56,9 +77,34 @@ namespace SharpGame
                 // add new to sum to be averaged
                 n.averageSum += n.time;
                 n.average = n.averageSum / Math.Min(n.currentAverageSlot + 1, PerfNode.NumAvgSlots);
+
+                if (sample)
+                {
+                    n.averageMS = n.average * Timer.MilliSecsPerTick;
+
+                    if(n.parent.IsRoot || n.IsRoot)
+                    {
+                        n.percent = 1.0f;
+                        n.totalPercent = 1.0f;
+                    }
+                    else
+                    {
+                        n.percent = (float)(n.averageMS / n.parent.averageMS);
+
+                        var r = n;
+                        while(!r.parent.IsRoot)
+                        {
+                            r = r.parent;
+                        }
+
+                        n.totalPercent = (float)(n.averageMS / r.averageMS);
+                    }
+
+                }
+
                 n.currentAverageSlot++;
                 n.count = 0L;
-                n.time = 0.0;
+                n.time = 0;
             }
 
             BuildItemTree(profiler, ref idx, path, root);
@@ -125,7 +171,7 @@ namespace SharpGame
         PerfNode HandleBlock(ThreadedProfiler profiler, ref int idx, PerfNode parent, StringBuilder path)
         {
             ref Cmd cmd = ref profiler[idx];
-            double startTime = cmd.time;
+            long startTime = cmd.time;
             Debug.Assert(cmd.type == CmdType.BeginBlock);
             path.Append((char)cmd.nodeId);
 
