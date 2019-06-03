@@ -122,11 +122,13 @@ namespace SharpGame.Samples
                 ImGui.Value("SingleLoop", singleLoop);
                 ImGui.Value("Fps", Fps);
                 ImGui.Value("Msec", Msec);
+                ImGui.Value("DrawCall", Stats.drawCall);
+                ImGui.Value("Triangle Count", Stats.triCount);
                 //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
                 //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
-         
-                ImGui.Text(string.Format("LogicWait : {0:F3}", Stats.LogicWait * Timer.MilliSecsPerTick));
-                ImGui.Text(string.Format("RenderWait : {0:F3}", Stats.RenderWait * Timer.MilliSecsPerTick));
+
+                ImGui.Text(string.Format("LogicWait : {0:F3}", Stats.WaitLogic * Timer.MilliSecsPerTick));
+                ImGui.Text(string.Format("RenderWait : {0:F3}", Stats.WaitRender * Timer.MilliSecsPerTick));
 
                 ImGui.Checkbox("Show stats", ref showStats);
 

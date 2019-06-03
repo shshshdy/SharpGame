@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Vulkan;
 
@@ -99,8 +100,9 @@ namespace SharpGame
             VertexCount = vertexCount;
 
             return true;
-        }        
+        }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void Draw(CommandBuffer cmdBuffer)
         {
             cmdBuffer.BindVertexBuffers(0, buffers_.Count, buffers_.Data, ref offsets_[0]);

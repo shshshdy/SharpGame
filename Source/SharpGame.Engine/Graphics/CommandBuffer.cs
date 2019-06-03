@@ -297,6 +297,8 @@ namespace SharpGame
         public void DrawIndexed(uint indexCount, uint instanceCount, uint firstIndex, int vertexOffset, uint firstInstance)
         {
             vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+            Stats.drawCall++;
+            Stats.triCount += indexCount / 2;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

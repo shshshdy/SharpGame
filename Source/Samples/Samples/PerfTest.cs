@@ -12,9 +12,9 @@ namespace SharpGame.Samples
             scene = new Scene();
 
             var cameraNode = scene.CreateChild("Camera");
-            cameraNode.Position = new Vector3(0, 800, -800);
+            cameraNode.Position = new Vector3(0, 1000, -1000);
             //cameraNode.LookAt(Vector3.Zero);
-            cameraNode.Rotation = Quaternion.FromEuler(MathUtil.DegreesToRadians(30), 0, 0);
+            cameraNode.Rotation = Quaternion.FromEuler(MathUtil.DegreesToRadians(50), 0, 0);
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
@@ -51,17 +51,17 @@ namespace SharpGame.Samples
                 var mat = new Material
                 {
                     Pipeline = pipeline,
-                    ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
+                    ResourceSet = new ResourceSet(resourceLayoutTex, Texture.White)
                 };
 
-                var model = Resources.Load<Model>("Models/cube.obj");
+                var model = Resources.Load<Model>("Models/sphere.obj");
 
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 40; i++)
                 {
-                    for (int j = 0; j < 100; j++)
+                    for (int j = 0; j < 40; j++)
                     {
                         var node = scene.CreateChild("Model");
-                        node.Position = new Vector3(i * 12-50*12, 0, j * 12 - 50 * 12);
+                        node.Position = new Vector3(i * 40-20*40, 0, j * 40 - 20 * 40);
                         //node.Rotation = Quaternion.FromEuler(0, MathUtil.DegreesToRadians(MathUtil.Random(0, 90)), 0);
                         var staticModel = node.AddComponent<StaticModel>();
                         staticModel.SetModel(model);

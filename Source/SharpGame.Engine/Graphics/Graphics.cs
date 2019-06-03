@@ -1,4 +1,4 @@
-﻿//#define NEW_SYNC
+﻿#define EVENT_SYNC
 
 using System;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace SharpGame
     public unsafe partial class Graphics : System<Graphics>
     {
         public Settings Settings { get; } = new Settings();
-        internal Statistics stats = new Statistics();
+        internal Stats stats = new Stats();
 
         public VkInstance VkInstance { get; protected set; }
         public VkPhysicalDeviceFeatures enabledFeatures;
@@ -359,14 +359,7 @@ namespace SharpGame
 
         public void BeginRender()
         {
-            Profiler.BeginSample("Acquire");
-
-            // Acquire the next image from the swap chaing
-            VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
-            nextImage = ((int)currentImage + 1)%ImageCount;
-            Profiler.EndSample();
-
-#if NEW_SYNC
+#if EVENT_SYNC
             if (!SingleLoop)
             {
                 Profiler.BeginSample("RenderWait");
@@ -389,6 +382,13 @@ namespace SharpGame
             Profiler.EndSample();
 
 #endif
+            Profiler.BeginSample("Acquire");
+
+            // Acquire the next image from the swap chaing
+            VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
+            nextImage = ((int)currentImage + 1)%ImageCount;
+            Profiler.EndSample();
+
         }
 
         public void EndRender()
@@ -403,9 +403,6 @@ namespace SharpGame
 
             Profiler.EndSample();
 
-            Profiler.BeginSample("RenderSemPost");
-            RenderSemPost();
-            Profiler.EndSample();
 
             Profiler.BeginSample("Present");
 
@@ -415,9 +412,17 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkQueueWaitIdle(queue));
 
             Profiler.EndSample();
+
+#if EVENT_SYNC
+
+#else
+            Profiler.BeginSample("RenderSemPost");
+            RenderSemPost();
+            Profiler.EndSample();
+#endif
         }
 
-#region MULTITHREADED
+        #region MULTITHREADED
 
         private int currentContext;
         public int WorkContext => SingleLoop ? 0 : currentContext;
@@ -449,7 +454,7 @@ namespace SharpGame
         public void Frame()
         {
             Profiler.BeginSample("RenderSemWait");
-#if NEW_SYNC
+#if EVENT_SYNC
             if (!SingleLoop)
             {
                 _renderCompleted.WaitOne();
@@ -465,7 +470,7 @@ namespace SharpGame
 
         public void Close()
         {
-#if NEW_SYNC
+#if EVENT_SYNC
             _renderCompleted.Set();
 #else
             MainSemWait();
@@ -486,7 +491,7 @@ namespace SharpGame
 
         public void FrameNoRenderWait()
         {
-#if NEW_SYNC
+#if EVENT_SYNC
 #else
             SwapContext();
             // release render thread
@@ -513,7 +518,7 @@ namespace SharpGame
             bool ok = mainSem.WaitOne(-1);
             if (ok)
             {
-                stats.LogicWait = Stopwatch.GetTimestamp() - curTime;
+                stats.WaitLogic = Stopwatch.GetTimestamp() - curTime;
                 return true;
             }
 
@@ -534,7 +539,7 @@ namespace SharpGame
             {
                 long curTime = Stopwatch.GetTimestamp();
                 bool ok = renderSem.WaitOne();
-                stats.RenderWait = Stopwatch.GetTimestamp() - curTime;
+                stats.WaitRender = Stopwatch.GetTimestamp() - curTime;
             }
         }
 
@@ -542,15 +547,17 @@ namespace SharpGame
 
     }
 
-    public struct Statistics
+    public struct Stats
     {
-        static long frameTick;
-        public long LogicWait;
-        public long RenderWait;
+        public long WaitLogic;
+        public long WaitRender;
+        public static uint drawCall;
+        public static uint triCount;
         
         public static void Tick(float timeStep)
         {
-            frameTick = Stopwatch.GetTimestamp();
+            drawCall = 0;
+            triCount = 0;
         }
     }
 }

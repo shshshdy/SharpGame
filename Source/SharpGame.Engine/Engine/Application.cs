@@ -24,7 +24,7 @@ namespace SharpGame
         public int Height { get; protected set; } = 720;
 
         public Settings Settings { get; } = new Settings();
-        public ref Statistics Stats => ref graphics.stats;
+        public ref Stats Stats => ref graphics.stats;
 
         protected IntPtr window;
         protected Sdl2Window nativeWindow;
@@ -145,7 +145,7 @@ namespace SharpGame
             {
                 Profiler.Begin();
                 Time.Tick(timeStep);
-                Statistics.Tick(timeStep);
+                Stats.Tick(timeStep);
 
                 input.snapshot = nativeWindow.PumpEvents();
 
@@ -209,7 +209,6 @@ namespace SharpGame
 
                 Time.Tick(timeStep);
 
-                Statistics.Tick(timeStep);
 
                 input.snapshot = nativeWindow.PumpEvents();
 
@@ -268,6 +267,8 @@ namespace SharpGame
                 timeTotal = Time.Elapsed,
                 timeDelta = Time.Delta
             });
+
+            Stats.Tick(timeStep);
 
             this.SendGlobalEvent(new Update
             {

@@ -130,7 +130,14 @@ namespace SharpGame
                 vertex.position = new Vector3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new Vector3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
-                vertex.texcoord = new Vector2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
+                if(mesh.HasTextureCoords(0))
+                {
+                    vertex.texcoord = new Vector2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
+                }
+                else
+                {
+                    vertex.texcoord = Vector2.Zero;
+                }
                 /*
                 // Mesh may not have vertex colors
                 if (mesh.HasVertexColors(0))
