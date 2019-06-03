@@ -209,7 +209,6 @@ namespace SharpGame
 
                 Time.Tick(timeStep);
 
-
                 input.snapshot = nativeWindow.PumpEvents();
 
                 UpdateFrame();
@@ -220,6 +219,7 @@ namespace SharpGame
             }
 
             graphics.Frame();
+
             timer.Stop();
             // Flush device to make sure all resources can be freed 
             graphics.WaitIdle();
@@ -359,9 +359,11 @@ namespace SharpGame
             Width = nativeWindow.Width;
             Height = nativeWindow.Width;
 
-            graphics.Resize(Width, Height);
+            graphics.Execute(() =>
+            {
+                graphics.Resize(Width, Height);
 
-            graphics.WaitIdle();
+            });
 
         }
 

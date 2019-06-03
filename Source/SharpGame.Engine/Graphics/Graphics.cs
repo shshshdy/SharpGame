@@ -1,4 +1,4 @@
-﻿#define EVENT_SYNC
+﻿//#define EVENT_SYNC
 
 using System;
 using System.Collections.Generic;
@@ -116,7 +116,7 @@ namespace SharpGame
             _renderComandsReady = new ManualResetEvent(false);
 
             _renderActive = new ManualResetEvent(false);
-            _renderCompleted = new ManualResetEvent(false);
+            _renderCompleted = new ManualResetEvent(true);
         }
 
 
@@ -348,7 +348,7 @@ namespace SharpGame
 
             int newBufferSize = Math.Max(MinStagingBufferSize, size);
             DeviceBuffer newBuffer = DeviceBuffer.Create(BufferUsageFlags.TransferSrc | BufferUsageFlags.TransferDst,
-                VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, size, 1);
+                MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, size, 1);
             return newBuffer;
         }
 
@@ -422,7 +422,17 @@ namespace SharpGame
 #endif
         }
 
-        #region MULTITHREADED
+        #region MULTITHREADED   
+
+        static int mainThreadID;
+        static int renderThreadID;
+
+        public static bool IsMainThread => mainThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
+        public static bool IsRenderThread => renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
+        public static void SetMainThread() => mainThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+        public static void SetRenderThread() => renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+
+        public bool SingleLoop => Settings.SingleLoop;
 
         private int currentContext;
         public int WorkContext => SingleLoop ? 0 : currentContext;
@@ -431,24 +441,14 @@ namespace SharpGame
         private int currentFrame;
         public int CurrentFrame => currentFrame;
 
-        static int mainThreadID;
-        public static bool IsMainThread => mainThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
-
-        static int renderThreadID;
-        public static bool IsRenderThread => renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
-
         private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
         private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);
-        public bool SingleLoop => Settings.SingleLoop;
 
-        public static void SetMainThread()
-        {
-            mainThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
-        }
+        List<System.Action> actions = new List<Action>();
 
-        public static void SetRenderThread()
+        public void Execute(System.Action action)
         {
-            renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            actions.Add(action);
         }
 
         public void Frame()
@@ -468,18 +468,18 @@ namespace SharpGame
             Profiler.EndSample();
         }
 
-        public void Close()
-        {
-#if EVENT_SYNC
-            _renderCompleted.Set();
-#else
-            MainSemWait();
-            RenderSemPost();
-#endif
-        }
-
         void SwapContext()
         {
+            if(actions.Count > 0)
+            {
+                foreach(var action in actions)
+                {
+                    action.Invoke();
+                }
+
+                actions.Clear();
+            }
+
             currentFrame++;
 
             if(!SingleLoop)
@@ -492,6 +492,9 @@ namespace SharpGame
         public void FrameNoRenderWait()
         {
 #if EVENT_SYNC
+
+            //_renderActive.Set();
+            _renderCompleted.Set();
 #else
             SwapContext();
             // release render thread
@@ -543,7 +546,17 @@ namespace SharpGame
             }
         }
 
-#endregion
+        public void Close()
+        {
+#if EVENT_SYNC
+            _renderCompleted.Set();
+#else
+            MainSemWait();
+            RenderSemPost();
+#endif
+        }
+
+        #endregion
 
     }
 

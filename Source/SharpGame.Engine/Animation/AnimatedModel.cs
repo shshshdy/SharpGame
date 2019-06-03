@@ -309,7 +309,7 @@ namespace SharpGame
                 morphs_.Clear();
                 morphElementMask_ = 0;
                 SetBoundingBox(BoundingBox.Empty);
-                SetSkeleton(default(Skeleton), false);
+                SetSkeleton(default, false);
             }
 
         }

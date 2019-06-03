@@ -25,11 +25,6 @@ namespace SharpGame
         Uint32 = 1
     }
 
-    public enum Usage
-    {
-
-    }
-
     public enum BufferUsageFlags
     {
         None = 0,
@@ -41,7 +36,17 @@ namespace SharpGame
         StorageBuffer = 32,
         IndexBuffer = 64,
         VertexBuffer = 128,
-        IndirectBuffer = 256
+        IndirectBuffer = 256,  
+    }
+
+    public enum MemoryPropertyFlags
+    {
+        None = 0,
+        DeviceLocal = 1,
+        HostVisible = 2,
+        HostCoherent = 4,
+        HostCached = 8,
+        LazilyAllocated = 16
     }
 
     public enum Format

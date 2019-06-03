@@ -26,7 +26,7 @@ namespace SharpGame
         internal ulong alignment = 0;
 
         /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
-        internal VkMemoryPropertyFlags memoryPropertyFlags;
+        internal MemoryPropertyFlags memoryPropertyFlags;
 
         public ref T Map<T>(int offset = 0) where T : struct
         {
@@ -72,7 +72,7 @@ namespace SharpGame
             return vkFlushMappedMemoryRanges(Graphics.device, 1, &mappedRange);
         }
 
-        public VkResult Invalidate(VkDeviceSize size = WholeSize, VkDeviceSize offset = 0)
+        public VkResult Invalidate(ulong size = WholeSize, ulong offset = 0)
         {
             VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
             mappedRange.memory = memory;
@@ -96,7 +96,7 @@ namespace SharpGame
 
         public static DeviceBuffer CreateDynamic<T>(BufferUsageFlags bufferUsages, int count = 1) where T : struct
         {
-            return Create(bufferUsages, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, Unsafe.SizeOf<T>(), count);
+            return Create(bufferUsages, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, Unsafe.SizeOf<T>(), count);
         }
 
         public static DeviceBuffer CreateUniformBuffer<T>(int count = 1) where T : struct
@@ -111,10 +111,10 @@ namespace SharpGame
 
         public static DeviceBuffer Create(BufferUsageFlags usageFlags, bool dynamic, int stride, int count, IntPtr data = default)
         {
-            return Create(usageFlags, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, stride, count, (void*)data);
+            return Create(usageFlags, dynamic ? MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent : MemoryPropertyFlags.DeviceLocal, stride, count, (void*)data);
         }
 
-        public static DeviceBuffer Create(BufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
+        public static DeviceBuffer Create(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
         {
             DeviceBuffer buffer = new DeviceBuffer
             {
@@ -126,7 +126,7 @@ namespace SharpGame
 
             // Create the buffer handle
             BufferCreateInfo bufferCreateInfo = new BufferCreateInfo(usageFlags, size);
-            if (data != null && (memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
+            if (data != null && (memoryPropertyFlags & MemoryPropertyFlags.HostCoherent) == 0)
             {
                 bufferCreateInfo.usage |= BufferUsageFlags.TransferDst;
             }
@@ -135,13 +135,12 @@ namespace SharpGame
             Device.GetBufferMemoryRequirements(buffer.buffer, out VkMemoryRequirements memReqs);
 
             // Find a memory type index that fits the properties of the buffer
-            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
+            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, (VkMemoryPropertyFlags)memoryPropertyFlags);
 
             // Create the memory backing up the buffer handle
             MemoryAllocateInfo memAlloc = new MemoryAllocateInfo(memReqs.size, memoryTypeIndex);
             
             buffer.memory = Device.AllocateMemory(ref memAlloc.native);
-
             buffer.alignment = memReqs.alignment;
             buffer.size = memAlloc.allocationSize;
             buffer.usageFlags = usageFlags;
@@ -152,7 +151,7 @@ namespace SharpGame
             // If a pointer to the buffer data has been passed, map the buffer and copy over the data
             if (data != null)
             {
-                if ((memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
+                if ((memoryPropertyFlags & MemoryPropertyFlags.HostCoherent) == 0)
                 {
                     VkBuffer stagingBuffer;
                     VkDeviceMemory stagingMemory;
