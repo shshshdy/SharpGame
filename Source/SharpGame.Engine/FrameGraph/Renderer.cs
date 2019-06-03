@@ -26,7 +26,7 @@ namespace SharpGame
 
         public void RenderUpdate()
         {
-            Profiler.BeginSample("RenderUpdate");
+            Profiler.BeginSample("Update");
 
             var frameInfo = new FrameInfo
             {

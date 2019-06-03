@@ -8,12 +8,25 @@ layout (location = 1) in vec3 inNormal;
 layout (location = 2) in vec2 inUV;
 layout (location = 3) in vec4 inColor;
 
+layout(push_constant) uniform PushConsts {
+	mat4 model;
+};
+
+layout (binding = 0) uniform CameraVS
+{
+    mat4 View;
+    mat4 ViewInv;
+    mat4 ViewProj;
+	vec3 CameraPos;
+	float NearClip;
+	vec3 FrustumSize;
+	float FarClip;
+};
+
+
 layout (set = 1, binding = 0) uniform UBO 
 {
-	mat4 model;
-	mat4 viewProj;
 	vec4 lightPos;
-	vec4 cameraPos;
 };
 
 layout (location = 0) out vec3 outNormal;
@@ -35,10 +48,10 @@ void main()
 	
 	vec4 pos = model * vec4(inPos, 1.0);
 
-	gl_Position = viewProj * pos;
+	gl_Position = ViewProj * pos;
 	
 	outNormal = mat3(model) * inNormal;
 	vec3 lPos = lightPos.xyz;
 	outLightVec = lPos - pos.xyz;
-	outViewVec = cameraPos.xyz-pos.xyz;		
+	outViewVec = CameraPos.xyz-pos.xyz;		
 }

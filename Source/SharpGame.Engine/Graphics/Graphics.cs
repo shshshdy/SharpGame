@@ -62,7 +62,7 @@ namespace SharpGame
         public RenderPass RenderPass => renderPass;
 
         public uint currentImage;
-        public uint nextImage;
+        public int nextImage;
 
         private NativeList<Semaphores> semaphores = new NativeList<Semaphores>(1, 1);
         private DepthStencil depthStencil;
@@ -349,7 +349,7 @@ namespace SharpGame
             Profiler.BeginSample("Acquire");
             // Acquire the next image from the swap chaing
             VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
-            nextImage = (currentImage + 1)%(uint)ImageCount;
+            nextImage = ((int)currentImage + 1)%ImageCount;
             MainSemWait();
 
             Profiler.EndSample();

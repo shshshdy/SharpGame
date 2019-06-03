@@ -10,11 +10,7 @@ namespace SharpGame.Samples
 {
     struct UboVS
     {
-        public Matrix model;
-        public Matrix viewProj;
         public Vector4 lightPos;
-        public Vector3 cameraPos;
-        float pading1;
     }
 
     [SampleDesc(sortOrder = 2)]
@@ -111,6 +107,11 @@ namespace SharpGame.Samples
                     },
 
                     resourceLayout
+                },
+
+                PushConstantRanges = new[]
+                {
+                    new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
                 }
             };
 
@@ -230,10 +231,6 @@ namespace SharpGame.Samples
 
             rotation.Y += Time.Delta * 10;
 
-            uboVS.model = Matrix.RotationY(MathUtil.DegreesToRadians(rotation.Y));
-
-            uboVS.viewProj = camera.View*camera.Projection;
-            uboVS.cameraPos = camera.Node.Position;
             uniformBufferScene.SetData(ref uboVS);
         }
 

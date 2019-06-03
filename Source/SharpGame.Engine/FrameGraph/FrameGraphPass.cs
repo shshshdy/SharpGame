@@ -76,10 +76,9 @@ namespace SharpGame
             }
 
             workContext = graphics.WorkContext;
-
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                framebuffer = framebuffers[workContext],//[graphics.nextImage],
+                framebuffer = framebuffers[graphics.SingleLoop ? graphics.nextImage : workContext],
                 renderPass = renderPass
             };
 
@@ -96,7 +95,7 @@ namespace SharpGame
             OnBeginDraw(view);
 
             this.SendGlobalEvent(new BeginRenderPass { renderPass = this});
-            
+
             //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
             cmdBuffers[workContext] = cmdBuffer;
 

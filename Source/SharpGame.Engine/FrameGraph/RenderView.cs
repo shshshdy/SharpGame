@@ -24,9 +24,7 @@ namespace SharpGame
         public ref Viewport Viewport => ref viewport;
 
         public uint ViewMask { get; set; }
-
-        public FrameGraphPass OverlayPass { get; set; }
-
+        
         internal FastList<Drawable> drawables = new FastList<Drawable>();
         internal FastList<Light> lights = new FastList<Light>();
 
@@ -93,8 +91,6 @@ namespace SharpGame
 
         public void Update(ref FrameInfo frameInfo)
         {
-            Profiler.BeginSample("ViewUpdate");
-
             var graphics = Graphics.Instance;
 
             this.frameInfo = frameInfo;
@@ -109,6 +105,8 @@ namespace SharpGame
 
             this.SendGlobalEvent(new BeginView { view = this });
 
+            Profiler.BeginSample("ViewUpdate");
+
             UpdateDrawables();
 
             if(camera != null)
@@ -118,18 +116,16 @@ namespace SharpGame
 
             UpdateLightParameters();
 
+            Profiler.EndSample();
+
             RenderPath.Draw(this);
-
-            OverlayPass?.Draw(this);
-
+            
             this.SendGlobalEvent(new EndView { view = this });
 
-            Profiler.EndSample();
         }
 
         private void UpdateDrawables()
         {
-            Profiler.BeginSample("UpdateDrawables");
 
             drawables.Clear();
 
@@ -157,7 +153,6 @@ namespace SharpGame
                 drawable.UpdateBatches(ref frameInfo);
             }
 
-            Profiler.EndSample();
         }
 
         private void UpdateViewParameters()
@@ -177,7 +172,6 @@ namespace SharpGame
         {
             Profiler.BeginSample("ViewRender");
             RenderPath?.Summit(imageIndex);
-            OverlayPass?.Summit(imageIndex);
             Profiler.EndSample();
         }
     }
