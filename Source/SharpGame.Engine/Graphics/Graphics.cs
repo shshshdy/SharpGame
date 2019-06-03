@@ -359,8 +359,15 @@ namespace SharpGame
 
         public void BeginRender()
         {
+            Profiler.BeginSample("Acquire");
+
+            // Acquire the next image from the swap chaing
+            VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
+            nextImage = ((int)currentImage + 1)%ImageCount;
+            Profiler.EndSample();
+
 #if NEW_SYNC
-            if(!SingleLoop)
+            if (!SingleLoop)
             {
                 Profiler.BeginSample("RenderWait");
                 _renderActive.Reset();
@@ -381,17 +388,7 @@ namespace SharpGame
             MainSemWait();
             Profiler.EndSample();
 
-            Profiler.BeginSample("RenderSemPost");
-            RenderSemPost();
-            Profiler.EndSample();
 #endif
-            Profiler.BeginSample("Acquire");
-
-            // Acquire the next image from the swap chaing
-            VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
-            nextImage = ((int)currentImage + 1)%ImageCount;
-            Profiler.EndSample();
-
         }
 
         public void EndRender()
@@ -404,6 +401,10 @@ namespace SharpGame
             // Submit to queue
             VulkanUtil.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
 
+            Profiler.EndSample();
+
+            Profiler.BeginSample("RenderSemPost");
+            RenderSemPost();
             Profiler.EndSample();
 
             Profiler.BeginSample("Present");

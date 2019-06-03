@@ -203,9 +203,6 @@ namespace SharpGame
 
             while (!shouldQuit)
             {
-                //timeStep = timer.ElapsedSeconds;
-                //msec = timer.ElapsedMicroseconds * 0.001f;
-
                 timer.Restart();
 
                 Profiler.Begin();
