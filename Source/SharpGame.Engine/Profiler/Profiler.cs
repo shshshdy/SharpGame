@@ -143,25 +143,25 @@ namespace SharpGame
             }
         }
 
-        //[Conditional("ENABLE_PROFILER")]
+        [Conditional("ENABLE_PROFILER")]
         public static void Begin()
         {
             ThreadedProfiler.Begin();
         }
 
-        //[Conditional("ENABLE_PROFILER")]
+        [Conditional("ENABLE_PROFILER")]
         public static void End()
         {
             ThreadedProfiler.End();
         }
 
-        //[Conditional("ENABLE_PROFILER")]
+        [Conditional("ENABLE_PROFILER")]
         public static void BeginSample(string name)
         {
             ThreadedProfiler.BeginSample(name);
         }
 
-        //[Conditional("ENABLE_PROFILER")]
+        [Conditional("ENABLE_PROFILER")]
         public static void EndSample()
         {
             ThreadedProfiler.EndSample();

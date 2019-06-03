@@ -125,7 +125,7 @@ namespace SharpGame
             base.Destroy();
         }
 
-
+        [MethodImpl((MethodImplOptions)0x100)]
         public void Begin(CommandBufferUsageFlags flags = CommandBufferUsageFlags.None)
         {
             var cmdBufInfo = VkCommandBufferBeginInfo.New();
@@ -133,6 +133,7 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void Begin(CommandBufferUsageFlags flags, ref CommandBufferInheritanceInfo commandBufferInheritanceInfo)
         {
             commandBufferInheritanceInfo.ToNative(out VkCommandBufferInheritanceInfo cmdBufInfo);
@@ -145,11 +146,13 @@ namespace SharpGame
             }
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void End()
         {
             VulkanUtil.CheckResult(vkEndCommandBuffer(commandBuffer));
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void BeginRenderPass(ref RenderPassBeginInfo renderPassBeginInfo, SubpassContents contents)
         {
             renderPassBeginInfo.ToNative(out VkRenderPassBeginInfo vkRenderPassBeginInfo);
@@ -157,43 +160,51 @@ namespace SharpGame
             renderPass = renderPassBeginInfo.renderPass;
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void EndRenderPass()
         {
             vkCmdEndRenderPass(commandBuffer);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void SetScissor(Rect2D scissor)
         {
             SetScissor(ref scissor);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void SetScissor(ref Rect2D pScissors)
         {
             vkCmdSetScissor(commandBuffer, 0, 1, Utilities.AsPointer(ref pScissors));
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void SetViewport(Viewport viewport)
         {
             SetViewport(ref viewport);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void SetViewport(ref Viewport pViewports)
         {
             vkCmdSetViewport(commandBuffer, 0, 1, Utilities.AsPointer(ref pViewports));
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void BindGraphicsPipeline(GraphicsPipeline pipeline)
         {
             var pipe = pipeline.GetGraphicsPipeline(renderPass, null, null);
             vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Graphics, pipeline.handle);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void BindComputePipeline(ComputePipeline pipeline)
         {
             var pipe = pipeline.GetComputePipeline(null);
             vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Compute, pipeline.handle);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindGraphicsResourceSet(GraphicsPipeline pipeline, int firstSet, ResourceSet resourceSet, uint[] dynamicOffsets = null)
         {
             uint dynamicOffsetCount = 0;
@@ -208,6 +219,7 @@ namespace SharpGame
             BindResourceSet(PipelineBindPoint.Graphics, pipeline, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindComputeResourceSet(GraphicsPipeline pipeline, int firstSet, ResourceSet resourceSet, uint[] dynamicOffsets)
         {
             uint dynamicOffsetCount = 0;
@@ -222,61 +234,72 @@ namespace SharpGame
             BindResourceSet(PipelineBindPoint.Compute, pipeline, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindResourceSet(PipelineBindPoint pipelineBindPoint,
             GraphicsPipeline pipeline, int set, ResourceSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
         {
             vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.pipelineLayout, (uint)set, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void BindPipeline(PipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
         {
             vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindVertexBuffers(uint firstBinding, uint bindingCount, IntPtr pBuffers, ref ulong pOffsets)
         {
             vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount, pBuffers, ref pOffsets);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void BindVertexBuffer(uint firstBinding, DeviceBuffer buffer)
         {
             ulong pOffsets = 0;
             vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, ref buffer.buffer, ref pOffsets);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindIndexBuffer(DeviceBuffer buffer, ulong offset, IndexType indexType)
         {
             vkCmdBindIndexBuffer(commandBuffer, buffer.buffer, offset, (VkIndexType)indexType);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void PushConstants<T>(GraphicsPipeline pipeline, ShaderStage shaderStage, int offset, ref T value) where T : struct
         {
             vkCmdPushConstants(commandBuffer, pipeline.pipelineLayout, (VkShaderStageFlags)shaderStage,
                 (uint)offset, (uint)Utilities.SizeOf<T>(), Unsafe.AsPointer(ref value));
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void PushConstants(GraphicsPipeline pipeline, ShaderStage shaderStage, int offset, int size, IntPtr value)
         {
             vkCmdPushConstants(commandBuffer, pipeline.pipelineLayout, (VkShaderStageFlags)shaderStage,
                 (uint)offset, (uint)size, (void*)value);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void PushDescriptorSet(GraphicsPipeline pipeline, int set, ResourceSet resourceSet)
         {
             vkCmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, (uint)set,
                 (uint)resourceSet.writeDescriptorSets.Length, ref resourceSet.writeDescriptorSets[0]);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void Draw(uint vertexCount, uint instanceCount, uint firstVertex, uint firstInstance)
         {
             vkCmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void DrawIndexed(uint indexCount, uint instanceCount, uint firstIndex, int vertexOffset, uint firstInstance)
         {
             vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void DrawGeometry(Geometry geometry, GraphicsPipeline pipeline, Material material)
         {
             var pipe = pipeline.GetGraphicsPipeline(renderPass, pipeline.Shader.Main, geometry);
@@ -285,6 +308,7 @@ namespace SharpGame
             geometry.Draw(this);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void DrawGeometry(Geometry geometry, GraphicsPipeline pipeline, Pass shader, ResourceSet resourceSet)
         {
             var pipe = pipeline.GetGraphicsPipeline(renderPass, shader, geometry);
@@ -293,6 +317,7 @@ namespace SharpGame
             geometry.Draw(this);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void ExecuteCommand(CommandBuffer cmdBuffer)
         {
             vkCmdExecuteCommands(commandBuffer, 1, ref cmdBuffer.commandBuffer);

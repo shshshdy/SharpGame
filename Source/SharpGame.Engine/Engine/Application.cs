@@ -37,12 +37,12 @@ namespace SharpGame
         protected Graphics graphics;
         protected Renderer renderer;
         protected Input input;
-
         protected bool paused = false;
-        protected bool prepared;
-        protected bool singleLoop = false;
-        private bool mainThreadRender = false;
         private bool shouldQuit = false;
+
+        protected bool singleLoop = false;
+        private bool mainThreadRender = true;
+
 
         private float fps;
         public float Fps => fps;
@@ -183,7 +183,7 @@ namespace SharpGame
             else
             {
                 new Thread(RenderLoop).Start();
-                SimulateLoop();            
+                SimulateLoop();     
             }
 
             
@@ -205,6 +205,7 @@ namespace SharpGame
             while (!shouldQuit)
             {
                 Profiler.Begin();
+
                 Time.Tick(timeStep);
 
                 Statistics.Tick(timeStep);
@@ -212,10 +213,9 @@ namespace SharpGame
                 input.snapshot = nativeWindow.PumpEvents();
 
                 UpdateFrame();
-                
-                graphics.Frame();
-                
+
                 ApplyFrameLimit();
+
                 Profiler.End();
             }
 
@@ -259,6 +259,8 @@ namespace SharpGame
 
         private void UpdateFrame()
         {
+            Profiler.BeginSample("UpdateFrame");
+
             this.SendGlobalEvent(new BeginFrame
             {
                 frameNum = Time.FrameNum,
@@ -282,6 +284,8 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndFrame());
 
+            graphics.Frame();
+            Profiler.EndSample();
         }
 
         private void ApplyFrameLimit()
@@ -349,13 +353,6 @@ namespace SharpGame
 
         private void OnWindowResize()
         {
-            if (!prepared)
-            {
-                return;
-            }
-
-            prepared = false;
-
             // Recreate swap chain
             Width = nativeWindow.Width;
             Height = nativeWindow.Width;
@@ -364,7 +361,6 @@ namespace SharpGame
 
             graphics.WaitIdle();
 
-            prepared = true;
         }
 
         private void OnWindowClosing()

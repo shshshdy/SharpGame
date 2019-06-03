@@ -1,9 +1,12 @@
-﻿using System;
+﻿#define NEW_SYNC
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using Vulkan;
 
 using static Vulkan.VulkanNative;
@@ -75,6 +78,10 @@ namespace SharpGame
         DeviceBuffer[] instanceBuffer = new DeviceBuffer[2];
         DeviceBuffer[] transistBuffer = new DeviceBuffer[2];
 
+        private ManualResetEvent _renderActive;
+        private ManualResetEvent _renderComandsReady;
+        private ManualResetEvent _renderCompleted;
+
         public Graphics(Settings settings)
         {
             Settings = settings;
@@ -104,6 +111,12 @@ namespace SharpGame
             submitInfo.pSignalSemaphores = &pSem->RenderComplete;
 
             Texture.Init();
+
+
+            _renderComandsReady = new ManualResetEvent(false);
+
+            _renderActive = new ManualResetEvent(false);
+            _renderCompleted = new ManualResetEvent(true);
         }
 
 
@@ -346,13 +359,35 @@ namespace SharpGame
 
         public void BeginRender()
         {
+#if NEW_SYNC
+            Profiler.BeginSample("RenderWait");
+            _renderActive.Reset();
+            _renderCompleted.Set();
+            _renderComandsReady.WaitOne();
+
+            _renderCompleted.Reset();
+            _renderComandsReady.Reset();
+            //SwapBuffers();
+            SwapContext();
+            _renderActive.Set();
+            Profiler.EndSample();
+#else
+
+            Profiler.BeginSample("MainSemWait");
+            MainSemWait();
+            Profiler.EndSample();
+
+            Profiler.BeginSample("RenderSemPost");
+            RenderSemPost();
+            Profiler.EndSample();
+#endif
             Profiler.BeginSample("Acquire");
+
             // Acquire the next image from the swap chaing
             VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
             nextImage = ((int)currentImage + 1)%ImageCount;
-            MainSemWait();
-
             Profiler.EndSample();
+
         }
 
         public void EndRender()
@@ -368,15 +403,16 @@ namespace SharpGame
             Profiler.EndSample();
 
             Profiler.BeginSample("Present");
+
+
             VulkanUtil.CheckResult(Swapchain.QueuePresent(queue, currentImage, semaphores[0].RenderComplete));
 
             VulkanUtil.CheckResult(vkQueueWaitIdle(queue));
 
-            RenderSemPost();
             Profiler.EndSample();
         }
 
-        #region MULTITHREADED
+#region MULTITHREADED
 
         private int currentContext;
         public int WorkContext => SingleLoop ? 0 : currentContext;
@@ -393,10 +429,7 @@ namespace SharpGame
 
         private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
         private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);
-
         public bool SingleLoop => Settings.SingleLoop;
-
-        private List<Action> commands_ = new List<Action>();
 
         public static void SetMainThread()
         {
@@ -408,18 +441,28 @@ namespace SharpGame
             renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
         }
 
-        public void Post(Action action) { commands_.Add(action); }
-
         public void Frame()
         {
+            Profiler.BeginSample("RenderSemWait");
+#if NEW_SYNC
+            _renderCompleted.WaitOne();
+            _renderComandsReady.Set();
+            _renderActive.WaitOne();
+#else
             RenderSemWait();
             FrameNoRenderWait();
+#endif
+            Profiler.EndSample();
         }
 
         public void Close()
         {
+#if NEW_SYNC
+            _renderCompleted.Set();
+#else
             MainSemWait();
             RenderSemPost();
+#endif
         }
 
         void SwapContext()
@@ -435,9 +478,12 @@ namespace SharpGame
 
         public void FrameNoRenderWait()
         {
+#if NEW_SYNC
+#else
             SwapContext();
             // release render thread
             MainSemPost();
+#endif
         }
 
         public void MainSemPost()
@@ -483,34 +529,14 @@ namespace SharpGame
                 stats.RenderWait = Stopwatch.GetTimestamp() - curTime;
             }
         }
-        #endregion
+
+#endregion
 
     }
 
     public struct Statistics
     {
         static long frameTick;
-
-        public long frameBegin;
-        public float FrameBegin => (float)((frameBegin - frameTick) * Timer.MilliSecsPerTick);
-
-        public long frameEnd;
-        
-       public float FrameEnd
-        {
-            get => (float)((frameEnd - frameTick) * Timer.MilliSecsPerTick);
-            set
-            {
-
-            }
-        }
-
-        public float[] frameTime;
-
-        public long RenderBegin;
-        public long RenderEnd;
-        public float[] renderTime;
-
         public long LogicWait;
         public long RenderWait;
         

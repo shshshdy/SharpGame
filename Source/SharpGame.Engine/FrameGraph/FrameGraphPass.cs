@@ -89,8 +89,8 @@ namespace SharpGame
                 cmdBuffer.commandBuffer.Handle,
                 inherit.framebuffer.handle);
 
-            cmdBuffer.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
-                | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
+            cmdBuffer.Begin(/*CommandBufferUsageFlags.OneTimeSubmit |*/ CommandBufferUsageFlags.RenderPassContinue
+                /*| CommandBufferUsageFlags.SimultaneousUse*/, ref inherit);
 
             OnBeginDraw(view);
 

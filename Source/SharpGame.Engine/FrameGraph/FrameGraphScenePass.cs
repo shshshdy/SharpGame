@@ -37,13 +37,9 @@ namespace SharpGame
 
         protected override void OnDraw(RenderView view)
         {
-            foreach (var drawable in view.drawables)
+            foreach (var batch in view.batches)
             {
-                for(int i = 0; i < drawable.Batches.Length; i++)
-                {
-                    SourceBatch batch = drawable.Batches[i];
-                    DrawBatch(batch, perFrameResSet);
-                }
+                DrawBatch(batch, perFrameResSet);               
             }
         }
     }

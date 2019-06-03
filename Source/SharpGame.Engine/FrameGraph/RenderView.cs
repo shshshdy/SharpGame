@@ -27,6 +27,7 @@ namespace SharpGame
         
         internal FastList<Drawable> drawables = new FastList<Drawable>();
         internal FastList<Light> lights = new FastList<Light>();
+        internal FastList<SourceBatch> batches = new FastList<SourceBatch>();
 
         private FrameInfo frameInfo;
 
@@ -128,6 +129,7 @@ namespace SharpGame
         {
 
             drawables.Clear();
+            batches.Clear();
 
             if (!Scene || !Camera)
             {
@@ -151,6 +153,12 @@ namespace SharpGame
             foreach (var drawable in drawables)
             {
                 drawable.UpdateBatches(ref frameInfo);
+
+                for (int i = 0; i < drawable.Batches.Length; i++)
+                {
+                    SourceBatch batch = drawable.Batches[i];
+                    batches.Add(batch);
+                }
             }
 
         }

@@ -26,8 +26,6 @@ namespace SharpGame
 
         public void RenderUpdate()
         {
-            Profiler.BeginSample("Update");
-
             var frameInfo = new FrameInfo
             {
                 timeStep = Time.Delta,
@@ -39,7 +37,6 @@ namespace SharpGame
                 viewport.Update(ref frameInfo);
             }
 
-            Profiler.EndSample();
         }
 
         public void Render()
