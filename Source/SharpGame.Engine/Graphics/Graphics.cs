@@ -1,4 +1,4 @@
-﻿#define NEW_SYNC
+﻿//#define NEW_SYNC
 
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ namespace SharpGame
     public class Settings
     {
         public CString ApplicationName { get; set; }
-        public bool Validation { get; set; } = true;
+        public bool Validation { get; set; } = false;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
         public bool SingleLoop { get; set; }
@@ -116,7 +116,7 @@ namespace SharpGame
             _renderComandsReady = new ManualResetEvent(false);
 
             _renderActive = new ManualResetEvent(false);
-            _renderCompleted = new ManualResetEvent(true);
+            _renderCompleted = new ManualResetEvent(false);
         }
 
 
@@ -360,17 +360,21 @@ namespace SharpGame
         public void BeginRender()
         {
 #if NEW_SYNC
-            Profiler.BeginSample("RenderWait");
-            _renderActive.Reset();
-            _renderCompleted.Set();
-            _renderComandsReady.WaitOne();
+            if(!SingleLoop)
+            {
+                Profiler.BeginSample("RenderWait");
+                _renderActive.Reset();
+                _renderCompleted.Set();
+                _renderComandsReady.WaitOne();
 
-            _renderCompleted.Reset();
-            _renderComandsReady.Reset();
-            //SwapBuffers();
-            SwapContext();
-            _renderActive.Set();
-            Profiler.EndSample();
+                _renderCompleted.Reset();
+                _renderComandsReady.Reset();
+                //SwapBuffers();
+                SwapContext();
+                _renderActive.Set();
+                Profiler.EndSample();
+            }
+
 #else
 
             Profiler.BeginSample("MainSemWait");
@@ -445,9 +449,12 @@ namespace SharpGame
         {
             Profiler.BeginSample("RenderSemWait");
 #if NEW_SYNC
-            _renderCompleted.WaitOne();
-            _renderComandsReady.Set();
-            _renderActive.WaitOne();
+            if (!SingleLoop)
+            {
+                _renderCompleted.WaitOne();
+                _renderComandsReady.Set();
+                _renderActive.WaitOne();
+            }
 #else
             RenderSemWait();
             FrameNoRenderWait();

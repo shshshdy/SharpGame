@@ -41,8 +41,7 @@ namespace SharpGame
         private bool shouldQuit = false;
 
         protected bool singleLoop = false;
-        private bool mainThreadRender = true;
-
+        private bool mainThreadRender = false;
 
         private float fps;
         public float Fps => fps;
@@ -204,6 +203,11 @@ namespace SharpGame
 
             while (!shouldQuit)
             {
+                //timeStep = timer.ElapsedSeconds;
+                //msec = timer.ElapsedMicroseconds * 0.001f;
+
+                timer.Restart();
+
                 Profiler.Begin();
 
                 Time.Tick(timeStep);

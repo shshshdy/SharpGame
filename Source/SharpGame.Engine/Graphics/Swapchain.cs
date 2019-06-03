@@ -253,7 +253,7 @@ namespace SharpGame
                 }
 
                 // Determine the number of Images
-                uint desiredNumberOfSwapchainImages = 2;// surfCaps.minImageCount + 1;
+                uint desiredNumberOfSwapchainImages = surfCaps.minImageCount + 1;
                 if ((surfCaps.maxImageCount > 0) && (desiredNumberOfSwapchainImages > surfCaps.maxImageCount))
                 {
                     desiredNumberOfSwapchainImages = surfCaps.maxImageCount;
