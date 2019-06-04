@@ -370,7 +370,7 @@ namespace SharpGame
                 _renderCompleted.Reset();
                 _renderComandsReady.Reset();
                 //SwapBuffers();
-                SwapContext();
+                //SwapContext();
                 _renderActive.Set();
                 Profiler.EndSample();
             }
@@ -454,19 +454,8 @@ namespace SharpGame
         public void Frame()
         {
             Profiler.BeginSample("RenderSemWait");
-            /*
-#if EVENT_SYNC
-            if (!SingleLoop)
-            {
-                _renderCompleted.WaitOne();
-                _renderComandsReady.Set();
-                _renderActive.WaitOne();
-            }
-#else*/
-            RenderSemWait();
+            WaitRender();
             WakeRender();
-            /*
-#endif*/
             Profiler.EndSample();
         }
 
@@ -493,11 +482,11 @@ namespace SharpGame
 
         public void WakeRender()
         {
+            SwapContext();
 #if EVENT_SYNC
             _renderComandsReady.Set();
             _renderActive.WaitOne();
 #else
-            SwapContext();
             // release render thread
             MainSemPost();
 #endif
@@ -537,7 +526,7 @@ namespace SharpGame
             }
         }
 
-        void RenderSemWait()
+        void WaitRender()
         {
             if (!SingleLoop)
             {
