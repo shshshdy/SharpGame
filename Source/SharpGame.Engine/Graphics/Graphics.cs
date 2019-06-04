@@ -1,4 +1,4 @@
-﻿#define EVENT_SYNC
+﻿//#define EVENT_SYNC
 
 using System;
 using System.Collections.Generic;
@@ -78,9 +78,11 @@ namespace SharpGame
         DeviceBuffer[] instanceBuffer = new DeviceBuffer[2];
         DeviceBuffer[] transistBuffer = new DeviceBuffer[2];
 
+#if EVENT_SYNC
         private ManualResetEvent _renderActive;
         private ManualResetEvent _renderComandsReady;
         private ManualResetEvent _renderCompleted;
+#endif  
 
         public Graphics(Settings settings)
         {
@@ -112,11 +114,11 @@ namespace SharpGame
 
             Texture.Init();
 
-
+#if EVENT_SYNC
             _renderComandsReady = new ManualResetEvent(false);
-
             _renderActive = new ManualResetEvent(false);
             _renderCompleted = new ManualResetEvent(true);
+#endif
         }
 
 
@@ -422,15 +424,15 @@ namespace SharpGame
 #endif
         }
 
-        #region MULTITHREADED   
+#region MULTITHREADED   
 
         static int mainThreadID;
         static int renderThreadID;
 
-        public static bool IsMainThread => mainThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
-        public static bool IsRenderThread => renderThreadID == System.Threading.Thread.CurrentThread.ManagedThreadId;
-        public static void SetMainThread() => mainThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
-        public static void SetRenderThread() => renderThreadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+        public static bool IsMainThread => mainThreadID == Thread.CurrentThread.ManagedThreadId;
+        public static bool IsRenderThread => renderThreadID == Thread.CurrentThread.ManagedThreadId;
+        public static void SetMainThread() => mainThreadID = Thread.CurrentThread.ManagedThreadId;
+        public static void SetRenderThread() => renderThreadID = Thread.CurrentThread.ManagedThreadId;
 
         public bool SingleLoop => Settings.SingleLoop;
 
@@ -441,8 +443,8 @@ namespace SharpGame
         private int currentFrame;
         public int CurrentFrame => currentFrame;
 
-        private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
-        private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);
+        private Semaphore renderSem = new Semaphore(0, 1);
+        private Semaphore mainSem = new Semaphore(0, 1);
 
         List<System.Action> actions = new List<Action>();
 
@@ -531,7 +533,7 @@ namespace SharpGame
             if (!SingleLoop)
             {
                 long curTime = Stopwatch.GetTimestamp();
-#if EVENT_SYNC                
+#if EVENT_SYNC
                 _renderCompleted.WaitOne();
 #else
                 bool ok = renderSem.WaitOne();
