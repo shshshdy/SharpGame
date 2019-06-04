@@ -1,4 +1,4 @@
-﻿//#define EVENT_SYNC
+﻿#define EVENT_SYNC
 
 using System;
 using System.Collections.Generic;
@@ -454,6 +454,7 @@ namespace SharpGame
         public void Frame()
         {
             Profiler.BeginSample("RenderSemWait");
+            /*
 #if EVENT_SYNC
             if (!SingleLoop)
             {
@@ -461,10 +462,11 @@ namespace SharpGame
                 _renderComandsReady.Set();
                 _renderActive.WaitOne();
             }
-#else
+#else*/
             RenderSemWait();
-            FrameNoRenderWait();
-#endif
+            WakeRender();
+            /*
+#endif*/
             Profiler.EndSample();
         }
 
@@ -489,12 +491,11 @@ namespace SharpGame
 
         }
 
-        public void FrameNoRenderWait()
+        public void WakeRender()
         {
 #if EVENT_SYNC
-
-            //_renderActive.Set();
-            _renderCompleted.Set();
+            _renderComandsReady.Set();
+            _renderActive.WaitOne();
 #else
             SwapContext();
             // release render thread
@@ -541,7 +542,11 @@ namespace SharpGame
             if (!SingleLoop)
             {
                 long curTime = Stopwatch.GetTimestamp();
+#if EVENT_SYNC                
+                _renderCompleted.WaitOne();
+#else
                 bool ok = renderSem.WaitOne();
+#endif
                 stats.WaitRender = Stopwatch.GetTimestamp() - curTime;
             }
         }
@@ -556,7 +561,7 @@ namespace SharpGame
 #endif
         }
 
-        #endregion
+#endregion
 
     }
 

@@ -198,7 +198,7 @@ namespace SharpGame
 
             Start();
             started = true;
-            graphics.FrameNoRenderWait();
+            graphics.WakeRender();
             graphics.Frame();
 
             while (!shouldQuit)
