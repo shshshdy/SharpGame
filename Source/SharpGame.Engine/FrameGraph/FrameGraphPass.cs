@@ -18,13 +18,14 @@ namespace SharpGame
 
         public ulong passID;
 
+        public RenderPass renderPass { get; set; }
+
         [IgnoreDataMember]
         public FrameGraph FrameGraph { get; set; }
 
         protected CommandBuffer cmdBuffer;
         public CommandBuffer CmdBuffer => cmdBuffer;
 
-        protected RenderPass renderPass;
 
         public FrameGraphPass()
         {

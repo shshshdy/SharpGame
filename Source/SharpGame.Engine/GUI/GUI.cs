@@ -25,6 +25,8 @@ namespace SharpGame
         RenderPass renderPass;
         Framebuffer[] framebuffers;
 
+        GraphicsPass guiPass;
+
         private IntPtr fontAtlasID = (IntPtr)1;
 
         public GUI()
@@ -51,7 +53,21 @@ namespace SharpGame
             ImGui.NewFrame();
 
             this.Subscribe<BeginFrame>(Handle);
-            this.Subscribe<EndRenderPass>(Handle);
+
+            guiPass = new GraphicsPass
+            {
+                framebuffers = framebuffers,
+                renderPass = renderPass,
+                ActionDraw = (view) =>
+                {
+
+                    var cmdBuffer = guiPass.CmdBuffer;
+                    RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
+                }
+            };
+
+            Renderer.Instance.MainView.OverlayPass = guiPass;
+
         }
 
         protected override void Destroy()
@@ -224,13 +240,6 @@ namespace SharpGame
             ImGui.Render();
 
         }
-
-        unsafe void Handle(EndRenderPass e)
-        {
-            var cmdBuffer = e.renderPass.CmdBuffer;
-            RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
-        }
-
 
         private unsafe void RenderImDrawData(CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
         {
