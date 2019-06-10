@@ -60,7 +60,7 @@ namespace SharpGame
             if (RenderPath == null)
             {
                 RenderPath = new FrameGraph();
-                RenderPath.AddRenderPass(new FrameGraphScenePass());
+                RenderPath.AddRenderPass(new FrameGraphDrawPass());
             }
 
             CreateBuffers();

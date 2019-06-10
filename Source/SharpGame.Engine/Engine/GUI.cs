@@ -208,14 +208,14 @@ namespace SharpGame
         private unsafe void SetPerFrameImGuiData(float deltaSeconds)
         {
             ImGuiIOPtr io = ImGui.GetIO();
-            io.DisplaySize = new System.Numerics.Vector2(Graphics.Instance.Width, Graphics.Instance.Height);
-            io.DisplayFramebufferScale = System.Numerics.Vector2.One;// window.ScaleFactor;
+            io.DisplaySize = new Vector2(Graphics.Instance.Width, Graphics.Instance.Height);
+            io.DisplayFramebufferScale = Vector2.One;// window.ScaleFactor;
             io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
         }
 
         void Handle(BeginFrame e)
         {
-            SetPerFrameImGuiData((float)Time.Delta);
+            SetPerFrameImGuiData(Time.Delta);
 
             UpdateImGuiInput();
 
@@ -307,11 +307,11 @@ namespace SharpGame
                         {
                             if (pcmd.TextureId == fontAtlasID)
                             {
-                                //    cl.SetGraphicsResourceSet(1, _fontTextureResourceSet);
+                                //cmdBuffer.BindGraphicsResourceSet(pipeline, 1, resourceSet);
                             }
                             else
                             {
-                                //    cl.SetGraphicsResourceSet(1, GetImageResourceSet(pcmd.TextureId));
+                                //cmdBuffer.BindGraphicsResourceSet(pipeline, 1, GetImageResourceSet(pcmd.TextureId));
                             }
                         }
 
