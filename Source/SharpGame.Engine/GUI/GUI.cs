@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿//#define OVERLAY_PASS
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -22,12 +23,15 @@ namespace SharpGame
         GraphicsPipeline pipeline;
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
+
+        private IntPtr fontAtlasID = (IntPtr)1;
+
+#if OVERLAY_PASS
         RenderPass renderPass;
         Framebuffer[] framebuffers;
 
         GraphicsPass guiPass;
-
-        private IntPtr fontAtlasID = (IntPtr)1;
+#endif
 
         public GUI()
         {
@@ -52,7 +56,10 @@ namespace SharpGame
 
             ImGui.NewFrame();
 
-            this.Subscribe<BeginFrame>(Handle);
+            this.Subscribe<BeginFrame>((e) => Update());
+
+
+#if OVERLAY_PASS
 
             guiPass = new GraphicsPass
             {
@@ -67,6 +74,14 @@ namespace SharpGame
             };
 
             Renderer.Instance.MainView.OverlayPass = guiPass;
+#else
+
+            this.Subscribe<EndRenderPass>((e) => 
+            {
+                var cmdBuffer = e.renderPass.CmdBuffer;
+                RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
+            });
+#endif
 
         }
 
@@ -82,7 +97,6 @@ namespace SharpGame
             pipeline.Dispose();
         }
 
-
         unsafe void CreateGraphicsResources()
         {
             uniformBufferVS = DeviceBuffer.CreateUniformBuffer<Matrix4x4>();
@@ -97,8 +111,6 @@ namespace SharpGame
             {
                 new Pass("shaders/ImGui.vert.spv", "shaders/ImGui.frag.spv")
             };
-
-            var graphics = Graphics.Instance;
 
             pipeline = new GraphicsPipeline
             {
@@ -116,13 +128,17 @@ namespace SharpGame
                 }
             };
 
+#if OVERLAY_PASS
+          
+            var graphics = Graphics.Instance;
+
             AttachmentDescription[] attachments =
             {
                 // Color attachment
                 new AttachmentDescription
                 (                
                     graphics.ColorFormat,
-                    loadOp : AttachmentLoadOp.DontCare,
+                    loadOp : AttachmentLoadOp.Load,
                     storeOp : AttachmentStoreOp.Store,
                     finalLayout : ImageLayout.PresentSrcKHR
                 ),
@@ -184,6 +200,7 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             renderPass = new RenderPass(ref renderPassInfo);
             framebuffers = Graphics.Instance.CreateSwapChainFramebuffers(renderPass);
+#endif
         }
 
         private unsafe void RecreateFontDeviceTexture()
@@ -227,7 +244,7 @@ namespace SharpGame
             io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
         }
 
-        void Handle(BeginFrame e)
+        private void Update()
         {
             SetPerFrameImGuiData(Time.Delta);
 
