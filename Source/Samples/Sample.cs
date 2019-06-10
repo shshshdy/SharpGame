@@ -14,6 +14,8 @@ namespace SharpGame.Samples
 
     public class Sample : Object
     {
+        public string Name { get; set; }
+
         protected Scene scene;
         protected Camera camera;
         private Vector2 mousePos = Vector2.Zero;

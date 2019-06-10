@@ -18,6 +18,11 @@ namespace SharpGame
 
         public ulong passID;
 
+        public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
+
+        public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
+
+
         [IgnoreDataMember]
         public FrameGraph FrameGraph { get; set; }
 
@@ -124,8 +129,7 @@ namespace SharpGame
 
         public void Summit(int imageIndex)
         {
-            var graphics = Graphics.Instance;
- 
+            var graphics = Graphics.Instance; 
             CommandBuffer cb = graphics.RenderCmdBuffer;
             var fbs = framebuffers ?? graphics.Framebuffers;
             int renderContext = graphics.RenderContext;
@@ -134,13 +138,14 @@ namespace SharpGame
             (
                 fb.renderPass, fb,
                 new Rect2D(0, 0, graphics.Width, graphics.Height),
-                new ClearColorValue(0.25f, 0.25f, 0.25f, 1.0f),
-                new ClearDepthStencilValue(1.0f, 0)
+                ClearColorValue, ClearDepthStencilValue
             );
 
             cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
+
             if (cmdBuffers[renderContext] != null)
             {
+                cb.ExecuteCommand(cmdBuffers[renderContext]);
                 cmdBuffers[renderContext] = null;
             }
 

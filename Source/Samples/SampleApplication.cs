@@ -66,7 +66,7 @@ namespace SharpGame.Samples
 
             if (allSamples.Count > 0)
             {
-                SetSample(Activator.CreateInstance(allSamples[0].Item4) as Sample);
+                SetSample(allSamples[0].Item4);
 
             }
         }
@@ -115,7 +115,7 @@ namespace SharpGame.Samples
                 ImGui.Text("Selected Sample:");
                 if (ImGui.Combo("", ref selected, sampleNames, sampleNames.Length))
                 {
-                    SetSample(sampleNames[selected]);
+                    SetSample(allSamples[selected].Item4);
                 }
 
                 ImGui.Separator();
@@ -166,26 +166,14 @@ namespace SharpGame.Samples
 
         }
 
-        void SetSample(string typeName)
+        void SetSample(Type type)
         {
-            var type = Type.GetType("SharpGame.Samples." + typeName);
-            if(type == null)
+            var sample = Activator.CreateInstance(type) as Sample;
+            if(sample)
             {
-                type = Type.GetType("SharpGame." + typeName);
+                sample.Name = type.Name;
+                SetSample(sample);
             }
-
-            if (type == null)
-            {
-                type = Type.GetType(typeName);
-            }
-
-            if (type == null)
-            {
-                return;
-            }
-
-            var sample = Activator.CreateInstance(type); 
-            SetSample(sample as Sample);
         }
 
         void SetSample(Sample sample)
@@ -201,6 +189,7 @@ namespace SharpGame.Samples
 
                 if (current)
                 {
+                    Title = current.Name;
                     current.Init();
                 }
             }

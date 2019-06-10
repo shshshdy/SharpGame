@@ -17,8 +17,20 @@ namespace SharpGame
     public unsafe partial class Application : CoreApplication
     {
         protected static Application instance;
+        private string m_title= "SharpGame";
+        public string Title
+        {
+            get => m_title;
+            set
+            {
+                m_title = value;
+                if(nativeWindow != null)
+                {
+                    nativeWindow.Title = value;
+                }
+            }
+        }
 
-        public string Title { get; set; } = "SharpGame";
         public CString Name { get; set; } = "SharpGame";
         public int Width { get; protected set; } = 1280;
         public int Height { get; protected set; } = 720;
@@ -99,7 +111,7 @@ namespace SharpGame
         protected virtual void CreateWindow()
         {
             windowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            nativeWindow = new Sdl2Window(Name, 50, 50, Width, Height, SDL_WindowFlags.Resizable, threadedProcessing: false)
+            nativeWindow = new Sdl2Window(Title, 50, 50, Width, Height, SDL_WindowFlags.Resizable, threadedProcessing: false)
             {
                 X = 50,
                 Y = 50,
