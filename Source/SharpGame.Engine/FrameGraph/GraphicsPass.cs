@@ -43,6 +43,7 @@ namespace SharpGame
             }
 
             int workContext = graphics.WorkContext;
+
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
                 framebuffer = framebuffers[graphics.SingleLoop ? graphics.nextImage : workContext],
@@ -54,6 +55,9 @@ namespace SharpGame
 
             cmdBuffer.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                 | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
+
+            cmdBuffer.SetViewport(ref view.Viewport);
+            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
 
             ActionBegin?.Invoke(view);
 
@@ -80,12 +84,6 @@ namespace SharpGame
             ActionEnd?.Invoke(view);
             cmdBuffer?.End();
             cmdBuffer = null;
-        }
-
-        protected void OnBegin(RenderView view)
-        {
-            cmdBuffer.SetViewport(ref view.Viewport);
-            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
         }
 
         public void DrawBatch(SourceBatch batch, ResourceSet resourceSet)

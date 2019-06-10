@@ -6,7 +6,6 @@ namespace SharpGame
 {
     public class ScenePass : GraphicsPass
     {
-
         private ResourceLayout perObjectResLayout;
         private ResourceSet perObjectSet;
 
@@ -14,24 +13,19 @@ namespace SharpGame
         {
             Name = name;
 
-
             perObjectResLayout = new ResourceLayout
             {
                 new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
             };
 
-
-            ActionBegin = OnBegin;
-            ActionDraw = OnDraw;
-        }
-
-
-        private void OnDraw(RenderView view)
-        {
-            foreach (var batch in view.batches)
+            ActionDraw = (view)=>
             {
-                DrawBatch(batch, view.perFrameSet);
-            }
+                foreach (var batch in view.batches)
+                {
+                    DrawBatch(batch, view.perFrameSet);
+                }
+            };
         }
+
     }
 }
