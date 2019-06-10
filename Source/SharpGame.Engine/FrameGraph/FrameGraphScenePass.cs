@@ -10,7 +10,9 @@ namespace SharpGame
     public class FrameGraphScenePass : FrameGraphPass
     {
         private ResourceLayout perFrameResLayout;
-        private ResourceSet perFrameResSet;
+        private ResourceSet perFrameSet;
+
+        private ResourceSet perObjectSet;
 
         public FrameGraphScenePass(string name = "main")
         {
@@ -23,23 +25,22 @@ namespace SharpGame
 
         }
 
-        protected override void OnBeginDraw(RenderView view)
+        protected override void OnBegin(RenderView view)
         {
-            if(perFrameResSet == null)
+            if(perFrameSet == null)
             {
-                perFrameResSet = new ResourceSet(perFrameResLayout, view.ubCameraVS);
+                perFrameSet = new ResourceSet(perFrameResLayout, view.ubCameraVS);
             }
 
             cmdBuffer.SetViewport(ref view.Viewport);
             cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
-
         }
 
         protected override void OnDraw(RenderView view)
         {
             foreach (var batch in view.batches)
             {
-                DrawBatch(batch, perFrameResSet);               
+                DrawBatch(batch, perFrameSet);               
             }
         }
     }
