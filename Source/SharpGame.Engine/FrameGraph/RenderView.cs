@@ -18,7 +18,7 @@ namespace SharpGame
         private Camera camera;
         public Camera Camera => camera;
 
-        public FrameGraph RenderPath { get; set; }
+        public FrameGraph FrameGraph { get; set; }
 
         private Viewport viewport;
         public ref Viewport Viewport => ref viewport;
@@ -55,12 +55,12 @@ namespace SharpGame
             this.scene = scene;
             this.camera = camera;
                         
-            RenderPath = renderPath;
+            FrameGraph = renderPath;
 
-            if (RenderPath == null)
+            if (FrameGraph == null)
             {
-                RenderPath = new FrameGraph();
-                RenderPath.AddRenderPass(new FrameGraphDrawPass());
+                FrameGraph = new FrameGraph();
+                FrameGraph.AddRenderPass(new FGScenePass());
             }
 
             CreateBuffers();
@@ -119,7 +119,7 @@ namespace SharpGame
 
             Profiler.EndSample();
 
-            RenderPath.Draw(this);
+            FrameGraph.Draw(this);
             
             this.SendGlobalEvent(new EndView { view = this });
 
@@ -179,7 +179,7 @@ namespace SharpGame
         public void Render(int imageIndex)
         {
             Profiler.BeginSample("ViewRender");
-            RenderPath?.Summit(imageIndex);
+            FrameGraph?.Summit(imageIndex);
             Profiler.EndSample();
         }
     }

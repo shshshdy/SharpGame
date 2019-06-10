@@ -14,7 +14,7 @@ namespace SharpGame
         public Task t;
     }
 
-    public class FrameGraphDrawPass : FrameGraphPass
+    public class FGDrawPass : FGPass
     {
         [IgnoreDataMember]
         public Framebuffer[] framebuffers;
@@ -24,26 +24,9 @@ namespace SharpGame
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
 
-        private ResourceLayout perFrameResLayout;
-        private ResourceSet perFrameSet;
-
-        private ResourceLayout perObjectResLayout;
-        private ResourceSet perObjectSet;
-
-        public FrameGraphDrawPass(string name = "main")
-        {
-            Name = name;
-
-            perFrameResLayout = new ResourceLayout
-            {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-            };
-
-            perObjectResLayout = new ResourceLayout
-            {
-                new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-            };
-        }
+        public Action<RenderView> ActionBegin { get; set; }
+        public Action<RenderView> ActionDraw { get; set; }
+        public Action<RenderView> ActionEnd { get; set; }
 
         public void DrawBatch(SourceBatch batch, ResourceSet resourceSet)
         {
@@ -92,7 +75,7 @@ namespace SharpGame
             cmdBuffer.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                 | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
 
-            OnBegin(view);
+            ActionBegin?.Invoke(view);
 
             this.SendGlobalEvent(new BeginRenderPass { renderPass = this });
 
@@ -105,7 +88,7 @@ namespace SharpGame
         {
             Begin(view);
 
-            OnDraw(view);
+            ActionDraw?.Invoke(view);
 
             End(view);
         }
@@ -117,7 +100,7 @@ namespace SharpGame
             cmdBuffer?.End();
             cmdBuffer = null;
         }
-        
+
         public override void Summit(int imageIndex)
         {
             var graphics = Graphics.Instance;
@@ -144,24 +127,6 @@ namespace SharpGame
             cb.EndRenderPass();
         }
 
-        protected void OnBegin(RenderView view)
-        {
-            if(perFrameSet == null)
-            {
-                perFrameSet = new ResourceSet(perFrameResLayout, view.ubCameraVS);
-            }
-
-            cmdBuffer.SetViewport(ref view.Viewport);
-            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
-        }
-
-        protected void OnDraw(RenderView view)
-        {
-            foreach (var batch in view.batches)
-            {
-                DrawBatch(batch, perFrameSet);               
-            }
-        }
     }
 
 
