@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class FGComputePass : FGPass
+    public class GUIPass : GraphicsPass
     {
     }
 }

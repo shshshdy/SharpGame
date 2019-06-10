@@ -19,6 +19,7 @@ namespace SharpGame
         public Camera Camera => camera;
 
         public FrameGraph FrameGraph { get; set; }
+        public GraphicsPass OverlayPass { get; set; }
 
         private Viewport viewport;
         public ref Viewport Viewport => ref viewport;
@@ -42,6 +43,9 @@ namespace SharpGame
         internal DeviceBuffer ubCameraPS;
         internal DeviceBuffer ubLight;
 
+        private ResourceLayout perFrameResLayout;
+        internal ResourceSet perFrameSet;
+
         ResourceSet perViewResourceSet;
         ResourceSet perObjectResourceSet;
 
@@ -60,10 +64,12 @@ namespace SharpGame
             if (FrameGraph == null)
             {
                 FrameGraph = new FrameGraph();
-                FrameGraph.AddRenderPass(new FGScenePass());
+                FrameGraph.AddRenderPass(new ScenePass());
             }
 
             CreateBuffers();
+
+
         }
 
         protected void CreateBuffers()
@@ -88,6 +94,12 @@ namespace SharpGame
                 ubLight = DeviceBuffer.CreateUniformBuffer<LightPS>();
             }
 
+            perFrameResLayout = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+            };
+
+            perFrameSet = new ResourceSet(perFrameResLayout, ubCameraVS);
         }
 
         public void Update(ref FrameInfo frameInfo)
@@ -100,8 +112,8 @@ namespace SharpGame
 
             Viewport.Define(0, 0, graphics.Width, graphics.Height);
 
-            frameUniform.DeltaTime = (float)Time.Delta;
-            frameUniform.ElapsedTime = (float)Time.Elapsed;
+            frameUniform.DeltaTime = Time.Delta;
+            frameUniform.ElapsedTime = Time.Elapsed;
             ubFrameInfo.SetData(ref frameUniform);
 
             this.SendGlobalEvent(new BeginView { view = this });
@@ -120,7 +132,9 @@ namespace SharpGame
             Profiler.EndSample();
 
             FrameGraph.Draw(this);
-            
+
+            OverlayPass?.Draw(this);
+
             this.SendGlobalEvent(new EndView { view = this });
 
         }
@@ -180,6 +194,7 @@ namespace SharpGame
         {
             Profiler.BeginSample("ViewRender");
             FrameGraph?.Summit(imageIndex);
+            OverlayPass?.Summit(imageIndex);
             Profiler.EndSample();
         }
     }

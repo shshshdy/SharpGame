@@ -22,10 +22,10 @@ namespace SharpGame
         GraphicsPipeline pipeline;
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
-        private IntPtr fontAtlasID = (IntPtr)1;
-
         RenderPass renderPass;
         Framebuffer[] framebuffers;
+
+        private IntPtr fontAtlasID = (IntPtr)1;
 
         public GUI()
         {
@@ -69,8 +69,6 @@ namespace SharpGame
 
         unsafe void CreateGraphicsResources()
         {
-            //vertexBuffer = DeviceBuffer.CreateDynamic<VertexPos2dTexColor>(BufferUsageFlags.VertexBuffer, 4096);
-            //indexBuffer = DeviceBuffer.CreateDynamic<ushort>(BufferUsageFlags.IndexBuffer, 4096);
             uniformBufferVS = DeviceBuffer.CreateUniformBuffer<Matrix4x4>();
 
             resourceLayout = new ResourceLayout

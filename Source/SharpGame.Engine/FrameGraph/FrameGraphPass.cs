@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    public class FGPass : Object
+    public class FrameGraphPass : Object
     {
         private StringID name;
         public StringID Name
@@ -26,7 +26,7 @@ namespace SharpGame
 
         protected RenderPass renderPass;
 
-        public FGPass()
+        public FrameGraphPass()
         {
         }
 

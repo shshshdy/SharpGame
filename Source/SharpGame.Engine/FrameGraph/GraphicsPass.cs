@@ -14,7 +14,7 @@ namespace SharpGame
         public Task t;
     }
 
-    public class FGDrawPass : FGPass
+    public class GraphicsPass : FrameGraphPass
     {
         [IgnoreDataMember]
         public Framebuffer[] framebuffers;
@@ -27,26 +27,6 @@ namespace SharpGame
         public Action<RenderView> ActionBegin { get; set; }
         public Action<RenderView> ActionDraw { get; set; }
         public Action<RenderView> ActionEnd { get; set; }
-
-        public void DrawBatch(SourceBatch batch, ResourceSet resourceSet)
-        {
-            var pipeline = batch.material.Pipeline;
-            var shader = pipeline.Shader;
-            if ((passID & shader.passFlags) == 0)
-            {
-                return;
-            }
-
-            var pass = shader.GetPass(passID);
-
-            var pipe = pipeline.GetGraphicsPipeline(renderPass, pass, batch.geometry);
-            cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipe);
-            cmdBuffer.PushConstants(pipeline, ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>(), batch.worldTransform);
-            cmdBuffer.BindGraphicsResourceSet(pipeline, 0, resourceSet);
-            cmdBuffer.BindGraphicsResourceSet(pipeline, 1, batch.material.ResourceSet);
-
-            batch.geometry.Draw(cmdBuffer);
-        }
 
         protected void Begin(RenderView view)
         {
@@ -97,8 +77,35 @@ namespace SharpGame
         {
             this.SendGlobalEvent(new EndRenderPass { renderPass = this });
 
+            ActionEnd?.Invoke(view);
             cmdBuffer?.End();
             cmdBuffer = null;
+        }
+
+        protected void OnBegin(RenderView view)
+        {
+            cmdBuffer.SetViewport(ref view.Viewport);
+            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+        }
+
+        public void DrawBatch(SourceBatch batch, ResourceSet resourceSet)
+        {
+            var pipeline = batch.material.Pipeline;
+            var shader = pipeline.Shader;
+            if ((passID & shader.passFlags) == 0)
+            {
+                return;
+            }
+
+            var pass = shader.GetPass(passID);
+
+            var pipe = pipeline.GetGraphicsPipeline(renderPass, pass, batch.geometry);
+            cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipe);
+            cmdBuffer.PushConstants(pipeline, ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>(), batch.worldTransform);
+            cmdBuffer.BindGraphicsResourceSet(pipeline, 0, resourceSet);
+            cmdBuffer.BindGraphicsResourceSet(pipeline, 1, batch.material.ResourceSet);
+
+            batch.geometry.Draw(cmdBuffer);
         }
 
         public override void Summit(int imageIndex)
