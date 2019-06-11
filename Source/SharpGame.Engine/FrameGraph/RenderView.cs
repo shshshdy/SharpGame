@@ -104,21 +104,21 @@ namespace SharpGame
 
         public void Update(ref FrameInfo frameInfo)
         {
-            var graphics = Graphics.Instance;
+            Profiler.BeginSample("ViewUpdate");
 
+            var g = Graphics.Instance;
             this.frameInfo = frameInfo;
             this.frameInfo.camera = Camera;
-            this.frameInfo.viewSize = new Int2(graphics.Width, graphics.Height);
+            this.frameInfo.viewSize = new Int2(g.Width, g.Height);
 
-            Viewport.Define(0, 0, graphics.Width, graphics.Height);
+            Viewport.Define(0, 0, g.Width, g.Height);
 
             frameUniform.DeltaTime = Time.Delta;
             frameUniform.ElapsedTime = Time.Elapsed;
+
             ubFrameInfo.SetData(ref frameUniform);
 
             this.SendGlobalEvent(new BeginView { view = this });
-
-            Profiler.BeginSample("ViewUpdate");
 
             UpdateDrawables();
 
@@ -129,14 +129,13 @@ namespace SharpGame
 
             UpdateLightParameters();
 
-            Profiler.EndSample();
-
             FrameGraph.Draw(this);
 
             OverlayPass?.Draw(this);
 
             this.SendGlobalEvent(new EndView { view = this });
 
+            Profiler.EndSample();
         }
 
         private void UpdateDrawables()

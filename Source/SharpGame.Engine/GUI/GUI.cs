@@ -1,4 +1,4 @@
-﻿//#define OVERLAY_PASS
+﻿#define OVERLAY_PASS
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -65,7 +65,7 @@ namespace SharpGame
             {
                 framebuffers = framebuffers,
                 renderPass = renderPass,
-                ActionDraw = (view) =>
+                OnDraw = (view) =>
                 {
 
                     var cmdBuffer = guiPass.CmdBuffer;

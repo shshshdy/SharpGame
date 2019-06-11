@@ -38,7 +38,9 @@ namespace SharpGame
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
 
         public static VkDevice device { get; protected set; }
-        public static VkQueue queue { get; protected set; }
+        public static VkQueue GraphicsQueue { get; protected set; }
+        public static VkQueue ComputeQueue { get; protected set; }
+
         public Format ColorFormat => Swapchain.ColorFormat;
         public Format DepthFormat { get; protected set; }
         public Swapchain Swapchain { get; } = new Swapchain();
@@ -93,7 +95,8 @@ namespace SharpGame
             device = Device.Init(enabledFeatures, EnabledExtensions);
            
             // Get a graphics queue from the Device
-            queue = Device.GetDeviceQueue(Device.QFIndices.Graphics, 0);
+            GraphicsQueue = Device.GetDeviceQueue(Device.QFIndices.Graphics, 0);
+            ComputeQueue = Device.GetDeviceQueue(Device.QFIndices.Compute, 0);
 
             DepthFormat = Device.GetSupportedDepthFormat();            
 
@@ -401,7 +404,7 @@ namespace SharpGame
 
             Profiler.BeginSample("Submit");
             // Submit to queue
-            VulkanUtil.CheckResult(vkQueueSubmit(queue, 1, ref submitInfo, VkFence.Null));
+            VulkanUtil.CheckResult(vkQueueSubmit(GraphicsQueue, 1, ref submitInfo, VkFence.Null));
 
             Profiler.EndSample();
 
@@ -409,9 +412,9 @@ namespace SharpGame
             Profiler.BeginSample("Present");
 
 
-            VulkanUtil.CheckResult(Swapchain.QueuePresent(queue, currentImage, semaphores[0].RenderComplete));
+            VulkanUtil.CheckResult(Swapchain.QueuePresent(GraphicsQueue, currentImage, semaphores[0].RenderComplete));
 
-            VulkanUtil.CheckResult(vkQueueWaitIdle(queue));
+            VulkanUtil.CheckResult(vkQueueWaitIdle(GraphicsQueue));
 
             Profiler.EndSample();
 

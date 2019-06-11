@@ -164,7 +164,7 @@ namespace SharpGame
                     VkBufferCopy copyRegion = new VkBufferCopy { size = size };
                     vkCmdCopyBuffer(copyCmd, stagingBuffer, buffer.buffer, 1, &copyRegion);
 
-                    Device.FlushCommandBuffer(copyCmd, Graphics.queue, true);
+                    Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
                     Device.DestroyBuffer(stagingBuffer);
                     Device.FreeMemory(stagingMemory);
                 }

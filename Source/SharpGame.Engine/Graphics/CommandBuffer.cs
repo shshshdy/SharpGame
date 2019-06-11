@@ -27,13 +27,23 @@ namespace SharpGame
         public Framebuffer framebuffer;
         public Rect2D renderArea;
         public ClearValue[] clearValues;
-
+        public int numClearValues;
         public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
         {
             this.renderPass = renderPass;
             this.framebuffer = framebuffer;
             this.renderArea = renderArea;
             this.clearValues = clearValues;
+            numClearValues = clearValues.Length;
+        }
+
+        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, ClearValue[] clearValues, int num)
+        {
+            this.renderPass = renderPass;
+            this.framebuffer = framebuffer;
+            this.renderArea = renderArea;
+            this.clearValues = clearValues;
+            numClearValues = num;
         }
 
         public unsafe void ToNative(out VkRenderPassBeginInfo native)
@@ -45,7 +55,7 @@ namespace SharpGame
 
             if (clearValues != null && clearValues.Length > 0)
             {
-                native.clearValueCount = (uint)clearValues.Length;
+                native.clearValueCount = (uint)numClearValues;
                 native.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues[0]);
             }
             else
@@ -325,6 +335,11 @@ namespace SharpGame
             vkCmdExecuteCommands(commandBuffer, 1, ref cmdBuffer.commandBuffer);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
+        public unsafe void ExecuteCommand(CommandBufferPool cmdBuffer)
+        {
+            vkCmdExecuteCommands(commandBuffer, (uint)cmdBuffer.currentIndex, (VkCommandBuffer*)cmdBuffer.GetAddress(0));
+        }
     }
 
 

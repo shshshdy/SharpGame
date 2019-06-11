@@ -144,7 +144,7 @@ namespace SharpGame
                     (VkImageLayout)texture.imageLayout,
                     subresourceRange);
 
-                Device.FlushCommandBuffer(copyCmd, Graphics.queue, true);
+                Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
                 Device.FreeMemory(stagingMemory);
                 Device.DestroyBuffer(stagingBuffer);
             }
@@ -378,7 +378,7 @@ namespace SharpGame
                     (VkImageLayout)imageLayout,
                     subresourceRange);
 
-                Device.FlushCommandBuffer(copyCmd, Graphics.queue);
+                Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue);
 
                 // Clean up staging resources
                 Device.FreeMemory(stagingMemory);
