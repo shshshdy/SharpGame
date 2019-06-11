@@ -20,8 +20,6 @@ namespace SharpGame
         [IgnoreDataMember]
         public Framebuffer[] framebuffers;
 
-        protected CommandBuffer[] cmdBuffers = new CommandBuffer[3];
-
         CommandBufferPool[] cmdBufferPool = new CommandBufferPool[2];
 
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
@@ -41,6 +39,28 @@ namespace SharpGame
 
             cmdBufferPool[0].Allocate(CommandBufferLevel.Secondary, 8);
             cmdBufferPool[1].Allocate(CommandBufferLevel.Secondary, 8);
+
+        }
+
+        protected CommandBuffer GetCmdBuffer(RenderView view)
+        {
+            var g = Graphics.Instance;
+            int workContext = g.WorkContext;
+            var cb = cmdBufferPool[workContext].Get();
+            cb.renderPass = renderPass;
+
+            CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
+            {
+                framebuffer = framebuffers[g.SingleLoop ? g.nextImage : workContext],
+                renderPass = renderPass
+            };
+
+            cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
+                | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
+
+            cb.SetViewport(ref view.Viewport);
+            cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+            return cb;
         }
 
         protected void Begin(RenderView view)
@@ -57,31 +77,14 @@ namespace SharpGame
                 framebuffers = g.Framebuffers;
             }
 
-            int workContext = g.WorkContext;
+            cmdBufferPool[g.WorkContext].currentIndex = 0;
 
-            CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
-            {
-                framebuffer = framebuffers[g.SingleLoop ? g.nextImage : workContext],
-                renderPass = renderPass
-            };
-
-            cmdBufferPool[workContext].currentIndex = 0;
-            cmdBuffer = cmdBufferPool[workContext].Get(); 
-
-            cmdBuffer.renderPass = renderPass;
-
-            cmdBuffer.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
-                | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
-
-            cmdBuffer.SetViewport(ref view.Viewport);
-            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+            cmdBuffer = GetCmdBuffer(view);
 
             OnBegin?.Invoke(view);
 
-            this.SendGlobalEvent(new BeginRenderPass { renderPass = this });
 
-            //System.Diagnostics.Debug.Assert(cmdBuffers_[imageIndex] == null);
-            cmdBuffers[workContext] = cmdBuffer;
+            //this.SendGlobalEvent(new BeginRenderPass { renderPass = this });
 
         }
 
@@ -96,14 +99,14 @@ namespace SharpGame
 
         protected void End(RenderView view)
         {
-            this.SendGlobalEvent(new EndRenderPass { renderPass = this });
+            //this.SendGlobalEvent(new EndRenderPass { renderPass = this });
 
             OnEnd?.Invoke(view);
             cmdBuffer?.End();
             cmdBuffer = null;
         }
 
-        public void DrawBatch(SourceBatch batch, ResourceSet resourceSet)
+        public void DrawBatch(CommandBuffer cmdBuffer, SourceBatch batch, ResourceSet resourceSet)
         {
             var pipeline = batch.material.Pipeline;
             var shader = pipeline.Shader;
@@ -113,8 +116,8 @@ namespace SharpGame
             }
 
             var pass = shader.GetPass(passID);
-
             var pipe = pipeline.GetGraphicsPipeline(renderPass, pass, batch.geometry);
+
             cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cmdBuffer.PushConstants(pipeline, ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>(), batch.worldTransform);
             cmdBuffer.BindGraphicsResourceSet(pipeline, 0, resourceSet);
@@ -139,7 +142,12 @@ namespace SharpGame
             );
 
             cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-            cb.ExecuteCommand(cmdBufferPool[renderContext]);
+            //cb.ExecuteCommand(cmdBufferPool[renderContext]);     
+            for(int i = 0; i < cmdBufferPool[renderContext].currentIndex; i++)
+            {
+                cb.ExecuteCommand(cmdBufferPool[renderContext].CommandBuffers[i]);
+                break;
+            }
             cb.EndRenderPass();
         }
 
