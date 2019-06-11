@@ -14,7 +14,7 @@ namespace SharpGame
         public Framebuffer frameBuffer;
         public CommandBuffer commandBuffers;
     }
-
+    
     public class GraphicsPass : FrameGraphPass
     {
         [IgnoreDataMember]
@@ -67,7 +67,7 @@ namespace SharpGame
 
             cmdBufferPool[workContext].currentIndex = 0;
             cmdBuffer = cmdBufferPool[workContext].Get(); 
-                //g.WorkCmdPool.Get();
+
             cmdBuffer.renderPass = renderPass;
 
             cmdBuffer.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
@@ -130,6 +130,7 @@ namespace SharpGame
             var fbs = framebuffers ?? g.Framebuffers;
             int renderContext = g.RenderContext;
             var fb = fbs[imageIndex];
+            
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
                 fb.renderPass, fb,
@@ -138,17 +139,7 @@ namespace SharpGame
             );
 
             cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-
             cb.ExecuteCommand(cmdBufferPool[renderContext]);
-                
-            /*
-            ref CommandBuffer secondaryCB = ref cmdBuffers[renderContext];
-            if (secondaryCB != null)
-            {
-                cb.ExecuteCommand(secondaryCB);
-                secondaryCB = null;
-            }*/
-
             cb.EndRenderPass();
         }
 
