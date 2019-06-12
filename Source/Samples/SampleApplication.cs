@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -27,6 +28,30 @@ namespace SharpGame.Samples
 
             this.Subscribe<GUIEvent>(HandleGUI);
             this.Subscribe<Update>(HandleUpdate);
+            /*
+            Hashtable h = new Hashtable
+            {
+                ["1"] = 1,
+                ["str"] = "str",
+                ["list"] = new ArrayList
+                {
+                    1,2,3,4,5
+                },
+
+
+                ["obj"] = new Hashtable
+                {
+                    ["1"] = 1,
+                    ["str"] = "str",
+                    ["list"] = new ArrayList
+                {
+                    1,2,3,4,5
+                },
+                }
+            };
+
+
+            SJSON.Save(h, "test.sjon");*/
 
         }
 
