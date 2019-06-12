@@ -27,7 +27,7 @@ namespace SharpGame
         void DrawBatches(RenderView view)
         {
             var batches = view.batches.Items;
-         
+            /*
             renderTasks.Clear();
 
             for (int i = 0; i < view.batches.Count; i += 400)
@@ -43,13 +43,13 @@ namespace SharpGame
                 renderTasks.Add(t);
             }
 
-            Task.WaitAll(renderTasks.Items);   /*
+            Task.WaitAll(renderTasks.Items);
             */
-            /*
+           
             foreach (var batch in view.batches)
             {
                 DrawBatch(cmdBuffer, batch, view.perFrameSet);
-            }*/
+            } /**/
             /*
             Draw(view, batches, cmdBuffer, 0, 400);
 

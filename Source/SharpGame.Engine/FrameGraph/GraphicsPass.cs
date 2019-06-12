@@ -20,7 +20,7 @@ namespace SharpGame
         [IgnoreDataMember]
         public Framebuffer[] framebuffers;
 
-        CommandBufferPool[] cmdBufferPool = new CommandBufferPool[2];
+        CommandBufferPool[] cmdBufferPool;
 
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
@@ -31,14 +31,16 @@ namespace SharpGame
 
         public GraphicsPass()
         {
-            cmdBufferPool = new CommandBufferPool[2]
+            cmdBufferPool = new CommandBufferPool[3]
             {
+                new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer),
                 new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer),
                 new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer)
             };
 
             cmdBufferPool[0].Allocate(CommandBufferLevel.Secondary, 8);
             cmdBufferPool[1].Allocate(CommandBufferLevel.Secondary, 8);
+            cmdBufferPool[2].Allocate(CommandBufferLevel.Secondary, 8);
 
         }
 
@@ -51,7 +53,7 @@ namespace SharpGame
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                framebuffer = framebuffers[g.SingleLoop ? g.nextImage : workContext],
+                framebuffer = framebuffers[/*g.SingleLoop ?*/ g.nextImage/* : workContext*/],
                 renderPass = renderPass
             };
 
@@ -77,7 +79,8 @@ namespace SharpGame
                 framebuffers = g.Framebuffers;
             }
 
-            cmdBufferPool[g.WorkContext].currentIndex = 0;
+            int workContext = g.WorkContext;
+            cmdBufferPool[workContext].currentIndex = 0;
 
             cmdBuffer = GetCmdBuffer(view);
 

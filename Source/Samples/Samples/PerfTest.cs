@@ -23,11 +23,13 @@ namespace SharpGame.Samples
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
             };
+            resourceLayout.Build();
 
             var resourceLayoutTex = new ResourceLayout(1)
             {
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
+            resourceLayoutTex.Build();
 
             var shader = new Shader
             {
