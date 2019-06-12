@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using Vulkan;
 
 namespace SharpGame
@@ -72,7 +73,8 @@ namespace SharpGame
 
         public CommandBuffer Get()
         {
-            int idx = currentIndex++;
+            int idx = currentIndex;
+                Interlocked.Increment(ref currentIndex);
             return CommandBuffers[idx % CommandBuffers.Length];
         }
 

@@ -106,7 +106,7 @@ namespace SharpGame
             cmdBuffer = null;
         }
 
-        public void DrawBatch(CommandBuffer cmdBuffer, SourceBatch batch, ResourceSet resourceSet)
+        public void DrawBatch(CommandBuffer cb, SourceBatch batch, ResourceSet resourceSet)
         {
             var pipeline = batch.material.Pipeline;
             var shader = pipeline.Shader;
@@ -118,12 +118,12 @@ namespace SharpGame
             var pass = shader.GetPass(passID);
             var pipe = pipeline.GetGraphicsPipeline(renderPass, pass, batch.geometry);
 
-            cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipe);
-            cmdBuffer.PushConstants(pipeline, ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>(), batch.worldTransform);
-            cmdBuffer.BindGraphicsResourceSet(pipeline, 0, resourceSet);
-            cmdBuffer.BindGraphicsResourceSet(pipeline, 1, batch.material.ResourceSet);
+            cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
+            cb.PushConstants(pipeline, ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>(), batch.worldTransform);
+            cb.BindGraphicsResourceSet(pipeline, 0, resourceSet);
+            cb.BindGraphicsResourceSet(pipeline, 1, batch.material.ResourceSet);
 
-            batch.geometry.Draw(cmdBuffer);
+            batch.geometry.Draw(cb);
         }
 
         public override void Summit(int imageIndex)
@@ -142,12 +142,12 @@ namespace SharpGame
             );
 
             cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-            //cb.ExecuteCommand(cmdBufferPool[renderContext]);     
-            for(int i = 0; i < cmdBufferPool[renderContext].currentIndex; i++)
+            cb.ExecuteCommand(cmdBufferPool[renderContext]);
+            /*
+            for (int i = 0; i < cmdBufferPool[renderContext].currentIndex; i++)
             {
                 cb.ExecuteCommand(cmdBufferPool[renderContext].CommandBuffers[i]);
-                break;
-            }
+            }*/
             cb.EndRenderPass();
         }
 

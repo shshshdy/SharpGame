@@ -27,29 +27,34 @@ namespace SharpGame
         void DrawBatches(RenderView view)
         {
             var batches = view.batches.Items;
-            /*
+         
             renderTasks.Clear();
 
             for (int i = 0; i < view.batches.Count; i += 400)
             {
-                var cmd = this.GetCmdBuffer(view);
+                int from = i;
                 int to = Math.Min(i + 400, view.batches.Count);                
-                var t = Task.Run(() => Draw(view, batches, cmd, i, to));
+                var t = Task.Run(
+                    () => {
+                        var cmd = GetCmdBuffer(view);
+                        Draw(view, batches, cmd, from, to);
+                        cmd.End();
+                    });
                 renderTasks.Add(t);
             }
 
-            Task.WaitAll(renderTasks.Items);
+            Task.WaitAll(renderTasks.Items);   /*
             */
             /*
             foreach (var batch in view.batches)
             {
                 DrawBatch(cmdBuffer, batch, view.perFrameSet);
             }*/
-
+            /*
             Draw(view, batches, cmdBuffer, 0, 400);
 
-            //var cmd = this.GetCmdBuffer(view);
-            //Draw(view, batches, cmd, 400, 800);
+            var cmd = this.GetCmdBuffer(view);
+            Draw(view, batches, cmd, 400, 800);*/
 
         }
 
