@@ -124,15 +124,13 @@ namespace SharpGame
         internal VkCommandBuffer commandBuffer;
         public RenderPass renderPass;
         bool owner = false;
+        bool opened = false;
+        public bool IsOpen => opened;
+
         internal CommandBuffer(VkCommandBuffer cmdBuffer)
         {
             commandBuffer = cmdBuffer;
             owner = true;
-        }
-
-        protected override void Destroy()
-        {
-            base.Destroy();
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -141,6 +139,7 @@ namespace SharpGame
             var cmdBufInfo = VkCommandBufferBeginInfo.New();
             cmdBufInfo.flags = (VkCommandBufferUsageFlags)flags;
             VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
+            opened = true;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -154,12 +153,14 @@ namespace SharpGame
                 cmdBufBeginInfo.pInheritanceInfo = &cmdBufInfo;
                 VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufBeginInfo));
             }
+            opened = true;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
         public void End()
         {
             VulkanUtil.CheckResult(vkEndCommandBuffer(commandBuffer));
+            opened = false;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

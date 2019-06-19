@@ -8,19 +8,13 @@ using Vulkan;
 
 
 namespace SharpGame
-{
-    public class PassSumitInfo
-    {
-        public Framebuffer frameBuffer;
-        public CommandBuffer commandBuffers;
-    }
-    
+{    
     public class GraphicsPass : FrameGraphPass
     {
         [IgnoreDataMember]
         public Framebuffer[] framebuffers;
 
-        CommandBufferPool[] cmdBufferPool;
+        protected CommandBufferPool[] cmdBufferPool;
 
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
@@ -36,9 +30,11 @@ namespace SharpGame
                 new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer)
             };
 
-            cmdBufferPool[0].Allocate(CommandBufferLevel.Secondary, 8);
-            cmdBufferPool[1].Allocate(CommandBufferLevel.Secondary, 8);
-            cmdBufferPool[2].Allocate(CommandBufferLevel.Secondary, 8);
+            for(int i = 0; i < 3; i++)
+            {
+                cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, 8);
+            }
+
         }
 
         protected CommandBuffer GetCmdBuffer()
@@ -57,8 +53,28 @@ namespace SharpGame
             cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                 | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
 
-            //cb.SetViewport(ref view.Viewport);
-            //cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+            return cb;
+        }
+
+        protected CommandBuffer GetCmdBufferAt(int index)
+        {
+            var g = Graphics.Instance;
+            int workContext = g.WorkContext;
+            var cb = cmdBufferPool[workContext][index];
+            cb.renderPass = renderPass;
+
+            if(!cb.IsOpen)
+            {
+                CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
+                {
+                    framebuffer = framebuffers[g.nextImage],
+                    renderPass = renderPass
+                };
+
+                cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
+                    | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
+            }
+
             return cb;
         }
 
@@ -98,6 +114,8 @@ namespace SharpGame
         {
             cmdBuffer = GetCmdBuffer();
 
+            cmdBuffer.SetViewport(ref view.Viewport);
+            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
             OnDraw?.Invoke(view);
             cmdBuffer?.End();
             cmdBuffer = null;

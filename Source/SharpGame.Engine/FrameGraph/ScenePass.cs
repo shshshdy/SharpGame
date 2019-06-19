@@ -24,31 +24,38 @@ namespace SharpGame
 
         protected override void DrawImpl(RenderView view)
         {
+            var g = Graphics.Instance;
             var batches = view.batches.Items;
-            
-            var cmd = GetCmdBuffer();
-
-            //cmd.SetViewport(ref view.Viewport);
-            //cmd.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
-            /*
+              /*
             renderTasks.Clear();
 
+            int idx = 0;
             for (int i = 0; i < view.batches.Count; i += 400)
             {
                 int from = i;
                 int to = Math.Min(i + 400, view.batches.Count);                
                 var t = Task.Run(
                     () => {
-                        var cb = GetCmdBuffer(view);
+                        var cb = GetCmdBufferAt(idx);
+                        cb.SetViewport(ref view.Viewport);
+                        cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
                         Draw(view, batches, cb, from, to);
                         cb.End();
                     });
                 renderTasks.Add(t);
+                idx++;
             }
 
-            Task.WaitAll(renderTasks.Items);
-            */
-            
+            int workContext = g.WorkContext;
+            cmdBufferPool[workContext].currentIndex = renderTasks.Count;
+            Task.WaitAll(renderTasks.Items);*/
+          
+            var cmd = GetCmdBuffer();
+
+            cmd.SetViewport(ref view.Viewport);
+            cmd.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+
+
             foreach (var batch in view.batches)
             {
                 DrawBatch(cmd, batch, view.perFrameSet);

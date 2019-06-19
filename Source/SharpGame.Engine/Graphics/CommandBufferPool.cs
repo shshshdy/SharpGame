@@ -30,6 +30,11 @@ namespace SharpGame
 
         }
 
+        public CommandBuffer this[int index]
+        {
+            get { return CommandBuffers[index]; }
+        }
+
         protected override void Destroy()
         {
             Free();
