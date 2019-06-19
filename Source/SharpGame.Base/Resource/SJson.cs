@@ -8,44 +8,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    /// JSON value type.
-    public enum JSONValueType
-    {
-        /// JSON null type.
-        Null = 0,
-        /// JSON boolean type.
-        Bool,
-        /// JSON number type.
-        Number,
-        /// JSON string type.
-        String,
-        /// JSON array type.
-        Array,
-        /// JSON object type.
-        Object
-    };
-
-    [StructLayout(LayoutKind.Explicit, Size = 4)]
-    public struct JsonValue
-    {
-        [FieldOffset(0)]
-        public JSONValueType type;
-
-        [FieldOffset(1)]
-        public bool val1;
-        [FieldOffset(1)]
-        public double val2;
-        [FieldOffset(1)]
-        public string val3;
-        [FieldOffset(1)]
-        public List<JsonValue> val4;
-        [FieldOffset(1)]
-        public Dictionary<string, JsonValue> val5;
-
-    }
-
-
-    public class Hashtable : Dictionary<string, object> { }
+    public class JSElement : Dictionary<string, object> { }
     /// <summary>
     /// Provides functions for encoding and decoding files in the simplified JSON format.
     /// </summary>
@@ -55,7 +18,7 @@ namespace SharpGame
 		///  Encodes the Hashtable t in the simplified JSON format. The Hashtable can
 		///  contain, numbers, bools, strings, ArrayLists and Hashtables.
 		/// </summary>
-		public static string Encode(Hashtable t)
+		public static string Encode(JSElement t)
 		{
 			StringBuilder sb = new StringBuilder();
 			WriteRootObject(t, sb);
@@ -77,30 +40,30 @@ namespace SharpGame
 		/// Decodes a SJSON bytestream into a Hashtable with numbers, bools, strings,
 		/// ArrayLists and Hashtables.
 		/// </summary>
-		public static Hashtable Decode(string sjson)
+		public static JSElement Decode(string sjson)
 		{
 			int index = 0;
 			return ParseRootObject(sjson, ref index);
 		}
         
-		public static Hashtable Load(string path)
+		public static JSElement Load(string path)
 		{
 			string text = System.IO.File.ReadAllText(path);
-			return Decode(text) as Hashtable;
+			return Decode(text) as JSElement;
 		}
         
-		public static void Save(Hashtable h, string path)
+		public static void Save(JSElement h, string path)
 		{
 			string s = Encode(h);
             System.IO.File.WriteAllText(path, s);
 		}
 
-		static void WriteRootObject(Hashtable t, StringBuilder builder)
+		static void WriteRootObject(JSElement t, StringBuilder builder)
 		{
 		   WriteObjectFields(t, builder, 0);
 		}
 
-		static void WriteObjectFields(Hashtable t, StringBuilder builder, int indentation)
+		static void WriteObjectFields(JSElement t, StringBuilder builder, int indentation)
 		{
 			var keys = new SortedSet<string>(t.Keys);
             
@@ -145,7 +108,7 @@ namespace SharpGame
                 case ArrayList v:
                     WriteArray(v, builder, indentation);
                     break;
-                case Hashtable v:
+                case JSElement v:
                     write_object(v, builder, indentation);
                     break;
                 default:
@@ -176,7 +139,7 @@ namespace SharpGame
 			builder.Append(" ]");
 		}
 
-		static void write_object(Hashtable t, StringBuilder builder, int indentation)
+		static void write_object(JSElement t, StringBuilder builder, int indentation)
 		{
 			builder.Append('{');
 			WriteObjectFields(t, builder, indentation+1);
@@ -184,9 +147,9 @@ namespace SharpGame
 			builder.Append('}');
 		}
 
-		static Hashtable ParseRootObject(string json, ref int index)
+		static JSElement ParseRootObject(string json, ref int index)
 		{
-			Hashtable ht = new Hashtable();
+			JSElement ht = new JSElement();
 			while (!AtEnd(json, ref index)) {
 				string key = ParseIdentifier(json, ref index);
 				Consume(json, ref index, "=");
@@ -305,9 +268,9 @@ namespace SharpGame
 			return json[index];
 		}
 
-		static Hashtable ParseObject(string json, ref int index)
+		static JSElement ParseObject(string json, ref int index)
 		{
-			Hashtable ht = new Hashtable();
+			JSElement ht = new JSElement();
 			Consume(json, ref index, "{");
 			SkipWhiteSpace(json, ref index);
 
