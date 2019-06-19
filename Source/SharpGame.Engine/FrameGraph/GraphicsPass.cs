@@ -25,9 +25,7 @@ namespace SharpGame
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
 
-        public Action<RenderView> OnBegin { get; set; }
         public Action<RenderView> OnDraw { get; set; }
-        public Action<RenderView> OnEnd { get; set; }
 
         public GraphicsPass()
         {
@@ -41,10 +39,9 @@ namespace SharpGame
             cmdBufferPool[0].Allocate(CommandBufferLevel.Secondary, 8);
             cmdBufferPool[1].Allocate(CommandBufferLevel.Secondary, 8);
             cmdBufferPool[2].Allocate(CommandBufferLevel.Secondary, 8);
-
         }
 
-        protected CommandBuffer GetCmdBuffer(RenderView view)
+        protected CommandBuffer GetCmdBuffer()
         {
             var g = Graphics.Instance;
             int workContext = g.WorkContext;
@@ -60,15 +57,14 @@ namespace SharpGame
             cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                 | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
 
-            cb.SetViewport(ref view.Viewport);
-            cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+            //cb.SetViewport(ref view.Viewport);
+            //cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
             return cb;
         }
 
         protected void Begin(RenderView view)
         {
             var g = Graphics.Instance;
-
             if (renderPass == null)
             {
                 renderPass = g.RenderPass;
@@ -81,21 +77,14 @@ namespace SharpGame
 
             int workContext = g.WorkContext;
             cmdBufferPool[workContext].currentIndex = 0;
-
-            cmdBuffer = GetCmdBuffer(view);
-
-            OnBegin?.Invoke(view);
-
-
             //this.SendGlobalEvent(new BeginRenderPass { renderPass = this });
-
         }
 
         public override void Draw(RenderView view)
         {
             Begin(view);
 
-            OnDraw?.Invoke(view);
+            DrawImpl(view);
 
             End(view);
         }
@@ -103,8 +92,13 @@ namespace SharpGame
         protected void End(RenderView view)
         {
             //this.SendGlobalEvent(new EndRenderPass { renderPass = this });
+        }
 
-            OnEnd?.Invoke(view);
+        protected virtual void DrawImpl(RenderView view)
+        {
+            cmdBuffer = GetCmdBuffer();
+
+            OnDraw?.Invoke(view);
             cmdBuffer?.End();
             cmdBuffer = null;
         }
@@ -145,6 +139,8 @@ namespace SharpGame
             );
 
             cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
+
+
             cb.ExecuteCommand(cmdBufferPool[renderContext]);
             /*
             for (int i = 0; i < cmdBufferPool[renderContext].currentIndex; i++)

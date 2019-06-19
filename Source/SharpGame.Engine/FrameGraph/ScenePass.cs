@@ -10,7 +10,6 @@ namespace SharpGame
         private ResourceLayout perObjectLayout;
         private ResourceSet perObjectSet;
 
-
         FastList<Task> renderTasks = new FastList<Task>();
         public ScenePass(string name = "main")
         {
@@ -21,12 +20,16 @@ namespace SharpGame
                 new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Vertex),
             };
 
-            OnDraw = DrawBatches;
         }
 
-        void DrawBatches(RenderView view)
+        protected override void DrawImpl(RenderView view)
         {
             var batches = view.batches.Items;
+            
+            var cmd = GetCmdBuffer();
+
+            //cmd.SetViewport(ref view.Viewport);
+            //cmd.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
             /*
             renderTasks.Clear();
 
@@ -36,25 +39,22 @@ namespace SharpGame
                 int to = Math.Min(i + 400, view.batches.Count);                
                 var t = Task.Run(
                     () => {
-                        var cmd = GetCmdBuffer(view);
-                        Draw(view, batches, cmd, from, to);
-                        cmd.End();
+                        var cb = GetCmdBuffer(view);
+                        Draw(view, batches, cb, from, to);
+                        cb.End();
                     });
                 renderTasks.Add(t);
             }
 
             Task.WaitAll(renderTasks.Items);
             */
-           
+            
             foreach (var batch in view.batches)
             {
-                DrawBatch(cmdBuffer, batch, view.perFrameSet);
-            } /**/
-            /*
-            Draw(view, batches, cmdBuffer, 0, 400);
-
-            var cmd = this.GetCmdBuffer(view);
-            Draw(view, batches, cmd, 400, 800);*/
+                DrawBatch(cmd, batch, view.perFrameSet);
+            }
+            cmd.End();
+            
 
         }
 

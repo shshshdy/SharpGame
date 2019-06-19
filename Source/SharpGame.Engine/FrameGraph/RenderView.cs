@@ -192,8 +192,16 @@ namespace SharpGame
         public void Render(int imageIndex)
         {
             Profiler.BeginSample("ViewRender");
+
+            var g = Graphics.Instance;
+
+            CommandBuffer cmdBuffer = g.RenderCmdBuffer;
+            cmdBuffer.SetViewport(ref Viewport);
+            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)Viewport.width, (int)Viewport.height));
+
             FrameGraph?.Summit(imageIndex);
             OverlayPass?.Summit(imageIndex);
+
             Profiler.EndSample();
         }
     }
