@@ -18,35 +18,31 @@ namespace SharpGame
 
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
-
+        public int WorkCount = 1;
         public Action<RenderView> OnDraw { get; set; }
 
         public GraphicsPass()
         {
-            cmdBufferPool = new CommandBufferPool[3]
+            cmdBufferPool = new CommandBufferPool[8];
+            for(int i = 0; i < 8; i++)
             {
-                new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer),
-                new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer),
-                new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer)
+                cmdBufferPool[i] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer | VkCommandPoolCreateFlags.Transient);
+                cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, 3);
             };
 
-            for(int i = 0; i < 3; i++)
-            {
-                cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, 8);
-            }
 
         }
 
         protected CommandBuffer GetCmdBuffer()
         {
             var g = Graphics.Instance;
-            int workContext = g.WorkContext;
-            var cb = cmdBufferPool[workContext].Get();
+            int workContext = /*g.nextImage;//*/g.WorkContext;
+            var cb = cmdBufferPool[0][workContext];
             cb.renderPass = renderPass;
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                framebuffer = framebuffers[/*g.SingleLoop ?*/ g.nextImage/* : workContext*/],
+                framebuffer = framebuffers[g.nextImage],
                 renderPass = renderPass
             };
 
@@ -59,8 +55,8 @@ namespace SharpGame
         protected CommandBuffer GetCmdBufferAt(int index)
         {
             var g = Graphics.Instance;
-            int workContext = g.WorkContext;
-            var cb = cmdBufferPool[workContext][index];
+            int workContext = /*g.nextImage;//*/g.WorkContext;
+            var cb = cmdBufferPool[index][workContext];
             cb.renderPass = renderPass;
 
             if(!cb.IsOpen)
@@ -91,8 +87,8 @@ namespace SharpGame
                 framebuffers = g.Framebuffers;
             }
 
-            int workContext = g.WorkContext;
-            cmdBufferPool[workContext].currentIndex = 0;
+            //int workContext = /*g.nextImage;//*/g.WorkContext;
+            //cmdBufferPool[workContext].currentIndex = 0;
             //this.SendGlobalEvent(new BeginRenderPass { renderPass = this });
         }
 
@@ -146,7 +142,7 @@ namespace SharpGame
             var g = Graphics.Instance;
             CommandBuffer cb = g.RenderCmdBuffer;
             var fbs = framebuffers ?? g.Framebuffers;
-            int renderContext = g.RenderContext;
+            int renderContext = /*imageIndex;//*/ g.RenderContext;
             var fb = fbs[imageIndex];
             
             var renderPassBeginInfo = new RenderPassBeginInfo
@@ -157,14 +153,11 @@ namespace SharpGame
             );
 
             cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-
-
-            cb.ExecuteCommand(cmdBufferPool[renderContext]);
-            /*
-            for (int i = 0; i < cmdBufferPool[renderContext].currentIndex; i++)
+            //cb.ExecuteCommand(cmdBufferPool[renderContext]);            
+            for (int i = 0; i < WorkCount; i++)
             {
-                cb.ExecuteCommand(cmdBufferPool[renderContext].CommandBuffers[i]);
-            }*/
+                cb.ExecuteCommand(cmdBufferPool[i].CommandBuffers[renderContext]);
+            }
             cb.EndRenderPass();
         }
 

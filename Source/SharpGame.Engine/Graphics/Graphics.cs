@@ -22,7 +22,7 @@ namespace SharpGame
     public class Settings
     {
         public CString ApplicationName { get; set; }
-        public bool Validation { get; set; } = false;
+        public bool Validation { get; set; } = true;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
         public bool SingleLoop { get; set; }
@@ -388,9 +388,10 @@ namespace SharpGame
 
 #endif
             Profiler.BeginSample("Acquire");
-
             // Acquire the next image from the swap chaing
             VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
+
+            System.Diagnostics.Debug.Assert(currentImage == nextImage);
             nextImage = ((int)currentImage + 1)%ImageCount;
             Profiler.EndSample();
 
