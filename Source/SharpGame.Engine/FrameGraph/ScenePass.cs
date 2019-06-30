@@ -14,6 +14,8 @@ namespace SharpGame
 
         private CommandBufferPool[][] cmdBufferPools = new CommandBufferPool[2][];
         FastList<Task> renderTasks = new FastList<Task>();
+
+        const int WORK_COUNT = 16;
         public ScenePass(string name = "main")
         {
             Name = name;
@@ -25,8 +27,8 @@ namespace SharpGame
 
             for(int i = 0; i < 2; i++)
             {
-                cmdBufferPools[i] = new CommandBufferPool[8];
-                for(int j = 0; j < 8; j++)
+                cmdBufferPools[i] = new CommandBufferPool[WORK_COUNT];
+                for(int j = 0; j < WORK_COUNT; j++)
                 {
                     cmdBufferPools[i][j] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
                     cmdBufferPools[i][j].Allocate(CommandBufferLevel.Secondary, 1);
@@ -72,11 +74,17 @@ namespace SharpGame
 
             renderTasks.Clear();
 
+            int dpPerBatch = (int)Math.Ceiling(view.batches.Count / (float)WORK_COUNT);
+            if(dpPerBatch < 200)
+            {
+                dpPerBatch = 200;
+            }
+
             int idx = 0;
-            for (int i = 0; i < view.batches.Count; i += 400)
+            for (int i = 0; i < view.batches.Count; i += dpPerBatch)
             {
                 int from = i;
-                int to = Math.Min(i + 400, view.batches.Count);
+                int to = Math.Min(i + dpPerBatch, view.batches.Count);
                 int cmdIndex = idx;
                 var t = Task.Run(
                     () => {
