@@ -23,6 +23,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AssimpNet" Version="4.1.0" />
     <PackageReference Include="ImGui.NET" Version="1.70.0" />
     <PackageReference Include="Vk" Version="1.0.21" />
   </ItemGroup>
