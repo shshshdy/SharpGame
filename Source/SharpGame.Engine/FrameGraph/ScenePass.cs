@@ -35,10 +35,11 @@ namespace SharpGame
             for (int i = 0; i < view.batches.Count; i += 400)
             {
                 int from = i;
-                int to = Math.Min(i + 400, view.batches.Count);                
+                int to = Math.Min(i + 400, view.batches.Count);
+                int cmdIdx = idx;
                 var t = Task.Run(
                     () => {
-                        var cb = GetCmdBufferAt(idx);
+                        var cb = GetCmdBufferAt(cmdIdx);
                         cb.SetViewport(ref view.Viewport);
                         cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
                         Draw(view, batches, cb, from, to);

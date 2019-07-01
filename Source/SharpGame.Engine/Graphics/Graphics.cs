@@ -22,7 +22,7 @@ namespace SharpGame
     public class Settings
     {
         public CString ApplicationName { get; set; }
-        public bool Validation { get; set; } = true;
+        public bool Validation { get; set; } = false;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
         public bool SingleLoop { get; set; }
