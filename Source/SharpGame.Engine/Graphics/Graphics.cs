@@ -564,8 +564,8 @@ namespace SharpGame
     {
         public long WaitLogic;
         public long WaitRender;
-        public static uint drawCall;
-        public static uint triCount;
+        public static int drawCall;
+        public static int triCount;
         
         public static void Tick(float timeStep)
         {

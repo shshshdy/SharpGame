@@ -104,7 +104,6 @@ namespace SharpGame
 
                 SetBoundingBox(model.BoundingBox);
                 ResetLodLevels();
-
             }
             else
             {
@@ -134,6 +133,7 @@ namespace SharpGame
         public override void UpdateBatches(ref FrameInfo frame)
         {
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
+            
             distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
 
             if (batches.Length == 1)
@@ -150,7 +150,7 @@ namespace SharpGame
 
             float scale = Vector3.Dot(worldBoundingBox.Size, MathUtil.DotScale);
             float newLodDistance = frame.camera.GetLodDistance(distance_, scale, lodBias_);
-
+            
             if (newLodDistance != lodDistance_)
             {
                 lodDistance_ = newLodDistance;

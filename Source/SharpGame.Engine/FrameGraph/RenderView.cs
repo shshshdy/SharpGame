@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define UPDATE_BATCH
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -148,7 +149,8 @@ namespace SharpGame
             {
                 return;
             }
-        
+
+            Profiler.BeginSample("Culling");
             FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery
             {
                 view = this,
@@ -156,23 +158,29 @@ namespace SharpGame
             };
 
             Scene.GetDrawables(frustumOctreeQuery, drawables);
-
+            Profiler.EndSample();
+            /*
+            Profiler.BeginSample("UpdateGeometry");
             //todo:multi thread
-            foreach(var drawable in drawables)
+            foreach (var drawable in drawables)
             {
                 drawable.UpdateGeometry(ref frameInfo);
             }
+            Profiler.EndSample();*/
 
+            Profiler.BeginSample("UpdateBatches");
             foreach (var drawable in drawables)
             {
+#if UPDATE_BATCH
                 drawable.UpdateBatches(ref frameInfo);
-
-                for (int i = 0; i < drawable.Batches.Length; i++)
+#endif
+                foreach (SourceBatch batch in drawable.Batches)
                 {
-                    SourceBatch batch = drawable.Batches[i];
                     batches.Add(batch);
                 }
             }
+
+            Profiler.EndSample();
 
         }
 
