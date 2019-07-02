@@ -26,12 +26,10 @@ namespace SharpGame
 
         private IntPtr fontAtlasID = (IntPtr)1;
 
-#if OVERLAY_PASS
         RenderPass renderPass;
         Framebuffer[] framebuffers;
 
         GraphicsPass guiPass;
-#endif
 
         public GUI()
         {
@@ -58,9 +56,6 @@ namespace SharpGame
 
             this.Subscribe<BeginFrame>((e) => Update());
 
-
-#if OVERLAY_PASS
-
             guiPass = new GraphicsPass
             {
                 framebuffers = framebuffers,
@@ -74,14 +69,6 @@ namespace SharpGame
             };
 
             Renderer.Instance.MainView.OverlayPass = guiPass;
-#else
-
-            this.Subscribe<EndRenderPass>((e) => 
-            {
-                var cmdBuffer = e.renderPass.CmdBuffer;
-                RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
-            });
-#endif
 
         }
 
@@ -128,7 +115,6 @@ namespace SharpGame
                 }
             };
 
-#if OVERLAY_PASS
           
             var graphics = Graphics.Instance;
 
@@ -200,7 +186,6 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             renderPass = new RenderPass(ref renderPassInfo);
             framebuffers = Graphics.Instance.CreateSwapChainFramebuffers(renderPass);
-#endif
         }
 
         private unsafe void RecreateFontDeviceTexture()

@@ -98,7 +98,7 @@ namespace SharpGame
                 idx++;
             }
 
-            Task.WaitAll(renderTasks.Items);
+            Task.WaitAll(renderTasks.ToArray());
 #else
             var cmd = GetCmdBuffer();
 

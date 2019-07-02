@@ -54,7 +54,8 @@ namespace SharpGame.Samples
                 node.Scaling = new Vector3(3.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
-               
+                ref var m = ref node.WorldTransform;
+
                 var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material
                 {
@@ -95,6 +96,7 @@ namespace SharpGame.Samples
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(mat);
+                    ref var m = ref node.WorldTransform;
                 }
             }
 

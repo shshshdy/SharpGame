@@ -29,7 +29,6 @@ namespace SharpGame.Samples
             {
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
-            resourceLayoutTex.Build();
 
             var shader = new Shader
             {
