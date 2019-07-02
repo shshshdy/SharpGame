@@ -29,17 +29,24 @@ namespace SharpGame.Samples
             this.Subscribe<GUIEvent>(HandleGUI);
             this.Subscribe<Update>(HandleUpdate);
             /*
-            Hashtable h = new Hashtable
+            JSElement js = new JSElement
             {
                 ["1"] = 1,
-                ["str"] = "str",
+                ["str"] = @"str
+                    123131,
+123123123
+12313
+4141414
+
+
+",
                 ["list"] = new ArrayList
                 {
                     1,2,3,4,5
                 },
 
 
-                ["obj"] = new Hashtable
+                ["obj"] = new JSElement
                 {
                     ["1"] = 1,
                     ["str"] = "str",
@@ -51,7 +58,9 @@ namespace SharpGame.Samples
             };
 
 
-            SJSON.Save(h, "test.sjon");*/
+            SJSON.Save(js, "test.sjon");
+
+            var j = SJSON.Load("Test.shader");*/
 
         }
 
