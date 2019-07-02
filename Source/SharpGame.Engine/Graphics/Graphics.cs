@@ -517,7 +517,7 @@ namespace SharpGame
             bool ok = mainSem.WaitOne(-1);
             if (ok)
             {
-                stats.WaitLogic = Stopwatch.GetTimestamp() - curTime;
+                stats.LogicWait = Stopwatch.GetTimestamp() - curTime;
                 return true;
             }
 
@@ -542,7 +542,7 @@ namespace SharpGame
 #else
                 bool ok = renderSem.WaitOne();
 #endif
-                stats.WaitRender = Stopwatch.GetTimestamp() - curTime;
+                stats.RenderWait = Stopwatch.GetTimestamp() - curTime;
             }
         }
 
@@ -562,8 +562,8 @@ namespace SharpGame
 
     public struct Stats
     {
-        public long WaitLogic;
-        public long WaitRender;
+        public long LogicWait;
+        public long RenderWait;
         public static int drawCall;
         public static int triCount;
         

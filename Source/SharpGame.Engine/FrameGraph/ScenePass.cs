@@ -16,6 +16,10 @@ namespace SharpGame
         FastList<Task> renderTasks = new FastList<Task>();
 
         const int WORK_COUNT = 16;
+        public static bool[] multiThreaded = { true, true };
+
+        public static bool MultiThreaded = true;
+
         public ScenePass(string name = "main")
         {
             Name = name;
@@ -62,57 +66,62 @@ namespace SharpGame
         protected override void DrawImpl(RenderView view)
         {
             var g = Graphics.Instance;
-            var batches = view.batches.Items;
-#if MULTI_THREAD
-
             int workContext = g.WorkContext;
-            for (int i = 0; i < cmdBufferPools[workContext].Length; i++)
+            var batches = view.batches.Items;
+            multiThreaded[workContext] = MultiThreaded;
+
+            if (MultiThreaded)
             {
-                var cmd = cmdBufferPools[workContext][i];
-                cmd.currentIndex = 0;
+                for (int i = 0; i < cmdBufferPools[workContext].Length; i++)
+                {
+                    var cmd = cmdBufferPools[workContext][i];
+                    cmd.currentIndex = 0;
+                }
+
+                renderTasks.Clear();
+
+                int dpPerBatch = (int)Math.Ceiling(view.batches.Count / (float)WORK_COUNT);
+                if(dpPerBatch < 200)
+                {
+                    dpPerBatch = 200;
+                }
+
+                int idx = 0;
+                for (int i = 0; i < view.batches.Count; i += dpPerBatch)
+                {
+                    int from = i;
+                    int to = Math.Min(i + dpPerBatch, view.batches.Count);
+                    int cmdIndex = idx;
+                    var t = Task.Run(
+                        () => {
+                            var cb = GetCmdBufferAt(cmdIndex);
+                            cb.SetViewport(ref view.Viewport);
+                            cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+                            Draw(view, batches, cb, from, to);
+                            cb.End();
+                        });
+                    renderTasks.Add(t);
+                    idx++;
+                }
+
+                Task.WaitAll(renderTasks.ToArray());
             }
-
-            renderTasks.Clear();
-
-            int dpPerBatch = (int)Math.Ceiling(view.batches.Count / (float)WORK_COUNT);
-            if(dpPerBatch < 200)
+            else
             {
-                dpPerBatch = 200;
+                var cmd = GetCmdBuffer();
+
+                cmd.SetViewport(ref view.Viewport);
+                cmd.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+
+                foreach (var batch in view.batches)
+                {
+                    DrawBatch(cmd, batch, view.perFrameSet);
+                }
+
+                cmd.End();
             }
-
-            int idx = 0;
-            for (int i = 0; i < view.batches.Count; i += dpPerBatch)
-            {
-                int from = i;
-                int to = Math.Min(i + dpPerBatch, view.batches.Count);
-                int cmdIndex = idx;
-                var t = Task.Run(
-                    () => {
-                        var cb = GetCmdBufferAt(cmdIndex);
-                        cb.SetViewport(ref view.Viewport);
-                        cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
-                        Draw(view, batches, cb, from, to);
-                        cb.End();
-                    });
-                renderTasks.Add(t);
-                idx++;
-            }
-
-            Task.WaitAll(renderTasks.ToArray());
-#else
-            var cmd = GetCmdBuffer();
-
-            cmd.SetViewport(ref view.Viewport);
-            cmd.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
-
-
-            foreach (var batch in view.batches)
-            {
-                DrawBatch(cmd, batch, view.perFrameSet);
-            }
-            cmd.End();
             
-#endif
+
         }
 
         void Draw(RenderView view, SourceBatch[] sourceBatches, CommandBuffer commandBuffer, int from, int to)
@@ -126,32 +135,39 @@ namespace SharpGame
 
         public override void Summit(int imageIndex)
         {
-#if MULTI_THREAD
             var g = Graphics.Instance;
-            CommandBuffer cb = g.RenderCmdBuffer;
-            var fbs = framebuffers ?? g.Framebuffers;
             int renderContext = g.RenderContext;
-            var fb = fbs[imageIndex];
+            bool mt = multiThreaded[renderContext];
 
-            var renderPassBeginInfo = new RenderPassBeginInfo
-            (
-                fb.renderPass, fb,
-                new Rect2D(0, 0, g.Width, g.Height),
-                ClearColorValue, ClearDepthStencilValue
-            );
-
-            cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-
-            for (int i = 0; i < cmdBufferPools[renderContext].Length; i++)
+            if (mt)
             {
-                var cmd = cmdBufferPools[renderContext][i];
-                if(cmd.currentIndex > 0)
-                cb.ExecuteCommand(cmd.CommandBuffers[0]);
+                CommandBuffer cb = g.RenderCmdBuffer;
+                var fbs = framebuffers ?? g.Framebuffers;
+                var fb = fbs[imageIndex];
+
+                var renderPassBeginInfo = new RenderPassBeginInfo
+                (
+                    fb.renderPass, fb,
+                    new Rect2D(0, 0, g.Width, g.Height),
+                    ClearColorValue, ClearDepthStencilValue
+                );
+
+                cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
+
+                for (int i = 0; i < cmdBufferPools[renderContext].Length; i++)
+                {
+                    var cmd = cmdBufferPools[renderContext][i];
+                    if (cmd.currentIndex > 0)
+                        cb.ExecuteCommand(cmd.CommandBuffers[0]);
+                }
+                cb.EndRenderPass();
+
             }
-            cb.EndRenderPass();
-#else
-            base.Summit(imageIndex);
-#endif
+            else
+            {
+                base.Summit(imageIndex);
+            }
+
         }
     }
 }
