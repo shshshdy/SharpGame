@@ -1,387 +1,381 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpGame.Resource
+namespace SharpGame.Res
 {
-
-    class SJSON
+    public class Hashtable : Dictionary<string, object> { }
+    /// <summary>
+    /// Provides functions for encoding and decoding files in the simplified JSON format.
+    /// </summary>
+    public class SJSON
     {
-#if false
-        static void parseError(string source, int at, string expected)
+        /// <summary>
+        ///  Encodes the Hashtable t in the simplified JSON format. The Hashtable can
+        ///  contain, numbers, bools, strings, ArrayLists and Hashtables.
+        /// </summary>
+        public static string Encode(Hashtable t)
         {
-            var token = String.fromCharCode(source[at]);
-            var near = source.toString('utf8', at, Math.min(at + 25, source.length + 1));
-            var line = 1;
-            for (int i = 0; i < at; ++i)
-                if (source[i] == 10) ++line;
-
-            //return new SyntaxError(`Unexpected token '${token}', expected '${expected}' on line ${ line } near '${near}'.`);
+            StringBuilder builder = new StringBuilder();
+            WriteRootObject(t, builder);
+            return builder.ToString();
         }
 
-        static int[] characterMask(string str)
+        /// <summary>
+        /// Encodes the object o in the simplified JSON format (not as a root object).
+        /// </summary>
+        public static string EncodeObject(object o)
         {
-            var mask = new int[4];
-            for (var i = 0; i < str.Length; ++i)
-            {
-                int c = str[i];
-                mask[c / 32] |= (1 << (c % 32));
-            }
-            return mask;
+            StringBuilder builder = new StringBuilder();
+            Write(o, builder, 0);
+            return builder.ToString();
         }
 
-        static bool hasChar(int[] mask, int c)
+        /// <summary>
+        /// Decodes a SJSON bytestream into a Hashtable with numbers, bools, strings, 
+        /// ArrayLists and Hashtables.
+        /// </summary>
+        public static Hashtable Decode(byte[] sjson)
         {
-            return (mask[c / 32] & (1 << (c % 32))) != 0;
+            int index = 0;
+            return ParseRootObject(sjson, ref index);
         }
 
-        static int[] NUMBER = characterMask("-+0123456789");
-        static int[] NUMBER_EXP = characterMask(".eE");
-        static int[] ID_TERM = characterMask(" \t\n=:");
-        static int[] WHITESPACE = characterMask(" \n\r\t,");
-
-        static void parse(string s)
+        /// <summary>
+        /// Convenience function for loading a file.
+        /// </summary>
+        public static Hashtable Load(string path)
         {
-
-            int i = 0;
-            //if (typeof(s) === 'string') s = Buffer(s);
-
-            void ws()
-            {
-                while (i < s.Length)
-                {
-                    if (s[i] == 47)
-                    { // "/"
-                        ++i;
-                        if (s[i] == 47)
-                            while (s[++i] != 10) ; // "\n"
-                        else if (s[i] == 42) // "*"
-                            while (s[++i] != 42) ;
-                    }
-                    else if (!hasChar(WHITESPACE, s[i]))
-                    {
-                        break;
-                    }
-                    ++i;
-                }
-            }
-
-            void consume(char c)
-            {
-                ws();
-                if (s[i++] != c)
-                    throw parseError(s, i - 1, String.fromCharCode(c));
-            }
-
-            void consumeKeyword(string kw)
-            {
-                ws();
-                //const chars = Buffer(kw);
-                foreach (var c in kw)
-                {
-                    if (s[i++] != c)
-                        throw parseError(s, i - 1, String.fromCharCode(c));
-                }
-            }
-
-            object pvalue()
-            {
-                ws();
-                var c = s[i];
-                if (hasChar(NUMBER, c)) return pnumber();
-                if (c == 123) return pobject();  // "{"
-                if (c == 91) return parray();   // "["
-                if (c == 34) return pstring();  // "
-                if (c == 116) { consumeKeyword("true"); return true; }
-                if (c == 102) { consumeKeyword("false"); return false; }
-                if (c == 110) { consumeKeyword("null"); return null; }
-                throw parseError(s, i, "number, {, [, \", true, false or null");
-            }
-
-            double pnumber()
-            {
-                ws();
-                int start = i;
-                bool isFloat = false;
-                for (; i < s.Length; ++i)
-                {
-                    int c = s[i];
-                    bool expc = hasChar(NUMBER_EXP, c);
-                    isFloat |= expc;
-                    if (!expc && !hasChar(NUMBER, c))
-                        break;
-                }
-                const n = s.toString('utf8', start, i);
-                return isFloat ? parseFloat(n) : parseInt(n);
-            }
-
-            void pstring()
-            {
-                // Literal string
-                if (s[i] === 34 && s[i + 1] === 34 && s[i + 2] === 34)
-                {
-                    i += 3;
-                    const start = i;
-                    for (; s[i] !== 34 || s[i + 1] !== 34 || s[i + 2] !== 34; ++i) ;
-                    i += 3;
-                    return s.toString('utf8', start, i - 3);
-                }
-
-                const start = i;
-                let escape = false;
-                consume(34);
-                for (; s[i] !== 34; ++i)
-                { // unescaped "
-                    if (s[i] === 92)
-                    {
-                        ++i;
-                        escape = true;
-                    }
-                }
-                consume(34);
-                if (!escape)
-                    return s.toString('utf8', start + 1, i - 1);
-
-                i = start;
-                var octets = [];
-                consume(34);
-                for (; s[i] !== 34; ++i)
-                { // unescaped "
-                    if (s[i] === 92)
-                    {
-                        ++i;
-                        if (s[i] == 98) octets.push(8); // \b
-                        else if (s[i] == 102) octets.push(12); // \f
-                        else if (s[i] == 110) octets.push(10); // \n
-                        else if (s[i] == 114) octets.push(13); // \r
-                        else if (s[i] == 116) octets.push(9); // \t
-                        else if (s[i] == 117)
-                        { // \u
-                            ++i;
-                            octets.push(16 * (s[i] - 48) + s[i + 1] - 48);
-                            i += 2;
-                            octets.push(16 * (s[i] - 48) + s[i + 1] - 48);
-                            i += 2;
-                        }
-                        else octets.push(s[i]); // \" \\ \/
-                    }
-                    else
-                        octets.push(s[i]);
-                }
-                consume(34);
-                return Buffer(octets).toString('utf8');
-            }
-
-            void parray()
-            {
-                const ar = [];
-                ws();
-                consume(91); // "["
-                ws();
-                for (; s[i] !== 93; ws()) // "]"
-                    ar.push(pvalue());
-
-                consume(93);
-                return ar;
-            }
-
-            void pidentifier()
-            {
-                ws();
-                if (i === s.length)  // Catch whitespace EOF
-                    return null;
-                if (s[i] === 34)
-                    return pstring();
-
-                const start = i;
-                for (; !hasChar(ID_TERM, s[i]); ++i) ;
-                return s.toString("utf8", start, i);
-            }
-
-            void pobject()
-            {
-                const object = Object.setPrototypeOf({ },  null);
-            consume(123); // "{"
-            ws();
-            for (; s[i] !== 125; ws())
-            { // "}"
-                const key = pidentifier();
-                ws();
-                (s[i] === 58) ? consume(58) : consume(61); // ":" or "="
-                object[key] = pvalue();
-            }
-            consume(125); // "}"
-            return object;
+            System.IO.FileStream fs = System.IO.File.Open(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            byte[] bytes = new byte[fs.Length];
+            fs.Read(bytes, 0, bytes.Length);
+            fs.Close();
+            return Decode(bytes);
         }
 
-        void proot()
+        /// <summary>
+        /// Convenience function for saving a file.
+        /// </summary>
+        public static void Save(Hashtable h, string path)
         {
-            ws();
-            if (s[i] === 123)
-                return pobject();
+            string s = Encode(h);
+            System.IO.FileStream fs = System.IO.File.Open(path, System.IO.FileMode.Create);
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(s);
+            fs.Write(bytes, 0, bytes.Length);
+            fs.Close();
+        }
 
-            const object = Object.setPrototypeOf({ },  null);
-            while (i < s.length)
-            { // "}"
-                const key = pidentifier();
-                ws();
-                if (i === s.length)  // Catch whitespace EOF
+        /// <summary>
+        /// Writes the root object of the SJSON file.
+        /// </summary>
+        public static void WriteRootObject(Hashtable t, StringBuilder builder)
+        {
+            WriteObjectFields(t, builder, 0);
+        }
+
+        /// <summary>
+        /// Writes the object field t[key].
+        /// </summary>
+        public static void WriteObjectField(Hashtable t, string key, StringBuilder builder, int indentation)
+        {
+            WriteNewLine(builder, indentation);
+            builder.Append(key);
+            builder.Append(" = ");
+            Write(t[key], builder, indentation);
+        }
+
+        /// <summary>
+        /// Writes all the fields of the SJSON object t.
+        /// </summary>
+        public static void WriteObjectFields(Hashtable t, StringBuilder builder, int indentation)
+        {
+            var keys = new string[t.Keys.Count];
+            t.Keys.CopyTo(keys, 0);
+            Array.Sort(keys);
+            foreach (string key in keys)
+                WriteObjectField(t, key, builder, indentation);
+        }
+
+        /// <summary>
+        /// Writes a new line followed by specified indentation.
+        /// </summary>
+        public static void WriteNewLine(StringBuilder builder, int indentation)
+        {
+            builder.Append('\n');
+            for (int i = 0; i < indentation; ++i)
+                builder.Append("    ");
+        }
+
+        /// <summary>
+        /// Generic SJSON object writer.
+        /// </summary>
+        public static void Write(object o, StringBuilder builder, int indentation)
+        {
+            if (o == null)
+                builder.Append("null");
+            else if (o is Boolean && (bool)o == false)
+                builder.Append("false");
+            else if (o is Boolean)
+                builder.Append("true");
+            else if (o is byte)
+                builder.Append((byte)o);
+            else if (o is int)
+                builder.Append((int)o);
+            else if (o is float)
+                builder.Append((float)o);
+            else if (o is double)
+                builder.Append((double)o);
+            else if (o is string)
+                WriteString((String)o, builder);
+            else if (o is ArrayList)
+                WriteArray((ArrayList)o, builder, indentation);
+            else if (o is Hashtable)
+                WriteObject((Hashtable)o, builder, indentation);
+            else
+                throw new ArgumentException("Unknown object");
+        }
+
+        /// <summary>
+        /// Writes a string in SJSON format.
+        /// </summary>
+        public static void WriteString(String s, StringBuilder builder)
+        {
+            builder.Append('"');
+            for (int i = 0; i < s.Length; ++i)
+            {
+                Char c = s[i];
+                if (c == '"' || c == '\\')
+                    builder.Append('\\');
+                builder.Append(c);
+            }
+            builder.Append('"');
+        }
+
+        /// <summary>
+        /// Writes an array in SJSON format.
+        /// </summary>
+        public static void WriteArray(ArrayList a, StringBuilder builder, int indentation)
+        {
+            builder.Append('[');
+            foreach (object item in a)
+            {
+                WriteNewLine(builder, indentation + 1);
+                Write(item, builder, indentation + 1);
+            }
+            WriteNewLine(builder, indentation);
+            builder.Append(']');
+        }
+
+        /// <summary>
+        /// Writes on object in SJSON format.
+        /// </summary>
+        public static void WriteObject(Hashtable t, StringBuilder builder, int indentation)
+        {
+            builder.Append('{');
+            WriteObjectFields(t, builder, indentation + 1);
+            WriteNewLine(builder, indentation);
+            builder.Append('}');
+        }
+
+        static Hashtable ParseRootObject(byte[] json, ref int index)
+        {
+            Hashtable ht = new Hashtable();
+            while (!AtEnd(json, ref index))
+            {
+                String key = ParseIdentifier(json, ref index);
+                Consume(json, ref index, "=");
+                object value = ParseValue(json, ref index);
+                ht[key] = value;
+            }
+            return ht;
+        }
+
+        static bool AtEnd(byte[] json, ref int index)
+        {
+            SkipWhitespace(json, ref index);
+            return (index >= json.Length);
+        }
+
+        static void SkipWhitespace(byte[] json, ref int index)
+        {
+            while (index < json.Length)
+            {
+                byte c = json[index];
+                if (c == '/')
+                    SkipComment(json, ref index);
+                else if (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == ',')
+                    ++index;
+                else
                     break;
-                (s[i] === 58) ? consume(58) : consume(61); // ":" or "="
-                object[key] = pvalue();
             }
-
-            ws();
-            if (i != s.length)
-                throw parseError(s, i, "end-of-string");
-
-            return object;
         }
 
-    return proot();
-    }
-
-    static void stringify(rootObj)
-    {
-        var nbTabs = 0;
-
-        const endLine = () =>
+        static void SkipComment(byte[] json, ref int index)
         {
-            let v = '\n';
-            let i = 0;
-            for (i; i < nbTabs; i++)
+            byte next = json[index + 1];
+            if (next == '/')
             {
-                v += '\t';
+                while (index + 1 < json.Length && json[index] != '\n')
+                    ++index;
+                ++index;
             }
-            return v;
-        };
-
-        string sstring(s)
-        {
-            if (s.match(/\r |\n /))
+            else if (next == '*')
             {
-                return '"""' + s + '"""';
+                while (index + 2 < json.Length && (json[index] != '*' || json[index + 1] != '/'))
+                    ++index;
+                index += 2;
             }
             else
-            {
-                let r = "";
-                for (const symbol of s) {
-            switch (symbol)
-            {
-                case '"':
-                    r += '\\"';
-                    break;
-                case '\\':
-                    r += '\\\\';
-                    break;
-                case '/':
-                    r += '\/';
-                    break;
-                case '\b':
-                    r += '\\b';
-                    break;
-                case '\f':
-                    r += '\\f';
-                    break;
-                case '\n':
-                    r += '\\n';
-                    break;
-                case '\r':
-                    r += '\\r';
-                    break;
-                case '\t':
-                    r += '\\t';
-                    break;
-                default:
-                    r += symbol;
-                    break;
-            }
+                throw new FormatException();
         }
-        return '"' + r + '"';
-    }
-}
 
-        string snumber(n)
-{
-    return '' + n;
-}
-
-        string sbool(b)
-{
-    return b ? 'true' : 'false';
-}
-
-        void sarray(arr)
-{
-    string s = '[';
-    string k;
-    nbTabs++; //indentation
-    for (k in arr)
-    {
-        s += endLine() + svalue(arr[k]);
-    }
-    nbTabs--; //end indentation
-    return s + endLine() + ']';
-}
-
-        void getObjKey(k)
-{
-    return k.match(/\s |=/) ? sstring(k) : k;
-}
-
-string sobj(obj)
-{
-    let s = '{';
-    let k;
-    nbTabs++; //indentation
-    for (k in obj)
-    {
-        s += endLine() + getObjKey(k) + ' = ' + svalue(obj[k]);
-    }
-    nbTabs--; //end indentation
-    return s + endLine() + '}';
-}
-
-string svalue(v)
-{
-    switch (typeof v) {
-        case 'object':
-            if (Array.isArray(v))
-            {
-                return sarray(v);
-            }
-            return sobj(v);
-        case 'number':
-            return snumber(v);
-        case 'boolean':
-            return sbool(v);
-        case 'string':
-            return sstring(v);
-    }
-}
-
-string sroot(r)
-{
-    //If the root is an object loop through key here to not add '{ }' and indentation
-    if (typeof r === 'object' && !Array.isArray(r))
-    {
-        var s = '';
-        var k;
-        for (k in r)
+        static String ParseIdentifier(byte[] json, ref int index)
         {
-            s += getObjKey(k) + ' = ' + svalue(r[k]) + endLine();
+            SkipWhitespace(json, ref index);
+
+            if (json[index] == '"')
+                return ParseString(json, ref index);
+
+            List<byte> s = new List<byte>();
+            while (true)
+            {
+                byte c = json[index];
+                if (c == ' ' || c == '\t' || c == '\n' || c == '=')
+                    break;
+                s.Add(c);
+                ++index;
+            }
+            return new UTF8Encoding().GetString(s.ToArray());
         }
-        return s;
+
+        static void Consume(byte[] json, ref int index, String consume)
+        {
+            SkipWhitespace(json, ref index);
+            for (int i = 0; i < consume.Length; ++i)
+            {
+                if (json[index] != consume[i])
+                    throw new FormatException();
+                ++index;
+            }
+        }
+
+        static object ParseValue(byte[] json, ref int index)
+        {
+            byte c = Next(json, ref index);
+
+            if (c == '{')
+                return ParseObject(json, ref index);
+            else if (c == '[')
+                return ParseArray(json, ref index);
+            else if (c == '"')
+                return ParseString(json, ref index);
+            else if (c == '-' || c >= '0' && c <= '9')
+                return ParseNumber(json, ref index);
+            else if (c == 't')
+            {
+                Consume(json, ref index, "true");
+                return true;
+            }
+            else if (c == 'f')
+            {
+                Consume(json, ref index, "false");
+                return false;
+            }
+            else if (c == 'n')
+            {
+                Consume(json, ref index, "null");
+                return null;
+            }
+            else
+                throw new FormatException();
+        }
+
+        static byte Next(byte[] json, ref int index)
+        {
+            SkipWhitespace(json, ref index);
+            return json[index];
+        }
+
+        static Hashtable ParseObject(byte[] json, ref int index)
+        {
+            Hashtable ht = new Hashtable();
+            Consume(json, ref index, "{");
+            SkipWhitespace(json, ref index);
+
+            while (Next(json, ref index) != '}')
+            {
+                String key = ParseIdentifier(json, ref index);
+                Consume(json, ref index, "=");
+                object value = ParseValue(json, ref index);
+                ht[key] = value;
+            }
+            Consume(json, ref index, "}");
+            return ht;
+        }
+
+        static ArrayList ParseArray(byte[] json, ref int index)
+        {
+            ArrayList a = new ArrayList();
+            Consume(json, ref index, "[");
+            while (Next(json, ref index) != ']')
+            {
+                object value = ParseValue(json, ref index);
+                a.Add(value);
+            }
+            Consume(json, ref index, "]");
+            return a;
+        }
+
+        static String ParseString(byte[] json, ref int index)
+        {
+            List<byte> s = new List<byte>();
+
+            Consume(json, ref index, "\"");
+            while (true)
+            {
+                byte c = json[index];
+                ++index;
+                if (c == '"')
+                    break;
+                else if (c != '\\')
+                    s.Add(c);
+                else
+                {
+                    byte q = json[index];
+                    ++index;
+                    if (q == '"' || q == '\\' || q == '/')
+                        s.Add(q);
+                    else if (q == 'b') s.Add((byte)'\b');
+                    else if (q == 'f') s.Add((byte)'\f');
+                    else if (q == 'n') s.Add((byte)'\n');
+                    else if (q == 'r') s.Add((byte)'\r');
+                    else if (q == 't') s.Add((byte)'\t');
+                    else if (q == 'u')
+                    {
+                        throw new FormatException();
+                    }
+                    else
+                    {
+                        throw new FormatException();
+                    }
+                }
+            }
+            return new UTF8Encoding().GetString(s.ToArray());
+        }
+
+        static Double ParseNumber(byte[] json, ref int index)
+        {
+            int end = index;
+            while (end < json.Length && "0123456789+-.eE".IndexOf((char)json[end]) != -1)
+                ++end;
+            byte[] num = new byte[end - index];
+            Array.Copy(json, index, num, 0, num.Length);
+            index = end;
+            String numstr = new UTF8Encoding().GetString(num);
+            return Double.Parse(numstr);
+        }
     }
-    return svalue(r);
-}
-    return sroot(rootObj);
-  }
-
-#endif
-
-}
-
 
 
 }
