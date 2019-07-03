@@ -29,17 +29,24 @@ namespace SharpGame.Samples
             this.Subscribe<GUIEvent>(HandleGUI);
             this.Subscribe<Update>(HandleUpdate);
             /*
-            Hashtable h = new Hashtable
+            JSElement js = new JSElement
             {
                 ["1"] = 1,
-                ["str"] = "str",
+                ["str"] = @"str
+                    123131,
+123123123
+12313
+4141414
+
+
+",
                 ["list"] = new ArrayList
                 {
                     1,2,3,4,5
                 },
 
 
-                ["obj"] = new Hashtable
+                ["obj"] = new JSElement
                 {
                     ["1"] = 1,
                     ["str"] = "str",
@@ -51,7 +58,9 @@ namespace SharpGame.Samples
             };
 
 
-            SJSON.Save(h, "test.sjon");*/
+            SJSON.Save(js, "test.sjon");
+
+            var j = SJSON.Load("Test.shader");*/
 
         }
 
@@ -62,8 +71,8 @@ namespace SharpGame.Samples
         {
             base.Init();
 
-
             var types = System.Reflection.Assembly.GetExecutingAssembly().GetTypes();
+
             foreach (var t in types)
             {
                 if (t.IsSubclassOf(typeof(Sample)))
@@ -144,18 +153,19 @@ namespace SharpGame.Samples
                 }
 
                 ImGui.Separator();
-                ImGui.Value("SingleLoop", singleLoop);
+                ImGui.Value("Single Loop", singleLoop);
                 ImGui.Value("Fps", Fps);
                 ImGui.Value("Msec", Msec);
-                ImGui.Value("DrawCall", Stats.drawCall);
+                ImGui.Value("Draw Call", Stats.drawCall);
                 ImGui.Value("Triangle Count", Stats.triCount);
                 //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
                 //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
 
-                ImGui.Text(string.Format("LogicWait : {0:F3}", Stats.WaitLogic * Timer.MilliSecsPerTick));
-                ImGui.Text(string.Format("RenderWait : {0:F3}", Stats.WaitRender * Timer.MilliSecsPerTick));
+                ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.LogicWait * Timer.MilliSecsPerTick));
+                ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.RenderWait * Timer.MilliSecsPerTick));
 
-                ImGui.Checkbox("Show stats", ref showStats);
+                ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
+                ImGui.Checkbox("Show Stats", ref showStats);
 
             }
 
