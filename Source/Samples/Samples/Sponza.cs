@@ -55,7 +55,6 @@ namespace SharpGame.Samples
                 node.Scaling = new Vector3(1.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
-                ref var m = ref node.WorldTransform;
             }
             
             Renderer.MainView.Attach(camera, scene);

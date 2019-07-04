@@ -218,7 +218,7 @@ namespace SharpGame
             return drawables_.GetEnumerator();
         }
 
-        public void GetDrawables(ISceneQuery query, IList<Drawable> drawables)
+        public void GetDrawables(ISceneQuery query, Action<Drawable> drawables)
         {
             if(accumulator_ != null)
             {
@@ -228,7 +228,7 @@ namespace SharpGame
 
             foreach(Drawable d in drawables_)
             {
-                drawables.Add(d);
+                drawables(d);
             }
         }
 

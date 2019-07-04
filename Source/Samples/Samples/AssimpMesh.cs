@@ -57,7 +57,6 @@ namespace SharpGame.Samples
           
             drawable.SetNumGeometries(1);
             drawable.SetGeometry(0, geometry);
-            ref var m = ref node.WorldTransform;
 
             var mat = new Material
             {

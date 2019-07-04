@@ -53,7 +53,7 @@ namespace SharpGame
         IEnumerator<Drawable> GetEnumerator();
 
         /// Return drawable objects by a query.
-        void GetDrawables(ISceneQuery query, IList<Drawable> drawables);
+        void GetDrawables(ISceneQuery query, Action<Drawable> drawables);
 
         /// Return drawable objects by a ray query.
         void Raycast(ref RayQuery query);

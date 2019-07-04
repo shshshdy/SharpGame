@@ -1,8 +1,8 @@
-﻿//#define UPDATE_BATCH
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SharpGame
 {
@@ -69,8 +69,6 @@ namespace SharpGame
             }
 
             CreateBuffers();
-
-
         }
 
         protected void CreateBuffers()
@@ -101,6 +99,16 @@ namespace SharpGame
             };
 
             perFrameSet = new ResourceSet(perFrameResLayout, ubCameraVS);
+        }
+
+        public void AddDrawable(Drawable drawable)
+        {
+            drawables.Add(drawable);
+
+            foreach (SourceBatch batch in drawable.Batches)
+            {
+                batches.Add(batch);
+            }
         }
 
         public void Update(ref FrameInfo frameInfo)
@@ -157,28 +165,18 @@ namespace SharpGame
                 camera = Camera
             };
 
-            Scene.GetDrawables(frustumOctreeQuery, drawables);
+            Scene.GetDrawables(frustumOctreeQuery, AddDrawable);
             Profiler.EndSample();
-            /*
+            
             Profiler.BeginSample("UpdateGeometry");
-            //todo:multi thread
-            foreach (var drawable in drawables)
-            {
-                drawable.UpdateGeometry(ref frameInfo);
-            }
-            Profiler.EndSample();*/
+            
+            Parallel.ForEach(drawables, drawable => drawable.Update(ref frameInfo));
 
+            Profiler.EndSample();
+            
             Profiler.BeginSample("UpdateBatches");
-            foreach (var drawable in drawables)
-            {
-#if UPDATE_BATCH
-                drawable.UpdateBatches(ref frameInfo);
-#endif
-                foreach (SourceBatch batch in drawable.Batches)
-                {
-                    batches.Add(batch);
-                }
-            }
+
+            Parallel.ForEach(drawables, drawable => drawable.UpdateBatches(ref frameInfo));
 
             Profiler.EndSample();
 
@@ -200,12 +198,6 @@ namespace SharpGame
         public void Render(int imageIndex)
         {
             Profiler.BeginSample("ViewRender");
-
-            var g = Graphics.Instance;
-
-            CommandBuffer cmdBuffer = g.RenderCmdBuffer;
-            cmdBuffer.SetViewport(ref Viewport);
-            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)Viewport.width, (int)Viewport.height));
 
             FrameGraph?.Summit(imageIndex);
             OverlayPass?.Summit(imageIndex);

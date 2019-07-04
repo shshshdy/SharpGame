@@ -96,7 +96,6 @@ namespace SharpGame.Samples
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(mat);
-                    ref var m = ref node.WorldTransform;
                 }
             }
 
