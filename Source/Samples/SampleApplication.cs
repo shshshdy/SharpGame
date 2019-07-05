@@ -28,7 +28,7 @@ namespace SharpGame.Samples
 
             this.Subscribe<GUIEvent>(HandleGUI);
             this.Subscribe<Update>(HandleUpdate);
-            /*
+           /*
             JSElement js = new JSElement
             {
                 ["1"] = 1,
@@ -59,8 +59,8 @@ namespace SharpGame.Samples
 
 
             SJSON.Save(js, "test.sjon");
-
-            var j = SJSON.Load("Test.shader");*/
+            */
+            //var j = SJSON.Load("Test.shader");
 
         }
 
