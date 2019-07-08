@@ -53,6 +53,7 @@ namespace SharpGame
         public int numWorldTransforms;
         /// Per-instance data. If not null, must contain enough data to fill instancing buffer.
         public IntPtr instancingData;
+        public uint offset;
         /// %Geometry type.
         public GeometryType geometryType;
     };

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,12 +44,13 @@ namespace SharpGame
         internal DeviceBuffer ubCameraVS;
         internal DeviceBuffer ubCameraPS;
         internal DeviceBuffer ubLight;
+        internal DeviceBuffer[] ubMatrics = new DeviceBuffer[2];
 
         private ResourceLayout perFrameResLayout;
         internal ResourceSet perFrameSet;
 
-        ResourceSet perViewResourceSet;
-        ResourceSet perObjectResourceSet;
+        private ResourceLayout perObjectResLayout;
+        ResourceSet[] perObjectSet = new ResourceSet[2];
 
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
@@ -93,12 +95,26 @@ namespace SharpGame
                 ubLight = DeviceBuffer.CreateUniformBuffer<LightPS>();
             }
 
+            if(ubMatrics[0] == null)
+            {
+                ubMatrics[0] = DeviceBuffer.CreateUniformBuffer<Matrix>(64 * 1024 * 10);
+                ubMatrics[1] = DeviceBuffer.CreateUniformBuffer<Matrix>(64 * 1024 * 10);
+            }
+
             perFrameResLayout = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
             };
 
             perFrameSet = new ResourceSet(perFrameResLayout, ubCameraVS);
+
+            perObjectResLayout = new ResourceLayout
+            {
+                new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+            };
+
+            perObjectSet[0] = new ResourceSet(perObjectResLayout, ubMatrics[0]);
+            perObjectSet[1] = new ResourceSet(perObjectResLayout, ubMatrics[1]);
         }
 
         public void AddDrawable(Drawable drawable)
@@ -108,7 +124,22 @@ namespace SharpGame
             foreach (SourceBatch batch in drawable.Batches)
             {
                 batches.Add(batch);
+                //batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
             }
+        }
+
+        uint offset;
+        unsafe uint GetTransform(IntPtr pos, uint count)
+        {
+            uint sz = (uint)Utilities.SizeOf<Matrix>() * count;
+            var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
+            void* buf = matrixBuf.Map(offset, sz);
+            Unsafe.CopyBlockUnaligned((void*)buf, (void*)pos, sz);
+            matrixBuf.Unmap();
+            uint oldOffset = offset;
+            offset += sz;
+            return oldOffset;
+
         }
 
         public void Update(ref FrameInfo frameInfo)
@@ -121,7 +152,7 @@ namespace SharpGame
             this.frameInfo.viewSize = new Int2(g.Width, g.Height);
 
             Viewport.Define(0, 0, g.Width, g.Height);
-
+            offset = 0;
             frameUniform.DeltaTime = Time.Delta;
             frameUniform.ElapsedTime = Time.Elapsed;
 
