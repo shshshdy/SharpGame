@@ -51,6 +51,7 @@ namespace SharpGame
 
         private ResourceLayout perObjectResLayout;
         ResourceSet[] perObjectSet = new ResourceSet[2];
+        byte[] positionBuff = new byte[4*16 * 10000];
 
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
@@ -132,10 +133,13 @@ namespace SharpGame
         unsafe uint GetTransform(IntPtr pos, uint count)
         {
             uint sz = (uint)Utilities.SizeOf<Matrix>() * count;
-            var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
-            void* buf = matrixBuf.Map(offset, sz);
-            Unsafe.CopyBlockUnaligned((void*)buf, (void*)pos, sz);
-            matrixBuf.Unmap();
+          
+            Unsafe.CopyBlockUnaligned(Unsafe.AsPointer(ref positionBuff[offset]), (void*)pos, sz);
+            /*
+        var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
+        void* buf = matrixBuf.Map(offset, sz);
+        Unsafe.CopyBlockUnaligned((void*)buf, (void*)pos, sz);
+        matrixBuf.Unmap();*/
             uint oldOffset = offset;
             offset += sz;
             return oldOffset;
