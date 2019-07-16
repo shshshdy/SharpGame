@@ -15,6 +15,8 @@ namespace SharpGame
         public int Count { get; set; }
         public int Size => Stride * Count;
 
+        public IntPtr Mapped;
+
         /** @brief Usage flags to be filled by external source at buffer creation (to query at some later point) */
         public BufferUsageFlags usageFlags;
 
@@ -30,18 +32,19 @@ namespace SharpGame
 
         public ref T Map<T>(int offset = 0) where T : struct
         {
-            void* mapped = Device.MapMemory(memory, (ulong)offset, size, 0);
-            return ref Unsafe.AsRef<T>(mapped);
+            Mapped = Device.MapMemory(memory, (ulong)offset, size, 0);
+            return ref Unsafe.AsRef<T>((void*)Mapped);
         }
 
-        public void* Map(ulong offset = 0, ulong size = WholeSize)
+        public IntPtr Map(ulong offset = 0, ulong size = WholeSize)
         {
             return Device.MapMemory(memory, offset, size, 0);
         }
                
         public void Unmap()
         {
-            Device.UnmapMemory(memory);            
+            Device.UnmapMemory(memory);
+            Mapped = IntPtr.Zero;
         }
 
         public void SetupDescriptor(ulong size = WholeSize, ulong offset = 0)
@@ -58,8 +61,8 @@ namespace SharpGame
 
         public void SetData(void* data, uint offset, uint size)
         {
-            void* mapped = Map(offset, size);
-            Unsafe.CopyBlock(mapped, data, (uint)size);
+            IntPtr mapped = Map(offset, size);
+            Unsafe.CopyBlock((void*)mapped, data, (uint)size);
             Unmap();
         }
 
@@ -171,7 +174,7 @@ namespace SharpGame
                 else
                 {
                     var mapped = buffer.Map();
-                    Unsafe.CopyBlock(mapped, data, (uint)size);
+                    Unsafe.CopyBlock((void*)mapped, data, (uint)size);
                     buffer.Unmap();
                 }
 

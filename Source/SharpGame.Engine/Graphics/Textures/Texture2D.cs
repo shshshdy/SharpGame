@@ -62,8 +62,8 @@ namespace SharpGame
                 Device.BindBufferMemory(stagingBuffer, stagingMemory, 0);
 
                 // Copy texture data into staging buffer
-                void* data = Device.MapMemory(stagingMemory, 0, memReqs.size, 0);
-                Unsafe.CopyBlock(data, tex2DDataPtr, (uint)totalBytes);
+                IntPtr data = Device.MapMemory(stagingMemory, 0, memReqs.size, 0);
+                Unsafe.CopyBlock((void*)data, tex2DDataPtr, (uint)totalBytes);
                 Device.UnmapMemory(stagingMemory);
 
                 // Setup buffer copy regions for each mip level
@@ -283,11 +283,11 @@ namespace SharpGame
                 Device.BindBufferMemory(stagingBuffer, stagingMemory, 0);
 
                 // Copy texture data into staging buffer
-                void* data = Device.MapMemory( stagingMemory, 0, memReqs.size, 0);
+                IntPtr data = Device.MapMemory( stagingMemory, 0, memReqs.size, 0);
                 byte[] pixelData = tex2D.GetAllTextureData();
                 fixed (byte* pixelDataPtr = &pixelData[0])
                 {
-                    Unsafe.CopyBlock(data, pixelDataPtr, (uint)pixelData.Length);
+                    Unsafe.CopyBlock((void*)data, pixelDataPtr, (uint)pixelData.Length);
                 }
                 Device.UnmapMemory(stagingMemory);
 

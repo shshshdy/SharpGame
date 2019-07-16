@@ -217,30 +217,32 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindGraphicsResourceSet(GraphicsPipeline pipeline, int firstSet, ResourceSet resourceSet, uint[] dynamicOffsets = null)
+        public unsafe void BindGraphicsResourceSet(GraphicsPipeline pipeline, int firstSet, ResourceSet resourceSet, uint? dynamicOffset = null)
         {
             uint dynamicOffsetCount = 0;
+            uint val;
             uint* pDynamicOffsets = null;
-            if (dynamicOffsets != null)
+            if (dynamicOffset != null)
             {
-                dynamicOffsetCount = 0;
-                dynamicOffsetCount = (uint)dynamicOffsets.Length;
-                pDynamicOffsets = (uint*)Unsafe.AsPointer(ref dynamicOffsets[0]);
+                dynamicOffsetCount = 1;
+                val = dynamicOffset.Value;
+                pDynamicOffsets = (uint*)Unsafe.AsPointer(ref val);
             }
 
             BindResourceSet(PipelineBindPoint.Graphics, pipeline, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindComputeResourceSet(GraphicsPipeline pipeline, int firstSet, ResourceSet resourceSet, uint[] dynamicOffsets)
+        public unsafe void BindComputeResourceSet(GraphicsPipeline pipeline, int firstSet, ResourceSet resourceSet, uint? dynamicOffset)
         {
             uint dynamicOffsetCount = 0;
+            uint val;
             uint* pDynamicOffsets = null;
-            if (dynamicOffsets != null)
+            if (dynamicOffset != null)
             {
-                dynamicOffsetCount = 0;
-                dynamicOffsetCount = (uint)dynamicOffsets.Length;
-                pDynamicOffsets = (uint*)Unsafe.AsPointer(ref dynamicOffsets[0]);
+                dynamicOffsetCount = 1;
+                val = dynamicOffset.Value;
+                pDynamicOffsets = (uint*)Unsafe.AsPointer(ref val);
             }
 
             BindResourceSet(PipelineBindPoint.Compute, pipeline, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
