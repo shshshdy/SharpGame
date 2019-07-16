@@ -41,7 +41,7 @@ namespace SharpGame
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                framebuffer = framebuffers[/*g.SingleLoop ?*/ g.nextImage/* : workContext*/],
+                framebuffer = framebuffers[g.nextImage],
                 renderPass = renderPass
             };
 
