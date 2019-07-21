@@ -30,10 +30,10 @@ namespace SharpGame
 
         public DeviceBuffer IndexBuffer { get; set; }
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
-        public int VertexStart { get; set; }
-        public int VertexCount { get; set; }
-        public int IndexStart { get; set; }
-        public int IndexCount { get; set; }
+        public uint VertexStart { get; set; }
+        public uint VertexCount { get; set; }
+        public uint IndexStart { get; set; }
+        public uint IndexCount { get; set; }
         public float LodDistance { get; set; }
 
         public VertexLayout VertexLayout { get; set; }
@@ -45,7 +45,7 @@ namespace SharpGame
         {
         }
 
-        public bool SetDrawRange(PrimitiveTopology type, int indexStart, int indexCount)
+        public bool SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount)
         {
             if (IndexBuffer == null)
             {
@@ -66,7 +66,7 @@ namespace SharpGame
             if (indexCount > 0)
             {
                 VertexStart = 0;
-                VertexCount = VertexBuffers[0] != null ? VertexBuffers[0].Count : 0;                
+                VertexCount = VertexBuffers[0] != null ? (uint)VertexBuffers[0].Count : 0;                
             }
             else
             {
@@ -77,7 +77,7 @@ namespace SharpGame
             return true;
         }
 
-        public bool SetDrawRange(PrimitiveTopology type, int indexStart, int indexCount, int vertexStart, int vertexCount)
+        public bool SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount, uint vertexStart, uint vertexCount)
         {
             if (IndexBuffer != null)
             {
@@ -110,7 +110,7 @@ namespace SharpGame
             if(IndexBuffer != null && IndexCount > 0)
             {
                 cmdBuffer.BindIndexBuffer(IndexBuffer, 0, IndexBuffer.Stride == 2 ?  IndexType.Uint16 : IndexType.Uint32);
-                cmdBuffer.DrawIndexed((uint)IndexCount, 1, (uint)IndexStart, VertexStart, 0);
+                cmdBuffer.DrawIndexed((uint)IndexCount, 1, (uint)IndexStart, (int)VertexStart, 0);
             }
             else
             {

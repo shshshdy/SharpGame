@@ -11,9 +11,9 @@ namespace SharpGame
     
     public unsafe class DeviceBuffer : RefCounted, IBindableResource
     {
-        public int Stride { get; set; }
-        public int Count { get; set; }
-        public int Size => Stride * Count;
+        public ulong Stride { get; set; }
+        public ulong Count { get; set; }
+        public ulong Size => Stride * Count;
 
         public IntPtr Mapped;
 
@@ -30,7 +30,7 @@ namespace SharpGame
         /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
         internal MemoryPropertyFlags memoryPropertyFlags;
 
-        public ref T Map<T>(int offset = 0) where T : struct
+        public ref T Map<T>(ulong offset = 0) where T : struct
         {
             Mapped = Device.MapMemory(memory, (ulong)offset, size, 0);
             return ref Unsafe.AsRef<T>((void*)Mapped);
@@ -97,27 +97,27 @@ namespace SharpGame
             }
         }
 
-        public static DeviceBuffer CreateDynamic<T>(BufferUsageFlags bufferUsages, int count = 1) where T : struct
+        public static DeviceBuffer CreateDynamic<T>(BufferUsageFlags bufferUsages, ulong count = 1) where T : struct
         {
-            return Create(bufferUsages, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, Unsafe.SizeOf<T>(), count);
+            return Create(bufferUsages, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, (ulong)Unsafe.SizeOf<T>(), count);
         }
 
-        public static DeviceBuffer CreateUniformBuffer<T>(int count = 1) where T : struct
+        public static DeviceBuffer CreateUniformBuffer<T>(ulong count = 1) where T : struct
         {
             return CreateDynamic<T>(BufferUsageFlags.UniformBuffer, count);
         }
 
         public static DeviceBuffer Create<T>(BufferUsageFlags bufferUsages, T[] data, bool dynamic = false) where T : struct
         {
-            return Create(bufferUsages, dynamic,  Unsafe.SizeOf<T>(), data.Length, Utilities.AsPointer(ref data[0]));
+            return Create(bufferUsages, dynamic,  (ulong)Unsafe.SizeOf<T>(), (ulong)data.Length, Utilities.AsPointer(ref data[0]));
         }
 
-        public static DeviceBuffer Create(BufferUsageFlags usageFlags, bool dynamic, int stride, int count, IntPtr data = default)
+        public static DeviceBuffer Create(BufferUsageFlags usageFlags, bool dynamic, ulong stride, ulong count, IntPtr data = default)
         {
             return Create(usageFlags, dynamic ? MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent : MemoryPropertyFlags.DeviceLocal, stride, count, (void*)data);
         }
 
-        public static DeviceBuffer Create(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, int stride,  int count, void* data = null)
+        public static DeviceBuffer Create(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, ulong stride, ulong count, void* data = null)
         {
             DeviceBuffer buffer = new DeviceBuffer
             {
@@ -125,7 +125,7 @@ namespace SharpGame
                 Count = count
             };
 
-            ulong size = (ulong)(stride * count);
+            ulong size = stride * count;
 
             // Create the buffer handle
             BufferCreateInfo bufferCreateInfo = new BufferCreateInfo(usageFlags, size);

@@ -92,7 +92,7 @@ namespace SharpGame
                     VertexLayout = VertexPosNormTex.Layout
                 };
 
-                geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], 0, ib.Count);
+                geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], 0, (uint)ib.Count);
                 model.Geometries[m] = new Geometry[] { geometry };
                 model.GeometryCenters[m] = meshBoundingBox.Center;
 
@@ -166,8 +166,8 @@ namespace SharpGame
             }
 
 
-            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, sizeof(VertexPosNormTex), (int)vertexBuffer.Count, vertexBuffer.Data);
-            ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
+            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosNormTex), vertexBuffer.Count, vertexBuffer.Data);
+            ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
 
             vertexBuffer.Dispose();

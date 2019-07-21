@@ -336,7 +336,7 @@ namespace SharpGame
         private readonly object _stagingResourcesLock = new object();
         private readonly List<Texture> _availableStagingTextures = new List<Texture>();
         private readonly List<DeviceBuffer> _availableStagingBuffers = new List<DeviceBuffer>();
-        private DeviceBuffer GetFreeStagingBuffer(int size)
+        private DeviceBuffer GetFreeStagingBuffer(uint size)
         {
             lock (_stagingResourcesLock)
             {
@@ -351,7 +351,7 @@ namespace SharpGame
                 }
             }
 
-            int newBufferSize = Math.Max(MinStagingBufferSize, size);
+            uint newBufferSize = Math.Max(MinStagingBufferSize, size);
             DeviceBuffer newBuffer = DeviceBuffer.Create(BufferUsageFlags.TransferSrc | BufferUsageFlags.TransferDst,
                 MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, size, 1);
             return newBuffer;

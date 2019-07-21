@@ -292,7 +292,7 @@ namespace SharpGame
                 if (desc.data_ != null)
                 {
                     buffer = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false
-                        , desc.vertexSize_, desc.vertexCount_, Utilities.AsPointer(ref desc.data_[0]));
+                        , (uint)desc.vertexSize_, (uint)desc.vertexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
 
@@ -303,7 +303,7 @@ namespace SharpGame
                 ref IndexBufferDesc desc = ref loadIBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, desc.indexSize_, desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
+                    buffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, (uint)desc.indexSize_, (uint)desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
 
@@ -318,7 +318,7 @@ namespace SharpGame
                     geometry.VertexBuffers = new[] { vertexBuffers_[desc.vbRef_] };
                     geometry.VertexLayout = loadVBData_[desc.vbRef_].layout;
                     geometry.IndexBuffer = indexBuffers_[desc.ibRef_];
-                    geometry.SetDrawRange(desc.type_, desc.indexStart_, desc.indexCount_, 0, -1);
+                    geometry.SetDrawRange(desc.type_, (uint)desc.indexStart_, (uint)desc.indexCount_);
                 }
             }
 

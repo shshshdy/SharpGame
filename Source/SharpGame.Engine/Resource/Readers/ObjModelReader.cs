@@ -98,7 +98,7 @@ namespace SharpGame
                     IndexBuffer = ibs[i]
                 };
 
-                geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, ibs[i].Count);
+                geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)ibs[i].Count);
                 geom.VertexLayout = VertexPosNormTex.Layout;
                 model.Geometries[i] = new Geometry[] { geom };
                 model.GeometryCenters.Add(Vector3.Zero);

@@ -188,7 +188,7 @@ namespace SharpGame.Samples
             }
 
             var vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false,
-                sizeof(VertexPosNormTexColor), (int)vertexBuffer.Count, vertexBuffer.Data);
+                (uint)sizeof(VertexPosNormTexColor), vertexBuffer.Count, vertexBuffer.Data);
             
             // Generate index buffer from ASSIMP scene data
             NativeList<uint> indexBuffer = new NativeList<uint>();
@@ -205,7 +205,7 @@ namespace SharpGame.Samples
                 }
             }
 
-            var ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), (int)indexBuffer.Count, indexBuffer.Data);
+            var ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
             
             geometry = new Geometry
             {
@@ -214,7 +214,7 @@ namespace SharpGame.Samples
                 VertexLayout = VertexPosNormTexColor.Layout
             };
 
-            geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, ib.Count);
+            geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)ib.Count);
             vertexBuffer.Dispose();
             indexBuffer.Dispose();
         }

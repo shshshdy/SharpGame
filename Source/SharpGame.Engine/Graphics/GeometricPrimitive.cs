@@ -74,7 +74,7 @@ namespace SharpGame
                 VertexLayout = VertexPosNormTex.Layout
             };
 
-            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, indices.Length);
+            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length);
             return geom;
         }
 
