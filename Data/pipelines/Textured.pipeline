@@ -1,0 +1,11 @@
+Pipeline
+{
+	Pass Base
+	{
+		Shader = "Textured.shader"
+		
+		CullMode = Back
+		FrontFace = CounterClockwise
+		
+	}
+}

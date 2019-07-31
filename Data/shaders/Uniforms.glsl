@@ -1,4 +1,3 @@
-
 layout (binding = 0) uniform CameraVS
 {
     mat4 View;

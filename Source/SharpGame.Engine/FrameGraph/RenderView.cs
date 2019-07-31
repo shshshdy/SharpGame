@@ -53,6 +53,8 @@ namespace SharpGame
         ResourceSet[] perObjectSet = new ResourceSet[2];
         byte[] positionBuff = new byte[4*16 * 10000];
 
+        TransientBufferManager[] uniformBuffer = new TransientBufferManager[2];
+
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
             Attach(camera, scene, renderPath);

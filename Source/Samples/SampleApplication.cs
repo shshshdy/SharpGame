@@ -27,41 +27,7 @@ namespace SharpGame.Samples
             perfTree = CreateSubsystem<PerfTree>();
 
             this.Subscribe<GUIEvent>(HandleGUI);
-            this.Subscribe<Update>(HandleUpdate);
-           /*
-            JSElement js = new JSElement
-            {
-                ["1"] = 1,
-                ["str"] = @"str
-                    123131,
-123123123
-12313
-4141414
-
-
-",
-                ["list"] = new ArrayList
-                {
-                    1,2,3,4,5
-                },
-
-
-                ["obj"] = new JSElement
-                {
-                    ["1"] = 1,
-                    ["str"] = "str",
-                    ["list"] = new ArrayList
-                {
-                    1,2,3,4,5
-                },
-                }
-            };
-
-
-            SJSON.Save(js, "test.sjon");
-            */
-            //var j = SJSON.Load("Test.shader");
-
+            this.Subscribe<Update>(HandleUpdate);           
 
         }
 

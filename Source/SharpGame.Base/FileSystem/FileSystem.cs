@@ -52,6 +52,19 @@ namespace SharpGame
             }
         }
 
+        public static string ReadAllText(string path)
+        {
+            using (File file = OpenFile(path))
+            {
+                if (file == null)
+                {
+                    return null;
+                }
+
+                return file.ReadAllText();
+            }
+        }
+
         public bool AddResourceDir(string pathName, int priority = int.MaxValue)
         {
             lock (resourceMutex_)

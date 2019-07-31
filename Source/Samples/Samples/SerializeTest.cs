@@ -1,17 +1,49 @@
-﻿using System;
+﻿using Hocon;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 5)]
+    [SampleDesc(sortOrder = -1)]
     public class SerializeTest : Sample
     {
         public override void Init()
         {
             base.Init();
 
-            //ServiceStack
+
+            {
+
+                var file = FileSystem.Instance.GetFile("pipelines/Textured.pipeline");
+                Hocon.HoconRoot root = HoconSerializer.Parse(file);
+
+                Console.WriteLine(root.PrettyPrint(4));
+            }
+
+            Task<string> ShaderResolver(HoconCallbackType type, string fileName)
+            {
+                switch (type)
+                {
+                    case HoconCallbackType.Resource:
+                        return null;// ReadResource(fileName);
+                    case HoconCallbackType.File:
+                        return Task.FromResult("Include = \"" + FileSystem.ReadAllText(fileName) + "\"");
+                    default:
+                        return null;
+                }
+            }
+            {
+
+                var file = FileSystem.Instance.GetFile("Shaders/Textured.shader");
+                Hocon.HoconRoot root = HoconSerializer.Parse(file, ShaderResolver);
+
+                Console.WriteLine(root.PrettyPrint(4));
+            }
+
+
+
         }
     }
 }
