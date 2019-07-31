@@ -1,6 +1,6 @@
 Pipeline
 {
-	Pass Base
+	Pass
 	{
 		Shader = "Textured.shader"
 		

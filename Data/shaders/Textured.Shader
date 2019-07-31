@@ -5,6 +5,7 @@ Shader
 	// include
 	Includes {
 		include file("Shaders/Uniforms.glsl") 
+		include file("Shaders/Uniforms.glsl") 
 	}
 
 	VertexShader = "
