@@ -1,15 +1,4 @@
-layout (binding = 0) uniform CameraVS
-{
-    mat4 View;
-    mat4 ViewInv;
-    mat4 ViewProj;
-	vec3 CameraPos;
-	float NearClip;
-	vec3 FrustumSize;
-	float FarClip;
-};
-
-layout (binding = 1) uniformCameraPS
+layout (binding = 1) uniform CameraPS
 {
 	vec3 CameraPos;
 	float pading1;
