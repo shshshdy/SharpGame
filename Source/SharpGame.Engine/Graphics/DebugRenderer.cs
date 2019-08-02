@@ -70,7 +70,7 @@ namespace SharpGame
 
         Shader uiShader_;
 
-        GraphicsPipeline renderState_ ;
+        Pass renderState_ ;
         public DebugRenderer()
         {
             //   uiShader_ = cache.GetResource<Shader>("shaders/default.shader");         

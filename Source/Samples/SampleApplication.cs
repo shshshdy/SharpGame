@@ -142,10 +142,10 @@ namespace SharpGame.Samples
             if (showStats)
             {
                 corner = 0;
-                Vector2 window_pos = new Vector2(io.DisplaySize.X / 2, io.DisplaySize.Y / 2);
-                Vector2 window_pos_pivot = new Vector2(0.5f, 0.0f);
+                Vector2 window_pos = new Vector2(io.DisplaySize.X / 2, io.DisplaySize.Y);
+                Vector2 window_pos_pivot = new Vector2(0.5f, 1.0f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
-                ImGui.SetNextWindowSize(io.DisplaySize * 0.8f);
+                ImGui.SetNextWindowSize(io.DisplaySize * 0.6f);
                 ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
                 if (ImGui.Begin("Stats", ref showStats, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
                 {

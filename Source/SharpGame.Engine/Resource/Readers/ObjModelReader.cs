@@ -118,17 +118,15 @@ namespace SharpGame
             var shader = new Shader
             {
                 new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-            };
-
-            var pipeline = new GraphicsPipeline
-            {
-                Shader = shader,
-                CullMode = CullMode.Back,
-                FrontFace = FrontFace.CounterClockwise,
-                ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                PushConstantRanges = new[]
                 {
-                    new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                    CullMode = CullMode.Back,
+                    FrontFace = FrontFace.CounterClockwise,
+                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
+                    PushConstantRanges = new[]
+                    {
+                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                    }
+
                 }
             };
 
@@ -146,7 +144,7 @@ namespace SharpGame
                         continue;
                     }
 
-                    Material mat = ConvertMaterial(path, materialDefinition, pipeline);
+                    Material mat = ConvertMaterial(path, materialDefinition, shader);
                     model.Materials.Add(mat);
                 }
             }
@@ -154,9 +152,9 @@ namespace SharpGame
             return model;
         }
 
-        Material ConvertMaterial(string path, MaterialDefinition materialDef, GraphicsPipeline pipeline)
+        Material ConvertMaterial(string path, MaterialDefinition materialDef, Shader shader)
         {
-            Material material = new Material(pipeline);
+            Material material = new Material(shader);
             
             if (!string.IsNullOrEmpty(materialDef.DiffuseTexture))
             {

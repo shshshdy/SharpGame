@@ -9,7 +9,7 @@ namespace SharpGame
 
     public class Material : Resource<Material>
     {
-        public ResourceRef PipelineName { get; set; }
+        public ResourceRef ShaderName { get; set; }
 
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
         public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
@@ -17,32 +17,34 @@ namespace SharpGame
         private ResourceSet resourceSet;
         public ResourceSet ResourceSet { get => resourceSet; set => resourceSet = value; }
 
-        public GraphicsPipeline Pipeline { get; set; }
+        public Shader Shader { get; set; }
 
         public Material()
         {
         }
 
-        public Material(string pipeline)
+        public Material(string shader)
         {
-            PipelineName = new ResourceRef("GraphicsPipeline", pipeline);
+            ShaderName = new ResourceRef("Shader", shader);
+
             OnBuild();
         }
 
-        public Material(GraphicsPipeline pipeline)
+        public Material(Shader shader)
         {
-            Pipeline = pipeline;
+            Shader = shader;
             OnBuild();
         }
 
         protected override bool OnBuild()
         {
-            if(PipelineName != null)
+            if(ShaderName != null)
             {
-                Pipeline = Resources.Instance.Load<GraphicsPipeline>(PipelineName);
+                Shader = Resources.Instance.Load<Shader>(ShaderName);
             }
-            resourceSet = new ResourceSet(Pipeline.ResourceLayout[1]);
-            return Pipeline != null;
+
+            resourceSet = new ResourceSet(Shader.Main.ResourceLayout[1]);
+            return Shader != null;
         }
 
         public ref ShaderParameter GetShaderParameter(StringID name)

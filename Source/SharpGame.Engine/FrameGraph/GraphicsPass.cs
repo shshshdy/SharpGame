@@ -94,20 +94,19 @@ namespace SharpGame
 
         public void DrawBatch(CommandBuffer cb, SourceBatch batch, ResourceSet resourceSet)
         {
-            var pipeline = batch.material.Pipeline;
-            var shader = pipeline.Shader;
+            var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
             {
                 return;
             }
-
+            
             var pass = shader.GetPass(passID);
-            var pipe = pipeline.GetGraphicsPipeline(renderPass, pass, batch.geometry);
+            var pipe = pass.GetGraphicsPipeline(renderPass, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
-            cb.PushConstants(pipeline, ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>(), batch.worldTransform);
-            cb.BindGraphicsResourceSet(pipeline, 0, resourceSet);
-            cb.BindGraphicsResourceSet(pipeline, 1, batch.material.ResourceSet);
+            cb.PushConstants(pass, ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>(), batch.worldTransform);
+            cb.BindGraphicsResourceSet(pass, 0, resourceSet);
+            cb.BindGraphicsResourceSet(pass, 1, batch.material.ResourceSet);
 
             batch.geometry.Draw(cb);
         }

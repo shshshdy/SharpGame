@@ -59,20 +59,17 @@ namespace SharpGame
             var shader = new Shader
             {
                 new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-            };
-
-            var pipeline = new GraphicsPipeline
-            {
-                Shader = shader,
-                CullMode = CullMode.Back,
-                FrontFace = FrontFace.CounterClockwise,
-                ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                PushConstantRanges = new[]
                 {
-                    new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                    CullMode = CullMode.Back,
+                    FrontFace = FrontFace.CounterClockwise,
+                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
+                    PushConstantRanges = new[]
+                    {
+                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                    }
                 }
             };
-
+            
             string path = FileUtil.GetPath(loadingFile);
 
             // Iterate through all meshes in the file and extract the vertex components
@@ -101,7 +98,7 @@ namespace SharpGame
 
                 if (mesh.MaterialIndex >= 0 && mesh.MaterialIndex < scene.MaterialCount)
                 {
-                    Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], pipeline);
+                    Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], shader);
                     model.Materials.Add(mat);
                 }
                 else
@@ -174,9 +171,9 @@ namespace SharpGame
             indexBuffer.Dispose();
         }
 
-        Material ConvertMaterial(string path, Assimp.Material aiMaterial, GraphicsPipeline pipeline)
+        Material ConvertMaterial(string path, Assimp.Material aiMaterial, Shader shader)
         {
-            Material material = new Material(pipeline);
+            Material material = new Material(shader);
 
             if (aiMaterial.HasTextureDiffuse)
             {

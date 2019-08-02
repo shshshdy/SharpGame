@@ -35,12 +35,7 @@ namespace SharpGame.Samples
             var shader = new Shader
             {
                 new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-            };
-
-            {
-                var pipeline = new GraphicsPipeline
                 {
-                    Shader = shader,
                     CullMode = CullMode.Back,
                     FrontFace = FrontFace.CounterClockwise,
                     ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
@@ -48,8 +43,11 @@ namespace SharpGame.Samples
                     {
                         new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
                     }
-                };
 
+                }
+            };
+
+            {
                 var model = Resources.Load<Model>("Models/crysponza_bubbles/sponza.obj");
                 var node = scene.CreateChild("Plane");
                 node.Scaling = new Vector3(1.0f);

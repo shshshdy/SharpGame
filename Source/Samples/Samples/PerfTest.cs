@@ -33,12 +33,7 @@ namespace SharpGame.Samples
             var shader = new Shader
             {
                 new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-            };
-
-            {
-                var pipeline = new GraphicsPipeline
                 {
-                    Shader = shader,
                     CullMode = CullMode.Back,
                     FrontFace = FrontFace.CounterClockwise,
                     ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
@@ -46,12 +41,15 @@ namespace SharpGame.Samples
                     {
                         new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
                     }
-                };
 
+                }
+            };
+
+            {
                 //var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material
                 {
-                    Pipeline = pipeline,
+                    Shader = shader,
                     ResourceSet = new ResourceSet(resourceLayoutTex, Texture.White)
                 };
 

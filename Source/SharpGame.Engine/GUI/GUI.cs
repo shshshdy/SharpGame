@@ -20,7 +20,7 @@ namespace SharpGame
         DeviceBuffer uniformBufferVS = new DeviceBuffer();
         Texture texture;
         Shader uiShader;
-        GraphicsPipeline pipeline;
+        Pass pipeline;
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
 
@@ -97,24 +97,23 @@ namespace SharpGame
             uiShader = new Shader("UI")
             {
                 new Pass("shaders/ImGui.vert.spv", "shaders/ImGui.frag.spv")
-            };
-
-            pipeline = new GraphicsPipeline
-            {
-                CullMode = CullMode.None,
-                DepthTestEnable = false,
-                DepthWriteEnable = false,
-                BlendMode = BlendMode.Alpha,
-                DynamicStates = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-
-                VertexLayout = VertexPos2dTexColor.Layout,
-
-                ResourceLayout = new[]
                 {
-                    resourceLayout
+                    CullMode = CullMode.None,
+                    DepthTestEnable = false,
+                    DepthWriteEnable = false,
+                    BlendMode = BlendMode.Alpha,
+                    DynamicStates = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
+
+                    VertexLayout = VertexPos2dTexColor.Layout,
+
+                    ResourceLayout = new[]
+                    {
+                        resourceLayout
+                    }
                 }
             };
 
+            pipeline = uiShader.Main;
           
             var graphics = Graphics.Instance;
 
@@ -289,7 +288,7 @@ namespace SharpGame
                 indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
             }
             
-            var pipelines_solid = pipeline.GetGraphicsPipeline(graphics.RenderPass, uiShader.Main, null);
+            var pipelines_solid = pipeline.GetGraphicsPipeline(graphics.RenderPass, null);
 
             cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pipeline, 0, resourceSet);
             cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelines_solid);

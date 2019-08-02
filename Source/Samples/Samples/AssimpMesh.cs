@@ -25,7 +25,6 @@ namespace SharpGame.Samples
 
         Shader shader;
         ResourceLayout resourceLayout;
-        GraphicsPipeline pipelineSolid;
 
         Vector3 rotation = new Vector3(-0.5f, 112.75f + 180, 0.0f);
      
@@ -60,7 +59,7 @@ namespace SharpGame.Samples
 
             var mat = new Material
             {
-                Pipeline = pipelineSolid,
+                Shader = shader,
                 ResourceSet = new ResourceSet(resourceLayout, uniformBufferScene, colorMap)
             };
 
@@ -75,7 +74,7 @@ namespace SharpGame.Samples
             geometry.Dispose();
             colorMap.Dispose();
             uniformBufferScene.Dispose();
-            pipelineSolid.Dispose();
+        
 
             base.Destroy();
         }
@@ -91,27 +90,24 @@ namespace SharpGame.Samples
             shader = new Shader
             {
                 new Pass("shaders/mesh.vert.spv", "shaders/mesh.frag.spv")
-            };
-
-            pipelineSolid = new GraphicsPipeline
-            {
-                Shader = shader,
-                CullMode = CullMode.Back,
-                FrontFace = FrontFace.CounterClockwise,
-
-                ResourceLayout = new[]
                 {
-                    new ResourceLayout
+                    CullMode = CullMode.Back,
+                    FrontFace = FrontFace.CounterClockwise,
+
+                    ResourceLayout = new[]
                     {
-                        new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                        new ResourceLayout
+                        {
+                            new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                        },
+
+                        resourceLayout
                     },
 
-                    resourceLayout
-                },
-
-                PushConstantRanges = new[]
-                {
-                    new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                    PushConstantRanges = new[]
+                    {
+                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                    }
                 }
             };
 

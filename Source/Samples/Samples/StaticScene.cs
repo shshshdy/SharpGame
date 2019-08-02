@@ -31,13 +31,23 @@ namespace SharpGame.Samples
             };
 
 
-            var shader = new Shader
-            {
-                new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-            };
 
             {
-                var pipeline = new GraphicsPipeline
+                var shader = new Shader
+                {
+                    new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
+                    {
+                        CullMode = CullMode.Back,
+                        FrontFace = FrontFace.CounterClockwise,
+                        ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
+                        PushConstantRanges = new[]
+                        {
+                            new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                        }
+                    }
+                };
+                /*
+                var pipeline = new Pass
                 {
                     Shader = shader,
                     CullMode = CullMode.Back,
@@ -47,7 +57,7 @@ namespace SharpGame.Samples
                     {
                         new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
                     }
-                };
+                };*/
 
                 var model = Resources.Load<Model>("Models/plane2.dae");
                 var node = scene.CreateChild("Plane");
@@ -59,7 +69,7 @@ namespace SharpGame.Samples
                 var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material
                 {
-                    Pipeline = pipeline,
+                    Shader = shader,
                     ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
                 };
 
@@ -67,22 +77,25 @@ namespace SharpGame.Samples
             }
 
             {
-                var pipeline = new GraphicsPipeline
+                var shader = new Shader
                 {
-                    Shader = shader,
-                    CullMode = CullMode.Back,
-                    FrontFace = FrontFace.Clockwise,
-                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                    PushConstantRanges = new[]
+                    new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
                     {
-                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+
+                        CullMode = CullMode.Back,
+                        FrontFace = FrontFace.Clockwise,
+                        ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
+                        PushConstantRanges = new[]
+                        {
+                            new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
+                        }
                     }
                 };
 
                 var colorMap = Resources.Load<Texture>("textures/Mushroom.png");
                 var mat = new Material
                 {
-                    Pipeline = pipeline,
+                    Shader = shader,
                     ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
                 };
 
