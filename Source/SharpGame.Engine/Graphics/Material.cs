@@ -59,7 +59,7 @@ namespace SharpGame
             return ref ShaderParameter.Null;
         }
 
-        public void SetShaderParmaeter<T>(StringID name, T val)
+        public void SetShaderParameter<T>(StringID name, T val)
         {
             ref ShaderParameter param = ref GetShaderParameter(name);
             if (!param.IsNull)
