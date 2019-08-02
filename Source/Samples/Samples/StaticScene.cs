@@ -30,8 +30,6 @@ namespace SharpGame.Samples
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
-
-
             {
                 var shader = new Shader
                 {
@@ -46,18 +44,6 @@ namespace SharpGame.Samples
                         }
                     }
                 };
-                /*
-                var pipeline = new Pass
-                {
-                    Shader = shader,
-                    CullMode = CullMode.Back,
-                    FrontFace = FrontFace.CounterClockwise,
-                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                    PushConstantRanges = new[]
-                    {
-                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
-                    }
-                };*/
 
                 var model = Resources.Load<Model>("Models/plane2.dae");
                 var node = scene.CreateChild("Plane");
