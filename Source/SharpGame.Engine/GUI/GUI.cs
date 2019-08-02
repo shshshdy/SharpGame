@@ -60,10 +60,10 @@ namespace SharpGame
             {
                 framebuffers = framebuffers,
                 renderPass = renderPass,
-                OnDraw = (view) =>
+                OnDraw = (pass, view) =>
                 {
 
-                    var cmdBuffer = guiPass.CmdBuffer;
+                    var cmdBuffer = pass.CmdBuffer;
                     RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
                 }
             };

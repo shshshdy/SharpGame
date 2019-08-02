@@ -47,7 +47,7 @@ namespace SharpGame
         internal DeviceBuffer[] ubMatrics = new DeviceBuffer[2];
 
         private ResourceLayout perFrameResLayout;
-        internal ResourceSet perFrameSet;
+        public ResourceSet perFrameSet;
 
         private ResourceLayout perObjectResLayout;
         ResourceSet[] perObjectSet = new ResourceSet[2];

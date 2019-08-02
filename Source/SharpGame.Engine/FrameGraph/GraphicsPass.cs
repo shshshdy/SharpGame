@@ -16,7 +16,7 @@ namespace SharpGame
 
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
-        public Action<RenderView> OnDraw { get; set; }
+        public Action<GraphicsPass, RenderView> OnDraw { get; set; }
 
         private CommandBufferPool[] cmdBufferPool;
 
@@ -87,7 +87,7 @@ namespace SharpGame
 
             cmdBuffer.SetViewport(ref view.Viewport);
             cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
-            OnDraw?.Invoke(view);
+            OnDraw?.Invoke(this, view);
             cmdBuffer?.End();
             cmdBuffer = null;
         }

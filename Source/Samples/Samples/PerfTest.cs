@@ -48,7 +48,7 @@ namespace SharpGame.Samples
                     }
                 };
 
-                var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
+                //var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material
                 {
                     Pipeline = pipeline,
