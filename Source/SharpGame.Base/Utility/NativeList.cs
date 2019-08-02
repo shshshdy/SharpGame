@@ -319,7 +319,7 @@ namespace SharpGame
             Marshal.FreeHGlobal(new IntPtr(dataPtr));
             dataPtr = null;
         }
-
+        
 #if DEBUG
         ~NativeList()
         {

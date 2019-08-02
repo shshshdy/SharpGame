@@ -128,7 +128,7 @@ namespace SharpGame
 
 #if UNMANAGED_MATRIX
         [IgnoreDataMember]
-        public IntPtr worldTransform_ = UnmanagedPool<Matrix>.Shared.Acquire();
+        public IntPtr worldTransform_ = NativePool<Matrix>.Shared.Acquire();
 #else
         [IgnoreDataMember]
         public Matrix worldTransform_;

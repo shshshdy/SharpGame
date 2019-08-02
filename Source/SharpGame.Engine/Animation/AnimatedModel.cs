@@ -91,12 +91,12 @@ namespace SharpGame
 
             if(!skinMatrices_.IsEmpty)
             {
-                UnmanagedPool<Matrix>.Shared.Release(skinMatrices_);
+                NativePool<Matrix>.Shared.Release(skinMatrices_);
             }
 
             foreach(Span<Matrix> m in geometrySkinMatrices_)
             {
-                UnmanagedPool<Matrix>.Shared.Release(m);
+                NativePool<Matrix>.Shared.Release(m);
             }
 
             geometrySkinMatrices_.Clear();
@@ -266,11 +266,11 @@ namespace SharpGame
                 // Reserve space for skinning matrices
                 if(!skinMatrices_.IsEmpty)
                 {
-                    UnmanagedPool<Matrix>.Shared.Release(skinMatrices_);
+                    NativePool<Matrix>.Shared.Release(skinMatrices_);
                 }
 
                 int numSkinMatrices = skeleton_.NumBones;
-                skinMatrices_ = UnmanagedPool<Matrix>.Shared.Acquire(numSkinMatrices);
+                skinMatrices_ = NativePool<Matrix>.Shared.Acquire(numSkinMatrices);
                 SetGeometryBoneMappings();
 
                 // Enable skinning in batches
@@ -912,7 +912,7 @@ namespace SharpGame
         {
             foreach(Span<Matrix> m in geometrySkinMatrices_)
             {
-                UnmanagedPool<Matrix>.Shared.Release(m);
+                NativePool<Matrix>.Shared.Release(m);
             }
 
             geometrySkinMatrices_.Clear();
@@ -934,7 +934,7 @@ namespace SharpGame
             Array.Resize(ref geometrySkinMatrices_, geometryBoneMappings_.Length);
             for(int i = 0; i < geometryBoneMappings_.Length; ++i)
             {
-                geometrySkinMatrices_[i] = UnmanagedPool<Matrix>.Shared.Acquire(geometryBoneMappings_[i].Length);
+                geometrySkinMatrices_[i] = NativePool<Matrix>.Shared.Acquire(geometryBoneMappings_[i].Length);
             //    Array.Resize(ref geometrySkinMatrices_[i], geometryBoneMappings_[i].Length);
             }
 

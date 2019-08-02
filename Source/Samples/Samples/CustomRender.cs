@@ -115,6 +115,8 @@ namespace SharpGame.Samples
             ubCameraVS.SetData(ref cameraVS);
 
             worldTransform = Matrix4x4.Identity;
+            batch.worldTransform = (IntPtr)Utilities.AsPointer(ref worldTransform);
+
             //pass.DrawBatch(pass.CmdBuffer, batch, view.perFrameSet);// resourceSet);
             pass.DrawBatch(pass.CmdBuffer, batch, resourceSet);
         }

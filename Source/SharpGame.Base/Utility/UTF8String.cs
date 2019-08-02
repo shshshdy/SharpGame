@@ -4,13 +4,13 @@ using System.Text;
 
 namespace SharpGame
 {
-    public unsafe class CString : IDisposable
+    public unsafe class UTF8String : IDisposable
     {
         private int length;
         public int Length => length;
-        public byte* StrPtr;// => (byte*)handle.AddrOfPinnedObject().ToPointer();
+        public byte* StrPtr;
 
-        public CString(string s)
+        public UTF8String(string s)
         {
             if (s == null)
             {
@@ -82,9 +82,9 @@ namespace SharpGame
             value == null ? 0 : Encoding.UTF8.GetMaxByteCount(value.Length + 1);
 
 
-        public static implicit operator byte* (CString utf8String) => utf8String.StrPtr;
-        public static implicit operator IntPtr (CString utf8String) => (IntPtr)(utf8String.StrPtr);
-        public static implicit operator CString(string s) => new CString(s);
-        public static implicit operator string(CString utf8String) => utf8String.GetString();
+        public static implicit operator byte* (UTF8String utf8String) => utf8String.StrPtr;
+        public static implicit operator IntPtr (UTF8String utf8String) => (IntPtr)(utf8String.StrPtr);
+        public static implicit operator UTF8String(string s) => new UTF8String(s);
+        public static implicit operator string(UTF8String utf8String) => utf8String.GetString();
     }
 }

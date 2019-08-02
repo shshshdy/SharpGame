@@ -67,9 +67,9 @@ namespace Vulkan
 
         public static IntPtr GetProcAddr(VkInstance instance, string name)
         {
-            int byteCount = CString.GetMaxByteCount(name);
+            int byteCount = UTF8String.GetMaxByteCount(name);
             var dstPtr = stackalloc byte[byteCount];
-            CString.ToPointer(name, dstPtr, byteCount);
+            UTF8String.ToPointer(name, dstPtr, byteCount);
             var addr = VulkanNative.vkGetInstanceProcAddr(instance, dstPtr);
             return addr;
         }

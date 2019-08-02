@@ -31,7 +31,7 @@ namespace SharpGame
             }
         }
 
-        public CString Name { get; set; } = "SharpGame";
+        public UTF8String Name { get; set; } = "SharpGame";
         public int Width { get; protected set; } = 1280;
         public int Height { get; protected set; } = 720;
 

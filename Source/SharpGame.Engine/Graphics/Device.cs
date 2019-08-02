@@ -29,7 +29,7 @@ namespace SharpGame
         private static VkCommandPool commandPool;
         private static VkPipelineCache pipelineCache;
         private static DebugReportCallbackExt debugReportCallbackExt;
-        private static CString engineName = "SharpGame";
+        private static UTF8String engineName = "SharpGame";
         public static VkInstance CreateInstance(Settings settings)
         {
             bool enableValidation = settings.Validation;

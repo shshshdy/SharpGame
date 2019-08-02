@@ -48,20 +48,20 @@ namespace SharpGame
         }
     }
 
-    public unsafe class UnmanagedPool<T> : IDisposable where T : struct
+    public unsafe class NativePool<T> : IDisposable where T : struct
     {
         List<IntPtr> buckets = new List<IntPtr>();
         List<int> bucketsSize = new List<int>();
         int capacity;
         Dictionary<int, List<IntPtr>> freeList = new Dictionary<int, List<IntPtr>>();
 
-        public static UnmanagedPool<T> Shared { get; }
-        static UnmanagedPool()
+        public static NativePool<T> Shared { get; }
+        static NativePool()
         {
-            Shared = new UnmanagedPool<T>(1024);
+            Shared = new NativePool<T>(1024);
         }
 
-        public UnmanagedPool(int capacity = 1024)
+        public NativePool(int capacity = 1024)
         {
             if(capacity < Unsafe.SizeOf<T>())
             {
