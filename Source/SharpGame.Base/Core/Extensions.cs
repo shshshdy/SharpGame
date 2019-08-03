@@ -28,6 +28,11 @@ namespace SharpGame
         {
             list.Add(item);
         }
+        
+        public static T Back<T>(this List<T> list)
+        {
+            return list[list.Count - 1];
+        }
 
         public static void Resize<T>(this List<T> list, int size)
         {

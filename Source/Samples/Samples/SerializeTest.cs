@@ -15,9 +15,10 @@ namespace SharpGame.Samples
 
             {
                 var file = FileSystem.Instance.GetFile("Shaders/Textured.shader");
-                Shader shader = HoconSerializer.Deserialize<Shader>(file);
-                
-
+                //Shader shader = HoconSerializer.Deserialize<Shader>(file);
+                AstParser ast = new AstParser();
+                ast.Parse(file.ReadAllText());
+                ast.Print();        
             }
 
             /*

@@ -39,6 +39,10 @@ namespace SharpGame
                 var field = it.Current.Value;
 
                 var prop = metaInfo.Get(key);
+                if(prop == null)
+                {
+                    return;
+                }
                 
                 switch(field.Type)
                 {

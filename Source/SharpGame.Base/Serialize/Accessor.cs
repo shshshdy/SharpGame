@@ -17,6 +17,18 @@ namespace SharpGame
         bool Visit(ISerializer serializer, object obj);
     }
 
+    public interface IArrayAccessor
+    {
+    }
+
+    public interface IListAccessor
+    {
+    }
+
+    public interface IDictionaryAccessor
+    {
+    }
+
     public class DynamicAccessor : IPropertyAccessor
     {
         public string Name { get; }
