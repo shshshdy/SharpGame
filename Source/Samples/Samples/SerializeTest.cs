@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 5)]
+    [SampleDesc(sortOrder = -5)]
     public class SerializeTest : Sample
     {
         public override void Init()
@@ -14,11 +14,13 @@ namespace SharpGame.Samples
             base.Init();
 
             {
-                var file = FileSystem.Instance.GetFile("pipelines/Textured.pipeline");
-                Hocon.HoconRoot root = HoconSerializer.Parse(file);
-                Console.WriteLine(root.PrettyPrint(4));
+                var file = FileSystem.Instance.GetFile("Shaders/Textured.shader");
+                Shader shader = HoconSerializer.Deserialize<Shader>(file);
+                
+
             }
 
+            /*
             Task<string> ShaderResolver(HoconCallbackType type, string fileName)
             {
                 switch (type)
@@ -37,7 +39,7 @@ namespace SharpGame.Samples
                 Hocon.HoconRoot root = HoconSerializer.Parse(file, ShaderResolver);
                 Console.WriteLine(root.PrettyPrint(4));
             }
-
+            */
 
 
         }

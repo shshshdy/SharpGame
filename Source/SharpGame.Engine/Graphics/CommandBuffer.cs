@@ -203,21 +203,21 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindGraphicsPipeline(Pass pipeline)
+        public void BindGraphicsPipeline(Pass pass)
         {
-            var pipe = pipeline.GetGraphicsPipeline(renderPass, null);
-            vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Graphics, pipeline.handle);
+            var pipe = pass.GetGraphicsPipeline(renderPass, null);
+            vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Graphics, pass.handle);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindComputePipeline(Pass pipeline)
+        public void BindComputePipeline(Pass pass)
         {
-            var pipe = pipeline.GetComputePipeline();
-            vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Compute, pipeline.handle);
+            var pipe = pass.GetComputePipeline();
+            vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Compute, pass.handle);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindGraphicsResourceSet(Pass pipeline, int firstSet, ResourceSet resourceSet, uint? dynamicOffset = null)
+        public unsafe void BindGraphicsResourceSet(Pass pass, int firstSet, ResourceSet resourceSet, uint? dynamicOffset = null)
         {
             uint dynamicOffsetCount = 0;
             uint val;
@@ -229,11 +229,11 @@ namespace SharpGame
                 pDynamicOffsets = (uint*)Unsafe.AsPointer(ref val);
             }
 
-            BindResourceSet(PipelineBindPoint.Graphics, pipeline, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
+            BindResourceSet(PipelineBindPoint.Graphics, pass, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindComputeResourceSet(Pass pipeline, int firstSet, ResourceSet resourceSet, uint? dynamicOffset)
+        public unsafe void BindComputeResourceSet(Pass pass, int firstSet, ResourceSet resourceSet, uint? dynamicOffset)
         {
             uint dynamicOffsetCount = 0;
             uint val;
@@ -245,20 +245,20 @@ namespace SharpGame
                 pDynamicOffsets = (uint*)Unsafe.AsPointer(ref val);
             }
 
-            BindResourceSet(PipelineBindPoint.Compute, pipeline, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
+            BindResourceSet(PipelineBindPoint.Compute, pass, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindResourceSet(PipelineBindPoint pipelineBindPoint,
-            Pass pipeline, int set, ResourceSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
+            Pass pass, int set, ResourceSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
         {
-            vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.pipelineLayout, (uint)set, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
+            vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pass.pipelineLayout, (uint)set, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindPipeline(PipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
+        public void BindPipeline(PipelineBindPoint pipelineBindPoint, VkPipeline pass)
         {
-            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline);
+            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pass);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -281,23 +281,23 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void PushConstants<T>(Pass pipeline, ShaderStage shaderStage, int offset, ref T value) where T : struct
+        public unsafe void PushConstants<T>(Pass pass, ShaderStage shaderStage, int offset, ref T value) where T : struct
         {
-            vkCmdPushConstants(commandBuffer, pipeline.pipelineLayout, (VkShaderStageFlags)shaderStage,
+            vkCmdPushConstants(commandBuffer, pass.pipelineLayout, (VkShaderStageFlags)shaderStage,
                 (uint)offset, (uint)Utilities.SizeOf<T>(), Unsafe.AsPointer(ref value));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void PushConstants(Pass pipeline, ShaderStage shaderStage, int offset, int size, IntPtr value)
+        public unsafe void PushConstants(Pass pass, ShaderStage shaderStage, int offset, int size, IntPtr value)
         {
-            vkCmdPushConstants(commandBuffer, pipeline.pipelineLayout, (VkShaderStageFlags)shaderStage,
+            vkCmdPushConstants(commandBuffer, pass.pipelineLayout, (VkShaderStageFlags)shaderStage,
                 (uint)offset, (uint)size, (void*)value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void PushDescriptorSet(Pass pipeline, int set, ResourceSet resourceSet)
+        public void PushDescriptorSet(Pass pass, int set, ResourceSet resourceSet)
         {
-            vkCmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pipeline.pipelineLayout, (uint)set,
+            vkCmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pass.pipelineLayout, (uint)set,
                 (uint)resourceSet.writeDescriptorSets.Length, ref resourceSet.writeDescriptorSets[0]);
         }
 
@@ -316,20 +316,20 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void DrawGeometry(Geometry geometry, Pass pipeline, Material material)
+        public unsafe void DrawGeometry(Geometry geometry, Pass pass, Material material)
         {
-            var pipe = pipeline.GetGraphicsPipeline(renderPass, geometry);
+            var pipe = pass.GetGraphicsPipeline(renderPass, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
-            BindResourceSet(PipelineBindPoint.Graphics, pipeline, 0, material.ResourceSet);
+            BindResourceSet(PipelineBindPoint.Graphics, pass, 0, material.ResourceSet);
             geometry.Draw(this);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void DrawGeometry(Geometry geometry, Pass pipeline, ResourceSet resourceSet)
+        public unsafe void DrawGeometry(Geometry geometry, Pass pass, ResourceSet resourceSet)
         {
-            var pipe = pipeline.GetGraphicsPipeline(renderPass, geometry);
+            var pipe = pass.GetGraphicsPipeline(renderPass, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
-            BindResourceSet(PipelineBindPoint.Graphics, pipeline, 0, resourceSet);
+            BindResourceSet(PipelineBindPoint.Graphics, pass, 0, resourceSet);
             geometry.Draw(this);
         }
 

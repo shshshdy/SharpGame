@@ -20,7 +20,7 @@ namespace SharpGame
         public List<ShaderParameter> Properties { get; set; }
 
         [DataMember]
-        public List<Pass> Passes { get; set; } = new List<Pass>();
+        public List<Pass> Pass { get; set; } = new List<Pass>();
 
         [IgnoreDataMember]
         public ulong passFlags = 0;
@@ -44,7 +44,7 @@ namespace SharpGame
 
         public void Add(Pass pass)
         {
-            Passes.Add(pass);
+            Pass.Add(pass);
             passFlags |= pass.passID;
         }
 
@@ -64,12 +64,12 @@ namespace SharpGame
                     return;
                 }
 
-                for (int i = 0; i < Passes.Count; i++)
+                for (int i = 0; i < Pass.Count; i++)
                 {
-                    if(Passes[i].passID == 1)
+                    if(Pass[i].passID == 1)
                     {
-                        Passes[i].Dispose();
-                        Passes[i] = value;
+                        Pass[i].Dispose();
+                        Pass[i] = value;
                     }
                 }
 
@@ -79,7 +79,7 @@ namespace SharpGame
 
         public Pass GetPass(ulong id)
         {
-            foreach (var pass in Passes)
+            foreach (var pass in Pass)
             {
                 if (pass.passID == id)
                 {
@@ -92,7 +92,7 @@ namespace SharpGame
 
         public Pass GetPass(StringID name)
         {
-            foreach(var pass in Passes)
+            foreach(var pass in Pass)
             {
                 if(pass.Name == name)
                 {
@@ -105,7 +105,7 @@ namespace SharpGame
 
         protected override bool OnBuild()
         {
-            foreach (var pass in Passes)
+            foreach (var pass in Pass)
             {
                 pass.Build();
             }
@@ -115,24 +115,24 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            foreach (var pass in Passes)
+            foreach (var pass in Pass)
             {
                 pass.Dispose();
             }
 
-            Passes.Clear();
+            Pass.Clear();
 
             base.Destroy();
         }
 
         public IEnumerator<Pass> GetEnumerator()
         {
-            return ((IEnumerable<Pass>)Passes).GetEnumerator();
+            return ((IEnumerable<Pass>)Pass).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<Pass>)Passes).GetEnumerator();
+            return ((IEnumerable<Pass>)Pass).GetEnumerator();
         }
     }
 

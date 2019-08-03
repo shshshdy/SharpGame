@@ -10,6 +10,10 @@ namespace SharpGame
         public int Length => length;
         public byte* StrPtr;
 
+        public UTF8String()
+        {
+        }
+
         public UTF8String(string s)
         {
             if (s == null)
