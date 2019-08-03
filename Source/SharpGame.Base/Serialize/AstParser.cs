@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -156,9 +157,10 @@ namespace SharpGame
             const char quote = '\"', slash = '/', backslash = '\\', openbrace = '{', closebrace = '}', colon = ':', star = '*', cr = '\r', lf = '\n';
             char c = '0', lastc = '0';
 
+            //todo: StringBuilder lexeme = new StringBuilder();
             String lexeme = "";
             uint line = 1, state = READY, lastQuote = 0;
-
+            int sourceStack = 0;
             // Iterate over the input
             char* i = buf, end = buf + size;
             while (i != end)
@@ -197,6 +199,31 @@ namespace SharpGame
                         else if (IsColon(c))
                         {
                         }
+                        
+                        else if (c == openbrace)
+                        {
+                            var node = current_;
+                          
+                            bool isSource = current_.token_.StartsWith("@");
+
+                            lexeme = c.ToString();
+
+                            if (isSource)
+                            {
+                                //enter source
+                                SetToken(lexeme, line, true);
+
+                                Debug.Assert(sourceStack == 0);
+                                lexeme = "";
+                                sourceStack++;
+                                state = SOURCE;
+                            }
+                            else
+                            {
+                                state = WORD;
+                            }
+                          
+                        }
                         else if (!IsWhitespace(c))
                         {
                             lexeme = c.ToString();
@@ -217,6 +244,38 @@ namespace SharpGame
                     case MULTICOMMENT:
                         if (c == slash && lastc == star)
                             state = READY;
+                        break;
+                    case SOURCE:
+                                 
+                        if (c == openbrace)
+                        {
+                            sourceStack++;
+                            lexeme += c;
+                        }
+                        else if(c == closebrace)
+                        {
+                            sourceStack--;
+
+                            //exit source
+                            if (sourceStack == 0)
+                            {
+                                SetToken(lexeme, line, true);
+                                lexeme = c.ToString();
+                                SetToken(lexeme, line, true);
+                                state = READY;
+                            }
+                            else
+                            {
+                                lexeme += c;
+                            }
+                        }
+                        else
+                        {
+                            lexeme += c;
+
+                        }
+                                           
+
                         break;
                     case POSSIBLECOMMENT:
                         if (c == slash && lastc == slash)
@@ -255,9 +314,27 @@ namespace SharpGame
                         }
                         else if (c == openbrace || c == closebrace)
                         {
+                            bool isSource = false;
+                            if (c == openbrace)
+                            {
+                                isSource = lexeme.StartsWith("@");
+                            }
+
                             SetToken(lexeme, line);
                             lexeme = c.ToString();
-                            SetToken(lexeme, line);
+                            SetToken(lexeme, line, isSource);
+
+                            //enter source
+                            if(isSource)
+                            {
+                                if(sourceStack == 0)
+                                {
+                                    sourceStack++;
+                                    state = SOURCE;
+                                    break;
+                                }
+                            }
+
                             state = READY;
                         }
                         else
@@ -285,9 +362,26 @@ namespace SharpGame
                         }
                         else if (c == openbrace || c == closebrace)
                         {
+                            bool isSource = false;
+                            if (c == openbrace)
+                            {
+                                isSource = lexeme.StartsWith("@");
+                            }
+
                             SetToken(lexeme, line);
                             lexeme = c.ToString();
-                            SetToken(lexeme, line);
+                            SetToken(lexeme, line, isSource);
+
+                            //enter source
+                            if (isSource)
+                            {
+                                if (sourceStack == 0)
+                                {
+                                    sourceStack++;
+                                    state = SOURCE;
+                                    break;
+                                }
+                            }
                             state = READY;
                         }
                         else
@@ -346,7 +440,7 @@ namespace SharpGame
             return true;
         }
 
-        void SetToken(String lexeme, uint line)
+        void SetToken(String lexeme, uint line, bool source = false)
         {
             const char openBracket = '{', closeBracket = '}', quote = '\"';
 
@@ -357,13 +451,28 @@ namespace SharpGame
             else if (lexeme.Length == 1 && lexeme[0] == openBracket)
             {
                 System.Diagnostics.Debug.Assert(current_ != null);
-                parents_.Add(current_);
-                current_ = null;
+                if(source)
+                {
+
+                }
+                else
+                {
+                    parents_.Add(current_);
+                    current_ = null;
+                }
             }
             else if (lexeme.Length == 1 && lexeme[0] == closeBracket)
             {
-                current_ = null;
-                parents_.Pop();
+                if (source)
+                {
+                    current_ = null;
+                }
+                else
+                {
+
+                    current_ = null;
+                    parents_.Pop();
+                }
             }
             else
             {
@@ -376,21 +485,36 @@ namespace SharpGame
 
                 if (current_ != null)
                 {
-                    if (current_.value_.Empty() && !current_.isQuote_)
+                    if (source)
                     {
-                        current_.value_ = isQuote ? lexeme.Substring(1, lexeme.Length - 2) : lexeme;
+                        current_.value_ = lexeme;
+                    }
+                    else
+                    {
+                        if (current_.value_.Empty() && !current_.isQuote_)
+                        {
+                            current_.value_ = isQuote ? lexeme.Substring(1, lexeme.Length - 2) : lexeme;
+                        }
+                        else
+                        {
+                            CreateNode(isQuote ? lexeme.Substring(1, lexeme.Length - 2) : lexeme, line);
+                        }
+                    }
+               
+                }
+                else
+                {
+                    if(source)
+                    {
+                        CreateNode(lexeme, line);
                     }
                     else
                     {
                         CreateNode(isQuote ? lexeme.Substring(1, lexeme.Length - 2) : lexeme, line);
                     }
                 }
-                else
-                {
-                    CreateNode(isQuote ? lexeme.Substring(1, lexeme.Length - 2) : lexeme, line);
-                }
 
-                current_.isQuote_ = isQuote;
+                current_.isQuote_ = isQuote || source;
             }
 
 
