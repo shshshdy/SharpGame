@@ -14,7 +14,13 @@ namespace SharpGame
         object Get(object obj);
         void Set(object obj, object value);
 
-        bool Visit(ISerializer serializer, object obj);
+    }
+
+    public interface IPropertyAccessor<T> : IPropertyAccessor
+    {
+        T Get(object obj);
+        void Set(object obj, T value);
+
     }
 
     public interface IArrayAccessor
@@ -45,13 +51,6 @@ namespace SharpGame
             this.setter = setter;
         }
 
-        public bool Visit(ISerializer serializer, object obj)
-        {
-            object val = getter.Invoke(obj);
-            serializer.VisitProperty(Name, ref val);
-            return true;
-        }
-
         public object Get(object obj)
         {
             return getter.Invoke(obj);
@@ -63,7 +62,7 @@ namespace SharpGame
         }
     }
 
-    public class PropertyAccessor<T> : IPropertyAccessor
+    public class PropertyAccessor<T> : IPropertyAccessor<T>
     {
         public string Name { get; }
         public Type PropertyType { get; } = typeof(T);
@@ -78,19 +77,27 @@ namespace SharpGame
             setter = DelegateFactory.PropertySet<T>(type, name);
         }
 
-        public bool Visit(ISerializer serializer, object obj)
+        public T Get(object obj)
         {
-            T val = getter.Invoke(obj);
-            serializer.VisitProperty(Name, ref val);
-            return true;
+            return getter.Invoke(obj);
         }
 
-        public object Get(object obj)
+        public void Set(object obj, T value)
         {
-            throw new NotImplementedException();
+            setter.Invoke(obj, value);
         }
+
+//         public object Get(object obj)
+//         {
+//             return getter.Invoke(obj);
+//         }
 
         public void Set(object obj, object value)
+        {
+            setter.Invoke(obj, (T)value);
+        }
+
+        object IPropertyAccessor.Get(object obj)
         {
             throw new NotImplementedException();
         }
@@ -109,13 +116,6 @@ namespace SharpGame
             Name = name;
             getter = DelegateFactory.FieldGet<T>(type, name);
             setter = DelegateFactory.FieldSet<T>(type, name);
-        }
-
-        public bool Visit(ISerializer serializer, object obj)
-        {
-            T val = getter.Invoke(obj);
-            serializer.VisitProperty(Name, ref val);
-            return true;
         }
 
         public object Get(object obj)

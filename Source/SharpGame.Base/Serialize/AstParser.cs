@@ -10,30 +10,46 @@ namespace SharpGame
 
     public class AstNode
     {
-        public String token_;
-        public String value_;
-        public bool isQuote_ = false;
+        public String token;
+        public String value;
+        public bool isQuote = false;
 
-        ChildMap children_;
+        ChildMap children;
 
         public AstNode(string type)
         {
-            token_ = type;
+            token = type;
         }
 
-        public bool IsObject => children_ != null;
+        public bool IsObject => children != null;
+        public int ChildCount => children == null ? 0 : children.Count;
+
+        public int GetChild(String key, out List<AstNode> child)
+        {
+            if (this.children != null)
+            {
+                if (this.children.TryGetValue(key, out child))
+                {
+                    return child.Count;
+                }
+            }
+
+            child = null;
+            return 0;
+
+        }
 
         public void AddChild(AstNode node)
         {
-            if (children_ == null)
+            if (children == null)
             {
-                children_ = new ChildMap();
+                children = new ChildMap();
             }
 
-            if (!children_.TryGetValue(node.token_, out var lst))
+            if (!children.TryGetValue(node.token, out var lst))
             {
                 lst = new List<AstNode>();
-                children_.Add(node.token_, lst);
+                children.Add(node.token, lst);
             }
 
             lst.Add(node);
@@ -42,9 +58,9 @@ namespace SharpGame
 
         public AstNode GetChild(string name)
         {
-            if (children_ != null)
+            if (children != null)
             {
-                if (children_.TryGetValue(name, out var lst))
+                if (children.TryGetValue(name, out var lst))
                 {
                     return lst[0];
                 }
@@ -55,9 +71,9 @@ namespace SharpGame
 
         public void VisitChild(string key, Action<AstNode> fn)
         {
-            if (children_ != null && fn != null)
+            if (children != null && fn != null)
             {
-                if (children_.TryGetValue(key, out var lst))
+                if (children.TryGetValue(key, out var lst))
                 {
                     foreach (var node in lst)
                     {
@@ -71,12 +87,12 @@ namespace SharpGame
         public void Print(int depth)
         {
             var space = new string(' ', depth*4);
-            Console.WriteLine(space + token_ + " = " + value_);
+            Console.WriteLine(space + token + " = " + value);
 
             if (IsObject)
             {
                 Console.WriteLine(space + "{");
-                var it = children_.GetEnumerator();
+                var it = children.GetEnumerator();
                 while (it.MoveNext())
                 {
                     var lst = it.Current.Value;
@@ -95,16 +111,17 @@ namespace SharpGame
 
     public class AstParser
     {
-        List<AstNode> root_ = new List<AstNode>();
-        String sourceFile_;
-        List<AstNode> parents_ = new List<AstNode>();
-        AstNode current_;
+        List<AstNode> root = new List<AstNode>();
+        List<AstNode> parents = new List<AstNode>();
+        AstNode current;
 
         public AstParser()
         {
         }
 
-        public AstNode Parent => parents_.Empty() ? null : parents_.Back();
+        public List<AstNode> Root => root;
+
+        public AstNode Parent => parents.Empty() ? null : parents.Back();
 
         static bool IsWhitespace(char c)
         {
@@ -123,7 +140,7 @@ namespace SharpGame
 
         public void Print()
         {
-            foreach (var n in root_)
+            foreach (var n in root)
             {
                 n.Print(0);
             }
@@ -138,7 +155,7 @@ namespace SharpGame
                 return false;
             }
 
-            return !root_.Empty();
+            return !root.Empty();
         }
 
         // State enums
@@ -202,9 +219,9 @@ namespace SharpGame
                         
                         else if (c == openbrace)
                         {
-                            var node = current_;
+                            var node = current;
                           
-                            bool isSource = current_.token_.StartsWith("@");
+                            bool isSource = current.token.StartsWith("@");
 
                             lexeme = c.ToString();
 
@@ -450,28 +467,28 @@ namespace SharpGame
             }
             else if (lexeme.Length == 1 && lexeme[0] == openBracket)
             {
-                System.Diagnostics.Debug.Assert(current_ != null);
+                System.Diagnostics.Debug.Assert(current != null);
                 if(source)
                 {
 
                 }
                 else
                 {
-                    parents_.Add(current_);
-                    current_ = null;
+                    parents.Add(current);
+                    current = null;
                 }
             }
             else if (lexeme.Length == 1 && lexeme[0] == closeBracket)
             {
                 if (source)
                 {
-                    current_ = null;
+                    current = null;
                 }
                 else
                 {
 
-                    current_ = null;
-                    parents_.Pop();
+                    current = null;
+                    parents.Pop();
                 }
             }
             else
@@ -483,17 +500,17 @@ namespace SharpGame
                     isQuote = true;
                 }
 
-                if (current_ != null)
+                if (current != null)
                 {
                     if (source)
                     {
-                        current_.value_ = lexeme;
+                        current.value = lexeme;
                     }
                     else
                     {
-                        if (current_.value_.Empty() && !current_.isQuote_)
+                        if (current.value.Empty() && !current.isQuote)
                         {
-                            current_.value_ = isQuote ? lexeme.Substring(1, lexeme.Length - 2) : lexeme;
+                            current.value = isQuote ? lexeme.Substring(1, lexeme.Length - 2) : lexeme;
                         }
                         else
                         {
@@ -514,7 +531,7 @@ namespace SharpGame
                     }
                 }
 
-                current_.isQuote_ = isQuote || source;
+                current.isQuote = isQuote || source;
             }
 
 
@@ -522,15 +539,15 @@ namespace SharpGame
 
         void CreateNode(string type, uint line)
         {
-            current_ = new AstNode(type);
+            current = new AstNode(type);
             AstNode parent = Parent;
             if (parent != null)
             {
-                parent.AddChild(current_);
+                parent.AddChild(current);
             }
             else
             {
-                root_.Add(current_);
+                root.Add(current);
             }
         }
     }
