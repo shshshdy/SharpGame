@@ -19,6 +19,7 @@
     <PackageReference Include="Vk" Version="1.0.21" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Tools\SharpShaderCompiler\src\SharpShaderCompiler\SharpShaderCompiler.csproj" />
     <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />
     <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
   </ItemGroup>

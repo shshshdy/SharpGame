@@ -75,11 +75,18 @@ namespace SharpGame
         [IgnoreDataMember]
         public ulong passID;
 
+        readonly ShaderModule[] shaderModels = new ShaderModule[6];
         [DataMember]
-        public ShaderModule[] ShaderModels { get; set; } = new ShaderModule[6];
+        public ShaderModule[] ShaderModels { get => shaderModels; }
+        public ref ShaderModule VertexShader => ref shaderModels[0];
+        public ref ShaderModule PixelShader => ref shaderModels[4];
+        public ref ShaderModule GeometryShader => ref shaderModels[1];
+        public ref ShaderModule HullShader => ref shaderModels[2];
+        public ref ShaderModule DomainShader => ref shaderModels[3];
+        public ref ShaderModule ComputeShader => ref shaderModels[5];
 
         [IgnoreDataMember]
-        public bool IsComputeShader => ShaderModels[5] != null;
+        public bool IsComputeShader => ComputeShader != null;
 
         private bool builded_ = false;
 
@@ -108,10 +115,11 @@ namespace SharpGame
         private BlendMode blendMode = BlendMode.Replace;
         public BlendMode BlendMode { get => blendMode; set { blendMode = value; SetBlendMode(value); } }
         public DynamicStateInfo DynamicStates { get; set; } = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor);
+
         public ResourceLayout[] ResourceLayout { get; set; }
 
-        private PushConstantRange[] pushConstantRanges;
-        public PushConstantRange[] PushConstantRanges { get => pushConstantRanges; set => pushConstantRanges = value; }
+        private PushConstantRange[] pushConstant;
+        public PushConstantRange[] PushConstant { get => pushConstant; set => pushConstant = value; }
 
         [IgnoreDataMember]
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
@@ -123,6 +131,59 @@ namespace SharpGame
 
         public Pass()
         {
+        }
+
+        public Pass(string vertexShader = null, string pixelShader = null, string geometryShader = null,
+            string hullShader = null, string domainShader = null, string computeShader = null)
+        {
+            if (!string.IsNullOrEmpty(vertexShader))
+            {
+                VertexShader = new ShaderModule(ShaderStage.Vertex, vertexShader);
+            }
+
+            if (!string.IsNullOrEmpty(pixelShader))
+            {
+                PixelShader = new ShaderModule(ShaderStage.Fragment, pixelShader);
+            }
+
+            if (!string.IsNullOrEmpty(geometryShader))
+            {
+                GeometryShader = new ShaderModule(ShaderStage.Geometry, geometryShader);
+            }
+
+            if (!string.IsNullOrEmpty(hullShader))
+            {
+                HullShader = new ShaderModule(ShaderStage.TessellationControl, hullShader);
+            }
+
+            if (!string.IsNullOrEmpty(domainShader))
+            {
+                DomainShader = new ShaderModule(ShaderStage.TessellationEvaluation, domainShader);
+            }
+
+            if (!string.IsNullOrEmpty(computeShader))
+            {
+                ComputeShader = new ShaderModule(ShaderStage.Compute, computeShader);
+            }
+
+            Build();
+        }
+                
+        public void Build()
+        {
+            if (builded_)
+            {
+                return;
+            }
+
+            builded_ = true;
+            passID = GetID(Name);
+
+            foreach(var sm in ShaderModels)
+            {
+                sm?.Build();
+            }
+
         }
 
         public unsafe void SetBlendMode(BlendMode blendMode)
@@ -152,80 +213,6 @@ namespace SharpGame
                 case BlendMode.SubtractAlpha:
                     break;
             }
-        }
-
-        public Pass(string vertexShader = null, string pixelShader = null, string geometryShader = null,
-            string hullShader = null, string domainShader = null, string computeShader = null)
-        {
-            if (!string.IsNullOrEmpty(vertexShader))
-            {
-                ShaderModels[0] = new ShaderModule(ShaderStage.Vertex, vertexShader);
-            }
-
-            if (!string.IsNullOrEmpty(pixelShader))
-            {
-                ShaderModels[4] = new ShaderModule(ShaderStage.Fragment, pixelShader);
-            }
-
-            if (!string.IsNullOrEmpty(geometryShader))
-            {
-                ShaderModels[1] = new ShaderModule(ShaderStage.Geometry, geometryShader);
-            }
-
-            if (!string.IsNullOrEmpty(hullShader))
-            {
-                ShaderModels[2] = new ShaderModule(ShaderStage.TessellationControl, hullShader);
-            }
-
-            if (!string.IsNullOrEmpty(domainShader))
-            {
-                ShaderModels[3] = new ShaderModule(ShaderStage.TessellationEvaluation, domainShader);
-            }
-
-            if (!string.IsNullOrEmpty(computeShader))
-            {
-                ShaderModels[5] = new ShaderModule(ShaderStage.Compute, computeShader);
-            }
-
-            Build();
-        }
-                
-        public void Build()
-        {
-            if (builded_)
-            {
-                return;
-            }
-
-            builded_ = true;
-            passID = GetID(Name);
-
-            foreach(var sm in ShaderModels)
-            {
-                sm?.Build();
-            }
-
-        }
-
-        protected override void Destroy()
-        {
-            foreach (var stage in ShaderModels)
-            {
-                stage?.Dispose();
-            }
-
-            if (handle != 0)
-            {
-                Device.Destroy(ref handle);
-            }
-
-            if (pipelineLayout != 0)
-            {
-                Device.DestroyPipelineLayout(pipelineLayout);
-                pipelineLayout = 0;
-            }
-
-            base.Destroy();
         }
 
         public unsafe uint GetShaderStageCreateInfos(VkPipelineShaderStageCreateInfo* shaderStageCreateInfo)
@@ -274,10 +261,10 @@ namespace SharpGame
             }
 
             var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);
-            if (!pushConstantRanges.IsNullOrEmpty())
+            if (!pushConstant.IsNullOrEmpty())
             {
-                pipelineLayoutInfo.pushConstantRangeCount = (uint)pushConstantRanges.Length;
-                pipelineLayoutInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref pushConstantRanges[0]);
+                pipelineLayoutInfo.pushConstantRangeCount = (uint)pushConstant.Length;
+                pipelineLayoutInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref pushConstant[0]);
             }
             vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
@@ -345,10 +332,10 @@ namespace SharpGame
             }
 
             var pipelineLayoutInfo = Builder.PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);
-            if (!pushConstantRanges.IsNullOrEmpty())
+            if (!pushConstant.IsNullOrEmpty())
             {
-                pipelineLayoutInfo.pushConstantRangeCount = (uint)pushConstantRanges.Length;
-                pipelineLayoutInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref pushConstantRanges[0]);
+                pipelineLayoutInfo.pushConstantRangeCount = (uint)pushConstant.Length;
+                pipelineLayoutInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref pushConstant[0]);
             }
             vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
 
@@ -360,5 +347,27 @@ namespace SharpGame
             return handle;
 
         }
+
+        protected override void Destroy()
+        {
+            foreach (var stage in ShaderModels)
+            {
+                stage?.Dispose();
+            }
+
+            if (handle != 0)
+            {
+                Device.Destroy(ref handle);
+            }
+
+            if (pipelineLayout != 0)
+            {
+                Device.DestroyPipelineLayout(pipelineLayout);
+                pipelineLayout = 0;
+            }
+
+            base.Destroy();
+        }
+
     }
 }

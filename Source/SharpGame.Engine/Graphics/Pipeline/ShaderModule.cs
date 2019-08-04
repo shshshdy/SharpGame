@@ -87,7 +87,16 @@ namespace SharpGame
 
             Build();
         }
-        
+
+        public ShaderModule(ShaderStage stage, byte[] code, string funcName = "main")
+        {
+            Stage = stage;
+            Code = code;
+            FuncName = funcName;        
+
+            Build();
+        }
+
         protected override bool OnLoad(File stream)
         {
             Code = stream.ReadAllBytes();

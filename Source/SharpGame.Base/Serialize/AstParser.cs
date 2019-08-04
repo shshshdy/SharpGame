@@ -23,6 +23,7 @@ namespace SharpGame
 
         public bool IsObject => children != null;
         public int ChildCount => children == null ? 0 : children.Count;
+        public ChildMap Children => children;
 
         public int GetChild(String key, out List<AstNode> child)
         {
@@ -82,8 +83,7 @@ namespace SharpGame
                 }
             }
         }
-
-
+        
         public void Print(int depth)
         {
             var space = new string(' ', depth*4);

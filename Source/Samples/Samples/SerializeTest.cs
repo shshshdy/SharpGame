@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -5)]
+    [SampleDesc(sortOrder = 5)]
     public class SerializeTest : Sample
     {
         public override void Init()
@@ -14,11 +14,14 @@ namespace SharpGame.Samples
             base.Init();
 
             {
+                /*
                 var file = FileSystem.Instance.GetFile("Shaders/Textured.shader");
                 //Shader shader = HoconSerializer.Deserialize<Shader>(file);
                 AstParser ast = new AstParser();
                 ast.Parse(file.ReadAllText());
-                ast.Print();        
+                ast.Print();*/
+
+                var shader = Resources.Load<Shader>("Shaders/Textured.shader");
             }
 
             /*

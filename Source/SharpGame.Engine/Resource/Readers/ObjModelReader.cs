@@ -122,7 +122,7 @@ namespace SharpGame
                     CullMode = CullMode.Back,
                     FrontFace = FrontFace.CounterClockwise,
                     ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                    PushConstantRanges = new[]
+                    PushConstant = new[]
                     {
                         new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
                     }
