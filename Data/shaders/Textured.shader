@@ -39,17 +39,8 @@ Shader "test"
 		@VertexShader
 		{
 			#version 450
-
-			layout (binding = 0) uniform CameraVS
-			{
-				mat4 View;
-				mat4 ViewInv;
-				mat4 ViewProj;
-				vec3 CameraPos;
-				float NearClip;
-				vec3 FrustumSize;
-				float FarClip;
-			};
+			
+			#include "UniformsVS.glsl"
 
 			layout(push_constant) uniform PushConsts {
 				mat4 model;

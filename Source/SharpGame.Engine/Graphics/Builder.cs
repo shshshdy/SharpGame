@@ -24,14 +24,7 @@ namespace SharpGame
             pipelineViewportStateCreateInfo.flags = flags;
             return pipelineViewportStateCreateInfo;
         }
-                
-        public static VkPipelineTessellationStateCreateInfo TessellationStateCreateInfo(uint patchControlPoints)
-        {
-            var pipelineTessellationStateCreateInfo = VkPipelineTessellationStateCreateInfo.New();
-            pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
-            return pipelineTessellationStateCreateInfo;
-        }
-
+              
         public static VkGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo(VkPipelineLayout layout, VkRenderPass renderPass, VkPipelineCreateFlags flags = 0)
         {
             VkGraphicsPipelineCreateInfo pipelineCreateInfo = VkGraphicsPipelineCreateInfo.New();
@@ -116,15 +109,5 @@ namespace SharpGame
             return descriptorSetAllocateInfo;
         }
 
-        public static VkPushConstantRange PushConstantRange(VkShaderStageFlags stageFlags, uint size, uint offset)
-        {
-            VkPushConstantRange pushConstantRange = new VkPushConstantRange
-            {
-                stageFlags = stageFlags,
-                offset = offset,
-                size = size
-            };
-            return pushConstantRange;
-        }
     }
 }

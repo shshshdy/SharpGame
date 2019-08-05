@@ -44,31 +44,18 @@ namespace SharpGame.Samples
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
-
+ 
             var resourceLayout = new ResourceLayout(0)
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
             };
-            resourceLayout.Build();
 
             var resourceLayoutTex = new ResourceLayout(1)
             {
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
-            var shader = new Shader
-            {
-                new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-                {
-                    CullMode = CullMode.Back,
-                    FrontFace = FrontFace.CounterClockwise,
-                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                    PushConstant = new[]
-                    {
-                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
-                    }
-                }
-            };
+            var shader = Resources.Load<Shader>("Shaders/Textured.shader");
 
             var mat = new Material
             {
@@ -87,17 +74,13 @@ namespace SharpGame.Samples
 
             ubCameraVS = DeviceBuffer.CreateUniformBuffer<CameraVS>();
             resourceSet = new ResourceSet(resourceLayout, ubCameraVS);
-
-            worldTransform = Matrix4x4.Identity; ;
-           
+            worldTransform = Matrix4x4.Identity;
 
             frameGraph.AddRenderPass(new GraphicsPass
             {
                 OnDraw = CustomDraw
             });
 
-           
-            //Renderer.MainView.Attach(null, null, frameGraph);
             Renderer.Instance.MainView.Attach(camera, scene, frameGraph);
 
         }

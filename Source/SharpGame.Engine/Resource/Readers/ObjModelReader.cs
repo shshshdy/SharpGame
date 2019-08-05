@@ -114,21 +114,7 @@ namespace SharpGame
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
-
-            var shader = new Shader
-            {
-                new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-                {
-                    CullMode = CullMode.Back,
-                    FrontFace = FrontFace.CounterClockwise,
-                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                    PushConstant = new[]
-                    {
-                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
-                    }
-
-                }
-            };
+            var shader = Resources.Instance.Load<Shader>("Shaders/Textured.shader");
 
             if (!string.IsNullOrEmpty(objFile.MaterialLibName))
             {

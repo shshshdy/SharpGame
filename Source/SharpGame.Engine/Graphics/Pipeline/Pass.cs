@@ -184,6 +184,14 @@ namespace SharpGame
                 sm?.Build();
             }
 
+            if(ResourceLayout != null)
+            {
+                foreach (var layout in ResourceLayout)
+                {
+                    layout.Build();
+                }
+            }
+
         }
 
         public unsafe void SetBlendMode(BlendMode blendMode)
@@ -257,7 +265,14 @@ namespace SharpGame
             VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
             for (int i = 0; i < ResourceLayout.Length; i++)
             {
-                pSetLayouts[i] = ResourceLayout[i].DescriptorSetLayout;
+                if(ResourceLayout[i] != null)
+                {
+                    pSetLayouts[i] = ResourceLayout[i].DescriptorSetLayout;
+                }
+                else
+                {
+                    pSetLayouts[i] = pSetLayouts[0];
+                }
             }
 
             var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);

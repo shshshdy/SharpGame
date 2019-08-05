@@ -20,7 +20,7 @@ namespace SharpGame
         DeviceBuffer uniformBufferVS = new DeviceBuffer();
         Texture texture;
         Shader uiShader;
-        Pass pipeline;
+        Pass pass;
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
 
@@ -81,7 +81,7 @@ namespace SharpGame
             vertexBuffer[1]?.Dispose();
             indexBuffer[1]?.Dispose();
             uniformBufferVS.Dispose();
-            pipeline.Dispose();
+            uiShader.Dispose();
         }
 
         unsafe void CreateGraphicsResources()
@@ -94,6 +94,9 @@ namespace SharpGame
                 new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
             };
 
+            uiShader = Resources.Instance.Load<Shader>("Shaders/ImGui.shader");
+            
+            /*
             uiShader = new Shader("UI")
             {
                 new Pass("shaders/ImGui.vert.spv", "shaders/ImGui.frag.spv")
@@ -102,8 +105,7 @@ namespace SharpGame
                     DepthTestEnable = false,
                     DepthWriteEnable = false,
                     BlendMode = BlendMode.Alpha,
-                    DynamicStates = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor),
-
+                  
                     VertexLayout = VertexPos2dTexColor.Layout,
 
                     ResourceLayout = new[]
@@ -111,10 +113,11 @@ namespace SharpGame
                         resourceLayout
                     }
                 }
-            };
+            };*/
 
-            pipeline = uiShader.Main;
-          
+            pass = uiShader.Main;
+            pass.VertexLayout = VertexPos2dTexColor.Layout;
+
             var graphics = Graphics.Instance;
 
             AttachmentDescription[] attachments =
@@ -288,10 +291,10 @@ namespace SharpGame
                 indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
             }
             
-            var pipelines_solid = pipeline.GetGraphicsPipeline(graphics.RenderPass, null);
+            var pipeline = pass.GetGraphicsPipeline(graphics.RenderPass, null);
 
-            cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pipeline, 0, resourceSet);
-            cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelines_solid);
+            cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pass, 0, resourceSet);
+            cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.BindVertexBuffer(0, vb);
             cmdBuffer.BindIndexBuffer(ib, 0, IndexType.Uint16);
 
@@ -315,11 +318,9 @@ namespace SharpGame
                         {
                             if (pcmd.TextureId == fontAtlasID)
                             {
-                                //cmdBuffer.BindGraphicsResourceSet(pipeline, 1, resourceSet);
                             }
                             else
                             {
-                                //cmdBuffer.BindGraphicsResourceSet(pipeline, 1, GetImageResourceSet(pcmd.TextureId));
                             }
                         }
 

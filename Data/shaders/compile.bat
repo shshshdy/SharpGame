@@ -1,2 +1,0 @@
-glslcompiler.exe ./
-pause

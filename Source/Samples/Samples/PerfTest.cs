@@ -23,27 +23,13 @@ namespace SharpGame.Samples
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
             };
-            resourceLayout.Build();
 
             var resourceLayoutTex = new ResourceLayout(1)
             {
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
-            var shader = new Shader
-            {
-                new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-                {
-                    CullMode = CullMode.Back,
-                    FrontFace = FrontFace.CounterClockwise,
-                    ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                    PushConstant = new[]
-                    {
-                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
-                    }
-
-                }
-            };
+            var shader = Resources.Load<Shader>("Shaders/Textured.shader");
 
             {
                 //var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");

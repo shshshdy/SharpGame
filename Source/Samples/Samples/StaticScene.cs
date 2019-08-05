@@ -20,30 +20,18 @@ namespace SharpGame.Samples
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
 
-            var resourceLayout = new ResourceLayout(0)
-            {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-            };
+//             var resourceLayout = new ResourceLayout(0)
+//             {
+//                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+//             };
 
             var resourceLayoutTex = new ResourceLayout(1)
             {
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
             };
 
+            var shader = Resources.Load<Shader>("Shaders/Textured.shader");
             {
-                var shader = new Shader
-                {
-                    new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-                    {
-                        CullMode = CullMode.Back,
-                        FrontFace = FrontFace.CounterClockwise,
-                        ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                        PushConstant = new[]
-                        {
-                            new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
-                        }
-                    }
-                };
 
                 var model = Resources.Load<Model>("Models/plane2.dae");
                 var node = scene.CreateChild("Plane");
@@ -62,22 +50,7 @@ namespace SharpGame.Samples
                 staticModel.SetMaterial(mat);
             }
 
-            {
-                var shader = new Shader
-                {
-                    new Pass("shaders/Textured.vert.spv", "shaders/Textured.frag.spv")
-                    {
-
-                        CullMode = CullMode.Back,
-                        FrontFace = FrontFace.Clockwise,
-                        ResourceLayout = new[] { resourceLayout, resourceLayoutTex },
-                        PushConstant = new[]
-                        {
-                            new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
-                        }
-                    }
-                };
-
+            {               
                 var colorMap = Resources.Load<Texture>("textures/Mushroom.png");
                 var mat = new Material
                 {

@@ -13,37 +13,63 @@ namespace SharpGame
 
         protected override bool OnLoad(Shader resource, File stream)
         {
-            string text = stream.ReadAllText();
-            AstParser ast = new AstParser();
-            if (ast.Parse(text))
+            var filePath = FileUtil.StandardlizeFile(stream.Name);
+            filePath = FileUtil.GetPath(filePath);
+            FileSystem.AddResourceDir(filePath);
+
+            try
             {
-                var node = ast.Root[0];
-                return LoadShader(resource, node);
+                string text = stream.ReadAllText();
+                AstParser ast = new AstParser();
+                if (ast.Parse(text))
+                {
+                    var node = ast.Root[0];
+                    return LoadShader(resource, node);
+                }
             }
+            catch(Exception e)
+            {
+                Log.Error(e.Message);
+            }
+            finally
+            {
+                FileSystem.RemoveResourceDir(filePath);
+            }
+
 
             return false;
         }
 
         bool LoadShader(Shader shader, AstNode node)
         {
+            if (!string.IsNullOrEmpty(node.value))
+            {
+                shader.Name = node.value;
+            }
+
             int passCount = node.GetChild("Pass", out var children);
             foreach (var passNode in children)
             {
                 var pass = LoadPass(passNode);
-                if(pass != null)
-                    shader.Pass.Add(pass);
+                if (pass != null)
+                {
+                    shader.Add(pass);
+                }
             }
-
+            shader.Build();
             return true;
         }
 
         Pass LoadPass(AstNode node)
         {
             Pass pass = new Pass();
-
-            if(!string.IsNullOrEmpty(node.value))
+            if (!string.IsNullOrEmpty(node.value))
             {
                 pass.Name = node.value;
+            }
+            else
+            {
+                pass.Name = "";
             }
 
             foreach (var kvp in node.Children)
@@ -62,6 +88,18 @@ namespace SharpGame
                         pass.FrontFace = (FrontFace)Enum.Parse(typeof(FrontFace), kvp.Value[0].value);
                         break;
 
+                    case "DepthTestEnable":
+                        pass.DepthTestEnable = bool.Parse(kvp.Value[0].value);
+                        break;
+
+                    case "DepthWriteEnable":
+                        pass.DepthWriteEnable = bool.Parse(kvp.Value[0].value);
+                        break;
+
+                    case "BlendMode":
+                        pass.BlendMode = (BlendMode)Enum.Parse(typeof(BlendMode), kvp.Value[0].value);
+                        break;
+
                     case "VertexShader":
                         pass.VertexShader = new ShaderModule(ShaderStage.Vertex, kvp.Value[0].value);
                         break;
@@ -71,10 +109,11 @@ namespace SharpGame
                         break;
 
                     case "ResourceLayout":
-                        pass.PixelShader = new ShaderModule(ShaderStage.Fragment, kvp.Value[0].value);
+                        pass.ResourceLayout = ReadResourceLayout(kvp.Value);
                         break;
+
                     case "PushConstant":
-                        pass.PixelShader = new ShaderModule(ShaderStage.Fragment, kvp.Value[0].value);
+                        pass.PushConstant = ReadPushConstant(kvp.Value);
                         break;
 
                     case "@VertexShader":
@@ -89,9 +128,89 @@ namespace SharpGame
             return pass;
         }
 
+        ResourceLayout[] ReadResourceLayout(List<AstNode> layout)
+        {
+            List<ResourceLayout> layouts = new List<ResourceLayout>();
+            foreach(var node in layout)
+            {
+                layouts.Add(ReadResourceLayout(node));
+            }
+            return layouts.ToArray(); ;
+        }
+
+        ResourceLayout ReadResourceLayout(AstNode node)
+        {
+            ResourceLayout layout = new ResourceLayout();
+            node.GetChild("ResourceLayoutBinding", out var resourceLayoutBinding);
+            foreach(var c in resourceLayoutBinding)
+            {
+                ResourceLayoutBinding binding = new ResourceLayoutBinding();
+                foreach (var kvp in c.Children)
+                {
+                    switch (kvp.Key)
+                    {
+                        case "binding":
+                            binding.binding = uint.Parse(kvp.Value[0].value);
+                            break;
+                        case "descriptorType":
+                            binding.descriptorType = (DescriptorType)Enum.Parse(typeof(DescriptorType), kvp.Value[0].value);
+                            break;
+                        case "stageFlags":
+                            binding.stageFlags = (ShaderStage)Enum.Parse(typeof(ShaderStage), kvp.Value[0].value);
+                            break;
+                        case "descriptorCount":
+                            binding.descriptorCount = uint.Parse(kvp.Value[0].value);
+                            break;
+                    }
+                }
+
+                layout.Add(binding);
+            }
+        
+
+            return layout;
+        }
+
+        PushConstantRange[] ReadPushConstant(List<AstNode> layout)
+        {
+            List<PushConstantRange> layouts = new List<PushConstantRange>();
+            foreach (var node in layout)
+            {
+                layouts.Add(ReadPushConstant(node));
+            }
+            return layouts.ToArray(); ;
+        }
+
+        PushConstantRange ReadPushConstant(AstNode node)
+        {
+            PushConstantRange layout = new PushConstantRange();
+            foreach (var kvp in node.Children)
+            {
+                switch (kvp.Key)
+                {
+                    case "stageFlags":
+                        layout.stageFlags = (ShaderStage)Enum.Parse(typeof(ShaderStage), kvp.Value[0].value);
+                        break;
+                    case "offset":
+                        layout.offset = int.Parse(kvp.Value[0].value);
+                        break;
+                    case "size":
+                        layout.size = int.Parse(kvp.Value[0].value);
+                        break;
+                }
+            }
+
+            return layout;
+        }
+
         IncludeResult IncludeHandler(string requestedSource, string requestingSource, CompileOptions.IncludeType type)
         {
-            return new IncludeResult(requestedSource, "");
+            using (var file = FileSystem.GetFile(requestedSource))
+            {
+                var content = file.ReadAllText();
+                return new IncludeResult(requestedSource, content);
+            }
+
         }
 
         ShaderModule LoadShaderModel(ShaderStage shaderStage, string code)
@@ -100,9 +219,33 @@ namespace SharpGame
             var o = new CompileOptions();
 
             o.Language = CompileOptions.InputLanguage.GLSL;
+            o.Target = CompileOptions.Environment.Vulkan;
             o.IncludeCallback = IncludeHandler;
 
-            var r = c.Preprocess(code, ShaderCompiler.Stage.Vertex, o, "main");
+            ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;
+            switch(shaderStage)
+            {
+                case ShaderStage.Vertex:
+                    stage = ShaderCompiler.Stage.Vertex;
+                    break;
+                case ShaderStage.Fragment:
+                    stage = ShaderCompiler.Stage.Fragment;
+                    break;
+                case ShaderStage.Geometry:
+                    stage = ShaderCompiler.Stage.Geometry;
+                    break;
+                case ShaderStage.Compute:
+                    stage = ShaderCompiler.Stage.Compute;
+                    break;
+                case ShaderStage.TessellationControl:
+                    stage = ShaderCompiler.Stage.TessControl;
+                    break;
+                case ShaderStage.TessellationEvaluation:
+                    stage = ShaderCompiler.Stage.TessEvaluation;
+                    break;
+            }
+
+            var r = c.Preprocess(code, stage, o, "main");
             if(r.NumberOfErrors > 0)
             {
                 Log.Error(r.ErrorMessage);
@@ -116,7 +259,7 @@ namespace SharpGame
             var bc = r.GetString();
             //todo: parse shader
 
-            var res = c.Compile(bc, ShaderCompiler.Stage.Vertex, o, "main");
+            var res = c.Compile(bc, stage, o, "main");
             if (res.NumberOfErrors > 0)
             {
                 Log.Error(res.ErrorMessage);
@@ -129,6 +272,8 @@ namespace SharpGame
 
             return new ShaderModule(shaderStage, res.GetBytes());
         }
+
+
     }
 
 }

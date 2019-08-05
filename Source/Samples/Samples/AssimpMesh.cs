@@ -73,8 +73,7 @@ namespace SharpGame.Samples
         {
             geometry.Dispose();
             colorMap.Dispose();
-            uniformBufferScene.Dispose();
-        
+            uniformBufferScene.Dispose();        
 
             base.Destroy();
         }
@@ -87,30 +86,7 @@ namespace SharpGame.Samples
                 new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
             };
 
-            shader = new Shader
-            {
-                new Pass("shaders/mesh.vert.spv", "shaders/mesh.frag.spv")
-                {
-                    CullMode = CullMode.Back,
-                    FrontFace = FrontFace.CounterClockwise,
-
-                    ResourceLayout = new[]
-                    {
-                        new ResourceLayout
-                        {
-                            new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-                        },
-
-                        resourceLayout
-                    },
-
-                    PushConstant = new[]
-                    {
-                        new PushConstantRange(ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>())
-                    }
-                }
-            };
-
+            shader = Resources.Load<Shader>("Shaders/Mesh.shader");
         }
 
         void LoadMesh()

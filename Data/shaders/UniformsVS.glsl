@@ -9,8 +9,10 @@ layout (binding = 0) uniform CameraVS
 	float FarClip;
 };
 
-layout(push_constant) uniform PushConsts
-{
-	mat4 model;
-};
+/*
+layout (constant_id = 0) const int MATRICES_COUNT = 1;
 
+layout (binding = 0) uniform ObjectVS
+{
+    mat4 Model[MATRICES_COUNT];
+};*/
