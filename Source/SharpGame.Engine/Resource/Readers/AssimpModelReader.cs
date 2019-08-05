@@ -45,16 +45,6 @@ namespace SharpGame
 
             BoundingBox boundingBox = new BoundingBox();
 
-            var resourceLayout = new ResourceLayout(0)
-            {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-            };
-
-            var resourceLayoutTex = new ResourceLayout(1)
-            {
-                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
-            };
-
             var shader = Resources.Instance.Load<Shader>("Shaders/Textured.shader");
             string path = FileUtil.GetPath(loadingFile);
 
@@ -165,12 +155,10 @@ namespace SharpGame
             {
                 Texture tex = Resources.Instance.Load<Texture>(path + aiMaterial.TextureDiffuse.FilePath);
                 material.SetTexture("DiffMap", tex.ResourceRef);
-                //test
-                //material.ResourceSet.Bind(0, tex).UpdateSets();
             }
             else
             {
-                //material.ResourceSet.Bind(0, Texture.White).UpdateSets();
+                material.SetTexture("DiffMap", Texture.White);
             }
             return material;
         }

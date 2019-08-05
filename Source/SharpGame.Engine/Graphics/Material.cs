@@ -114,12 +114,13 @@ namespace SharpGame
                 if (param.name == name)
                 {
                     param.texture = texRef;
+                    UpdateResourceSet(name, (Texture)texRef.resource);
                     break;
                 }
             }
 
             TextureParameters.Add(new TexureParameter { name = name, texture = texRef });
-
+            UpdateResourceSet(name, (Texture)texRef.resource);
         }
 
         public void SetTexture(StringID name, Texture tex)

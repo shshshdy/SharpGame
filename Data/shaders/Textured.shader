@@ -9,7 +9,7 @@ Shader "test"
 
 		ResourceLayout
 		{
-			ResourceLayoutBinding
+			ResourceLayoutBinding "CameraVS"
 			{
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
@@ -20,7 +20,7 @@ Shader "test"
 		{
 			Dynamic = true
 			
-			ResourceLayoutBinding "sampler_Color"
+			ResourceLayoutBinding "DiffMap"
 			{
 				DescriptorType = CombinedImageSampler
 				StageFlags = Fragment
@@ -66,14 +66,15 @@ Shader "test"
 		{
 			#version 450
 
-			layout (set = 1, binding = 0) uniform sampler2D sampler_Color;
+			layout (set = 1, binding = 0) uniform sampler2D DiffMap;
 
 			layout (location = 0) in vec2 in_TexCoord;
 
 			layout (location = 0) out vec4 out_Color;
 
 			void main() {
-			   vec4 color = texture(sampler_Color, in_TexCoord);
+			   
+				vec4 color = texture(DiffMap, in_TexCoord);
 			//out_Color = vec4(1,1,1,1);
 				out_Color = vec4(color.rgb, 1.0);
 			}

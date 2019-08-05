@@ -59,7 +59,8 @@ Shader "UI"
 			layout (location = 2) in vec2 inUV;
 			layout (location = 3) in vec4 inColor;
 
-			layout(push_constant) uniform PushConsts {
+			layout(push_constant) uniform PushConsts
+			{
 				mat4 model;
 			};
 

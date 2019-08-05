@@ -13,6 +13,11 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="..\..\Data\shaders\ImGUI.shader" Link="Shaders\ImGUI.shader" />
+    <None Include="..\..\Data\shaders\Mesh.shader" Link="Shaders\Mesh.shader" />
+    <None Include="..\..\Data\shaders\Textured.shader" Link="Shaders\Textured.shader" />
+    <None Include="..\..\Data\shaders\UniformsPS.glsl" Link="Shaders\UniformsPS.glsl" />
+    <None Include="..\..\Data\shaders\UniformsVS.glsl" Link="Shaders\UniformsVS.glsl" />
     <None Include="..\SharpGame.Sdl2\native\win-x64\SDL2.dll" Link="SDL2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -26,5 +31,8 @@
     <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />
     <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
     <ProjectReference Include="..\SharpGame.Engine\SharpGame.Engine.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Shaders\" />
   </ItemGroup>
 </Project>

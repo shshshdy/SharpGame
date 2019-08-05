@@ -32,7 +32,7 @@ namespace SharpGame.Samples
 
                 var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material(shader);
-                mat.SetTexture("sampler_Color", colorMap);
+                mat.SetTexture("DiffMap", colorMap);
 
                 staticModel.SetMaterial(mat);
             }
@@ -40,7 +40,7 @@ namespace SharpGame.Samples
             {               
                 var colorMap = Resources.Load<Texture>("textures/Mushroom.png");
                 var mat = new Material(shader);
-                mat.SetTexture("sampler_Color", colorMap);
+                mat.SetTexture("DiffMap", colorMap);
 
                 var model = Resources.Load<Model>("Models/Mushroom.mdl");
 

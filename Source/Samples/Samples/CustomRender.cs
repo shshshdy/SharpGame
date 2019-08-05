@@ -58,7 +58,7 @@ namespace SharpGame.Samples
             var shader = Resources.Load<Shader>("Shaders/Textured.shader");
 
             var mat = new Material(shader);
-            mat.SetTexture("sampler_Color", Texture.White);
+            mat.SetTexture("DiffMap", Texture.White);
 
             cube = GeometricPrimitive.CreateCube(10, 10, 10);
             batch = new SourceBatch

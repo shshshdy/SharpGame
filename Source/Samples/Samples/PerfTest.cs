@@ -24,7 +24,7 @@ namespace SharpGame.Samples
             {
                 //var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material(shader);
-                mat.SetTexture("sampler_Color", Texture.White);
+                mat.SetTexture("DiffMap", Texture.White);
 
                 var model = Resources.Load<Model>("Models/sphere.obj");
 
