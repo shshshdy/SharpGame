@@ -45,14 +45,6 @@ namespace SharpGame
         }
     }
 
-    public enum LayoutSet : int
-    {
-        PerFrame = 0,
-        PerShader = 1,
-        PerMaterial = 2,
-        PerObject = 3,
-    }
-
     public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
         public int Set { get; set; }
@@ -86,14 +78,6 @@ namespace SharpGame
             Build();
         }
         
-        protected override void Destroy()
-        {
-            if(descriptorSetLayout != 0)
-            {
-                VulkanNative.vkDestroyDescriptorSetLayout(Graphics.device, descriptorSetLayout, IntPtr.Zero);
-            }
-        }
-
         public unsafe ResourceLayout Build()
         {
             if(!needRebuild)
@@ -150,6 +134,28 @@ namespace SharpGame
             Bindings.Add(binding);
             needRebuild = true;
         }
+
+        public ResourceLayoutBinding GetBinding(string name)
+        {
+            foreach(var binding in Bindings)
+            {
+                if(binding.name == name)
+                {
+                    return binding;
+                }
+            }
+
+            return null;
+        }
+
+        protected override void Destroy()
+        {
+            if (descriptorSetLayout != 0)
+            {
+                VulkanNative.vkDestroyDescriptorSetLayout(Graphics.device, descriptorSetLayout, IntPtr.Zero);
+            }
+        }
+
     }
 
     internal unsafe struct DescriptorResourceCounts

@@ -223,6 +223,16 @@ namespace SharpGame
             }
         }
 
+        public ResourceLayout GetResourceLayout(int index)
+        {
+            if(index >= ResourceLayout.Length)
+            {
+                return null;
+            }
+
+            return ResourceLayout[index];
+        }
+
         public unsafe uint GetShaderStageCreateInfos(VkPipelineShaderStageCreateInfo* shaderStageCreateInfo)
         {
             uint count = 0;
@@ -241,7 +251,7 @@ namespace SharpGame
             return count;
         }
 
-        public unsafe VkPipelineShaderStageCreateInfo GetComputeStageCreateInfo()
+        private unsafe VkPipelineShaderStageCreateInfo GetComputeStageCreateInfo()
         {
             if (ShaderModels[5] != null)
             {
@@ -325,8 +335,6 @@ namespace SharpGame
 
             return handle;
         }
-
-
 
         internal unsafe VkPipeline GetComputePipeline()
         {

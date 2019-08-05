@@ -95,26 +95,6 @@ namespace SharpGame
             };
 
             uiShader = Resources.Instance.Load<Shader>("Shaders/ImGui.shader");
-            
-            /*
-            uiShader = new Shader("UI")
-            {
-                new Pass("shaders/ImGui.vert.spv", "shaders/ImGui.frag.spv")
-                {
-                    CullMode = CullMode.None,
-                    DepthTestEnable = false,
-                    DepthWriteEnable = false,
-                    BlendMode = BlendMode.Alpha,
-                  
-                    VertexLayout = VertexPos2dTexColor.Layout,
-
-                    ResourceLayout = new[]
-                    {
-                        resourceLayout
-                    }
-                }
-            };*/
-
             pass = uiShader.Main;
             pass.VertexLayout = VertexPos2dTexColor.Layout;
 

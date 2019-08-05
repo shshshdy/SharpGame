@@ -11,14 +11,9 @@
 		}
 
 		public TokenType Type { get; }
-
 		public string Lexeme { get; }
-
 		public object Literal { get; }
-
 		public int Line { get; }
-
-		public override string ToString()
-			=> $"{Type} {Lexeme} {Literal}";
+		public override string ToString() => $"{Type} {Lexeme} {Literal}";
 	}
 }
