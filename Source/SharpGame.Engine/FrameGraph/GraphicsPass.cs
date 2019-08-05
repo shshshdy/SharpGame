@@ -108,7 +108,10 @@ namespace SharpGame
             cb.BindGraphicsResourceSet(pass, resourceSet.Set, resourceSet);
 
             foreach(var rs in batch.material.ResourceSet)
+            {
                 cb.BindGraphicsResourceSet(pass, rs.Set, rs);
+                //cb.PushDescriptorSet(pass, rs);
+            }
 
             batch.geometry.Draw(cb);
         }

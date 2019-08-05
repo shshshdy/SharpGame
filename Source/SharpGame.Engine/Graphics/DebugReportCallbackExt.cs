@@ -64,35 +64,13 @@ namespace Vulkan
             _callback = null;
          
         }
-
-        public static IntPtr GetProcAddr(VkInstance instance, string name)
-        {
-            int byteCount = UTF8String.GetMaxByteCount(name);
-            var dstPtr = stackalloc byte[byteCount];
-            UTF8String.ToPointer(name, dstPtr, byteCount);
-            var addr = VulkanNative.vkGetInstanceProcAddr(instance, dstPtr);
-            return addr;
-        }
-
-        public unsafe static TDelegate GetProc<TDelegate>(VkInstance instance, string name) where TDelegate : class
-        {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-
-            IntPtr ptr = GetProcAddr(instance, name);
-            TDelegate proc = ptr != IntPtr.Zero
-                ? Marshal.GetDelegateForFunctionPointer<TDelegate>(ptr)
-                : null;
-
-            return proc;
-        }
-
+        
         private delegate VkBool32 DebugReportCallback(
             DebugReportFlagsExt flags, DebugReportObjectTypeExt objectType, long @object,
             IntPtr location, int messageCode, byte* layerPrefix, byte* message, IntPtr userData);
 
         private delegate VkResult vkCreateDebugReportCallbackEXTDelegate(IntPtr instance, VkDebugReportCallbackCreateInfoEXT* createInfo, VkAllocationCallbacks* allocator, long* callback);
-        private static vkCreateDebugReportCallbackEXTDelegate vkCreateDebugReportCallbackEXT(VkInstance instance) => GetProc<vkCreateDebugReportCallbackEXTDelegate>(instance, nameof(vkCreateDebugReportCallbackEXT));
+        private static vkCreateDebugReportCallbackEXTDelegate vkCreateDebugReportCallbackEXT(VkInstance instance) => instance.GetProc<vkCreateDebugReportCallbackEXTDelegate>(nameof(vkCreateDebugReportCallbackEXT));
     }
 
     /// <summary>

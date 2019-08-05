@@ -295,10 +295,13 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void PushDescriptorSet(Pass pass, int set, ResourceSet resourceSet)
+        public unsafe void PushDescriptorSet(Pass pass, ResourceSet resourceSet)
         {
-            vkCmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pass.pipelineLayout, (uint)set,
-                (uint)resourceSet.writeDescriptorSets.Length, ref resourceSet.writeDescriptorSets[0]);
+            //vkCmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pass.pipelineLayout, (uint)resourceSet.Set,
+            //    (uint)resourceSet.writeDescriptorSets.Length, ref resourceSet.writeDescriptorSets[0]);
+
+            Device.CmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pass.pipelineLayout, (uint)resourceSet.Set,
+                (uint)resourceSet.writeDescriptorSets.Length, (VkWriteDescriptorSet*)Unsafe.AsPointer(ref resourceSet.writeDescriptorSets[0]));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

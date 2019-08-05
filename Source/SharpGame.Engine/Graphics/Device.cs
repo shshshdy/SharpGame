@@ -30,6 +30,7 @@ namespace SharpGame
         private static VkPipelineCache pipelineCache;
         private static DebugReportCallbackExt debugReportCallbackExt;
         private static UTF8String engineName = "SharpGame";
+        private static List<string> supportedExtensions = new List<string>();
         public static VkInstance CreateInstance(Settings settings)
         {
             bool enableValidation = settings.Validation;
@@ -152,9 +153,9 @@ namespace SharpGame
                     for (uint i = 0; i < extCount; i++)
                     {
                         var ext = extensions[i];
-                        //string strExt = CString.FromPointer(ext.extensionName);
+                        string strExt = UTF8String.FromPointer(ext.extensionName);
                         enabledExtensions.Add((IntPtr)ext.extensionName);
-                        //supportedExtensions.push_back(ext.extensionName);
+                        supportedExtensions.Add(strExt);
                         // TODO: fixed-length char arrays are not being parsed correctly.
                     }
                 }
@@ -162,6 +163,9 @@ namespace SharpGame
 
             VulkanUtil.CheckResult(CreateLogicalDevice(enabledFeatures, enabledExtensions));
             queue = GetDeviceQueue(Device.QFIndices.Graphics, 0);
+
+
+            vkCmdPushDescriptorSetKHR();
             return device;
         }
 
@@ -372,6 +376,15 @@ namespace SharpGame
             }
 
             return Format.Undefined;
+        }
+
+
+        public delegate VkResult vkCmdPushDescriptorSetKHRDelegate(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint set, uint descriptorWriteCount, VkWriteDescriptorSet* pDescriptorWrites);
+
+        public static vkCmdPushDescriptorSetKHRDelegate CmdPushDescriptorSetKHR;
+        private static void vkCmdPushDescriptorSetKHR()
+        {
+            CmdPushDescriptorSetKHR = VkInstance.GetProc<vkCmdPushDescriptorSetKHRDelegate>(nameof(vkCmdPushDescriptorSetKHR));
         }
 
         public static VkSemaphore CreateSemaphore(uint flags = 0)

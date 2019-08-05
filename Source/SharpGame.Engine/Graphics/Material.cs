@@ -56,7 +56,6 @@ namespace SharpGame
                 }
             }
 
-            //resourceSet = new ResourceSet(Shader.Main.ResourceLayout[1]);
             return Shader != null;
         }
 
