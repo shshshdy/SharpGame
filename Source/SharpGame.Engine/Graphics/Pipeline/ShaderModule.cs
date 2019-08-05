@@ -13,8 +13,8 @@ namespace SharpGame
     {
         None = 0,
         Vertex = 1,
-        TessellationControl = 2,
-        TessellationEvaluation = 4,
+        TessControl = 2,
+        TessEvaluation = 4,
         Geometry = 8,
         Fragment = 16,
         AllGraphics = 31,
@@ -56,7 +56,7 @@ namespace SharpGame
         public uint numStaticTextures;
     }
 
-    public class ShaderModule : Resource<ShaderModule>
+    public class ShaderModule : Object
     {
         [DataMember]
         public ShaderStage Stage { get; set; }
@@ -67,6 +67,8 @@ namespace SharpGame
 
         [DataMember]
         public ShaderReflection ShaderReflection { get; set; }
+
+        internal string FileName {get;set; }
 
         internal VkShaderModule shaderModule;
 
@@ -97,16 +99,7 @@ namespace SharpGame
             Build();
         }
 
-        protected override bool OnLoad(File stream)
-        {
-            Code = stream.ReadAllBytes();
-
-            Build();
-
-            return true;
-        }
-
-        protected override bool OnBuild()
+        public bool Build()
         {
             if (Code == null)
             {

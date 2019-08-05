@@ -237,10 +237,10 @@ namespace SharpGame
                 case ShaderStage.Compute:
                     stage = ShaderCompiler.Stage.Compute;
                     break;
-                case ShaderStage.TessellationControl:
+                case ShaderStage.TessControl:
                     stage = ShaderCompiler.Stage.TessControl;
                     break;
-                case ShaderStage.TessellationEvaluation:
+                case ShaderStage.TessEvaluation:
                     stage = ShaderCompiler.Stage.TessEvaluation;
                     break;
             }

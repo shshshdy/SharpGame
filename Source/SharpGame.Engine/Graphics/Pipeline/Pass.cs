@@ -153,12 +153,12 @@ namespace SharpGame
 
             if (!string.IsNullOrEmpty(hullShader))
             {
-                HullShader = new ShaderModule(ShaderStage.TessellationControl, hullShader);
+                HullShader = new ShaderModule(ShaderStage.TessControl, hullShader);
             }
 
             if (!string.IsNullOrEmpty(domainShader))
             {
-                DomainShader = new ShaderModule(ShaderStage.TessellationEvaluation, domainShader);
+                DomainShader = new ShaderModule(ShaderStage.TessEvaluation, domainShader);
             }
 
             if (!string.IsNullOrEmpty(computeShader))
