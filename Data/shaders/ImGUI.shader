@@ -13,18 +13,16 @@ Shader "UI"
 		{
 			ResourceLayoutBinding
 			{
-				binding	= 0
-				descriptorType = UniformBuffer
-				stageFlags = Vertex
-				descriptorCount = 1
+				Binding	= 0
+				DescriptorType = UniformBuffer
+				StageFlags = Vertex
 			}
 
 			ResourceLayoutBinding
 			{
-				binding = 1
-				descriptorType = CombinedImageSampler
-				stageFlags = Fragment
-				descriptorCount = 1
+				Binding = 1
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
 			}
 		}
 	

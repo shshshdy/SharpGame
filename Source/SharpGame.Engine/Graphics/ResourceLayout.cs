@@ -22,13 +22,18 @@ namespace SharpGame
         InputAttachment = 10
     }
 
-    public struct ResourceLayoutBinding
+    public class ResourceLayoutBinding
     {
+        public string name;
         public uint binding;
         public DescriptorType descriptorType;
-        public uint descriptorCount;
+        public uint descriptorCount = 1;
         public ShaderStage stageFlags;
         public VkSampler[] pImmutableSamplers;
+
+        public ResourceLayoutBinding()
+        {
+        }
 
         public ResourceLayoutBinding(uint binding, DescriptorType type, ShaderStage stageFlags, uint descriptorCount = 1)
         {
@@ -51,7 +56,7 @@ namespace SharpGame
     public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
         public int Set { get; set; }
-
+        public bool Dynamic { get; set; }
         public List<ResourceLayoutBinding> Bindings { get; set; }
 
         private VkDescriptorSetLayoutBinding[] bindings;

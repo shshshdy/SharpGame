@@ -19,25 +19,12 @@ namespace SharpGame.Samples
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
 
-            var resourceLayout = new ResourceLayout(0)
-            {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-            };
-
-            var resourceLayoutTex = new ResourceLayout(1)
-            {
-                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
-            };
-
             var shader = Resources.Load<Shader>("Shaders/Textured.shader");
 
             {
                 //var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
-                var mat = new Material
-                {
-                    Shader = shader,
-                    ResourceSet = new ResourceSet(resourceLayoutTex, Texture.White)
-                };
+                var mat = new Material(shader);
+                mat.SetTexture("sampler_Color", Texture.White);
 
                 var model = Resources.Load<Model>("Models/sphere.obj");
 

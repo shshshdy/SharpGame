@@ -20,16 +20,6 @@ namespace SharpGame.Samples
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
 
-//             var resourceLayout = new ResourceLayout(0)
-//             {
-//                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-//             };
-
-            var resourceLayoutTex = new ResourceLayout(1)
-            {
-                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment, 1)
-            };
-
             var shader = Resources.Load<Shader>("Shaders/Textured.shader");
             {
 
@@ -41,22 +31,16 @@ namespace SharpGame.Samples
                 ref var m = ref node.WorldTransform;
 
                 var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
-                var mat = new Material
-                {
-                    Shader = shader,
-                    ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
-                };
+                var mat = new Material(shader);
+                mat.SetTexture("sampler_Color", colorMap);
 
                 staticModel.SetMaterial(mat);
             }
 
             {               
                 var colorMap = Resources.Load<Texture>("textures/Mushroom.png");
-                var mat = new Material
-                {
-                    Shader = shader,
-                    ResourceSet = new ResourceSet(resourceLayoutTex, colorMap)
-                };
+                var mat = new Material(shader);
+                mat.SetTexture("sampler_Color", colorMap);
 
                 var model = Resources.Load<Model>("Models/Mushroom.mdl");
 

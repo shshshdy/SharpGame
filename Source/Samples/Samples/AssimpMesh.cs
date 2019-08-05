@@ -13,18 +13,18 @@ namespace SharpGame.Samples
         public Vector4 lightPos;
     }
 
-    [SampleDesc(sortOrder = 2)]
+    [SampleDesc(sortOrder = -2)]
     public unsafe class AssimpMesh : Sample
     {
         Texture2D colorMap = new Texture2D();
 
         Geometry geometry;
-        DeviceBuffer uniformBufferScene = new DeviceBuffer();
+
+        DeviceBuffer ubLight = new DeviceBuffer();
 
         UboVS uboVS = new UboVS() { lightPos = new Vector4(0.0f, 1.0f, -5.0f, 1.0f) };
 
         Shader shader;
-        ResourceLayout resourceLayout;
 
         Vector3 rotation = new Vector3(-0.5f, 112.75f + 180, 0.0f);
      
@@ -51,42 +51,21 @@ namespace SharpGame.Samples
             var drawable = node.AddComponent<Drawable>();
             
             LoadMesh();
-            CreatePipelines();
+
             CreateUniformBuffers();
           
             drawable.SetNumGeometries(1);
             drawable.SetGeometry(0, geometry);
 
-            var mat = new Material
-            {
-                Shader = shader,
-                ResourceSet = new ResourceSet(resourceLayout, uniformBufferScene, colorMap)
-            };
+            shader = Resources.Load<Shader>("Shaders/Mesh.shader");
+            var mat = new Material(shader);
+
+            mat.SetTexture("samplerColorMap", colorMap);
+            mat.SetBuffer("UBO", ubLight);
 
             drawable.SetMaterial(0, mat);
 
             Renderer.Instance.MainView.Attach(camera, scene);
-        }
-
-
-        protected override void Destroy()
-        {
-            geometry.Dispose();
-            colorMap.Dispose();
-            uniformBufferScene.Dispose();        
-
-            base.Destroy();
-        }
-
-        void CreatePipelines()
-        {
-            resourceLayout = new ResourceLayout
-            {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
-            };
-
-            shader = Resources.Load<Shader>("Shaders/Mesh.shader");
         }
 
         void LoadMesh()
@@ -194,7 +173,7 @@ namespace SharpGame.Samples
         // Prepare and initialize uniform buffer containing shader uniforms
         void CreateUniformBuffers()
         {
-            uniformBufferScene = DeviceBuffer.CreateUniformBuffer<UboVS>();
+            ubLight = DeviceBuffer.CreateUniformBuffer<UboVS>();
         }
 
         public override void Update()
@@ -203,9 +182,17 @@ namespace SharpGame.Samples
 
             rotation.Y += Time.Delta * 10;
 
-            uniformBufferScene.SetData(ref uboVS);
+            ubLight.SetData(ref uboVS);
         }
 
+        protected override void Destroy()
+        {
+            geometry.Dispose();
+            colorMap.Dispose();
+            ubLight.Dispose();
+
+            base.Destroy();
+        }
 
     }
 }

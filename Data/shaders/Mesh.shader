@@ -9,38 +9,43 @@ Shader "UI"
 		{
 			ResourceLayoutBinding
 			{
-				binding	= 0
-				descriptorType = UniformBuffer
-				stageFlags = Vertex
-				descriptorCount = 1
+				Binding	= 0
+				DescriptorType = UniformBuffer
+				StageFlags = Vertex
 			}
 			
 		}
 		
 		ResourceLayout
 		{
-			ResourceLayoutBinding
+			Dynamic = true
+			
+			ResourceLayoutBinding UBO
 			{
-				binding	= 0
-				descriptorType = UniformBuffer
-				stageFlags = Vertex
-				descriptorCount = 1
+				Binding	= 0
+				DescriptorType = UniformBuffer
+				StageFlags = Vertex
 			}
 
-			ResourceLayoutBinding
-			{
-				binding = 1
-				descriptorType = CombinedImageSampler
-				stageFlags = Fragment
-				descriptorCount = 1
-			}
 		}
 	
+		ResourceLayout
+		{
+			Dynamic = true
+			
+			ResourceLayoutBinding samplerColorMap
+			{
+				Binding = 0
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
+			}
+		}
+		
 		PushConstant
 		{
-			stageFlags = Vertex
-			offset = 0
-			size = 64		
+			StageFlags = Vertex
+			Offset = 0
+			Size = 64		
 		}
 		
 		@VertexShader
@@ -93,7 +98,6 @@ Shader "UI"
 				outViewVec = CameraPos.xyz-pos.xyz;		
 			}
 
-
 		}
 		
 		@PixelShader
@@ -103,7 +107,7 @@ Shader "UI"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
-			layout (set = 1, binding = 1) uniform sampler2D samplerColorMap;
+			layout (set = 2, binding = 0) uniform sampler2D samplerColorMap;
 
 			layout (location = 0) in vec3 inNormal;
 			layout (location = 1) in vec4 inColor;

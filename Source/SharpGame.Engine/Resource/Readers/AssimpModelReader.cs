@@ -166,11 +166,11 @@ namespace SharpGame
                 Texture tex = Resources.Instance.Load<Texture>(path + aiMaterial.TextureDiffuse.FilePath);
                 material.SetTexture("DiffMap", tex.ResourceRef);
                 //test
-                material.ResourceSet.Bind(0, tex).UpdateSets();
+                //material.ResourceSet.Bind(0, tex).UpdateSets();
             }
             else
             {
-                material.ResourceSet.Bind(0, Texture.White).UpdateSets();
+                //material.ResourceSet.Bind(0, Texture.White).UpdateSets();
             }
             return material;
         }

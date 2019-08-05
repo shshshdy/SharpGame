@@ -4,36 +4,36 @@ Shader "test"
 
 	Pass "main"
 	{
-		CullMode = Back
+		CullMode = None
 		FrontFace = CounterClockwise
 
 		ResourceLayout
 		{
 			ResourceLayoutBinding
 			{
-				binding	= 0
-				descriptorType = UniformBuffer
-				stageFlags = Vertex
-				descriptorCount = 1
+				Binding	= 0
+				DescriptorType = UniformBuffer
+				StageFlags = Vertex
 			}
 		}
 
 		ResourceLayout
 		{
-			ResourceLayoutBinding
+			Dynamic = true
+			
+			ResourceLayoutBinding "sampler_Color"
 			{
-				binding = 0
-				descriptorType = CombinedImageSampler
-				stageFlags = Fragment
-				descriptorCount = 1
+				Binding = 0
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
 			}
 		}
 
 		PushConstant
 		{
-			stageFlags = Vertex
-			offset = 0
-			size = 64		
+			StageFlags = Vertex
+			Offset = 0
+			Size = 64		
 		}
 		
 		@VertexShader

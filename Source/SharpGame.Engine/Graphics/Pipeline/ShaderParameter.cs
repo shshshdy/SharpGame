@@ -60,6 +60,15 @@ namespace SharpGame
         public static TexureParameter Null = new TexureParameter();
     }
 
+    public struct BufferParameter
+    {
+        public StringID name;
+        public DeviceBuffer buffer;
+
+        public bool IsNull => name.IsNullOrEmpty;
+
+    }
+
     public struct ShaderParameter
     {
         public StringID name;

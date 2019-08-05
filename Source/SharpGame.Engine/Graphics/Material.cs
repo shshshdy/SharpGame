@@ -13,9 +13,10 @@ namespace SharpGame
 
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
         public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
+        public FastList<BufferParameter> BufferParameters { get; set; } = new FastList<BufferParameter>();
 
-        private ResourceSet resourceSet;
-        public ResourceSet ResourceSet { get => resourceSet; set => resourceSet = value; }
+        private List<ResourceSet> resourceSet = new List<ResourceSet>();
+        public List<ResourceSet> ResourceSet { get => resourceSet; set => resourceSet = value; }
 
         public Shader Shader { get; set; }
 
@@ -43,7 +44,19 @@ namespace SharpGame
                 Shader = Resources.Instance.Load<Shader>(ShaderName);
             }
 
-            resourceSet = new ResourceSet(Shader.Main.ResourceLayout[1]);
+            if(Shader != null)
+            {
+                foreach(var layout in Shader.Main.ResourceLayout)
+                {
+                    if(layout.Dynamic)
+                    {
+                        resourceSet.Add(new ResourceSet(layout));
+                    }
+
+                }
+            }
+
+            //resourceSet = new ResourceSet(Shader.Main.ResourceLayout[1]);
             return Shader != null;
         }
 
@@ -116,12 +129,53 @@ namespace SharpGame
                 ref TexureParameter param = ref TextureParameters.At(i);
                 if (param.name == name)
                 {
-                    param.texture = tex.ResourceRef;
+                    if(tex.ResourceRef != param.texture)
+                    {
+                        param.texture = tex.ResourceRef;
+                        UpdateResourceSet(name, tex);
+                    }
+                    return;
                 }
             }
 
             TextureParameters.Add(new TexureParameter { name = name, texture = tex.ResourceRef });
+            UpdateResourceSet(name, tex);
+        }
 
+        public void SetBuffer(StringID name, DeviceBuffer buf)
+        {
+            for (int i = 0; i < BufferParameters.Count; i++)
+            {
+                ref BufferParameter param = ref BufferParameters.At(i);
+                if (param.name == name)
+                {
+                    if (buf != param.buffer)
+                    {
+                        param.buffer = buf;
+                        UpdateResourceSet(name, buf);
+                    }
+                    return;
+                }
+            }
+
+            BufferParameters.Add(new BufferParameter { name = name, buffer = buf });
+            UpdateResourceSet(name, buf);
+        }
+
+        void UpdateResourceSet(StringID name, IBindableResource tex)
+        {
+            foreach (var rs in resourceSet)
+            {
+                foreach (var binding in rs.resourceLayout.Bindings)
+                {
+                    if (binding.name == name)
+                    {
+                        rs.Bind(binding.binding, tex);
+                        rs.UpdateSets();
+                        return;
+                    }
+                }
+            }
         }
 
     }

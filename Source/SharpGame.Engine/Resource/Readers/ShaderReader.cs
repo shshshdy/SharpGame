@@ -133,7 +133,9 @@ namespace SharpGame
             List<ResourceLayout> layouts = new List<ResourceLayout>();
             foreach(var node in layout)
             {
-                layouts.Add(ReadResourceLayout(node));
+                var resLayout = ReadResourceLayout(node);
+                resLayout.Set = layouts.Count;
+                layouts.Add(resLayout);
             }
             return layouts.ToArray(); ;
         }
@@ -144,21 +146,35 @@ namespace SharpGame
             node.GetChild("ResourceLayoutBinding", out var resourceLayoutBinding);
             foreach(var c in resourceLayoutBinding)
             {
+                var n = node.GetChild("Dynamic");
+                if(n != null)
+                {
+                    layout.Dynamic = bool.Parse(n.value);
+                }
+
                 ResourceLayoutBinding binding = new ResourceLayoutBinding();
+
+                if (!string.IsNullOrEmpty(c.value))
+                {
+                    binding.name = c.value;
+                }
+
                 foreach (var kvp in c.Children)
                 {
+                   
+
                     switch (kvp.Key)
                     {
-                        case "binding":
+                        case "Binding":
                             binding.binding = uint.Parse(kvp.Value[0].value);
                             break;
-                        case "descriptorType":
+                        case "DescriptorType":
                             binding.descriptorType = (DescriptorType)Enum.Parse(typeof(DescriptorType), kvp.Value[0].value);
                             break;
-                        case "stageFlags":
+                        case "StageFlags":
                             binding.stageFlags = (ShaderStage)Enum.Parse(typeof(ShaderStage), kvp.Value[0].value);
                             break;
-                        case "descriptorCount":
+                        case "DescriptorCount":
                             binding.descriptorCount = uint.Parse(kvp.Value[0].value);
                             break;
                     }
@@ -188,13 +204,13 @@ namespace SharpGame
             {
                 switch (kvp.Key)
                 {
-                    case "stageFlags":
+                    case "StageFlags":
                         layout.stageFlags = (ShaderStage)Enum.Parse(typeof(ShaderStage), kvp.Value[0].value);
                         break;
-                    case "offset":
+                    case "Offset":
                         layout.offset = int.Parse(kvp.Value[0].value);
                         break;
-                    case "size":
+                    case "Size":
                         layout.size = int.Parse(kvp.Value[0].value);
                         break;
                 }

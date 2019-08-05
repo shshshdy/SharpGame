@@ -105,8 +105,10 @@ namespace SharpGame
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.PushConstants(pass, ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>(), batch.worldTransform);
-            cb.BindGraphicsResourceSet(pass, 0, resourceSet);
-            cb.BindGraphicsResourceSet(pass, 1, batch.material.ResourceSet);
+            cb.BindGraphicsResourceSet(pass, resourceSet.Set, resourceSet);
+
+            foreach(var rs in batch.material.ResourceSet)
+                cb.BindGraphicsResourceSet(pass, rs.Set, rs);
 
             batch.geometry.Draw(cb);
         }

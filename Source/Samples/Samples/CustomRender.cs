@@ -44,7 +44,7 @@ namespace SharpGame.Samples
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
- 
+
             var resourceLayout = new ResourceLayout(0)
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
@@ -57,11 +57,8 @@ namespace SharpGame.Samples
 
             var shader = Resources.Load<Shader>("Shaders/Textured.shader");
 
-            var mat = new Material
-            {
-                Shader = shader,
-                ResourceSet = new ResourceSet(resourceLayoutTex, Texture.White)
-            };
+            var mat = new Material(shader);
+            mat.SetTexture("sampler_Color", Texture.White);
 
             cube = GeometricPrimitive.CreateCube(10, 10, 10);
             batch = new SourceBatch
