@@ -39,5 +39,10 @@ namespace SharpGame
         {
             Console.WriteLine(msg, arg);
         }
+
+        public static void Error(int line, string message)
+        {
+            Log.Error("[line " + line + "]: " +  message);           
+        }
     }
 }
