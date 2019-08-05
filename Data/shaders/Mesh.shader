@@ -9,7 +9,6 @@ Shader "UI"
 		{
 			ResourceLayoutBinding
 			{
-				Binding	= 0
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
 			}
@@ -22,7 +21,6 @@ Shader "UI"
 			
 			ResourceLayoutBinding UBO
 			{
-				Binding	= 0
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
 			}
@@ -35,7 +33,6 @@ Shader "UI"
 			
 			ResourceLayoutBinding samplerColorMap
 			{
-				Binding = 0
 				DescriptorType = CombinedImageSampler
 				StageFlags = Fragment
 			}

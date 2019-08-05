@@ -13,14 +13,12 @@ Shader "UI"
 		{
 			ResourceLayoutBinding
 			{
-				Binding	= 0
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
 			}
 
 			ResourceLayoutBinding
 			{
-				Binding = 1
 				DescriptorType = CombinedImageSampler
 				StageFlags = Fragment
 			}
@@ -33,14 +31,14 @@ Shader "UI"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
-			layout (location = 0) in vec2 vsin_position;
-			layout (location = 1) in vec2 vsin_texCoord;
-			layout (location = 2) in vec4 vsin_color;
-
 			layout (binding = 0) uniform Projection
 			{
 				mat4 projection;
 			};
+			
+			layout (location = 0) in vec2 vsin_position;
+			layout (location = 1) in vec2 vsin_texCoord;
+			layout (location = 2) in vec4 vsin_color;
 
 			layout (location = 0) out vec4 vsout_color;
 			layout (location = 1) out vec2 vsout_texCoord;

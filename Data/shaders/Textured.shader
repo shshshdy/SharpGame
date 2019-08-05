@@ -11,7 +11,6 @@ Shader "test"
 		{
 			ResourceLayoutBinding
 			{
-				Binding	= 0
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
 			}
@@ -23,7 +22,6 @@ Shader "test"
 			
 			ResourceLayoutBinding "sampler_Color"
 			{
-				Binding = 0
 				DescriptorType = CombinedImageSampler
 				StageFlags = Fragment
 			}

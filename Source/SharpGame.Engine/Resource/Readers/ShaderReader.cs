@@ -152,7 +152,10 @@ namespace SharpGame
                     layout.Dynamic = bool.Parse(n.value);
                 }
 
-                ResourceLayoutBinding binding = new ResourceLayoutBinding();
+                ResourceLayoutBinding binding = new ResourceLayoutBinding
+                {
+                    binding = (uint)layout.Bindings.Count
+                };
 
                 if (!string.IsNullOrEmpty(c.value))
                 {
@@ -160,9 +163,7 @@ namespace SharpGame
                 }
 
                 foreach (var kvp in c.Children)
-                {
-                   
-
+                {                   
                     switch (kvp.Key)
                     {
                         case "Binding":

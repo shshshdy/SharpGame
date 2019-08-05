@@ -57,7 +57,7 @@ namespace SharpGame
     {
         public int Set { get; set; }
         public bool Dynamic { get; set; }
-        public List<ResourceLayoutBinding> Bindings { get; set; }
+        public List<ResourceLayoutBinding> Bindings { get; set; } = new List<ResourceLayoutBinding>();
 
         private VkDescriptorSetLayoutBinding[] bindings;
 
