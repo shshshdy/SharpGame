@@ -31,7 +31,7 @@ namespace SharpGame.Samples
                 staticModel.SetModel(model);
                 ref var m = ref node.WorldTransform;
 
-                var colorMap = Resources.Load<Texture2D>("textures/StoneDiffuse.png");
+                var colorMap = Resources.Load<TextureCube>("textures/cubemap_yokohama_bc3_unorm.ktx");
                 var mat = new Material(shader);
                 mat.SetTexture("DiffMap", colorMap);
 

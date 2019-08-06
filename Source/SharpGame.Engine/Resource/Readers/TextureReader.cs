@@ -46,7 +46,7 @@ namespace SharpGame
 
     }
 
-    public class KtxTextureCubeReader : ResourceReader<Texture2D>
+    public class KtxTextureCubeReader : ResourceReader<TextureCube>
     {
         public KtxTextureCubeReader() : base(".ktx")
         {
@@ -59,8 +59,8 @@ namespace SharpGame
                 return null;
             }
 
-            var resource = new Texture2D();
-            resource.LoadFromFile(name, Format.Bc3UnormBlock);
+            var resource = new TextureCube();
+            resource.LoadFromFile(name, Format.Bc3UnormBlock, true);
             return resource;
         }
 
