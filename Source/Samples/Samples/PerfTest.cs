@@ -19,11 +19,8 @@ namespace SharpGame.Samples
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
 
-            var shader = Resources.Load<Shader>("Shaders/Textured.shader");
-
             {
-                //var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
-                var mat = new Material(shader);
+                var mat = new Material("Shaders/Textured.shader");
                 mat.SetTexture("DiffMap", Texture2D.White);
 
                 var model = Resources.Load<Model>("Models/sphere.obj");
