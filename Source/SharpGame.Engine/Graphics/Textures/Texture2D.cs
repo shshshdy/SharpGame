@@ -14,7 +14,26 @@ namespace SharpGame
         {
         }
 
-        public static Texture Create(int w, int h, int bytesPerPixel, byte* tex2DDataPtr, bool dynamic = false)
+        public static Texture2D White;
+        public static Texture2D Gray;
+        public static Texture2D Black;
+        public static Texture2D Purple;
+
+        public unsafe static void Init()
+        {
+            Texture2D CreateTex(Color color)
+            {
+                byte* c = &color.R;
+                return Texture2D.Create(1, 1, 4, c);
+            }
+
+            White = CreateTex(Color.White);
+            Gray = CreateTex(Color.Gray);
+            Black = CreateTex(Color.Black);
+            Purple = CreateTex(Color.Purple);
+        }
+
+        public static Texture2D Create(int w, int h, int bytesPerPixel, byte* tex2DDataPtr, bool dynamic = false)
         {
             var texture = new Texture2D
             {

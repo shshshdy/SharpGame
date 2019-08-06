@@ -8,7 +8,7 @@ namespace SharpGame
 {
     using static Vulkan.VulkanNative;
 
-    public class Texture : Resource<Texture>, IBindableResource
+    public class Texture : Resource, IBindableResource
     {
         public int width;
         public int height;
@@ -27,25 +27,6 @@ namespace SharpGame
 
         public Texture()
         {
-        }
-
-        public static Texture White;
-        public static Texture Gray;
-        public static Texture Black;
-        public static Texture Purple;
-
-        public unsafe static void Init()
-        {
-            Texture CreateTex(Color color)
-            {
-                byte* c = &color.R;
-                return Texture2D.Create(1, 1, 4, c);
-            }
-
-            White = CreateTex(Color.White);
-            Gray = CreateTex(Color.Gray);
-            Black = CreateTex(Color.Black);
-            Purple = CreateTex(Color.Purple);
         }
 
         internal void UpdateDescriptor()

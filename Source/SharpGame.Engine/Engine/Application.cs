@@ -76,6 +76,8 @@ namespace SharpGame
 
         protected virtual void Setup()
         {
+            Resource.RegisterAllResType(typeof(Application));
+
             timer = CreateSubsystem<Timer>();
             fileSystem = CreateSubsystem<FileSystem>(workSpace);
             cache = CreateSubsystem<Resources>();
@@ -87,7 +89,7 @@ namespace SharpGame
             cache.RegisterAssertReader(new AssimpModelReader());
             
             cache.RegisterAssertReader(new SharpTextureReader());
-            cache.RegisterAssertReader(new KtxTextureReader());
+            cache.RegisterAssertReader(new KtxTexture2DReader());
 
             cache.RegisterAssertReader(new AnimationReader());
 

@@ -13,7 +13,7 @@ namespace SharpGame.Samples
 
             var cameraNode = scene.CreateChild("Camera");
             cameraNode.Position = new Vector3(0, 1000, -1000);
-            //cameraNode.LookAt(Vector3.Zero);
+            //cameraNode.LookAt(Vector3.Zero, TransformSpace.WORLD);
             cameraNode.Rotation = Quaternion.FromEuler(MathUtil.DegreesToRadians(50), 0, 0);
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
@@ -24,7 +24,7 @@ namespace SharpGame.Samples
             {
                 //var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material(shader);
-                mat.SetTexture("DiffMap", Texture.White);
+                mat.SetTexture("DiffMap", Texture2D.White);
 
                 var model = Resources.Load<Model>("Models/sphere.obj");
 
@@ -35,7 +35,7 @@ namespace SharpGame.Samples
                         for(int k = 0; k < 5; k++)
                         {
                             var node = scene.CreateChild("Model");
-                            node.Position = new Vector3(i * 40-20*40, 50 * k, j * 40 - 20 * 40);
+                            node.Position = new Vector3(i * 40 - 20 * 40, 50 * k, j * 40 - 20 * 40);
                             //node.Rotation = Quaternion.FromEuler(0, MathUtil.DegreesToRadians(MathUtil.Random(0, 90)), 0);
                             var staticModel = node.AddComponent<StaticModel>();
                             staticModel.SetModel(model);

@@ -68,7 +68,6 @@ namespace SharpGame.Samples
             if (allSamples.Count > 0)
             {
                 SetSample(allSamples[0].Item4);
-
             }
         }
 

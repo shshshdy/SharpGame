@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Font : Resource
+    public class TextureCube : Texture
     {
     }
 }

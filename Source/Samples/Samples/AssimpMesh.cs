@@ -13,7 +13,7 @@ namespace SharpGame.Samples
         public Vector4 lightPos;
     }
 
-    [SampleDesc(sortOrder = -2)]
+    [SampleDesc(sortOrder = 2)]
     public unsafe class AssimpMesh : Sample
     {
         Texture2D colorMap = new Texture2D();
@@ -23,9 +23,7 @@ namespace SharpGame.Samples
         DeviceBuffer ubLight = new DeviceBuffer();
 
         UboVS uboVS = new UboVS() { lightPos = new Vector4(0.0f, 1.0f, -5.0f, 1.0f) };
-
-        Shader shader;
-
+        
         Vector3 rotation = new Vector3(-0.5f, 112.75f + 180, 0.0f);
      
         public AssimpMesh()
@@ -52,15 +50,14 @@ namespace SharpGame.Samples
             
             LoadMesh();
 
-            CreateUniformBuffers();
-          
             drawable.SetNumGeometries(1);
             drawable.SetGeometry(0, geometry);
 
-            shader = Resources.Load<Shader>("Shaders/Mesh.shader");
-            var mat = new Material(shader);
+            var mat = new Material("Shaders/Mesh.shader");
 
             mat.SetTexture("samplerColorMap", colorMap);
+
+            ubLight = DeviceBuffer.CreateUniformBuffer<UboVS>();
             mat.SetBuffer("UBO", ubLight);
 
             drawable.SetMaterial(0, mat);
@@ -168,12 +165,6 @@ namespace SharpGame.Samples
             geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)ib.Count);
             vertexBuffer.Dispose();
             indexBuffer.Dispose();
-        }
-
-        // Prepare and initialize uniform buffer containing shader uniforms
-        void CreateUniformBuffers()
-        {
-            ubLight = DeviceBuffer.CreateUniformBuffer<UboVS>();
         }
 
         public override void Update()

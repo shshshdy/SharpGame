@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class PlainText : Resource<PlainText>
+    public class PlainText : Resource
     {
         public string Text { get; set; }
     }

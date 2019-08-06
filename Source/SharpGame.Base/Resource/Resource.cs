@@ -8,20 +8,8 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    public class Resource<T> : Resource
-    {
-        [IgnoreDataMember]
-        public override Type ResourceType => typeof(T);
-        static Resource()
-        {
-            nameToType[typeof(T).Name] = typeof(T);
-        }
-    }
-
     public abstract class Resource : Object
     {
-        public static Dictionary<string, Type> nameToType = new Dictionary<string, Type>();
-
         [DataMember]
         public Guid Guid { get; set; }
 
@@ -35,7 +23,7 @@ namespace SharpGame
         public bool Modified { get; set; }
 
         [IgnoreDataMember]
-        public abstract Type ResourceType { get; }
+        public Type ResourceType => GetType();
         [IgnoreDataMember]
         public ResourceRef ResourceRef => new ResourceRef(ResourceType, Guid, this);
 
@@ -43,11 +31,38 @@ namespace SharpGame
 
         protected bool builded_ = false;
 
-#pragma warning disable CS1998 // 异步方法缺少 "await" 运算符，将以同步方式运行
-        public virtual async Task<bool> LoadAsync(File stream)
-#pragma warning restore CS1998 // 异步方法缺少 "await" 运算符，将以同步方式运行
+        static Dictionary<string, Type> nameToType = new Dictionary<string, Type>();
+        public static Type GetType(string name)
         {
-            return false;
+            if(nameToType.TryGetValue(name, out var type))
+            {
+                return type;
+            }
+
+            return null;
+        }
+
+        public static void RegisterResType(Type type)
+        {
+            nameToType[type.Name] = type;
+        }
+
+        public static void RegisterAllResType(Type type)
+        {
+            var types = System.Reflection.Assembly.GetAssembly(type).GetTypes();
+
+            foreach (var t in types)
+            {
+                if (t.IsSubclassOf(typeof(Resource)))
+                {
+                    RegisterResType(t);
+                }
+            }
+        }
+
+        public virtual Task<bool> LoadAsync(File stream)
+        {
+            return Task.FromResult(Load(stream));
         }
 
         public virtual bool Load(File stream)

@@ -158,7 +158,7 @@ namespace SharpGame
             }
             else
             {
-                material.SetTexture("DiffMap", Texture.White);
+                material.SetTexture("DiffMap", Texture2D.White);
             }
             return material;
         }

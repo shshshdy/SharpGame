@@ -10,7 +10,7 @@ using Vulkan;
 namespace SharpGame
 {
     [DataContract]
-    public class Model : Resource<Model>
+    public class Model : Resource
     {
         /// Vertex buffers.
         private DeviceBuffer[] vertexBuffers;

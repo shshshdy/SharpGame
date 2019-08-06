@@ -5,12 +5,11 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class SharpTextureReader : ResourceReader<Texture>
+    public class SharpTextureReader : ResourceReader<Texture2D>
     {
         public SharpTextureReader() : base(".tga|.png|.jpg|.gif|.bmp")
         {
         }
-
 
         public override Resource Load(string name)
         {
@@ -27,15 +26,35 @@ namespace SharpGame
 
     }
 
-    public class KtxTextureReader : ResourceReader<Texture>
+    public class KtxTexture2DReader : ResourceReader<Texture2D>
     {
-        public KtxTextureReader() : base(".ktx")
+        public KtxTexture2DReader() : base(".ktx")
         {
         }
 
         public override Resource Load(string name)
         {
             if(!MatchExtension(name))
+            {
+                return null;
+            }
+
+            var resource = new Texture2D();
+            resource.LoadFromFile(name, Format.Bc3UnormBlock);
+            return resource;
+        }
+
+    }
+
+    public class KtxTextureCubeReader : ResourceReader<Texture2D>
+    {
+        public KtxTextureCubeReader() : base(".ktx")
+        {
+        }
+
+        public override Resource Load(string name)
+        {
+            if (!MatchExtension(name))
             {
                 return null;
             }

@@ -9,7 +9,7 @@ namespace SharpGame
     public class ResourceRef
     {
         [DataMember]
-        public string Type { get => type.Name; set => type = Resource.nameToType[value]; }
+        public string Type { get => type.Name; set => type = Resource.GetType(value); }
         [DataMember]
         public Guid FileID;
 
@@ -22,22 +22,29 @@ namespace SharpGame
         {
         }
 
-        public ResourceRef(string type, Guid guid, Resource resource = null)
+        public ResourceRef Create<T>(string file)
         {
-            this.Type = type;
-            this.FileID = guid;
+            return new ResourceRef(typeof(T), Resources.Instance.GetGuid(file), null);
+        }
+
+//         public ResourceRef(string type, Guid guid, Resource resource = null)
+//         {
+//             this.Type = type;
+//             this.FileID = guid;
+//             this.resource = resource;
+//         }
+
+        public ResourceRef(Type type, Guid guid, Resource resource = null)            
+        {
+            Type = type.Name;
+            FileID = guid;
             this.resource = resource;
         }
 
-        public ResourceRef(Type type, Guid guid, Resource resource = null)
-            : this(type.Name, guid, resource)
-        {
-        }
-
-        public ResourceRef(string type, string file)
-            : this(type, Resources.Instance.GetGuid(file), null)
-        {
-        }
+//         public ResourceRef(string type, string file)
+//             : this(type, Resources.Instance.GetGuid(file), null)
+//         {
+//         }
     }
 
     [DataContract]

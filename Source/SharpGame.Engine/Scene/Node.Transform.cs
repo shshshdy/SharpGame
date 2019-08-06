@@ -109,6 +109,10 @@ namespace SharpGame
             }
         }
         protected Quaternion worldRotation_;
+        public void SetWorldRotation(Quaternion rotation)
+        {
+            Rotation = ((parent_ == scene_ || !parent_) ? rotation : Quaternion.Invert(parent_.WorldRotation) * rotation);
+        }
 
         [IgnoreDataMember]
         public unsafe ref Matrix WorldTransform
@@ -170,12 +174,12 @@ namespace SharpGame
         {
             Position = ((parent_ == scene_ || parent_ == null) ? position : parent_.WorldToLocal(position));
         }
-
+/*
         void SetWorldRotation(Quaternion rotation)
-        {/*
+        {
             Rotation = ((parent_ == scene_ || parent_ == null) ? rotation : 
-                    parent_.WorldRotation.Inverse() * rotation);*/
-        }
+                    parent_.WorldRotation.Inverse() * rotation);
+        }*/
 
         void SetWorldDirection(Vector3 direction)
         {/*
@@ -349,12 +353,13 @@ namespace SharpGame
             if(lookDir.Equals(Vector3.Zero))
                 return false;
 
-            Quaternion newRotation = Quaternion.LookAtLH(WorldPosition, worldSpaceTarget, up);
+            //Quaternion newRotation = Quaternion.LookAtLH(WorldPosition, worldSpaceTarget, up);
+            Quaternion newRotation = Quaternion.RotationLookAtLH(lookDir, up);
             // Do nothing if setting look rotation failed
             //if (!newRotation.FromLookRotation(lookDir, up))
             //    return false;
 
-            WorldRotation = newRotation;
+            SetWorldRotation(newRotation);
             return true;
         }
 

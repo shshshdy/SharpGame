@@ -7,7 +7,7 @@ using Vulkan;
 namespace SharpGame
 {
 
-    public class Material : Resource<Material>
+    public class Material : Resource
     {
         public ResourceRef ShaderName { get; set; }
 
@@ -26,7 +26,7 @@ namespace SharpGame
 
         public Material(string shader)
         {
-            ShaderName = new ResourceRef("Shader", shader);
+            ShaderName = ResourceRef.Create<Shader>(shader);
 
             OnBuild();
         }

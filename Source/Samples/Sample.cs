@@ -18,13 +18,13 @@ namespace SharpGame.Samples
 
         protected Scene scene;
         protected Camera camera;
-        private Vector2 mousePos = Vector2.Zero;
-        private float yaw;
-        private float pitch;
-        private float rotSpeed = 0.5f;
-        private float wheelSpeed = 150.0f;
-        private float moveSpeed = 15.0f;
-        private Vector3 offset;
+        protected Vector2 mousePos = Vector2.Zero;
+        protected float yaw;
+        protected float pitch;
+        protected float rotSpeed = 0.5f;
+        protected float wheelSpeed = 150.0f;
+        protected float moveSpeed = 15.0f;
+        protected Vector3 offset;
 
         public FileSystem FileSystem => FileSystem.Instance;
         public Resources Resources => Resources.Instance;
@@ -100,14 +100,27 @@ namespace SharpGame.Samples
                 offset.Y = delta.Y;
             }
 
-            camera.Node.Translate(offset * (float)(Time.Delta * moveSpeed) + new Vector3(0, 0, input.WheelDelta * (float)(Time.Delta * wheelSpeed)), TransformSpace.LOCAL);
+            camera.Node.Translate(offset * (Time.Delta * moveSpeed) + new Vector3(0, 0, input.WheelDelta * (Time.Delta * wheelSpeed)), TransformSpace.LOCAL);
 
             mousePos = input.MousePosition;
             
         }
 
+        bool hudOpen;
         public virtual void OnGUI()
         {
+            const float DISTANCE = 10.0f;
+            var io = ImGui.GetIO();
+            Vector2 window_pos = new Vector2(DISTANCE, DISTANCE);
+            Vector2 window_pos_pivot = new Vector2(0.0f, 0.0f);
+            ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+            ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+            if (ImGui.Begin("Camera", ref hudOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            {
+                ImGui.Value("yaw", MathUtil.RadiansToDegrees(yaw));
+                ImGui.Value("pitch", MathUtil.RadiansToDegrees(pitch));
+                //ImGui.Value("Msec", Msec);
+            }
         }
 
         protected override void Destroy()

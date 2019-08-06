@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Prefab : Resource<Prefab>
+    public class Prefab : Resource
     {
         public Node Node { get; set; }
     }
