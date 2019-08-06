@@ -44,19 +44,22 @@ namespace SharpGame
                 Shader = Resources.Instance.Load<Shader>(ShaderName);
             }
 
-            if(Shader != null)
+            if(Shader == null)
             {
-                foreach(var layout in Shader.Main.ResourceLayout)
-                {
-                    if(layout.Dynamic)
-                    {
-                        resourceSet.Add(new ResourceSet(layout));
-                    }
-
-                }
+                return false;
             }
 
-            return Shader != null;
+            foreach (var layout in Shader.Main.ResourceLayout)
+            {
+                if (layout.Dynamic)
+                {
+                    resourceSet.Add(new ResourceSet(layout));
+                }
+
+            }
+
+
+            return true;
         }
 
         public ref ShaderParameter GetShaderParameter(StringID name)

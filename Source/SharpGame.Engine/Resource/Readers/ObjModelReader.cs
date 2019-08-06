@@ -134,7 +134,7 @@ namespace SharpGame
             
             if (!string.IsNullOrEmpty(materialDef.DiffuseTexture))
             {
-                Texture tex = Resources.Instance.Load<Texture>(path + materialDef.DiffuseTexture);
+                Texture tex = Resources.Instance.Load<Texture2D>(path + materialDef.DiffuseTexture);
                 material.SetTexture("DiffMap", tex.ResourceRef);
                 
             }
@@ -142,6 +142,7 @@ namespace SharpGame
             {
                 material.SetTexture("DiffMap", Texture2D.White);
             }
+
             return material;
         }
     }

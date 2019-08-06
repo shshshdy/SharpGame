@@ -20,7 +20,6 @@ namespace SharpGame.Samples
     }
 
     [SampleDesc(sortOrder = 6)]
-
     public class CustomRender : Sample
     {
         FrameGraph frameGraph = new FrameGraph();
@@ -37,6 +36,7 @@ namespace SharpGame.Samples
             var resourceLayout = new ResourceLayout(0)
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+            //    new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
             };
 
             var mat = new Material("Shaders/Textured.shader");
@@ -82,8 +82,6 @@ namespace SharpGame.Samples
             var m = Matrix.Transformation(ref cameraPos, ref newRotation);
             m.Invert();
             cameraVS.View = m;
-
-
 
         }
 

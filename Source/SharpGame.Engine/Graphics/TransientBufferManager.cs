@@ -20,7 +20,7 @@ namespace SharpGame
             public uint size;
         }
 
-        FastList<TransientBufferDesc> buffers = new FastList<TransientBufferDesc>();
+        FastList<TransientBufferDesc>[] buffers = new [] { new FastList<TransientBufferDesc>(), new FastList<TransientBufferDesc> ()};
         public BufferUsageFlags BufferUsageFlags { get; }
         public uint Size { get; }
 
@@ -32,7 +32,12 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            foreach(var buf in buffers)
+            foreach(var buf in buffers[0])
+            {
+                buf.buffer.Release();
+            }
+
+            foreach (var buf in buffers[1])
             {
                 buf.buffer.Release();
             }
@@ -45,9 +50,10 @@ namespace SharpGame
                 size = size
             };
 
-            for (int i = 0; i < buffers.Count; i++)
+            var currentBuffers = buffers[Graphics.Instance.WorkContext];
+            for (int i = 0; i < currentBuffers.Count; i++)
             {
-                ref TransientBufferDesc tbc = ref buffers.At(i);
+                ref TransientBufferDesc tbc = ref currentBuffers.At(i);
                 if(tbc.size + size < tbc.buffer.Size)
                 {
                     tb.offset = tbc.size;
@@ -66,9 +72,10 @@ namespace SharpGame
 
         public void Reset()
         {
-            for (int i = 0; i < buffers.Count; i++)
+            var currentBuffers = buffers[Graphics.Instance.WorkContext];
+            for (int i = 0; i < currentBuffers.Count; i++)
             {
-                ref TransientBufferDesc tbc = ref buffers.At(i);                
+                ref TransientBufferDesc tbc = ref currentBuffers.At(i);                
                 tbc.size = 0;                  
             }
 
@@ -76,9 +83,10 @@ namespace SharpGame
 
         public void Flush()
         {
-            for (int i = 0; i < buffers.Count; i++)
+            var currentBuffers = buffers[Graphics.Instance.RenderContext];
+            for (int i = 0; i < currentBuffers.Count; i++)
             {
-                ref TransientBufferDesc tbc = ref buffers.At(i);
+                ref TransientBufferDesc tbc = ref currentBuffers.At(i);
                 if(tbc.size > 0)
                 {
                     tbc.buffer.Flush(tbc.size);
@@ -88,10 +96,11 @@ namespace SharpGame
 
         unsafe ref TransientBufferDesc CreateNewBuffer()
         {
+            var currentBuffers = buffers[Graphics.Instance.WorkContext];
             var buffer = DeviceBuffer.Create(BufferUsageFlags, MemoryPropertyFlags.HostVisible, 1, Size);
             buffer.Map();
-            buffers.Add(new TransientBufferDesc { buffer = buffer, size = 0 });
-            return ref buffers.At(buffers.Count - 1);
+            currentBuffers.Add(new TransientBufferDesc { buffer = buffer, size = 0 });
+            return ref currentBuffers.At(currentBuffers.Count - 1);
         }
     }
 }

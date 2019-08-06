@@ -153,7 +153,7 @@ namespace SharpGame
 
             if (aiMaterial.HasTextureDiffuse)
             {
-                Texture tex = Resources.Instance.Load<Texture>(path + aiMaterial.TextureDiffuse.FilePath);
+                Texture tex = Resources.Instance.Load<Texture2D>(path + aiMaterial.TextureDiffuse.FilePath);
                 material.SetTexture("DiffMap", tex.ResourceRef);
             }
             else

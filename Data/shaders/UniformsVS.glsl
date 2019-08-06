@@ -8,7 +8,6 @@ layout (binding = 0) uniform CameraVS
 	vec3 FrustumSize;
 	float FarClip;
 };
-
 /*
 layout (constant_id = 0) const int MATRICES_COUNT = 1;
 

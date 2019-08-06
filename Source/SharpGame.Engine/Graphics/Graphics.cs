@@ -76,10 +76,10 @@ namespace SharpGame
 
         private VkSubmitInfo submitInfo;
 
-        TransientBufferManager[] positionBuffer = new TransientBufferManager[2];
-        TransientBufferManager[] instanceBuffer = new TransientBufferManager[2];
-        TransientBufferManager[] transientVertexBuffer = new TransientBufferManager[2];
-        TransientBufferManager[] transientIndexBuffer = new TransientBufferManager[2];
+        TransientBufferManager positionBuffer = new TransientBufferManager(BufferUsageFlags.UniformBuffer, 1024 * 1024);
+        TransientBufferManager instanceBuffer = new TransientBufferManager(BufferUsageFlags.UniformBuffer, 1024 * 1024);
+        TransientBufferManager transientVertexBuffer = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
+        TransientBufferManager transientIndexBuffer = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
 
 #if EVENT_SYNC
         private ManualResetEvent _renderActive;
@@ -303,6 +303,26 @@ namespace SharpGame
 
             depthStencil = new DepthStencil(Width, Height, DepthFormat);
 
+        }
+
+        public TransientBuffer AllocMatrix(uint count)
+        {
+            return positionBuffer.Alloc(count);
+        }
+
+        public TransientBuffer AllocInstance(uint count)
+        {
+            return instanceBuffer.Alloc(count);
+        }
+
+        public TransientBuffer AllocVertexBuffer(uint count)
+        {
+            return transientVertexBuffer.Alloc(count);
+        }
+
+        public TransientBuffer AllocIndexBuffer(uint count)
+        {
+            return transientIndexBuffer.Alloc(count);
         }
 
         private Texture GetFreeStagingTexture(uint width, uint height, uint depth, Format format)

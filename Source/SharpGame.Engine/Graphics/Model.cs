@@ -55,6 +55,16 @@ namespace SharpGame
         {
         }
 
+        public Model(Geometry[] geometries)
+        {
+            SetNumGeometry(geometries.Length);
+
+            for(int i = 0; i < geometries.Length; i++)
+            {
+                this.geometries[i] = new []{ geometries[i] };
+            }
+        }
+
         public void SetNumGeometry(int count)
         {
             Array.Resize(ref geometries, count);

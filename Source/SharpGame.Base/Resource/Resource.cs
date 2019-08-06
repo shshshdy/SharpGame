@@ -88,12 +88,12 @@ namespace SharpGame
 
         protected virtual bool OnLoad(File stream)
         {
-            return true;
+            return false;
         }
 
         protected virtual bool OnBuild()
         {
-            return true;
+            return false;
         }
     }
 }

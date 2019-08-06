@@ -1,4 +1,4 @@
-Shader "test"
+Shader "Skybox"
 {
 	Properties = {}
 
