@@ -13,7 +13,7 @@ namespace SharpGame.Samples
             scene = new Scene();
 
             var cameraNode = scene.CreateChild("Camera");
-            cameraNode.Position = new Vector3(0, 0, 0);
+            cameraNode.Position = new Vector3(0, 0, -10);
             //cameraNode.LookAt(Vector3.Zero);
             cameraNode.Rotation = Quaternion.FromEuler(MathUtil.DegreesToRadians(30), 0, 0);
 
@@ -21,19 +21,19 @@ namespace SharpGame.Samples
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
 
-            var shader = Resources.Load<Shader>("Shaders/Textured.shader");
+            var shader = Resources.Load<Shader>("Shaders/Skybox.shader");
             {
 
                 var model = Resources.Load<Model>("Models/cube.obj");
-                var node = scene.CreateChild("Plane");
-                node.Scaling = new Vector3(3.0f);
+                var node = scene.CreateChild("Sky");
+                node.Scaling = new Vector3(30.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
                 ref var m = ref node.WorldTransform;
 
                 var colorMap = Resources.Load<TextureCube>("textures/cubemap_yokohama_bc3_unorm.ktx");
                 var mat = new Material(shader);
-                mat.SetTexture("DiffMap", colorMap);
+                mat.SetTexture("samplerCubeMap", colorMap);
 
                 staticModel.SetMaterial(mat);
             }

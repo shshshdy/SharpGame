@@ -15,6 +15,8 @@
   <ItemGroup>
     <None Include="..\..\Data\shaders\ImGUI.shader" Link="Shaders\ImGUI.shader" />
     <None Include="..\..\Data\shaders\Mesh.shader" Link="Shaders\Mesh.shader" />
+    <None Include="..\..\Data\shaders\Reflect.shader" Link="Shaders\Reflect.shader" />
+    <None Include="..\..\Data\shaders\Skybox.shader" Link="Shaders\Skybox.shader" />
     <None Include="..\..\Data\shaders\Textured.shader" Link="Shaders\Textured.shader" />
     <None Include="..\..\Data\shaders\UniformsPS.glsl" Link="Shaders\UniformsPS.glsl" />
     <None Include="..\..\Data\shaders\UniformsVS.glsl" Link="Shaders\UniformsVS.glsl" />

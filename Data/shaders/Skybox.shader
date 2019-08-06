@@ -4,12 +4,12 @@ Shader "test"
 
 	Pass "main"
 	{
-		CullMode = None
+		CullMode = Front
 		FrontFace = CounterClockwise
 
 		ResourceLayout
 		{
-			ResourceLayoutBinding "UBO"
+			ResourceLayoutBinding "CameraVS"
 			{
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
@@ -41,11 +41,13 @@ Shader "test"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
-			layout (binding = 0) uniform UBO 
-			{
-				mat4 projection;
-				mat4 model;
-			} ubo;
+            #include "UniformsVS.glsl"
+
+
+            layout(push_constant) uniform PushConsts
+            {
+                mat4 model;
+            };
 
 			layout (location = 0) in vec3 inPos;
 
@@ -59,8 +61,8 @@ Shader "test"
 			void main() 
 			{
 				outUVW = inPos;
-				outUVW.x *= -1.0;
-				gl_Position = ubo.projection * ubo.model * vec4(inPos.xyz, 1.0);
+				outUVW.y *= -1.0;
+				gl_Position = ViewProj * model*vec4(inPos.xyz, 1.0);
 			}
 
 
@@ -73,7 +75,7 @@ Shader "test"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
-			layout (binding = 1) uniform samplerCube samplerCubeMap;
+			layout (set = 1, binding = 0) uniform samplerCube samplerCubeMap;
 
 			layout (location = 0) in vec3 inUVW;
 
