@@ -76,9 +76,10 @@ namespace SharpGame
 
         private VkSubmitInfo submitInfo;
 
-        DeviceBuffer[] positionBuffer = new DeviceBuffer[2];
-        DeviceBuffer[] instanceBuffer = new DeviceBuffer[2];
-        DeviceBuffer[] transistBuffer = new DeviceBuffer[2];
+        TransientBufferManager[] positionBuffer = new TransientBufferManager[2];
+        TransientBufferManager[] instanceBuffer = new TransientBufferManager[2];
+        TransientBufferManager[] transientVertexBuffer = new TransientBufferManager[2];
+        TransientBufferManager[] transientIndexBuffer = new TransientBufferManager[2];
 
 #if EVENT_SYNC
         private ManualResetEvent _renderActive;

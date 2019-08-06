@@ -12,12 +12,12 @@ namespace SharpGame
         public uint size;
     }
 
-    public class TransientBufferManager
+    public class TransientBufferManager : DisposeBase
     {
         public struct TransientBufferDesc
         {
             public DeviceBuffer buffer;
-            public uint offset;
+            public uint size;
         }
 
         FastList<TransientBufferDesc> buffers = new FastList<TransientBufferDesc>();
@@ -30,6 +30,14 @@ namespace SharpGame
             Size = size;
         }
 
+        protected override void Destroy()
+        {
+            foreach(var buf in buffers)
+            {
+                buf.buffer.Release();
+            }
+        }
+
         public TransientBuffer Alloc(uint size)
         {
             var tb = new TransientBuffer
@@ -40,19 +48,19 @@ namespace SharpGame
             for (int i = 0; i < buffers.Count; i++)
             {
                 ref TransientBufferDesc tbc = ref buffers.At(i);
-                if(tbc.offset + size < tbc.buffer.Size)
+                if(tbc.size + size < tbc.buffer.Size)
                 {
-                    tb.offset = tbc.offset;
+                    tb.offset = tbc.size;
                     tb.buffer = tbc.buffer;
-                    tbc.offset += size;
+                    tbc.size += size;
                     return tb;
                 }
             }
 
             ref TransientBufferDesc desc = ref CreateNewBuffer();
-            tb.offset = desc.offset;
+            tb.offset = desc.size;
             tb.buffer = desc.buffer;
-            desc.offset += size;
+            desc.size += size;
             return tb;
         }
 
@@ -61,7 +69,7 @@ namespace SharpGame
             for (int i = 0; i < buffers.Count; i++)
             {
                 ref TransientBufferDesc tbc = ref buffers.At(i);                
-                tbc.offset = 0;                  
+                tbc.size = 0;                  
             }
 
         }
@@ -71,9 +79,9 @@ namespace SharpGame
             for (int i = 0; i < buffers.Count; i++)
             {
                 ref TransientBufferDesc tbc = ref buffers.At(i);
-                if(tbc.offset > 0)
+                if(tbc.size > 0)
                 {
-                    tbc.buffer.Flush(tbc.offset);
+                    tbc.buffer.Flush(tbc.size);
                 }
             }
         }
@@ -82,7 +90,7 @@ namespace SharpGame
         {
             var buffer = DeviceBuffer.Create(BufferUsageFlags, MemoryPropertyFlags.HostVisible, 1, Size);
             buffer.Map();
-            buffers.Add(new TransientBufferDesc { buffer = buffer, offset = 0 });
+            buffers.Add(new TransientBufferDesc { buffer = buffer, size = 0 });
             return ref buffers.At(buffers.Count - 1);
         }
     }
