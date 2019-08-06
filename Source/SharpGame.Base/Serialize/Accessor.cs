@@ -23,18 +23,6 @@ namespace SharpGame
 
     }
 
-    public interface IArrayAccessor
-    {
-    }
-
-    public interface IListAccessor
-    {
-    }
-
-    public interface IDictionaryAccessor
-    {
-    }
-
     public class DynamicAccessor : IPropertyAccessor
     {
         public string Name { get; }
