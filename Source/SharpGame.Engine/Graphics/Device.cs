@@ -384,7 +384,7 @@ namespace SharpGame
         public static vkCmdPushDescriptorSetKHRDelegate CmdPushDescriptorSetKHR;
         private static void vkCmdPushDescriptorSetKHR()
         {
-            CmdPushDescriptorSetKHR = VkInstance.GetProc<vkCmdPushDescriptorSetKHRDelegate>(nameof(vkCmdPushDescriptorSetKHR));
+            CmdPushDescriptorSetKHR = device.GetProc<vkCmdPushDescriptorSetKHRDelegate>(nameof(vkCmdPushDescriptorSetKHR));
         }
 
         public static VkSemaphore CreateSemaphore(uint flags = 0)

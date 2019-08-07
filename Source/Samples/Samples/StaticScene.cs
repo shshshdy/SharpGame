@@ -27,8 +27,6 @@ namespace SharpGame.Samples
                 node.Scaling = new Vector3(3.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
-                ref var m = ref node.WorldTransform;
-
                 var colorMap = Resources.Load<Texture2D>("textures/StoneDiffuse.png");
                 var mat = new Material(shader);
                 mat.SetTexture("DiffMap", colorMap);

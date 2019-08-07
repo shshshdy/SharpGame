@@ -43,16 +43,13 @@ namespace SharpGame.Samples
                 List<string> filenames = new List<string> { "models/sphere.obj"/*, "models/teapot.dae", "models/torusknot.obj"*/ };
                 foreach (string file in filenames)
                 {
-
                     var model = Resources.Load<Model>(file);
 
                     var node = scene.CreateChild("Model");
                     node.Scaling = new Vector3(0.1f);
-                    //node.Position = new Vector3(i * 40 - 20 * 40, 50 * k, j * 40 - 20 * 40);
-                    //node.Rotation = Quaternion.FromEuler(0, MathUtil.DegreesToRadians(MathUtil.Random(0, 90)), 0);
+
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
-
                     staticModel.SetMaterial(mat);
                 }
             }

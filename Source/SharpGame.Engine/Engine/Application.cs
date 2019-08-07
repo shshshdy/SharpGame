@@ -66,7 +66,7 @@ namespace SharpGame
         private float timeStep;
         private int timeStepSmoothing = 2;
         private uint minFps = 10;
-        private uint maxFps = 2000;
+        private uint maxFps = 3000;
 
         public Application(string dataPath)
         {

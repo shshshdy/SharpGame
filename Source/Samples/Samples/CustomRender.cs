@@ -69,15 +69,11 @@ namespace SharpGame.Samples
             //var m = Matrix.LookAtLH(cameraPos,
             //        new Vector3(0, 0, 0), Vector3.UnitY);
 
-
             Quaternion newRotation = Quaternion.LookAtLH(cameraPos, new Vector3(0, 0, 0), Vector3.UnitY);
 
             Vector3 e = newRotation.ToEuler();
-           
             yaw = e.Y;
             pitch = e.X;
-          
-
 
             var m = Matrix.Transformation(ref cameraPos, ref newRotation);
             m.Invert();

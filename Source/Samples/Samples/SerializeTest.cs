@@ -9,7 +9,7 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = 5)]
     public class SerializeTest : Sample
     {
-        public override void Init()
+       public override void Init()
         {
             base.Init();
 
@@ -19,32 +19,10 @@ namespace SharpGame.Samples
                 //Shader shader = HoconSerializer.Deserialize<Shader>(file);
                 AstParser ast = new AstParser();
                 ast.Parse(file.ReadAllText());
-                ast.Print();*/
+                ast.Print();
 
-                var shader = Resources.Load<Shader>("Shaders/Textured.shader");
+                var shader = Resources.Load<Shader>("Shaders/Textured.shader");*/
             }
-
-            /*
-            Task<string> ShaderResolver(HoconCallbackType type, string fileName)
-            {
-                switch (type)
-                {
-                    case HoconCallbackType.Resource:
-                        return null;// ReadResource(fileName);
-                    case HoconCallbackType.File:
-                        return Task.FromResult("Include = \"" + FileSystem.ReadAllText(fileName) + "\"");
-                    default:
-                        return null;
-                }
-            }
-
-            {
-                var file = FileSystem.Instance.GetFile("Shaders/Textured.shader");
-                Hocon.HoconRoot root = HoconSerializer.Parse(file, ShaderResolver);
-                Console.WriteLine(root.PrettyPrint(4));
-            }
-            */
-
 
         }
     }
