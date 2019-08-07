@@ -68,30 +68,6 @@ namespace SharpGame
             return writeDescriptorSet;
         }
 
-        public static VkImageMemoryBarrier ImageMemoryBarrier()
-        {
-            VkImageMemoryBarrier imageMemoryBarrier = VkImageMemoryBarrier.New();
-            imageMemoryBarrier.srcQueueFamilyIndex = QueueFamilyIgnored;
-            imageMemoryBarrier.dstQueueFamilyIndex = QueueFamilyIgnored;
-            return imageMemoryBarrier;
-        }
-        
-        public static VkBufferCreateInfo BufferCreateInfo(VkBufferUsageFlags usage, ulong size)
-        {
-            VkBufferCreateInfo bufCreateInfo = VkBufferCreateInfo.New();
-            bufCreateInfo.usage = usage;
-            bufCreateInfo.size = size;
-            return bufCreateInfo;
-        }
-
-        public static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo(ref VkDescriptorSetLayout pSetLayouts, int setLayoutCount = 1)
-        {
-            VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo.New();
-            pipelineLayoutCreateInfo.setLayoutCount = (uint)setLayoutCount;
-            pipelineLayoutCreateInfo.pSetLayouts = (VkDescriptorSetLayout*)Unsafe.AsPointer(ref pSetLayouts);
-            return pipelineLayoutCreateInfo;
-        }
-
         public unsafe static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo( VkDescriptorSetLayout* pSetLayouts, int setLayoutCount = 1)
         {
             VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo.New();

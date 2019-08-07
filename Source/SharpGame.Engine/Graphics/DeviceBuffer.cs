@@ -38,7 +38,8 @@ namespace SharpGame
 
         public IntPtr Map(ulong offset = 0, ulong size = WholeSize)
         {
-            return Device.MapMemory(memory, offset, size, 0);
+            Mapped = Device.MapMemory(memory, offset, size, 0);
+            return Mapped;
         }
                
         public void Unmap()
@@ -115,6 +116,11 @@ namespace SharpGame
         public static DeviceBuffer Create(BufferUsageFlags usageFlags, bool dynamic, ulong stride, ulong count, IntPtr data = default)
         {
             return Create(usageFlags, dynamic ? MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent : MemoryPropertyFlags.DeviceLocal, stride, count, (void*)data);
+        }
+
+        public static DeviceBuffer Create(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, ulong count)
+        {
+            return Create(usageFlags, memoryPropertyFlags, 1, count, null);
         }
 
         public static DeviceBuffer Create(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, ulong stride, ulong count, void* data = null)

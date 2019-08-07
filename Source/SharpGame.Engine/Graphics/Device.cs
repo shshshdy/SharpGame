@@ -475,7 +475,9 @@ namespace SharpGame
         public static void CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
         {
             // Create the buffer handle
-            VkBufferCreateInfo bufferCreateInfo = Builder.BufferCreateInfo(usageFlags, size);
+            VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
+            bufferCreateInfo.usage = usageFlags;
+            bufferCreateInfo.size = size;
             bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
             VulkanUtil.CheckResult(vkCreateBuffer(LogicalDevice, &bufferCreateInfo, null, buffer));
 

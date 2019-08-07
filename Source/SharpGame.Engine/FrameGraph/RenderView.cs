@@ -44,6 +44,7 @@ namespace SharpGame
         internal DeviceBuffer ubCameraVS;
         internal DeviceBuffer ubCameraPS;
         internal DeviceBuffer ubLight;
+
         internal DeviceBuffer[] ubMatrics = new DeviceBuffer[2];
 
         private ResourceLayout perFrameResLayout;
@@ -52,8 +53,6 @@ namespace SharpGame
         private ResourceLayout perObjectResLayout;
         ResourceSet[] perObjectSet = new ResourceSet[2];
         byte[] positionBuff = new byte[4*16 * 10000];
-
-        TransientBufferManager[] uniformBuffer = new TransientBufferManager[2];
 
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
@@ -100,8 +99,10 @@ namespace SharpGame
 
             if(ubMatrics[0] == null)
             {
-                ubMatrics[0] = DeviceBuffer.CreateUniformBuffer<Matrix>(64 * 1024 * 10);
-                ubMatrics[1] = DeviceBuffer.CreateUniformBuffer<Matrix>(64 * 1024 * 10);
+                ubMatrics[0] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, 1024 * 1024);
+                ubMatrics[0].Map();
+                ubMatrics[1] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, 1024 * 1024);
+                ubMatrics[1].Map();
             }
 
             perFrameResLayout = new ResourceLayout
@@ -137,11 +138,10 @@ namespace SharpGame
             uint sz = (uint)Utilities.SizeOf<Matrix>() * count;
           
             Unsafe.CopyBlockUnaligned(Unsafe.AsPointer(ref positionBuff[offset]), (void*)pos, sz);
-            /*
-        var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
-        void* buf = matrixBuf.Map(offset, sz);
-        Unsafe.CopyBlockUnaligned((void*)buf, (void*)pos, sz);
-        matrixBuf.Unmap();*/
+
+            var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
+            void* buf = (void*)matrixBuf.Mapped;
+            Unsafe.CopyBlockUnaligned((void*)buf, (void*)pos, sz);      
             uint oldOffset = offset;
             offset += sz;
             return oldOffset;
@@ -181,6 +181,9 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndView { view = this });
 
+
+            var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
+            matrixBuf.Flush(offset);
             Profiler.EndSample();
         }
 

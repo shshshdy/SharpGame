@@ -19,7 +19,7 @@ namespace SharpGame.Samples
         public float FarClip;
     }
 
-    [SampleDesc(sortOrder = 6)]
+    [SampleDesc(sortOrder = -6)]
     public class CustomRender : Sample
     {
         FrameGraph frameGraph = new FrameGraph();
@@ -29,6 +29,7 @@ namespace SharpGame.Samples
 
         CameraVS cameraVS = new CameraVS();
         DeviceBuffer ubCameraVS;
+        DeviceBuffer ubObjectVS;
         Geometry cube;
         Vector3 cameraPos;
         public override void Init()
@@ -36,10 +37,10 @@ namespace SharpGame.Samples
             var resourceLayout = new ResourceLayout(0)
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-            //    new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+                new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex, 1),
             };
 
-            var mat = new Material("Shaders/Textured.shader");
+            var mat = new Material("Shaders/Basic.shader");
             mat.SetTexture("DiffMap", Texture2D.White);
 
             cube = GeometricPrimitive.CreateCube(10, 10, 10);
@@ -52,9 +53,14 @@ namespace SharpGame.Samples
             };
 
             ubCameraVS = DeviceBuffer.CreateUniformBuffer<CameraVS>();
-
-            resourceSet = new ResourceSet(resourceLayout, ubCameraVS);
+            ubObjectVS = DeviceBuffer.CreateUniformBuffer<Matrix>();
+            //ubObjectVS.Map();
+            resourceSet = new ResourceSet(resourceLayout, ubCameraVS, ubObjectVS);
+       
             worldTransform = Matrix.Identity;
+            //Utilities.CopyMemory(ubObjectVS.Mapped, batch.worldTransform, Utilities.SizeOf<Matrix>());
+            // ubObjectVS.Flush();
+            ubObjectVS.SetData(ref worldTransform);
 
             frameGraph.AddRenderPass(new GraphicsPass
             {
@@ -135,8 +141,7 @@ namespace SharpGame.Samples
 
         void CustomDraw(GraphicsPass pass, RenderView view)
         {
-            var m = Matrix.RotationYawPitchRoll(yaw, pitch, 0)
-                * Matrix.Translation(cameraPos);
+            var m = Matrix.RotationYawPitchRoll(yaw, pitch, 0) * Matrix.Translation(cameraPos);
             m.Invert();
             cameraVS.View = m;
 
@@ -149,8 +154,8 @@ namespace SharpGame.Samples
             worldTransform = Matrix.Identity;
             batch.worldTransform = Utilities.AsPointer(ref worldTransform);
 
-            //pass.DrawBatch(pass.CmdBuffer, batch, view.perFrameSet);// resourceSet);
-            pass.DrawBatch(pass.CmdBuffer, batch, resourceSet);
+            uint offset = 0;
+            pass.DrawBatch(pass.CmdBuffer, batch, resourceSet, offset);
         }
     }
 }

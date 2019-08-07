@@ -69,10 +69,10 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct MaterialPS
     {
-        public vec4 cMatDiffColor;
-        public vec4 cMatEmissiveColor;
-        public vec4 cMatEnvMapColor;
-        public vec4 cMatSpecColor;
+        public vec4 MatDiffColor;
+        public vec4 MatEmissiveColor;
+        public vec4 MatEnvMapColor;
+        public vec4 MatSpecColor;
         public float cRoughness;
         public float cMetallic;
     }

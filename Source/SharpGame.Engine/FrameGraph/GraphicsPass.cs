@@ -92,7 +92,7 @@ namespace SharpGame
             cmdBuffer = null;
         }
 
-        public void DrawBatch(CommandBuffer cb, SourceBatch batch, ResourceSet resourceSet)
+        public void DrawBatch(CommandBuffer cb, SourceBatch batch, ResourceSet resourceSet, uint? offset = null)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
@@ -105,7 +105,7 @@ namespace SharpGame
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.PushConstants(pass, ShaderStage.Vertex, 0, Utilities.SizeOf<Matrix>(), batch.worldTransform);
-            cb.BindGraphicsResourceSet(pass, resourceSet.Set, resourceSet);
+            cb.BindGraphicsResourceSet(pass, resourceSet.Set, resourceSet, offset);
 
             foreach(var rs in batch.material.ResourceSet)
             {

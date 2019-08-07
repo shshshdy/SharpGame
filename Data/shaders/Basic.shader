@@ -1,4 +1,4 @@
-Shader "test"
+Shader "Basic"
 {
 	Properties = {}
 
@@ -12,6 +12,12 @@ Shader "test"
 			ResourceLayoutBinding "CameraVS"
 			{
 				DescriptorType = UniformBuffer
+				StageFlags = Vertex
+			}
+			
+			ResourceLayoutBinding "ObjectVS"
+			{
+				DescriptorType = UniformBufferDynamic
 				StageFlags = Vertex
 			}
 		}
@@ -39,11 +45,7 @@ Shader "test"
 			#version 450
 			
 			#include "UniformsVS.glsl"
-
-			layout(push_constant) uniform PushConsts {
-				mat4 model;
-			};
-
+			
 			layout (location = 0) in vec3 in_Position;
 			layout (location = 1) in vec3 in_Normal;
 			layout (location = 2) in vec2 in_TexCoord;
@@ -55,9 +57,10 @@ Shader "test"
 				vec4 gl_Position;
 			};
 
-			void main() {
+			void main() 
+			{
 				out_TexCoord = in_TexCoord;
-				gl_Position = ViewProj * model* vec4(in_Position.xyz, 1.0);
+				gl_Position = ViewProj * Model[0]* vec4(in_Position.xyz, 1.0);
 			}
 
 		}
@@ -69,7 +72,6 @@ Shader "test"
 			layout (set = 1, binding = 0) uniform sampler2D DiffMap;
 
 			layout (location = 0) in vec2 in_TexCoord;
-
 			layout (location = 0) out vec4 out_Color;
 
 			void main() {
