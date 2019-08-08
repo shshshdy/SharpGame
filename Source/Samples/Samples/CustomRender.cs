@@ -19,7 +19,7 @@ namespace SharpGame.Samples
         public float FarClip;
     }
 
-    [SampleDesc(sortOrder = -6)]
+    [SampleDesc(sortOrder = 6)]
     public class CustomRender : Sample
     {
         FrameGraph frameGraph = new FrameGraph();

@@ -9,9 +9,6 @@ namespace SharpGame
 {
     public class ScenePass : GraphicsPass
     {
-        private ResourceLayout perObjectLayout;
-        private ResourceSet perObjectSet;
-
         private CommandBufferPool[][] cmdBufferPools = new CommandBufferPool[2][];
         FastList<Task> renderTasks = new FastList<Task>();
 
@@ -23,12 +20,7 @@ namespace SharpGame
         public ScenePass(string name = "main")
         {
             Name = name;
-
-            perObjectLayout = new ResourceLayout
-            {
-                new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-            };
-
+            
             for(int i = 0; i < 2; i++)
             {
                 cmdBufferPools[i] = new CommandBufferPool[WORK_COUNT];
@@ -128,7 +120,7 @@ namespace SharpGame
         {
             for(int i = from; i < to; i++)
             {
-                DrawBatch(commandBuffer, sourceBatches[i], view.perFrameSet);
+                DrawBatch(commandBuffer, sourceBatches[i], view.PerObjectSet, sourceBatches[i].offset);
             }
 
         }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 1)]
+    [SampleDesc(sortOrder = -1)]
     public class StaticScene : Sample
     {
         public override void Init()
@@ -18,8 +18,9 @@ namespace SharpGame.Samples
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
-
-            var shader = Resources.Load<Shader>("Shaders/Textured.shader");
+            
+            var shader = Resources.Load<Shader>("Shaders/Basic.shader");
+            
             {
                 var model = Resources.Load<Model>("Models/plane2.dae");
                 var node = scene.CreateChild("Plane");

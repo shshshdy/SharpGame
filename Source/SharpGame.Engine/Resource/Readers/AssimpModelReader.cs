@@ -95,6 +95,8 @@ namespace SharpGame
             NativeList<VertexPosNormTex> vertexBuffer = new NativeList<VertexPosNormTex>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
 
+            Log.Info("Geom type : " + typeof(VertexPosNormTex));
+
             meshBoundingBox = new BoundingBox();
             for (int v = 0; v < mesh.VertexCount; v++)
             {

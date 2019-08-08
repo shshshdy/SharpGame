@@ -4,7 +4,7 @@ Shader "Basic"
 
 	Pass "main"
 	{
-		CullMode = Back
+		CullMode = None
 		FrontFace = CounterClockwise
 
 		ResourceLayout

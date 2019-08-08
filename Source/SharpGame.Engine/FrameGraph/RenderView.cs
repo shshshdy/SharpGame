@@ -99,10 +99,11 @@ namespace SharpGame
 
             if(ubMatrics[0] == null)
             {
-                ubMatrics[0] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, 1024 * 1024);
-                ubMatrics[0].Map();
-                ubMatrics[1] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, 1024 * 1024);
-                ubMatrics[1].Map();
+                ulong size = 6400 * 1024;
+                ubMatrics[0] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
+                ubMatrics[0].Map(0, size);
+                ubMatrics[1] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
+                ubMatrics[1].Map(0, size);
             }
 
             perFrameResLayout = new ResourceLayout
@@ -133,6 +134,12 @@ namespace SharpGame
             }
         }
 
+        public void AddBatch(SourceBatch batch)
+        {
+            batches.Add(batch);
+            batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+        }
+
         uint offset;
         unsafe uint GetTransform(IntPtr pos, uint count)
         {
@@ -143,8 +150,8 @@ namespace SharpGame
             }
           
             var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
-            void* buf = (void*)matrixBuf.Mapped;
-            Unsafe.CopyBlock((void*)buf, (void*)pos, (uint)Utilities.SizeOf<Matrix>());      
+            void* buf = (void*)(matrixBuf.Mapped + (int)offset);
+            Unsafe.CopyBlock(buf, (void*)pos, (uint)Utilities.SizeOf<Matrix>());      
             uint oldOffset = offset;
             offset += sz;
             return oldOffset;
