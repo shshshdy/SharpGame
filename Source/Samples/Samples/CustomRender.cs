@@ -23,15 +23,15 @@ namespace SharpGame.Samples
     public class CustomRender : Sample
     {
         FrameGraph frameGraph = new FrameGraph();
-        SourceBatch batch;
+        List<SourceBatch> batches = new List<SourceBatch>();
         ResourceSet resourceSet;
-        Matrix worldTransform;
 
         CameraVS cameraVS = new CameraVS();
         DeviceBuffer ubCameraVS;
         DeviceBuffer ubObjectVS;
         Geometry cube;
         Vector3 cameraPos;
+        const int COUNT = 100;
         public override void Init()
         {
             var resourceLayout = new ResourceLayout(0)
@@ -44,23 +44,40 @@ namespace SharpGame.Samples
             mat.SetTexture("DiffMap", Texture2D.White);
 
             cube = GeometricPrimitive.CreateCube(10, 10, 10);
-            batch = new SourceBatch
+
+            for(int i = 0; i < COUNT; i++)
             {
-                geometry = cube,
-                material = mat,
-                numWorldTransforms = 1,
-                worldTransform = Utilities.AsPointer(ref worldTransform)
-            };
+                var batch = new SourceBatch
+                {
+                    geometry = cube,
+                    material = mat,
+                    numWorldTransforms = 1,
+                };
+
+                batches.Add(batch);
+            }
 
             ubCameraVS = DeviceBuffer.CreateUniformBuffer<CameraVS>();
-            ubObjectVS = DeviceBuffer.CreateUniformBuffer<Matrix>();
-            //ubObjectVS.Map();
+            ubObjectVS = DeviceBuffer.CreateUniformBuffer<Matrix>(COUNT*4);
+
+            ubObjectVS.Map();
+
             resourceSet = new ResourceSet(resourceLayout, ubCameraVS, ubObjectVS);
-       
-            worldTransform = Matrix.Identity;
-            //Utilities.CopyMemory(ubObjectVS.Mapped, batch.worldTransform, Utilities.SizeOf<Matrix>());
-            // ubObjectVS.Flush();
-            ubObjectVS.SetData(ref worldTransform);
+
+            uint offset = 0;
+            for(int i = 0; i < COUNT; i++)
+            {
+                Matrix worldTransform = Matrix.Translation(15*(i/10), 0, 15 * (i % 10));
+                batches[i].offset = offset;
+
+                Utilities.CopyMemory(ubObjectVS.Mapped + (int)offset, Utilities.AsPointer(ref worldTransform), Utilities.SizeOf<Matrix>());
+
+                offset += (uint)Utilities.SizeOf<Matrix>()*4;
+            }
+
+            ubObjectVS.Flush();
+
+            //ubObjectVS.SetData(ref worldTransform);
 
             frameGraph.AddRenderPass(new GraphicsPass
             {
@@ -68,22 +85,9 @@ namespace SharpGame.Samples
             });
 
             cameraPos = new Vector3(0, 8, -30);
+            pitch = MathUtil.DegreesToRadians(15);
 
-            //Renderer.Instance.MainView.Attach(camera, scene, frameGraph);
             Renderer.Instance.MainView.Attach(null, null, frameGraph);
-
-            //var m = Matrix.LookAtLH(cameraPos,
-            //        new Vector3(0, 0, 0), Vector3.UnitY);
-
-            Quaternion newRotation = Quaternion.LookAtLH(cameraPos, new Vector3(0, 0, 0), Vector3.UnitY);
-
-            Vector3 e = newRotation.ToEuler();
-            yaw = e.Y;
-            pitch = e.X;
-
-            var m = Matrix.Transformation(ref cameraPos, ref newRotation);
-            m.Invert();
-            cameraVS.View = m;
 
         }
 
@@ -142,20 +146,19 @@ namespace SharpGame.Samples
         void CustomDraw(GraphicsPass pass, RenderView view)
         {
             var m = Matrix.RotationYawPitchRoll(yaw, pitch, 0) * Matrix.Translation(cameraPos);
-            m.Invert();
-            cameraVS.View = m;
+            Matrix.Invert(ref m, out cameraVS.View);
+            
+            var proj = Matrix.PerspectiveFovLH((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
 
-            var proj = Matrix.PerspectiveFovLH((float)Math.PI / 4, 16 / 9.0f, 1, 100);
-            //Matrix.Invert(ref camera.View, out cameraVS.ViewInv);
             cameraVS.ViewProj = cameraVS.View * proj;
-            //cameraVS.CameraPos = camera.Node.Position;
             ubCameraVS.SetData(ref cameraVS);
 
-            worldTransform = Matrix.Identity;
-            batch.worldTransform = Utilities.AsPointer(ref worldTransform);
+            for(int i = 0; i < COUNT; i++)
+            {
+                var batch = batches[i];
+                pass.DrawBatch(pass.CmdBuffer, batch, resourceSet, batch.offset);
 
-            uint offset = 0;
-            pass.DrawBatch(pass.CmdBuffer, batch, resourceSet, offset);
+            }
         }
     }
 }

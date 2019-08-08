@@ -51,8 +51,8 @@ namespace SharpGame
         public ResourceSet perFrameSet;
 
         private ResourceLayout perObjectResLayout;
+        public ResourceSet PerObjectSet => perObjectSet[Graphics.Instance.WorkContext];
         ResourceSet[] perObjectSet = new ResourceSet[2];
-        byte[] positionBuff = new byte[4*16 * 10000];
 
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
@@ -114,11 +114,12 @@ namespace SharpGame
 
             perObjectResLayout = new ResourceLayout
             {
-                new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+                new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex, 1),
             };
 
-            perObjectSet[0] = new ResourceSet(perObjectResLayout, ubMatrics[0]);
-            perObjectSet[1] = new ResourceSet(perObjectResLayout, ubMatrics[1]);
+            perObjectSet[0] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics[0]);
+            perObjectSet[1] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics[1]);
         }
 
         public void AddDrawable(Drawable drawable)
@@ -128,7 +129,7 @@ namespace SharpGame
             foreach (SourceBatch batch in drawable.Batches)
             {
                 batches.Add(batch);
-                //batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+                batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
             }
         }
 
@@ -136,12 +137,14 @@ namespace SharpGame
         unsafe uint GetTransform(IntPtr pos, uint count)
         {
             uint sz = (uint)Utilities.SizeOf<Matrix>() * count;
+            if(sz < 256)
+            {
+                sz = 256;
+            }
           
-            Unsafe.CopyBlockUnaligned(Unsafe.AsPointer(ref positionBuff[offset]), (void*)pos, sz);
-
             var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
             void* buf = (void*)matrixBuf.Mapped;
-            Unsafe.CopyBlockUnaligned((void*)buf, (void*)pos, sz);      
+            Unsafe.CopyBlock((void*)buf, (void*)pos, (uint)Utilities.SizeOf<Matrix>());      
             uint oldOffset = offset;
             offset += sz;
             return oldOffset;

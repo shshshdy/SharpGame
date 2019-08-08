@@ -55,7 +55,7 @@ namespace SharpGame
             descriptor.range = size;
         }
 
-        public void SetData<T>(ref T data, int offset = 0) where T : struct
+        public void SetData<T>(ref T data, uint offset = 0) where T : struct
         {
             SetData(Unsafe.AsPointer(ref data), (uint)offset, (uint)Unsafe.SizeOf<T>());
         }

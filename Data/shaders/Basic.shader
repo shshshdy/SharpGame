@@ -4,7 +4,7 @@ Shader "Basic"
 
 	Pass "main"
 	{
-		CullMode = None
+		CullMode = Back
 		FrontFace = CounterClockwise
 
 		ResourceLayout
@@ -33,13 +33,6 @@ Shader "Basic"
 			}
 		}
 
-		PushConstant
-		{
-			StageFlags = Vertex
-			Offset = 0
-			Size = 64		
-		}
-		
 		@VertexShader
 		{
 			#version 450

@@ -9,6 +9,7 @@ namespace SharpGame
     using global::System.Runtime.CompilerServices;
     using static VulkanNative;
     using static Builder;
+    using global::System.Collections.Concurrent;
 
     public struct PushConstantRange
     {
@@ -128,6 +129,7 @@ namespace SharpGame
 
         internal VkPipelineLayout pipelineLayout;
         internal VkPipeline handle;
+        ConcurrentDictionary<long, VkPipeline> pipelines = new ConcurrentDictionary<long, VkPipeline>();
 
         public Pass()
         {
@@ -267,9 +269,10 @@ namespace SharpGame
 
         internal unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, Geometry geometry)
         {
-            if (handle != 0)
+            var vertexInput = geometry != null ? geometry.VertexLayout : VertexLayout;
+            if (pipelines.TryGetValue(vertexInput.GetHashCode(), out var pipe))
             {
-                return handle;
+                return pipe;
             }
 
             VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
@@ -296,7 +299,7 @@ namespace SharpGame
             unsafe
             {
                 var pipelineCreateInfo = GraphicsPipelineCreateInfo(pipelineLayout, renderPass.handle, 0);//,
-                var vertexInput = geometry != null ? geometry.VertexLayout : VertexLayout;
+
                 vertexInput.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
                 pipelineCreateInfo.pVertexInputState = &vertexInputState;
 
@@ -331,6 +334,8 @@ namespace SharpGame
                 }
 
                 handle = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
+
+                pipelines.TryAdd(vertexInput.GetHashCode(), handle);
             }
 
             return handle;
@@ -378,10 +383,16 @@ namespace SharpGame
                 stage?.Dispose();
             }
 
-            if (handle != 0)
+            foreach (var kvp in pipelines)
             {
-                Device.Destroy(ref handle);
+                Device.DestroyPipeline(kvp.Value);
             }
+            pipelines.Clear();
+
+//             if (handle != 0)
+//             {
+//                 Device.Destroy(ref handle);
+//             }
 
             if (pipelineLayout != 0)
             {

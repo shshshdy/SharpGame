@@ -21,7 +21,6 @@ namespace SharpGame.Samples
 
             var shader = Resources.Load<Shader>("Shaders/Textured.shader");
             {
-
                 var model = Resources.Load<Model>("Models/plane2.dae");
                 var node = scene.CreateChild("Plane");
                 node.Scaling = new Vector3(3.0f);

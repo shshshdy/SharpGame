@@ -62,6 +62,11 @@ namespace SharpGame
             this.attributes = attributes;
         }
 
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         public unsafe void ToNative(out VkPipelineVertexInputStateCreateInfo native)
         {
             native = VkPipelineVertexInputStateCreateInfo.New();
