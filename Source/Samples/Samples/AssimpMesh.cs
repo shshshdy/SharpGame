@@ -53,9 +53,9 @@ namespace SharpGame.Samples
             drawable.SetNumGeometries(1);
             drawable.SetGeometry(0, geometry);
 
-            var mat = new Material("Shaders/Mesh.shader");
+            var mat = new Material("Shaders/Basic.shader");
 
-            mat.SetTexture("samplerColorMap", colorMap);
+            mat.SetTexture("DiffMap", colorMap);
 
             ubLight = DeviceBuffer.CreateUniformBuffer<UboVS>();
             mat.SetBuffer("UBO", ubLight);
@@ -104,14 +104,14 @@ namespace SharpGame.Samples
 
             // Generate vertex buffer from ASSIMP scene data
             float scale = 1.0f;
-            NativeList<VertexPosNormTexColor> vertexBuffer = new NativeList<VertexPosNormTexColor>();
+            NativeList<VertexPosNormTex> vertexBuffer = new NativeList<VertexPosNormTex>();
 
             // Iterate through all meshes in the file and extract the vertex components
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 for (int v = 0; v < scene.Meshes[(int)m].VertexCount; v++)
                 {
-                    VertexPosNormTexColor vertex;
+                    VertexPosNormTex vertex;
                     Assimp.Mesh mesh = scene.Meshes[m];
 
                     // Use glm make_* functions to convert ASSIMP vectors to glm vectors
@@ -120,23 +120,23 @@ namespace SharpGame.Samples
                     // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                     vertex.texcoord = new Vector2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
                     // Mesh may not have vertex colors
-                    if (mesh.HasVertexColors(0))
-                    {
-                        vertex.color = new Color(mesh.VertexColorChannels[0][v].R,
-                            mesh.VertexColorChannels[0][v].G,
-                            mesh.VertexColorChannels[0][v].B);
-                    }
-                    else
-                    {
-                        vertex.color = new Color(1.0f);
-                    }
+//                     if (mesh.HasVertexColors(0))
+//                     {
+//                         vertex.color = new Color(mesh.VertexColorChannels[0][v].R,
+//                             mesh.VertexColorChannels[0][v].G,
+//                             mesh.VertexColorChannels[0][v].B);
+//                     }
+//                     else
+//                     {
+//                         vertex.color = new Color(1.0f);
+//                     }
 
                     vertexBuffer.Add(vertex);
                 }
             }
 
             var vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false,
-                (uint)sizeof(VertexPosNormTexColor), vertexBuffer.Count, vertexBuffer.Data);
+                (uint)sizeof(VertexPosNormTex), vertexBuffer.Count, vertexBuffer.Data);
             
             // Generate index buffer from ASSIMP scene data
             NativeList<uint> indexBuffer = new NativeList<uint>();
@@ -159,7 +159,7 @@ namespace SharpGame.Samples
             {
                 VertexBuffers = new[] { vb },
                 IndexBuffer = ib,
-                VertexLayout = VertexPosNormTexColor.Layout
+                VertexLayout = VertexPosNormTex.Layout
             };
 
             geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)ib.Count);

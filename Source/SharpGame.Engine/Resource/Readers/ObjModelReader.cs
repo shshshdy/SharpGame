@@ -104,7 +104,7 @@ namespace SharpGame
                 model.GeometryCenters.Add(Vector3.Zero);
             }
 
-            var shader = Resources.Instance.Load<Shader>("Shaders/Textured.shader");
+            var shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");
 
             if (!string.IsNullOrEmpty(objFile.MaterialLibName))
             {

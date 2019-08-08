@@ -45,7 +45,7 @@ namespace SharpGame
 
             BoundingBox boundingBox = new BoundingBox();
 
-            var shader = Resources.Instance.Load<Shader>("Shaders/Textured.shader");
+            var shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");
             string path = FileUtil.GetPath(loadingFile);
 
             // Iterate through all meshes in the file and extract the vertex components

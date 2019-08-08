@@ -19,7 +19,7 @@ namespace SharpGame.Samples
             camera.FarClip = 3000.0f;
 
             {
-                var mat = new Material("Shaders/Textured.shader");
+                var mat = new Material("Shaders/Basic.shader");
                 mat.SetTexture("DiffMap", Texture2D.White);
 
                 var model = Resources.Load<Model>("Models/sphere.obj");

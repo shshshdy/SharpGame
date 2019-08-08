@@ -45,12 +45,13 @@ namespace SharpGame
         internal DeviceBuffer ubCameraPS;
         internal DeviceBuffer ubLight;
 
-        internal DeviceBuffer[] ubMatrics = new DeviceBuffer[2];
-
         private ResourceLayout perFrameResLayout;
         public ResourceSet perFrameSet;
 
         private ResourceLayout perObjectResLayout;
+
+        internal DoubleBuffer ubMatrics;
+
         public ResourceSet PerObjectSet => perObjectSet[Graphics.Instance.WorkContext];
         ResourceSet[] perObjectSet = new ResourceSet[2];
 
@@ -97,13 +98,10 @@ namespace SharpGame
                 ubLight = DeviceBuffer.CreateUniformBuffer<LightPS>();
             }
 
-            if(ubMatrics[0] == null)
+            if(ubMatrics == null)
             {
-                ulong size = 6400 * 1024;
-                ubMatrics[0] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
-                ubMatrics[0].Map(0, size);
-                ubMatrics[1] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
-                ubMatrics[1].Map(0, size);
+                uint size = 6400 * 1024;
+                ubMatrics = new DoubleBuffer(size);
             }
 
             perFrameResLayout = new ResourceLayout
@@ -119,8 +117,8 @@ namespace SharpGame
                 new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex, 1),
             };
 
-            perObjectSet[0] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics[0]);
-            perObjectSet[1] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics[1]);
+            perObjectSet[0] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics.Buffer[0]);
+            perObjectSet[1] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics.Buffer[1]);
         }
 
         public void AddDrawable(Drawable drawable)
@@ -140,22 +138,10 @@ namespace SharpGame
             batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
         }
 
-        uint offset;
         unsafe uint GetTransform(IntPtr pos, uint count)
         {
             uint sz = (uint)Utilities.SizeOf<Matrix>() * count;
-            if(sz < 256)
-            {
-                sz = 256;
-            }
-          
-            var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
-            void* buf = (void*)(matrixBuf.Mapped + (int)offset);
-            Unsafe.CopyBlock(buf, (void*)pos, (uint)Utilities.SizeOf<Matrix>());      
-            uint oldOffset = offset;
-            offset += sz;
-            return oldOffset;
-
+            return ubMatrics.Alloc(sz, pos);
         }
 
         public void Update(ref FrameInfo frameInfo)
@@ -167,8 +153,10 @@ namespace SharpGame
             this.frameInfo.camera = Camera;
             this.frameInfo.viewSize = new Int2(g.Width, g.Height);
 
+            ubMatrics.Clear();
+
             Viewport.Define(0, 0, g.Width, g.Height);
-            offset = 0;
+
             frameUniform.DeltaTime = Time.Delta;
             frameUniform.ElapsedTime = Time.Elapsed;
 
@@ -191,15 +179,13 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndView { view = this });
 
+            ubMatrics.Flush();
 
-            var matrixBuf = ubMatrics[Graphics.Instance.WorkContext];
-            matrixBuf.Flush(offset);
             Profiler.EndSample();
         }
 
         private void UpdateDrawables()
         {
-
             drawables.Clear();
             batches.Clear();
 

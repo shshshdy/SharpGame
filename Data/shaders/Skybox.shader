@@ -14,6 +14,12 @@ Shader "Skybox"
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
 			}
+
+			ResourceLayoutBinding "ObjectVS"
+			{
+				DescriptorType = UniformBufferDynamic
+				StageFlags = Vertex
+			}
 		}
 
 		ResourceLayout
@@ -62,7 +68,7 @@ Shader "Skybox"
 			{
 				outUVW = inPos;
 				outUVW.y *= -1.0;
-				gl_Position = ViewProj * model*vec4(inPos.xyz, 1.0);
+				gl_Position = ViewProj * Model[0] *vec4(inPos.xyz, 1.0);
 			}
 
 
