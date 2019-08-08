@@ -53,7 +53,7 @@ Shader "Basic"
 			void main() 
 			{
 				out_TexCoord = in_TexCoord;
-				gl_Position = ViewProj * Model[0]* vec4(in_Position.xyz, 1.0);
+				gl_Position = ViewProj * Model* vec4(in_Position.xyz, 1.0);
 			}
 
 		}

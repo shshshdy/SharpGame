@@ -32,13 +32,6 @@ Shader "Skybox"
 				StageFlags = Fragment
 			}
 		}
-
-		PushConstant
-		{
-			StageFlags = Vertex
-			Offset = 0
-			Size = 64		
-		}
 		
 		@VertexShader
 		{
@@ -48,12 +41,6 @@ Shader "Skybox"
 			#extension GL_ARB_shading_language_420pack : enable
 
             #include "UniformsVS.glsl"
-
-
-            layout(push_constant) uniform PushConsts
-            {
-                mat4 model;
-            };
 
 			layout (location = 0) in vec3 inPos;
 
@@ -68,7 +55,7 @@ Shader "Skybox"
 			{
 				outUVW = inPos;
 				outUVW.y *= -1.0;
-				gl_Position = ViewProj * Model[0] *vec4(inPos.xyz, 1.0);
+				gl_Position = ViewProj * Model *vec4(inPos.xyz, 1.0);
 			}
 
 

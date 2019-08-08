@@ -50,7 +50,6 @@ Shader "Reflect"
 			#include "UniformsVS.glsl"
 
 			layout(push_constant) uniform PushConsts{
-			//	mat4 model;
 				float lodBias;
 			};
 
@@ -71,8 +70,8 @@ Shader "Reflect"
 
 			void main() 
 			{
-				mat4 worldView = View * Model[0];
-				gl_Position = ViewProj * Model[0] * vec4(inPos.xyz, 1.0);
+				mat4 worldView = View * Model;
+				gl_Position = ViewProj * Model * vec4(inPos.xyz, 1.0);
 				
 				outPos = vec3(worldView * vec4(inPos, 1.0));
 				outNormal = mat3(worldView) * inNormal;

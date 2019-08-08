@@ -1,4 +1,4 @@
-Shader "Textured"
+Shader "UnLit"
 {
 	Properties = {}
 
@@ -14,6 +14,12 @@ Shader "Textured"
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
 			}
+
+			ResourceLayoutBinding "ObjectVS"
+			{
+				DescriptorType = UniformBufferDynamic
+				StageFlags = Vertex
+			}
 		}
 
 		ResourceLayout
@@ -27,22 +33,11 @@ Shader "Textured"
 			}
 		}
 
-		PushConstant
-		{
-			StageFlags = Vertex
-			Offset = 0
-			Size = 64		
-		}
-		
 		@VertexShader
 		{
 			#version 450
 			
 			#include "UniformsVS.glsl"
-
-			layout(push_constant) uniform PushConsts {
-				mat4 model;
-			};
 
 			layout (location = 0) in vec3 in_Position;
 			layout (location = 1) in vec3 in_Normal;
@@ -57,7 +52,7 @@ Shader "Textured"
 
 			void main() {
 				out_TexCoord = in_TexCoord;
-				gl_Position = ViewProj * model* vec4(in_Position.xyz, 1.0);
+				gl_Position = ViewProj * Model* vec4(in_Position.xyz, 1.0);
 			}
 
 		}

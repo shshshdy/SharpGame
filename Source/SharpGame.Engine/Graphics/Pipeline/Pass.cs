@@ -121,6 +121,7 @@ namespace SharpGame
 
         private PushConstantRange[] pushConstant;
         public PushConstantRange[] PushConstant { get => pushConstant; set => pushConstant = value; }
+        public List<string> PushConstantNames { get; set; }
 
         [IgnoreDataMember]
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;

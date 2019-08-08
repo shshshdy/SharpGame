@@ -50,21 +50,20 @@ namespace SharpGame
 
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct MaterialVS
-    {
-        public vec4 UOffset;
-        public vec4 VOffset;
-    }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct ObjectVS
     {
         public mat4 Model;
-        //mat3 cBillboardRot;
-        //vec4 cSkinMatrices [64*3];
+        public vec4 UOffset;
+        public vec4 VOffset;
     };
 
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct SkinVS
+    {
+        fixed float SkinMatrices[16*64];
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct MaterialPS

@@ -1,6 +1,7 @@
 ﻿using SharpShaderCompiler;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace SharpGame
@@ -113,7 +114,7 @@ namespace SharpGame
                         break;
 
                     case "PushConstant":
-                        pass.PushConstant = ReadPushConstant(kvp.Value);
+                        ReadPushConstant(pass, kvp.Value);
                         break;
 
                     case "@VertexShader":
@@ -188,14 +189,26 @@ namespace SharpGame
             return layout;
         }
 
-        PushConstantRange[] ReadPushConstant(List<AstNode> layout)
+        void ReadPushConstant(Pass pass, List<AstNode> layout)
         {
+            pass.PushConstantNames = new List<string>();
             List<PushConstantRange> layouts = new List<PushConstantRange>();
             foreach (var node in layout)
             {
+                if (!string.IsNullOrEmpty(node.value))
+                {
+                    pass.PushConstantNames.Add(node.value);
+                }
+                else
+                {
+                    Debug.Assert(false);
+                    pass.PushConstantNames.Add(string.Empty);
+                }
+
                 layouts.Add(ReadPushConstant(node));
             }
-            return layouts.ToArray(); ;
+
+            pass.PushConstant = layouts.ToArray(); ;
         }
 
         PushConstantRange ReadPushConstant(AstNode node)
