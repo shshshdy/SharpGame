@@ -22,6 +22,8 @@
 
 		PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
 
+        LAYOUT, UNIFORM, IN, OUT,
+
 		EOF,
 	}
 }

@@ -103,22 +103,10 @@ namespace SharpGame
             return dest;
         }
 
-        public Node CreateChild(string name, int id = 0)
+        public Node CreateChild(string name)
         {
             Node newNode = new Node();
-            newNode.Name = name;
-
-            // If zero ID specified, or the ID is already taken, let the scene assign
-            if (scene_ != null)
-            {
-                if (id <= 0 || scene_.GetNode(id) != null)
-                    id = scene_.GetFreeNodeID();
-
-                newNode.ID = id;
-            }
-            else
-                newNode.ID = id;
-
+            newNode.Name = name;            
             AddChild(newNode);
             return newNode;
         }

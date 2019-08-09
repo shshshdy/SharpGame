@@ -45,7 +45,7 @@ namespace SharpGame
         }
     }
 
-    public interface ISceneAccumulator
+    public interface IDrawableAccumulator
     {
         void InsertDrawable(Drawable drawable);
         void RemoveDrawable(Drawable drawable);

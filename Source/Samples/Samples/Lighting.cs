@@ -16,14 +16,12 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = -2)]
     public unsafe class Lighting : Sample
     {
-        Texture2D colorMap = new Texture2D();
-
         DeviceBuffer ubLight = new DeviceBuffer();
 
         UboVS uboVS = new UboVS() { lightPos = new Vector4(0.0f, 1.0f, -5.0f, 1.0f) };
         
         Vector3 rotation = new Vector3(-0.5f, 112.75f + 180, 0.0f);
-     
+        Node node;
         public override void Init()
         {
             base.Init();
@@ -39,7 +37,7 @@ namespace SharpGame.Samples
             camera.Fov = MathUtil.DegreesToRadians(60);
             camera.AspectRatio = (float)graphics.Width / graphics.Height;
 
-            var node = scene.CreateChild("Mesh");
+            node = scene.CreateChild("Mesh");
             var staticModel = node.AddComponent<StaticModel>();
             staticModel.SetModel("models/voyager/voyager.dae");
 
@@ -52,20 +50,20 @@ namespace SharpGame.Samples
             staticModel.SetMaterial(mat);
 
             Renderer.Instance.MainView.Attach(camera, scene);
-        }
-        
-        public override void Update()
-        {
-            base.Update();
-
-            rotation.Y += Time.Delta * 10;
 
             ubLight.SetData(ref uboVS);
         }
 
+        public override void Update()
+        {
+            base.Update();
+
+            node.Yaw(Time.Delta * 0.1f, TransformSpace.LOCAL);
+
+        }
+
         protected override void Destroy()
         {
-            colorMap.Dispose();
             ubLight.Dispose();
 
             base.Destroy();

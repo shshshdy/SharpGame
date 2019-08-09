@@ -5,8 +5,8 @@ Shader "UI"
 	Pass "main"
 	{
 		CullMode = None
-		DepthTestEnable = false
-		DepthWriteEnable = false
+		DepthTest = false
+		DepthWrite = false
 		BlendMode = Alpha
 		
 		ResourceLayout

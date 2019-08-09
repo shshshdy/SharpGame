@@ -9,47 +9,13 @@ using System.Threading.Tasks;
 namespace SharpGame
 {
     [DataContract]
-    public class Scene : Node, ISceneAccumulator
+    public class Scene : Node, IDrawableAccumulator
     {
-        const int FIRST_LOCAL_ID = 0x01000000;
-        const int LAST_LOCAL_ID = int.MaxValue;
-        
-        protected Dictionary<int, Node> localNodes_ = new Dictionary<int, Node>();
-        /// Next free local node ID.
-        protected int localNodeID_;
-        protected ISceneAccumulator accumulator_;
+        protected IDrawableAccumulator accumulator_;
         protected List<Drawable> drawables_ = new List<Drawable>();
         public Scene()
         {
-            ID = GetFreeNodeID();
             NodeAdded(this);
-        }
-
-        public Node GetNode(int id)
-        {
-            Node ret;
-            if (localNodes_.TryGetValue(id, out ret))
-            {
-                return ret;
-            }
-
-            return null;
-        }
-        
-        public int GetFreeNodeID()
-        {
-            for (;;)
-            {
-                int ret = localNodeID_;
-                if (localNodeID_ < LAST_LOCAL_ID)
-                    ++localNodeID_;
-                else
-                    localNodeID_ = FIRST_LOCAL_ID;
-
-                if (!localNodes_.ContainsKey(ret))
-                    return ret;
-            }
-
         }
         
         public void NodeAdded(Node node)
@@ -63,24 +29,6 @@ namespace SharpGame
                 oldScene.NodeRemoved(node);
 
             node.Scene = this;
-
-            // If the new node has an ID of zero (default), assign a replicated ID now
-            int id = node.ID;
-            if (id == 0)
-            {
-                id = GetFreeNodeID();
-                node.ID = id;
-            }
-
-            // If node with same ID exists, remove the scene reference from it and overwrite with the new node
-
-            Node existNode = GetNode(id);
-            if (existNode != null && existNode != this)
-            {
-                NodeRemoved(existNode);
-            }
-
-            localNodes_[id] = node;
             
             foreach (var c in node.ComponentList)
             {
@@ -100,9 +48,6 @@ namespace SharpGame
             {
                 return;
             }
-
-            int id = node.ID;        
-            localNodes_.Remove(id);
 
             foreach (var c in node.ComponentList)
             {
@@ -127,9 +72,9 @@ namespace SharpGame
 
             if(component.Node == this)
             {
-                if(component is ISceneAccumulator)
+                if(component is IDrawableAccumulator)
                 {
-                    accumulator_ = component as ISceneAccumulator;
+                    accumulator_ = component as IDrawableAccumulator;
                     OnAttachAccumutor(accumulator_);
                 }
             }
@@ -152,7 +97,7 @@ namespace SharpGame
             }
         }
 
-        void OnAttachAccumutor(ISceneAccumulator accum)
+        void OnAttachAccumutor(IDrawableAccumulator accum)
         {
             foreach(Drawable drawable in drawables_)
             {
@@ -160,7 +105,7 @@ namespace SharpGame
             }
         }
 
-        void OnDetachAccumutor(ISceneAccumulator accum)
+        void OnDetachAccumutor(IDrawableAccumulator accum)
         {
             foreach(Drawable drawable in accum)
             {

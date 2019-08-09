@@ -24,7 +24,12 @@ namespace SharpGame
 			{ "true", TRUE },
 			{ "var", VAR },
 			{ "while", WHILE },
-		};
+
+            { "layout", LAYOUT },
+            { "uniform", UNIFORM },
+            { "in", IN },
+            { "out", OUT },
+        };
 
 		private readonly List<Token> _tokens = new List<Token>();
 		private int _start = 0;
@@ -51,7 +56,7 @@ namespace SharpGame
 			return _tokens;
 		}
 
-		private void ScanToken()
+		protected void ScanToken()
 		{
 			var c = Advance();
 			switch (c)
