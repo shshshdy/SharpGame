@@ -77,8 +77,6 @@ namespace SharpGame.Samples
 
             ubObjectVS.Flush();
 
-            //ubObjectVS.SetData(ref worldTransform);
-
             frameGraph.AddRenderPass(new GraphicsPass
             {
                 OnDraw = CustomDraw

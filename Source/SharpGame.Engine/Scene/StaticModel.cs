@@ -113,6 +113,11 @@ namespace SharpGame
 
         }
 
+        public void SetModel(string modelFile)
+        {
+            SetModelAttr(SharpGame.ResourceRef.Create<Model>(modelFile));
+        }
+
         public void SetModelAttr(ResourceRef resourceRef)
         {
             var model = Resources.Instance.Load<Model>(resourceRef.FileID);

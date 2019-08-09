@@ -22,7 +22,7 @@ namespace SharpGame
         {
         }
 
-        public ResourceRef Create<T>(string file)
+        public static ResourceRef Create<T>(string file)
         {
             return new ResourceRef(typeof(T), Resources.Instance.GetGuid(file), null);
         }

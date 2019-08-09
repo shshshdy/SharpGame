@@ -43,17 +43,6 @@ namespace SharpGame
     {
         public UniformBlock pushConstants;
         public List<UniformBlock> descriptorSets;
-
-        public List<uint> dynamicSets;
-        public List<uint> globalSets;
-        public List<uint> staticSets;
-
-        public uint dynamicSetSize;
-        public uint staticSetSize;
-        public uint numDynamicUniforms;
-        public uint numDynamicTextures;
-        public uint numStaticUniforms;
-        public uint numStaticTextures;
     }
 
     public class ShaderModule : Object

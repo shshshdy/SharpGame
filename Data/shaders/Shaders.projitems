@@ -14,7 +14,7 @@
     <None Include="$(MSBuildThisFileDirectory)GLSL\UniformsPS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\UniformsVS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ImGUI.shader" />
-    <None Include="$(MSBuildThisFileDirectory)Mesh.shader" />
+    <None Include="$(MSBuildThisFileDirectory)LitSolid.shader" />
     <None Include="$(MSBuildThisFileDirectory)Pbr.shader" />
     <None Include="$(MSBuildThisFileDirectory)Reflect.shader" />
     <None Include="$(MSBuildThisFileDirectory)Skybox.shader" />

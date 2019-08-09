@@ -83,6 +83,10 @@ namespace SharpGame
                         continue;
                     }
 
+                    foreach(var shaderParam in ShaderParameters)
+                    {
+
+                    }
 
                 }
 
