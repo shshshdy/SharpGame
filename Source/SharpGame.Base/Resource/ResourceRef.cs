@@ -22,18 +22,6 @@ namespace SharpGame
         {
         }
 
-        public static ResourceRef Create<T>(string file)
-        {
-            return new ResourceRef(typeof(T), Resources.Instance.GetGuid(file), null);
-        }
-
-//         public ResourceRef(string type, Guid guid, Resource resource = null)
-//         {
-//             this.Type = type;
-//             this.FileID = guid;
-//             this.resource = resource;
-//         }
-
         public ResourceRef(Type type, Guid guid, Resource resource = null)            
         {
             Type = type.Name;
@@ -41,10 +29,11 @@ namespace SharpGame
             this.resource = resource;
         }
 
-//         public ResourceRef(string type, string file)
-//             : this(type, Resources.Instance.GetGuid(file), null)
-//         {
-//         }
+        public static ResourceRef Create<T>(string file)
+        {
+            return new ResourceRef(typeof(T), Resources.Instance.GetGuid(file), null);
+        }
+
     }
 
     [DataContract]

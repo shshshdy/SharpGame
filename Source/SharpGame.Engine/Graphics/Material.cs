@@ -20,6 +20,8 @@ namespace SharpGame
 
         public Shader Shader { get; set; }
         IntPtr pushConstBuffer;
+        int minPushConstRange = 1000;
+        int maxPushConstRange = 0;
         int maxPushConstantsSize;
         public Material()
         {
@@ -76,15 +78,32 @@ namespace SharpGame
             {
                 for (int i = 0; i < mainPass.PushConstantNames.Count; i++)
                 {
+                    var constName = mainPass.PushConstantNames[i];
                     var pushConst = mainPass.PushConstant[i];
                     if(pushConst.offset + pushConst.size > maxPushConstantsSize)
                     {
-                        Log.Error("PushConst out of range" + mainPass.PushConstantNames[i]);
+                        Log.Error("PushConst out of range" + constName);
                         continue;
                     }
 
-                    foreach(var shaderParam in ShaderParameters)
+                    if(pushConst.offset < minPushConstRange)
                     {
+                        minPushConstRange = pushConst.offset;
+                    }
+
+                    if(pushConst.offset + pushConst.size > maxPushConstRange)
+                    {
+                        maxPushConstRange = pushConst.offset + pushConst.size;
+                    }
+
+                    for (int j = 0; j < ShaderParameters.Count; j++)
+                    {
+                        ref ShaderParameter shaderParam = ref ShaderParameters.At(j);
+                        if (shaderParam.name == constName)
+                        {
+                            shaderParam.addr = pushConstBuffer + pushConst.offset;
+                            break;
+                        }
 
                     }
 
@@ -109,12 +128,12 @@ namespace SharpGame
             return ref ShaderParameter.Null;
         }
 
-        public void SetShaderParameter<T>(StringID name, T val)
+        public void SetShaderParameter<T>(StringID name, ref T val)
         {
             ref ShaderParameter param = ref GetShaderParameter(name);
             if (!param.IsNull)
             {
-                param.SetValue(val);
+                param.SetValue(ref val);
             }
             else
             {
@@ -122,7 +141,7 @@ namespace SharpGame
                 {
                     name = name
                 };
-                shaderParam.SetValue(val);
+                shaderParam.SetValue(ref val);
                 ShaderParameters.Add(shaderParam);
             }
         }

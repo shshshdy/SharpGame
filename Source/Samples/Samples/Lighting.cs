@@ -43,7 +43,7 @@ namespace SharpGame.Samples
             var staticModel = node.AddComponent<StaticModel>();
             staticModel.SetModel("models/voyager/voyager.dae");
 
-            LoadMesh();
+            var colorMap = Resources.Load<Texture2D>("models/voyager/voyager_bc3_unorm.ktx");
 
             var mat = new Material("Shaders/LitSolid.shader");
             mat.SetTexture("DiffMap", colorMap);
@@ -53,28 +53,7 @@ namespace SharpGame.Samples
 
             Renderer.Instance.MainView.Attach(camera, scene);
         }
-
-        void LoadMesh()
-        {
-            if (Device.Features.textureCompressionBC == 1)
-            {
-                colorMap.LoadFromFile("models/voyager/voyager_bc3_unorm.ktx",
-                    Format.Bc3UnormBlock);
-            }
-            else if (Device.Features.textureCompressionASTC_LDR == 1)
-            {
-                colorMap.LoadFromFile("models/voyager/voyager_astc_8x8_unorm.ktx", Format.Astc8x8UnormBlock);
-            }
-            else if (Device.Features.textureCompressionETC2 == 1)
-            {
-                colorMap.LoadFromFile("models/voyager/voyager_etc2_unorm.ktx", Format.Etc2R8g8b8a8UnormBlock);
-            }
-            else
-            {
-                throw new InvalidOperationException("Device does not support any compressed texture format!");
-            }
-        }
-
+        
         public override void Update()
         {
             base.Update();

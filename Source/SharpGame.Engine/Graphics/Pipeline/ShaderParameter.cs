@@ -68,16 +68,12 @@ namespace SharpGame
         public StringID name;
         public UniformType uniformType;
         public UniformData data;
-
-        internal int set;
-        internal int binding;
-        internal ResourceSet resourceSet;
-
+        internal IntPtr addr;
         public bool IsNull => name.IsNullOrEmpty;
 
         public static ShaderParameter Null = new ShaderParameter();
 
-        public void SetValue<T>(T val)
+        public void SetValue<T>(ref T val)
         {
             switch (val)
             {
