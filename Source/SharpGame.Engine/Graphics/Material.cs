@@ -19,13 +19,18 @@ namespace SharpGame
         public List<ResourceSet> ResourceSet { get => resourceSet; set => resourceSet = value; }
 
         public Shader Shader { get; set; }
-
+        IntPtr pushConstBuffer;
+        int maxPushConstantsSize;
         public Material()
         {
+            maxPushConstantsSize = (int)Device.Properties.limits.maxPushConstantsSize;
+            pushConstBuffer = Utilities.Alloc(maxPushConstantsSize);
         }
 
         public Material(string shader)
         {
+            maxPushConstantsSize = (int)Device.Properties.limits.maxPushConstantsSize;
+            pushConstBuffer = Utilities.Alloc(maxPushConstantsSize);
             ShaderName = ResourceRef.Create<Shader>(shader);
 
             OnBuild();
@@ -33,7 +38,10 @@ namespace SharpGame
 
         public Material(Shader shader)
         {
+            maxPushConstantsSize = (int)Device.Properties.limits.maxPushConstantsSize;
+            pushConstBuffer = Utilities.Alloc(maxPushConstantsSize);
             Shader = shader;
+
             OnBuild();
         }
 
@@ -49,7 +57,13 @@ namespace SharpGame
                 return false;
             }
 
-            foreach (var layout in Shader.Main.ResourceLayout)
+            var mainPass = Shader.Main;
+            if(mainPass == null)
+            {
+                return false;
+            }
+
+            foreach (var layout in mainPass.ResourceLayout)
             {
                 if (layout.Dynamic)
                 {
@@ -58,6 +72,21 @@ namespace SharpGame
 
             }
 
+            if(mainPass.PushConstantNames != null)
+            {
+                for (int i = 0; i < mainPass.PushConstantNames.Count; i++)
+                {
+                    var pushConst = mainPass.PushConstant[i];
+                    if(pushConst.offset + pushConst.size > maxPushConstantsSize)
+                    {
+                        Log.Error("PushConst out of range" + mainPass.PushConstantNames[i]);
+                        continue;
+                    }
+
+
+                }
+
+            }
 
             return true;
         }
@@ -179,6 +208,13 @@ namespace SharpGame
                     }
                 }
             }
+        }
+
+        protected override void Destroy()
+        {
+            base.Destroy();
+
+            Utilities.Free(pushConstBuffer);
         }
 
     }

@@ -94,9 +94,7 @@ namespace SharpGame.Samples
         bool hudOpen;
         bool showStats = false;
         const float DISTANCE = 10.0f;
-
-        float[] fps = new float[1000];
-
+        
         private void HandleGUI(GUIEvent e)
         {
             var io = ImGui.GetIO();
@@ -109,7 +107,7 @@ namespace SharpGame.Samples
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
             }
 
-            ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+            ImGui.SetNextWindowBgAlpha(0.5f);
             if (ImGui.Begin("Perf HUD", ref hudOpen, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
                 ImGui.Text("Selected Sample:");
@@ -145,13 +143,11 @@ namespace SharpGame.Samples
                 Vector2 window_pos_pivot = new Vector2(0.5f, 1.0f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
                 ImGui.SetNextWindowSize(io.DisplaySize * 0.6f);
-                ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+                ImGui.SetNextWindowBgAlpha(0.5f);
+
                 if (ImGui.Begin("Stats", ref showStats, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
                 {
                     perfTree.Draw();
-
-                    //fps[(Time.FrameNum / 10) % fps.Length] = Fps;
-                    //ImGui.PlotLines("fps", ref fps[0], fps.Length, 0, "fps", 2, 4, new Vector2(800, 200 ));
                 }
 
                 ImGui.End();

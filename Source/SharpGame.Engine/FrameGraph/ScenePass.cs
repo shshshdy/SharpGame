@@ -107,7 +107,7 @@ namespace SharpGame
 
                 foreach (var batch in view.batches)
                 {
-                    DrawBatch(cmd, batch, view.perFrameSet);
+                    DrawBatch(cmd, batch, view.PerObjectSet, batch.offset);
                 }
 
                 cmd.End();

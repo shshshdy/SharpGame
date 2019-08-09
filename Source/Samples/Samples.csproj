@@ -13,15 +13,6 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\Data\shaders\Basic.shader" Link="Shaders\Basic.shader" />
-    <None Include="..\..\Data\shaders\ImGUI.shader" Link="Shaders\ImGUI.shader" />
-    <None Include="..\..\Data\shaders\Mesh.shader" Link="Shaders\Mesh.shader" />
-    <None Include="..\..\Data\shaders\Pbr.shader" Link="Shaders\Pbr.shader" />
-    <None Include="..\..\Data\shaders\Reflect.shader" Link="Shaders\Reflect.shader" />
-    <None Include="..\..\Data\shaders\Skybox.shader" Link="Shaders\Skybox.shader" />
-    <None Include="..\..\Data\shaders\UniformsPS.glsl" Link="Shaders\UniformsPS.glsl" />
-    <None Include="..\..\Data\shaders\UniformsVS.glsl" Link="Shaders\UniformsVS.glsl" />
-    <None Include="..\..\Data\shaders\UnLit.shader" Link="Shaders\UnLit.shader" />
     <None Include="..\SharpGame.Sdl2\native\win-x64\SDL2.dll" Link="SDL2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

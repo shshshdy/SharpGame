@@ -32,7 +32,6 @@ namespace SharpGame.Samples
                         {
                             var node = scene.CreateChild("Model");
                             node.Position = new Vector3(i * 50 - 25 * 50, 50 * k, j * 50 - 25 * 50);
-                            //node.Rotation = Quaternion.FromEuler(0, MathUtil.DegreesToRadians(MathUtil.Random(0, 90)), 0);
                             var staticModel = node.AddComponent<StaticModel>();
                             staticModel.SetModel(model);
                             staticModel.SetMaterial(mat);
@@ -41,7 +40,7 @@ namespace SharpGame.Samples
                 }
             }
 
-            Renderer.Instance.MainView.Attach(camera, scene);
+            Renderer.MainView.Attach(camera, scene);
             
         }
     }

@@ -27,13 +27,6 @@ Shader "Pbr"
 			}
 		}
 
-		PushConstant
-		{
-			StageFlags = Vertex
-			Offset = 0
-			Size = 64		
-		}
-		
 		@VertexShader
 		{
 			#version 450

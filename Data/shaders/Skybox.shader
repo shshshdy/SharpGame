@@ -6,6 +6,8 @@ Shader "Skybox"
 	{
 		CullMode = Front
 		FrontFace = CounterClockwise
+        DepthTestEnable = false
+        DepthWriteEnable = false
 
 		ResourceLayout
 		{
@@ -22,7 +24,7 @@ Shader "Skybox"
 			}
 		}
 
-		ResourceLayout
+		ResourceLayout PerMaterial
 		{
 			Dynamic = true
 			
@@ -55,7 +57,7 @@ Shader "Skybox"
 			{
 				outUVW = inPos;
 				outUVW.y *= -1.0;
-				gl_Position = ViewProj * Model *vec4(inPos.xyz, 1.0);
+				gl_Position = ViewProj * vec4(inPos.xyz + CameraPos, 1.0);
 			}
 
 
@@ -76,7 +78,7 @@ Shader "Skybox"
 
 			void main() 
 			{
-				outFragColor = texture(samplerCubeMap, inUVW);
+                outFragColor = texture(samplerCubeMap, inUVW);
 			}
 
 		}

@@ -36,7 +36,7 @@ Shader "Reflect"
 		PushConstant lodBias
 		{
 			StageFlags = Vertex
-			Offset = 64
+			Offset = 0
 			Size = 4
 		}
 		

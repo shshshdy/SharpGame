@@ -1,4 +1,4 @@
-Shader "UnLit"
+Shader "Unlit"
 {
 	Properties = {}
 

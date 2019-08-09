@@ -15,8 +15,10 @@ namespace SharpGame
         protected override bool OnLoad(Shader resource, File stream)
         {
             var filePath = FileUtil.StandardlizeFile(stream.Name);
-            filePath = FileUtil.GetPath(filePath);
+            filePath = FileUtil.GetPath(stream.Name);
+            var glslPath = filePath + "GLSL";
             FileSystem.AddResourceDir(filePath);
+            FileSystem.AddResourceDir(glslPath);
 
             try
             {
@@ -35,6 +37,7 @@ namespace SharpGame
             finally
             {
                 FileSystem.RemoveResourceDir(filePath);
+                FileSystem.RemoveResourceDir(glslPath);
             }
 
 
@@ -89,10 +92,12 @@ namespace SharpGame
                         pass.FrontFace = (FrontFace)Enum.Parse(typeof(FrontFace), kvp.Value[0].value);
                         break;
 
+                    case "DepthTest":
                     case "DepthTestEnable":
                         pass.DepthTestEnable = bool.Parse(kvp.Value[0].value);
                         break;
 
+                    case "DepthWrite":
                     case "DepthWriteEnable":
                         pass.DepthWriteEnable = bool.Parse(kvp.Value[0].value);
                         break;
@@ -144,15 +149,15 @@ namespace SharpGame
         ResourceLayout ReadResourceLayout(AstNode node)
         {
             ResourceLayout layout = new ResourceLayout();
+            var n = node.GetChild("Dynamic");
+            if (n != null)
+            {
+                layout.Dynamic = bool.Parse(n.value);
+            }
+
             node.GetChild("ResourceLayoutBinding", out var resourceLayoutBinding);
             foreach(var c in resourceLayoutBinding)
             {
-                var n = node.GetChild("Dynamic");
-                if(n != null)
-                {
-                    layout.Dynamic = bool.Parse(n.value);
-                }
-
                 ResourceLayoutBinding binding = new ResourceLayoutBinding
                 {
                     binding = (uint)layout.Bindings.Count

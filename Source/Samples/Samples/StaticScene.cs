@@ -52,7 +52,7 @@ namespace SharpGame.Samples
                 }
             }
 
-            Renderer.Instance.MainView.Attach(camera, scene);
+            Renderer.MainView.Attach(camera, scene);
 
         }
     }

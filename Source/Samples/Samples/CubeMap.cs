@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 7)]
+    [SampleDesc(sortOrder = -7)]
 
     public class CubeMap : Sample
     {
@@ -15,7 +15,6 @@ namespace SharpGame.Samples
 
             var cameraNode = scene.CreateChild("Camera");
             cameraNode.Position = new Vector3(0, 5, -10);
-            //cameraNode.LookAt(Vector3.Zero);
             cameraNode.Rotation = Quaternion.FromEuler(MathUtil.DegreesToRadians(30), 0, 0);
 
             camera = cameraNode.CreateComponent<Camera>();
