@@ -11,11 +11,6 @@ namespace SharpGame
 
     public class ResourceSet : IDisposable
     {
-        public const int PerFrame = 0;
-        public const int PerShader = 1;
-        public const int PerObject = 2;
-        public const int PerMaterial = 3;
-
         public int Set => resourceLayout.Set;
 
         internal ResourceLayout resourceLayout;

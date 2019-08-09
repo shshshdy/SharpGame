@@ -26,8 +26,6 @@ Shader "Skybox"
 
 		ResourceLayout PerMaterial
 		{
-			Dynamic = true
-			
 			ResourceLayoutBinding "samplerCubeMap"
 			{
 				DescriptorType = CombinedImageSampler

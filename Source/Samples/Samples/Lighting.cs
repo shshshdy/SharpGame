@@ -49,7 +49,7 @@ namespace SharpGame.Samples
             mat.SetBuffer("UBO", ubLight);
             staticModel.SetMaterial(mat);
 
-            Renderer.Instance.MainView.Attach(camera, scene);
+            Renderer.MainView.Attach(camera, scene);
 
             ubLight.SetData(ref uboVS);
         }

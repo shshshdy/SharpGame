@@ -67,7 +67,7 @@ namespace SharpGame
 
             foreach (var layout in mainPass.ResourceLayout)
             {
-                if (layout.Dynamic)
+                if (layout.PerMaterial)
                 {
                     resourceSet.Add(new ResourceSet(layout));
                 }

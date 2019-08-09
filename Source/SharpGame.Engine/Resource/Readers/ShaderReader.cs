@@ -148,12 +148,8 @@ namespace SharpGame
 
         ResourceLayout ReadResourceLayout(AstNode node)
         {
-            ResourceLayout layout = new ResourceLayout();
-            var n = node.GetChild("Dynamic");
-            if (n != null)
-            {
-                layout.Dynamic = bool.Parse(n.value);
-            }
+            ResourceLayout layout = new ResourceLayout();            
+            layout.PerMaterial = (string.Compare(node.value, "PerMaterial", true) == 0);            
 
             node.GetChild("ResourceLayoutBinding", out var resourceLayoutBinding);
             foreach(var c in resourceLayoutBinding)
@@ -251,11 +247,12 @@ namespace SharpGame
         ShaderModule LoadShaderModel(ShaderStage shaderStage, string code)
         {
             var c = new ShaderCompiler();
-            var o = new CompileOptions();
-
-            o.Language = CompileOptions.InputLanguage.GLSL;
-            o.Target = CompileOptions.Environment.Vulkan;
-            o.IncludeCallback = IncludeHandler;
+            var o = new CompileOptions
+            {
+                Language = CompileOptions.InputLanguage.GLSL,
+                Target = CompileOptions.Environment.Vulkan,
+                IncludeCallback = IncludeHandler
+            };
 
             ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;
             switch(shaderStage)

@@ -20,10 +20,8 @@ Shader "LitSolid"
             }
 		}
 		
-		ResourceLayout
+		ResourceLayout PerMaterial
 		{
-			Dynamic = true
-			
 			ResourceLayoutBinding UBO
 			{
 				DescriptorType = UniformBuffer
@@ -32,10 +30,8 @@ Shader "LitSolid"
 
 		}
 	
-		ResourceLayout
+		ResourceLayout PerMaterial
 		{
-			Dynamic = true
-			
 			ResourceLayoutBinding DiffMap
 			{
 				DescriptorType = CombinedImageSampler

@@ -22,10 +22,8 @@ Shader "Unlit"
 			}
 		}
 
-		ResourceLayout
-		{
-			Dynamic = true
-			
+		ResourceLayout PerMaterial
+		{			
 			ResourceLayoutBinding "DiffMap"
 			{
 				DescriptorType = CombinedImageSampler

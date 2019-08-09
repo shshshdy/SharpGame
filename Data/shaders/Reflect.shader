@@ -22,10 +22,8 @@ Shader "Reflect"
 			}
 		}
 
-		ResourceLayout
+		ResourceLayout PerMaterial
 		{
-			Dynamic = true
-			
 			ResourceLayoutBinding "samplerColor"
 			{
 				DescriptorType = CombinedImageSampler
