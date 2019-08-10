@@ -236,6 +236,24 @@ namespace SharpGame
             return ResourceLayout[index];
         }
 
+        public bool GetPushConstant(string name, out PushConstantRange pushConstantRange)
+        {
+            if(PushConstantNames != null)
+            {
+                for (int i = 0; i < PushConstantNames.Count; i++)
+                {
+                    if (PushConstantNames[i] == name)
+                    {
+                        pushConstantRange = PushConstant[i];
+                        return true;
+                    }
+                }
+            }
+          
+            pushConstantRange = default;
+            return false;
+        }
+
         public unsafe uint GetShaderStageCreateInfos(VkPipelineShaderStageCreateInfo* shaderStageCreateInfo)
         {
             uint count = 0;

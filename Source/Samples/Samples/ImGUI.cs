@@ -17,4 +17,5 @@ namespace SharpGame.Samples
             ImGui.ShowDemoWindow();
         }
     }
+
 }

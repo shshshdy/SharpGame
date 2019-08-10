@@ -288,10 +288,12 @@ namespace SharpGame
                 return null;
             }
 
-            var bc = r.GetString();
-            //todo: parse shader
+            var source = r.GetString();
 
-            var res = c.Compile(bc, stage, o, "main");
+            LayoutParser layoutParser = new LayoutParser(source);
+            var refl = layoutParser.Reflection();
+
+            var res = c.Compile(source, stage, o, "main");
             if (res.NumberOfErrors > 0)
             {
                 Log.Error(res.ErrorMessage);
@@ -302,7 +304,9 @@ namespace SharpGame
                 return null;
             }
 
-            return new ShaderModule(shaderStage, res.GetBytes());
+            var shaderModule = new ShaderModule(shaderStage, res.GetBytes());
+            shaderModule.ShaderReflection = refl;
+            return shaderModule;
         }
 
 

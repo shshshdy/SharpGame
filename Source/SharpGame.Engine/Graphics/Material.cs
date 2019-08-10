@@ -101,7 +101,7 @@ namespace SharpGame
                         ref ShaderParameter shaderParam = ref ShaderParameters.At(j);
                         if (shaderParam.name == constName)
                         {
-                            shaderParam.addr = pushConstBuffer + pushConst.offset;
+                            shaderParam.Bind(pushConstBuffer + pushConst.offset);
                             break;
                         }
 
@@ -128,6 +128,11 @@ namespace SharpGame
             return ref ShaderParameter.Null;
         }
 
+        public void SetShaderParameter<T>(StringID name, T val)
+        {
+            SetShaderParameter(name, ref val);
+        }
+
         public void SetShaderParameter<T>(StringID name, ref T val)
         {
             ref ShaderParameter param = ref GetShaderParameter(name);
@@ -141,8 +146,21 @@ namespace SharpGame
                 {
                     name = name
                 };
+
                 shaderParam.SetValue(ref val);
+
+                var mainPass = Shader.Main;
+                if (mainPass != null)
+                {
+                    if(mainPass.GetPushConstant(name, out var pushConst))
+                    {
+                        shaderParam.Bind(pushConstBuffer + pushConst.offset);
+                    }
+                }
+
                 ShaderParameters.Add(shaderParam);
+
+
             }
         }
 
@@ -230,6 +248,15 @@ namespace SharpGame
                         return;
                     }
                 }
+            }
+        }
+
+        public void PushConstants(Pass pass, CommandBuffer cmd)
+        {
+            int size = maxPushConstRange - minPushConstRange;
+            if (size > 0)
+            {
+                cmd.PushConstants(pass, ShaderStage.Vertex, minPushConstRange, size, pushConstBuffer + minPushConstRange);
             }
         }
 

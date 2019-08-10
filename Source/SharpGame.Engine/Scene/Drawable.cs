@@ -53,6 +53,7 @@ namespace SharpGame
         public int numWorldTransforms;
         /// Per-instance data. If not null, must contain enough data to fill instancing buffer.
         public IntPtr instancingData;
+
         public uint offset;
         /// %Geometry type.
         public GeometryType geometryType;
@@ -188,20 +189,11 @@ namespace SharpGame
 
         public override void OnMarkedDirty(Node node)
         {
-            worldBoundingBoxDirty_ = true;
-            /*
-            if(!updateQueued_ && octant_)
-                octant_->GetRoot()->QueueUpdate(this);
-
-            // Mark zone assignment dirty when transform changes
-            if(node == node_)
-                zoneDirty_ = true;*/
+            worldBoundingBoxDirty_ = true;           
         }
 
         public void MarkForUpdate()
-        {/*
-            if (!updateQueued_ && octant_)
-                octant_->GetRoot()->QueueUpdate(this);*/
+        {
         }
 
         void AddToScene()
@@ -227,20 +219,9 @@ namespace SharpGame
             if(index >= 0)
             {
                 Scene scene = Scene;
-                /*
-                Octree* octree = octant_->GetRoot();
-                if(updateQueued_)
-                    octree->CancelUpdate(this);*/
-
-                // Perform subclass specific deinitialization if necessary
-                OnRemoveFromOctree();
-
+                
                 scene.RemoveDrawable(this);
             }
-        }
-
-        protected virtual void OnRemoveFromOctree()
-        {
         }
 
         public virtual Geometry GetLodGeometry(int batchIndex, int level)
@@ -284,6 +265,7 @@ namespace SharpGame
         public virtual void UpdateGeometry(ref FrameInfo frameInfo)
         {
         }
+
         /*
         public virtual void DrawDebugGeometry(DebugRenderer debug, bool depthTest)
         {

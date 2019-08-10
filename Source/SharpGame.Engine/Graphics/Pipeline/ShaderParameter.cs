@@ -73,6 +73,8 @@ namespace SharpGame
 
         public static ShaderParameter Null = new ShaderParameter();
 
+        public bool IsBinded => addr != IntPtr.Zero;
+
         public void SetValue<T>(ref T val)
         {
             switch (val)
@@ -110,6 +112,48 @@ namespace SharpGame
                     break;
             }
 
+            if(IsBinded)
+            {
+                WriteData();
+            }
+        }
+
+        public void Bind(IntPtr intPtr)
+        {
+            addr = intPtr;
+            WriteData();
+        }
+
+        void WriteData()
+        {
+
+            switch (uniformType)
+            {
+                case UniformType.Bool:
+                    Utilities.Write(addr, ref data.boolVal);
+                    break;
+                case UniformType.Int:
+                    Utilities.Write(addr, ref data.intVal);
+                    break;
+                case UniformType.Float:
+                    Utilities.Write(addr, ref data.floatVal);
+                    break;
+                case UniformType.Vec2:
+                    Utilities.Write(addr, ref data.vec2Val);
+                    break;
+                case UniformType.Vec3:
+                    Utilities.Write(addr, ref data.vec3Val);
+                    break;
+                case UniformType.Vec4:
+                    Utilities.Write(addr, ref data.vec4Val);
+                    break;
+                case UniformType.Color:
+                    Utilities.Write(addr, ref data.colorVal);
+                    break;
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    break;
+            }
         }
     }
 

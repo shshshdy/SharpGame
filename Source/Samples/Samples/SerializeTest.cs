@@ -14,6 +14,13 @@ namespace SharpGame.Samples
             base.Init();
 
             {
+
+                using (File file = FileSystem.Instance.GetFile("Shaders/GLSL/UniformsVS.glsl"))
+                {
+                    LayoutParser layoutParser = new LayoutParser(file);
+                    var layouts = layoutParser.Parse();
+                }
+
                 /*
                 var file = FileSystem.Instance.GetFile("Shaders/Textured.shader");
                 //Shader shader = HoconSerializer.Deserialize<Shader>(file);

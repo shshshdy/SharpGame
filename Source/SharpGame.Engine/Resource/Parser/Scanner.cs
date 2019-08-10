@@ -28,6 +28,7 @@ namespace SharpGame
             { "const", CONST },
             { "layout", LAYOUT },
             { "uniform", UNIFORM },
+            { "readonly", READONLY },
             { "in", IN },
             { "out", OUT },
             { "inout", INOUT },
@@ -67,7 +68,9 @@ namespace SharpGame
 				case ')': AddToken(RIGHT_PAREN); break;
 				case '{': AddToken(LEFT_BRACE); break;
 				case '}': AddToken(RIGHT_BRACE); break;
-				case ',': AddToken(COMMA); break;
+                case '[': AddToken(LEFT_BRACKET); break;
+                case ']': AddToken(RIGHT_BRACKET); break;
+                case ',': AddToken(COMMA); break;
 				case '.': AddToken(DOT); break;
 				case '-': AddToken(MINUS); break;
 				case '+': AddToken(PLUS); break;
@@ -82,14 +85,22 @@ namespace SharpGame
 					{
 						// A comment goes until the end of the line.
 						while (Peek() != '\n' && !IsAtEnd()) Advance();
-					}
-					else
+                    }
+                    else if (Match('*'))
+                    {
+                        ParseMulitLineComment();
+                    }
+                    else
 					{
 						AddToken(SLASH);
 					}
 					break;
 
-				case ' ':
+                case '#':
+                    while (Peek() != '\n' && !IsAtEnd()) Advance();
+                    break;
+
+                case ' ':
 				case '\r':
 				case '\t':
 					// Ignore whitespace.
@@ -113,6 +124,7 @@ namespace SharpGame
 					else
 					{
 						Log.Error(_line, "Unexpected character.");
+                        Advance();
 					}
 					break;
 			}
@@ -177,8 +189,43 @@ namespace SharpGame
 			}
 			AddToken(resolvedType);
 		}
+        private void ParseMulitLineComment()
+        {
+            int depth = 1;
+            int startingLine = _line;
+            while (true)
+            {
+                if (IsAtEnd())
+                {
+                    Log.Error(startingLine, "Unterminated multi line comment");
+                    break;
+                }
 
-		private void AddToken(TokenType type)
+                char current = Advance();
+
+                if (current == '/' && Match('*'))
+                {
+                    // We hit a nested comment
+                    depth++;
+                }
+                else if (current == '*' && Match('/'))
+                {
+                    depth--;
+
+                    if (depth == 0)
+                    {
+                        break;
+                    }
+                }
+
+                if (current == '\n')
+                {
+                    _line++;
+                }
+            }
+        }
+
+        private void AddToken(TokenType type)
 		{
 			AddToken(type, null);
 		}

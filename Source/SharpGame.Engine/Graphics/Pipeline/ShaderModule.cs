@@ -22,18 +22,19 @@ namespace SharpGame
         All = int.MaxValue
     }
 
-    public enum LayoutType
-    {
-        ResourceSet,
-        PushConstant,
-        SpecializationConst
-    }
-
     public struct BlockMember
     {
         public string name;
         public int size;
         public int offset;
+    }
+
+    public struct SpecializationConst
+    {
+        public string name;
+        public uint id;
+        public uint offset;
+        public object value;
     }
 
     public struct UniformBlock
@@ -48,8 +49,9 @@ namespace SharpGame
 
     public class ShaderReflection
     {
-        public UniformBlock pushConstants;
+        public List<BlockMember> pushConstants;
         public List<UniformBlock> descriptorSets;
+        public List<SpecializationConst> specializationConsts;
     }
 
     public class ShaderModule : Object

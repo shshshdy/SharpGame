@@ -7,16 +7,25 @@ namespace SharpGame
 {
     using static TokenType;
 
+    public enum LayoutType
+    {
+        ResourceSet,
+        PushConstant,
+        SpecializationConst
+    }
+
     public class Layout : Stmt
     {
         public LayoutType layoutType;
         public int set;
         public int binding;
-        public int id;
-
+        public uint id;
+        DescriptorType descriptorType;
         public string uniformType;
         public string uniformName;
-
+        public bool isTexture = false;
+        public List<BlockMember> structMembers;
+    
         public class Attribute
         {
             public string name;
@@ -27,18 +36,75 @@ namespace SharpGame
     public class LayoutParser : Parser
     {
         Scanner scanner;
-        public LayoutParser(string path)
+        public LayoutParser(File file)
         {
-            using (File file = FileSystem.Instance.GetFile(path))
-            {
-                string txt = file.ReadAllText();
-                scanner = new Scanner(txt);
-                this.Tokens = scanner.ScanTokens();
-            }
+            string txt = file.ReadAllText();
+            scanner = new Scanner(txt);
+            this.Tokens = scanner.ScanTokens();
+
+        }
+
+        public LayoutParser(string source)
+        {
+            scanner = new Scanner(source);
+            this.Tokens = scanner.ScanTokens();
         }
 
         public LayoutParser(List<Token> tokens) : base(tokens)
         {
+        }
+
+        public ShaderReflection Reflection()
+        {
+            var layouts = Parse();
+            ShaderReflection shaderReflection = new ShaderReflection();
+            foreach(var stmt in layouts)
+            {
+                Layout layout = stmt as Layout;
+                switch(layout.layoutType)
+                {
+                    case LayoutType.ResourceSet:
+                        if(shaderReflection.descriptorSets == null)
+                        {
+                            shaderReflection.descriptorSets = new List<UniformBlock>();
+                        }
+
+                        UniformBlock uniformBlock = new UniformBlock
+                        {
+                            name = layout.uniformName,
+                            set = layout.set,
+                            binding = layout.binding,
+                        };
+
+                        shaderReflection.descriptorSets.Add(uniformBlock);
+
+                        break;
+                    case LayoutType.PushConstant:
+                        if (shaderReflection.pushConstants == null)
+                        {
+                            shaderReflection.pushConstants = new List<BlockMember>();
+                        }
+                        break;
+                    case LayoutType.SpecializationConst:
+                        if (shaderReflection.specializationConsts == null)
+                        {
+                            shaderReflection.specializationConsts = new List<SpecializationConst>();
+                        }
+
+                        SpecializationConst specializationConst = new SpecializationConst
+                        {
+                            name = layout.uniformName,
+                            id = layout.id
+                        };
+
+                        shaderReflection.specializationConsts.Add(specializationConst);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return shaderReflection;
         }
 
         protected override Stmt Declaration()
@@ -60,21 +126,34 @@ namespace SharpGame
                     Layout layout = new Layout();
                     if (Match(UNIFORM))
                     {
+                        if(Match(READONLY))
+                        {
+
+                        }
+
                         var t = Consume(IDENTIFIER, "");
                    
                         switch(t.Lexeme)
                         {
                             case "bool":
                             case "int":
+                            case "uint":
                             case "float":
                             case "vec2":
                             case "vec3":
                             case "vec4":
+                            case "ivec2":
+                            case "ivec3":
+                            case "ivec4":
+                            case "uvec2":
+                            case "uvec3":
+                            case "uvec4":
+                            case "bvec2":
+                            case "bvec3":
+                            case "bvec4":
+                            case "mat2":
+                            case "mat3":
                             case "mat4":
-                            case "sampler1D":
-                            case "sampler2D":
-                            case "sampler3D":
-                            case "samplerCube":
 
                                 layout.uniformType = t.Lexeme;
                                 var uniformName = Advance();
@@ -82,8 +161,28 @@ namespace SharpGame
                                 Synchronize();
                                 break;
 
+                            case "texture1D":
+                            case "texture2D":
+                            case "texture3D":
+                            case "textureCube":
+                            case "sampler":
+                            case "sampler1D":
+                            case "sampler2D":
+                            case "sampler3D":
+                            case "samplerCube":
+                            case "sampler1DArray":
+                            case "sampler2DArray":
+                            case "imageBuffer":
+                            case "uimageBuffer":
+
+
+                                layout.uniformType = t.Lexeme;
+                                var samplerName = Advance();
+                                layout.uniformName = samplerName.Lexeme;
+                                Synchronize();
+                                break;
+
                             default:
-                                //todo: parse struct layout
                                 layout.uniformType = "Struct";
                                 layout.uniformName = t.Lexeme;
                                 if(Check(TokenType.LEFT_BRACE))
@@ -91,6 +190,7 @@ namespace SharpGame
                                     do
                                     {
                                         Advance();
+                                        //todo: parse struct layout
                                     }
                                     while (!Check(RIGHT_BRACE) && !IsAtEnd());
 
@@ -115,15 +215,28 @@ namespace SharpGame
                         {
                             case "bool":
                             case "int":
+                            case "uint":
                             case "float":
                             case "vec2":
                             case "vec3":
                             case "vec4":
+                            case "ivec2":
+                            case "ivec3":
+                            case "ivec4":
+                            case "uvec2":
+                            case "uvec3":
+                            case "uvec4":
+                            case "bvec2":
+                            case "bvec3":
+                            case "bvec4":
+                            case "mat2":
+                            case "mat3":
                             case "mat4":
 
                                 layout.uniformType = t.Lexeme;
                                 var n = Advance();
                                 layout.uniformName = n.Lexeme;
+                                //layout.value = n.Literal;
                                 //TODO: parse default value
                                 Synchronize();
                                 break;
@@ -148,7 +261,7 @@ namespace SharpGame
                     if(attri != null)
                     {
                         layout.layoutType = LayoutType.SpecializationConst;
-                        layout.id = (int)(double)attri.value;
+                        layout.id = (uint)(double)attri.value;
                     }
 
                     attri = attributes.Find(a => a.name == "push_constant");
@@ -171,7 +284,7 @@ namespace SharpGame
 
                     return layout;
                 }
-
+                Advance();
                 return null;
             }
             catch (ParseError)

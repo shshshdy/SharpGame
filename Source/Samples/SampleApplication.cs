@@ -92,6 +92,7 @@ namespace SharpGame.Samples
 
         static int corner = 1;
         bool hudOpen;
+        bool settings = true;
         bool showStats = false;
         const float DISTANCE = 10.0f;
         
@@ -108,6 +109,7 @@ namespace SharpGame.Samples
             }
 
             ImGui.SetNextWindowBgAlpha(0.5f);
+
             if (ImGui.Begin("Perf HUD", ref hudOpen, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
                 ImGui.Text("Selected Sample:");
@@ -117,24 +119,42 @@ namespace SharpGame.Samples
                 }
 
                 ImGui.Separator();
-                ImGui.Value("Single Loop", singleLoop);
-                ImGui.Value("Fps", Fps);
-                ImGui.Value("Msec", Msec);
-                ImGui.Value("Draw Call", Stats.drawCall);
-                ImGui.Value("Triangle Count", Stats.triCount);
-                //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
-                //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
 
-                ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.LogicWait * Timer.MilliSecsPerTick));
-                ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.RenderWait * Timer.MilliSecsPerTick));
-
-                ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
-                ImGui.Checkbox("Show Stats", ref showStats);
+                if (current)
+                {
+                    current.SampleGUI();
+                }
 
             }
 
             ImGui.End();
 
+
+            {
+                Vector2 window_pos = new Vector2(DISTANCE, DISTANCE);
+                Vector2 window_pos_pivot = new Vector2(0.0f, 0.0f);
+                ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+                ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+            }
+
+            if (ImGui.Begin("Settings", ref hudOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            {
+                    ImGui.Value("Single Loop", singleLoop);
+                    ImGui.Value("Fps", Fps);
+                    ImGui.Value("Msec", Msec);
+                    ImGui.Value("Draw Call", Stats.drawCall);
+                    ImGui.Value("Triangle Count", Stats.triCount);
+                    //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
+                    //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
+
+                    ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.LogicWait * Timer.MilliSecsPerTick));
+                    ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.RenderWait * Timer.MilliSecsPerTick));
+
+                    ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
+                    ImGui.Checkbox("Show Stats", ref showStats);
+            }
+            
+            ImGui.End();
 
             if (showStats)
             {
@@ -145,7 +165,7 @@ namespace SharpGame.Samples
                 ImGui.SetNextWindowSize(io.DisplaySize * 0.6f);
                 ImGui.SetNextWindowBgAlpha(0.5f);
 
-                if (ImGui.Begin("Stats", ref showStats, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+                if (ImGui.Begin("Stats", ref showStats, ImGuiWindowFlags.None))
                 {
                     perfTree.Draw();
                 }
@@ -153,14 +173,11 @@ namespace SharpGame.Samples
                 ImGui.End();
 
             }
- 
 
             if (current)
             {
                 current.OnGUI();
             }
-
-
         }
 
         void SetSample(Type type)

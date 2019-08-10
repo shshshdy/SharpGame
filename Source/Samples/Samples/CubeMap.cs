@@ -1,14 +1,17 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 7)]
+    [SampleDesc(sortOrder = -7)]
 
     public class CubeMap : Sample
     {
+        Material material;
+        private float lodBias = 1.0f;
         public override void Init()
         {
             scene = new Scene();
@@ -36,8 +39,9 @@ namespace SharpGame.Samples
             }
                         
             {
-                var mat = new Material("Shaders/Reflect.shader");
-                mat.SetTexture("samplerColor", cubeMap);
+                material = new Material("Shaders/Reflect.shader");
+                material.SetTexture("samplerColor", cubeMap);
+                material.SetShaderParameter("lodBias", lodBias);
 
                 List<string> filenames = new List<string> { "models/sphere.obj"/*, "models/teapot.dae", "models/torusknot.obj"*/ };
                 foreach (string file in filenames)
@@ -49,12 +53,21 @@ namespace SharpGame.Samples
 
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
-                    staticModel.SetMaterial(mat);
+                    staticModel.SetMaterial(material);
                 }
             }
 
-            Renderer.Instance.MainView.Attach(camera, scene);
+            Renderer.MainView.Attach(camera, scene);
 
         }
+
+        public override void SampleGUI()
+        {
+            if(ImGui.SliderFloat("lodBias", ref lodBias, 0, 10))
+            {
+                material.SetShaderParameter("lodBias", lodBias);
+            }
+        }
+
     }
 }

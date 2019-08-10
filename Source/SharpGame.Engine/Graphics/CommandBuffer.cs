@@ -290,8 +290,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void PushConstants(Pass pass, ShaderStage shaderStage, int offset, int size, IntPtr value)
         {
-            vkCmdPushConstants(commandBuffer, pass.pipelineLayout, (VkShaderStageFlags)shaderStage,
-                (uint)offset, (uint)size, (void*)value);
+            vkCmdPushConstants(commandBuffer, pass.pipelineLayout, (VkShaderStageFlags)shaderStage, (uint)offset, (uint)size, (void*)value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
