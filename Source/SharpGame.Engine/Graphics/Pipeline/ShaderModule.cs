@@ -22,6 +22,13 @@ namespace SharpGame
         All = int.MaxValue
     }
 
+    public enum LayoutType
+    {
+        ResourceSet,
+        PushConstant,
+        SpecializationConst
+    }
+
     public struct BlockMember
     {
         public string name;

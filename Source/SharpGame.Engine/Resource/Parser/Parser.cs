@@ -18,19 +18,27 @@ namespace SharpGame
 
         private int _current = 0;
 
+        public Parser()
+        {
+        }
+
         public Parser(List<Token> tokens)
         {
             Tokens = tokens;
         }
 
-        public List<Token> Tokens { get; }
+        public List<Token> Tokens { get; protected set; }
 
         public List<Stmt> Parse()
         {
             var statements = new List<Stmt>();
             while (!IsAtEnd())
             {
-                statements.Add(Declaration());
+                var stmt = Declaration();
+                if(stmt != null)
+                {
+                    statements.Add(stmt);
+                }
             }
 
             return statements;
@@ -39,6 +47,47 @@ namespace SharpGame
         protected virtual Stmt Declaration()
         {
             return null;
+        }
+
+        [DebuggerStepThrough]
+        protected Token Consume(TokenType type, String message)
+        {
+            if (Check(type)) return Advance();
+
+            throw Error(Peek(), message);
+        }
+
+        [DebuggerStepThrough]
+        protected ParseError Error(Token token, String message)
+        {
+            Log.Error(token + message);
+            return new ParseError();
+        }
+
+        [DebuggerStepThrough]
+        protected void Synchronize()
+        {
+            Advance();
+
+            while (!IsAtEnd())
+            {
+                if (Previous().Type == SEMICOLON) return;
+
+                switch (Peek().Type)
+                {
+                    case CLASS:
+                    case FUN:
+                    case VAR:
+                    case FOR:
+                    case IF:
+                    case WHILE:
+                    case PRINT:
+                    case RETURN:
+                        return;
+                }
+
+                Advance();
+            }
         }
 
         [DebuggerStepThrough]

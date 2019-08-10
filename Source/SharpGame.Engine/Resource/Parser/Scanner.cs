@@ -25,10 +25,12 @@ namespace SharpGame
 			{ "var", VAR },
 			{ "while", WHILE },
 
+            { "const", CONST },
             { "layout", LAYOUT },
             { "uniform", UNIFORM },
             { "in", IN },
             { "out", OUT },
+            { "inout", INOUT },
         };
 
 		private readonly List<Token> _tokens = new List<Token>();

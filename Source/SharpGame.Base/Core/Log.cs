@@ -8,9 +8,19 @@ namespace SharpGame
 {
     public class Log
     {
+        public static void Info(string msg)
+        {
+            Console.WriteLine(msg);
+        }
+
         public static void Info(string msg, params object[] arg)
         {
             Console.WriteLine(msg, arg);
+        }
+
+        public static void Debug(string msg)
+        {
+            Console.WriteLine(msg);
         }
 
         public static void Debug(string msg, params object[] arg)
@@ -18,9 +28,19 @@ namespace SharpGame
             Console.WriteLine(msg, arg);
         }
 
+        public static void Warn(string msg)
+        {
+            Console.WriteLine(msg);
+        }
+
         public static void Warn(string msg, params object[] arg)
         {
             Console.WriteLine(msg, arg);
+        }
+
+        public static void Error(string msg)
+        {
+            Console.WriteLine(msg);
         }
 
         public static void Error(string msg, params object[] arg)
