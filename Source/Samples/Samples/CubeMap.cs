@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -7)]
+    [SampleDesc(sortOrder = 7)]
 
     public class CubeMap : Sample
     {
