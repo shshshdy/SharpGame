@@ -1,4 +1,5 @@
-layout (set = 1£¬ binding = 0) uniform CameraPS
+
+layout (set = 1, binding = 0) uniform CameraPS
 {
 	vec3 CameraPos;
 	float pading1;
@@ -9,21 +10,13 @@ layout (set = 1£¬ binding = 0) uniform CameraPS
 };
 
 
-layout (set = 1£¬ binding = 1) uniform LightPS
+layout (set = 1, binding = 1) uniform LightPS
 {
-    vec4 SunLightColor;
-	vec3 SunLightDir;
-    float pading1;
-	vec4 LightColor;
-	vec4 LightPos;
-	vec3 LightDir;
-	float pading2;
-	vec4 NormalOffsetScale;
-	vec4 ShadowCubeAdjust;
-	vec4 ShadowDepthFade;
-	vec2 ShadowIntensity;
-	vec2 ShadowMapInvSize;
-	vec4 ShadowSplits;
-	float LightRad;
-	float LightLength;
+    vec4 SunlightColor;
+	vec3 SunlightDir;
+	float LightPS_pading1;
+
+	vec4 LightColor[8];
+	vec4 LightVec[8];
+
 };

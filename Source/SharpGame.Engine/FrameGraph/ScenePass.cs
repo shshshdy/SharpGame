@@ -107,7 +107,7 @@ namespace SharpGame
 
                 foreach (var batch in view.batches)
                 {
-                    DrawBatch(cmd, batch, view.PerObjectSet, batch.offset);
+                    DrawBatch(cmd, batch, view.VSSet, view.PSSet, batch.offset);
                 }
 
                 cmd.End();
@@ -120,7 +120,8 @@ namespace SharpGame
         {
             for(int i = from; i < to; i++)
             {
-                DrawBatch(commandBuffer, sourceBatches[i], view.PerObjectSet, sourceBatches[i].offset);
+                var batch = sourceBatches[i];
+                DrawBatch(commandBuffer, batch, view.VSSet, view.PSSet, batch.offset);
             }
 
         }

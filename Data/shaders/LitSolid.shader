@@ -20,14 +20,19 @@ Shader "LitSolid"
             }
 		}
 		
-		ResourceLayout PerMaterial
+		ResourceLayout
 		{
-			ResourceLayoutBinding UBO
+			ResourceLayoutBinding CameraPS
 			{
 				DescriptorType = UniformBuffer
-				StageFlags = Vertex
+				StageFlags = Fragment
 			}
 
+			ResourceLayoutBinding LightPS
+			{
+				DescriptorType = UniformBuffer
+				StageFlags = Fragment
+			}
 		}
 	
 		ResourceLayout PerMaterial
@@ -52,16 +57,11 @@ Shader "LitSolid"
 			layout (location = 1) in vec3 inNormal;
 			layout (location = 2) in vec2 inUV;
 			layout (location = 3) in vec4 inColor;
-
-			layout (set = 1, binding = 0) uniform UBO 
-			{
-				vec4 lightPos;
-			};
-
-			layout (location = 0) out vec3 outNormal;
+			
+			layout (location = 0) out vec4 outWorldPos;
+			layout (location = 1) out vec3 outNormal;
 			layout (location = 2) out vec2 outUV;
 			layout (location = 3) out vec3 outViewVec;
-			layout (location = 4) out vec3 outLightVec;
 
 			out gl_PerVertex
 			{
@@ -73,14 +73,13 @@ Shader "LitSolid"
 				outNormal = inNormal;
 				outUV = inUV;
 				
-				vec4 pos = Model * vec4(inPos, 1.0);
+				vec4 worldPos = Model * vec4(inPos, 1.0);
 
-				gl_Position = ViewProj * pos;
-				
+				gl_Position = ViewProj * worldPos;
+
+				outWorldPos = worldPos;// vec4(worldPos, GetDepth(gl_Position));
 				outNormal = mat3(Model) * inNormal;
-				vec3 lPos = lightPos.xyz;
-				outLightVec = lPos - pos.xyz;
-				outViewVec = CameraPos.xyz-pos.xyz;		
+				outViewVec = CameraPos.xyz - worldPos.xyz;
 			}
 
 		}
@@ -92,23 +91,30 @@ Shader "LitSolid"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
+			#include "UniformsPS.glsl"		
+			#include "Lighting.glsl"
+
+
 			layout (set = 2, binding = 0) uniform sampler2D DiffMap;
 
-			layout (location = 0) in vec3 inNormal;
+			layout (location = 0) in vec4 inWorldPos;
+			layout (location = 1) in vec3 inNormal;
 			layout (location = 2) in vec2 inUV;
 			layout (location = 3) in vec3 inViewVec;
-			layout (location = 4) in vec3 inLightVec;
 
 			layout (location = 0) out vec4 outFragColor;
 
 			void main() 
 			{
-				vec4 color = texture(DiffMap, inUV);
+				vec4 diffColor = texture(DiffMap, inUV);
+				
 				vec3 N = normalize(inNormal);
-				vec3 L = normalize(inLightVec);
+				vec3 L = -SunlightDir;
+				vec3 diffuse = diffColor.rgb * max(dot(N, L), 0.0);
+
 				vec3 V = normalize(inViewVec);
 				vec3 R = reflect(-L, N);
-				vec3 diffuse = color.rgb*max(dot(N, L), 0.0);
+				//GetSpecular
 				vec3 specular = pow(max(dot(R, V), 0.0), 16.0) * vec3(0.75);
 				outFragColor = vec4(diffuse + specular, 1.0);		
 			}

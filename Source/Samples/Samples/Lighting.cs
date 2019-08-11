@@ -45,13 +45,13 @@ namespace SharpGame.Samples
 
             var mat = new Material("Shaders/LitSolid.shader");
             mat.SetTexture("DiffMap", colorMap);
-            ubLight = DeviceBuffer.CreateUniformBuffer<UboVS>();
-            mat.SetBuffer("UBO", ubLight);
-            staticModel.SetMaterial(mat);
+//             ubLight = DeviceBuffer.CreateUniformBuffer<UboVS>();
+//             mat.SetBuffer("UBO", ubLight);
+             staticModel.SetMaterial(mat);
 
             Renderer.MainView.Attach(camera, scene);
 
-            ubLight.SetData(ref uboVS);
+            //ubLight.SetData(ref uboVS);
         }
 
         public override void Update()
@@ -64,7 +64,7 @@ namespace SharpGame.Samples
 
         protected override void Destroy()
         {
-            ubLight.Dispose();
+            //ubLight.Dispose();
 
             base.Destroy();
         }

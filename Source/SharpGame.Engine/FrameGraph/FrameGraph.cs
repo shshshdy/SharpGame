@@ -21,6 +21,17 @@ namespace SharpGame
         public FrameGraph()
         {
         }
+        
+        public void AddGraphicsPass(Action<GraphicsPass, RenderView> onDraw)
+        {
+            var renderPass = new GraphicsPass
+            {
+                OnDraw = onDraw,
+                FrameGraph = this
+            };
+
+            RenderPassList.Add(renderPass);
+        }
 
         public void AddRenderPass(FrameGraphPass renderPass)
         {
@@ -35,7 +46,6 @@ namespace SharpGame
             {
                 renderPass.Draw(view);
             }
-
             Profiler.EndSample();
         }
 

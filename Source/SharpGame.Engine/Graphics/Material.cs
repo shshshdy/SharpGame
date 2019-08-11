@@ -6,10 +6,20 @@ using Vulkan;
 
 namespace SharpGame
 {
+    public enum LightingMode
+    {
+        None,
+        Default,
+        Pbr,
+        Custom
+    }
+
 
     public class Material : Resource
     {
         public ResourceRef ShaderName { get; set; }
+
+        public LightingMode LightingMode { get; set; } = LightingMode.Default;
 
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
         public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
@@ -23,6 +33,7 @@ namespace SharpGame
         int minPushConstRange = 1000;
         int maxPushConstRange = 0;
         int maxPushConstantsSize;
+
         public Material()
         {
             maxPushConstantsSize = (int)Device.Properties.limits.maxPushConstantsSize;
@@ -256,7 +267,29 @@ namespace SharpGame
             int size = maxPushConstRange - minPushConstRange;
             if (size > 0)
             {
-                cmd.PushConstants(pass, ShaderStage.Vertex, minPushConstRange, size, pushConstBuffer + minPushConstRange);
+                ShaderStage shaderStage = ShaderStage.None;
+                int minRange = minPushConstRange;
+                int currentSize = 0;
+                for (int i = 0; i < pass.PushConstant.Length; i++ )
+                {
+                    if(i == 0)
+                    {
+                        shaderStage = pass.PushConstant[0].stageFlags;
+                    }
+
+                    currentSize += pass.PushConstant[i].size;
+
+                    if ((pass.PushConstant[i].stageFlags != shaderStage) || (i == pass.PushConstant.Length - 1))
+                    {
+                        cmd.PushConstants(pass, shaderStage, minRange, currentSize, pushConstBuffer + minRange);
+
+                        shaderStage = pass.PushConstant[i].stageFlags;
+                        minRange += currentSize;
+                        currentSize = 0;
+                    }
+                }
+
+                //cmd.PushConstants(pass, ShaderStage.Vertex, minPushConstRange, size, pushConstBuffer + minPushConstRange);
             }
         }
 

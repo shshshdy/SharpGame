@@ -1,39 +1,39 @@
 
-float GetDiffuse(vec3 normal, vec3 worldPos, out vec3 lightDir)
+float GetDiffuse(vec3 normal, vec3 worldPos, vec3 lightDir)
 {
-    #ifdef DIRLIGHT
-        lightDir = cLightDirPS;
-        #ifdef TRANSLUCENT
-            return abs(dot(normal, lightDir));
-        #else
-            return max(dot(normal, lightDir), 0.0);
-        #endif
+    #ifdef TRANSLUCENT
+        return abs(dot(normal, lightDir));
     #else
-        vec3 lightVec = (cLightPosPS.xyz - worldPos) * cLightPosPS.w;
-        float lightDist = length(lightVec);
-        lightDir = lightVec / lightDist;
+        return max(dot(normal, lightDir), 0.0);
     #endif
+
 }
 
-float GetAtten(vec3 normal, vec3 worldPos, out vec3 lightDir)
+float GetPointLightDiffuse(vec3 normal, vec3 worldPos, vec4 lightPos, out vec3 lightDir)
 {
-    lightDir = cLightDirPS;
+    vec3 lightVec = (lightPos.xyz - worldPos) * lightPos.w;
+    float lightDist = length(lightVec);
+    lightDir = lightVec / lightDist;
+	return max(dot(normal, lightDir), 0.0);
+}
+
+float GetAtten(vec3 normal, vec3 worldPos, vec3 lightDir)
+{
     return clamp(dot(normal, lightDir), 0.0, 1.0);
 }
 
-float GetAttenPoint(vec3 normal, vec3 worldPos, out vec3 lightDir)
+float GetAttenPoint(vec3 normal, vec3 worldPos, vec4 lightPos, out vec3 lightDir)
 {
-    vec3 lightVec = (cLightPosPS.xyz - worldPos) * cLightPosPS.w;
+    vec3 lightVec = (lightPos.xyz - worldPos) * lightPos.w;
     float lightDist = length(lightVec);
     float falloff = pow(clamp(1.0 - pow(lightDist / 1.0, 4.0), 0.0, 1.0), 2.0) * 3.14159265358979323846 / (4.0 * 3.14159265358979323846)*(pow(lightDist, 2.0) + 1.0);
     lightDir = lightVec / lightDist;
     return clamp(dot(normal, lightDir), 0.0, 1.0) * falloff;
-
 }
 
-float GetAttenSpot(vec3 normal, vec3 worldPos, out vec3 lightDir)
+float GetAttenSpot(vec3 normal, vec3 worldPos, vec4 lightPos, out vec3 lightDir)
 {
-    vec3 lightVec = (cLightPosPS.xyz - worldPos) * cLightPosPS.w;
+    vec3 lightVec = (lightPos.xyz - worldPos) * lightPos.w;
     float lightDist = length(lightVec);
     float falloff = pow(clamp(1.0 - pow(lightDist / 1.0, 4.0), 0.0, 1.0), 2.0) / (pow(lightDist, 2.0) + 1.0);
 
@@ -59,31 +59,6 @@ float GetIntensity(vec3 color)
     #define NUMCASCADES 4
 #else
     #define NUMCASCADES 1
-#endif
-
-#ifdef VSM_SHADOW
-float ReduceLightBleeding(float min, float p_max)  
-{  
-    return clamp((p_max - min) / (1.0 - min), 0.0, 1.0);  
-}
-
-float Chebyshev(vec2 Moments, float depth)  
-{  
-    //One-tailed inequality valid if depth > Moments.x  
-    float p = float(depth <= Moments.x);  
-    //Compute variance.  
-    float Variance = Moments.y - (Moments.x * Moments.x); 
-
-    float minVariance = cVSMShadowParams.x;
-    Variance = max(Variance, minVariance);
-    //Compute probabilistic upper bound.  
-    float d = depth - Moments.x;  
-    float p_max = Variance / (Variance + d*d); 
-    // Prevent light bleeding
-    p_max = ReduceLightBleeding(cVSMShadowParams.y, p_max);
-
-    return max(p, p_max);
-}
 #endif
 
 #ifndef GL_ES

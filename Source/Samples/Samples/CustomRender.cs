@@ -77,10 +77,7 @@ namespace SharpGame.Samples
 
             ubObjectVS.Flush();
 
-            frameGraph.AddRenderPass(new GraphicsPass
-            {
-                OnDraw = CustomDraw
-            });
+            frameGraph.AddGraphicsPass(CustomDraw);
 
             cameraPos = new Vector3(0, 8, -30);
             pitch = MathUtil.DegreesToRadians(15);
@@ -154,7 +151,7 @@ namespace SharpGame.Samples
             for(int i = 0; i < COUNT; i++)
             {
                 var batch = batches[i];
-                pass.DrawBatch(pass.CmdBuffer, batch, resourceSet, batch.offset);
+                pass.DrawBatch(pass.CmdBuffer, batch, resourceSet, null, batch.offset);
 
             }
         }

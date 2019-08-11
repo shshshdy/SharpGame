@@ -57,6 +57,7 @@ namespace SharpGame
         public uint offset;
         /// %Geometry type.
         public GeometryType geometryType;
+        public LightingMode lightingMode;
     };
 
     public class Drawable : Component
@@ -66,6 +67,8 @@ namespace SharpGame
         public const uint DRAWABLE_ZONE = 0x4;
         public const uint DRAWABLE_GEOMETRY2D = 0x8;
         public const uint DRAWABLE_ANY = 0xff;
+
+        public GeometryType GeometryType { get; set; }
 
         [IgnoreDataMember]
         internal int index = -1;
@@ -126,7 +129,10 @@ namespace SharpGame
             {
                 if (batches[i] == null)
                 {
-                    batches[i] = new SourceBatch();
+                    batches[i] = new SourceBatch
+                    {
+                        geometryType = GeometryType
+                    };
                 }
             }
         }

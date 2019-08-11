@@ -12,6 +12,49 @@ namespace SharpGame
     using vec4 = Vector4;
     using mat4 = Matrix;
 
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct FrameUniform
+    {
+        public float DeltaTime;
+        public float ElapsedTime;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct CameraVS
+    {
+        public mat4 View;
+        public mat4 ViewInv;
+        public mat4 ViewProj;
+        public vec3 CameraPos;
+        public float NearClip;
+        public vec3 FrustumSize;
+        public float FarClip;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct CameraPS
+    {
+        public vec3 CameraPos;
+        float pading1;
+        public vec4 DepthReconstruct;
+        public vec2 GBufferInvSize;
+        public float NearClip;
+        public float FarClip;
+    }
+
+
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct LightPS
+    {
+        public Color4 SunlightColor;
+        public vec3 SunlightDir;
+        public float LightPS_pading1;
+
+        public fixed float LightColor[4*8];
+        public fixed float LightVec[4*8];
+    }
+
     public class RenderView : Object
     {
         private Scene scene;
@@ -36,7 +79,6 @@ namespace SharpGame
 
         private FrameUniform frameUniform = new FrameUniform();
         private CameraVS cameraVS = new CameraVS();
-
         private CameraPS cameraPS = new CameraPS();
         private LightPS light = new LightPS();
 
@@ -45,15 +87,16 @@ namespace SharpGame
         internal DeviceBuffer ubCameraPS;
         internal DeviceBuffer ubLight;
 
-        private ResourceLayout perFrameResLayout;
-        public ResourceSet perFrameSet;
+        internal DoubleBuffer ubMatrics;
 
         private ResourceLayout perObjectResLayout;
 
-        internal DoubleBuffer ubMatrics;
+        public ResourceSet VSSet => vsResourceSet[Graphics.Instance.WorkContext];
+        ResourceSet[] vsResourceSet = new ResourceSet[2];
 
-        public ResourceSet PerObjectSet => perObjectSet[Graphics.Instance.WorkContext];
-        ResourceSet[] perObjectSet = new ResourceSet[2];
+        private ResourceLayout psResLayout;
+        public ResourceSet PSSet => psResourceSet[Graphics.Instance.WorkContext];
+        ResourceSet[] psResourceSet = new ResourceSet[2];
 
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
@@ -104,21 +147,23 @@ namespace SharpGame
                 ubMatrics = new DoubleBuffer(size);
             }
 
-            perFrameResLayout = new ResourceLayout
+            perObjectResLayout = new ResourceLayout(0)
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
             };
 
-            perFrameSet = new ResourceSet(perFrameResLayout, ubCameraVS);
+            vsResourceSet[0] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics.Buffer[0]);
+            vsResourceSet[1] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics.Buffer[1]);
 
-            perObjectResLayout = new ResourceLayout
+            psResLayout = new ResourceLayout(1)
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-                new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex, 1),
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Fragment),
             };
 
-            perObjectSet[0] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics.Buffer[0]);
-            perObjectSet[1] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics.Buffer[1]);
+            psResourceSet[0] = new ResourceSet(psResLayout, ubCameraPS, ubLight);
+            psResourceSet[1] = new ResourceSet(psResLayout, ubCameraPS, ubLight);
         }
 
         public void AddDrawable(Drawable drawable)
@@ -138,7 +183,8 @@ namespace SharpGame
             batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
         }
 
-        unsafe uint GetTransform(IntPtr pos, uint count)
+        [MethodImpl((MethodImplOptions)0x100)]
+        public unsafe uint GetTransform(IntPtr pos, uint count)
         {
             uint sz = (uint)Utilities.SizeOf<Matrix>() * count;
             return ubMatrics.Alloc(sz, pos);
@@ -224,11 +270,24 @@ namespace SharpGame
             Matrix.Invert(ref camera.View, out cameraVS.ViewInv);
             cameraVS.ViewProj = camera.View*camera.Projection;
             cameraVS.CameraPos = camera.Node.Position;
+            //cameraVS.FrustumSize = camera.Frustum;
+            cameraVS.NearClip = camera.NearClip;
+            cameraVS.FarClip = camera.FarClip;
+
             ubCameraVS.SetData(ref cameraVS);
+
+            cameraPS.CameraPos = camera.Node.Position;
+            cameraPS.NearClip = camera.NearClip;
+            cameraPS.FarClip = camera.FarClip;
+            ubCameraPS.SetData(ref cameraPS);
+
         }
 
         private void UpdateLightParameters()
         {
+            light.SunlightColor = new Color4(0.5f);
+            light.SunlightDir = new Vector3(-1, -1, 1); light.SunlightDir.Normalize();
+            ubLight.SetData(ref light);
         }
 
         public void Render(int imageIndex)
@@ -242,59 +301,5 @@ namespace SharpGame
         }
     }
     
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct FrameUniform
-    {
-        public float DeltaTime;
-        public float ElapsedTime;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CameraVS
-    {
-        public mat4 View;
-        public mat4 ViewInv;
-        public mat4 ViewProj;
-        public vec3 CameraPos;
-        public float NearClip;
-        public vec3 FrustumSize;
-        public float FarClip;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CameraPS
-    {
-        public vec3 CameraPos;
-        float pading1;
-        public vec4 DepthReconstruct;
-        public vec2 GBufferInvSize;
-        public float NearClip;
-        public float FarClip;
-    }
-
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct LightPS
-    {
-        public vec4 LightColor;
-        public vec4 LightPos;
-        public vec3 LightDir;
-        float pading1;
-        public vec4 NormalOffsetScale;
-        public vec4 ShadowCubeAdjust;
-        public vec4 ShadowDepthFade;
-        public vec2 ShadowIntensity;
-        public vec2 ShadowMapInvSize;
-        public vec4 ShadowSplits;
-        /*
-        mat4 LightMatricesPS [4];
-        */
-        //    vec2 VSMShadowParams;
-
-        public float LightRad;
-        public float LightLength;
-
-    }
 
 }

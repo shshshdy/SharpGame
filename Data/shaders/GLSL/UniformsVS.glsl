@@ -11,14 +11,14 @@ layout (binding = 0) uniform CameraVS
 
 layout (constant_id = 0) const int MATRICES_COUNT = 64;
 
-layout (binding = 1) uniform ObjectVS
+layout (binding = 1) uniform ObjectVS_dynamic
 {
     mat4 Model;	
     vec4 UOffset;
     vec4 VOffset;
 };
 
-layout (binding = 1) uniform SkinVS
+layout (binding = 1) uniform SkinVS_dynamic
 {
     mat4 SkinMatrices[MATRICES_COUNT];
 };
