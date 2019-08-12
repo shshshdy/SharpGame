@@ -11,12 +11,14 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Basic.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\Lighting.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\Transform.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\UniformsPS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\UniformsVS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ImGUI.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitSolid.shader" />
     <None Include="$(MSBuildThisFileDirectory)Pbr.shader" />
     <None Include="$(MSBuildThisFileDirectory)Reflect.shader" />
+    <None Include="$(MSBuildThisFileDirectory)Skinned.shader" />
     <None Include="$(MSBuildThisFileDirectory)Skybox.shader" />
     <None Include="$(MSBuildThisFileDirectory)UnLit.shader" />
   </ItemGroup>

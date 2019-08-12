@@ -40,6 +40,7 @@ namespace SharpGame
                 }
             }
         }
+
         List<AnimationState> animationStates_ = new List<AnimationState>();
 
         /// Skinning matrices.
