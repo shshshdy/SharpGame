@@ -108,8 +108,13 @@ namespace SharpGame.Samples
 
         public virtual void OnGUI()
         {
-            ImGui.Value("yaw", MathUtil.RadiansToDegrees(yaw));
-            ImGui.Value("pitch", MathUtil.RadiansToDegrees(pitch));         
+            if(camera)
+            {
+                ImGui.TextUnformatted("Camera pos : " + camera.Node.Position.ToString());
+            }
+
+            ImGui.Value("Camera yaw ", MathUtil.RadiansToDegrees(yaw));
+            ImGui.Value("Camera pitch ", MathUtil.RadiansToDegrees(pitch));         
         }
 
         protected override void Destroy()

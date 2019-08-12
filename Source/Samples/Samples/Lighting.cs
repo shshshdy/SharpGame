@@ -8,8 +8,8 @@ using ImGuiNET;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -2)]
-    public unsafe class Lighting : Sample
+    [SampleDesc(sortOrder = 2)]
+    public class Lighting : Sample
     {
         Node node;
         public override void Init()

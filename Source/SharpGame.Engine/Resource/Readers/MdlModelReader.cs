@@ -119,7 +119,30 @@ namespace SharpGame
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    /*
+                    enum VertexElementSemantic
+                    {
+                        SEM_POSITION = 0,
+                        SEM_NORMAL,
+                        SEM_BINORMAL,
+                        SEM_TANGENT,
+                        SEM_TEXCOORD,
+                        SEM_COLOR,
+                        SEM_BLENDWEIGHTS,
+                        SEM_BLENDINDICES,
+                        SEM_OBJECTINDEX,
+                        MAX_VERTEX_ELEMENT_SEMANTICS
+                    }*/
+                    uint numElements = stream.Read<uint>();
+                    for (uint j = 0; j < numElements; ++j)
+                    {
+                        uint elementDesc = stream.Read<uint>();
+                        uint type = /*(VertexElementType)*/(elementDesc & 0xff);
+                        uint semantic = /*(VertexElementSemantic)*/((elementDesc >> 8) & 0xffu);
+                        uint index = /*(unsigned char)*/((elementDesc >> 16) & 0xffu);
+                        //desc.vertexElements_.Push(VertexElement(type, semantic, index));
+                    }
+
                 }
 
                 morphRangeStarts_[i] = stream.Read<int>();

@@ -26,7 +26,6 @@ namespace SharpGame
 
         public Resources()
         {
-
         }
 
         public void RegisterAssertReader(IResourceReader reader)

@@ -57,7 +57,7 @@ namespace SharpGame
         public uint offset;
         /// %Geometry type.
         public GeometryType geometryType;
-        public LightingMode lightingMode;
+        public ShadingMode lightingMode;
     };
 
     public class Drawable : Component

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace SharpGame
@@ -45,36 +46,39 @@ namespace SharpGame
 
     public struct TexureParameter
     {
-        public StringID name;
+        public string name;
         public ResourceRef texture;
         public Vector4 uvOffset;
 
-        public bool IsNull => name.IsNullOrEmpty;
+        [IgnoreDataMember]
+        public bool IsNull => string.IsNullOrEmpty(name);
 
         public static TexureParameter Null = new TexureParameter();
     }
 
     public struct BufferParameter
     {
-        public StringID name;
+        public string name;
         public DeviceBuffer buffer;
 
-        public bool IsNull => name.IsNullOrEmpty;
-
+        [IgnoreDataMember]
+        public bool IsNull => string.IsNullOrEmpty(name);
     }
 
     public struct ShaderParameter
     {
-        public StringID name;
+        public string name;
         public UniformType uniformType;
         public UniformData data;
         internal IntPtr addr;
-        public bool IsNull => name.IsNullOrEmpty;
 
-        public static ShaderParameter Null = new ShaderParameter();
+        [IgnoreDataMember]
+        public bool IsNull => string.IsNullOrEmpty(name);
 
+        [IgnoreDataMember]
         public bool IsBinded => addr != IntPtr.Zero;
 
+        public static ShaderParameter Null = new ShaderParameter();
         public void SetValue<T>(ref T val)
         {
             switch (val)
@@ -126,7 +130,6 @@ namespace SharpGame
 
         void WriteData()
         {
-
             switch (uniformType)
             {
                 case UniformType.Bool:

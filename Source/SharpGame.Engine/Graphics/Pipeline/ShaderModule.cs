@@ -44,7 +44,7 @@ namespace SharpGame
         public List<BlockMember> members;
         public int set;
         public int binding;
-        public bool isTextureBlock;
+        public DescriptorType descriptorType;
     }
 
     public class ShaderReflection

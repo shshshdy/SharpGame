@@ -17,13 +17,13 @@ namespace SharpGame
     public class Layout : Stmt
     {
         public LayoutType layoutType;
+        public string objectType;
+        public string objectName;
+        public DescriptorType descriptorType;
         public int set;
         public int binding;
         public uint id;
-        DescriptorType descriptorType;
-        public string uniformType;
-        public string uniformName;
-        public bool isTexture = false;
+        public bool isDynamic = false;        
         public List<BlockMember> structMembers;
     
         public class Attribute
@@ -71,9 +71,10 @@ namespace SharpGame
 
                         UniformBlock uniformBlock = new UniformBlock
                         {
-                            name = layout.uniformName,
+                            name = layout.objectName,
                             set = layout.set,
                             binding = layout.binding,
+                            descriptorType = layout.descriptorType,
                         };
 
                         shaderReflection.descriptorSets.Add(uniformBlock);
@@ -93,7 +94,7 @@ namespace SharpGame
 
                         SpecializationConst specializationConst = new SpecializationConst
                         {
-                            name = layout.uniformName,
+                            name = layout.objectName,
                             id = layout.id
                         };
 
@@ -126,14 +127,13 @@ namespace SharpGame
                     Layout layout = new Layout();
                     if (Match(UNIFORM))
                     {
-                        if(Match(READONLY))
+                        if (Match(READONLY))
                         {
-
                         }
 
                         var t = Consume(IDENTIFIER, "");
-                   
-                        switch(t.Lexeme)
+
+                        switch (t.Lexeme)
                         {
                             case "bool":
                             case "int":
@@ -154,38 +154,92 @@ namespace SharpGame
                             case "mat2":
                             case "mat3":
                             case "mat4":
-
-                                layout.uniformType = t.Lexeme;
-                                var uniformName = Advance();
-                                layout.uniformName = uniformName.Lexeme;
-                                Synchronize();
+                                {
+                                    layout.objectType = t.Lexeme;
+                                    var uniformName = Advance();
+                                    layout.objectName = uniformName.Lexeme;
+                                    Synchronize();
+                                }
                                 break;
 
                             case "texture1D":
                             case "texture2D":
                             case "texture3D":
                             case "textureCube":
+                                {
+                                    layout.descriptorType = DescriptorType.SampledImage;                                   
+                                    layout.objectType = t.Lexeme;
+                                    var samplerImgName = Advance();
+                                    layout.objectName = samplerImgName.Lexeme;
+                                    Synchronize();
+                                }
+                                break;
                             case "sampler":
+                                {
+                                    layout.descriptorType = DescriptorType.Sampler;                                    
+                                    layout.objectType = t.Lexeme;
+                                    var samplerName = Advance();
+                                    layout.objectName = samplerName.Lexeme;
+                                    Synchronize();
+                                }
+                                break;
                             case "sampler1D":
                             case "sampler2D":
                             case "sampler3D":
                             case "samplerCube":
                             case "sampler1DArray":
                             case "sampler2DArray":
-                            case "imageBuffer":
+                                {
+                                    layout.descriptorType = DescriptorType.CombinedImageSampler;                                    
+                                    layout.objectType = t.Lexeme;
+                                    var combinedSamplerName = Advance();
+                                    layout.objectName = combinedSamplerName.Lexeme;
+                                    Synchronize();
+                                }
+                                break;
+                            case "image2D":
+                                {
+                                    layout.descriptorType = DescriptorType.StorageImage;                                    
+                                    layout.objectType = t.Lexeme;
+                                    var objName = Advance();
+                                    layout.objectName = objName.Lexeme;
+                                    Synchronize();
+                                }
+                                break;
+                            case "samplerBuffer":
+                                {
+                                    layout.descriptorType = DescriptorType.UniformTexelBuffer;                                    
+                                    layout.objectType = t.Lexeme;
+                                    var objName = Advance();
+                                    layout.objectName = objName.Lexeme;
+                                    Synchronize();
+                                }
+                                break;
+                            case "imageBuffer":                           
                             case "uimageBuffer":
-
-
-                                layout.uniformType = t.Lexeme;
-                                var samplerName = Advance();
-                                layout.uniformName = samplerName.Lexeme;
-                                Synchronize();
+                                {
+                                    layout.descriptorType = DescriptorType.StorageTexelBuffer;                                    
+                                    layout.objectType = t.Lexeme;
+                                    var objName = Advance();
+                                    layout.objectName = objName.Lexeme;
+                                    Synchronize();
+                                }
                                 break;
 
                             default:
-                                layout.uniformType = "Struct";
-                                layout.uniformName = t.Lexeme;
-                                if(Check(TokenType.LEFT_BRACE))
+                                layout.objectType = "UniformBuffer";
+                                layout.objectName = t.Lexeme;
+                                if (layout.objectName.EndsWith("_dynamic"))
+                                {
+                                    layout.isDynamic = true;
+                                    layout.descriptorType = DescriptorType.UniformBufferDynamic;
+                                }
+                                else
+                                {
+                                    layout.descriptorType = DescriptorType.UniformBuffer;
+                                }
+
+                                if (Check(LEFT_BRACE))
                                 {
                                     do
                                     {
@@ -196,10 +250,10 @@ namespace SharpGame
 
                                     Advance();
 
-                                    if(Check(IDENTIFIER))
+                                    if (Check(IDENTIFIER))
                                     {
                                         var structName = Advance();
-                                        layout.uniformName = structName.Lexeme;
+                                        layout.objectName = structName.Lexeme;
                                     }
 
                                     Synchronize();
@@ -233,25 +287,72 @@ namespace SharpGame
                             case "mat3":
                             case "mat4":
 
-                                layout.uniformType = t.Lexeme;
+                                layout.objectType = t.Lexeme;
                                 var n = Advance();
-                                layout.uniformName = n.Lexeme;
+                                layout.objectName = n.Lexeme;
                                 //layout.value = n.Literal;
                                 //TODO: parse default value
                                 Synchronize();
                                 break;
 
                             default:
-                                
+
                                 break;
                         }
 
                     }
+                    else if (Match(IN))
+                    {
+                        return null;
+                    }
+                    else if (Match(OUT))
+                    {
+                        return null;
+                    }
+                    else if (Match(INOUT))
+                    {
+                        return null;
+                    }
                     else
                     {
-                        //todo: parse in out
+                        var t = Consume(IDENTIFIER, "");
+                        switch (t.Lexeme)
+                        {
+                            case "buffer":
+                                layout.objectType = "StorageBuffer";
+                                layout.objectName = t.Lexeme;
+                                if (layout.objectName.EndsWith("_dynamic"))
+                                {
+                                    layout.isDynamic = true;
+                                    layout.descriptorType = DescriptorType.StorageBufferDynamic;
+                                }
+                                else
+                                {
+                                    layout.descriptorType = DescriptorType.StorageBuffer;
+                                }
 
-                        return null;
+                                if (Check(LEFT_BRACE))
+                                {
+                                    do
+                                    {
+                                        Advance();
+                                        //todo: parse struct layout
+                                    }
+                                    while (!Check(RIGHT_BRACE) && !IsAtEnd());
+
+                                    Advance();
+
+                                    if (Check(IDENTIFIER))
+                                    {
+                                        var structName = Advance();
+                                        layout.objectName = structName.Lexeme;
+                                    }
+
+                                    Synchronize();
+                                }
+
+                                break;
+                        }
                     }
 
 

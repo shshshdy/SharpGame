@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Text;
 using Vulkan;
 
 namespace SharpGame
 {
-    public enum LightingMode
+    public enum ShadingMode
     {
-        None,
+        Unlit,
         Default,
         Pbr,
+        Toon,
         Custom
     }
 
@@ -19,15 +21,17 @@ namespace SharpGame
     {
         public ResourceRef ShaderName { get; set; }
 
-        public LightingMode LightingMode { get; set; } = LightingMode.Default;
+        public ShadingMode ShadingMode { get; set; } = ShadingMode.Default;
 
         public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
         public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
         public FastList<BufferParameter> BufferParameters { get; set; } = new FastList<BufferParameter>();
 
         private List<ResourceSet> resourceSet = new List<ResourceSet>();
+        [IgnoreDataMember]
         public List<ResourceSet> ResourceSet { get => resourceSet; set => resourceSet = value; }
 
+        [IgnoreDataMember]
         public Shader Shader { get; set; }
         IntPtr pushConstBuffer;
         int minPushConstRange = 1000;
@@ -170,7 +174,6 @@ namespace SharpGame
                 }
 
                 ShaderParameters.Add(shaderParam);
-
 
             }
         }

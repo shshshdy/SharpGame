@@ -77,28 +77,5 @@ namespace SharpGame
         }
     }
 
-    public class VertexInputLayout
-    {
-        public VertexInputBinding[] bindings;
-
-        public VertexInputLayout()
-        {
-        }
-
-        public VertexInputLayout(VertexInputBinding[] bindings, VertexInputAttribute[] attributes)
-        {
-            this.bindings = bindings;
-        }
-
-        public unsafe void ToNative(out VkPipelineVertexInputStateCreateInfo native)
-        {
-            native = VkPipelineVertexInputStateCreateInfo.New();
-            native.vertexBindingDescriptionCount = (uint)bindings.Length;
-            native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AllocToPointer(bindings);
-            //native.vertexAttributeDescriptionCount = (uint)attributes.Length;
-            //native.pVertexAttributeDescriptions = (Vulkan.VkVertexInputAttributeDescription*)Utilities.AllocToPointer(attributes);
-        }
-    }
-
 
 }
