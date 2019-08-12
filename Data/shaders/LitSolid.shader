@@ -77,7 +77,7 @@ Shader "LitSolid"
 
 				gl_Position = ViewProj * worldPos;
 
-				outWorldPos = worldPos;// vec4(worldPos, GetDepth(gl_Position));
+				outWorldPos = worldPos;
 				outNormal = mat3(Model) * inNormal;
 				outViewVec = CameraPos.xyz - worldPos.xyz;
 			}
@@ -110,13 +110,10 @@ Shader "LitSolid"
 				
 				vec3 N = normalize(inNormal);
 				vec3 L = -SunlightDir;
-				vec3 diffuse = diffColor.rgb * max(dot(N, L), 0.0);
 
-				vec3 V = normalize(inViewVec);
-				vec3 R = reflect(-L, N);
-				//GetSpecular
-				vec3 specular = pow(max(dot(R, V), 0.0), 16.0) * vec3(0.75);
-				outFragColor = vec4(diffuse + specular, 1.0);		
+				vec3 diffuse = diffColor.rgb * max(dot(N, L), 0.0);
+				vec3 specular = vec3(0.75) * BlinnPhong(N, inViewVec, L, 16.0);
+				outFragColor = vec4(diffColor.rgb * AmbientColor.xyz + diffuse + specular, 1.0);
 			}
 
 

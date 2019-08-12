@@ -42,7 +42,7 @@ float GetAttenSpot(vec3 normal, vec3 worldPos, vec4 lightPos, out vec3 lightDir)
 
 }
 
-float GetSpecular(vec3 normal, vec3 eyeVec, vec3 lightDir, float specularPower)
+float BlinnPhong(vec3 normal, vec3 eyeVec, vec3 lightDir, float specularPower)
 {
     vec3 halfVec = normalize(normalize(eyeVec) + lightDir);  
     return pow(max(dot(normal, halfVec), 0.0), specularPower);

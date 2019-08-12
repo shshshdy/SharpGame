@@ -106,25 +106,10 @@ namespace SharpGame.Samples
             
         }
 
-        public virtual void SampleGUI()
-        {
-        }
-
-        bool hudOpen;
         public virtual void OnGUI()
         {
-//             const float DISTANCE = 10.0f;
-//             var io = ImGui.GetIO();
-//             Vector2 window_pos = new Vector2(DISTANCE, DISTANCE);
-//             Vector2 window_pos_pivot = new Vector2(0.0f, 0.0f);
-//             ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
-//             ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
-//             if (ImGui.Begin("Camera", ref hudOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
-            {
-            //    ImGui.Value("yaw", MathUtil.RadiansToDegrees(yaw));
-            //     ImGui.Value("pitch", MathUtil.RadiansToDegrees(pitch));
-                //ImGui.Value("Msec", Msec);
-            }
+            ImGui.Value("yaw", MathUtil.RadiansToDegrees(yaw));
+            ImGui.Value("pitch", MathUtil.RadiansToDegrees(pitch));         
         }
 
         protected override void Destroy()

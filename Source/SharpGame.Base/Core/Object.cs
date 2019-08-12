@@ -47,8 +47,9 @@ namespace SharpGame
 
             if (eventHandlers.TryGetValue(typeof(T), out List<IEventHandler> handlers))
             {
-                foreach (var handler in handlers)
+                for (int i = 0; i < handlers.Count; i++)
                 {
+                    var handler = handlers[i];
                     ((RefEventHandler<T>)handler).Invoke(ref e);
                 }
             }
@@ -63,8 +64,9 @@ namespace SharpGame
 
             if (eventHandlers.TryGetValue(typeof(T), out List<IEventHandler> handlers))
             {
-                foreach (var handler in handlers)
+                for(int i = 0; i < handlers.Count; i++)
                 {
+                    var handler = handlers[i];
                     ((TEventHandler<T>)handler).Invoke(e);
                 }
             }

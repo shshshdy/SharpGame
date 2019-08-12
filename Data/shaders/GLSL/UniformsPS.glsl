@@ -12,6 +12,7 @@ layout (set = 1, binding = 0) uniform CameraPS
 
 layout (set = 1, binding = 1) uniform LightPS
 {
+    vec4 AmbientColor;
     vec4 SunlightColor;
 	vec3 SunlightDir;
 	float LightPS_pading1;

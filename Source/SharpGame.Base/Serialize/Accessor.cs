@@ -18,7 +18,9 @@ namespace SharpGame
 
     public interface IPropertyAccessor<T> : IPropertyAccessor
     {
+#pragma warning disable CS0108 // Member hides inherited member; missing new keyword
         T Get(object obj);
+#pragma warning restore CS0108 // Member hides inherited member; missing new keyword
         void Set(object obj, T value);
 
     }

@@ -61,7 +61,7 @@ namespace SharpGame.Samples
 
         }
 
-        public override void SampleGUI()
+        public override void OnGUI()
         {
             if(ImGui.SliderFloat("lodBias", ref lodBias, 0, 10))
             {

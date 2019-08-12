@@ -47,6 +47,7 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct LightPS
     {
+        public Color4 AmbientColor;
         public Color4 SunlightColor;
         public vec3 SunlightDir;
         public float LightPS_pading1;
@@ -285,8 +286,11 @@ namespace SharpGame
 
         private void UpdateLightParameters()
         {
+            light.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
             light.SunlightColor = new Color4(0.5f);
-            light.SunlightDir = new Vector3(-1, -1, 1); light.SunlightDir.Normalize();
+            light.SunlightDir = new Vector3(-1, -1, 1);
+            light.SunlightDir.Normalize();
+
             ubLight.SetData(ref light);
         }
 

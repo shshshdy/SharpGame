@@ -12,10 +12,11 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = 5)]
     public unsafe class ImGUI : Sample
     {
-        public override void OnGUI()
+        public ImGUI()
         {
-            ImGui.ShowDemoWindow();
+            this.Subscribe<GUIEvent>( e => ImGui.ShowDemoWindow());
         }
+
     }
 
 }

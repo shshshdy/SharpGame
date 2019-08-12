@@ -91,8 +91,8 @@ namespace SharpGame.Samples
 
 
         static int corner = 1;
+
         bool hudOpen;
-        bool settings = true;
         bool showStats = false;
         const float DISTANCE = 10.0f;
         
@@ -122,13 +122,12 @@ namespace SharpGame.Samples
 
                 if (current)
                 {
-                    current.SampleGUI();
+                    current.OnGUI();
                 }
 
             }
 
             ImGui.End();
-
 
             {
                 Vector2 window_pos = new Vector2(DISTANCE, DISTANCE);
@@ -174,10 +173,6 @@ namespace SharpGame.Samples
 
             }
 
-            if (current)
-            {
-                current.OnGUI();
-            }
         }
 
         void SetSample(Type type)
