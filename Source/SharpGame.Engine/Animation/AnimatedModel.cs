@@ -973,7 +973,7 @@ namespace SharpGame
 
         static int CompareAnimationOrder(AnimationState lhs, AnimationState rhs)
         {
-            return lhs.layer - rhs.layer;
+            return lhs.Layer - rhs.Layer;
         }
 
         void ApplyAnimation()

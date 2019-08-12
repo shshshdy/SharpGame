@@ -14,7 +14,7 @@ namespace SharpGame
         public const byte BONECOLLISION_BOX = 0x2;
 
         /// Bone name.
-        public StringID name_;
+        public string name_;
         /// Parent bone index.
         public int parentIndex_;
         /// Reset position.

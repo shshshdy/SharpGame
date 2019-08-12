@@ -64,7 +64,7 @@ namespace SharpGame
 
         public float Length => animation_ != null ? animation_.Length : 0.0f;
 
-        public byte layer => layer_;
+        public byte Layer => layer_;
 
         /// Animated model (model mode.)
         AnimatedModel model_;

@@ -8,6 +8,24 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
+    public struct SceneUpdate
+    {
+        public Scene scene;
+        public float timeStep;
+    }
+
+    public struct ScenePostUpdate
+    {
+        public Scene scene;
+        public float timeStep;
+    }
+
+    public struct SceneSubsystemUpdate
+    {
+        public Scene scene;
+        public float timeStep;
+    }
+
     [DataContract]
     public class Scene : Node, IDrawableAccumulator
     {
@@ -16,6 +34,8 @@ namespace SharpGame
         public Scene()
         {
             NodeAdded(this);
+
+            this.Subscribe<Update>(e => Update(e.timeDelta));
         }
         
         public void NodeAdded(Node node)
@@ -199,9 +219,13 @@ namespace SharpGame
             throw new NotImplementedException();
         }
 
-        public void Update()
+        public void Update(float timeStep)
         {
+            this.SendEvent(new SceneUpdate { scene = this, timeStep = timeStep });
 
+            this.SendEvent(new SceneSubsystemUpdate { scene = this, timeStep = timeStep });
+
+            this.SendEvent(new ScenePostUpdate { scene = this, timeStep = timeStep });
         }
 
     }

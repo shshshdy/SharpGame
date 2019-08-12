@@ -23,7 +23,7 @@ namespace SharpGame
 
             // Read name and length
             model.AnimationName = source.ReadCString();
-            //animationNameHash_ = animationName_;
+            model.NameHash = model.AnimationName.GetHashCode();
             model.Length = source.Read<float>();
             model.Tracks.Clear();
 

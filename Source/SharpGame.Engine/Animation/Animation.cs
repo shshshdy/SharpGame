@@ -120,7 +120,10 @@ namespace SharpGame
 
         /// Animation name.
         [DataMember]
-        public StringID AnimationName { get; set; }
+        public string AnimationName { get; set; }
+
+        [IgnoreDataMember]
+        public int NameHash { get; set; }
 
         /// Animation length. 
         [DataMember]
