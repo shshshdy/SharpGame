@@ -133,16 +133,26 @@ namespace SharpGame
                         SEM_OBJECTINDEX,
                         MAX_VERTEX_ELEMENT_SEMANTICS
                     }*/
+
+
                     uint numElements = stream.Read<uint>();
+                    FastList<VertexInputAttribute> attrs = new FastList<VertexInputAttribute>();
+                    uint offset = 0;
                     for (uint j = 0; j < numElements; ++j)
                     {
                         uint elementDesc = stream.Read<uint>();
                         uint type = /*(VertexElementType)*/(elementDesc & 0xff);
                         uint semantic = /*(VertexElementSemantic)*/((elementDesc >> 8) & 0xffu);
                         uint index = /*(unsigned char)*/((elementDesc >> 16) & 0xffu);
-                        //desc.vertexElements_.Push(VertexElement(type, semantic, index));
+
+                        VertexInputAttribute attr = new VertexInputAttribute(0, j, semanticToFormat[semantic], offset);
+                        offset += semanticSize[semantic];
+                        attrs.Add(attr);
                     }
 
+                    vertexSize = offset;
+                    loadVBData_[i].layout = new VertexLayout(new[] { new VertexInputBinding(0, offset, VertexInputRate.Vertex)  }, attrs.ToArray());
+                
                 }
 
                 morphRangeStarts_[i] = stream.Read<int>();
@@ -270,7 +280,6 @@ namespace SharpGame
                             vertexSize += sizeof(Vector3);
                         if ((newBuffer.elementMask_ & MASK_TANGENT) != 0)
                             vertexSize += sizeof(Vector3);
-
                     }
 
                     newBuffer.dataSize_ = newBuffer.vertexCount_ * (int)vertexSize;
@@ -373,6 +382,19 @@ namespace SharpGame
         const uint MASK_INSTANCEMATRIX2 = 0x1000;
         const uint MASK_INSTANCEMATRIX1 = 0x2000;
 
+        Format[] semanticToFormat =
+        {
+            Format.R32g32b32Sfloat,
+            Format.R32g32b32Sfloat,
+            Format.R32g32b32a32Sfloat,
+            Format.R32g32b32a32Sfloat,
+            Format.R32g32Sfloat,
+            Format.R8g8b8a8Unorm,
+            Format.R32g32b32a32Sfloat,
+            Format.R8g8b8a8Uint,
+        };
+
+        uint[] semanticSize = { 12, 12, 16, 16, 8, 4, 16, 4 };
         static VertexLayout CreateVertexInputStateCreateInfo(uint mask, out uint stride)
         {
             List<VertexInputBinding> vertexInputBinding = new List<VertexInputBinding>();

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 3)]
+    [SampleDesc(sortOrder = -3)]
     public class SkinnedModel : Sample
     {
         public override void Init()
@@ -33,6 +33,7 @@ namespace SharpGame.Samples
 
                 staticModel.SetMaterial(mat);
             }
+
             {
                 var colorMap = Resources.Load<Texture2D>("Models/Mutant/Textures/Mutant_diffuse.jpg");
                 var mat = new Material(shader);
@@ -45,7 +46,7 @@ namespace SharpGame.Samples
                     var node = scene.CreateChild("Model");
                     node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20));
                     node.Rotation = Quaternion.FromEuler(0, MathUtil.DegreesToRadians(MathUtil.Random(0, 90)), 0);
-                    var staticModel = node.AddComponent<StaticModel>();
+                    var staticModel = node.AddComponent<AnimatedModel>();
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(mat);
                 }

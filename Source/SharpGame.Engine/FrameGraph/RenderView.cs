@@ -251,7 +251,7 @@ namespace SharpGame
             Scene.GetDrawables(frustumOctreeQuery, AddDrawable);
             Profiler.EndSample();
             
-            Profiler.BeginSample("UpdateGeometry");
+            Profiler.BeginSample("UpdateDrawable");
             
             Parallel.ForEach(drawables, drawable => drawable.Update(ref frameInfo));
 
@@ -263,6 +263,9 @@ namespace SharpGame
 
             Profiler.EndSample();
 
+            Profiler.BeginSample("UpdateGeometry");
+            Parallel.ForEach(drawables, drawable => drawable.UpdateGeometry(ref frameInfo));
+            Profiler.EndSample();
         }
 
         private void UpdateViewParameters()
@@ -287,7 +290,7 @@ namespace SharpGame
         private void UpdateLightParameters()
         {
             light.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
-            light.SunlightColor = new Color4(0.5f);
+            light.SunlightColor = new Color4(0.75f);
             light.SunlightDir = new Vector3(-1, -1, 1);
             light.SunlightDir.Normalize();
 

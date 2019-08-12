@@ -65,12 +65,24 @@ namespace SharpGame
 
         public T Load<T>(ResourceRef resourceRef) where T : Resource, new()
         {
-            return Load(resourceRef.type, resourceRef.FileID) as T;
+            var res = Load(resourceRef.type, resourceRef.FileID) as T;
+            if (res != null)
+            {
+                return res;
+            }
+
+            return Load<T>(resourceRef.FilePath);
         }
 
         public Resource Load(ResourceRef resourceRef)
         {
-            return Load(resourceRef.type, resourceRef.FileID);
+            var res = Load(resourceRef.type, resourceRef.FileID);
+            if(res != null)
+            {
+                return res;
+            }
+
+            return Load(resourceRef.type, resourceRef.FilePath);
         }
 
         public T Load<T>(Guid guid) where T : Resource, new()

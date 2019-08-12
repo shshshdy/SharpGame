@@ -12,6 +12,8 @@ namespace SharpGame
         public string Type { get => type.Name; set => type = Resource.GetType(value); }
         [DataMember]
         public Guid FileID;
+        [DataMember]
+        public string FilePath;
 
         [IgnoreDataMember]
         public Type type;
@@ -29,9 +31,17 @@ namespace SharpGame
             this.resource = resource;
         }
 
+        public ResourceRef(Type type, string filePath, Resource resource = null)
+        {
+            Type = type.Name;
+            FilePath = filePath;
+            FileID = Resources.Instance.GetGuid(filePath);
+            this.resource = resource;
+        }
+
         public static ResourceRef Create<T>(string file)
         {
-            return new ResourceRef(typeof(T), Resources.Instance.GetGuid(file), null);
+            return new ResourceRef(typeof(T), file, null);
         }
 
     }

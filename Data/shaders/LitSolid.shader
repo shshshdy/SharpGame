@@ -4,6 +4,7 @@ Shader "LitSolid"
 
 	Pass "main"
 	{
+        CullMode = None
 				
 		ResourceLayout
 		{
