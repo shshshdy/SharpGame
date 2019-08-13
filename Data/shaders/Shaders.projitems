@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Basic.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\Lighting.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\Pbr.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\Transform.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\UniformsPS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\UniformsVS.glsl" />
