@@ -6,8 +6,8 @@ Shader "Skybox"
 	{
 		CullMode = Front
 		FrontFace = CounterClockwise
-        DepthTestEnable = false
-        DepthWriteEnable = false
+        DepthTest = false
+        DepthWrite = false
 
 		ResourceLayout
 		{
