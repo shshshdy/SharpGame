@@ -226,6 +226,15 @@ namespace SharpGame
             return texture;
         }
 
+        public static Texture2D LoadFromFile(string filename,
+            Format format,
+            ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled,
+            ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal)
+        {
+            var tex = new Texture2D();
+            tex.LoadFromFile(filename, format, imageUsageFlags, imageLayout, false);
+            return tex;
+        }
 
         public void LoadFromFile(
             string filename,

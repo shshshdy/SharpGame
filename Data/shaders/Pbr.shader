@@ -14,11 +14,89 @@ Shader "Pbr"
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
 			}
+
+			ResourceLayoutBinding "ObjectVS"
+			{
+				DescriptorType = UniformBufferDynamic
+				StageFlags = Vertex
+			}
+		}
+
+		ResourceLayout
+		{
+			ResourceLayoutBinding CameraPS
+			{
+				DescriptorType = UniformBuffer
+				StageFlags = Fragment
+			}
+
+			ResourceLayoutBinding LightPS
+			{
+				DescriptorType = UniformBuffer
+				StageFlags = Fragment
+			}
+		}
+			
+		ResourceLayout
+		{
+			ResourceLayoutBinding "samplerIrradiance"
+			{
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
+			}
+
+			ResourceLayoutBinding "samplerBRDFLUT"
+			{
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
+			}
+
+			ResourceLayoutBinding "prefilteredMap"
+			{
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
+			}
 		}
 
 		ResourceLayout PerMaterial
-		{			
-			ResourceLayoutBinding "DiffMap"
+		{
+			ResourceLayoutBinding "albedoMap"
+			{
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
+			}
+		}
+			
+		ResourceLayout PerMaterial
+		{
+			ResourceLayoutBinding "normalMap"
+			{
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
+			}
+		}
+
+		ResourceLayout PerMaterial
+		{
+			ResourceLayoutBinding "metallicMap"
+			{
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
+			}
+		}
+
+		ResourceLayout PerMaterial
+		{
+			ResourceLayoutBinding "roughnessMap"
+			{
+				DescriptorType = CombinedImageSampler
+				StageFlags = Fragment
+			}
+		}
+
+		ResourceLayout PerMaterial
+		{
+			ResourceLayoutBinding "aoMap"
 			{
 				DescriptorType = CombinedImageSampler
 				StageFlags = Fragment
@@ -64,33 +142,15 @@ Shader "Pbr"
             #include "UniformsPS.glsl"
             #include "Pbr.glsl"
 
-			layout (binding = 1) uniform UBOParams {
-				vec4 lights[4];
-				float exposure;
-				float gamma;
-			} uboParams;
-
 			layout (location = 0) in vec3 inWorldPos;
 			layout (location = 1) in vec3 inNormal;
 			layout (location = 2) in vec2 inUV;
 
-			layout (set = 2,binding = 0) uniform samplerCube samplerIrradiance;
-			layout (set = 2, binding = 1) uniform sampler2D samplerBRDFLUT;
-			layout (set = 2, binding = 2) uniform samplerCube prefilteredMap;
-
-			layout (set = 3, binding = 0) uniform sampler2D albedoMap;
-			layout (set = 4, binding = 0) uniform sampler2D normalMap;
-			layout (set = 5, binding = 0) uniform sampler2D aoMap;
-			layout (set = 6, binding = 0) uniform sampler2D metallicMap;
-			layout (set = 7, binding = 0) uniform sampler2D roughnessMap;
-
-
 			layout (location = 0) out vec4 outColor;
-
 
 			void main()
 			{		
-				vec3 N = perturbNormal();
+				vec3 N = perturbNormal(inWorldPos, inNormal, inUV);
 				vec3 V = normalize(CameraPos - inWorldPos);
 				vec3 R = reflect(-V, N); 
 
@@ -101,17 +161,17 @@ Shader "Pbr"
 				F0 = mix(F0, ALBEDO, metallic);
 
 				vec3 Lo = vec3(0.0);
-				for(int i = 0; i < uboParams.lights[i].length(); i++) {
-					vec3 L = normalize(uboParams.lights[i].xyz - inWorldPos);
-					Lo += specularContribution(L, V, N, F0, metallic, roughness);
-				}   
+				vec3 albedo = ALBEDO;
+
+				vec3 L = -SunlightDir;
+				Lo += specularContribution(albedo, L, V, N, F0, metallic, roughness);
 				
 				vec2 brdf = texture(samplerBRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
 				vec3 reflection = prefilteredReflection(R, roughness).rgb;	
 				vec3 irradiance = texture(samplerIrradiance, N).rgb;
 
 				// Diffuse based on irradiance
-				vec3 diffuse = irradiance * ALBEDO;	
+				vec3 diffuse = irradiance * albedo;
 
 				vec3 F = F_SchlickR(max(dot(N, V), 0.0), F0, roughness);
 
@@ -126,10 +186,10 @@ Shader "Pbr"
 				vec3 color = ambient + Lo;
 
 				// Tone mapping
-				color = Uncharted2Tonemap(color * uboParams.exposure);
-				color = color * (1.0f / Uncharted2Tonemap(vec3(11.2f)));	
+				//color = Uncharted2Tonemap(color * uboParams.exposure);
+				//color = color * (1.0f / Uncharted2Tonemap(vec3(11.2f)));	
 				// Gamma correction
-				color = pow(color, vec3(1.0f / uboParams.gamma));
+				//color = pow(color, vec3(1.0f / uboParams.gamma));
 
 				outColor = vec4(color, 1.0);
 			}

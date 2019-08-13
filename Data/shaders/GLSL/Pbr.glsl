@@ -1,6 +1,17 @@
 
+layout (set = 2,binding = 0) uniform samplerCube samplerIrradiance;
+layout (set = 2, binding = 1) uniform sampler2D samplerBRDFLUT;
+layout (set = 2, binding = 2) uniform samplerCube prefilteredMap;
+
+layout (set = 3, binding = 0) uniform sampler2D albedoMap;
+layout (set = 4, binding = 0) uniform sampler2D normalMap;
+layout (set = 5, binding = 0) uniform sampler2D metallicMap;
+layout (set = 6, binding = 0) uniform sampler2D roughnessMap;
+layout (set = 7, binding = 0) uniform sampler2D aoMap;
+
 #define PI 3.1415926535897932384626433832795
 #define ALBEDO pow(texture(albedoMap, inUV).rgb, vec3(2.2))
+
 
 // From http://filmicgames.com/archives/75
 vec3 Uncharted2Tonemap(vec3 x)
@@ -54,7 +65,7 @@ vec3 prefilteredReflection(vec3 R, float roughness)
 	return mix(a, b, lod - lodf);
 }
 
-vec3 specularContribution(vec3 L, vec3 V, vec3 N, vec3 F0, float metallic, float roughness)
+vec3 specularContribution(vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, float metallic, float roughness)
 {
 	// Precalculate vectors and dot products	
 	vec3 H = normalize (V + L);
@@ -76,19 +87,19 @@ vec3 specularContribution(vec3 L, vec3 V, vec3 N, vec3 F0, float metallic, float
 		vec3 F = F_Schlick(dotNV, F0);		
 		vec3 spec = D * F * G / (4.0 * dotNL * dotNV + 0.001);		
 		vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);			
-		color += (kD * ALBEDO / PI + spec) * dotNL;
+		color += (kD * albedo / PI + spec) * dotNL;
 	}
 
 	return color;
 }
 
 // See http://www.thetenthplanet.de/archives/1180
-vec3 perturbNormal()
+vec3 perturbNormal(vec3 worldPos, vec3 inNormal, vec2 inUV)
 {
 	vec3 tangentNormal = texture(normalMap, inUV).xyz * 2.0 - 1.0;
 
-	vec3 q1 = dFdx(inWorldPos);
-	vec3 q2 = dFdy(inWorldPos);
+	vec3 q1 = dFdx(worldPos);
+	vec3 q2 = dFdy(worldPos);
 	vec2 st1 = dFdx(inUV);
 	vec2 st2 = dFdy(inUV);
 

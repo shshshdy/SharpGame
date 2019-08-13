@@ -18,10 +18,17 @@ namespace SharpGame
                 return null;
             }
 
-            using(var stream = FileSystem.GetFile(name))
-            using (var imageSharpTexture
-                 = new ImageSharp.ImageSharpTexture(stream))
-                return imageSharpTexture.CreateDeviceTexture();
+            using (var stream = FileSystem.GetFile(name))
+            {
+                if(stream == null)
+                {
+                    return null;
+                }
+
+                using (var imageSharpTexture
+                     = new ImageSharp.ImageSharpTexture(stream))
+                    return imageSharpTexture.CreateDeviceTexture();
+            }
         }
 
     }
