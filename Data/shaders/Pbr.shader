@@ -74,15 +74,15 @@ Shader "Pbr"
 			layout (location = 1) in vec3 inNormal;
 			layout (location = 2) in vec2 inUV;
 
-			layout (binding = 2) uniform samplerCube samplerIrradiance;
-			layout (binding = 3) uniform sampler2D samplerBRDFLUT;
-			layout (binding = 4) uniform samplerCube prefilteredMap;
+			layout (set = 2,binding = 0) uniform samplerCube samplerIrradiance;
+			layout (set = 2, binding = 1) uniform sampler2D samplerBRDFLUT;
+			layout (set = 2, binding = 2) uniform samplerCube prefilteredMap;
 
-			layout (binding = 5) uniform sampler2D albedoMap;
-			layout (binding = 6) uniform sampler2D normalMap;
-			layout (binding = 7) uniform sampler2D aoMap;
-			layout (binding = 8) uniform sampler2D metallicMap;
-			layout (binding = 9) uniform sampler2D roughnessMap;
+			layout (set = 3, binding = 0) uniform sampler2D albedoMap;
+			layout (set = 4, binding = 0) uniform sampler2D normalMap;
+			layout (set = 5, binding = 0) uniform sampler2D aoMap;
+			layout (set = 6, binding = 0) uniform sampler2D metallicMap;
+			layout (set = 7, binding = 0) uniform sampler2D roughnessMap;
 
 
 			layout (location = 0) out vec4 outColor;
