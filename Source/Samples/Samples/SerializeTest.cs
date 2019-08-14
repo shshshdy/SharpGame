@@ -26,7 +26,7 @@ namespace SharpGame.Samples
                     System.IO.File.WriteAllText("test.material", text);
                 }
 
-                //var mat1 = Resources.Load<Material>("materials/Stone.material");
+                var mat1 = Resources.Load<Material>("materials/Stone.material");
 
                 {
                     var bytes = MessagePack.MessagePackSerializer.Serialize(mat, MessagePack.Resolvers.ContractlessStandardResolver.Instance);

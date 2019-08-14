@@ -135,28 +135,50 @@ namespace SharpGame
             {
                 return null;
             }
-
-            var resource = Activator.CreateInstance(type) as Resource;
-
-            if (!resource.Load(stream))
+            try
             {
+                Resource resource = null;
+                resource = ReadDefault(type, stream);
+                if(resource != null)
+                {
+                    resource.Build();
+                    return resource;
+                }
+
+                resource = Activator.CreateInstance(type) as Resource;
+
+                if (!resource.Load(stream))
+                {
+                    return null;
+                }
+
+                RegisterResource(resourceName, resource);
+                return resource;
+            }
+            catch(Exception e)
+            {
+                Log.Error(e.Message);
                 return null;
             }
-
-            RegisterResource(resourceName, resource);
-            return resource;
+            finally
+            {
+                stream.Dispose();
+            }
         }
 
-        private T ReadDefault<T>(File stream) where T : Resource, new()
+        private Resource ReadDefault(Type type, File stream)
         {
             int firstByte = stream.ReadByte();
-
-            if(firstByte == '{')
+            stream.Seek(0);
+            if (firstByte == '{')
             {
-
+                return Utf8Json.JsonSerializer.NonGeneric.Deserialize(type, stream) as Resource;
+            }
+            else
+            {
+                return MessagePack.MessagePackSerializer.NonGeneric.Deserialize(type, stream) as Resource;
             }
 
-            return null;
         }
 
         public async Task<T> LoadAsync<T>(string resourceName) where T : Resource, new()
