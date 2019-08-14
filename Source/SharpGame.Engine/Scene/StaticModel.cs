@@ -32,7 +32,7 @@ namespace SharpGame
             }
         }
 
-        public ResourceRef ResourceRef
+        public ResourceRef ModelResource
         {
             get
             {
@@ -95,11 +95,16 @@ namespace SharpGame
                     batches[i].worldTransform = node_.worldTransform_;
                     batches[i].numWorldTransforms = 1;
 
-                    Material mat = model.GetMaterial(i);
-                    if(mat)
+                    var m = GetMaterial(i);
+                    if(m == null)
                     {
-                        SetMaterial(i, mat);
+                        Material mat = model.GetMaterial(i);
+                        if (mat)
+                        {
+                            SetMaterial(i, mat);
+                        }
                     }
+                   
                 }
 
                 SetBoundingBox(model.BoundingBox);

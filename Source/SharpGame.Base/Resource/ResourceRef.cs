@@ -39,6 +39,11 @@ namespace SharpGame
             this.resource = resource;
         }
 
+        public Resource Load()
+        {
+            return Resources.Instance.Load(this);
+        }
+
         public static ResourceRef Create<T>(string file)
         {
             return new ResourceRef(typeof(T), file, null);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 
@@ -79,10 +80,13 @@ namespace SharpGame
             var res = Load(resourceRef.type, resourceRef.FileID);
             if(res != null)
             {
+                resourceRef.resource = res;
                 return res;
             }
 
-            return Load(resourceRef.type, resourceRef.FilePath);
+            res = Load(resourceRef.type, resourceRef.FilePath);
+            resourceRef.resource = res;
+            return res;
         }
 
         public T Load<T>(Guid guid) where T : Resource, new()

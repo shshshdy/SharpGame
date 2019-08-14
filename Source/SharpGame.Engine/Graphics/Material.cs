@@ -19,12 +19,12 @@ namespace SharpGame
 
     public class Material : Resource
     {
-        public ResourceRef ShaderName { get; set; }
+        public ResourceRef ShaderResource { get; set; }
 
         public ShadingMode ShadingMode { get; set; } = ShadingMode.Default;
 
         public FastList<ShaderParameter> ShaderParameters { get; set; }// = new FastList<ShaderParameter>();
-        public FastList<TexureParameter> TextureParameters { get; set; }// = new FastList<TexureParameter>();
+        public FastList<TextureParameter> TextureParameters { get; set; }// = new FastList<TexureParameter>();
         public FastList<BufferParameter> BufferParameters { get; set; }// = new FastList<BufferParameter>();
 
         private List<ResourceSet> resourceSet = new List<ResourceSet>();
@@ -48,7 +48,7 @@ namespace SharpGame
         {
             maxPushConstantsSize = (int)Device.Properties.limits.maxPushConstantsSize;
             pushConstBuffer = Utilities.Alloc(maxPushConstantsSize);
-            ShaderName = ResourceRef.Create<Shader>(shader);
+            ShaderResource = ResourceRef.Create<Shader>(shader);
 
             OnBuild();
         }
@@ -64,9 +64,9 @@ namespace SharpGame
 
         protected override bool OnBuild()
         {
-            if(ShaderName != null)
+            if(ShaderResource != null)
             {
-                Shader = Resources.Instance.Load<Shader>(ShaderName);
+                Shader = Resources.Instance.Load<Shader>(ShaderResource);
             }
 
             if(Shader == null)
@@ -87,6 +87,16 @@ namespace SharpGame
                     resourceSet.Add(new ResourceSet(layout));
                 }
 
+            }
+
+            if (TextureParameters != null)
+            {
+                for (int j = 0; j < TextureParameters.Count; j++)
+                {
+                    ref TextureParameter texParam = ref TextureParameters.At(j);
+                    var res = texParam.texture.Load();
+                    UpdateResourceSet(texParam.name, res as Texture);
+                }
             }
 
             if(mainPass.PushConstantNames != null)
@@ -188,13 +198,13 @@ namespace SharpGame
             }
         }
 
-        public ref TexureParameter GetTextureParameter(StringID name)
+        public ref TextureParameter GetTextureParameter(StringID name)
         {
             if (TextureParameters != null)
             {
                 for (int i = 0; i < TextureParameters.Count; i++)
                 {
-                    ref TexureParameter param = ref TextureParameters.At(i);
+                    ref TextureParameter param = ref TextureParameters.At(i);
                     if (param.name == name)
                     {
                         return ref param;
@@ -202,19 +212,19 @@ namespace SharpGame
                 }
             }
 
-            return ref TexureParameter.Null;
+            return ref TextureParameter.Null;
         }
 
         public void SetTexture(StringID name, ResourceRef texRef)
         {
             if (TextureParameters == null)
             {
-                TextureParameters = new FastList<TexureParameter>();
+                TextureParameters = new FastList<TextureParameter>();
             }
 
             for (int i = 0; i < TextureParameters.Count; i++)
             {
-                ref TexureParameter param = ref TextureParameters.At(i);
+                ref TextureParameter param = ref TextureParameters.At(i);
                 if (param.name == name)
                 {
                     param.texture = texRef;
@@ -223,7 +233,7 @@ namespace SharpGame
                 }
             }
 
-            TextureParameters.Add(new TexureParameter { name = name, texture = texRef });
+            TextureParameters.Add(new TextureParameter { name = name, texture = texRef });
             UpdateResourceSet(name, (Texture)texRef.resource);
         }
 
@@ -231,12 +241,12 @@ namespace SharpGame
         {
             if (TextureParameters == null)
             {
-                TextureParameters = new FastList<TexureParameter>();
+                TextureParameters = new FastList<TextureParameter>();
             }
 
             for (int i = 0; i < TextureParameters.Count; i++)
             {
-                ref TexureParameter param = ref TextureParameters.At(i);
+                ref TextureParameter param = ref TextureParameters.At(i);
                 if (param.name == name)
                 {
                     if(tex.ResourceRef != param.texture)
@@ -248,7 +258,7 @@ namespace SharpGame
                 }
             }
 
-            TextureParameters.Add(new TexureParameter { name = name, texture = tex.ResourceRef });
+            TextureParameters.Add(new TextureParameter { name = name, texture = tex.ResourceRef });
             UpdateResourceSet(name, tex);
         }
 
@@ -320,7 +330,6 @@ namespace SharpGame
                     }
                 }
 
-                //cmd.PushConstants(pass, ShaderStage.Vertex, minPushConstRange, size, pushConstBuffer + minPushConstRange);
             }
         }
 

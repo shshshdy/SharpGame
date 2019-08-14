@@ -44,7 +44,7 @@ namespace SharpGame
         public Color colorVal;
     }
 
-    public struct TexureParameter
+    public struct TextureParameter
     {
         public string name;
         public ResourceRef texture;
@@ -53,7 +53,7 @@ namespace SharpGame
         [IgnoreDataMember]
         public bool IsNull => string.IsNullOrEmpty(name);
 
-        public static TexureParameter Null = new TexureParameter();
+        public static TextureParameter Null = new TextureParameter();
     }
 
     public struct BufferParameter

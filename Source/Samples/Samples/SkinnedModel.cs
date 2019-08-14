@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -3)]
+    [SampleDesc(sortOrder = 3)]
     public class SkinnedModel : Sample
     {
         List<AnimatedModel> animators_ = new List<AnimatedModel>();
@@ -27,10 +27,11 @@ namespace SharpGame.Samples
                 node.Scaling = new Vector3(3.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
-                var colorMap = Resources.Load<Texture2D>("textures/StoneDiffuse.png");
-                var mat = new Material(shader);
-                mat.SetTexture("DiffMap", colorMap);
 
+                var colorMap = Resources.Load<Texture2D>("textures/StoneDiffuse.png");
+
+                var mat = Resources.Load<Material>("materials/Stone.material");// new Material(shader);
+ 
                 staticModel.SetMaterial(mat);
             }
 

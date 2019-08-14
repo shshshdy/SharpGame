@@ -12,6 +12,12 @@ namespace SharpGame.Samples
     {
         Material material;
         private float lodBias = 1.0f;
+
+        string[] names = {"sphere", "teapot", "torusknot" };
+        string[] filenames = { "models/sphere.obj", "models/teapot.dae", "models/torusknot.obj" };
+        int selected;
+        StaticModel staticModel;
+
         public override void Init()
         {
             scene = new Scene();
@@ -43,30 +49,38 @@ namespace SharpGame.Samples
                 material.SetTexture("samplerColor", cubeMap);
                 material.SetShaderParameter("lodBias", lodBias);
 
-                List<string> filenames = new List<string> { "models/sphere.obj"/*, "models/teapot.dae", "models/torusknot.obj"*/ };
-                foreach (string file in filenames)
-                {
-                    var model = Resources.Load<Model>(file);
+                var node = scene.CreateChild("Model");
+                node.Scaling = new Vector3(0.1f);
 
-                    var node = scene.CreateChild("Model");
-                    node.Scaling = new Vector3(0.1f);
+                staticModel = node.AddComponent<StaticModel>();
+                SetModel(filenames[0]);
+                staticModel.SetMaterial(material);
 
-                    var staticModel = node.AddComponent<StaticModel>();
-                    staticModel.SetModel(model);
-                    staticModel.SetMaterial(material);
-                }
             }
 
             Renderer.MainView.Attach(camera, scene);
 
         }
 
+        void SetModel(string filePath)
+        {
+            var model = Resources.Load<Model>(filePath);
+
+            staticModel.SetModel(model);
+        }
+
         public override void OnGUI()
         {
-            if(ImGui.SliderFloat("lodBias", ref lodBias, 0, 10))
+            if (ImGui.Combo("Model", ref selected, names, names.Length))
+            {
+                SetModel(filenames[selected]);
+            }
+
+            if (ImGui.SliderFloat("lodBias", ref lodBias, 0, 10))
             {
                 material.SetShaderParameter("lodBias", lodBias);
             }
+
         }
 
     }
