@@ -9,6 +9,12 @@ namespace SharpGame
     using static Vulkan.VulkanNative;
     public unsafe class TextureCube : Texture
     {
+        public static TextureCube LoadFromFile(string filename, Format format)
+        {
+            var tex = new TextureCube();
+            tex.LoadFromFile(filename, format, false);
+            return tex;
+        }
 
         public void LoadFromFile(string filename, Format format, bool forceLinearTiling)
         {

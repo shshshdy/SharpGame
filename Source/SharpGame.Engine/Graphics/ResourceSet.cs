@@ -6,6 +6,7 @@ using Vulkan;
 
 namespace SharpGame
 {
+    using global::System.Runtime.Serialization;
     using System.Runtime.CompilerServices;
     using static Builder;
 
@@ -14,7 +15,7 @@ namespace SharpGame
         public int Set => resourceLayout.Set;
 
         internal ResourceLayout resourceLayout;
-
+        [IgnoreDataMember]
         internal ref DescriptorResourceCounts Counts => ref resourceLayout.descriptorResourceCounts;
 
         internal VkDescriptorSet descriptorSet;

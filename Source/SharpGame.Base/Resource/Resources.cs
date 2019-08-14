@@ -147,6 +147,18 @@ namespace SharpGame
             return resource;
         }
 
+        private T ReadDefault<T>(File stream) where T : Resource, new()
+        {
+            int firstByte = stream.ReadByte();
+
+            if(firstByte == '{')
+            {
+
+            }
+
+            return null;
+        }
+
         public async Task<T> LoadAsync<T>(string resourceName) where T : Resource, new()
         {
             if (cachedResources.TryGetValue(resourceName, out Resource value))

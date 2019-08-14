@@ -10,7 +10,7 @@ namespace SharpGame
 {
     public abstract class Resource : Object
     {
-        [DataMember]
+        [IgnoreDataMember]
         public Guid Guid { get; set; }
 
         [IgnoreDataMember]

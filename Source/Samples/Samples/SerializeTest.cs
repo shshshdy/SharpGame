@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Utf8Json;
+using Utf8Json.Resolvers;
 
 namespace SharpGame.Samples
 {
@@ -18,9 +19,21 @@ namespace SharpGame.Samples
                 var colorMap = Resources.Load<Texture2D>("textures/StoneDiffuse.png");
                 var mat = new Material("Shaders/Basic.shader");
                 mat.SetTexture("DiffMap", colorMap);
-                byte[] bytes = JsonSerializer.Serialize(mat);
-                var text = JsonSerializer.PrettyPrint(bytes);
-                System.IO.File.WriteAllText("test.material", text);
+
+                {
+                    var bytes = JsonSerializer.Serialize(mat, StandardResolver.ExcludeNull);
+                    var text = JsonSerializer.PrettyPrint(bytes);
+                    System.IO.File.WriteAllText("test.material", text);
+                }
+
+                //var mat1 = Resources.Load<Material>("materials/Stone.material");
+
+                {
+                    var bytes = MessagePack.MessagePackSerializer.Serialize(mat, MessagePack.Resolvers.ContractlessStandardResolver.Instance);
+
+                    System.IO.File.WriteAllText("test1.material", MessagePack.MessagePackSerializer.ToJson(bytes));
+                    System.IO.File.WriteAllBytes("test2.material", bytes);
+                }
 
                 using (File file = FileSystem.Instance.GetFile("Shaders/GLSL/UniformsVS.glsl"))
                 {

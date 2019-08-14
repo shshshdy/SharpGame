@@ -23,9 +23,9 @@ namespace SharpGame
 
         public ShadingMode ShadingMode { get; set; } = ShadingMode.Default;
 
-        public FastList<ShaderParameter> ShaderParameters { get; set; } = new FastList<ShaderParameter>();
-        public FastList<TexureParameter> TextureParameters { get; set; } = new FastList<TexureParameter>();
-        public FastList<BufferParameter> BufferParameters { get; set; } = new FastList<BufferParameter>();
+        public FastList<ShaderParameter> ShaderParameters { get; set; }// = new FastList<ShaderParameter>();
+        public FastList<TexureParameter> TextureParameters { get; set; }// = new FastList<TexureParameter>();
+        public FastList<BufferParameter> BufferParameters { get; set; }// = new FastList<BufferParameter>();
 
         private List<ResourceSet> resourceSet = new List<ResourceSet>();
         [IgnoreDataMember]
@@ -111,17 +111,19 @@ namespace SharpGame
                         maxPushConstRange = pushConst.offset + pushConst.size;
                     }
 
-                    for (int j = 0; j < ShaderParameters.Count; j++)
+                    if (ShaderParameters != null)
                     {
-                        ref ShaderParameter shaderParam = ref ShaderParameters.At(j);
-                        if (shaderParam.name == constName)
+                        for (int j = 0; j < ShaderParameters.Count; j++)
                         {
-                            shaderParam.Bind(pushConstBuffer + pushConst.offset);
-                            break;
+                            ref ShaderParameter shaderParam = ref ShaderParameters.At(j);
+                            if (shaderParam.name == constName)
+                            {
+                                shaderParam.Bind(pushConstBuffer + pushConst.offset);
+                                break;
+                            }
+
                         }
-
                     }
-
                 }
 
             }
@@ -131,12 +133,15 @@ namespace SharpGame
 
         public ref ShaderParameter GetShaderParameter(StringID name)
         {
-            for(int i = 0; i < ShaderParameters.Count; i++)
+            if (ShaderParameters != null)
             {
-                ref ShaderParameter param = ref ShaderParameters.At(i);
-                if(param.name == name)
+                for (int i = 0; i < ShaderParameters.Count; i++)
                 {
-                    return ref param;
+                    ref ShaderParameter param = ref ShaderParameters.At(i);
+                    if (param.name == name)
+                    {
+                        return ref param;
+                    }
                 }
             }
 
@@ -173,6 +178,11 @@ namespace SharpGame
                     }
                 }
 
+                if (ShaderParameters == null)
+                {
+                    ShaderParameters = new FastList<ShaderParameter>();
+                }
+
                 ShaderParameters.Add(shaderParam);
 
             }
@@ -180,12 +190,15 @@ namespace SharpGame
 
         public ref TexureParameter GetTextureParameter(StringID name)
         {
-            for (int i = 0; i < ShaderParameters.Count; i++)
+            if (TextureParameters != null)
             {
-                ref TexureParameter param = ref TextureParameters.At(i);
-                if (param.name == name)
+                for (int i = 0; i < TextureParameters.Count; i++)
                 {
-                    return ref param;
+                    ref TexureParameter param = ref TextureParameters.At(i);
+                    if (param.name == name)
+                    {
+                        return ref param;
+                    }
                 }
             }
 
@@ -194,6 +207,11 @@ namespace SharpGame
 
         public void SetTexture(StringID name, ResourceRef texRef)
         {
+            if (TextureParameters == null)
+            {
+                TextureParameters = new FastList<TexureParameter>();
+            }
+
             for (int i = 0; i < TextureParameters.Count; i++)
             {
                 ref TexureParameter param = ref TextureParameters.At(i);
@@ -211,6 +229,11 @@ namespace SharpGame
 
         public void SetTexture(StringID name, Texture tex)
         {
+            if (TextureParameters == null)
+            {
+                TextureParameters = new FastList<TexureParameter>();
+            }
+
             for (int i = 0; i < TextureParameters.Count; i++)
             {
                 ref TexureParameter param = ref TextureParameters.At(i);
@@ -231,6 +254,11 @@ namespace SharpGame
 
         public void SetBuffer(StringID name, DeviceBuffer buf)
         {
+            if (BufferParameters == null)
+            {
+                BufferParameters = new FastList<BufferParameter>();
+            }
+
             for (int i = 0; i < BufferParameters.Count; i++)
             {
                 ref BufferParameter param = ref BufferParameters.At(i);
