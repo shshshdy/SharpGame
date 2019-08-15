@@ -117,7 +117,7 @@ Shader "Pbr"
 
             layout(location = 0) out vec3 outWorldPos;
             layout(location = 1) out vec2 outUV;
-            layout(location = 2) out mat3 outNormal;
+            layout(location = 2) out mat3 outTBN;
             
 
 			out gl_PerVertex 
@@ -129,7 +129,7 @@ Shader "Pbr"
 			{
 				vec3 locPos = vec3(Model * vec4(inPos, 1.0));
 				outWorldPos = locPos;
-				outNormal = mat3(Model) * mat3(inTangent, inBitangent, inNormal);
+                outTBN = mat3(Model) * mat3(inTangent, inBitangent, inNormal);
 
 				outUV = inUV;
 				outUV.t = 1.0 - inUV.t;
@@ -148,13 +148,14 @@ Shader "Pbr"
 
 			layout (location = 0) in vec3 inWorldPos;
 			layout (location = 1) in vec2 inUV;
-			layout (location = 2) in mat3 inNormal;
+			layout (location = 2) in mat3 inTBN;
 
 			layout (location = 0) out vec4 outColor;
 
 			void main()
-			{		
-				vec3 N = perturbNormal(inNormal, inUV);
+			{
+                vec3 tangentNormal = texture(normalMap, inUV).xyz * 2.0 - 1.0;
+                vec3 N = normalize(inTBN * tangentNormal);
 				vec3 V = normalize(CameraPos - inWorldPos);
 				vec3 R = reflect(-V, N); 
 

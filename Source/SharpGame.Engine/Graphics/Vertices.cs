@@ -43,7 +43,7 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPosNTBTex
+    public struct VertexPosTBNTex
     {
         public Vector3 position;
         public Vector3 normal;
@@ -55,7 +55,7 @@ namespace SharpGame
         (
             new[]
             {
-                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosNTBTex>(), VertexInputRate.Vertex)
+                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosTBNTex>(), VertexInputRate.Vertex)
             },
             new[]
             {

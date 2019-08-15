@@ -145,7 +145,6 @@ Assimp.PostProcessSteps.ValidateDataStructure;
 
             for (int f = 0; f < mesh.FaceCount; f++)
             {
-                // We assume that all faces are triangulated
                 for (int i = 0; i < 3; i++)
                 {
                     indexBuffer.Add((uint)mesh.Faces[f].Indices[i]);
@@ -163,18 +162,18 @@ Assimp.PostProcessSteps.ValidateDataStructure;
         private static unsafe void ConvertGeomNTB(float scale, Assimp.Mesh mesh,
             out BoundingBox meshBoundingBox, out DeviceBuffer vb, out DeviceBuffer ib, out VertexLayout vertexLayout)
         {
-            NativeList<VertexPosNTBTex> vertexBuffer = new NativeList<VertexPosNTBTex>();
+            NativeList<VertexPosTBNTex> vertexBuffer = new NativeList<VertexPosTBNTex>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
 
-            Log.Info("Geom type : " + typeof(VertexPosNTBTex));
+            Log.Info("Geom type : " + typeof(VertexPosTBNTex));
 
             meshBoundingBox = new BoundingBox();
 
-            vertexLayout = VertexPosNTBTex.Layout;
+            vertexLayout = VertexPosTBNTex.Layout;
 
             for (int v = 0; v < mesh.VertexCount; v++)
             {
-                VertexPosNTBTex vertex;
+                VertexPosTBNTex vertex;
 
                 vertex.position = new Vector3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new Vector3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
@@ -188,31 +187,15 @@ Assimp.PostProcessSteps.ValidateDataStructure;
                     vertex.texcoord = Vector2.Zero;
                 }
 
-
                 vertex.tangent = new Vector3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);
                 vertex.bitangent = new Vector3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
-          
-                /*
-                // Mesh may not have vertex colors
-                if (mesh.HasVertexColors(0))
-                {
-                    vertex.color = new Color(mesh.VertexColorChannels[0][v].R,
-                        mesh.VertexColorChannels[0][v].G,
-                        mesh.VertexColorChannels[0][v].B);
-                }
-                else
-                {
-                    vertex.color = new Color(1.0f);
-                }*/
 
                 vertexBuffer.Add(vertex);
-
                 meshBoundingBox.Merge(ref vertex.position);
             }
 
             for (int f = 0; f < mesh.FaceCount; f++)
             {
-                // We assume that all faces are triangulated
                 for (int i = 0; i < 3; i++)
                 {
                     indexBuffer.Add((uint)mesh.Faces[f].Indices[i]);

@@ -513,44 +513,6 @@ namespace SharpGame
 
         }
 
-        /*
-        public static void CreateImage(
-            int width,
-            int height,
-            Format format,
-            VkImageTiling tiling,
-            ImageUsageFlags usage,
-            VkMemoryPropertyFlags properties,
-            out Image image,
-            out VkDeviceMemory memory)
-        {
-            ImageCreateInfo imageCI = new ImageCreateInfo
-            {
-                imageType = ImageType.Image2D
-            };
-            imageCI.extent.width = width;
-            imageCI.extent.height = height;
-            imageCI.extent.depth = 1;
-            imageCI.mipLevels = 1;
-            imageCI.arrayLayers = 1;
-            imageCI.format = format;
-            imageCI.tiling = tiling;
-            imageCI.initialLayout = ImageLayout.Preinitialized;
-            imageCI.usage = usage;
-            imageCI.sharingMode = VkSharingMode.Exclusive;
-            imageCI.samples = SampleCountFlags.Count1;
-
-            vkCreateImage(device, ref imageCI, null, out image);
-
-            vkGetImageMemoryRequirements(device, image, out VkMemoryRequirements memRequirements);
-            VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.New();
-            allocInfo.allocationSize = memRequirements.size;
-            allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
-            vkAllocateMemory(device, ref allocInfo, null, out memory);
-
-            vkBindImageMemory(device, image, memory, 0);
-        }
-        */
         private static uint FindMemoryType(uint typeFilter, VkMemoryPropertyFlags properties)
         {
             vkGetPhysicalDeviceMemoryProperties(PhysicalDevice, out VkPhysicalDeviceMemoryProperties memProperties);
@@ -577,30 +539,6 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkBindImageMemory(device, image, memory, offset));
         }
 
-        public static void CopyImage(VkImage srcImage, VkImage dstImage, uint width, uint height, uint level = 0)
-        {
-            VkImageSubresourceLayers subresource = new VkImageSubresourceLayers
-            {
-                mipLevel = level,
-                layerCount = 1,
-                aspectMask = VkImageAspectFlags.Color,
-                baseArrayLayer = 0
-            };
-
-            VkImageCopy region = new VkImageCopy
-            {
-                dstSubresource = subresource,
-                srcSubresource = subresource
-            };
-            region.extent.width = width;
-            region.extent.height = height;
-            region.extent.depth = 1;
-
-            VkCommandBuffer copyCmd = BeginOneTimeCommands();
-            vkCmdCopyImage(copyCmd, srcImage, VkImageLayout.TransferSrcOptimal, dstImage, VkImageLayout.TransferDstOptimal, 1, ref region);
-            EndOneTimeCommands(copyCmd);
-        }
-
         public static void CreateImageView(VkImage image, VkFormat format, out VkImageView imageView)
         {
             VkImageViewCreateInfo imageViewCI = VkImageViewCreateInfo.New();
@@ -615,93 +553,6 @@ namespace SharpGame
 
             vkCreateImageView(device, ref imageViewCI, null, out imageView);
         }
-
-        public static void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
-        {
-            VkCommandBuffer cb = BeginOneTimeCommands();
-
-            VkImageMemoryBarrier barrier = VkImageMemoryBarrier.New();
-            barrier.oldLayout = oldLayout;
-            barrier.newLayout = newLayout;
-            barrier.srcQueueFamilyIndex = QueueFamilyIgnored;
-            barrier.dstQueueFamilyIndex = QueueFamilyIgnored;
-            barrier.image = image;
-            barrier.subresourceRange.aspectMask = VkImageAspectFlags.Color;
-            barrier.subresourceRange.baseMipLevel = 0;
-            barrier.subresourceRange.levelCount = 1;
-            barrier.subresourceRange.baseArrayLayer = 0;
-            barrier.subresourceRange.layerCount = 1;
-
-            vkCmdPipelineBarrier(
-                cb,
-                VkPipelineStageFlags.TopOfPipe,
-                VkPipelineStageFlags.TopOfPipe,
-                VkDependencyFlags.None,
-                0, null,
-                0, null,
-                1, &barrier);
-
-            EndOneTimeCommands(cb);
-        }
-
-
-        public static void TransitionImageLayout(VkCommandBuffer cb, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
-        {
-            VkImageMemoryBarrier barrier = VkImageMemoryBarrier.New();
-            barrier.oldLayout = oldLayout;
-            barrier.newLayout = newLayout;
-            barrier.srcQueueFamilyIndex = QueueFamilyIgnored;
-            barrier.dstQueueFamilyIndex = QueueFamilyIgnored;
-            barrier.image = image;
-            barrier.subresourceRange.aspectMask = VkImageAspectFlags.Color;
-            barrier.subresourceRange.baseMipLevel = 0;
-            barrier.subresourceRange.levelCount = 1;
-            barrier.subresourceRange.baseArrayLayer = 0;
-            barrier.subresourceRange.layerCount = 1;
-
-            vkCmdPipelineBarrier(
-                cb,
-                VkPipelineStageFlags.TopOfPipe,
-                VkPipelineStageFlags.TopOfPipe,
-                VkDependencyFlags.None,
-                0, null,
-                0, null,
-                1, &barrier);
-
-        }
-
-
-        public static VkCommandBuffer BeginOneTimeCommands()
-        {
-            VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.New();
-            allocInfo.commandBufferCount = 1;
-            allocInfo.commandPool = commandPool;
-            allocInfo.level = VkCommandBufferLevel.Primary;
-
-            vkAllocateCommandBuffers(device, ref allocInfo, out VkCommandBuffer cb);
-
-            VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.New();
-            beginInfo.flags = VkCommandBufferUsageFlags.OneTimeSubmit;
-
-            vkBeginCommandBuffer(cb, ref beginInfo);
-
-            return cb;
-        }
-
-        public static void EndOneTimeCommands(VkCommandBuffer cb)
-        {
-            vkEndCommandBuffer(cb);
-
-            VkSubmitInfo submitInfo = VkSubmitInfo.New();
-            submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = &cb;
-
-            vkQueueSubmit(queue, 1, &submitInfo, VkFence.Null);
-            vkQueueWaitIdle(queue);
-
-            vkFreeCommandBuffers(device, commandPool, 1, ref cb);
-        }
-
 
         public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
         {
@@ -827,27 +678,6 @@ namespace SharpGame
         {
             VulkanUtil.CheckResult(vkCreateComputePipelines(device, pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
             return pPipelines;
-        }
-
-        public static void Destroy<T>(ref T handle) where T : struct
-        {
-            switch (handle)
-            {
-                case VkPipeline pipeline:
-                    if(pipeline != 0)
-                    {
-                        vkDestroyPipeline(device, pipeline, null);
-                        handle = default;
-                    }
-                    break;
-                case VkPipelineLayout pipelineLayout:
-                    if (pipelineLayout != 0)
-                    {
-                        vkDestroyPipelineLayout(device, pipelineLayout, null);
-                        handle = default;
-                    }
-                    break;
-            }
         }
 
         public static void DestroyPipeline(VkPipeline pipeline)

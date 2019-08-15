@@ -92,10 +92,3 @@ vec3 specularContribution(vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, float me
 
 	return color;
 }
-
-// See http://www.thetenthplanet.de/archives/1180
-vec3 perturbNormal(mat3 TBN, vec2 inUV)
-{
-	vec3 tangentNormal = texture(normalMap, inUV).xyz * 2.0 - 1.0;
-	return normalize(TBN * tangentNormal);
-}

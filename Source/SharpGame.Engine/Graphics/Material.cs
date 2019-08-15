@@ -23,9 +23,9 @@ namespace SharpGame
 
         public ShadingMode ShadingMode { get; set; } = ShadingMode.Default;
 
-        public FastList<ShaderParameter> ShaderParameters { get; set; }// = new FastList<ShaderParameter>();
-        public FastList<TextureParameter> TextureParameters { get; set; }// = new FastList<TexureParameter>();
-        public FastList<BufferParameter> BufferParameters { get; set; }// = new FastList<BufferParameter>();
+        public FastList<ShaderParameter> ShaderParameters { get; set; }
+        public FastList<TextureParameter> TextureParameters { get; set; }
+        public FastList<BufferParameter> BufferParameters { get; set; }
 
         private List<ResourceSet> resourceSet = new List<ResourceSet>();
         [IgnoreDataMember]
@@ -33,6 +33,7 @@ namespace SharpGame
 
         [IgnoreDataMember]
         public Shader Shader { get; set; }
+
         IntPtr pushConstBuffer;
         int minPushConstRange = 1000;
         int maxPushConstRange = 0;

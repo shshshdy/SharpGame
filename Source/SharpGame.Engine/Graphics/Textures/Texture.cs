@@ -41,8 +41,8 @@ namespace SharpGame
             view.Dispose();
             image.Dispose();
             sampler.Dispose();
-            Device.FreeMemory(deviceMemory);
 
+            Device.FreeMemory(deviceMemory);
             base.Destroy();
         }
 
