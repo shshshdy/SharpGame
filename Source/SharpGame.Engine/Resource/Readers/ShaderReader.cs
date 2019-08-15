@@ -15,10 +15,10 @@ namespace SharpGame
         protected override bool OnLoad(Shader resource, File stream)
         {
             var filePath = FileUtil.StandardlizeFile(stream.Name);
-            filePath = FileUtil.GetPath(stream.Name);
-            var glslPath = filePath + "GLSL";
+            filePath = FileUtil.GetPath(stream.Name);           
             FileSystem.AddResourceDir(filePath);
-            FileSystem.AddResourceDir(glslPath);
+            FileSystem.AddResourceDir(filePath + "GLSL");
+            FileSystem.AddResourceDir(filePath + "Common");
 
             try
             {
@@ -37,9 +37,9 @@ namespace SharpGame
             finally
             {
                 FileSystem.RemoveResourceDir(filePath);
-                FileSystem.RemoveResourceDir(glslPath);
+                FileSystem.RemoveResourceDir(filePath + "GLSL");
+                FileSystem.RemoveResourceDir(filePath + "Common");
             }
-
 
             return false;
         }
@@ -107,11 +107,11 @@ namespace SharpGame
                         break;
 
                     case "VertexShader":
-                        pass.VertexShader = new ShaderModule(ShaderStage.Vertex, kvp.Value[0].value);
+                        pass.VertexShader = LoadShaderModelFromFile(ShaderStage.Vertex, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "PixelShader":
-                        pass.PixelShader = new ShaderModule(ShaderStage.Fragment, kvp.Value[0].value);
+                        pass.PixelShader = LoadShaderModelFromFile(ShaderStage.Fragment, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "ResourceLayout":
@@ -123,10 +123,10 @@ namespace SharpGame
                         break;
 
                     case "@VertexShader":
-                        pass.VertexShader = LoadShaderModel(ShaderStage.Vertex, kvp.Value[0].value);
+                        pass.VertexShader = LoadShaderModel(ShaderStage.Vertex, kvp.Value[0].value, pass.Defines);
                         break;
                     case "@PixelShader":
-                        pass.PixelShader = LoadShaderModel(ShaderStage.Fragment, kvp.Value[0].value);
+                        pass.PixelShader = LoadShaderModel(ShaderStage.Fragment, kvp.Value[0].value, pass.Defines);
                         break;
                 }
             }
@@ -184,8 +184,7 @@ namespace SharpGame
                 }
 
                 layout.Add(binding);
-            }
-        
+            }        
 
             return layout;
         }
@@ -244,7 +243,15 @@ namespace SharpGame
 
         }
 
-        ShaderModule LoadShaderModel(ShaderStage shaderStage, string code)
+        ShaderModule LoadShaderModelFromFile(ShaderStage shaderStage, string file, string[] defs)
+        {
+            using (File stream = FileSystem.Instance.GetFile(file))
+            {
+                return LoadShaderModel(shaderStage, stream.ReadAllText(), defs);
+            }
+        }
+
+        ShaderModule LoadShaderModel(ShaderStage shaderStage, string code, string[] defs)
         {
             var c = new ShaderCompiler();
             var o = new CompileOptions
@@ -276,6 +283,19 @@ namespace SharpGame
                     stage = ShaderCompiler.Stage.TessEvaluation;
                     break;
             }
+            /*
+            StringBuilder sb = new StringBuilder();
+            sb.Append("#define VULKAN");
+
+            if (defs != null)
+            {
+                foreach (var def in defs)
+                {
+                    sb.Append("#define ").Append(def);
+                }
+            }
+
+            code = sb.ToString() + code;*/
 
             var r = c.Preprocess(code, stage, o, "main");
             if(r.NumberOfErrors > 0)

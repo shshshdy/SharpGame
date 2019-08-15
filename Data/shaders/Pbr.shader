@@ -109,13 +109,16 @@ Shader "Pbr"
 
             #include "UniformsVS.glsl"
 
-			layout (location = 0) in vec3 inPos;
-			layout (location = 1) in vec3 inNormal;
-			layout (location = 2) in vec2 inUV;
+            layout(location = 0) in vec3 inPos;
+            layout(location = 1) in vec3 inNormal;
+            layout(location = 2) in vec3 inTangent;
+            layout(location = 3) in vec3 inBitangent;
+            layout(location = 4) in vec2 inUV;
 
-			layout (location = 0) out vec3 outWorldPos;
-			layout (location = 1) out vec3 outNormal;
-			layout (location = 2) out vec2 outUV;
+            layout(location = 0) out vec3 outWorldPos;
+            layout(location = 1) out vec2 outUV;
+            layout(location = 2) out mat3 outNormal;
+            
 
 			out gl_PerVertex 
 			{
@@ -126,7 +129,8 @@ Shader "Pbr"
 			{
 				vec3 locPos = vec3(Model * vec4(inPos, 1.0));
 				outWorldPos = locPos;
-				outNormal = mat3(Model) * inNormal;
+				outNormal = mat3(Model) * mat3(inTangent, inBitangent, inNormal);
+
 				outUV = inUV;
 				outUV.t = 1.0 - inUV.t;
 				gl_Position =  ViewProj * vec4(outWorldPos, 1.0);
@@ -143,14 +147,14 @@ Shader "Pbr"
             #include "Pbr.glsl"
 
 			layout (location = 0) in vec3 inWorldPos;
-			layout (location = 1) in vec3 inNormal;
-			layout (location = 2) in vec2 inUV;
+			layout (location = 1) in vec2 inUV;
+			layout (location = 2) in mat3 inNormal;
 
 			layout (location = 0) out vec4 outColor;
 
 			void main()
 			{		
-				vec3 N = perturbNormal(inWorldPos, inNormal, inUV);
+				vec3 N = perturbNormal(inNormal, inUV);
 				vec3 V = normalize(CameraPos - inWorldPos);
 				vec3 R = reflect(-V, N); 
 
@@ -166,9 +170,9 @@ Shader "Pbr"
 				vec3 L = -SunlightDir;
 				Lo += specularContribution(albedo, L, V, N, F0, metallic, roughness);
 				
-				vec2 brdf = texture(samplerBRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
-				vec3 reflection = prefilteredReflection(R, roughness).rgb;	
-				vec3 irradiance = texture(samplerIrradiance, N).rgb;
+				vec2 brdf = vec2(0.25); //texture(samplerBRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+				vec3 reflection = vec3(0.25); prefilteredReflection(R, roughness).rgb;
+                vec3 irradiance = vec3(0.5);// texture(samplerIrradiance, N).rgb;
 
 				// Diffuse based on irradiance
 				vec3 diffuse = irradiance * albedo;

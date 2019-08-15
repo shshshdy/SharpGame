@@ -79,11 +79,18 @@ namespace SharpGame
         readonly ShaderModule[] shaderModels = new ShaderModule[6];
         [DataMember]
         public ShaderModule[] ShaderModels { get => shaderModels; }
+
+        [IgnoreDataMember]
         public ref ShaderModule VertexShader => ref shaderModels[0];
+        [IgnoreDataMember]
         public ref ShaderModule PixelShader => ref shaderModels[4];
+        [IgnoreDataMember]
         public ref ShaderModule GeometryShader => ref shaderModels[1];
+        [IgnoreDataMember]
         public ref ShaderModule HullShader => ref shaderModels[2];
+        [IgnoreDataMember]
         public ref ShaderModule DomainShader => ref shaderModels[3];
+        [IgnoreDataMember]
         public ref ShaderModule ComputeShader => ref shaderModels[5];
 
         [IgnoreDataMember]
@@ -116,7 +123,7 @@ namespace SharpGame
         private BlendMode blendMode = BlendMode.Replace;
         public BlendMode BlendMode { get => blendMode; set { blendMode = value; SetBlendMode(value); } }
         public DynamicStateInfo DynamicStates { get; set; } = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor);
-
+        public string[] Defines { get; set; }
         public ResourceLayout[] ResourceLayout { get; set; }
 
         private PushConstantRange[] pushConstant;

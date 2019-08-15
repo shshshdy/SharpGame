@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 9)]
+    [SampleDesc(sortOrder = -9)]
     public class PbrLighting : Sample
     {
         public override void Init()

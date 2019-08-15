@@ -10,11 +10,19 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Basic.shader" />
-    <None Include="$(MSBuildThisFileDirectory)GLSL\Lighting.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)GLSL\Pbr.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)GLSL\Transform.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)GLSL\UniformsPS.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)GLSL\UniformsVS.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\Lighting.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\Pbr.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\Transform.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\UniformsPS.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\equirect2cube_cs.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\irmap_cs.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\pbr_fs.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\pbr_vs.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\spbrdf_cs.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\spmap_cs.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\tonemap_fs.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\tonemap_vs.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ImGUI.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitSolid.shader" />
     <None Include="$(MSBuildThisFileDirectory)Pbr.shader" />

@@ -138,19 +138,19 @@ namespace SharpGame.Samples
 
             if (ImGui.Begin("Settings", ref hudOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
-                    ImGui.Value("Single Loop", singleLoop);
-                    ImGui.Value("Fps", Fps);
-                    ImGui.Value("Msec", Msec);
-                    ImGui.Value("Draw Call", Stats.drawCall);
-                    ImGui.Value("Triangle Count", Stats.triCount);
-                    //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
-                    //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
+                ImGui.Value("Single Loop", singleLoop);
+                ImGui.Value("Fps", Fps);
+                ImGui.Value("Msec", Msec);
+                ImGui.Value("Draw Call", Stats.drawCall);
+                ImGui.Value("Triangle Count", Stats.triCount);
+                //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
+                //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
 
-                    ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.LogicWait * Timer.MilliSecsPerTick));
-                    ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.RenderWait * Timer.MilliSecsPerTick));
+                ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.LogicWait * Timer.MilliSecsPerTick));
+                ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.RenderWait * Timer.MilliSecsPerTick));
 
-                    ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
-                    ImGui.Checkbox("Show Stats", ref showStats);
+                ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
+                ImGui.Checkbox("Show Stats", ref showStats);
             }
             
             ImGui.End();

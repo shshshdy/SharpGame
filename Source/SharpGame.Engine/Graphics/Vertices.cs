@@ -43,6 +43,32 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    public struct VertexPosNTBTex
+    {
+        public Vector3 position;
+        public Vector3 normal;
+        public Vector3 tangent;
+        public Vector3 bitangent;
+        public Vector2 texcoord;
+
+        public static VertexLayout Layout = new VertexLayout
+        (
+            new[]
+            {
+                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosNTBTex>(), VertexInputRate.Vertex)
+            },
+            new[]
+            {
+                new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+                new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
+                new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 12),
+                new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, 12),
+                new VertexInputAttribute(0, 4, Format.R32g32Sfloat, 24)
+            }
+        );
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct VertexPosNormTexColor
     {
         public Vector3 position;
