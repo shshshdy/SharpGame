@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace SharpGame
@@ -106,14 +107,6 @@ namespace SharpGame
                         pass.BlendMode = (BlendMode)Enum.Parse(typeof(BlendMode), kvp.Value[0].value);
                         break;
 
-                    case "VertexShader":
-                        pass.VertexShader = LoadShaderModelFromFile(ShaderStage.Vertex, kvp.Value[0].value, pass.Defines);
-                        break;
-
-                    case "PixelShader":
-                        pass.PixelShader = LoadShaderModelFromFile(ShaderStage.Fragment, kvp.Value[0].value, pass.Defines);
-                        break;
-
                     case "ResourceLayout":
                         pass.ResourceLayout = ReadResourceLayout(kvp.Value);
                         break;
@@ -122,11 +115,33 @@ namespace SharpGame
                         ReadPushConstant(pass, kvp.Value);
                         break;
 
+                    case "VertexShader":
+                        pass.VertexShader = LoadShaderModelFromFile(ShaderStage.Vertex, kvp.Value[0].value, pass.Defines);
+                        break;
+
+                    case "PixelShader":
+                        pass.PixelShader = LoadShaderModelFromFile(ShaderStage.Fragment, kvp.Value[0].value, pass.Defines);
+                        break;
+
+                    case "ComputeShader":
+                        pass.ComputeShader = LoadShaderModelFromFile(ShaderStage.Compute, kvp.Value[0].value, pass.Defines);
+                        break;
+
+                    case "GeometryShader":
+                        pass.GeometryShader = LoadShaderModelFromFile(ShaderStage.Geometry, kvp.Value[0].value, pass.Defines);
+                        break;
+
                     case "@VertexShader":
                         pass.VertexShader = LoadShaderModel(ShaderStage.Vertex, kvp.Value[0].value, pass.Defines);
                         break;
                     case "@PixelShader":
                         pass.PixelShader = LoadShaderModel(ShaderStage.Fragment, kvp.Value[0].value, pass.Defines);
+                        break;
+                    case "@ComputeShader":
+                        pass.ComputeShader = LoadShaderModel(ShaderStage.Compute, kvp.Value[0].value, pass.Defines);
+                        break;
+                    case "@GeometryShader":
+                        pass.GeometryShader = LoadShaderModel(ShaderStage.Geometry, kvp.Value[0].value, pass.Defines);
                         break;
                 }
             }
@@ -283,9 +298,45 @@ namespace SharpGame
                     stage = ShaderCompiler.Stage.TessEvaluation;
                     break;
             }
-            /*
+
+            List<string> saveLines = new List<string>();
+            string ver = "";
+
+            StringReader reader = new StringReader(code);
+
+            while(true)
+            {
+                string line = reader.ReadLine();
+                if(line == null)
+                {
+                    break;
+                }
+
+                string str = line.TrimStart();
+                if (str.StartsWith("#version"))
+                {
+                    ver = line;
+                    break;
+                }
+
+                if (str.StartsWith("#include"))
+                {
+                    if(ReadInclude(str.Substring(8), saveLines, out ver))
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    saveLines.Add(line);
+                }
+            }
+
+
+
             StringBuilder sb = new StringBuilder();
-            sb.Append("#define VULKAN");
+            sb.AppendLine(ver);
+            //sb.Append("#define VULKAN 1");
 
             if (defs != null)
             {
@@ -295,7 +346,14 @@ namespace SharpGame
                 }
             }
 
-            code = sb.ToString() + code;*/
+            foreach(var line in saveLines)
+            {
+                sb.AppendLine(line);
+            }
+
+            sb.Append(reader.ReadToEnd());
+
+            code = sb.ToString();
 
             var r = c.Preprocess(code, stage, o, "main");
             if(r.NumberOfErrors > 0)
@@ -329,6 +387,44 @@ namespace SharpGame
             return shaderModule;
         }
 
+        bool ReadInclude(string path, List<string> strs, out string ver)
+        {
+            path = path.Trim(new char[] {' ', '\t', '"' });
+
+            ver = "";
+
+            using (File file = FileSystem.OpenFile(path))
+            {
+                if(file == null)
+                {
+                    return false;
+                }
+
+                using (StreamReader sr = new StreamReader(file))
+                {
+                    while(!sr.EndOfStream)
+                    {
+                        string line = sr.ReadLine();
+
+                        if (line.TrimStart().StartsWith("#version"))
+                        {
+                            ver = line;
+                            strs.Add(sr.ReadToEnd());
+                            break;
+                        }
+                        else
+                        {
+                            strs.Add(line);
+                        }
+
+                    }
+
+                }
+
+            }
+
+            return !string.IsNullOrEmpty(ver);
+        }
 
     }
 

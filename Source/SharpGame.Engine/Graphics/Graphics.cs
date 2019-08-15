@@ -274,10 +274,12 @@ namespace SharpGame
         private void CreateCommandPool()
         {
             primaryCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
-            secondaryCmdPool = new CommandBufferPool[2]
+
+            secondaryCmdPool = new CommandBufferPool[(int)Swapchain.ImageCount];
+            for(int i = 0; i < Swapchain.ImageCount; i++)
             {
-                new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer),
-                new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer)
+                secondaryCmdPool[i] = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
+                secondaryCmdPool[i] = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
             };            
         }
 

@@ -197,7 +197,6 @@ namespace SharpGame
 
         public void StopLayer(byte layer, float fadeOutTime)
         {
-            bool needUpdate = false;
             foreach (var i in animations_)
             {
                 AnimationState state = GetAnimationState(i.hash_);
@@ -205,7 +204,6 @@ namespace SharpGame
                 {
                     i.targetWeight_ = 0.0f;
                     i.fadeTime_ = fadeOutTime;
-                    needUpdate = true;
                 }
             }
 
@@ -245,7 +243,6 @@ namespace SharpGame
 
             byte layer = state.Layer;
 
-            bool needUpdate = false;
             for (int i = 0; i < animations_.Count; ++i)
             {
                 if (i != index)
@@ -256,7 +253,6 @@ namespace SharpGame
                     {
                         control.targetWeight_ = MathUtil.Clamp(targetWeight, 0.0f, 1.0f);
                         control.fadeTime_ = fadeTime;
-                        needUpdate = true;
                     }
                 }
             }

@@ -45,14 +45,6 @@ namespace SharpGame
         }
     }
 
-    public enum ResourceSetType
-    {
-        PerView,
-        PerShader,
-        PerObject,
-        PerMaterial,
-    }
-
     public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
         public int Set { get; set; }

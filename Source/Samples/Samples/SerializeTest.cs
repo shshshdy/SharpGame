@@ -8,7 +8,7 @@ using Utf8Json.Resolvers;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 5)]
+    [SampleDesc(sortOrder = -5)]
     public class SerializeTest : Sample
     {
        public override void Init()
@@ -40,15 +40,14 @@ namespace SharpGame.Samples
                     LayoutParser layoutParser = new LayoutParser(file);
                     var layouts = layoutParser.Parse();
                 }
-
                 /*
-                var file = FileSystem.Instance.GetFile("Shaders/Textured.shader");
+                var file = FileSystem.Instance.GetFile("Shaders/Brdf.shader");
                 //Shader shader = HoconSerializer.Deserialize<Shader>(file);
                 AstParser ast = new AstParser();
                 ast.Parse(file.ReadAllText());
-                ast.Print();
+                ast.Print();*/
 
-                var shader = Resources.Load<Shader>("Shaders/Textured.shader");*/
+                var shader = Resources.Load<Shader>("Shaders/Brdf.shader");
             }
 
         }

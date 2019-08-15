@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Basic.shader" />
+    <None Include="$(MSBuildThisFileDirectory)Brdf.shader" />
     <None Include="$(MSBuildThisFileDirectory)Common\Lighting.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Pbr.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Transform.glsl" />
