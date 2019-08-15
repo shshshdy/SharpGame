@@ -55,6 +55,7 @@ Assimp.PostProcessSteps.ValidateDataStructure;
             BoundingBox boundingBox = new BoundingBox();
 
             var shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");
+            var shader1 = Resources.Instance.Load<Shader>("Shaders/Litsolid.shader");
             string path = FileUtil.GetPath(loadingFile);
 
             // Iterate through all meshes in the file and extract the vertex components
@@ -66,7 +67,8 @@ Assimp.PostProcessSteps.ValidateDataStructure;
                 DeviceBuffer vb;
                 DeviceBuffer ib;
                 VertexLayout vertexLayout;
-                if (mesh.HasTangentBasis)
+                bool hasTangent = mesh.HasTangentBasis;
+                if (hasTangent)
                 {
                     ConvertGeomNTB(scale, mesh, out meshBoundingBox, out vb, out ib, out vertexLayout);
                 }
@@ -94,7 +96,7 @@ Assimp.PostProcessSteps.ValidateDataStructure;
 
                 if (mesh.MaterialIndex >= 0 && mesh.MaterialIndex < scene.MaterialCount)
                 {
-                    Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], shader);
+                    Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], hasTangent ? shader1 : shader);
                     model.Materials.Add(mat);
                 }
                 else

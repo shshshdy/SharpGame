@@ -152,7 +152,6 @@ namespace SharpGame.Samples
             {
                 var batch = batches[i];
                 pass.DrawBatch(pass.CmdBuffer, batch, resourceSet, null, batch.offset);
-
             }
         }
     }

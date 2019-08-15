@@ -4,14 +4,13 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -9)]
+    [SampleDesc(sortOrder = 9)]
     public class PbrLighting : Sample
     {
         public override void Init()
         {
             base.Init();
 
-            var graphics = Graphics.Instance;
             scene = new Scene();
 
             var cameraNode = scene.CreateChild("Camera");
@@ -19,7 +18,7 @@ namespace SharpGame.Samples
             cameraNode.Rotate(Quaternion.FromEuler(0, MathUtil.DegreesToRadians(-45), 0), TransformSpace.LOCAL);
             camera = cameraNode.CreateComponent<Camera>();
             camera.Fov = MathUtil.DegreesToRadians(60);
-            camera.AspectRatio = (float)graphics.Width / graphics.Height;
+            camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
 
             var cubeMap = TextureCube.LoadFromFile("textures/hdr/gcanyon_cube.ktx", Format.R16g16b16a16Sfloat);
             {

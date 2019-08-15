@@ -21,17 +21,12 @@ namespace SharpGame.Samples
             camera.FarClip = 3000.0f;
 
             {
-                var shader = Resources.Load<Shader>("Shaders/LitSolid.shader");
-                var model = Resources.Load<Model>("Models/plane2.dae");
+                var model = GeometricPrimitive.CreatePlaneModel(100, 100);
                 var node = scene.CreateChild("Plane");
-                node.Scaling = new Vector3(3.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
+                var mat = Resources.Load<Material>("materials/Stone.material");
 
-                var colorMap = Resources.Load<Texture2D>("textures/StoneDiffuse.png");
-
-                var mat = Resources.Load<Material>("materials/Stone.material");// new Material(shader);
- 
                 staticModel.SetMaterial(mat);
             }
 

@@ -11,7 +11,7 @@ namespace SharpGame.Samples
     public class CubeMap : Sample
     {
         Material material;
-        private float lodBias = 1.0f;
+        float lodBias = 1.0f;
 
         string[] names = {"sphere", "teapot", "torusknot" };
         string[] filenames = { "models/sphere.obj", "models/teapot.dae", "models/torusknot.obj" };

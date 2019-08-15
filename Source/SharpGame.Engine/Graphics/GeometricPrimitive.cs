@@ -6,9 +6,41 @@ namespace SharpGame
 {
     public class GeometricPrimitive
     {
+        public static Model CreatePlaneModel(float width, float height)
+        {
+            var model = new Model(CreatePlane(width, height));
+
+            var boundingBox = new BoundingBox();
+            boundingBox.Define(-width / 2, height / 2);
+            model.BoundingBox = boundingBox;
+
+            return model;
+        }
+
         public static Geometry CreatePlane(float width, float height)
         {
-            return null;
+            float w2 = 0.5f * width;
+            float h2 = 0.5f * height;
+
+            VertexPosNormTexColor[] vertices =
+            {                
+                new VertexPosNormTexColor(new Vector3(-w2, 0, -h2), new Vector3(+0, 1, +0), new Vector2(+0, +0), Color.White),
+                new VertexPosNormTexColor(new Vector3(+w2, 0, -h2), new Vector3(+0, 1, +0), new Vector2(+1, +0), Color.White),
+                new VertexPosNormTexColor(new Vector3(+w2, 0, +h2), new Vector3(+0, 1, +0), new Vector2(+1, +1), Color.White),
+                new VertexPosNormTexColor(new Vector3(-w2, 0, +h2), new Vector3(+0, 1, +0), new Vector2(+1, +0), Color.White),
+            };
+
+            int[] indices = { 0, 1, 2, 0, 2, 3, };
+
+            var geom = new Geometry
+            {
+                VertexBuffers = new[] { DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
+                IndexBuffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexLayout = VertexPosNormTexColor.Layout
+            };
+
+            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length);
+            return geom;
         }
 
         public static Geometry CreateCube(float width, float height, float depth)

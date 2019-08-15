@@ -110,14 +110,14 @@ namespace SharpGame
         }
 
         /// Define from minimum and maximum vectors.
-        void Define(ref Vector3 min, ref Vector3 max)
+        public void Define(ref Vector3 min, ref Vector3 max)
         {
             Minimum = min;
             Maximum = max;
         }
 
         /// Define from minimum and maximum floats (all dimensions same.)
-        void Define(float min, float max)
+        public void Define(float min, float max)
         {
             Minimum = new Vector3(min, min, min);
             Maximum = new Vector3(max, max, max);

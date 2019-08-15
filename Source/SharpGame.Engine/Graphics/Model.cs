@@ -55,7 +55,7 @@ namespace SharpGame
         {
         }
 
-        public Model(Geometry[] geometries)
+        public Model(params Geometry[] geometries)
         {
             SetNumGeometry(geometries.Length);
 

@@ -16,7 +16,6 @@ namespace SharpGame.Samples
         {
             base.Init();
 
-            var graphics = Graphics.Instance;
             scene = new Scene();
 
             var cameraNode = scene.CreateChild("Camera");
@@ -25,7 +24,7 @@ namespace SharpGame.Samples
 
             camera = cameraNode.CreateComponent<Camera>();
             camera.Fov = MathUtil.DegreesToRadians(60);
-            camera.AspectRatio = (float)graphics.Width / graphics.Height;
+            camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
 
             node = scene.CreateChild("Mesh");
             var staticModel = node.AddComponent<StaticModel>();
