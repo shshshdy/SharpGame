@@ -150,15 +150,11 @@ namespace SharpGame
                         attrs.Add(attr);
                     }
 
-                    Log.Info("vertex attribute : ");
-                    foreach (var attr in attrs)
-                    {
-                        Log.Info("{{{0}, {1}, {2}}}", attr.location, attr.format, attr.offset);
-                    }
-
                     vertexSize = offset;
-                    loadVBData_[i].layout = new VertexLayout(new[] { new VertexInputBinding(0, offset, VertexInputRate.Vertex)  }, attrs.ToArray());
-                
+                    var layout = new VertexLayout(new[] { new VertexInputBinding(0, offset, VertexInputRate.Vertex)  }, attrs.ToArray());
+                    loadVBData_[i].layout = layout;
+                    layout.Print();
+                    
                 }
 
                 morphRangeStarts_[i] = stream.Read<int>();

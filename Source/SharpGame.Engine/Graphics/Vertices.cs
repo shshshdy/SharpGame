@@ -61,9 +61,9 @@ namespace SharpGame
             {
                 new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
                 new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
-                new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 12),
-                new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, 12),
-                new VertexInputAttribute(0, 4, Format.R32g32Sfloat, 24)
+                new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 24),
+                new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, 36),
+                new VertexInputAttribute(0, 4, Format.R32g32Sfloat, 48)
             }
         );
     }

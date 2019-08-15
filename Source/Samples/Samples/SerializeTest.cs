@@ -35,7 +35,7 @@ namespace SharpGame.Samples
                     System.IO.File.WriteAllBytes("test2.material", bytes);
                 }
 
-                using (File file = FileSystem.Instance.GetFile("Shaders/GLSL/UniformsVS.glsl"))
+                using (File file = FileSystem.Instance.GetFile("Shaders/Common/UniformsVS.glsl"))
                 {
                     LayoutParser layoutParser = new LayoutParser(file);
                     var layouts = layoutParser.Parse();

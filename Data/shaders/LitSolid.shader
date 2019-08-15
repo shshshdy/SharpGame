@@ -54,15 +54,15 @@ Shader "LitSolid"
 			
 			#include "UniformsVS.glsl"
 
-			layout (location = 0) in vec3 inPos;
-			layout (location = 1) in vec3 inNormal;
-            layout(location = 2) in vec3 inTangent;
-            layout(location = 3) in vec3 inBitangent;
-			layout (location = 4) in vec2 inUV;
-			
-			layout (location = 0) out vec4 outWorldPos;
-			layout (location = 1) out vec2 outUV;
-			layout (location = 2) out mat3 outNormal;
+			layout(location = 0) in vec3 inPos;
+			layout(location = 1) in vec3 inNormal;
+			layout(location = 2) in vec3 inTangent;
+			layout(location = 3) in vec3 inBitangent;
+			layout(location = 4) in vec2 inUV;
+
+			layout(location = 0) out vec4 outWorldPos;
+			layout(location = 1) out vec2 outUV;
+			layout(location = 2) out mat3 outNormal;
 
 			out gl_PerVertex
 			{
@@ -105,7 +105,7 @@ Shader "LitSolid"
 			void main() 
 			{
 				vec4 diffColor = texture(DiffMap, inUV);
-				
+
 				vec3 N = normalize(inNormal[2]);
 				vec3 L = -SunlightDir;
 

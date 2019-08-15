@@ -53,7 +53,7 @@ Assimp.PostProcessSteps.ValidateDataStructure;
             };
 
             BoundingBox boundingBox = new BoundingBox();
-
+            VertexLayout vertexLayout = null;
             var shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");
             var shader1 = Resources.Instance.Load<Shader>("Shaders/Litsolid.shader");
             string path = FileUtil.GetPath(loadingFile);
@@ -66,7 +66,6 @@ Assimp.PostProcessSteps.ValidateDataStructure;
                 BoundingBox meshBoundingBox;
                 DeviceBuffer vb;
                 DeviceBuffer ib;
-                VertexLayout vertexLayout;
                 bool hasTangent = mesh.HasTangentBasis;
                 if (hasTangent)
                 {
@@ -107,6 +106,7 @@ Assimp.PostProcessSteps.ValidateDataStructure;
             }
 
             model.BoundingBox = boundingBox;
+            vertexLayout?.Print();
 
             ctx.Dispose();
             return true;
@@ -117,9 +117,7 @@ Assimp.PostProcessSteps.ValidateDataStructure;
         {
             NativeList<VertexPosNormTex> vertexBuffer = new NativeList<VertexPosNormTex>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
-
-            Log.Info("Geom type : " + typeof(VertexPosNormTex));
-
+            
             meshBoundingBox = new BoundingBox();
 
             vertexLayout = VertexPosNormTex.Layout;
@@ -153,7 +151,6 @@ Assimp.PostProcessSteps.ValidateDataStructure;
                 }
             }
 
-
             vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosNormTex), vertexBuffer.Count, vertexBuffer.Data);
             ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
@@ -167,8 +164,6 @@ Assimp.PostProcessSteps.ValidateDataStructure;
             NativeList<VertexPosTBNTex> vertexBuffer = new NativeList<VertexPosTBNTex>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
 
-            Log.Info("Geom type : " + typeof(VertexPosTBNTex));
-
             meshBoundingBox = new BoundingBox();
 
             vertexLayout = VertexPosTBNTex.Layout;
@@ -179,6 +174,9 @@ Assimp.PostProcessSteps.ValidateDataStructure;
 
                 vertex.position = new Vector3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new Vector3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
+                vertex.tangent = new Vector3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);
+                vertex.bitangent = new Vector3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
+
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 if (mesh.HasTextureCoords(0))
                 {
@@ -188,9 +186,6 @@ Assimp.PostProcessSteps.ValidateDataStructure;
                 {
                     vertex.texcoord = Vector2.Zero;
                 }
-
-                vertex.tangent = new Vector3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);
-                vertex.bitangent = new Vector3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
 
                 vertexBuffer.Add(vertex);
                 meshBoundingBox.Merge(ref vertex.position);
@@ -205,7 +200,7 @@ Assimp.PostProcessSteps.ValidateDataStructure;
             }
 
 
-            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosNormTex), vertexBuffer.Count, vertexBuffer.Data);
+            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTBNTex), vertexBuffer.Count, vertexBuffer.Data);
             ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
             vertexBuffer.Dispose();

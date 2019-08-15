@@ -75,6 +75,15 @@ namespace SharpGame
             native.vertexAttributeDescriptionCount = (uint)attributes.Length;
             native.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)Utilities.AllocToPointer(attributes);           
         }
+
+        public void Print()
+        {
+            Log.Info("vertex attribute : ");
+            foreach (var attr in attributes)
+            {
+                Log.Info("{{{0}, {1}, {2}}}", attr.location, attr.format, attr.offset);
+            }
+        }
     }
 
 
