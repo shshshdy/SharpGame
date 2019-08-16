@@ -13,7 +13,7 @@ namespace SharpGame
     {
         public ulong Stride { get; set; }
         public ulong Count { get; set; }
-        public ulong Size => Stride * Count;
+        public ulong Size { get; set; }
 
         public IntPtr Mapped;
 
@@ -24,15 +24,12 @@ namespace SharpGame
         internal VkDeviceMemory memory;
         internal VkDescriptorBufferInfo descriptor;
 
-        internal ulong size = 0;
-        internal ulong alignment = 0;
-
         /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
         internal MemoryPropertyFlags memoryPropertyFlags;
 
         public ref T Map<T>(ulong offset = 0) where T : struct
         {
-            Mapped = Device.MapMemory(memory, (ulong)offset, size, 0);
+            Mapped = Device.MapMemory(memory, (ulong)offset, Size, 0);
             return ref Unsafe.AsRef<T>((void*)Mapped);
         }
 
@@ -125,13 +122,14 @@ namespace SharpGame
 
         public static DeviceBuffer Create(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, ulong stride, ulong count, void* data = null)
         {
+            ulong size = stride * count;
+
             DeviceBuffer buffer = new DeviceBuffer
             {
                 Stride = stride,
-                Count = count
+                Count = count,
+                Size = size
             };
-
-            ulong size = stride * count;
 
             // Create the buffer handle
             BufferCreateInfo bufferCreateInfo = new BufferCreateInfo(usageFlags, size);
@@ -150,8 +148,8 @@ namespace SharpGame
             MemoryAllocateInfo memAlloc = new MemoryAllocateInfo(memReqs.size, memoryTypeIndex);
             
             buffer.memory = Device.AllocateMemory(ref memAlloc.native);
-            buffer.alignment = memReqs.alignment;
-            buffer.size = memAlloc.allocationSize;
+            //buffer.alignment = memReqs.alignment;
+            buffer.Size = memAlloc.allocationSize;
             buffer.usageFlags = usageFlags;
             buffer.memoryPropertyFlags = memoryPropertyFlags;
 
@@ -193,9 +191,7 @@ namespace SharpGame
             return buffer;
         }
 
-
     }
-
 
     public ref struct BufferCreateInfo
     {

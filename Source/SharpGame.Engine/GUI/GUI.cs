@@ -174,7 +174,7 @@ namespace SharpGame
         {
             var io = ImGui.GetIO();
             io.Fonts.GetTexDataAsRGBA32(out byte* out_pixels, out int out_width, out int out_height, out int out_bytes_per_pixel);
-            this.texture = Texture2D.Create(out_width, out_height, out_bytes_per_pixel, out_pixels);
+            texture = Texture2D.Create((uint)out_width, (uint)out_height, (uint)out_bytes_per_pixel, out_pixels);
             io.Fonts.SetTexID(fontAtlasID);
             io.Fonts.ClearTexData();
         }
@@ -239,13 +239,13 @@ namespace SharpGame
 
             ref DeviceBuffer vb = ref vertexBuffer[graphics.WorkContext];
             ref DeviceBuffer ib = ref indexBuffer[graphics.WorkContext];
-            if (vb == null || draw_data.TotalVtxCount * sizeof(ImDrawVert) > (int)vb.size)
+            if (vb == null || draw_data.TotalVtxCount * sizeof(ImDrawVert) > (int)vb.Size)
             {
                 vb?.Dispose();
                 vb = DeviceBuffer.CreateDynamic<ImDrawVert>(BufferUsageFlags.VertexBuffer, (uint)(1.5f * draw_data.TotalVtxCount));
             }
 
-            if (ib == null || draw_data.TotalIdxCount * sizeof(ushort) > (int)ib.size)
+            if (ib == null || draw_data.TotalIdxCount * sizeof(ushort) > (int)ib.Size)
             {
                 ib?.Dispose();
                 ib = DeviceBuffer.CreateDynamic<ushort>(BufferUsageFlags.IndexBuffer, (uint)(1.5f * draw_data.TotalIdxCount));

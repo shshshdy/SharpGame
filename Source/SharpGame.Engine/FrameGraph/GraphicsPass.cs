@@ -27,7 +27,7 @@ namespace SharpGame
 
             for (int i = 0; i < 3; i++)
             {
-                cmdBufferPool[i] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
+                cmdBufferPool[i] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
                 cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, 8);
             }
         }

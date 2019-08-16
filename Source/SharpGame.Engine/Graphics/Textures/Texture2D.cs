@@ -33,7 +33,7 @@ namespace SharpGame
             Purple = CreateTex(Color.Purple);
         }
 
-        public static Texture2D Create(int w, int h, int bytesPerPixel, byte* tex2DDataPtr, bool dynamic = false)
+        public static Texture2D Create(uint w, uint h, uint bytesPerPixel, byte* tex2DDataPtr, bool dynamic = false)
         {
             var texture = new Texture2D
             {
@@ -44,7 +44,7 @@ namespace SharpGame
                 format = Format.R8g8b8a8Unorm
             };
 
-            int totalBytes = bytesPerPixel * w * h;
+            uint totalBytes = bytesPerPixel * w * h;
 
             Format format = Format.R8g8b8a8Unorm;
             //VkFormatProperties formatProperties;
@@ -265,7 +265,7 @@ namespace SharpGame
             if (height == 0)
                 height = width;
 
-            mipLevels = tex2D.Mipmaps.Length;
+            mipLevels = (uint)tex2D.Mipmaps.Length;
 
             // Get device properites for the requested texture format
             //VkFormatProperties formatProperties;

@@ -10,10 +10,11 @@ namespace SharpGame
 
     public class Texture : Resource, IBindableResource
     {
-        public int width;
-        public int height;
-        public int mipLevels;
-        public int depth;
+        public uint width;
+        public uint height;
+        public uint mipLevels;
+        public uint depth;
+
         public Format format;
         public ImageUsageFlags imageUsageFlags;
         public ImageLayout imageLayout;
@@ -36,26 +37,59 @@ namespace SharpGame
             descriptor.imageLayout = (VkImageLayout)imageLayout;
         }
 
+
         protected override void Destroy()
         {
-            view.Dispose();
-            image.Dispose();
-            sampler.Dispose();
+            view?.Dispose();
+            image?.Dispose();
+            sampler?.Dispose();
 
             Device.FreeMemory(deviceMemory);
+
             base.Destroy();
+        }
+
+        static int NumMipmapLevels(uint width, uint height)
+        {
+            int levels = 1;
+            while (((width | height) >> levels) != 0)
+            {
+                ++levels;
+            }
+            return levels;
+        }
+
+        public static Texture Create(uint width, uint height, uint layers, Format format, uint levels = 0, ImageUsageFlags additionalUsage = ImageUsageFlags.None)
+        {
+            Texture texture = new Texture
+            {
+                width = width,
+                height = height,
+                depth = layers,
+                mipLevels = (levels > 0) ? levels : (uint)NumMipmapLevels(width, height)
+            };
+
+            ImageUsageFlags usage = ImageUsageFlags.Sampled | ImageUsageFlags.TransferDst | additionalUsage;
+            if (texture.mipLevels > 1)
+            {
+                usage |= ImageUsageFlags.TransferSrc; // For mipmap generation
+            }
+
+            texture.image = Image.Create(width, height, layers, texture.mipLevels, format, 1, usage);
+            texture.view = ImageView.Create(texture, format, VkImageAspectFlags.Color, 0, RemainingMipLevels);
+            return texture;
         }
 
     }
 
     public class ImageData
     {
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public int NumberOfMipmapLevels { get; }
+        public uint Width { get; set; }
+        public uint Height { get; set; }
+        public uint NumberOfMipmapLevels { get; }
         public MipmapData[] Mipmaps { get; }
 
-        public ImageData(int width, int height, int numberOfMipmapLevels, MipmapData[] mipmaps)
+        public ImageData(uint width, uint height, uint numberOfMipmapLevels, MipmapData[] mipmaps)
         {
             Width = width;
             Height = height;
@@ -63,7 +97,7 @@ namespace SharpGame
             Mipmaps = mipmaps;
         }
 
-        public ImageData(int numberOfMipmapLevels)
+        public ImageData(uint numberOfMipmapLevels)
         {
             NumberOfMipmapLevels = numberOfMipmapLevels;
             Mipmaps = new MipmapData[numberOfMipmapLevels];

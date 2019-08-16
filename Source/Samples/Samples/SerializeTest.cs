@@ -8,7 +8,7 @@ using Utf8Json.Resolvers;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -5)]
+    [SampleDesc(sortOrder = 5)]
     public class SerializeTest : Sample
     {
        public override void Init()

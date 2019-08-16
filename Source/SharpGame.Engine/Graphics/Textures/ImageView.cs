@@ -5,6 +5,8 @@ using Vulkan;
 
 namespace SharpGame
 {
+    using static Vulkan.VulkanNative;
+
     public class ImageView : DisposeBase
     {
         internal VkImageView handle;
@@ -17,6 +19,25 @@ namespace SharpGame
         protected override void Destroy()
         {
             Device.Destroy(handle);
+        }
+
+
+        public static ImageView Create(Texture texture, Format format, VkImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels)
+        {
+
+            ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
+            {
+                image = texture.image,
+                viewType = (texture.depth == 6) ? ImageViewType.ImageCube : ImageViewType.Image2D,
+                format = format
+            };
+            viewCreateInfo.subresourceRange.aspectMask = aspectMask;
+            viewCreateInfo.subresourceRange.baseMipLevel = baseMipLevel;
+            viewCreateInfo.subresourceRange.levelCount = numMipLevels;
+            viewCreateInfo.subresourceRange.baseArrayLayer = 0;
+            viewCreateInfo.subresourceRange.layerCount = RemainingArrayLayers;
+
+            return new ImageView(ref viewCreateInfo);
         }
     }
 

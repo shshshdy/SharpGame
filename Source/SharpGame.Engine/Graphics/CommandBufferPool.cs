@@ -6,6 +6,13 @@ using Vulkan;
 
 namespace SharpGame
 {
+    public enum CommandPoolCreateFlags
+    {
+        None = 0,
+        Transient = 1,
+        ResetCommandBuffer = 2
+    }
+
     public class CommandBufferPool : DisposeBase
     {
         public CommandBuffer[] CommandBuffers { get; private set; }
@@ -17,17 +24,9 @@ namespace SharpGame
 
         public IntPtr GetAddress(uint idx) => cmdBuffers.GetAddress(idx);
 
-        public CommandBufferPool(uint queue, VkCommandPoolCreateFlags commandPoolCreateFlags)
+        public CommandBufferPool(uint queue, CommandPoolCreateFlags commandPoolCreateFlags)
         {
-            VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
-            cmdPoolInfo.queueFamilyIndex = queue;
-            cmdPoolInfo.flags = commandPoolCreateFlags;
-
-            unsafe
-            {
-                VulkanUtil.CheckResult(VulkanNative.vkCreateCommandPool(Graphics.device, &cmdPoolInfo, null, out cmdPool));
-            }
-
+            cmdPool = Device.CreateCommandPool(queue, (VkCommandPoolCreateFlags)commandPoolCreateFlags);
         }
 
         public CommandBuffer this[int index]

@@ -77,12 +77,12 @@ namespace SharpGame.ImageSharp
                 mipmaps[i] = new MipmapData(imageSize, MemoryMarshal.AsBytes(image.GetPixelSpan()).ToArray(), (uint)image.Width, (uint)image.Height);
             }
 
-            ImageData face = new ImageData(Width, Height, Images.Length, mipmaps);
+            ImageData face = new ImageData((uint)Width, (uint)Height, (uint)Images.Length, mipmaps);
             Texture2D tex = new Texture2D
             {
-                width = Width,
-                height = Height,
-                mipLevels = MipLevels,
+                width = (uint)Width,
+                height = (uint)Height,
+                mipLevels = (uint)MipLevels,
                 depth = 1,
                 format = Format,
                 imageUsageFlags = ImageUsageFlags.Sampled,

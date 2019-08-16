@@ -17,9 +17,9 @@ namespace SharpGame.ImageSharp
         /// <param name="width">The width of the texture.</param>
         /// <param name="height">The height of the texture.</param>
         /// <returns>The number of mipmap levels needed for a texture of the given dimensions.</returns>
-        public static int ComputeMipLevels(int width, int height)
+        public static uint ComputeMipLevels(uint width, uint height)
         {
-            return 1 + (int)Math.Floor(Math.Log(Math.Max(width, height), 2));
+            return 1 + (uint)Math.Floor(Math.Log(Math.Max(width, height), 2));
         }
 
         public static int GetDimension(int largestLevelDimension, int mipLevel)
@@ -35,7 +35,7 @@ namespace SharpGame.ImageSharp
 
         internal static Image<T>[] GenerateMipmaps<T>(Image<T> baseImage) where T : struct, IPixel<T>
         {
-            int mipLevelCount = MipmapHelper.ComputeMipLevels(baseImage.Width, baseImage.Height);
+            uint mipLevelCount = MipmapHelper.ComputeMipLevels((uint)baseImage.Width, (uint)baseImage.Height);
             Image<T>[] mipLevels = new Image<T>[mipLevelCount];
             mipLevels[0] = baseImage;
             int i = 1;

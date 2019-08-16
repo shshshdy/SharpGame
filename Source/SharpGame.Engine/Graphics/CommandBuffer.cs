@@ -131,7 +131,7 @@ namespace SharpGame
         internal CommandBuffer(VkCommandBuffer cmdBuffer)
         {
             commandBuffer = cmdBuffer;
-            owner = true;
+            owner = false;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -350,6 +350,19 @@ namespace SharpGame
         public unsafe void ExecuteCommand(CommandBufferPool cmdBuffer)
         {
             vkCmdExecuteCommands(commandBuffer, (uint)cmdBuffer.currentIndex, (VkCommandBuffer*)cmdBuffer.GetAddress(0));
+        }
+
+        public void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkDependencyFlags dependencyFlags,
+            uint memoryBarrierCount, ref VkMemoryBarrier pMemoryBarriers, uint bufferMemoryBarrierCount, IntPtr pBufferMemoryBarriers,
+            uint imageMemoryBarrierCount, ref VkImageMemoryBarrier pImageMemoryBarriers)
+        {
+            vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, ref pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers,
+                imageMemoryBarrierCount, ref pImageMemoryBarriers);
+        }
+
+        public void Reset(bool releaseRes)
+        {
+            vkResetCommandBuffer(commandBuffer, releaseRes ? VkCommandBufferResetFlags.ReleaseResources : VkCommandBufferResetFlags.None);
         }
     }
 

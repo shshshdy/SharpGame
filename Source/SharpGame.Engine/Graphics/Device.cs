@@ -539,21 +539,6 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkBindImageMemory(device, image, memory, offset));
         }
 
-        public static void CreateImageView(VkImage image, VkFormat format, out VkImageView imageView)
-        {
-            VkImageViewCreateInfo imageViewCI = VkImageViewCreateInfo.New();
-            imageViewCI.image = image;
-            imageViewCI.viewType = VkImageViewType.Image2D;
-            imageViewCI.format = format;
-            imageViewCI.subresourceRange.aspectMask = VkImageAspectFlags.Color;
-            imageViewCI.subresourceRange.baseMipLevel = 0;
-            imageViewCI.subresourceRange.levelCount = 1;
-            imageViewCI.subresourceRange.baseArrayLayer = 0;
-            imageViewCI.subresourceRange.layerCount = 1;
-
-            vkCreateImageView(device, ref imageViewCI, null, out imageView);
-        }
-
         public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
         {
             VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
@@ -585,11 +570,6 @@ namespace SharpGame
 
         public static void FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free = true)
         {
-            if (commandBuffer.Handle == NullHandle)
-            {
-                return;
-            }
-
             VulkanUtil.CheckResult(vkEndCommandBuffer(commandBuffer));
 
             VkSubmitInfo submitInfo = VkSubmitInfo.New();
@@ -669,8 +649,7 @@ namespace SharpGame
 
         public static VkPipeline CreateGraphicsPipeline(ref VkGraphicsPipelineCreateInfo pCreateInfos)
         {
-            VulkanUtil.CheckResult(vkCreateGraphicsPipelines(device, pipelineCache,
-                1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
+            VulkanUtil.CheckResult(vkCreateGraphicsPipelines(device, pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
             return pPipelines;
         }
 

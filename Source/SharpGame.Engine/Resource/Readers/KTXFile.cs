@@ -52,7 +52,7 @@ namespace SharpGame
             List<ImageData> faces = new List<ImageData>((int)numberOfFaces);
             for (int i = 0; i < numberOfFaces; i++)
             {
-                faces.Add(new ImageData((int)header.NumberOfMipmapLevels) { Width = (int)header.PixelWidth, Height = (int)header.PixelHeight});
+                faces.Add(new ImageData(header.NumberOfMipmapLevels) { Width = header.PixelWidth, Height = header.PixelHeight});
             }
             for (uint mipLevel = 0; mipLevel < header.NumberOfMipmapLevels; mipLevel++)
             {

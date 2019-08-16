@@ -24,9 +24,9 @@ namespace SharpGame
                 texCube = KtxFile.Load(fs, readKeyValuePairs: false);
             }
 
-            width = (int)texCube.Header.PixelWidth;
-            height = (int)texCube.Header.PixelHeight;
-            mipLevels = (int)texCube.Header.NumberOfMipmapLevels;
+            width = texCube.Header.PixelWidth;
+            height = texCube.Header.PixelHeight;
+            mipLevels = texCube.Header.NumberOfMipmapLevels;
 
             VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
             VkMemoryRequirements memReqs;

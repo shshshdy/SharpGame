@@ -56,13 +56,10 @@ namespace SharpGame
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
         private CommandBufferPool primaryCmdPool;
-        private CommandBufferPool[] secondaryCmdPool;
+        private CommandBufferPool workCmdPool;
 
         public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[RenderContext];
-
-        //todo: multithread
-        public CommandBufferPool WorkCmdPool => secondaryCmdPool[WorkContext];
-
+        
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
 
@@ -273,36 +270,43 @@ namespace SharpGame
         
         private void CreateCommandPool()
         {
-            primaryCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
-
-            secondaryCmdPool = new CommandBufferPool[(int)Swapchain.ImageCount];
-            for(int i = 0; i < Swapchain.ImageCount; i++)
-            {
-                secondaryCmdPool[i] = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
-                secondaryCmdPool[i] = new CommandBufferPool(Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
-            };            
+            primaryCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
+            workCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
         }
 
         protected void CreateCommandBuffers()
         {
             primaryCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
+            workCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
+        }
 
-            foreach (var cmdPool in secondaryCmdPool)
+        public CommandBuffer BeginWorkCommandBuffer()
+        {
+            workCmdPool[WorkContext].Begin(CommandBufferUsageFlags.OneTimeSubmit);
+            return workCmdPool[WorkContext];
+        }
+
+        public void EndWorkCommandBuffer(CommandBuffer commandBuffer)
+        {
+            commandBuffer.End();
+
+            VkSubmitInfo submitInfo = VkSubmitInfo.New();
+            submitInfo.commandBufferCount = 1;
+
+            fixed (VkCommandBuffer* cb = &commandBuffer.commandBuffer)
             {
-                cmdPool.Allocate(CommandBufferLevel.Secondary, 8);
+                submitInfo.pCommandBuffers = cb;
+                vkQueueSubmit(GraphicsQueue, 1, &submitInfo, VkFence.Null);
             }
+
+            vkQueueWaitIdle(GraphicsQueue);
+            commandBuffer.Reset(true);
         }
 
         protected void CreateDepthStencil()
         {
-            if (depthStencil != null)
-            {
-                depthStencil.Dispose();
-                depthStencil = null;
-            }
-
+            depthStencil?.Dispose();         
             depthStencil = new DepthStencil(Width, Height, DepthFormat);
-
         }
         
         public TransientBuffer AllocVertexBuffer(uint count)
@@ -367,6 +371,8 @@ namespace SharpGame
                 MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, size, 1);
             return newBuffer;
         }
+
+
 
         public void WaitIdle()
         {
