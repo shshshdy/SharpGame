@@ -12,6 +12,7 @@ namespace SharpGame
     {
         public uint width;
         public uint height;
+        public uint layers;
         public uint mipLevels;
         public uint depth;
 
@@ -65,7 +66,7 @@ namespace SharpGame
             {
                 width = width,
                 height = height,
-                depth = layers,
+                layers = layers,
                 mipLevels = (levels > 0) ? levels : (uint)NumMipmapLevels(width, height)
             };
 

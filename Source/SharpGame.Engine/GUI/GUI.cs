@@ -273,7 +273,7 @@ namespace SharpGame
             
             var pipeline = pass.GetGraphicsPipeline(graphics.RenderPass, null);
 
-            cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pass, 0, resourceSet);
+            cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, 0, resourceSet);
             cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.BindVertexBuffer(0, vb);
             cmdBuffer.BindIndexBuffer(ib, 0, IndexType.Uint16);

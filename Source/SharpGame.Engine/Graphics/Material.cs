@@ -81,7 +81,7 @@ namespace SharpGame
                 return false;
             }
 
-            foreach (var layout in mainPass.ResourceLayout)
+            foreach (var layout in mainPass.PipelineLayout.ResourceLayout)
             {
                 if (layout.PerMaterial)
                 {
@@ -105,7 +105,7 @@ namespace SharpGame
                 for (int i = 0; i < mainPass.PushConstantNames.Count; i++)
                 {
                     var constName = mainPass.PushConstantNames[i];
-                    var pushConst = mainPass.PushConstant[i];
+                    var pushConst = mainPass.PipelineLayout.PushConstant[i];
                     if(pushConst.offset + pushConst.size > maxPushConstantsSize)
                     {
                         Log.Error("PushConst out of range" + constName);
@@ -304,7 +304,7 @@ namespace SharpGame
             }
         }
 
-        public void PushConstants(Pass pass, CommandBuffer cmd)
+        public void PushConstants(PipelineLayout pipelineLayout, CommandBuffer cmd)
         {
             int size = maxPushConstRange - minPushConstRange;
             if (size > 0)
@@ -312,20 +312,20 @@ namespace SharpGame
                 ShaderStage shaderStage = ShaderStage.None;
                 int minRange = minPushConstRange;
                 int currentSize = 0;
-                for (int i = 0; i < pass.PushConstant.Length; i++ )
+                for (int i = 0; i < pipelineLayout.PushConstant.Length; i++ )
                 {
                     if(i == 0)
                     {
-                        shaderStage = pass.PushConstant[0].stageFlags;
+                        shaderStage = pipelineLayout.PushConstant[0].stageFlags;
                     }
 
-                    currentSize += pass.PushConstant[i].size;
+                    currentSize += pipelineLayout.PushConstant[i].size;
 
-                    if ((pass.PushConstant[i].stageFlags != shaderStage) || (i == pass.PushConstant.Length - 1))
+                    if ((pipelineLayout.PushConstant[i].stageFlags != shaderStage) || (i == pipelineLayout.PushConstant.Length - 1))
                     {
-                        cmd.PushConstants(pass, shaderStage, minRange, currentSize, pushConstBuffer + minRange);
+                        cmd.PushConstants(pipelineLayout, shaderStage, minRange, currentSize, pushConstBuffer + minRange);
 
-                        shaderStage = pass.PushConstant[i].stageFlags;
+                        shaderStage = pipelineLayout.PushConstant[i].stageFlags;
                         minRange += currentSize;
                         currentSize = 0;
                     }

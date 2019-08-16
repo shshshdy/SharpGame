@@ -124,10 +124,15 @@ namespace SharpGame
         public BlendMode BlendMode { get => blendMode; set { blendMode = value; SetBlendMode(value); } }
         public DynamicStateInfo DynamicStates { get; set; } = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor);
         public string[] Defines { get; set; }
+
+        public PipelineLayout PipelineLayout { get; set; } = new PipelineLayout();
+     
+        /*
         public ResourceLayout[] ResourceLayout { get; set; }
 
         private PushConstantRange[] pushConstant;
         public PushConstantRange[] PushConstant { get => pushConstant; set => pushConstant = value; }
+        */
         public List<string> PushConstantNames { get; set; }
 
         [IgnoreDataMember]
@@ -135,8 +140,8 @@ namespace SharpGame
         [IgnoreDataMember]
         public VertexLayout VertexLayout { get; set; }
 
-        internal VkPipelineLayout pipelineLayout;
-        internal VkPipeline handle;
+        //internal VkPipelineLayout pipelineLayout;
+        internal VkPipeline computeHandle;
         ConcurrentDictionary<long, VkPipeline> pipelines = new ConcurrentDictionary<long, VkPipeline>();
 
         public Pass()
@@ -194,13 +199,7 @@ namespace SharpGame
                 sm?.Build();
             }
 
-            if(ResourceLayout != null)
-            {
-                foreach (var layout in ResourceLayout)
-                {
-                    layout.Build();
-                }
-            }
+            PipelineLayout.Build();
 
         }
 
@@ -235,12 +234,12 @@ namespace SharpGame
 
         public ResourceLayout GetResourceLayout(int index)
         {
-            if(index >= ResourceLayout.Length)
+            if(index >= PipelineLayout.ResourceLayout.Length)
             {
                 return null;
             }
 
-            return ResourceLayout[index];
+            return PipelineLayout.ResourceLayout[index];
         }
 
         public bool GetPushConstant(string name, out PushConstantRange pushConstantRange)
@@ -251,7 +250,7 @@ namespace SharpGame
                 {
                     if (PushConstantNames[i] == name)
                     {
-                        pushConstantRange = PushConstant[i];
+                        pushConstantRange = PipelineLayout.PushConstant[i];
                         return true;
                     }
                 }
@@ -300,105 +299,69 @@ namespace SharpGame
             {
                 return pipe;
             }
+                     
+            var pipelineCreateInfo = GraphicsPipelineCreateInfo(PipelineLayout.handle, renderPass.handle, 0);//,
 
-            VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
-            for (int i = 0; i < ResourceLayout.Length; i++)
+            vertexInput.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
+            pipelineCreateInfo.pVertexInputState = &vertexInputState;
+
+            VkPipelineShaderStageCreateInfo* shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];
+            uint count = GetShaderStageCreateInfos(shaderStageCreateInfos);
+            pipelineCreateInfo.stageCount = count;
+            pipelineCreateInfo.pStages = shaderStageCreateInfos;
+
+            var inputAssemblyStateCreateInfo = InputAssemblyStateCreateInfo(geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
+            pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+
+            rasterizationState.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo);
+            pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
+
+            var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
+            pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+
+            this.multisampleState.ToNative(out VkPipelineMultisampleStateCreateInfo multisampleState);
+            pipelineCreateInfo.pMultisampleState = &multisampleState;
+
+            depthStencilState_.ToNative(out VkPipelineDepthStencilStateCreateInfo depthStencilState);
+            pipelineCreateInfo.pDepthStencilState = &depthStencilState;
+
+            ColorBlendState.ToNative(out VkPipelineColorBlendStateCreateInfo colorBlendState);
+            pipelineCreateInfo.pColorBlendState = &colorBlendState;
+
+            VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
+            if (DynamicStates.HasValue)
             {
-                if(ResourceLayout[i] != null)
-                {
-                    pSetLayouts[i] = ResourceLayout[i].DescriptorSetLayout;
-                }
-                else
-                {
-                    pSetLayouts[i] = pSetLayouts[0];
-                }
+                DynamicStates.ToNative(out dynamicStateCreateInfo);
+                pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
             }
 
-            var pipelineLayoutInfo = PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);
-            if (!pushConstant.IsNullOrEmpty())
-            {
-                pipelineLayoutInfo.pushConstantRangeCount = (uint)pushConstant.Length;
-                pipelineLayoutInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref pushConstant[0]);
-            }
-            vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
+            var handle = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
 
-            unsafe
-            {
-                var pipelineCreateInfo = GraphicsPipelineCreateInfo(pipelineLayout, renderPass.handle, 0);//,
-
-                vertexInput.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
-                pipelineCreateInfo.pVertexInputState = &vertexInputState;
-
-                VkPipelineShaderStageCreateInfo* shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];
-                uint count = GetShaderStageCreateInfos(shaderStageCreateInfos);
-                pipelineCreateInfo.stageCount = count;
-                pipelineCreateInfo.pStages = shaderStageCreateInfos;
-
-                var inputAssemblyStateCreateInfo = InputAssemblyStateCreateInfo(geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
-                pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
-
-                rasterizationState.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo);
-                pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
-
-                var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
-                pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
-
-                this.multisampleState.ToNative(out VkPipelineMultisampleStateCreateInfo multisampleState);
-                pipelineCreateInfo.pMultisampleState = &multisampleState;
-
-                depthStencilState_.ToNative(out VkPipelineDepthStencilStateCreateInfo depthStencilState);
-                pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-
-                ColorBlendState.ToNative(out VkPipelineColorBlendStateCreateInfo colorBlendState);
-                pipelineCreateInfo.pColorBlendState = &colorBlendState;
-
-                VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
-                if (DynamicStates.HasValue)
-                {
-                    DynamicStates.ToNative(out dynamicStateCreateInfo);
-                    pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
-                }
-
-                handle = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
-
-                pipelines.TryAdd(vertexInput.GetHashCode(), handle);
-            }
+            pipelines.TryAdd(vertexInput.GetHashCode(), handle);
+           
 
             return handle;
         }
 
         internal unsafe VkPipeline GetComputePipeline()
         {
-            if (handle != 0)
-            {
-                return handle;
-            }
 
             if (!IsComputeShader)
             {
                 return 0;
             }
 
-            VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];
-            for (int i = 0; i < ResourceLayout.Length; i++)
+            if (computeHandle != 0)
             {
-                pSetLayouts[i] = ResourceLayout[i].DescriptorSetLayout;
+                return computeHandle;
             }
-
-            var pipelineLayoutInfo = Builder.PipelineLayoutCreateInfo(pSetLayouts, ResourceLayout.Length);
-            if (!pushConstant.IsNullOrEmpty())
-            {
-                pipelineLayoutInfo.pushConstantRangeCount = (uint)pushConstant.Length;
-                pipelineLayoutInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref pushConstant[0]);
-            }
-            vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutInfo, IntPtr.Zero, out pipelineLayout);
-
+            
             var pipelineCreateInfo = VkComputePipelineCreateInfo.New();
             pipelineCreateInfo.stage = GetComputeStageCreateInfo();
-            pipelineCreateInfo.layout = pipelineLayout;
+            pipelineCreateInfo.layout = PipelineLayout.handle;
 
-            handle = Device.CreateComputePipeline(ref pipelineCreateInfo);
-            return handle;
+            computeHandle = Device.CreateComputePipeline(ref pipelineCreateInfo);
+            return computeHandle;
 
         }
 
@@ -413,18 +376,16 @@ namespace SharpGame
             {
                 Device.DestroyPipeline(kvp.Value);
             }
+
             pipelines.Clear();
 
-//             if (handle != 0)
-//             {
-//                 Device.Destroy(ref handle);
-//             }
-
-            if (pipelineLayout != 0)
+            if (computeHandle != 0)
             {
-                Device.DestroyPipelineLayout(pipelineLayout);
-                pipelineLayout = 0;
+                Device.DestroyPipeline(computeHandle);
+                computeHandle = 0;
             }
+
+            PipelineLayout.Dispose();
 
             base.Destroy();
         }

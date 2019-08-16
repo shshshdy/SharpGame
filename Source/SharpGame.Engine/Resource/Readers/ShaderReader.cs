@@ -108,7 +108,7 @@ namespace SharpGame
                         break;
 
                     case "ResourceLayout":
-                        pass.ResourceLayout = ReadResourceLayout(kvp.Value);
+                        pass.PipelineLayout.ResourceLayout = ReadResourceLayout(kvp.Value);
                         break;
 
                     case "PushConstant":
@@ -223,7 +223,7 @@ namespace SharpGame
                 layouts.Add(ReadPushConstant(node));
             }
 
-            pass.PushConstant = layouts.ToArray(); ;
+            pass.PipelineLayout.PushConstant = layouts.ToArray(); ;
         }
 
         PushConstantRange ReadPushConstant(AstNode node)

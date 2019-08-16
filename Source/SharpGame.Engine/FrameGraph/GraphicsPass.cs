@@ -105,18 +105,18 @@ namespace SharpGame
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
 
-            cb.BindGraphicsResourceSet(pass, resourceSet.Set, resourceSet, offset);
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet.Set, resourceSet, offset);
 
             if (resourceSet1 != null)
             {
-                cb.BindGraphicsResourceSet(pass, resourceSet1.Set, resourceSet1, offset1);
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet1.Set, resourceSet1, offset1);
             }
 
-            batch.material.PushConstants(pass, cb);
+            batch.material.PushConstants(pass.PipelineLayout, cb);
 
             foreach (var rs in batch.material.ResourceSet)
             {
-                cb.BindGraphicsResourceSet(pass, rs.Set, rs);
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
             }
 
             batch.geometry.Draw(cb);

@@ -243,8 +243,8 @@ namespace SharpGame.Samples
                     //vkCmdDispatch(commandBuffer, kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
 
                     commandBuffer.BindComputePipeline(shader.Main);
-                    commandBuffer.BindComputeResourceSet(shader.Main, 0, null, null);
-                    //commandBuffer.Dis
+                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, null, null);
+                    commandBuffer.Dispatch(kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
 
                     //const auto postDispatchBarrier = ImageMemoryBarrier(m_spBRDF_LUT, VK_ACCESS_SHADER_WRITE_BIT, 0, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
                     //pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, { postDispatchBarrier });
