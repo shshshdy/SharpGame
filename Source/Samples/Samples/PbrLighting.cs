@@ -14,7 +14,8 @@ namespace SharpGame.Samples
 
         int kEnvMapLevels = NumMipmapLevels(kEnvMapSize, kEnvMapSize);
 
-        Texture2D brdfLUT;
+        Texture brdfLUT;
+        ResourceSet brdfResSet;
         public override void Init()
         {
             base.Init();
@@ -226,31 +227,28 @@ namespace SharpGame.Samples
             // Compute Cook-Torrance BRDF 2D LUT for split-sum approximation.
             {
                 //m_spBRDF_LUT = createTexture(kBRDF_LUT_Size, kBRDF_LUT_Size, 1, VK_FORMAT_R16G16_SFLOAT, 1, VK_IMAGE_USAGE_STORAGE_BIT);
-                //brdfLUT = Texture2D.Create(kBRDF_LUT_Size, kBRDF_LUT_Size)
+                brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
+
                 //VkPipeline pipeline = createComputePipeline("shaders/spirv/spbrdf_cs.spv", computePipelineLayout);
                 Shader shader = Resources.Load<Shader>("shaders/brdf.shader");
-/*
-                const VkDescriptorImageInfo outputTexture = { VK_NULL_HANDLE, m_spBRDF_LUT.view, VK_IMAGE_LAYOUT_GENERAL };
-                updateDescriptorSet(computeDescriptorSet, Binding_OutputTexture, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, { outputTexture });
-                */
+
+                brdfResSet = new ResourceSet(shader.Main.GetResourceLayout(0), brdfLUT);
+
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
                 {
                     //const auto preDispatchBarrier = ImageMemoryBarrier(m_spBRDF_LUT, 0, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
                     //pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, { preDispatchBarrier });
 
-                    //vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-                    //vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout, 0, 1, &computeDescriptorSet, 0, nullptr);
-                    //vkCmdDispatch(commandBuffer, kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
-
                     commandBuffer.BindComputePipeline(shader.Main);
-                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, null, null);
+                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, brdfResSet, null);
                     commandBuffer.Dispatch(kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
 
                     //const auto postDispatchBarrier = ImageMemoryBarrier(m_spBRDF_LUT, VK_ACCESS_SHADER_WRITE_BIT, 0, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
                     //pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, { postDispatchBarrier });
                 }
+
                 Graphics.EndWorkCommandBuffer(commandBuffer);
-               // vkDestroyPipeline(m_device, pipeline, nullptr);*/
+
             }
         }
 

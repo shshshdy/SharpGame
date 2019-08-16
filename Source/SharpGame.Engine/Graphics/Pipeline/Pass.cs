@@ -127,12 +127,6 @@ namespace SharpGame
 
         public PipelineLayout PipelineLayout { get; set; } = new PipelineLayout();
      
-        /*
-        public ResourceLayout[] ResourceLayout { get; set; }
-
-        private PushConstantRange[] pushConstant;
-        public PushConstantRange[] PushConstant { get => pushConstant; set => pushConstant = value; }
-        */
         public List<string> PushConstantNames { get; set; }
 
         [IgnoreDataMember]
@@ -140,7 +134,6 @@ namespace SharpGame
         [IgnoreDataMember]
         public VertexLayout VertexLayout { get; set; }
 
-        //internal VkPipelineLayout pipelineLayout;
         internal VkPipeline computeHandle;
         ConcurrentDictionary<long, VkPipeline> pipelines = new ConcurrentDictionary<long, VkPipeline>();
 

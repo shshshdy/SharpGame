@@ -24,7 +24,7 @@ namespace SharpGame
             Texture2D CreateTex(Color color)
             {
                 byte* c = &color.R;
-                return Texture2D.Create(1, 1, 4, c);
+                return Texture2D.Create(1, 1, Format.R8g8b8a8Unorm, c);
             }
 
             White = CreateTex(Color.White);
@@ -33,7 +33,7 @@ namespace SharpGame
             Purple = CreateTex(Color.Purple);
         }
 
-        public static Texture2D Create(uint w, uint h, uint bytesPerPixel, byte* tex2DDataPtr, bool dynamic = false)
+        public static Texture2D Create(uint w, uint h, Format format, byte* tex2DDataPtr, bool dynamic = false)
         {
             var texture = new Texture2D
             {
@@ -41,20 +41,42 @@ namespace SharpGame
                 height = h,
                 mipLevels = 1,
                 depth = 1,
-                format = Format.R8g8b8a8Unorm
+                format = format
             };
 
-            uint totalBytes = bytesPerPixel * w * h;
-
-            Format format = Format.R8g8b8a8Unorm;
             //VkFormatProperties formatProperties;
             // Get Device properites for the requested texture format
             //vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, format, &formatProperties);
 
             uint useStaging = 1;
 
+            // Create optimal tiled target image
+            ImageCreateInfo imageCreateInfo = new ImageCreateInfo
+            {
+                imageType = ImageType.Image2D,
+                format = format,
+                mipLevels = texture.mipLevels,
+                arrayLayers = 1,
+                samples = SampleCountFlags.Count1,
+                tiling = ImageTiling.Optimal,
+                sharingMode = SharingMode.Exclusive,
+                // Set initial layout of the image to undefined
+                initialLayout = ImageLayout.Undefined,
+                extent = new Extent3D { width = texture.width, height = texture.height, depth = 1 },
+                usage = ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled
+            };
+
+            texture.image = new Image(ref imageCreateInfo);
+            Device.GetImageMemoryRequirements(texture.image.handle, out var memReqs);
+
             VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
-            VkMemoryRequirements memReqs = new VkMemoryRequirements();
+            memAllocInfo.allocationSize = memReqs.size;
+            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
+
+            ulong totalBytes = memAllocInfo.allocationSize;
+
+            texture.deviceMemory = Device.AllocateMemory(ref memAllocInfo);
+            Device.BindImageMemory(texture.image.handle, texture.deviceMemory, 0);
 
             if (useStaging == 1)
             {
@@ -101,31 +123,6 @@ namespace SharpGame
                     bufferCopyRegion.bufferOffset = offset;
                     bufferCopyRegions.Add(bufferCopyRegion);
                 }
-
-                // Create optimal tiled target image
-                ImageCreateInfo imageCreateInfo = new ImageCreateInfo
-                {
-                    imageType = ImageType.Image2D,
-                    format = format,
-                    mipLevels = texture.mipLevels,
-                    arrayLayers = 1,
-                    samples = SampleCountFlags.Count1,
-                    tiling = ImageTiling.Optimal,
-                    sharingMode = SharingMode.Exclusive,
-                    // Set initial layout of the image to undefined
-                    initialLayout = ImageLayout.Undefined,
-                    extent = new Extent3D { width = texture.width, height = texture.height, depth = 1 },
-                    usage = ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled
-                };
-
-                texture.image = new Image(ref imageCreateInfo);
-                Device.GetImageMemoryRequirements(texture.image.handle, out memReqs);
-
-                memAllocInfo.allocationSize = memReqs.size;
-                memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-
-                texture.deviceMemory = Device.AllocateMemory(ref memAllocInfo);
-                Device.BindImageMemory(texture.image.handle, texture.deviceMemory, 0);
 
                 VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
                 // The sub resource range describes the regions of the image we will be transition
