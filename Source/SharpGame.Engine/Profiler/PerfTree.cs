@@ -31,13 +31,13 @@ namespace SharpGame
 
         public void Draw()
         {
-            ImGui.SameLine(400);
-            ImGui.Text("Count"); ImGui.SameLine(500);
-            ImGui.Text("Time(ms)"); ImGui.SameLine(600);
-            ImGui.Text("Percent"); ImGui.SameLine(800);
-            ImGui.Text("Total Percent");
+            ImGuiNET.ImGui.SameLine(400);
+            ImGuiNET.ImGui.Text("Count"); ImGuiNET.ImGui.SameLine(500);
+            ImGuiNET.ImGui.Text("Time(ms)"); ImGuiNET.ImGui.SameLine(600);
+            ImGuiNET.ImGui.Text("Percent"); ImGuiNET.ImGui.SameLine(800);
+            ImGuiNET.ImGui.Text("Total Percent");
 
-            ImGui.Separator();
+            ImGuiNET.ImGui.Separator();
             timer += Time.Delta;
 
             bool sample = false;

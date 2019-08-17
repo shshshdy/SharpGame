@@ -11,7 +11,6 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = -2)]
     public class Lighting : Sample
     {
-        Node node;
         public override void Init()
         {
             base.Init();
@@ -19,14 +18,15 @@ namespace SharpGame.Samples
             scene = new Scene();
 
             var cameraNode = scene.CreateChild("Camera");
-            cameraNode.Position = new Vector3(0.0f, 2.0f, -5);
-            cameraNode.LookAt(Vector3.Zero);
+            cameraNode.Position = new Vector3(0.0f, 2.0f, -10);
+            //cameraNode.LookAt(Vector3.Zero);
 
             camera = cameraNode.CreateComponent<Camera>();
             camera.Fov = MathUtil.DegreesToRadians(60);
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
 
-            node = scene.CreateChild("Mesh");
+            var node = scene.CreateChild("Mesh");
+            node.Yaw(MathUtil.DegreesToRadians(90), TransformSpace.LOCAL);
             var staticModel = node.AddComponent<StaticModel>();
             staticModel.SetModel("models/voyager/voyager.dae");
 
@@ -39,12 +39,6 @@ namespace SharpGame.Samples
             Renderer.MainView.Attach(camera, scene);
         }
 
-        public override void Update()
-        {
-            base.Update();
-
-            node.Yaw(Time.Delta * 0.1f, TransformSpace.LOCAL);
-        }
 
     }
 }

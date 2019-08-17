@@ -10,11 +10,11 @@ using static Vulkan.VulkanNative;
 namespace SharpGame.Samples
 {
     [SampleDesc(sortOrder = 5)]
-    public class ImGUI : Sample
+    public class ImGuiDemo : Sample
     {
-        public ImGUI()
+        public ImGuiDemo()
         {
-            this.Subscribe<GUIEvent>( e => ImGui.ShowDemoWindow());
+            (this).Subscribe( (GUIEvent e) => ImGuiNET.ImGui.ShowDemoWindow());
         }
 
     }

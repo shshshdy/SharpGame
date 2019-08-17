@@ -16,14 +16,17 @@ Shader "UI"
 				DescriptorType = UniformBuffer
 				StageFlags = Vertex
 			}
+		}
 
+		ResourceLayout
+		{
 			ResourceLayoutBinding
 			{
 				DescriptorType = CombinedImageSampler
 				StageFlags = Fragment
 			}
 		}
-	
+
 		@VertexShader
 		{
 			#version 450
@@ -82,7 +85,7 @@ Shader "UI"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
-			layout(set = 0, binding = 1) uniform sampler2D FontSampler;
+			layout(set = 1, binding = 0) uniform sampler2D ColorSampler;
 
 			layout (location = 0) in vec4 color;
 			layout (location = 1) in vec2 texCoord;
@@ -90,7 +93,7 @@ Shader "UI"
 
 			void main()
 			{
-				outputColor = color * texture(FontSampler, texCoord);
+				outputColor = color * texture(ColorSampler, texCoord);
 			}
 
 		}

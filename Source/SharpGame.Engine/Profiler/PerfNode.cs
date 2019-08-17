@@ -54,19 +54,19 @@ namespace SharpGame
 
         public void Draw(int depth)
         {
-            bool collapse = ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.FramePadding);
+            bool collapse = ImGuiNET.ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.FramePadding);
             if(!IsRoot)   
             {
-                ImGui.SameLine(400);
-                ImGui.Text(string.Format("{0:D}", count)); ImGui.SameLine(500);
-                ImGui.Text(string.Format("{0:F4}", averageMS)); ImGui.SameLine(600);
-                ImGui.Text(string.Format("{0:P1}%%", percent)); ImGui.SameLine(800);
-                ImGui.Text(string.Format("{0:P1}%%", totalPercent));
+                ImGuiNET.ImGui.SameLine(400);
+                ImGuiNET.ImGui.Text(string.Format("{0:D}", count)); ImGuiNET.ImGui.SameLine(500);
+                ImGuiNET.ImGui.Text(string.Format("{0:F4}", averageMS)); ImGuiNET.ImGui.SameLine(600);
+                ImGuiNET.ImGui.Text(string.Format("{0:P1}%%", percent)); ImGuiNET.ImGui.SameLine(800);
+                ImGuiNET.ImGui.Text(string.Format("{0:P1}%%", totalPercent));
             }
 
             if(depth < 3 && !collapse)
             {
-                ImGui.TreePush();
+                ImGuiNET.ImGui.TreePush();
             }            
 
             if (collapse || depth < 3)
@@ -76,7 +76,7 @@ namespace SharpGame
                     c.Draw(depth + 1);
                 }
 
-                ImGui.TreePop();
+                ImGuiNET.ImGui.TreePop();
             }
 
            

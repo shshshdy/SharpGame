@@ -70,7 +70,7 @@ namespace SharpGame
             Texture CreateTex(Color color)
             {
                 byte* c = &color.R;
-                return Texture.Create(1, 1, Format.R8g8b8a8Unorm, c);
+                return Texture.Create2D(1, 1, Format.R8g8b8a8Unorm, c);
             }
 
             White = CreateTex(Color.White);

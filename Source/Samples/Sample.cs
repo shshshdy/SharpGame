@@ -110,10 +110,10 @@ namespace SharpGame.Samples
         {
             if(camera)
             {
-                ImGui.TextUnformatted("Camera");
-                ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0:0.00"));
-                ImGui.Value("yaw ", MathUtil.RadiansToDegrees(yaw));
-                ImGui.Value("pitch ", MathUtil.RadiansToDegrees(pitch));
+                ImGuiNET.ImGui.TextUnformatted("Camera");
+                ImGuiNET.ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0:0.00"));
+                ImGuiNET.ImGui.Value("yaw ", MathUtil.RadiansToDegrees(yaw));
+                ImGuiNET.ImGui.Value("pitch ", MathUtil.RadiansToDegrees(pitch));
             }
        
         }

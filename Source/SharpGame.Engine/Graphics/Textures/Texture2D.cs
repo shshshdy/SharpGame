@@ -10,7 +10,7 @@ namespace SharpGame
 
     public partial class Texture : Resource
     {
-        public unsafe static Texture Create(uint w, uint h, Format format, byte* tex2DDataPtr, bool dynamic = false)
+        public unsafe static Texture Create2D(uint w, uint h, Format format, byte* tex2DDataPtr, bool dynamic = false)
         {
             var texture = new Texture
             {
@@ -20,13 +20,7 @@ namespace SharpGame
                 depth = 1,
                 format = format
             };
-
-            //VkFormatProperties formatProperties;
-            // Get Device properites for the requested texture format
-            //vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, format, &formatProperties);
-
-            uint useStaging = 1;
-
+            
             // Create optimal tiled target image
             ImageCreateInfo imageCreateInfo = new ImageCreateInfo
             {
@@ -55,8 +49,7 @@ namespace SharpGame
             texture.deviceMemory = Device.AllocateMemory(ref memAllocInfo);
             Device.BindImageMemory(texture.image.handle, texture.deviceMemory, 0);
 
-            if (useStaging == 1)
-            {
+            { 
                 // Create a host-visible staging buffer that contains the raw image data
                 VkBuffer stagingBuffer;
                 VkDeviceMemory stagingMemory;
@@ -154,7 +147,7 @@ namespace SharpGame
                 compareOp = CompareOp.Never,
                 minLod = 0.0f,
                 // Set max level-of-detail to mip level count of the texture
-                maxLod = (useStaging == 1) ? (float)texture.mipLevels : 0.0f
+                maxLod = (float)texture.mipLevels
             };
             // Enable anisotropic filtering
             // This feature is optional, so we must check if it's supported on the Device
@@ -192,44 +185,13 @@ namespace SharpGame
             viewCreateInfo.subresourceRange.layerCount = 1;
             // Linear tiling usually won't support mip maps
             // Only set mip map count if optimal tiling is used
-            viewCreateInfo.subresourceRange.levelCount = (useStaging == 1) ? (uint)texture.mipLevels : 1;
+            viewCreateInfo.subresourceRange.levelCount = (uint)texture.mipLevels;
             // The view will be based on the texture's image
             viewCreateInfo.image = texture.image;
             texture.imageView = new ImageView(ref viewCreateInfo);
             texture.UpdateDescriptor();
             return texture;
         }
-        /*
-        public static Texture2D LoadFromFile(string filename,
-            Format format,
-            ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled,
-            ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal)
-        {
-            var tex = new Texture2D();
-            tex.LoadFromFile(filename, format, imageUsageFlags, imageLayout, false);
-            return tex;
-        }
-
-        public void LoadFromFile(
-            string filename,
-            Format format,
-            ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled,
-            ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal,
-            bool forceLinear = false)
-        {
-            KtxFile tex2D;
-
-            this.format = format;
-            this.imageUsageFlags = imageUsageFlags;
-            this.imageLayout = imageLayout;
-
-            using (var file = FileSystem.Instance.GetFile(filename))
-            {
-                tex2D = KtxFile.Load(file, false);
-                SetImage2D(tex2D.Faces[0], forceLinear);
-            }
-
-        }*/
 
         public unsafe void SetImage2D(ImageData tex2D, bool forceLinear = false)
         {

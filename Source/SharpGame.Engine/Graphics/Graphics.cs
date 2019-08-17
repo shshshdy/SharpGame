@@ -129,7 +129,7 @@ namespace SharpGame
 
             CreateSwapChain();
             CreateDepthStencil();
-            CreateRenderPass();
+            CreateDefaultRenderPass();
             CreateFrameBuffer();
 
             CreateCommandPool();
@@ -186,7 +186,7 @@ namespace SharpGame
             Height = (int)height;
         }
 
-        public void CreateRenderPass()
+        public void CreateDefaultRenderPass()
         {
             AttachmentDescription[] attachments =
             {
@@ -239,6 +239,79 @@ namespace SharpGame
             RenderPassCreateInfo renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             
             renderPass = new RenderPass(ref renderPassInfo);           
+        }
+
+        public RenderPass CreateRenderPass(bool clearColor = false, bool clearDepth = false)
+        {
+
+            AttachmentDescription[] attachments =
+            {
+                // Color attachment
+                new AttachmentDescription
+                (
+                    ColorFormat,
+                    loadOp : clearColor? AttachmentLoadOp.Clear : AttachmentLoadOp.Load,
+                    storeOp : AttachmentStoreOp.Store,
+                    finalLayout : ImageLayout.PresentSrcKHR
+                ),
+
+                // Depth attachment
+                new AttachmentDescription
+                (
+                    DepthFormat,
+                    loadOp : clearDepth ? AttachmentLoadOp.Clear : AttachmentLoadOp.DontCare,
+                    storeOp : AttachmentStoreOp.DontCare,
+                    finalLayout : ImageLayout.DepthStencilAttachmentOptimal
+                )
+            };
+
+            SubpassDescription[] subpassDescription =
+            {
+                new SubpassDescription
+                {
+                    pipelineBindPoint = PipelineBindPoint.Graphics,
+
+                    pColorAttachments = new []
+                    {
+                        new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal)
+                    },
+
+                    pDepthStencilAttachment = new []
+                    {
+                        new AttachmentReference(1, ImageLayout.DepthStencilAttachmentOptimal)
+                    },
+                }
+            };
+
+            // Subpass dependencies for layout transitions
+            SubpassDependency[] dependencies =
+            {
+                new SubpassDependency
+                {
+                    srcSubpass = VulkanNative.SubpassExternal,
+                    dstSubpass = 0,
+                    srcStageMask = PipelineStageFlags.BottomOfPipe,
+                    dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
+                    srcAccessMask = AccessFlags.MemoryRead,
+                    dstAccessMask = (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
+                    dependencyFlags = DependencyFlags.ByRegion
+                },
+
+                new SubpassDependency
+                {
+                    srcSubpass = 0,
+                    dstSubpass = VulkanNative.SubpassExternal,
+                    srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
+                    dstStageMask = PipelineStageFlags.BottomOfPipe,
+                    srcAccessMask = (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
+                    dstAccessMask = AccessFlags.MemoryRead,
+                    dependencyFlags = DependencyFlags.ByRegion
+                },
+            };
+
+            var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
+            renderPass = new RenderPass(ref renderPassInfo);
+            return renderPass;
         }
 
         public Framebuffer[] CreateSwapChainFramebuffers(RenderPass vkRenderPass)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -16,6 +17,8 @@ namespace SharpGame.Samples
 
         Texture brdfLUT;
         ResourceSet brdfResSet;
+
+        Texture colorMap;
         public override void Init()
         {
             base.Init();
@@ -49,7 +52,7 @@ namespace SharpGame.Samples
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel("models/cerberus/cerberus.fbx");
 
-                var colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Unorm);
+                colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Unorm);
                 var normalMap = Texture.LoadFromFile("models/cerberus/normal.ktx", Format.R8g8b8a8Unorm);
                 var metallicMap = Texture.LoadFromFile("models/cerberus/metallic.ktx", Format.R8Unorm);
                 var roughnessMap = Texture.LoadFromFile("models/cerberus/roughness.ktx", Format.R8Unorm);
@@ -65,8 +68,12 @@ namespace SharpGame.Samples
                 staticModel.SetMaterial(mat);
             }
 
+            //Preprocess();
 
             Renderer.MainView.Attach(camera, scene);
+
+
+            (this).Subscribe((GUIEvent e) => OnDebugGUI());
         }
 
         static int NumMipmapLevels(int width, int height)
@@ -251,6 +258,32 @@ namespace SharpGame.Samples
 
             }
         }
+
+        bool debugOpen = true;
+
+        void OnDebugGUI()
+        {
+
+            var io = ImGuiNET.ImGui.GetIO();
+            {
+                Vector2 window_pos = new Vector2(10, io.DisplaySize.Y - 10);
+                Vector2 window_pos_pivot = new Vector2(0.0f, 1.0f);
+                ImGuiNET.ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+                ImGuiNET.ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+            }
+
+            if (ImGuiNET.ImGui.Begin("Debugger", ref debugOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            {
+
+                ImGui.Image(colorMap, new Vector2(200, 200));
+            }
+
+            ImGuiNET.ImGui.End();
+
+
+        }
+
+
 
     }
 

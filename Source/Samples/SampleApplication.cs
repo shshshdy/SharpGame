@@ -98,27 +98,27 @@ namespace SharpGame.Samples
         
         private void HandleGUI(GUIEvent e)
         {
-            var io = ImGui.GetIO();
+            var io = ImGuiNET.ImGui.GetIO();
             corner = 1;
             if (corner != -1)
             {
                 Vector2 window_pos = new Vector2(((corner & 1) != 0) ? io.DisplaySize.X - DISTANCE
                     : DISTANCE, (corner & 2) != 0 ? io.DisplaySize.Y - DISTANCE : DISTANCE);
                 Vector2 window_pos_pivot = new Vector2((corner & 1) != 0 ? 1.0f : 0.0f, (corner & 2) != 0 ? 1.0f : 0.0f);
-                ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+                ImGuiNET.ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
             }
 
-            ImGui.SetNextWindowBgAlpha(0.5f);
+            ImGuiNET.ImGui.SetNextWindowBgAlpha(0.5f);
 
-            if (ImGui.Begin("Perf HUD", ref hudOpen, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            if (ImGuiNET.ImGui.Begin("Perf HUD", ref hudOpen, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
-                ImGui.Text("Selected Sample:");
-                if (ImGui.Combo("", ref selected, sampleNames, sampleNames.Length))
+                ImGuiNET.ImGui.Text("Selected Sample:");
+                if (ImGuiNET.ImGui.Combo("", ref selected, sampleNames, sampleNames.Length))
                 {
                     SetSample(allSamples[selected].Item4);
                 }
 
-                ImGui.Separator();
+                ImGuiNET.ImGui.Separator();
 
                 if (current)
                 {
@@ -127,49 +127,49 @@ namespace SharpGame.Samples
 
             }
 
-            ImGui.End();
+            ImGuiNET.ImGui.End();
 
             {
                 Vector2 window_pos = new Vector2(DISTANCE, DISTANCE);
                 Vector2 window_pos_pivot = new Vector2(0.0f, 0.0f);
-                ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
-                ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+                ImGuiNET.ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+                ImGuiNET.ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
             }
 
-            if (ImGui.Begin("Settings", ref hudOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            if (ImGuiNET.ImGui.Begin("Settings", ref hudOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
-                ImGui.Value("Single Loop", singleLoop);
-                ImGui.Value("Fps", Fps);
-                ImGui.Value("Msec", Msec);
-                ImGui.Value("Draw Call", Stats.drawCall);
-                ImGui.Value("Triangle Count", Stats.triCount);
+                ImGuiNET.ImGui.Value("Single Loop", singleLoop);
+                ImGuiNET.ImGui.Value("Fps", Fps);
+                ImGuiNET.ImGui.Value("Msec", Msec);
+                ImGuiNET.ImGui.Value("Draw Call", Stats.drawCall);
+                ImGuiNET.ImGui.Value("Triangle Count", Stats.triCount);
                 //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
                 //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
 
-                ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.LogicWait * Timer.MilliSecsPerTick));
-                ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.RenderWait * Timer.MilliSecsPerTick));
+                ImGuiNET.ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.LogicWait * Timer.MilliSecsPerTick));
+                ImGuiNET.ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.RenderWait * Timer.MilliSecsPerTick));
 
-                ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
-                ImGui.Checkbox("Show Stats", ref showStats);
+                ImGuiNET.ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
+                ImGuiNET.ImGui.Checkbox("Show Stats", ref showStats);
             }
-            
-            ImGui.End();
+
+            ImGuiNET.ImGui.End();
 
             if (showStats)
             {
                 corner = 0;
                 Vector2 window_pos = new Vector2(io.DisplaySize.X / 2, io.DisplaySize.Y);
                 Vector2 window_pos_pivot = new Vector2(0.5f, 1.0f);
-                ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
-                ImGui.SetNextWindowSize(io.DisplaySize * 0.6f);
-                ImGui.SetNextWindowBgAlpha(0.5f);
+                ImGuiNET.ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+                ImGuiNET.ImGui.SetNextWindowSize(io.DisplaySize * 0.6f);
+                ImGuiNET.ImGui.SetNextWindowBgAlpha(0.5f);
 
-                if (ImGui.Begin("Stats", ref showStats, ImGuiWindowFlags.None))
+                if (ImGuiNET.ImGui.Begin("Stats", ref showStats, ImGuiWindowFlags.None))
                 {
                     perfTree.Draw();
                 }
 
-                ImGui.End();
+                ImGuiNET.ImGui.End();
 
             }
 
