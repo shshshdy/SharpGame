@@ -28,7 +28,7 @@ namespace SharpGame
             ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
             {
                 image = texture.image,
-                viewType = (texture.depth == 6) ? ImageViewType.ImageCube : ImageViewType.Image2D,
+                viewType = (texture.layers == 6) ? ImageViewType.ImageCube : ImageViewType.Image2D,
                 format = format
             };
             viewCreateInfo.subresourceRange.aspectMask = aspectMask;

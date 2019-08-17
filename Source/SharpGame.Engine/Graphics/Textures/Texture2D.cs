@@ -8,34 +8,11 @@ namespace SharpGame
     using global::System.Runtime.CompilerServices;
     using static Vulkan.VulkanNative;
 
-    public unsafe class Texture2D : Texture
+    public partial class Texture : Resource
     {
-        public Texture2D()
+        public unsafe static Texture Create(uint w, uint h, Format format, byte* tex2DDataPtr, bool dynamic = false)
         {
-        }
-
-        public static Texture2D White;
-        public static Texture2D Gray;
-        public static Texture2D Black;
-        public static Texture2D Purple;
-
-        public unsafe static void Init()
-        {
-            Texture2D CreateTex(Color color)
-            {
-                byte* c = &color.R;
-                return Texture2D.Create(1, 1, Format.R8g8b8a8Unorm, c);
-            }
-
-            White = CreateTex(Color.White);
-            Gray = CreateTex(Color.Gray);
-            Black = CreateTex(Color.Black);
-            Purple = CreateTex(Color.Purple);
-        }
-
-        public static Texture2D Create(uint w, uint h, Format format, byte* tex2DDataPtr, bool dynamic = false)
-        {
-            var texture = new Texture2D
+            var texture = new Texture
             {
                 width = w,
                 height = h,
@@ -201,7 +178,7 @@ namespace SharpGame
             // Textures are not directly accessed by the shaders and
             // are abstracted by image views containing additional
             // information and sub resource ranges
-            ImageViewCreateInfo view = new ImageViewCreateInfo
+            ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
             {
                 viewType = ImageViewType.Image2D,
                 format = format,
@@ -209,20 +186,20 @@ namespace SharpGame
             };
             // The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
             // It's possible to create multiple image views for a single image referring to different (and/or overlapping) ranges of the image
-            view.subresourceRange.aspectMask = VkImageAspectFlags.Color;
-            view.subresourceRange.baseMipLevel = 0;
-            view.subresourceRange.baseArrayLayer = 0;
-            view.subresourceRange.layerCount = 1;
+            viewCreateInfo.subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            viewCreateInfo.subresourceRange.baseMipLevel = 0;
+            viewCreateInfo.subresourceRange.baseArrayLayer = 0;
+            viewCreateInfo.subresourceRange.layerCount = 1;
             // Linear tiling usually won't support mip maps
             // Only set mip map count if optimal tiling is used
-            view.subresourceRange.levelCount = (useStaging == 1) ? (uint)texture.mipLevels : 1;
+            viewCreateInfo.subresourceRange.levelCount = (useStaging == 1) ? (uint)texture.mipLevels : 1;
             // The view will be based on the texture's image
-            view.image = texture.image;
-            texture.view = new ImageView(ref view);
+            viewCreateInfo.image = texture.image;
+            texture.imageView = new ImageView(ref viewCreateInfo);
             texture.UpdateDescriptor();
             return texture;
         }
-
+        /*
         public static Texture2D LoadFromFile(string filename,
             Format format,
             ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled,
@@ -252,9 +229,9 @@ namespace SharpGame
                 SetImage2D(tex2D.Faces[0], forceLinear);
             }
 
-        }
+        }*/
 
-        public void SetImage2D(ImageData tex2D, bool forceLinear = false)
+        public unsafe void SetImage2D(ImageData tex2D, bool forceLinear = false)
         {
             width = tex2D.Width;
             height = tex2D.Height;
@@ -450,7 +427,7 @@ namespace SharpGame
             // Only set mip map count if optimal tiling is used
             viewCreateInfo.subresourceRange.levelCount = (useStaging) ? (uint)mipLevels : 1;
             viewCreateInfo.image = image;
-            view = new ImageView(ref viewCreateInfo);
+            imageView = new ImageView(ref viewCreateInfo);
 
             // Update descriptor image info member that can be used for setting up descriptor sets
             UpdateDescriptor();

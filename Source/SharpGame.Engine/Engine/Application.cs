@@ -89,7 +89,7 @@ namespace SharpGame
             cache.RegisterAssertReader(new AssimpModelReader());
             
             cache.RegisterAssertReader(new SharpTextureReader());
-            cache.RegisterAssertReader(new KtxTexture2DReader());
+            //cache.RegisterAssertReader(new KtxTexture2DReader());
             cache.RegisterAssertReader(new KtxTextureCubeReader());
 
             cache.RegisterAssertReader(new AnimationReader());

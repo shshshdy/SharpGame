@@ -7,26 +7,27 @@ using Vulkan;
 namespace SharpGame
 {
     using static Vulkan.VulkanNative;
-    public unsafe class TextureCube : Texture
+    public partial class Texture : Resource, IBindableResource
     {
-        public static TextureCube LoadFromFile(string filename, Format format)
+        public static Texture LoadFromFile(string filename, Format format)
         {
-            var tex = new TextureCube();
+            var tex = new Texture();
             tex.LoadFromFile(filename, format, false);
             return tex;
         }
 
-        public void LoadFromFile(string filename, Format format, bool forceLinearTiling)
+        public unsafe void LoadFromFile(string filename, Format format, bool forceLinearTiling)
         {
-            KtxFile texCube;
+            KtxFile texFile;
             using (var fs = FileSystem.Instance.GetFile(filename))
             {
-                texCube = KtxFile.Load(fs, readKeyValuePairs: false);
+                texFile = KtxFile.Load(fs, readKeyValuePairs: false);
             }
 
-            width = texCube.Header.PixelWidth;
-            height = texCube.Header.PixelHeight;
-            mipLevels = texCube.Header.NumberOfMipmapLevels;
+            width = texFile.Header.PixelWidth;
+            height = texFile.Header.PixelHeight;
+            mipLevels = texFile.Header.NumberOfMipmapLevels;
+            layers = (uint)texFile.Faces.Length;
 
             VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
             VkMemoryRequirements memReqs;
@@ -36,7 +37,7 @@ namespace SharpGame
             VkDeviceMemory stagingMemory;
 
             VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
-            bufferCreateInfo.size = texCube.GetTotalSize();
+            bufferCreateInfo.size = texFile.GetTotalSize();
             // This buffer is used as a transfer source for the buffer copy
             bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
             bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
@@ -53,7 +54,7 @@ namespace SharpGame
 
             // Copy texture data into staging buffer
             byte* data = (byte*)Device.MapMemory(stagingMemory, 0, memReqs.size, 0);
-            byte[] allTextureData = texCube.GetAllTextureData();
+            byte[] allTextureData = texFile.GetAllTextureData();
             fixed (byte* texCubeDataPtr = &allTextureData[0])
             {
                 Unsafe.CopyBlock(data, texCubeDataPtr, (uint)allTextureData.Length);
@@ -74,9 +75,9 @@ namespace SharpGame
                 extent = new Extent3D { width = width, height = height, depth = 1 },
                 usage = ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled,
                 // Cube faces count as array layers in Vulkan
-                arrayLayers = 6,
+                arrayLayers = layers,
                 // This flag is required for cube map images
-                flags = ImageCreateFlags.CubeCompatible
+                flags = layers == 6 ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None
             };
 
             image = new Image(ref imageCreateInfo);
@@ -94,7 +95,7 @@ namespace SharpGame
             NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
             uint offset = 0;
 
-            for (uint face = 0; face < 6; face++)
+            for (uint face = 0; face < layers; face++)
             {
                 for (uint level = 0; level < mipLevels; level++)
                 {
@@ -103,15 +104,15 @@ namespace SharpGame
                     bufferCopyRegion.imageSubresource.mipLevel = level;
                     bufferCopyRegion.imageSubresource.baseArrayLayer = face;
                     bufferCopyRegion.imageSubresource.layerCount = 1;
-                    bufferCopyRegion.imageExtent.width = texCube.Faces[face].Mipmaps[level].Width;
-                    bufferCopyRegion.imageExtent.height = texCube.Faces[face].Mipmaps[level].Height;
+                    bufferCopyRegion.imageExtent.width = texFile.Faces[face].Mipmaps[level].Width;
+                    bufferCopyRegion.imageExtent.height = texFile.Faces[face].Mipmaps[level].Height;
                     bufferCopyRegion.imageExtent.depth = 1;
                     bufferCopyRegion.bufferOffset = offset;
 
                     bufferCopyRegions.Add(bufferCopyRegion);
 
                     // Increase offset into staging buffer for next level / face
-                    offset += texCube.Faces[face].Mipmaps[level].SizeInBytes;
+                    offset += texFile.Faces[face].Mipmaps[level].SizeInBytes;
                 }
             }
 
@@ -121,7 +122,7 @@ namespace SharpGame
             subresourceRange.aspectMask = VkImageAspectFlags.Color;
             subresourceRange.baseMipLevel = 0;
             subresourceRange.levelCount = (uint)mipLevels;
-            subresourceRange.layerCount = 6;
+            subresourceRange.layerCount = layers;
 
             VulkanUtil.SetImageLayout(
                 copyCmd,
@@ -177,17 +178,17 @@ namespace SharpGame
             // Create image view
             ImageViewCreateInfo view = new ImageViewCreateInfo();
             // Cube map view type
-            view.viewType = ImageViewType.ImageCube;
+            view.viewType = layers == 6 ? ImageViewType.ImageCube : ImageViewType.Image2D;
             view.format = format;
             view.components = new ComponentMapping(ComponentSwizzle.R, ComponentSwizzle.G, ComponentSwizzle.B, ComponentSwizzle.A );
             view.subresourceRange = new VkImageSubresourceRange { aspectMask = VkImageAspectFlags.Color, baseMipLevel = 0, layerCount = 1, baseArrayLayer = 0, levelCount = 1 };
-            // 6 array layers (faces)
-            view.subresourceRange.layerCount = 6;
+            // array layers (faces)
+            view.subresourceRange.layerCount = layers;
             // Set number of mip levels
             view.subresourceRange.levelCount = (uint)mipLevels;
             view.image = image;
 
-            this.view = new ImageView(ref view);
+            this.imageView = new ImageView(ref view);
 
             // Clean up staging resources
             Device.FreeMemory(stagingMemory);

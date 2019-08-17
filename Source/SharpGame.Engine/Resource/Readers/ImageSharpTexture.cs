@@ -78,7 +78,7 @@ namespace SharpGame.ImageSharp
             }
 
             ImageData face = new ImageData((uint)Width, (uint)Height, (uint)Images.Length, mipmaps);
-            Texture2D tex = new Texture2D
+            Texture tex = new Texture
             {
                 width = (uint)Width,
                 height = (uint)Height,

@@ -9,7 +9,7 @@
     {
       "name": "DiffMap",
       "texture": {
-        "Type": "Texture2D",
+        "Type": "Texture",
         "FileID": "c314fddf-0197-4134-9e33-f68f313f3930",
         "FilePath": "textures/StoneDiffuse.png"
       },

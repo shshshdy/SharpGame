@@ -8,7 +8,7 @@ using ImGuiNET;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 2)]
+    [SampleDesc(sortOrder = -2)]
     public class Lighting : Sample
     {
         Node node;
@@ -30,7 +30,7 @@ namespace SharpGame.Samples
             var staticModel = node.AddComponent<StaticModel>();
             staticModel.SetModel("models/voyager/voyager.dae");
 
-            var colorMap = Resources.Load<Texture2D>("models/voyager/voyager_bc3_unorm.ktx");
+            var colorMap = Resources.Load<Texture>("models/voyager/voyager_bc3_unorm.ktx");
 
             var mat = new Material("Shaders/LitSolid.shader");
             mat.SetTexture("DiffMap", colorMap);

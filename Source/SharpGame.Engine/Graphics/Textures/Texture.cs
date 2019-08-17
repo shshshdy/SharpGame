@@ -8,7 +8,7 @@ namespace SharpGame
 {
     using static Vulkan.VulkanNative;
 
-    public class Texture : Resource, IBindableResource
+    public partial class Texture : Resource, IBindableResource
     {
         public uint width;
         public uint height;
@@ -20,7 +20,7 @@ namespace SharpGame
         public ImageUsageFlags imageUsageFlags;
         public ImageLayout imageLayout;
 
-        internal ImageView view;
+        internal ImageView imageView;
         internal Image image;
         internal Sampler sampler;
 
@@ -34,14 +34,14 @@ namespace SharpGame
         internal void UpdateDescriptor()
         {
             descriptor.sampler = sampler.handle;
-            descriptor.imageView = view.handle;
+            descriptor.imageView = imageView.handle;
             descriptor.imageLayout = (VkImageLayout)imageLayout;
         }
 
 
         protected override void Destroy()
         {
-            view?.Dispose();
+            imageView?.Dispose();
             image?.Dispose();
             sampler?.Dispose();
 
@@ -58,6 +58,25 @@ namespace SharpGame
                 ++levels;
             }
             return levels;
+        }
+
+        public static Texture White;
+        public static Texture Gray;
+        public static Texture Black;
+        public static Texture Purple;
+
+        public unsafe static void Init()
+        {
+            Texture CreateTex(Color color)
+            {
+                byte* c = &color.R;
+                return Texture.Create(1, 1, Format.R8g8b8a8Unorm, c);
+            }
+
+            White = CreateTex(Color.White);
+            Gray = CreateTex(Color.Gray);
+            Black = CreateTex(Color.Black);
+            Purple = CreateTex(Color.Purple);
         }
 
         public static Texture Create(uint width, uint height, uint layers, Format format, uint levels = 0, ImageUsageFlags additionalUsage = ImageUsageFlags.None)
@@ -77,7 +96,7 @@ namespace SharpGame
             }
 
             texture.image = Image.Create(width, height, layers, texture.mipLevels, format, 1, usage);
-            texture.view = ImageView.Create(texture, format, VkImageAspectFlags.Color, 0, RemainingMipLevels);
+            texture.imageView = ImageView.Create(texture, format, VkImageAspectFlags.Color, 0, RemainingMipLevels);
             return texture;
         }
 

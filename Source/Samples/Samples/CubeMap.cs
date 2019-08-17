@@ -30,7 +30,7 @@ namespace SharpGame.Samples
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
             camera.FarClip = 3000.0f;
 
-            var cubeMap = Resources.Load<TextureCube>("textures/cubemap_yokohama_bc3_unorm.ktx");
+            var cubeMap = Resources.Load<Texture>("textures/cubemap_yokohama_bc3_unorm.ktx");
             {
                 var model = Resources.Load<Model>("Models/cube.obj");
                 var node = scene.CreateChild("Sky");

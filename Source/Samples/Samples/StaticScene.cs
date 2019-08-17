@@ -30,7 +30,7 @@ namespace SharpGame.Samples
             }
 
             {               
-                var colorMap = Resources.Load<Texture2D>("textures/Mushroom.png");
+                var colorMap = Resources.Load<Texture>("textures/Mushroom.png");
                 var mat = new Material("Shaders/Basic.shader");
                 mat.SetTexture("DiffMap", colorMap);
 

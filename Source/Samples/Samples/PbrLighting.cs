@@ -29,7 +29,7 @@ namespace SharpGame.Samples
             camera.Fov = MathUtil.DegreesToRadians(60);
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
 
-            var cubeMap = TextureCube.LoadFromFile("textures/hdr/gcanyon_cube.ktx", Format.R16g16b16a16Sfloat);
+            var cubeMap = Texture.LoadFromFile("textures/hdr/gcanyon_cube.ktx", Format.R16g16b16a16Sfloat);
             {
                 var model = Resources.Load<Model>("Models/cube.obj");
                 var node = scene.CreateChild("Sky");
@@ -49,11 +49,11 @@ namespace SharpGame.Samples
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel("models/cerberus/cerberus.fbx");
 
-                var colorMap = Texture2D.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Unorm);
-                var normalMap = Texture2D.LoadFromFile("models/cerberus/normal.ktx", Format.R8g8b8a8Unorm);
-                var metallicMap = Texture2D.LoadFromFile("models/cerberus/metallic.ktx", Format.R8Unorm);
-                var roughnessMap = Texture2D.LoadFromFile("models/cerberus/roughness.ktx", Format.R8Unorm);
-                var aoMap = Texture2D.LoadFromFile("models/cerberus/ao.ktx", Format.R8Unorm);
+                var colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Unorm);
+                var normalMap = Texture.LoadFromFile("models/cerberus/normal.ktx", Format.R8g8b8a8Unorm);
+                var metallicMap = Texture.LoadFromFile("models/cerberus/metallic.ktx", Format.R8Unorm);
+                var roughnessMap = Texture.LoadFromFile("models/cerberus/roughness.ktx", Format.R8Unorm);
+                var aoMap = Texture.LoadFromFile("models/cerberus/ao.ktx", Format.R8Unorm);
 
                 var mat = new Material("Shaders/Pbr.shader");
                 mat.SetTexture("albedoMap", colorMap);

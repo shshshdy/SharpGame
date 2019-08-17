@@ -16,7 +16,7 @@ namespace SharpGame.Samples
             base.Init();
 
             {
-                var colorMap = Resources.Load<Texture2D>("textures/StoneDiffuse.png");
+                var colorMap = Resources.Load<Texture>("textures/StoneDiffuse.png");
                 var mat = new Material("Shaders/Basic.shader");
                 mat.SetTexture("DiffMap", colorMap);
 

@@ -111,7 +111,7 @@ namespace SharpGame
             submitInfo.signalSemaphoreCount = 1;
             submitInfo.pSignalSemaphores = &pSem->RenderComplete;
 
-            Texture2D.Init();
+            Texture.Init();
 
 #if EVENT_SYNC
             _renderComandsReady = new ManualResetEvent(false);

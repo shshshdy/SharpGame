@@ -184,7 +184,7 @@ namespace SharpGame
                 Format.R8g8b8a8Unorm,
             };
 
-            texture = Texture2D.Create((uint)out_width, (uint)out_height, fmts[out_bytes_per_pixel], out_pixels);
+            texture = Texture.Create((uint)out_width, (uint)out_height, fmts[out_bytes_per_pixel], out_pixels);
             io.Fonts.SetTexID(fontAtlasID);
             io.Fonts.ClearTexData();
         }

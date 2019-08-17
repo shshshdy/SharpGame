@@ -41,7 +41,7 @@ namespace SharpGame.Samples
             };
 
             var mat = new Material("Shaders/Basic.shader");
-            mat.SetTexture("DiffMap", Texture2D.White);
+            mat.SetTexture("DiffMap", Texture.White);
 
             cube = GeometricPrimitive.CreateCube(10, 10, 10);
 

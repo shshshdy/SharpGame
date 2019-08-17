@@ -213,7 +213,7 @@ Assimp.PostProcessSteps.ValidateDataStructure;
 
             if (aiMaterial.HasTextureDiffuse)
             {
-                Texture tex = Resources.Instance.Load<Texture2D>(path + aiMaterial.TextureDiffuse.FilePath);
+                Texture tex = Resources.Instance.Load<Texture>(path + aiMaterial.TextureDiffuse.FilePath);
                 if(tex != null)
                 {
                     material.SetTexture("DiffMap", tex.ResourceRef);
@@ -221,7 +221,7 @@ Assimp.PostProcessSteps.ValidateDataStructure;
             }
             else
             {
-                material.SetTexture("DiffMap", Texture2D.White);
+                material.SetTexture("DiffMap", Texture.White);
             }
             return material;
         }

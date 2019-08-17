@@ -20,7 +20,7 @@ namespace SharpGame.Samples
 
             {
                 var mat = new Material("Shaders/Basic.shader");
-                mat.SetTexture("DiffMap", Texture2D.White);
+                mat.SetTexture("DiffMap", Texture.White);
 
                 var model = Resources.Load<Model>("Models/sphere.obj");
 

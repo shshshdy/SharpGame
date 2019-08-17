@@ -31,8 +31,8 @@ namespace SharpGame.Samples
             }
 
             {
-                var colorMap = Resources.Load<Texture2D>("Models/Mutant/Textures/Mutant_diffuse.jpg");
-                var normalMap = Resources.Load<Texture2D>("Models/Mutant/Textures/Mutant_normal.jpg");
+                var colorMap = Resources.Load<Texture>("Models/Mutant/Textures/Mutant_diffuse.jpg");
+                var normalMap = Resources.Load<Texture>("Models/Mutant/Textures/Mutant_normal.jpg");
                 var mat = new Material("Shaders/Skinned.shader");
                 mat.SetTexture("DiffMap", colorMap);
                 mat.SetTexture("NormalMap", normalMap);

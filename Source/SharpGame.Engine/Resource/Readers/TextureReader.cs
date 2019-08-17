@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class SharpTextureReader : ResourceReader<Texture2D>
+    public class SharpTextureReader : ResourceReader<Texture>
     {
         public SharpTextureReader() : base(".tga|.png|.jpg|.gif|.bmp")
         {
@@ -32,7 +32,7 @@ namespace SharpGame
         }
 
     }
-
+    /*
     public class KtxTexture2DReader : ResourceReader<Texture2D>
     {
         public KtxTexture2DReader() : base(".ktx")
@@ -51,9 +51,9 @@ namespace SharpGame
             return resource;
         }
 
-    }
+    }*/
 
-    public class KtxTextureCubeReader : ResourceReader<TextureCube>
+    public class KtxTextureCubeReader : ResourceReader<Texture>
     {
         public KtxTextureCubeReader() : base(".ktx")
         {
@@ -66,7 +66,7 @@ namespace SharpGame
                 return null;
             }
 
-            var resource = new TextureCube();
+            var resource = new Texture();
             resource.LoadFromFile(name, Format.Bc3UnormBlock, true);
             return resource;
         }
