@@ -44,11 +44,11 @@ namespace SharpGame
         List<AnimationState> animationStates_ = new List<AnimationState>();
 
         /// Skinning matrices.
-        Span<Matrix> skinMatrices_;
+        MativeSpan<Matrix> skinMatrices_;
         /// Mapping of subgeometry bone indices, used if more bones than skinning shader can manage.
         int[][] geometryBoneMappings_;
         /// Subgeometry skinning matrices, used if more bones than skinning shader can manage.
-        Span<Matrix>[] geometrySkinMatrices_ = Array.Empty<Span<Matrix>>();// new Span<Matrix>[0];
+        MativeSpan<Matrix>[] geometrySkinMatrices_ = Array.Empty<MativeSpan<Matrix>>();// new Span<Matrix>[0];
         /// Subgeometry skinning matrix pointers, if more bones than skinning shader can manage.
         IntPtr[][] geometrySkinMatrixPtrs_;
         /// Bounding box calculated from bones.
@@ -95,7 +95,7 @@ namespace SharpGame
                 NativePool<Matrix>.Shared.Release(skinMatrices_);
             }
 
-            foreach(Span<Matrix> m in geometrySkinMatrices_)
+            foreach(MativeSpan<Matrix> m in geometrySkinMatrices_)
             {
                 NativePool<Matrix>.Shared.Release(m);
             }
@@ -802,7 +802,7 @@ namespace SharpGame
 
         void SetGeometryBoneMappings()
         {
-            foreach(Span<Matrix> m in geometrySkinMatrices_)
+            foreach(MativeSpan<Matrix> m in geometrySkinMatrices_)
             {
                 NativePool<Matrix>.Shared.Release(m);
             }

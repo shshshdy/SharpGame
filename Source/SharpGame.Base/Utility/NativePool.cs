@@ -5,9 +5,9 @@ using System.Text;
 
 namespace SharpGame
 {
-    public struct Span<T>
+    public struct MativeSpan<T>
     {
-        public static Span<T> Empty => default(Span<T>);
+        public static MativeSpan<T> Empty => default(MativeSpan<T>);
 
         /// <summary>
         /// The number of items in the span.
@@ -20,7 +20,7 @@ namespace SharpGame
         public bool IsEmpty => length == 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe Span(void* pointer, int length)
+        public unsafe MativeSpan(void* pointer, int length)
         {
             this.length = length;
             _byteOffset = new IntPtr(pointer);
@@ -77,9 +77,9 @@ namespace SharpGame
                 Utilities.Free(ptr);
         }
 
-        public Span<T> Acquire(int count)
+        public MativeSpan<T> Acquire(int count)
         {
-            return new Span<T>((void*)AcquireImpl(count), count);
+            return new MativeSpan<T>((void*)AcquireImpl(count), count);
         }
 
         public IntPtr Acquire()
@@ -113,7 +113,7 @@ namespace SharpGame
             return ret1;
         }
 
-        public void Release(Span<T> span)
+        public void Release(MativeSpan<T> span)
         {
             if(!freeList.TryGetValue(span.Length, out var list))
             {

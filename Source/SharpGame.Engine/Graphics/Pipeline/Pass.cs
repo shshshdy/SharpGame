@@ -11,36 +11,36 @@ namespace SharpGame
     using static Builder;
     using global::System.Collections.Concurrent;
 
-    public struct PushConstantRange
+    public struct SpecializationMapEntry
     {
-        public ShaderStage stageFlags;
-        public int offset;
-        public int size;
-        public PushConstantRange(ShaderStage shaderStage, int offset, int size)
-        {
-            this.stageFlags = shaderStage;
-            this.offset = offset;
-            this.size = size;
-        }
+        public uint constantID;
+        public uint offset;
+        public UIntPtr size;
+    }
+
+    public class SpecializationInfo
+    {
+        public SpecializationMapEntry[] pMapEntries;
+        public byte[] data;
     }
 
     public partial class Pass : DisposeBase
     {
-        public static readonly StringID Shadow = "shadow";
-        public static readonly StringID Depth = "depth";
-        public static readonly StringID Clear = "clear";
-        public static readonly StringID Main = "main";
+        public static readonly string Shadow = "shadow";
+        public static readonly string Depth = "depth";
+        public static readonly string Clear = "clear";
+        public static readonly string Main = "main";
 
-        private static List<StringID> passList = new List<StringID>();
+        private static List<string> passList = new List<string>();
 
         static Pass()
         {
             passList.Add(Main);
         }
 
-        public static ulong GetID(StringID pass)
+        public static ulong GetID(string pass)
         {
-            if (pass.IsNullOrEmpty)
+            if (string.IsNullOrEmpty(pass))
             {
                 return 1;
             }
@@ -62,8 +62,8 @@ namespace SharpGame
             return (ulong)(1 << (passList.Count - 1));
         }
 
-        private StringID name_;
-        public StringID Name
+        private string name_;
+        public string Name
         {
             get => name_;
             set
@@ -128,6 +128,8 @@ namespace SharpGame
         public PipelineLayout PipelineLayout { get; set; } = new PipelineLayout();
      
         public List<string> PushConstantNames { get; set; }
+
+        public SpecializationInfo SpecializationInfo { get; set; }
 
         [IgnoreDataMember]
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;

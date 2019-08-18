@@ -8,6 +8,19 @@ namespace SharpGame
 {
     using static VulkanNative;
 
+    public struct PushConstantRange
+    {
+        public ShaderStage stageFlags;
+        public int offset;
+        public int size;
+        public PushConstantRange(ShaderStage shaderStage, int offset, int size)
+        {
+            this.stageFlags = shaderStage;
+            this.offset = offset;
+            this.size = size;
+        }
+    }
+
     public class PipelineLayout : DisposeBase
     {
         public ResourceLayout[] ResourceLayout { get; set; }

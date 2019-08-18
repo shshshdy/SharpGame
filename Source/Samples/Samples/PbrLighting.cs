@@ -15,8 +15,14 @@ namespace SharpGame.Samples
 
         int kEnvMapLevels = NumMipmapLevels(kEnvMapSize, kEnvMapSize);
 
+        Texture cubeMap;
         Texture brdfLUT;
+        Texture envMap;
+        Texture irMap;
+
         ResourceSet brdfResSet;
+        ResourceSet irResSet;
+        ResourceSet spResSet;
 
         Texture colorMap;
         public override void Init()
@@ -32,7 +38,7 @@ namespace SharpGame.Samples
             camera.Fov = MathUtil.DegreesToRadians(60);
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
 
-            var cubeMap = Texture.LoadFromFile("textures/hdr/gcanyon_cube.ktx", Format.R16g16b16a16Sfloat);
+            cubeMap = Texture.LoadFromFile("textures/hdr/gcanyon_cube.ktx", Format.R16g16b16a16Sfloat);
             {
                 var model = Resources.Load<Model>("Models/cube.obj");
                 var node = scene.CreateChild("Sky");
@@ -68,6 +74,10 @@ namespace SharpGame.Samples
                 staticModel.SetMaterial(mat);
             }
 
+            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, 6, Format.R16g16b16a16Sfloat, 0, ImageUsageFlags.Storage);
+            irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);
+            brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
+
             Preprocess();
 
             Renderer.MainView.Attach(camera, scene);
@@ -88,7 +98,7 @@ namespace SharpGame.Samples
 
         void Preprocess()
         {
-#if false
+            /*
             // Load & pre-process environment map.
             {
                 Texture envTextureUnfiltered = createTexture(kEnvMapSize, kEnvMapSize, 6, VK_FORMAT_R16G16B16A16_SFLOAT, 0, VK_IMAGE_USAGE_STORAGE_BIT);
@@ -123,24 +133,32 @@ namespace SharpGame.Samples
 
                     generateMipmaps(envTextureUnfiltered);
                 }
+            */
 
+            { 
                 // Compute pre-filtered specular environment map.
                 {
-                    const uint32_t numMipTailLevels = kEnvMapLevels - 1;
-
+                    uint numMipTailLevels = (uint)kEnvMapLevels - 1;
+                    /*
                     VkPipeline pipeline;
                     {
                         const VkSpecializationMapEntry specializationMap = { 0, 0, sizeof(uint32_t) };
-                        const uint32_t specializationData[] = { numMipTailLevels };
+                        const uint specializationData[] = { numMipTailLevels };
 
                         const VkSpecializationInfo specializationInfo = { 1, &specializationMap, sizeof(specializationData), specializationData };
                         pipeline = createComputePipeline("shaders/spirv/spmap_cs.spv", computePipelineLayout, &specializationInfo);
-                    }
+                    }*/
 
-                    VkCommandBuffer commandBuffer = beginImmediateCommandBuffer();
+                    Shader shader = Resources.Load<Shader>("shaders/spmap.shader");
+                    ResourceLayout resLayout = shader.Main.GetResourceLayout(0);
+                    spResSet = new ResourceSet(resLayout, cubeMap, envMap);
+                }
 
-                    // Copy base mipmap level into destination environment map.
-                    {
+                CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
+
+                // Copy base mipmap level into destination environment map.
+                {
+                /*
                         const std::vector<ImageMemoryBarrier> preCopyBarriers = {
                     ImageMemoryBarrier(envTextureUnfiltered, 0, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL).mipLevels(0, 1),
                     ImageMemoryBarrier(m_envTexture, 0, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL),
@@ -194,47 +212,53 @@ namespace SharpGame.Samples
 
                     const auto barrier = ImageMemoryBarrier(m_envTexture, VK_ACCESS_SHADER_WRITE_BIT, 0, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
                     pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, { barrier });
+            */
                 }
 
-                executeImmediateCommandBuffer(commandBuffer);
+                Graphics.EndWorkCommandBuffer(commandBuffer);
+                //executeImmediateCommandBuffer(commandBuffer);
 
-                for (VkImageView mipTailView : envTextureMipTailViews)
-                {
-                    vkDestroyImageView(m_device, mipTailView, nullptr);
-                }
-                vkDestroyPipeline(m_device, pipeline, nullptr);
-                destroyTexture(envTextureUnfiltered);
+                //for (VkImageView mipTailView : envTextureMipTailViews)
+                //{
+                //    vkDestroyImageView(m_device, mipTailView, nullptr);
+                //}
+                //vkDestroyPipeline(m_device, pipeline, nullptr);
+                //destroyTexture(envTextureUnfiltered);
             }
 
             // Compute diffuse irradiance cubemap
             {
-                VkPipeline pipeline = createComputePipeline("shaders/spirv/irmap_cs.spv", computePipelineLayout);
+                Shader shader = Resources.Load<Shader>("shaders/irmap.shader");
+                ResourceLayout resLayout = shader.Main.GetResourceLayout(0);
+                irResSet = new ResourceSet(resLayout, cubeMap, irMap);
 
-                const VkDescriptorImageInfo inputTexture = { VK_NULL_HANDLE, m_envTexture.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-                const VkDescriptorImageInfo outputTexture = { VK_NULL_HANDLE, m_irmapTexture.view, VK_IMAGE_LAYOUT_GENERAL };
-                updateDescriptorSet(computeDescriptorSet, Binding_InputTexture, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, { inputTexture });
-                updateDescriptorSet(computeDescriptorSet, Binding_OutputTexture, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, { outputTexture });
+//                 const VkDescriptorImageInfo inputTexture = { VK_NULL_HANDLE, m_envTexture.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+//                 const VkDescriptorImageInfo outputTexture = { VK_NULL_HANDLE, m_irmapTexture.view, VK_IMAGE_LAYOUT_GENERAL };
+//                 updateDescriptorSet(computeDescriptorSet, Binding_InputTexture, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, { inputTexture });
+//                 updateDescriptorSet(computeDescriptorSet, Binding_OutputTexture, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, { outputTexture });
 
-                VkCommandBuffer commandBuffer = beginImmediateCommandBuffer();
+                CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
                 {
-                    const auto preDispatchBarrier = ImageMemoryBarrier(m_irmapTexture, 0, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-                    pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, { preDispatchBarrier });
+                    System.Span<ImageMemoryBarrier> barriers = stackalloc []{ new ImageMemoryBarrier(irMap, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General) };
+                    commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
+                    //const auto preDispatchBarrier = ImageMemoryBarrier(m_irmapTexture, 0, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+                    //pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, { preDispatchBarrier });
 
-                    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-                    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout, 0, 1, &computeDescriptorSet, 0, nullptr);
-                    vkCmdDispatch(commandBuffer, kIrradianceMapSize / 32, kIrradianceMapSize / 32, 6);
+                    commandBuffer.BindComputePipeline(shader.Main);
+                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, irResSet, null);
+                    commandBuffer.Dispatch(kIrradianceMapSize / 32, kIrradianceMapSize / 32, 6);
 
-                    const auto postDispatchBarrier = ImageMemoryBarrier(m_irmapTexture, VK_ACCESS_SHADER_WRITE_BIT, 0, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-                    pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, { postDispatchBarrier });
+                    System.Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(irMap, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
+                    commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, postDispatchBarrier);
+                    //const auto postDispatchBarrier = ImageMemoryBarrier(m_irmapTexture, VK_ACCESS_SHADER_WRITE_BIT, 0, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                    //pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, { postDispatchBarrier });
                 }
-                executeImmediateCommandBuffer(commandBuffer);
-                vkDestroyPipeline(m_device, pipeline, nullptr);
+                Graphics.EndWorkCommandBuffer(commandBuffer);
+                //vkDestroyPipeline(m_device, pipeline, nullptr);
             }
-#endif
+
             // Compute Cook-Torrance BRDF 2D LUT for split-sum approximation.
             {
-                brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
-
                 Shader shader = Resources.Load<Shader>("shaders/brdf.shader");
 
                 ResourceLayout resLayout = shader.Main.GetResourceLayout(0);
@@ -242,15 +266,15 @@ namespace SharpGame.Samples
 
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
                 {
-                    //const auto preDispatchBarrier = ImageMemoryBarrier(m_spBRDF_LUT, 0, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-                    //pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, { preDispatchBarrier });
+                    System.Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(brdfLUT, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General)};
+                    commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
 
                     commandBuffer.BindComputePipeline(shader.Main);
                     commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, brdfResSet, null);
                     commandBuffer.Dispatch(kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
 
-                    //const auto postDispatchBarrier = ImageMemoryBarrier(m_spBRDF_LUT, VK_ACCESS_SHADER_WRITE_BIT, 0, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-                    //pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, { postDispatchBarrier });
+                    System.Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(brdfLUT, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
+                    commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, postDispatchBarrier);
                 }
 
                 Graphics.EndWorkCommandBuffer(commandBuffer);
@@ -274,9 +298,11 @@ namespace SharpGame.Samples
             if (ImGuiNET.ImGui.Begin("Debugger", ref debugOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
                 ImGUI.Image(brdfLUT, new Vector2(200, 200));
+                ImGUI.Image(envMap, new Vector2(200, 200));
+                ImGUI.Image(irMap, new Vector2(200, 200));
             }
 
-            ImGuiNET.ImGui.End();
+            ImGui.End();
 
 
         }

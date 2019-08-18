@@ -101,4 +101,42 @@ namespace SharpGame
         }
     }
 
+
+    public struct ImageMemoryBarrier
+    {
+        internal VkImageMemoryBarrier barrier;
+        public ImageMemoryBarrier(Texture texture, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout)
+        {
+            barrier = VkImageMemoryBarrier.New();
+
+            barrier.srcAccessMask = (VkAccessFlags)srcAccessMask;
+            barrier.dstAccessMask = (VkAccessFlags)dstAccessMask;
+            barrier.oldLayout = (VkImageLayout)oldLayout;
+            barrier.newLayout = (VkImageLayout)newLayout;
+            barrier.srcQueueFamilyIndex = uint.MaxValue;
+            barrier.dstQueueFamilyIndex = uint.MaxValue;
+            barrier.image = texture.image.handle;
+            barrier.subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            barrier.subresourceRange.levelCount = uint.MaxValue;
+            barrier.subresourceRange.layerCount = uint.MaxValue;
+	    }
+
+        public void SetApectMask(VkImageAspectFlags aspectMask)
+        {
+            barrier.subresourceRange.aspectMask = aspectMask;
+        }
+
+        public void SetMipLevels(uint baseMipLevel, uint levelCount = uint.MaxValue)
+        {
+            barrier.subresourceRange.baseMipLevel = baseMipLevel;
+            barrier.subresourceRange.levelCount = levelCount;
+        }
+
+        public void SetArrayLayers(uint baseArrayLayer, uint layerCount = uint.MaxValue)
+        {
+            barrier.subresourceRange.baseArrayLayer = baseArrayLayer;
+            barrier.subresourceRange.layerCount = layerCount;
+        }
+    }
+
 }
