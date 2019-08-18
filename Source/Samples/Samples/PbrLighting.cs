@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -9)]
+    [SampleDesc(sortOrder = 9)]
     public class PbrLighting : Sample
     {
         const int kEnvMapSize = 1024;
@@ -287,19 +287,19 @@ namespace SharpGame.Samples
         void OnDebugGUI()
         {
 
-            var io = ImGuiNET.ImGui.GetIO();
+            var io = ImGui.GetIO();
             {
                 Vector2 window_pos = new Vector2(10, io.DisplaySize.Y - 10);
                 Vector2 window_pos_pivot = new Vector2(0.0f, 1.0f);
-                ImGuiNET.ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
-                ImGuiNET.ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+                ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+                ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
             }
 
-            if (ImGuiNET.ImGui.Begin("Debugger", ref debugOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            if (ImGui.Begin("Debugger", ref debugOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
                 ImGUI.Image(brdfLUT, new Vector2(200, 200));
-                ImGUI.Image(envMap, new Vector2(200, 200));
-                ImGUI.Image(irMap, new Vector2(200, 200));
+                //ImGUI.Image(envMap, new Vector2(200, 200));
+                //ImGUI.Image(irMap, new Vector2(200, 200));
             }
 
             ImGui.End();
