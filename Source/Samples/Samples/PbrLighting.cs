@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 9)]
+    [SampleDesc(sortOrder = -9)]
     public class PbrLighting : Sample
     {
         const int kEnvMapSize = 1024;
@@ -68,7 +68,7 @@ namespace SharpGame.Samples
                 staticModel.SetMaterial(mat);
             }
 
-            //Preprocess();
+            Preprocess();
 
             Renderer.MainView.Attach(camera, scene);
 
@@ -233,13 +233,12 @@ namespace SharpGame.Samples
 #endif
             // Compute Cook-Torrance BRDF 2D LUT for split-sum approximation.
             {
-                //m_spBRDF_LUT = createTexture(kBRDF_LUT_Size, kBRDF_LUT_Size, 1, VK_FORMAT_R16G16_SFLOAT, 1, VK_IMAGE_USAGE_STORAGE_BIT);
                 brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
 
-                //VkPipeline pipeline = createComputePipeline("shaders/spirv/spbrdf_cs.spv", computePipelineLayout);
                 Shader shader = Resources.Load<Shader>("shaders/brdf.shader");
 
-                brdfResSet = new ResourceSet(shader.Main.GetResourceLayout(0), brdfLUT);
+                ResourceLayout resLayout = shader.Main.GetResourceLayout(0);
+                brdfResSet = new ResourceSet(resLayout, brdfLUT);
 
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
                 {
@@ -274,8 +273,7 @@ namespace SharpGame.Samples
 
             if (ImGuiNET.ImGui.Begin("Debugger", ref debugOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
-
-                ImGui.Image(colorMap, new Vector2(200, 200));
+                ImGUI.Image(brdfLUT, new Vector2(200, 200));
             }
 
             ImGuiNET.ImGui.End();

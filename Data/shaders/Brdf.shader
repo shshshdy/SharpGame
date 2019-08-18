@@ -9,7 +9,7 @@ Shader "Brdf"
 		{
 			ResourceLayoutBinding
 			{
-				DescriptorType = CombinedImageSampler
+				DescriptorType = StorageImage
 				StageFlags = Compute
 			}
 		}

@@ -108,7 +108,7 @@ namespace SharpGame
 
         protected virtual void Init()
         {
-            CreateSubsystem<ImGui>();
+            CreateSubsystem<ImGUI>();
         }
 
         protected virtual void CreateWindow()

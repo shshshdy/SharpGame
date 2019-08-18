@@ -332,8 +332,6 @@ namespace SharpGame
                 }
             }
 
-
-
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(ver);
             //sb.Append("#define VULKAN 1");

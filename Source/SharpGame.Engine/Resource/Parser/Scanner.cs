@@ -28,6 +28,8 @@ namespace SharpGame
             { "const", CONST },
             { "layout", LAYOUT },
             { "uniform", UNIFORM },
+            { "restrict", RESTRICT },
+            { "writeonly", WRITEONLY },
             { "readonly", READONLY },
             { "in", IN },
             { "out", OUT },

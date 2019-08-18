@@ -13,7 +13,7 @@ namespace SharpGame
     {
     }
 
-    public class ImGui : System<ImGui>
+    public class ImGUI : System<ImGUI>
     {
         DeviceBuffer[] vertexBuffer = new DeviceBuffer[2];
         DeviceBuffer[] indexBuffer = new DeviceBuffer[2];
@@ -49,7 +49,7 @@ namespace SharpGame
         private readonly List<IDisposable> _ownedResources = new List<IDisposable>();
         private int _lastAssignedID = 100;
 
-        public ImGui()
+        public ImGUI()
         {
             IntPtr context = ImGuiNET.ImGui.CreateContext();
             ImGuiNET.ImGui.SetCurrentContext(context);

@@ -127,6 +127,14 @@ namespace SharpGame
                     Layout layout = new Layout();
                     if (Match(UNIFORM))
                     {
+                        if (Match(RESTRICT))
+                        {
+                        }
+
+                        if (Match(WRITEONLY))
+                        {
+                        }
+
                         if (Match(READONLY))
                         {
                         }

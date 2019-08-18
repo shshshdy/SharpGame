@@ -171,7 +171,7 @@ Shader "Pbr"
 				vec3 L = -SunlightDir;
 				Lo += specularContribution(albedo, L, V, N, F0, metallic, roughness);
 				
-				vec2 brdf = vec2(0.25); //texture(samplerBRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+				vec2 brdf = texture(samplerBRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
 				vec3 reflection = vec3(0.25); prefilteredReflection(R, roughness).rgb;
                 vec3 irradiance = vec3(0.5);// texture(samplerIrradiance, N).rgb;
 

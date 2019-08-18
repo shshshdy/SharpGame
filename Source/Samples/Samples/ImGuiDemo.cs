@@ -14,7 +14,7 @@ namespace SharpGame.Samples
     {
         public ImGuiDemo()
         {
-            (this).Subscribe( (GUIEvent e) => ImGuiNET.ImGui.ShowDemoWindow());
+            this.Subscribe( (GUIEvent e) => ImGui.ShowDemoWindow());
         }
 
     }
