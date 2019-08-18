@@ -16,7 +16,7 @@ const float InvNumSamples = 1.0 / float(NumSamples);
 #if VULKAN
 layout(constant_id=0) const int NumMipLevels = 1;
 layout(set=0, binding=0) uniform samplerCube inputTexture;
-layout(set=0, binding=2, rgba16f) restrict writeonly uniform imageCube outputTexture[NumMipLevels];
+layout(set=0, binding=1, rgba16f) restrict writeonly uniform imageCube outputTexture[NumMipLevels];
 #else
 // In OpenGL only a single mip level is bound.
 const int NumMipLevels = 1;
