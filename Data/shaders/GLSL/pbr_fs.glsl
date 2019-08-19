@@ -7,6 +7,8 @@
 // This implementation is based on "Real Shading in Unreal Engine 4" SIGGRAPH 2013 course notes by Epic Games.
 // See: http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
 
+#include "UniformsPS.glsl"
+
 const float PI = 3.141592;
 const float Epsilon = 0.00001;
 
@@ -29,33 +31,21 @@ layout(location=0) in Vertex
 
 layout(location=0) out vec4 color;
 
-#if VULKAN
 layout(set=0, binding=1) uniform ShadingUniforms
-#else
-layout(std140, binding=1) uniform ShadingUniforms
-#endif // VULKAN
 {
 	AnalyticalLight lights[NumLights];
-	vec3 eyePosition;
 };
 
-#if VULKAN
-layout(set=1, binding=0) uniform sampler2D albedoTexture;
-layout(set=1, binding=1) uniform sampler2D normalTexture;
-layout(set=1, binding=2) uniform sampler2D metalnessTexture;
-layout(set=1, binding=3) uniform sampler2D roughnessTexture;
-layout(set=1, binding=4) uniform samplerCube specularTexture;
-layout(set=1, binding=5) uniform samplerCube irradianceTexture;
-layout(set=1, binding=6) uniform sampler2D specularBRDF_LUT;
-#else
-layout(binding=0) uniform sampler2D albedoTexture;
-layout(binding=1) uniform sampler2D normalTexture;
-layout(binding=2) uniform sampler2D metalnessTexture;
-layout(binding=3) uniform sampler2D roughnessTexture;
-layout(binding=4) uniform samplerCube specularTexture;
-layout(binding=5) uniform samplerCube irradianceTexture;
-layout(binding=6) uniform sampler2D specularBRDF_LUT;
-#endif // VULKAN
+layout(set=1, binding=0) uniform samplerCube specularTexture;
+layout(set=1, binding=1) uniform samplerCube irradianceTexture;
+layout(set=1, binding=2) uniform sampler2D specularBRDF_LUT;
+
+layout(set=2, binding=0) uniform sampler2D albedoTexture;
+layout(set=2, binding=1) uniform sampler2D normalTexture;
+layout(set=2, binding=2) uniform sampler2D metalnessTexture;
+layout(set=2, binding=3) uniform sampler2D roughnessTexture;
+
+
 
 // GGX/Towbridge-Reitz normal distribution function.
 // Uses Disney's reparametrization of alpha = roughness^2.
@@ -96,7 +86,7 @@ void main()
 	float roughness = texture(roughnessTexture, vin.texcoord).r;
 
 	// Outgoing light direction (vector from world-space fragment position to the "eye").
-	vec3 Lo = normalize(eyePosition - vin.position);
+	vec3 Lo = normalize(CameraPos - vin.position);
 
 	// Get current fragment's normal and transform to world space.
 	vec3 N = normalize(2.0 * texture(normalTexture, vin.texcoord).rgb - 1.0);

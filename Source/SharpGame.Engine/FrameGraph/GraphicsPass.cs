@@ -116,7 +116,10 @@ namespace SharpGame
 
             foreach (var rs in batch.material.ResourceSet)
             {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
+                if (rs.Updated)
+                {
+                    cb.BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
+                }
             }
 
             batch.geometry.Draw(cb);

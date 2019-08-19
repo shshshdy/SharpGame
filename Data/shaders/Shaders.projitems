@@ -34,4 +34,7 @@
     <None Include="$(MSBuildThisFileDirectory)SpMap.shader" />
     <None Include="$(MSBuildThisFileDirectory)UnLit.shader" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)LitPbr.shader" />
+  </ItemGroup>
 </Project>

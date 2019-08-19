@@ -83,11 +83,10 @@ namespace SharpGame
 
             foreach (var layout in mainPass.PipelineLayout.ResourceLayout)
             {
-                if (layout.PerMaterial)
+                //if (layout.PerMaterial)
                 {
                     resourceSet.Add(new ResourceSet(layout));
                 }
-
             }
 
             if (TextureParameters != null)

@@ -318,7 +318,10 @@ namespace SharpGame
 
             foreach(var rs in material.ResourceSet)
             {
-                BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, rs.Set, rs);
+                if (rs.Updated)
+                {
+                    BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, rs.Set, rs);
+                }
             }
 
             geometry.Draw(this);
@@ -348,6 +351,16 @@ namespace SharpGame
         public unsafe void ExecuteCommand(CommandBufferPool cmdBuffer)
         {
             vkCmdExecuteCommands(commandBuffer, (uint)cmdBuffer.currentIndex, (VkCommandBuffer*)cmdBuffer.GetAddress(0));
+        }
+
+        public void CopyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ref ImageCopy region)
+        {
+            vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, ref Unsafe.As<ImageCopy, VkImageCopy>(ref region));
+        }
+
+        public void CopyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, Span<ImageCopy> region)
+        {
+            vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)region.Length, ref Unsafe.As<ImageCopy, VkImageCopy>(ref region[0]));
         }
 
         public void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags,

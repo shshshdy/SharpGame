@@ -8,7 +8,6 @@ using Vulkan;
 namespace SharpGame
 {
     using System.Collections;
-    using static Builder;
 
     [DataContract]
     public class Shader : Resource, IEnumerable<Pass>

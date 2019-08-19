@@ -9,7 +9,8 @@ namespace SharpGame
 
     public class ImageView : DisposeBase
     {
-        internal VkImageView handle;
+        public VkImageView handle;
+
         public ImageView(ref ImageViewCreateInfo imageViewCreateInfo)
         {
             imageViewCreateInfo.ToNative(out VkImageViewCreateInfo native);
@@ -22,21 +23,20 @@ namespace SharpGame
         }
 
 
-        public static ImageView Create(Texture texture, Format format, VkImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels)
+        public static ImageView Create(Texture texture, Format format, ImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels)
         {
-
             ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
             {
                 image = texture.image,
                 viewType = (texture.layers == 6) ? ImageViewType.ImageCube : ImageViewType.Image2D,
                 format = format
             };
-            viewCreateInfo.subresourceRange.aspectMask = aspectMask;
+
+            viewCreateInfo.subresourceRange.aspectMask = (VkImageAspectFlags)aspectMask;
             viewCreateInfo.subresourceRange.baseMipLevel = baseMipLevel;
             viewCreateInfo.subresourceRange.levelCount = numMipLevels;
             viewCreateInfo.subresourceRange.baseArrayLayer = 0;
             viewCreateInfo.subresourceRange.layerCount = RemainingArrayLayers;
-
             return new ImageView(ref viewCreateInfo);
         }
     }

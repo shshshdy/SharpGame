@@ -20,9 +20,9 @@ namespace SharpGame
         public ImageUsageFlags imageUsageFlags;
         public ImageLayout imageLayout;
 
-        internal ImageView imageView;
-        internal Image image;
-        internal Sampler sampler;
+        public ImageView imageView;
+        public Image image;
+        public Sampler sampler;
 
         internal VkDeviceMemory deviceMemory;
         internal VkDescriptorImageInfo descriptor;
@@ -96,7 +96,7 @@ namespace SharpGame
             }
 
             texture.image = Image.Create(width, height, layers, texture.mipLevels, format, 1, usage);
-            texture.imageView = ImageView.Create(texture, format, VkImageAspectFlags.Color, 0, RemainingMipLevels);
+            texture.imageView = ImageView.Create(texture, format, ImageAspectFlags.Color, 0, RemainingMipLevels);
 
 
             SamplerCreateInfo sampler = new SamplerCreateInfo

@@ -9,7 +9,6 @@ layout (set = 1, binding = 0) uniform CameraPS
 	float FarClip;
 };
 
-
 layout (set = 1, binding = 1) uniform LightPS
 {
     vec4 AmbientColor;

@@ -193,6 +193,7 @@ namespace SharpGame
             // Clean up staging resources
             Device.FreeMemory(stagingMemory);
             Device.DestroyBuffer(stagingBuffer);
+
             UpdateDescriptor();
         }
 

@@ -68,6 +68,8 @@ namespace SharpGame
 
         internal string FileName {get;set; }
 
+        public SpecializationInfo SpecializationInfo { get; set; }
+
         internal VkShaderModule shaderModule;
 
         public ShaderModule()

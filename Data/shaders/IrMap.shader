@@ -4,7 +4,6 @@ Shader "IrMap"
 
 	Pass
 	{
-
 		ResourceLayout
 		{
 			ResourceLayoutBinding

@@ -4,7 +4,6 @@ Shader "Brdf"
 
 	Pass
 	{
-
 		ResourceLayout
 		{
 			ResourceLayoutBinding

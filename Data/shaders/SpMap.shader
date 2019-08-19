@@ -4,7 +4,6 @@ Shader "SpMap"
 
 	Pass
 	{
-
 		ResourceLayout
 		{
 			ResourceLayoutBinding

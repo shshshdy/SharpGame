@@ -1,7 +1,7 @@
 
-layout (set = 2,binding = 0) uniform samplerCube samplerIrradiance;
-layout (set = 2, binding = 1) uniform sampler2D samplerBRDFLUT;
-layout (set = 2, binding = 2) uniform samplerCube prefilteredMap;
+layout (set = 2, binding = 0) uniform samplerCube prefilteredMap;
+layout (set = 2,binding = 1) uniform samplerCube samplerIrradiance;
+layout (set = 2, binding = 2) uniform sampler2D samplerBRDFLUT;
 
 layout (set = 3, binding = 0) uniform sampler2D albedoMap;
 layout (set = 4, binding = 0) uniform sampler2D normalMap;

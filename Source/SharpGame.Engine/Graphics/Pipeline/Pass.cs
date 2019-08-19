@@ -7,8 +7,6 @@ using Vulkan;
 namespace SharpGame
 {
     using global::System.Runtime.CompilerServices;
-    using static VulkanNative;
-    using static Builder;
     using global::System.Collections.Concurrent;
 
     public struct SpecializationMapEntry
@@ -16,12 +14,81 @@ namespace SharpGame
         public uint constantID;
         public uint offset;
         public UIntPtr size;
+
+        public SpecializationMapEntry(uint id, uint offset, uint size)
+        {
+            constantID = id;
+            this.offset = offset;
+            this.size = (UIntPtr)size;
+        }
     }
 
-    public class SpecializationInfo
+    public unsafe class SpecializationInfo
     {
-        public SpecializationMapEntry[] pMapEntries;
+        public SpecializationMapEntry[] mapEntries;
         public byte[] data;
+        private VkSpecializationInfo* pSpecializationInfo;
+
+        public SpecializationInfo(params SpecializationMapEntry[] mapEntries)
+        {
+            this.mapEntries = mapEntries;
+            uint size = 0;
+            foreach(var entry in mapEntries)
+            {
+                var sz = entry.offset + (uint)entry.size;
+                if(sz > size)
+                {
+                    size = sz;
+                }
+            }
+
+            data = new byte[size];
+            pSpecializationInfo = (VkSpecializationInfo*)Utilities.Alloc<VkSpecializationInfo>();
+        }
+
+        ~SpecializationInfo()
+        {
+            Utilities.Free((IntPtr)pSpecializationInfo);
+        }
+
+        public int Offset(uint id)
+        {
+            for(int i = 0; i < mapEntries.Length; i++)
+            {
+                if(id == mapEntries[i].constantID)
+                {
+                    return (int)mapEntries[i].offset;
+                }
+            }
+
+            return -1;
+        }
+
+        public unsafe SpecializationInfo Write<T>(uint id, T val)
+        {
+            int offset = Offset(id);
+            if(offset >= 0)
+            {
+                Unsafe.AsRef<T>(Unsafe.AsPointer(ref data[offset])) = val;
+            }
+            else
+            {
+                Log.Error("Error constant id: " + id);
+            }
+            return this;
+        }
+
+        internal VkSpecializationInfo* ToNative
+        {
+            get
+            {
+                pSpecializationInfo->pMapEntries = (VkSpecializationMapEntry*)Unsafe.AsPointer(ref mapEntries[0]);
+                pSpecializationInfo->mapEntryCount = (uint)mapEntries.Length;
+                pSpecializationInfo->pData = Unsafe.AsPointer(ref data[0]);
+                pSpecializationInfo->dataSize = (UIntPtr)data.Length;
+                return pSpecializationInfo;
+            }
+        }
     }
 
     public partial class Pass : DisposeBase
@@ -82,14 +149,19 @@ namespace SharpGame
 
         [IgnoreDataMember]
         public ref ShaderModule VertexShader => ref shaderModels[0];
+
         [IgnoreDataMember]
         public ref ShaderModule PixelShader => ref shaderModels[4];
+
         [IgnoreDataMember]
         public ref ShaderModule GeometryShader => ref shaderModels[1];
+
         [IgnoreDataMember]
         public ref ShaderModule HullShader => ref shaderModels[2];
+
         [IgnoreDataMember]
         public ref ShaderModule DomainShader => ref shaderModels[3];
+
         [IgnoreDataMember]
         public ref ShaderModule ComputeShader => ref shaderModels[5];
 
@@ -98,21 +170,21 @@ namespace SharpGame
 
         private bool builded_ = false;
 
-        private RasterizationStateInfo rasterizationState = RasterizationStateInfo.Default;
         [IgnoreDataMember]
         public ref RasterizationStateInfo RasterizationState => ref rasterizationState;
+        private RasterizationStateInfo rasterizationState = RasterizationStateInfo.Default;
 
-        private MultisampleStateInfo multisampleState = MultisampleStateInfo.Default;
         [IgnoreDataMember]
         public ref MultisampleStateInfo MultisampleState => ref multisampleState;
+        private MultisampleStateInfo multisampleState = MultisampleStateInfo.Default;
 
-        private DepthStencilStateInfo depthStencilState_ = DepthStencilStateInfo.Solid;
         [IgnoreDataMember]
         public ref DepthStencilStateInfo DepthStencilState => ref depthStencilState_;
+        private DepthStencilStateInfo depthStencilState_ = DepthStencilStateInfo.Solid;
 
-        private ColorBlendStateInfo colorBlendState = ColorBlendStateInfo.Replace;
         [IgnoreDataMember]
         public ref ColorBlendStateInfo ColorBlendState => ref colorBlendState;
+        private ColorBlendStateInfo colorBlendState = ColorBlendStateInfo.Replace;
 
         public PolygonMode FillMode { get => rasterizationState.polygonMode; set => rasterizationState.polygonMode = value; }
         public CullMode CullMode { get => rasterizationState.cullMode; set => rasterizationState.cullMode = value; }
@@ -128,8 +200,6 @@ namespace SharpGame
         public PipelineLayout PipelineLayout { get; set; } = new PipelineLayout();
      
         public List<string> PushConstantNames { get; set; }
-
-        public SpecializationInfo SpecializationInfo { get; set; }
 
         [IgnoreDataMember]
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
@@ -266,6 +336,12 @@ namespace SharpGame
                     shaderStage.stage = (VkShaderStageFlags)sm.Stage;
                     shaderStage.module = sm.shaderModule;
                     shaderStage.pName = Strings.main;// sm.FuncName;
+
+                    if(sm.SpecializationInfo != null)
+                    {
+                        shaderStage.pSpecializationInfo = sm.SpecializationInfo.ToNative;
+                    }
+
                     shaderStageCreateInfo[count++] = shaderStage;
                 }
             }
@@ -295,7 +371,12 @@ namespace SharpGame
                 return pipe;
             }
                      
-            var pipelineCreateInfo = GraphicsPipelineCreateInfo(PipelineLayout.handle, renderPass.handle, 0);//,
+            VkGraphicsPipelineCreateInfo pipelineCreateInfo = VkGraphicsPipelineCreateInfo.New();
+            pipelineCreateInfo.layout = PipelineLayout.handle;
+            pipelineCreateInfo.renderPass = renderPass.handle;
+            pipelineCreateInfo.flags = 0;
+            pipelineCreateInfo.basePipelineIndex = -1;
+            pipelineCreateInfo.basePipelineHandle = new VkPipeline();
 
             vertexInput.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
             pipelineCreateInfo.pVertexInputState = &vertexInputState;
@@ -305,14 +386,20 @@ namespace SharpGame
             pipelineCreateInfo.stageCount = count;
             pipelineCreateInfo.pStages = shaderStageCreateInfos;
 
-            var inputAssemblyStateCreateInfo = InputAssemblyStateCreateInfo(geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
-            pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+            var pipelineInputAssemblyStateCreateInfo = VkPipelineInputAssemblyStateCreateInfo.New();
+            pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)(geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
+            pipelineInputAssemblyStateCreateInfo.flags = 0;
+            pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = false;
+            pipelineCreateInfo.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo;
 
             rasterizationState.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo);
             pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 
-            var viewportStateCreateInfo = ViewportStateCreateInfo(1, 1);
-            pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+            var pipelineViewportStateCreateInfo = VkPipelineViewportStateCreateInfo.New();
+            pipelineViewportStateCreateInfo.viewportCount = 1;
+            pipelineViewportStateCreateInfo.scissorCount = 1;
+            pipelineViewportStateCreateInfo.flags = 0;
+            pipelineCreateInfo.pViewportState = &pipelineViewportStateCreateInfo;
 
             this.multisampleState.ToNative(out VkPipelineMultisampleStateCreateInfo multisampleState);
             pipelineCreateInfo.pMultisampleState = &multisampleState;
@@ -333,14 +420,11 @@ namespace SharpGame
             var handle = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
 
             pipelines.TryAdd(vertexInput.GetHashCode(), handle);
-           
-
             return handle;
         }
 
         internal unsafe VkPipeline GetComputePipeline()
         {
-
             if (!IsComputeShader)
             {
                 return 0;

@@ -101,11 +101,23 @@ namespace SharpGame
         }
     }
 
+    public enum ImageAspectFlags
+    {
+        None = 0,
+        Color = 1,
+        Depth = 2,
+        Stencil = 4,
+        Metadata = 8,
+        Plane0KHR = 16,
+        Plane1KHR = 32,
+        Plane2KHR = 64
+    }
 
     public struct ImageMemoryBarrier
     {
         internal VkImageMemoryBarrier barrier;
-        public ImageMemoryBarrier(Texture texture, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout)
+        public ImageMemoryBarrier(Texture texture, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout,
+            ImageAspectFlags apectMask = ImageAspectFlags.Color, uint baseMipLevel = 0, uint levelCount = uint.MaxValue)
         {
             barrier = VkImageMemoryBarrier.New();
 
@@ -116,15 +128,13 @@ namespace SharpGame
             barrier.srcQueueFamilyIndex = uint.MaxValue;
             barrier.dstQueueFamilyIndex = uint.MaxValue;
             barrier.image = texture.image.handle;
-            barrier.subresourceRange.aspectMask = VkImageAspectFlags.Color;
-            barrier.subresourceRange.levelCount = uint.MaxValue;
+            barrier.subresourceRange.aspectMask = (VkImageAspectFlags)apectMask;
+            barrier.subresourceRange.baseMipLevel = baseMipLevel;
+            barrier.subresourceRange.levelCount = levelCount;
             barrier.subresourceRange.layerCount = uint.MaxValue;
 	    }
 
-        public void SetApectMask(VkImageAspectFlags aspectMask)
-        {
-            barrier.subresourceRange.aspectMask = aspectMask;
-        }
+        public ImageAspectFlags ApectMask { set => barrier.subresourceRange.aspectMask = (VkImageAspectFlags)value; }
 
         public void SetMipLevels(uint baseMipLevel, uint levelCount = uint.MaxValue)
         {
@@ -139,4 +149,20 @@ namespace SharpGame
         }
     }
 
+    public struct ImageSubresourceLayers
+    {
+        public ImageAspectFlags aspectMask;
+        public uint mipLevel;
+        public uint baseArrayLayer;
+        public uint layerCount;
+    }
+
+    public struct ImageCopy
+    {
+        public ImageSubresourceLayers srcSubresource;
+        public Offset3D srcOffset;
+        public ImageSubresourceLayers dstSubresource;
+        public Offset3D dstOffset;
+        public Extent3D extent;
+    }
 }
