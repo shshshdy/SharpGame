@@ -56,7 +56,7 @@ namespace SharpGame.ImageSharp
         public ImageSharpTexture(Image<Rgba32> image, bool mipmap = true) : this(image, mipmap, false) { }
         public ImageSharpTexture(Image<Rgba32> image, bool mipmap, bool srgb)
         {
-            Format = /*srgb ? Format.R8g8b8a8Unorm_Srgb :*/ Format.R8g8b8a8Unorm;
+            Format = srgb ? Format.R8g8b8a8Srgb : Format.R8g8b8a8Unorm;
             if (mipmap)
             {
                 Images = MipmapHelper.GenerateMipmaps(image);

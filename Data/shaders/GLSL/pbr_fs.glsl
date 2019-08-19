@@ -78,6 +78,10 @@ vec3 fresnelSchlick(vec3 F0, float cosTheta)
 	return F0 + (vec3(1.0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+const float gamma     = 2.2;
+const float exposure  = 1.0;
+const float pureWhite = 1.0;
+
 void main()
 {
 	// Sample input textures to get shading model params.
@@ -172,5 +176,21 @@ void main()
 	}
 
 	// Final fragment color.
-	color = vec4(directLighting + ambientLighting, 1.0);
+	//color = vec4(directLighting + ambientLighting, 1.0);
+
+
+	vec3 c = directLighting + ambientLighting;
+
+	float luminance = dot(c, vec3(0.2126, 0.7152, 0.0722));
+	float mappedLuminance = (luminance * (1.0 + luminance/(pureWhite*pureWhite))) / (1.0 + luminance);
+
+	// Scale color by ratio of average luminances.
+	vec3 mappedColor = (mappedLuminance / luminance) * c;
+
+	// Gamma correction.
+	color = vec4(pow(mappedColor, vec3(1.0/gamma)), 1.0);
+
+
+
+
 }

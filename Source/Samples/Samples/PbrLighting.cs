@@ -6,7 +6,7 @@ using Vulkan;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -9)]
+    [SampleDesc(sortOrder = 9)]
     public class PbrLighting : Sample
     {
         const int kEnvMapSize = 1024;
@@ -71,7 +71,7 @@ namespace SharpGame.Samples
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel("models/cerberus/cerberus.fbx");
 
-                var colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Srgb);
+                var colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Unorm);
                 var normalMap = Texture.LoadFromFile("models/cerberus/normal.ktx", Format.R8g8b8a8Unorm);
                 var metallicMap = Texture.LoadFromFile("models/cerberus/metallic.ktx", Format.R8Unorm);
                 var roughnessMap = Texture.LoadFromFile("models/cerberus/roughness.ktx", Format.R8Unorm);
@@ -94,7 +94,7 @@ namespace SharpGame.Samples
                 .Bind(1, irMap)
                 .Bind(2, brdfLUT).UpdateSets();
 
-            computeSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, true, BorderColor.FloatTransparentBlack);
+            computeSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, false, BorderColor.FloatTransparentBlack);
             brdfSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
             Preprocess();
 

@@ -94,39 +94,8 @@ namespace SharpGame
             }
 
             texture.image = Image.Create(width, height, layers, texture.mipLevels, format, 1, usage);
-            texture.imageView = ImageView.Create(texture, format, ImageAspectFlags.Color, 0, RemainingMipLevels);
-
-            SamplerCreateInfo sampler = new SamplerCreateInfo
-            {
-                magFilter = Filter.Linear,
-                minFilter = Filter.Linear,
-                mipmapMode = SamplerMipmapMode.Linear,
-                addressModeU = SamplerAddressMode.ClampToBorder,
-                addressModeV = SamplerAddressMode.ClampToBorder,
-                addressModeW = SamplerAddressMode.ClampToBorder,
-                mipLodBias = 0.0f,
-                compareOp = CompareOp.Never,
-                minLod = 0.0f,
-                // Set max level-of-detail to mip level count of the texture
-                maxLod = (float)texture.mipLevels
-            };
-            // Enable anisotropic filtering
-            // This feature is optional, so we must check if it's supported on the Device
-            if (Device.Features.samplerAnisotropy == 1)
-            {
-                // Use max. level of anisotropy for this example
-                sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;
-                sampler.anisotropyEnable = true;
-            }
-            else
-            {
-                // The Device does not support anisotropic filtering
-                sampler.maxAnisotropy = 1.0f;
-                sampler.anisotropyEnable = false;
-            }
-
-            sampler.borderColor = BorderColor.FloatOpaqueWhite;
-            texture.sampler = new Sampler(ref sampler);
+            texture.imageView = ImageView.Create(texture, format, ImageAspectFlags.Color, 0, RemainingMipLevels);            
+            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, Device.Features.samplerAnisotropy == 1);
             texture.UpdateDescriptor();
             return texture;
         }

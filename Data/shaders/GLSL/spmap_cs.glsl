@@ -14,7 +14,7 @@ const float InvNumSamples = 1.0 / float(NumSamples);
 
 // In Vulkan whole mip tail is bound to the descriptor set and appropriate mip level is selected via a push constant.
 #if VULKAN
-layout(constant_id=0) const int NumMipLevels = 1;
+layout(constant_id=0) const int NumMipLevels = 10;
 layout(set=0, binding=0) uniform samplerCube inputTexture;
 layout(set=0, binding=1, rgba16f) restrict writeonly uniform imageCube outputTexture[NumMipLevels];
 #else

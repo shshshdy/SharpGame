@@ -37,9 +37,9 @@ namespace SharpGame
             sampler.compareOp = CompareOp.Never;
             sampler.minLod = 0.0f;
             sampler.maxLod = float.MaxValue;
-            sampler.borderColor = BorderColor.FloatOpaqueWhite;
-            sampler.maxAnisotropy = 1.0f;
-            sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;
+            sampler.borderColor = borderColor;
+            //sampler.maxAnisotropy = 1.0f;
+            sampler.maxAnisotropy = anisotropyEnable ? Device.Properties.limits.maxSamplerAnisotropy : 1;
             sampler.anisotropyEnable = anisotropyEnable;
             return new Sampler(ref sampler);
         }
