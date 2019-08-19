@@ -83,6 +83,13 @@ namespace SharpGame
         public uint width;
         public uint height;
         public uint depth;
+
+        public Extent3D(uint w, uint h, uint depth)
+        {
+            this.width = w;
+            this.height = h;
+            this.depth = depth;
+        }
     }
 
     public struct Offset3D
@@ -90,5 +97,12 @@ namespace SharpGame
         public int x;
         public int y;
         public int z;
+
+        public Offset3D(int x, int y, int z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
 }

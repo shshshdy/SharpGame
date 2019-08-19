@@ -76,7 +76,8 @@ Shader "Skybox"
 
 			void main() 
 			{
-                outFragColor = texture(samplerCubeMap, inUVW);
+                vec3 envVector = normalize(inUVW);
+                outFragColor = textureLod(samplerCubeMap, envVector, 0);
 			}
 
 		}

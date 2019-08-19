@@ -172,19 +172,19 @@ Shader "Pbr"
 
                 //for (int i = 0; i < 3; i++)
                 {
-                    vec3 L = -SunlightDir;
+                    vec3 L = vec3(-1, 0, 0);//-SunlightDir;
                     Lo += specularContribution(albedo, L, V, N, F0, metallic, roughness);
                 }
-                /*
+               
                 {
                     vec3 L = vec3(1, 0, 0);
                     Lo += specularContribution(albedo, L, V, N, F0, metallic, roughness);
                 }
 
                 {
-                    vec3 L = vec3(0, 0, 1);
+                    vec3 L = vec3(0, -1, 0);
                     Lo += specularContribution(albedo, L, V, N, F0, metallic, roughness);
-                }*/
+                }
 
 				vec2 brdf = texture(samplerBRDFLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
 				vec3 reflection = prefilteredReflection(R, roughness).rgb;
@@ -201,7 +201,7 @@ Shader "Pbr"
 				// Ambient part
 				vec3 kD = 1.0 - F;
 				kD *= 1.0 - metallic;	  
-				vec3 ambient = (kD * diffuse + specular) * texture(aoMap, inUV).rrr;
+                vec3 ambient = (kD * diffuse + specular);// *texture(aoMap, inUV).rrr;
                 
 				vec3 color = ambient + Lo;
 

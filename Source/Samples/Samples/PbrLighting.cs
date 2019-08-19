@@ -23,7 +23,6 @@ namespace SharpGame.Samples
 
         ResourceSet brdfResSet;
         ResourceSet irResSet;
-        ResourceSet spInputSet;
         ResourceSet spResSet;
 
         Material pbrMaterial;
@@ -32,6 +31,9 @@ namespace SharpGame.Samples
             public uint level;
             public float roughness;
         };
+
+        Sampler computeSampler;
+        Sampler brdfSampler;
 
         public override void Init()
         {
@@ -52,7 +54,7 @@ namespace SharpGame.Samples
 
             cubeMap = Texture.LoadFromFile("textures/hdr/gcanyon_cube.ktx", Format.R16g16b16a16Sfloat);
             {
-                var model = Resources.Load<Model>("Models/cube.obj");
+                var model = GeometricPrimitive.CreateCubeModel(10, 10, 10);// Resources.Load<Model>("Models/skybox.obj");
                 var node = scene.CreateChild("Sky");
                 node.Scaling = new Vector3(30.0f);
                 var staticModel = node.AddComponent<StaticModel>();
@@ -69,13 +71,13 @@ namespace SharpGame.Samples
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel("models/cerberus/cerberus.fbx");
 
-                var colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Unorm);
+                var colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Srgb);
                 var normalMap = Texture.LoadFromFile("models/cerberus/normal.ktx", Format.R8g8b8a8Unorm);
                 var metallicMap = Texture.LoadFromFile("models/cerberus/metallic.ktx", Format.R8Unorm);
                 var roughnessMap = Texture.LoadFromFile("models/cerberus/roughness.ktx", Format.R8Unorm);
                 var aoMap = Texture.LoadFromFile("models/cerberus/ao.ktx", Format.R8Unorm);
 
-                var mat = new Material("Shaders/Pbr.shader");
+                var mat = new Material("Shaders/LitPbr.shader");
                 mat.SetTexture("albedoMap", colorMap);
                 mat.SetTexture("normalMap", normalMap);
                 mat.SetTexture("metallicMap", metallicMap);
@@ -92,6 +94,8 @@ namespace SharpGame.Samples
                 .Bind(1, irMap)
                 .Bind(2, brdfLUT).UpdateSets();
 
+            computeSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, true, BorderColor.FloatTransparentBlack);
+            brdfSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
             Preprocess();
 
             Renderer.MainView.Attach(camera, scene);
@@ -111,43 +115,6 @@ namespace SharpGame.Samples
 
         void Preprocess()
         {
-            /*
-            // Load & pre-process environment map.
-            {
-                Texture envTextureUnfiltered = createTexture(kEnvMapSize, kEnvMapSize, 6, VK_FORMAT_R16G16B16A16_SFLOAT, 0, VK_IMAGE_USAGE_STORAGE_BIT);
-
-                // Load & convert equirectangular envuronment map to cubemap texture
-                {
-                    VkPipeline pipeline = createComputePipeline("shaders/spirv/equirect2cube_cs.spv", computePipelineLayout);
-
-                    Texture envTextureEquirect = createTexture(Image::fromFile("environment.hdr"), VK_FORMAT_R32G32B32A32_SFLOAT, 1);
-
-                    const VkDescriptorImageInfo inputTexture = { VK_NULL_HANDLE, envTextureEquirect.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
-                    const VkDescriptorImageInfo outputTexture = { VK_NULL_HANDLE, envTextureUnfiltered.view, VK_IMAGE_LAYOUT_GENERAL };
-                    updateDescriptorSet(computeDescriptorSet, Binding_InputTexture, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, { inputTexture });
-                    updateDescriptorSet(computeDescriptorSet, Binding_OutputTexture, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, { outputTexture });
-
-                    VkCommandBuffer commandBuffer = beginImmediateCommandBuffer();
-                    {
-                        const auto preDispatchBarrier = ImageMemoryBarrier(envTextureUnfiltered, 0, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL).mipLevels(0, 1);
-                        pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, { preDispatchBarrier });
-
-                        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-                        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computePipelineLayout, 0, 1, &computeDescriptorSet, 0, nullptr);
-                        vkCmdDispatch(commandBuffer, kEnvMapSize / 32, kEnvMapSize / 32, 6);
-
-                        const auto postDispatchBarrier = ImageMemoryBarrier(envTextureUnfiltered, VK_ACCESS_SHADER_WRITE_BIT, 0, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL).mipLevels(0, 1);
-                        pipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, { postDispatchBarrier });
-                    }
-                    executeImmediateCommandBuffer(commandBuffer);
-
-                    vkDestroyPipeline(m_device, pipeline, nullptr);
-                    destroyTexture(envTextureEquirect);
-
-                    generateMipmaps(envTextureUnfiltered);
-                }
-            */
-
             {
                 Shader shader = Resources.Load<Shader>("shaders/spmap.shader");
                 Pass pass = shader.Main;
@@ -196,24 +163,26 @@ namespace SharpGame.Samples
 
                     // Pre-filter rest of the mip-chain.
                     List<ImageView> envTextureMipTailViews = new List<ImageView>();
-                       
-                    VkDescriptorImageInfo inputTexture = new VkDescriptorImageInfo{ imageView = cubeMap.imageView.handle,
-                         imageLayout = VkImageLayout.ShaderReadOnlyOptimal };
-                    Span<VkDescriptorImageInfo> info = stackalloc[] { inputTexture };
-                    //updateDescriptorSet(computeDescriptorSet, Binding_InputTexture, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, { inputTexture });
+                     
+                    DescriptorImageInfo inputTexture = new DescriptorImageInfo
+                    (
+                        computeSampler,
+                        cubeMap.imageView,
+                        ImageLayout.ShaderReadOnlyOptimal
+                    );
+
+                    Span<DescriptorImageInfo> info = stackalloc[] { inputTexture };
                     spResSet.Bind(0, info);
 
-                    Span<VkDescriptorImageInfo> envTextureMipTailDescriptors = stackalloc VkDescriptorImageInfo[(int)numMipTailLevels];
+                    Span<DescriptorImageInfo> envTextureMipTailDescriptors = stackalloc DescriptorImageInfo[(int)numMipTailLevels];
                     for (uint level = 0; level < numMipTailLevels; ++level)
                     {
                         var view = ImageView.Create(envMap, Format.R16g16b16a16Sfloat, ImageAspectFlags.Color, level, 1);
                         envTextureMipTailViews.Add(view);
-                        envTextureMipTailDescriptors[(int)level] = new VkDescriptorImageInfo{ imageView = view.handle, imageLayout = VkImageLayout.General };
+                        envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, ImageLayout.General);
                     }
                     spResSet.Bind(1, envTextureMipTailDescriptors);
                     spResSet.UpdateSets();
-
-                    //updateDescriptorSet(computeDescriptorSet, Binding_OutputMipTail, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, envTextureMipTailDescriptors);
 
                     commandBuffer.BindComputePipeline(pass);
                     commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, spResSet, null);

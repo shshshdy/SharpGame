@@ -43,6 +43,17 @@ namespace SharpGame
             return geom;
         }
 
+        public static Model CreateCubeModel(float width, float height, float depth)
+        {
+            var model = new Model(CreateCube(width, height, depth));
+
+            var boundingBox = new BoundingBox();
+            boundingBox.Define(-width / 2, width / 2);
+            model.BoundingBox = boundingBox;
+
+            return model;
+        }
+
         public static Geometry CreateCube(float width, float height, float depth)
         {
             float w2 = 0.5f * width;

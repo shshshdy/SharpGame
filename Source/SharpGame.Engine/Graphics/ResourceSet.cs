@@ -77,7 +77,15 @@ namespace SharpGame
             Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
         }
 
-        public ResourceSet Bind(uint dstBinding, Span<VkDescriptorImageInfo> imageInfo)
+        public ResourceSet Bind(uint dstBinding, ref DescriptorImageInfo imageInfo)
+        {
+            var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
+            writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+                               descriptorType, ref imageInfo, 1);
+            return this;
+        }
+
+        public ResourceSet Bind(uint dstBinding, Span<DescriptorImageInfo> imageInfo)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
@@ -85,7 +93,15 @@ namespace SharpGame
             return this;
         }
 
-        public ResourceSet Bind(uint dstBinding, Span<VkDescriptorBufferInfo> bufferInfo)
+        public ResourceSet Bind(uint dstBinding, ref DescriptorBufferInfo bufferInfo)
+        {
+            var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
+            writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+                               descriptorType, ref bufferInfo, 1);
+            return this;
+        }
+
+        public ResourceSet Bind(uint dstBinding, Span<DescriptorBufferInfo> bufferInfo)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
@@ -146,13 +162,41 @@ namespace SharpGame
 
     }
 
+    public struct DescriptorImageInfo
+    {
+        internal VkDescriptorImageInfo native;
+        public DescriptorImageInfo(Sampler sampler, ImageView imageView, ImageLayout imageLayout)
+        {
+            native = new VkDescriptorImageInfo
+            {
+                sampler = sampler? sampler.handle : VkSampler.Null,
+                imageView = imageView.handle,
+                imageLayout = (VkImageLayout)imageLayout,
+            };
+        }
+    }
+
+    public struct DescriptorBufferInfo
+    {
+        public VkBuffer buffer;
+        public ulong offset;
+        public ulong range;
+
+        public DescriptorBufferInfo(DeviceBuffer buffer, ulong offset, ulong range)
+        {
+            this.buffer = buffer.buffer;
+            this.offset = offset;
+            this.range = range;
+        }
+    }
+
     public struct WriteDescriptorSet
     {
         internal VkWriteDescriptorSet native;
         public unsafe WriteDescriptorSet(uint binding,
             VkDescriptorSet dstSet,
             DescriptorType type,
-            ref VkDescriptorBufferInfo bufferInfo,
+            ref DescriptorBufferInfo bufferInfo,
             uint descriptorCount = 1)
         {
             native = VkWriteDescriptorSet.New();
@@ -167,7 +211,7 @@ namespace SharpGame
             uint binding,
             VkDescriptorSet dstSet,
             DescriptorType type,
-            ref VkDescriptorImageInfo imageInfo,
+            ref DescriptorImageInfo imageInfo,
             uint descriptorCount = 1)
         {
             native = VkWriteDescriptorSet.New();

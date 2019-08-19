@@ -165,4 +165,14 @@ namespace SharpGame
         public Offset3D dstOffset;
         public Extent3D extent;
     }
+
+    public struct ImageBlit
+    {
+        public ImageSubresourceLayers srcSubresource;
+        public Offset3D srcOffsets_0;
+        public Offset3D srcOffsets_1;
+        public ImageSubresourceLayers dstSubresource;
+        public Offset3D dstOffsets_0;
+        public Offset3D dstOffsets_1;
+    }
 }

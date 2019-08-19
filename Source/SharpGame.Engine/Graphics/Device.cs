@@ -528,6 +528,11 @@ namespace SharpGame
             throw new InvalidOperationException("No suitable memory type.");
         }
 
+        public static bool MemoryTypeNeedsStaging(uint memoryTypeIndex)
+        {
+            VkMemoryPropertyFlags flags = MemoryProperties.GetMemoryType(memoryTypeIndex).propertyFlags;
+            return (flags & VkMemoryPropertyFlags.HostVisible) == 0;
+        }
 
         public static void GetImageMemoryRequirements(VkImage image, out VkMemoryRequirements pMemoryRequirements)
         {

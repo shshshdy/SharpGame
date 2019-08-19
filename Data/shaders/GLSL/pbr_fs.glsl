@@ -30,20 +30,20 @@ layout(location=0) in Vertex
 } vin;
 
 layout(location=0) out vec4 color;
-
+/*
 layout(set=0, binding=1) uniform ShadingUniforms
 {
 	AnalyticalLight lights[NumLights];
 };
+*/
+layout(set=2, binding=0) uniform samplerCube prefilteredMap;
+layout(set=2, binding=1) uniform samplerCube samplerIrradiance;
+layout(set=2, binding=2) uniform sampler2D samplerBRDFLUT;
 
-layout(set=1, binding=0) uniform samplerCube specularTexture;
-layout(set=1, binding=1) uniform samplerCube irradianceTexture;
-layout(set=1, binding=2) uniform sampler2D specularBRDF_LUT;
-
-layout(set=2, binding=0) uniform sampler2D albedoTexture;
-layout(set=2, binding=1) uniform sampler2D normalTexture;
-layout(set=2, binding=2) uniform sampler2D metalnessTexture;
-layout(set=2, binding=3) uniform sampler2D roughnessTexture;
+layout(set=3, binding=0) uniform sampler2D albedoMap;
+layout(set=4, binding=0) uniform sampler2D normalMap;
+layout(set=5, binding=0) uniform sampler2D metallicMap;
+layout(set=6, binding=0) uniform sampler2D roughnessMap;
 
 
 
@@ -81,15 +81,15 @@ vec3 fresnelSchlick(vec3 F0, float cosTheta)
 void main()
 {
 	// Sample input textures to get shading model params.
-	vec3 albedo = texture(albedoTexture, vin.texcoord).rgb;
-	float metalness = texture(metalnessTexture, vin.texcoord).r;
-	float roughness = texture(roughnessTexture, vin.texcoord).r;
+	vec3 albedo = texture(albedoMap, vin.texcoord).rgb;
+	float metalness = texture(metallicMap, vin.texcoord).r;
+	float roughness = texture(roughnessMap, vin.texcoord).r;
 
 	// Outgoing light direction (vector from world-space fragment position to the "eye").
 	vec3 Lo = normalize(CameraPos - vin.position);
 
 	// Get current fragment's normal and transform to world space.
-	vec3 N = normalize(2.0 * texture(normalTexture, vin.texcoord).rgb - 1.0);
+	vec3 N = normalize(2.0 * texture(normalMap, vin.texcoord).rgb - 1.0);
 	N = normalize(vin.tangentBasis * N);
 	
 	// Angle between surface normal and outgoing light direction.
@@ -105,8 +105,8 @@ void main()
 	vec3 directLighting = vec3(0);
 	for(int i=0; i<NumLights; ++i)
 	{
-		vec3 Li = -lights[i].direction;
-		vec3 Lradiance = lights[i].radiance;
+		vec3 Li = -LightVec[i].xyz;
+		vec3 Lradiance = LightColor[i].xyz;
 
 		// Half-vector between Li and Lo.
 		vec3 Lh = normalize(Li + Lo);
@@ -143,7 +143,7 @@ void main()
 	vec3 ambientLighting;
 	{
 		// Sample diffuse irradiance at normal direction.
-		vec3 irradiance = texture(irradianceTexture, N).rgb;
+		vec3 irradiance = texture(samplerIrradiance, N).rgb;
 
 		// Calculate Fresnel term for ambient lighting.
 		// Since we use pre-filtered cubemap(s) and irradiance is coming from many directions
@@ -155,14 +155,14 @@ void main()
 		vec3 kd = mix(vec3(1.0) - F, vec3(0.0), metalness);
 
 		// Irradiance map contains exitant radiance assuming Lambertian BRDF, no need to scale by 1/PI here either.
-		vec3 diffuseIBL = kd * albedo * irradiance;
+		vec3 diffuseIBL = kd * albedo * irradiance*10;
 
 		// Sample pre-filtered specular reflection environment at correct mipmap level.
-		int specularTextureLevels = textureQueryLevels(specularTexture);
-		vec3 specularIrradiance = textureLod(specularTexture, Lr, roughness * specularTextureLevels).rgb;
+		int specularTextureLevels = textureQueryLevels(prefilteredMap);
+		vec3 specularIrradiance = textureLod(prefilteredMap, Lr, roughness * specularTextureLevels).rgb;
 
 		// Split-sum approximation factors for Cook-Torrance specular BRDF.
-		vec2 specularBRDF = texture(specularBRDF_LUT, vec2(cosLo, roughness)).rg;
+		vec2 specularBRDF = texture(samplerBRDFLUT, vec2(cosLo, roughness)).rg;
 
 		// Total specular IBL contribution.
 		vec3 specularIBL = (F0 * specularBRDF.x + specularBRDF.y) * specularIrradiance;

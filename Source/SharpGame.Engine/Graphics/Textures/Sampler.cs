@@ -7,7 +7,8 @@ namespace SharpGame
 {
     public class Sampler : DisposeBase, IBindableResource
     {
-        internal VkSampler handle;
+        public VkSampler handle;
+
         public Sampler(ref SamplerCreateInfo samplerCreateInfo)
         {
             samplerCreateInfo.ToNative(out VkSamplerCreateInfo vkSamplerCreate);
@@ -19,6 +20,28 @@ namespace SharpGame
             Device.Destroy(handle);
 
             base.Destroy();
+        }
+
+        public static Sampler Create(Filter filter, SamplerMipmapMode mipmapMode,
+            SamplerAddressMode addressMode, bool anisotropyEnable, BorderColor borderColor = BorderColor.FloatOpaqueWhite)
+        {
+            // Create sampler
+            SamplerCreateInfo sampler = new SamplerCreateInfo();
+            sampler.magFilter = filter;
+            sampler.minFilter = filter;
+            sampler.mipmapMode = mipmapMode;
+            sampler.addressModeU = addressMode;
+            sampler.addressModeV = addressMode;
+            sampler.addressModeW = addressMode;
+            sampler.mipLodBias = 0.0f;
+            sampler.compareOp = CompareOp.Never;
+            sampler.minLod = 0.0f;
+            sampler.maxLod = float.MaxValue;
+            sampler.borderColor = BorderColor.FloatOpaqueWhite;
+            sampler.maxAnisotropy = 1.0f;
+            sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;
+            sampler.anisotropyEnable = anisotropyEnable;
+            return new Sampler(ref sampler);
         }
     }
 

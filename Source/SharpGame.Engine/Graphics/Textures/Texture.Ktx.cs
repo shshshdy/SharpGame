@@ -167,6 +167,7 @@ namespace SharpGame
             sampler.maxLod = mipLevels;
             sampler.borderColor = BorderColor.FloatOpaqueWhite;
             sampler.maxAnisotropy = 1.0f;
+
             if (Device.Features.samplerAnisotropy == 1)
             {
                 sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;

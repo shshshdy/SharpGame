@@ -22,7 +22,7 @@ namespace SharpGame
 
         internal VkBuffer buffer;
         internal VkDeviceMemory memory;
-        internal VkDescriptorBufferInfo descriptor;
+        internal DescriptorBufferInfo descriptor;
 
         /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
         internal MemoryPropertyFlags memoryPropertyFlags;

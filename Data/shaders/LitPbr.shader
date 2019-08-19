@@ -94,15 +94,6 @@
             }
         }
 
-        ResourceLayout PerMaterial
-        {
-            ResourceLayoutBinding "aoMap"
-            {
-                DescriptorType = CombinedImageSampler
-                StageFlags = Fragment
-            }
-        }
-
         @VertexShader
         {
             #include "pbr_vs.glsl"
@@ -110,7 +101,7 @@
 
         @PixelShader
         {
-            #include "pbr_ps.glsl"
+            #include "pbr_fs.glsl"
         }
 
     }

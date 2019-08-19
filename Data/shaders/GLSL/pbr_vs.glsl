@@ -22,7 +22,7 @@ layout(location=0) out Vertex
 void main()
 {
 	vout.position = vec3(Model * vec4(position, 1.0));
-	vout.texcoord = vec2(texcoord.x, 1.0-texcoord.y);
+	vout.texcoord = vec2(texcoord.x, 1.0 - texcoord.y);
 
 	// Pass tangent space basis vectors (for normal mapping).
 	vout.tangentBasis = mat3(Model) * mat3(tangent, bitangent, normal);

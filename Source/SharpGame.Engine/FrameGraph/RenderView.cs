@@ -52,8 +52,18 @@ namespace SharpGame
         public vec3 SunlightDir;
         public float LightPS_pading1;
 
-        public fixed float LightColor[4*8];
-        public fixed float LightVec[4*8];
+        public fixed float LightColor[4 * 8];
+        public fixed float LightVec[4 * 8];
+
+        public ref Color4 color(int index)
+        {
+            return ref Unsafe.As<float, Color4>(ref LightColor[index * 4]);
+        }
+
+        public ref Vector4 lightVec(int index)
+        {
+            return ref Unsafe.As<float, Vector4>(ref LightVec[index * 4]);
+        }
     }
 
     public class RenderView : Object
@@ -287,12 +297,30 @@ namespace SharpGame
 
         }
 
+        Vector4[] lightVec = new Vector4[]
+        {
+            new Vector4(-1, 0, 0, 0),
+            new Vector4(1, 0, 0, 0),
+            new Vector4(0, -1, 0, 0),
+            new Vector4(0, 1, 0, 0),
+            new Vector4(1, 1, 0, 0),
+            new Vector4(-1, -1, 0, 0),
+            new Vector4(1, 0, 1, 1),
+            new Vector4(-1, 0,  -1, 0),
+        };
+
         private void UpdateLightParameters()
         {
             light.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
             light.SunlightColor = new Color4(0.5f);
             light.SunlightDir = new Vector3(-1, -1, 1);
             light.SunlightDir.Normalize();
+
+            for(int i = 0; i < 8; i++)
+            {
+                light.color(i) = Color4.White;
+                light.lightVec(i) = Vector4.Normalize(lightVec[i]);
+            }
 
             ubLight.SetData(ref light);
         }
