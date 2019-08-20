@@ -159,7 +159,7 @@ void main()
 		vec3 kd = mix(vec3(1.0) - F, vec3(0.0), metalness);
 
 		// Irradiance map contains exitant radiance assuming Lambertian BRDF, no need to scale by 1/PI here either.
-		vec3 diffuseIBL = kd * albedo * irradiance*10;
+		vec3 diffuseIBL = kd * albedo * irradiance;
 
 		// Sample pre-filtered specular reflection environment at correct mipmap level.
 		int specularTextureLevels = textureQueryLevels(prefilteredMap);
@@ -176,8 +176,7 @@ void main()
 	}
 
 	// Final fragment color.
-	//color = vec4(directLighting + ambientLighting, 1.0);
-
+	color = vec4(directLighting + ambientLighting, 1.0);
 
 	vec3 c = directLighting + ambientLighting;
 
@@ -189,7 +188,7 @@ void main()
 
 	// Gamma correction.
 	color = vec4(pow(mappedColor, vec3(1.0/gamma)), 1.0);
-
+  
 
 
 

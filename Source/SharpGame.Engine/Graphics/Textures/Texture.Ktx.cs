@@ -152,13 +152,13 @@ namespace SharpGame
                 subresourceRange);
 
             Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
-
+            /*
             // Create sampler
             SamplerCreateInfo sampler = new SamplerCreateInfo();
             sampler.magFilter = Filter.Linear;
             sampler.minFilter = Filter.Linear;
             sampler.mipmapMode = SamplerMipmapMode.Linear;
-            sampler.addressModeU = SamplerAddressMode.ClampToEdge;
+            sampler.addressModeU = SamplerAddressMode.Repeat;
             sampler.addressModeV = sampler.addressModeU;
             sampler.addressModeW = sampler.addressModeU;
             sampler.mipLodBias = 0.0f;
@@ -172,9 +172,9 @@ namespace SharpGame
             {
                 sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;
                 sampler.anisotropyEnable = true;
-            }
+            }*/
 
-            this.sampler = new Sampler(ref sampler);
+            this.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
 
             // Create image view
             ImageViewCreateInfo view = new ImageViewCreateInfo();

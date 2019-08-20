@@ -177,7 +177,7 @@ namespace SharpGame.Samples
                     Span<DescriptorImageInfo> envTextureMipTailDescriptors = stackalloc DescriptorImageInfo[(int)numMipTailLevels];
                     for (uint level = 0; level < numMipTailLevels; ++level)
                     {
-                        var view = ImageView.Create(envMap, Format.R16g16b16a16Sfloat, ImageAspectFlags.Color, level, 1);
+                        var view = ImageView.Create(envMap, Format.R16g16b16a16Sfloat, ImageAspectFlags.Color, level + 1, 1);
                         envTextureMipTailViews.Add(view);
                         envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, ImageLayout.General);
                     }

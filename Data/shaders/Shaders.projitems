@@ -12,7 +12,6 @@
     <None Include="$(MSBuildThisFileDirectory)Basic.shader" />
     <None Include="$(MSBuildThisFileDirectory)Brdf.shader" />
     <None Include="$(MSBuildThisFileDirectory)Common\Lighting.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)Common\Pbr.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Transform.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsPS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
@@ -27,7 +26,6 @@
     <None Include="$(MSBuildThisFileDirectory)ImGUI.shader" />
     <None Include="$(MSBuildThisFileDirectory)IrMap.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitSolid.shader" />
-    <None Include="$(MSBuildThisFileDirectory)Pbr.shader" />
     <None Include="$(MSBuildThisFileDirectory)Reflect.shader" />
     <None Include="$(MSBuildThisFileDirectory)Skinned.shader" />
     <None Include="$(MSBuildThisFileDirectory)Skybox.shader" />
