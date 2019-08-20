@@ -76,7 +76,11 @@ namespace SharpGame
 				case '.': AddToken(DOT); break;
 				case '-': AddToken(MINUS); break;
 				case '+': AddToken(PLUS); break;
-				case ';': AddToken(SEMICOLON); break;
+
+                case '|': break;
+                case '&': break;
+
+                case ';': AddToken(SEMICOLON); break;
 				case '*': AddToken(STAR); break;
 				case '!': AddToken(Match('=') ? BANG_EQUAL : BANG); break;
 				case '=': AddToken(Match('=') ? EQUAL_EQUAL : EQUAL); break;

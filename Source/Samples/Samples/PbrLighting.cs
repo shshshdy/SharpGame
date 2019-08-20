@@ -72,7 +72,7 @@ namespace SharpGame.Samples
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel("models/cerberus/cerberus.fbx");
 
-                var colorMap = Resources.Load<Texture>("models/cerberus/cerberus_A.png");// Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Srgb);
+                var colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Srgb);
                 var normalMap = Texture.LoadFromFile("models/cerberus/normal.ktx", Format.R8g8b8a8Unorm);
                 var metallicMap = Texture.LoadFromFile("models/cerberus/metallic.ktx", Format.R8Unorm);
                 var roughnessMap = Texture.LoadFromFile("models/cerberus/roughness.ktx", Format.R8Unorm);
@@ -101,7 +101,7 @@ namespace SharpGame.Samples
 
             Renderer.MainView.Attach(camera, scene);
 
-            (this).Subscribe((GUIEvent e) => OnDebugGUI());
+            //(this).Subscribe((GUIEvent e) => OnDebugGUI());
         }
 
         static int NumMipmapLevels(int width, int height)
@@ -260,8 +260,6 @@ namespace SharpGame.Samples
             if (ImGui.Begin("Debugger", ref debugOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
                 ImGUI.Image(brdfLUT, new Vector2(200, 200));
-                //ImGUI.Image(envMap, new Vector2(200, 200));
-                //ImGUI.Image(irMap, new Vector2(200, 200));
             }
 
             ImGui.End();

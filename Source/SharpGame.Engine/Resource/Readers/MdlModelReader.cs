@@ -141,9 +141,9 @@ namespace SharpGame
                     for (uint j = 0; j < numElements; ++j)
                     {
                         uint elementDesc = stream.Read<uint>();
-                        uint type = /*(VertexElementType)*/(elementDesc & 0xff);
-                        uint semantic = /*(VertexElementSemantic)*/((elementDesc >> 8) & 0xff);
-                        uint index = /*(unsigned char)*/((elementDesc >> 16) & 0xff);
+                        uint type = (elementDesc & 0xff);
+                        uint semantic =((elementDesc >> 8) & 0xff);
+                        uint index = ((elementDesc >> 16) & 0xff);
 
                         VertexInputAttribute attr = new VertexInputAttribute(0, j, semanticToFormat[semantic], offset);
                         offset += semanticSize[semantic];

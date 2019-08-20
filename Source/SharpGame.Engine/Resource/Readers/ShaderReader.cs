@@ -334,7 +334,6 @@ namespace SharpGame
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(ver);
-            //sb.Append("#define VULKAN 1");
 
             if (defs != null)
             {
@@ -380,8 +379,10 @@ namespace SharpGame
                 return null;
             }
 
-            var shaderModule = new ShaderModule(shaderStage, res.GetBytes());
-            shaderModule.ShaderReflection = refl;
+            var shaderModule = new ShaderModule(shaderStage, res.GetBytes())
+            {
+                ShaderReflection = refl
+            };
             return shaderModule;
         }
 
