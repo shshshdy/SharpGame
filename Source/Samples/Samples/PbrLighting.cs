@@ -6,7 +6,7 @@ using Vulkan;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 9)]
+    [SampleDesc(sortOrder = -9)]
     public class PbrLighting : Sample
     {
         const int kEnvMapSize = 1024;
@@ -17,13 +17,14 @@ namespace SharpGame.Samples
         int kEnvMapLevels = NumMipmapLevels(kEnvMapSize, kEnvMapSize);
 
         Texture cubeMap;
+
         Texture brdfLUT;
         Texture envMap;
         Texture irMap;
 
-        ResourceSet brdfResSet;
-        ResourceSet irResSet;
-        ResourceSet spResSet;
+        ResourceSet spSet;
+        ResourceSet irSet;
+        ResourceSet brdfLUTSet;
 
         Material pbrMaterial;
         struct SpecularFilterPushConstants
@@ -33,7 +34,7 @@ namespace SharpGame.Samples
         };
 
         Sampler computeSampler;
-        Sampler brdfSampler;
+        Sampler brdfLUTSampler;
 
         public override void Init()
         {
@@ -52,16 +53,16 @@ namespace SharpGame.Samples
             irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);
             brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
 
-            cubeMap = Texture.LoadFromFile("textures/hdr/gcanyon_cube.ktx", Format.R16g16b16a16Sfloat);
+            cubeMap = Texture.LoadFromFile("textures/hdr/papermill.ktx", Format.R16g16b16a16Sfloat);
             {
-                var model = GeometricPrimitive.CreateCubeModel(10, 10, 10);// Resources.Load<Model>("Models/skybox.obj");
+                var model = GeometricPrimitive.CreateCubeModel(10, 10, 10);
                 var node = scene.CreateChild("Sky");
-                node.Scaling = new Vector3(30.0f);
+               
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
 
                 var mat = new Material("Shaders/Skybox.shader");
-                mat.SetTexture("samplerCubeMap", envMap);
+                mat.SetTexture("samplerCubeMap", cubeMap);
 
                 staticModel.SetMaterial(mat);
             }
@@ -71,7 +72,7 @@ namespace SharpGame.Samples
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel("models/cerberus/cerberus.fbx");
 
-                var colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Unorm);
+                var colorMap = Resources.Load<Texture>("models/cerberus/cerberus_A.png");// Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Srgb);
                 var normalMap = Texture.LoadFromFile("models/cerberus/normal.ktx", Format.R8g8b8a8Unorm);
                 var metallicMap = Texture.LoadFromFile("models/cerberus/metallic.ktx", Format.R8Unorm);
                 var roughnessMap = Texture.LoadFromFile("models/cerberus/roughness.ktx", Format.R8Unorm);
@@ -95,7 +96,7 @@ namespace SharpGame.Samples
                 .Bind(2, brdfLUT).UpdateSets();
 
             computeSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, false, BorderColor.FloatTransparentBlack);
-            brdfSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+            brdfLUTSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
             Preprocess();
 
             Renderer.MainView.Attach(camera, scene);
@@ -105,7 +106,7 @@ namespace SharpGame.Samples
 
         static int NumMipmapLevels(int width, int height)
         {
-           int levels = 1;
+            int levels = 1;
             while (((width | height) >> levels) != 0)
             {
                 ++levels;
@@ -120,15 +121,13 @@ namespace SharpGame.Samples
                 Pass pass = shader.Main;
                 uint numMipTailLevels = (uint)kEnvMapLevels - 1;
 
-                // Compute pre-filtered specular environment map.
-                {
-                  
-                    var specializationInfo = new SpecializationInfo(new SpecializationMapEntry(0, 0, sizeof(uint)));
-                    specializationInfo.Write(0, numMipTailLevels);
-                    pass.ComputeShader.SpecializationInfo = specializationInfo;
-                    ResourceLayout resLayout = pass.GetResourceLayout(0);
-                    spResSet = new ResourceSet(resLayout);//, cubeMap, envMap);
-                }
+                // Compute pre-filtered specular environment map.            
+                var specializationInfo = new SpecializationInfo(new SpecializationMapEntry(0, 0, sizeof(uint)));
+                specializationInfo.Write(0, numMipTailLevels);
+                pass.ComputeShader.SpecializationInfo = specializationInfo;
+                ResourceLayout resLayout = pass.GetResourceLayout(0);
+
+                spSet = new ResourceSet(resLayout);
 
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
 
@@ -164,15 +163,8 @@ namespace SharpGame.Samples
                     // Pre-filter rest of the mip-chain.
                     List<ImageView> envTextureMipTailViews = new List<ImageView>();
                      
-                    DescriptorImageInfo inputTexture = new DescriptorImageInfo
-                    (
-                        computeSampler,
-                        cubeMap.imageView,
-                        ImageLayout.ShaderReadOnlyOptimal
-                    );
-
-                    Span<DescriptorImageInfo> info = stackalloc[] { inputTexture };
-                    spResSet.Bind(0, info);
+                    var inputTexture = new DescriptorImageInfo(computeSampler, cubeMap.imageView, ImageLayout.ShaderReadOnlyOptimal);
+                    spSet.Bind(0, ref inputTexture);
 
                     Span<DescriptorImageInfo> envTextureMipTailDescriptors = stackalloc DescriptorImageInfo[(int)numMipTailLevels];
                     for (uint level = 0; level < numMipTailLevels; ++level)
@@ -181,11 +173,11 @@ namespace SharpGame.Samples
                         envTextureMipTailViews.Add(view);
                         envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, ImageLayout.General);
                     }
-                    spResSet.Bind(1, envTextureMipTailDescriptors);
-                    spResSet.UpdateSets();
+                    spSet.Bind(1, envTextureMipTailDescriptors);
+                    spSet.UpdateSets();
 
                     commandBuffer.BindComputePipeline(pass);
-                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, spResSet, null);
+                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, spSet, null);
 
                     float deltaRoughness = 1.0f / Math.Max((float)numMipTailLevels, 1.0f);
                     for (uint level = 1, size = kEnvMapSize / 2; level < kEnvMapLevels; ++level, size /= 2)
@@ -197,8 +189,8 @@ namespace SharpGame.Samples
                         commandBuffer.Dispatch(numGroups, numGroups, 6);
                     }
                   
-                    Span<ImageMemoryBarrier> barrier = stackalloc[] { new ImageMemoryBarrier(envMap, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
-                    commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, barrier);
+                    var barrier = new ImageMemoryBarrier(envMap, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal);
+                    commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, ref barrier);
 
                 }
 
@@ -209,7 +201,7 @@ namespace SharpGame.Samples
             {
                 Shader shader = Resources.Load<Shader>("shaders/irmap.shader");
                 ResourceLayout resLayout = shader.Main.GetResourceLayout(0);
-                irResSet = new ResourceSet(resLayout, cubeMap, irMap);
+                irSet = new ResourceSet(resLayout, cubeMap, irMap);
 
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
                 {
@@ -217,7 +209,7 @@ namespace SharpGame.Samples
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
 
                     commandBuffer.BindComputePipeline(shader.Main);
-                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, irResSet, null);
+                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, irSet, null);
                     commandBuffer.Dispatch(kIrradianceMapSize / 32, kIrradianceMapSize / 32, 6);
 
                     Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(irMap, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
@@ -232,7 +224,7 @@ namespace SharpGame.Samples
                 Shader shader = Resources.Load<Shader>("shaders/brdf.shader");
 
                 ResourceLayout resLayout = shader.Main.GetResourceLayout(0);
-                brdfResSet = new ResourceSet(resLayout, brdfLUT);
+                brdfLUTSet = new ResourceSet(resLayout, brdfLUT);
 
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
                 {
@@ -240,7 +232,7 @@ namespace SharpGame.Samples
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
 
                     commandBuffer.BindComputePipeline(shader.Main);
-                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, brdfResSet, null);
+                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, brdfLUTSet, null);
                     commandBuffer.Dispatch(kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
 
                     Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(brdfLUT, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };

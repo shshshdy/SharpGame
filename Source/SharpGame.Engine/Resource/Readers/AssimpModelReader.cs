@@ -16,14 +16,14 @@ namespace SharpGame
            //| Assimp.PostProcessSteps.Triangulate
            //| Assimp.PostProcessSteps.PreTransformVertices;
             Assimp.PostProcessSteps.CalculateTangentSpace |
-Assimp.PostProcessSteps.Triangulate |
-Assimp.PostProcessSteps.SortByPrimitiveType |
-Assimp.PostProcessSteps.PreTransformVertices |
-Assimp.PostProcessSteps.GenerateNormals |
-Assimp.PostProcessSteps.GenerateUVCoords |
-Assimp.PostProcessSteps.OptimizeMeshes |
-Assimp.PostProcessSteps.Debone |
-Assimp.PostProcessSteps.ValidateDataStructure;
+            Assimp.PostProcessSteps.Triangulate |
+            Assimp.PostProcessSteps.SortByPrimitiveType |
+            Assimp.PostProcessSteps.PreTransformVertices |
+            Assimp.PostProcessSteps.GenerateNormals |
+            Assimp.PostProcessSteps.GenerateUVCoords |
+            Assimp.PostProcessSteps.OptimizeMeshes |
+            Assimp.PostProcessSteps.Debone |
+            Assimp.PostProcessSteps.ValidateDataStructure;
 
             var ctx = new Assimp.AssimpContext();
             string ext = FileUtil.GetExtension(loadingFile);

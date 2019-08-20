@@ -110,11 +110,11 @@ namespace SharpGame
             if(IndexBuffer != null && IndexCount > 0)
             {
                 cmdBuffer.BindIndexBuffer(IndexBuffer, 0, IndexBuffer.Stride == 2 ?  IndexType.Uint16 : IndexType.Uint32);
-                cmdBuffer.DrawIndexed((uint)IndexCount, 1, (uint)IndexStart, (int)VertexStart, 0);
+                cmdBuffer.DrawIndexed(IndexCount, 1, IndexStart, (int)VertexStart, 0);
             }
             else
             {
-                cmdBuffer.Draw((uint)VertexCount, 1, (uint)VertexStart, 0);
+                cmdBuffer.Draw(VertexCount, 1, VertexStart, 0);
             }
         }
 

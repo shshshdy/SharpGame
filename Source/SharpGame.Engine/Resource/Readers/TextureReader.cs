@@ -26,36 +26,16 @@ namespace SharpGame
                 }
 
                 using (var imageSharpTexture
-                     = new ImageSharp.ImageSharpTexture(stream))
+                     = new ImageSharp.ImageSharpTexture(stream, true, true))
                     return imageSharpTexture.CreateDeviceTexture();
             }
         }
 
-    }
-    /*
-    public class KtxTexture2DReader : ResourceReader<Texture2D>
+    }    
+
+    public class KtxTextureReader : ResourceReader<Texture>
     {
-        public KtxTexture2DReader() : base(".ktx")
-        {
-        }
-
-        public override Resource Load(string name)
-        {
-            if(!MatchExtension(name))
-            {
-                return null;
-            }
-
-            var resource = new Texture2D();
-            resource.LoadFromFile(name, Format.Bc3UnormBlock);
-            return resource;
-        }
-
-    }*/
-
-    public class KtxTextureCubeReader : ResourceReader<Texture>
-    {
-        public KtxTextureCubeReader() : base(".ktx")
+        public KtxTextureReader() : base(".ktx")
         {
         }
 

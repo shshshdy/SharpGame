@@ -12,7 +12,7 @@
 const float PI = 3.141592;
 const float Epsilon = 0.00001;
 
-const int NumLights = 3;
+const int NumLights = 2;
 
 // Constant normal incidence Fresnel factor for all dielectrics.
 const vec3 Fdielectric = vec3(0.04);
@@ -107,7 +107,7 @@ void main()
 
 	// Direct lighting calculation for analytical lights.
 	vec3 directLighting = vec3(0);
-	for(int i=0; i<NumLights; ++i)
+	for(int i=0; i< NumLights; ++i)
 	{
 		vec3 Li = -LightVec[i].xyz;
 		vec3 Lradiance = LightColor[i].xyz;

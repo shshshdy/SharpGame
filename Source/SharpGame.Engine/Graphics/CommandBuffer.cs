@@ -261,6 +261,12 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
+        public unsafe void BindVertexBuffers(uint firstBinding, Span<VkBuffer> pBuffers, ref ulong pOffsets)
+        {
+            vkCmdBindVertexBuffers(commandBuffer, firstBinding, (uint)pBuffers.Length, ref pBuffers[0], ref pOffsets);
+        }
+
+        [MethodImpl((MethodImplOptions)0x100)]
         public void BindVertexBuffer(uint firstBinding, DeviceBuffer buffer)
         {
             ulong pOffsets = 0;
