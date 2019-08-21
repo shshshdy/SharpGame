@@ -9,6 +9,13 @@ namespace SharpGame
 {
     using System.Collections;
 
+    public struct ShaderProperty
+    {
+        public string tint;
+        public UniformType type;
+        public object value;
+    }
+
     [DataContract]
     public class Shader : Resource, IEnumerable<Pass>
     {
@@ -16,7 +23,7 @@ namespace SharpGame
         public string Name { get; set; }
 
         [DataMember]
-        public List<ShaderParameter> Properties { get; set; }
+        public Dictionary<string, ShaderProperty> Properties { get; set; }
 
         [DataMember]
         public List<Pass> Pass { get; set; } = new List<Pass>();

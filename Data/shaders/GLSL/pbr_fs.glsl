@@ -17,11 +17,6 @@ const int NumLights = 2;
 // Constant normal incidence Fresnel factor for all dielectrics.
 const vec3 Fdielectric = vec3(0.04);
 
-struct AnalyticalLight {
-	vec3 direction;
-	vec3 radiance;
-};
-
 layout(location=0) in Vertex
 {
 	vec3 position;
@@ -30,20 +25,6 @@ layout(location=0) in Vertex
 } vin;
 
 layout(location=0) out vec4 color;
-/*
-layout(set=0, binding=1) uniform ShadingUniforms
-{
-	AnalyticalLight lights[NumLights];
-};
-*/
-layout(set=2, binding=0) uniform samplerCube prefilteredMap;
-layout(set=2, binding=1) uniform samplerCube samplerIrradiance;
-layout(set=2, binding=2) uniform sampler2D samplerBRDFLUT;
-
-layout(set=3, binding=0) uniform sampler2D albedoMap;
-layout(set=4, binding=0) uniform sampler2D normalMap;
-layout(set=5, binding=0) uniform sampler2D metallicMap;
-layout(set=6, binding=0) uniform sampler2D roughnessMap;
 
 
 
@@ -82,10 +63,46 @@ const float gamma     = 2.2;
 const float exposure  = 1.0;
 const float pureWhite = 1.0;
 
+//#define MANUAL_SRGB 1
+
+vec3 Uncharted2Tonemap(vec3 color)
+{
+	float A = 0.15;
+	float B = 0.50;
+	float C = 0.10;
+	float D = 0.20;
+	float E = 0.02;
+	float F = 0.30;
+	float W = 11.2;
+	return ((color*(A*color+C*B)+D*E)/(color*(A*color+B)+D*F))-E/F;
+}
+
+vec4 tonemap(vec4 color)
+{
+	vec3 outcol = Uncharted2Tonemap(color.rgb * exposure);
+	outcol = outcol * (1.0f / Uncharted2Tonemap(vec3(11.2f)));	
+	return vec4(pow(outcol, vec3(1.0f / gamma)), color.a);
+}
+
+vec4 SRGBtoLINEAR(vec4 srgbIn)
+{
+	#ifdef MANUAL_SRGB
+	#ifdef SRGB_FAST_APPROXIMATION
+	vec3 linOut = pow(srgbIn.xyz,vec3(2.2));
+	#else //SRGB_FAST_APPROXIMATION
+	vec3 bLess = step(vec3(0.04045),srgbIn.xyz);
+	vec3 linOut = mix( srgbIn.xyz/vec3(12.92), pow((srgbIn.xyz+vec3(0.055))/vec3(1.055),vec3(2.4)), bLess );
+	#endif //SRGB_FAST_APPROXIMATION
+	return vec4(linOut,srgbIn.w);;
+	#else //MANUAL_SRGB
+	return srgbIn;
+	#endif //MANUAL_SRGB
+}
+
 void main()
 {
 	// Sample input textures to get shading model params.
-	vec3 albedo = texture(albedoMap, vin.texcoord).rgb;
+	vec3 albedo = SRGBtoLINEAR(texture(albedoMap, vin.texcoord)).rgb;
 	float metalness = texture(metallicMap, vin.texcoord).r;
 	float roughness = texture(roughnessMap, vin.texcoord).r;
 
@@ -147,7 +164,7 @@ void main()
 	vec3 ambientLighting;
 	{
 		// Sample diffuse irradiance at normal direction.
-		vec3 irradiance = texture(samplerIrradiance, N).rgb;
+		vec3 irradiance = SRGBtoLINEAR(texture(samplerIrradiance, N)).rgb;
 
 		// Calculate Fresnel term for ambient lighting.
 		// Since we use pre-filtered cubemap(s) and irradiance is coming from many directions
@@ -163,7 +180,7 @@ void main()
 
 		// Sample pre-filtered specular reflection environment at correct mipmap level.
 		int specularTextureLevels = textureQueryLevels(prefilteredMap);
-		vec3 specularIrradiance = textureLod(prefilteredMap, Lr, roughness * specularTextureLevels).rgb;
+		vec3 specularIrradiance = SRGBtoLINEAR(textureLod(prefilteredMap, Lr, roughness * specularTextureLevels)).rgb;
 
 		// Split-sum approximation factors for Cook-Torrance specular BRDF.
 		vec2 specularBRDF = texture(samplerBRDFLUT, vec2(cosLo, roughness)).rg;
@@ -177,7 +194,7 @@ void main()
 
 	// Final fragment color.
 	color = vec4(directLighting + ambientLighting, 1.0);
-
+    
 	vec3 c = directLighting + ambientLighting;
 
 	float luminance = dot(c, vec3(0.2126, 0.7152, 0.0722));
@@ -189,7 +206,7 @@ void main()
 	// Gamma correction.
 	color = vec4(pow(mappedColor, vec3(1.0/gamma)), 1.0);
   
-
+ 
 
 
 }

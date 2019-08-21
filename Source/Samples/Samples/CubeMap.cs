@@ -71,12 +71,12 @@ namespace SharpGame.Samples
 
         public override void OnGUI()
         {
-            if (ImGuiNET.ImGui.Combo("Model", ref selected, names, names.Length))
+            if (ImGui.Combo("Model", ref selected, names, names.Length))
             {
                 SetModel(filenames[selected]);
             }
 
-            if (ImGuiNET.ImGui.SliderFloat("lodBias", ref lodBias, 0, 10))
+            if (ImGui.SliderFloat("lodBias", ref lodBias, 0, 10))
             {
                 material.SetShaderParameter("lodBias", lodBias);
             }

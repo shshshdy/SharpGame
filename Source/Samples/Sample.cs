@@ -110,11 +110,11 @@ namespace SharpGame.Samples
         {
             if(camera)
             {
-                ImGuiNET.ImGui.TextUnformatted("Camera");
-                ImGuiNET.ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0:0.00"));
-                ImGuiNET.ImGui.TextUnformatted("rot : " + camera.Node.Rotation.ToEuler().ToString("0:0.00"));
-                ImGuiNET.ImGui.SliderFloat("rot speed: ", ref rotSpeed, 1, 100);
-                ImGuiNET.ImGui.SliderFloat("move speed: ", ref moveSpeed, 1, 100);
+                ImGui.TextUnformatted("Camera");
+                ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0:0.00"));
+                ImGui.TextUnformatted("rot : " + camera.Node.Rotation.ToEuler().ToString("0:0.00"));
+                ImGui.SliderFloat("rot speed: ", ref rotSpeed, 1, 100);
+                ImGui.SliderFloat("move speed: ", ref moveSpeed, 1, 100);
             }
        
         }

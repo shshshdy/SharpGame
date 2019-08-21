@@ -52,6 +52,12 @@ namespace SharpGame
                 shader.Name = node.value;
             }
 
+            int propCount = node.GetChild("Properties", out var properties);
+            foreach(var prop in properties)
+            {
+                ReadShaderProperties(shader, prop);
+            }
+
             int passCount = node.GetChild("Pass", out var children);
             foreach (var passNode in children)
             {
@@ -62,6 +68,17 @@ namespace SharpGame
                 }
             }
             shader.Build();
+            return true;
+        }
+
+        bool ReadShaderProperties(Shader shader, AstNode node)
+        {
+            if(shader.Properties == null)
+            {
+                shader.Properties = new Dictionary<string, ShaderProperty>();
+            }
+
+
             return true;
         }
 
@@ -164,9 +181,8 @@ namespace SharpGame
         ResourceLayout ReadResourceLayout(AstNode node)
         {
             ResourceLayout layout = new ResourceLayout();            
-            //layout.PerMaterial = (string.Compare(node.value, "PerMaterial", true) == 0);            
-
             node.GetChild("ResourceLayoutBinding", out var resourceLayoutBinding);
+
             foreach(var c in resourceLayoutBinding)
             {
                 ResourceLayoutBinding binding = new ResourceLayoutBinding

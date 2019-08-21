@@ -1,6 +1,17 @@
 Shader "Basic"
 {
-	Properties = {}
+	Properties
+    {
+        DiffMap "DiffuseMap"
+        {
+           2D = "White"
+        }
+
+        Texture2D DiffMap
+        {
+           2D = "White"
+        }
+    }
 
 	Pass "main"
 	{
@@ -42,8 +53,8 @@ Shader "Basic"
 			layout (location = 0) in vec2 in_TexCoord;
 			layout (location = 0) out vec4 out_Color;
 
-			void main() {
-			   
+			void main()
+            {			   
 				vec4 color = texture(DiffMap, in_TexCoord);
 				out_Color = vec4(color.rgb, 1.0);
 			}
