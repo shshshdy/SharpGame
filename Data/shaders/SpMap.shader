@@ -1,7 +1,5 @@
 Shader "SpMap"
 {
-	Properties = {}
-
 	Pass
 	{
 		PushConstant level

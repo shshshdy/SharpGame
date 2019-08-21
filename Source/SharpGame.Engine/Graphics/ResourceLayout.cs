@@ -31,6 +31,8 @@ namespace SharpGame
         public ShaderStage stageFlags;
         public VkSampler[] pImmutableSamplers;
 
+        public bool IsTexture => descriptorType == DescriptorType.CombinedImageSampler;
+
         public ResourceLayoutBinding()
         {
         }

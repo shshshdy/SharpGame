@@ -26,10 +26,27 @@ namespace SharpGame
         public ResourceLayout[] ResourceLayout { get; set; }
 
         public PushConstantRange[] PushConstant { get => pushConstant; set => pushConstant = value; }
-
         private PushConstantRange[] pushConstant;
 
+        public List<string> PushConstantNames { get; set; }
+
         internal VkPipelineLayout handle;
+
+        public ResourceLayoutBinding GetBinding(string name)
+        {
+            foreach(var layout in ResourceLayout)
+            {
+                foreach(var binding in layout.Bindings)
+                {
+                    if(binding.name == name)
+                    {
+                        return binding;
+                    }
+                }
+            }
+
+            return null;
+        }
 
         public unsafe void Build()
         {            

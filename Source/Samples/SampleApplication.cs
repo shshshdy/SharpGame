@@ -110,7 +110,7 @@ namespace SharpGame.Samples
 
             ImGui.SetNextWindowBgAlpha(0.5f);
 
-            if (ImGui.Begin("Perf HUD", ref hudOpen, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            if (ImGui.Begin("HUD", ref hudOpen, (corner != -1 ? ImGuiWindowFlags.NoMove : 0) | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
             {
                 ImGui.Text("Selected Sample:");
                 if (ImGui.Combo("", ref selected, sampleNames, sampleNames.Length))
@@ -120,10 +120,6 @@ namespace SharpGame.Samples
 
                 ImGui.Separator();
 
-                if (current)
-                {
-                    current.OnGUI();
-                }
 
             }
 
@@ -143,6 +139,7 @@ namespace SharpGame.Samples
                 ImGui.Value("Msec", Msec);
                 ImGui.Value("Draw Call", Stats.drawCall);
                 ImGui.Value("Triangle Count", Stats.triCount);
+
                 //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
                 //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
 
@@ -173,6 +170,11 @@ namespace SharpGame.Samples
 
             }
 
+
+            if (current)
+            {
+                current.OnGUI();
+            }
         }
 
         void SetSample(Type type)

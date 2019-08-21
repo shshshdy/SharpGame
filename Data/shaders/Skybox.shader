@@ -1,6 +1,9 @@
 Shader "Skybox"
 {
-	Properties = {}
+	Properties
+	{
+		EnvMap = "White"
+	}
 
 	Pass "main"
 	{
@@ -44,7 +47,7 @@ Shader "Skybox"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
-			layout (set = 1, binding = 0) uniform samplerCube samplerCubeMap;
+			layout (set = 1, binding = 0) uniform samplerCube EnvMap;
 
 			layout (location = 0) in vec3 inUVW;
 
@@ -53,7 +56,7 @@ Shader "Skybox"
 			void main() 
 			{
                 vec3 envVector = normalize(inUVW);
-                outFragColor = textureLod(samplerCubeMap, envVector, 0);
+                outFragColor = textureLod(EnvMap, envVector, 0);
 			}
 
 		}

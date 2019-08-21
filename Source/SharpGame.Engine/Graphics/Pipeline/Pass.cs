@@ -199,8 +199,6 @@ namespace SharpGame
 
         public PipelineLayout PipelineLayout { get; set; } = new PipelineLayout();
      
-        public List<string> PushConstantNames { get; set; }
-
         [IgnoreDataMember]
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
         [IgnoreDataMember]
@@ -350,11 +348,11 @@ namespace SharpGame
 
         public bool GetPushConstant(string name, out PushConstantRange pushConstantRange)
         {
-            if(PushConstantNames != null)
+            if(PipelineLayout.PushConstantNames != null)
             {
-                for (int i = 0; i < PushConstantNames.Count; i++)
+                for (int i = 0; i < PipelineLayout.PushConstantNames.Count; i++)
                 {
-                    if (PushConstantNames[i] == name)
+                    if (PipelineLayout.PushConstantNames[i] == name)
                     {
                         pushConstantRange = PipelineLayout.PushConstant[i];
                         return true;

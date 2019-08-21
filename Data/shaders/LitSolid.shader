@@ -1,6 +1,9 @@
 Shader "LitSolid"
 {
-	Properties = {}
+	Properties
+	{
+		DiffMap = "White"
+	}
 
 	Pass "main"
 	{

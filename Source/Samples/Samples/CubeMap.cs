@@ -39,14 +39,14 @@ namespace SharpGame.Samples
                 staticModel.SetModel(model);
 
                 var mat = new Material("Shaders/Skybox.shader");
-                mat.SetTexture("samplerCubeMap", cubeMap);
+                mat.SetTexture("EnvMap", cubeMap);
 
                 staticModel.SetMaterial(mat);
             }
                         
             {
                 material = new Material("Shaders/Reflect.shader");
-                material.SetTexture("samplerColor", cubeMap);
+                material.SetTexture("ReflMap", cubeMap);
                 material.SetShaderParameter("lodBias", lodBias);
 
                 var node = scene.CreateChild("Model");
@@ -71,14 +71,17 @@ namespace SharpGame.Samples
 
         public override void OnGUI()
         {
-            if (ImGui.Combo("Model", ref selected, names, names.Length))
+            if (ImGui.Begin("HUD"))
             {
-                SetModel(filenames[selected]);
-            }
+                if (ImGui.Combo("Model", ref selected, names, names.Length))
+                {
+                    SetModel(filenames[selected]);
+                }
 
-            if (ImGui.SliderFloat("lodBias", ref lodBias, 0, 10))
-            {
-                material.SetShaderParameter("lodBias", lodBias);
+                if (ImGui.SliderFloat("lodBias", ref lodBias, 0, 10))
+                {
+                    material.SetShaderParameter("lodBias", lodBias);
+                }
             }
 
         }

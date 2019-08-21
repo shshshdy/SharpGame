@@ -63,7 +63,8 @@ const float gamma     = 2.2;
 const float exposure  = 1.0;
 const float pureWhite = 1.0;
 
-//#define MANUAL_SRGB 1
+#define MANUAL_SRGB 1
+#define SRGB_FAST_APPROXIMATION 1
 
 vec3 Uncharted2Tonemap(vec3 color)
 {
@@ -124,7 +125,7 @@ void main()
 
 	// Direct lighting calculation for analytical lights.
 	vec3 directLighting = vec3(0);
-	for(int i=0; i< NumLights; ++i)
+	for(int i = 0; i < NumLights; ++i)
 	{
 		vec3 Li = -LightVec[i].xyz;
 		vec3 Lradiance = LightColor[i].xyz;
@@ -164,6 +165,7 @@ void main()
 	vec3 ambientLighting;
 	{
 		// Sample diffuse irradiance at normal direction.
+		N.y *= -1.0;
 		vec3 irradiance = SRGBtoLINEAR(texture(samplerIrradiance, N)).rgb;
 
 		// Calculate Fresnel term for ambient lighting.
@@ -180,6 +182,7 @@ void main()
 
 		// Sample pre-filtered specular reflection environment at correct mipmap level.
 		int specularTextureLevels = textureQueryLevels(prefilteredMap);
+		Lr.y *= -1.0;
 		vec3 specularIrradiance = SRGBtoLINEAR(textureLod(prefilteredMap, Lr, roughness * specularTextureLevels)).rgb;
 
 		// Split-sum approximation factors for Cook-Torrance specular BRDF.

@@ -52,12 +52,6 @@ namespace SharpGame
                 shader.Name = node.value;
             }
 
-            int propCount = node.GetChild("Properties", out var properties);
-            foreach(var prop in properties)
-            {
-                ReadShaderProperties(shader, prop);
-            }
-
             int passCount = node.GetChild("Pass", out var children);
             foreach (var passNode in children)
             {
@@ -67,19 +61,75 @@ namespace SharpGame
                     shader.Add(pass);
                 }
             }
+
             shader.Build();
+
+            int propCount = node.GetChild("Properties", out var properties);
+            if (propCount > 0)
+            {
+                foreach (var prop in properties)
+                {
+                    ReadShaderProperties(shader, prop);
+                }
+            }
+
             return true;
         }
 
         bool ReadShaderProperties(Shader shader, AstNode node)
         {
+            if(node.Children == null)
+            {
+                return false;
+            }
+
             if(shader.Properties == null)
             {
                 shader.Properties = new Dictionary<string, ShaderProperty>();
             }
 
+            foreach (var kvp in node.Children)
+            {
+                if(ReadProperty(shader, kvp.Key, kvp.Value[0].value, out var prop))
+                {
+                    shader.Properties.Add(kvp.Key, prop);
+                }
+
+            }
 
             return true;
+        }
+
+        bool ReadProperty(Shader shader, string key, string val, out ShaderProperty prop)
+        {
+            foreach (var pass in shader.Pass)
+            {
+                var binding = pass.PipelineLayout.GetBinding(key);
+                if (binding.IsTexture)
+                {
+                    prop = new ShaderProperty
+                    {
+                        type = UniformType.Texture,
+                        value = val
+                    };
+                    return true;
+                }
+
+                if(pass.GetPushConstant(key, out var pushConst))
+                {
+                    prop = new ShaderProperty
+                    {
+                        //type = UniformType.Texture,
+                        //value = val
+                    };
+                    return true;
+                }
+
+            }
+            
+            prop = default;
+            return false;
+
         }
 
         Pass LoadPass(AstNode node)
@@ -222,18 +272,18 @@ namespace SharpGame
 
         void ReadPushConstant(Pass pass, List<AstNode> layout)
         {
-            pass.PushConstantNames = new List<string>();
+            pass.PipelineLayout.PushConstantNames = new List<string>();
             List<PushConstantRange> layouts = new List<PushConstantRange>();
             foreach (var node in layout)
             {
                 if (!string.IsNullOrEmpty(node.value))
                 {
-                    pass.PushConstantNames.Add(node.value);
+                    pass.PipelineLayout.PushConstantNames.Add(node.value);
                 }
                 else
                 {
                     Debug.Assert(false);
-                    pass.PushConstantNames.Add(string.Empty);
+                    pass.PipelineLayout.PushConstantNames.Add(string.Empty);
                 }
 
                 layouts.Add(ReadPushConstant(node));

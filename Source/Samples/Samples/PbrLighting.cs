@@ -12,7 +12,6 @@ namespace SharpGame.Samples
         const int kEnvMapSize = 1024;
         const int kIrradianceMapSize = 32;
         const int kBRDF_LUT_Size = 256;
-        const ulong kUniformBufferSize = 64 * 1024;
 
         int kEnvMapLevels = NumMipmapLevels(kEnvMapSize, kEnvMapSize);
 
@@ -26,6 +25,7 @@ namespace SharpGame.Samples
         ResourceSet irSet;
         ResourceSet brdfLUTSet;
 
+        Material skyMaterial;
         Material pbrMaterial;
         struct SpecularFilterPushConstants
         {
@@ -35,6 +35,11 @@ namespace SharpGame.Samples
 
         Sampler computeSampler;
         Sampler brdfLUTSampler;
+
+        string[] cubeMaps =
+        {
+            "gcanyon_cube.ktx", "papermill.ktx", "pisa_cube.ktx", "uffizi_cube.ktx"
+        };
 
         public override void Init()
         {
@@ -53,7 +58,7 @@ namespace SharpGame.Samples
             irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);
             brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
 
-            cubeMap = Texture.LoadFromFile("textures/hdr/papermill.ktx", Format.R16g16b16a16Sfloat);
+
             {
                 var model = GeometricPrimitive.CreateCubeModel(10, 10, 10);
                 var node = scene.CreateChild("Sky");
@@ -61,10 +66,8 @@ namespace SharpGame.Samples
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
 
-                var mat = new Material("Shaders/Skybox.shader");
-                mat.SetTexture("samplerCubeMap", cubeMap);
-
-                staticModel.SetMaterial(mat);
+                skyMaterial = new Material("Shaders/Skybox.shader");
+                staticModel.SetMaterial(skyMaterial);
             }
 
             {
@@ -98,7 +101,7 @@ namespace SharpGame.Samples
             computeSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, false, BorderColor.FloatTransparentBlack);
             brdfLUTSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
 
-            Preprocess();
+            SetCubeMap(cubeMaps[0]);
 
             Renderer.MainView.Attach(camera, scene);
 
@@ -113,6 +116,13 @@ namespace SharpGame.Samples
                 ++levels;
             }
             return levels;
+        }
+
+        void SetCubeMap(string cubemap)
+        {
+            cubeMap = Texture.LoadFromFile("textures/hdr/" + cubemap, Format.R16g16b16a16Sfloat);
+            skyMaterial.SetTexture("EnvMap", cubeMap);
+            Preprocess();
         }
 
         void Preprocess()
@@ -174,6 +184,7 @@ namespace SharpGame.Samples
                         envTextureMipTailViews.Add(view);
                         envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, ImageLayout.General);
                     }
+
                     spSet.Bind(1, envTextureMipTailDescriptors);
                     spSet.UpdateSets();
 
@@ -245,11 +256,26 @@ namespace SharpGame.Samples
             }
         }
 
+        int selected = 0;
+        public override void OnGUI()
+        {
+            base.OnGUI();
+
+            if (ImGui.Begin("HUD"))
+            {
+                ImGui.Text("Selected cube map:");
+                if (ImGui.Combo("CubeMap", ref selected, cubeMaps, cubeMaps.Length))
+                {
+                    SetCubeMap(cubeMaps[selected]);
+                }
+
+            }
+        }
+
         bool debugOpen = true;
 
         void OnDebugGUI()
         {
-
             var io = ImGui.GetIO();
             {
                 Vector2 window_pos = new Vector2(10, io.DisplaySize.Y - 10);
@@ -264,7 +290,6 @@ namespace SharpGame.Samples
             }
 
             ImGui.End();
-
 
         }
 

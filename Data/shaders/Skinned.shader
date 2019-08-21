@@ -1,6 +1,12 @@
 Shader "Skinned"
-{
-	Properties = {}
+{	
+	Properties
+	{
+		DiffMap = "White"
+		NormalMap = "Normal"
+		SpecMap = "Gray"
+		EmissiveMap = "Black"
+	}
 
 	Pass "main"
 	{

@@ -83,10 +83,7 @@ namespace SharpGame
 
             foreach (var layout in mainPass.PipelineLayout.ResourceLayout)
             {
-                //if (layout.PerMaterial)
-                {
-                    resourceSet.Add(new ResourceSet(layout));
-                }
+                resourceSet.Add(new ResourceSet(layout));                
             }
 
             if (TextureParameters != null)
@@ -99,11 +96,11 @@ namespace SharpGame
                 }
             }
 
-            if(mainPass.PushConstantNames != null)
+            if(mainPass.PipelineLayout.PushConstantNames != null)
             {
-                for (int i = 0; i < mainPass.PushConstantNames.Count; i++)
+                for (int i = 0; i < mainPass.PipelineLayout.PushConstantNames.Count; i++)
                 {
-                    var constName = mainPass.PushConstantNames[i];
+                    var constName = mainPass.PipelineLayout.PushConstantNames[i];
                     var pushConst = mainPass.PipelineLayout.PushConstant[i];
                     if(pushConst.offset + pushConst.size > maxPushConstantsSize)
                     {

@@ -12,11 +12,10 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = 5)]
     public class ImGuiDemo : Sample
     {
-        public ImGuiDemo()
+        public override void OnGUI()
         {
-            this.Subscribe( (GUIEvent e) => ImGui.ShowDemoWindow());
+            ImGui.ShowDemoWindow();
         }
-
     }
 
 }

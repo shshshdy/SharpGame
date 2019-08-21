@@ -11,7 +11,6 @@ namespace SharpGame
 
     public struct ShaderProperty
     {
-        public string tint;
         public UniformType type;
         public object value;
     }
@@ -119,6 +118,16 @@ namespace SharpGame
             return true;
         }
 
+        public IEnumerator<Pass> GetEnumerator()
+        {
+            return ((IEnumerable<Pass>)Pass).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<Pass>)Pass).GetEnumerator();
+        }
+
         protected override void Destroy()
         {
             foreach (var pass in Pass)
@@ -131,15 +140,6 @@ namespace SharpGame
             base.Destroy();
         }
 
-        public IEnumerator<Pass> GetEnumerator()
-        {
-            return ((IEnumerable<Pass>)Pass).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable<Pass>)Pass).GetEnumerator();
-        }
     }
 
     

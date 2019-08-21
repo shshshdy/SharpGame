@@ -1,6 +1,9 @@
 Shader "Unlit"
 {
-	Properties = {}
+	Properties
+	{
+		DiffMap = "White"
+	}
 
 	Pass "main"
 	{

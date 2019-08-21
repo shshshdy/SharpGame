@@ -2,15 +2,7 @@ Shader "Basic"
 {
 	Properties
     {
-        DiffMap "DiffuseMap"
-        {
-           2D = "White"
-        }
-
-        Texture2D DiffMap
-        {
-           2D = "White"
-        }
+        DiffMap  = "White"
     }
 
 	Pass "main"

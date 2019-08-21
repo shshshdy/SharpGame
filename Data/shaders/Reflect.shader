@@ -1,6 +1,9 @@
 Shader "Reflect"
 {
-	Properties = {}
+	Properties
+	{
+		ReflMap = "White"
+	}
 
 	Pass "main"
 	{
@@ -69,7 +72,7 @@ Shader "Reflect"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
-			layout (set = 1, binding = 0) uniform samplerCube samplerColor;
+			layout (set = 1, binding = 0) uniform samplerCube ReflMap;
 
 			layout (location = 0) in vec3 inPos;
 			layout (location = 1) in vec3 inNormal;
@@ -88,7 +91,7 @@ Shader "Reflect"
 				cR = vec3(inInvModelView * vec4(cR, 0.0));
 				cR.y *= -1.0;
 
-				vec4 color = texture(samplerColor, cR, inLodBias);
+				vec4 color = texture(ReflMap, cR, inLodBias);
 
 				vec3 N = normalize(inNormal);
 				vec3 L = normalize(inLightVec);
