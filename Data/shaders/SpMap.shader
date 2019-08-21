@@ -4,21 +4,6 @@ Shader "SpMap"
 
 	Pass
 	{
-		ResourceLayout
-		{
-			ResourceLayoutBinding
-			{
-				DescriptorType = CombinedImageSampler
-				StageFlags = Compute
-			}
-
-			ResourceLayoutBinding
-			{
-				DescriptorType = StorageImage
-				StageFlags = Compute
-			}
-		}
-
 		PushConstant level
 		{
 			StageFlags = Compute

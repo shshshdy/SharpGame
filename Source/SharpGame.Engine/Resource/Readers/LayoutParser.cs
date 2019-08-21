@@ -21,7 +21,7 @@ namespace SharpGame
         public string objectName;
         public DescriptorType descriptorType;
         public int set;
-        public int binding;
+        public uint binding;
         public uint id;
         public bool isDynamic = false;        
         public List<BlockMember> structMembers;
@@ -104,6 +104,8 @@ namespace SharpGame
                         break;
                 }
             }
+
+            shaderReflection.descriptorSets?.Sort( (x, y) => { return x.set * 1000 + (int)x.binding - x.set + (int)x.binding; });
 
             return shaderReflection;
         }
@@ -205,7 +207,10 @@ namespace SharpGame
                                     Synchronize();
                                 }
                                 break;
+                            case "imageCube":
+                            case "image3D":
                             case "image2D":
+                            case "image1D":
                                 {
                                     layout.descriptorType = DescriptorType.StorageImage;                                    
                                     layout.objectType = t.Lexeme;
@@ -388,7 +393,7 @@ namespace SharpGame
                     attri = attributes.Find(a => a.name == "binding");
                     if (attri != null)
                     {
-                        layout.binding = (int)(double)attri.value;
+                        layout.binding = (uint)(double)attri.value;
                     }
 
                     return layout;

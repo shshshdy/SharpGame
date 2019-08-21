@@ -9,30 +9,6 @@ Shader "Skybox"
         DepthTest = false
         DepthWrite = false
 
-		ResourceLayout
-		{
-			ResourceLayoutBinding "CameraVS"
-			{
-				DescriptorType = UniformBuffer
-				StageFlags = Vertex
-			}
-
-			ResourceLayoutBinding "ObjectVS"
-			{
-				DescriptorType = UniformBufferDynamic
-				StageFlags = Vertex
-			}
-		}
-
-		ResourceLayout PerMaterial
-		{
-			ResourceLayoutBinding "samplerCubeMap"
-			{
-				DescriptorType = CombinedImageSampler
-				StageFlags = Fragment
-			}
-		}
-		
 		@VertexShader
 		{
 			#version 450

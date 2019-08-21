@@ -164,7 +164,7 @@ namespace SharpGame
         ResourceLayout ReadResourceLayout(AstNode node)
         {
             ResourceLayout layout = new ResourceLayout();            
-            layout.PerMaterial = (string.Compare(node.value, "PerMaterial", true) == 0);            
+            //layout.PerMaterial = (string.Compare(node.value, "PerMaterial", true) == 0);            
 
             node.GetChild("ResourceLayoutBinding", out var resourceLayoutBinding);
             foreach(var c in resourceLayoutBinding)

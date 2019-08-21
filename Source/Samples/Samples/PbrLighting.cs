@@ -6,7 +6,7 @@ using Vulkan;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -9)]
+    [SampleDesc(sortOrder = 9)]
     public class PbrLighting : Sample
     {
         const int kEnvMapSize = 1024;
@@ -76,14 +76,14 @@ namespace SharpGame.Samples
                 var normalMap = Texture.LoadFromFile("models/cerberus/normal.ktx", Format.R8g8b8a8Unorm);
                 var metallicMap = Texture.LoadFromFile("models/cerberus/metallic.ktx", Format.R8Unorm);
                 var roughnessMap = Texture.LoadFromFile("models/cerberus/roughness.ktx", Format.R8Unorm);
-                var aoMap = Texture.LoadFromFile("models/cerberus/ao.ktx", Format.R8Unorm);
+                //var aoMap = Texture.LoadFromFile("models/cerberus/ao.ktx", Format.R8Unorm);
 
                 var mat = new Material("Shaders/LitPbr.shader");
                 mat.SetTexture("albedoMap", colorMap);
                 mat.SetTexture("normalMap", normalMap);
                 mat.SetTexture("metallicMap", metallicMap);
                 mat.SetTexture("roughnessMap", roughnessMap);
-                mat.SetTexture("aoMap", aoMap);
+                //mat.SetTexture("aoMap", aoMap);
 
                 staticModel.SetMaterial(mat);
 
@@ -97,6 +97,7 @@ namespace SharpGame.Samples
 
             computeSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, false, BorderColor.FloatTransparentBlack);
             brdfLUTSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+
             Preprocess();
 
             Renderer.MainView.Attach(camera, scene);

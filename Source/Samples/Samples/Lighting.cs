@@ -8,7 +8,7 @@ using ImGuiNET;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -2)]
+    [SampleDesc(sortOrder = 2)]
     public class Lighting : Sample
     {
         public override void Init()

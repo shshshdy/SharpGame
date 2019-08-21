@@ -4,15 +4,6 @@ Shader "Brdf"
 
 	Pass
 	{
-		ResourceLayout
-		{
-			ResourceLayoutBinding
-			{
-				DescriptorType = StorageImage
-				StageFlags = Compute
-			}
-		}
-
 		@ComputeShader
 		{
 			#include "spbrdf_cs.glsl"

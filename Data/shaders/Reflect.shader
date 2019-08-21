@@ -7,30 +7,6 @@ Shader "Reflect"
 		CullMode = None
 		FrontFace = CounterClockwise
 
-		ResourceLayout
-		{
-			ResourceLayoutBinding "CameraVS"
-			{
-				DescriptorType = UniformBuffer
-				StageFlags = Vertex
-			}
-
-			ResourceLayoutBinding "ObjectVS"
-			{
-				DescriptorType = UniformBufferDynamic
-				StageFlags = Vertex
-			}
-		}
-
-		ResourceLayout PerMaterial
-		{
-			ResourceLayoutBinding "samplerColor"
-			{
-				DescriptorType = CombinedImageSampler
-				StageFlags = Fragment
-			}
-		}
-
 		PushConstant lodBias
 		{
 			StageFlags = Vertex

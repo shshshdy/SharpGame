@@ -9,24 +9,6 @@ Shader "UI"
 		DepthWrite = false
 		BlendMode = Alpha
 		
-		ResourceLayout
-		{
-			ResourceLayoutBinding
-			{
-				DescriptorType = UniformBuffer
-				StageFlags = Vertex
-			}
-		}
-
-		ResourceLayout
-		{
-			ResourceLayoutBinding
-			{
-				DescriptorType = CombinedImageSampler
-				StageFlags = Fragment
-			}
-		}
-
 		@VertexShader
 		{
 			#version 450

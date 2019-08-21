@@ -5,55 +5,6 @@ Shader "Skinned"
 	Pass "main"
 	{
         CullMode = None
-				
-		ResourceLayout
-		{
-			ResourceLayoutBinding "CameraVS"
-			{
-				DescriptorType = UniformBuffer
-				StageFlags = Vertex
-			}
-
-            ResourceLayoutBinding "ObjectVS"
-            {
-                DescriptorType = UniformBufferDynamic
-                StageFlags = Vertex
-            }
-		}
-		
-		ResourceLayout
-		{
-			ResourceLayoutBinding CameraPS
-			{
-				DescriptorType = UniformBuffer
-				StageFlags = Fragment
-			}
-
-			ResourceLayoutBinding LightPS
-			{
-				DescriptorType = UniformBuffer
-				StageFlags = Fragment
-			}
-		}
-	
-		ResourceLayout PerMaterial
-		{
-			ResourceLayoutBinding DiffMap
-			{
-				DescriptorType = CombinedImageSampler
-				StageFlags = Fragment
-			}
-		}
-
-		ResourceLayout PerMaterial
-		{
-			ResourceLayoutBinding NormalMap
-			{
-				DescriptorType = CombinedImageSampler
-				StageFlags = Fragment
-			}
-		}
-
 
 		@VertexShader
 		{

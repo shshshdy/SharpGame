@@ -40,11 +40,12 @@ namespace SharpGame
     public struct UniformBlock
     {
         public string name;
-        public int size;
+        public uint size;
         public List<BlockMember> members;
         public int set;
-        public int binding;
+        public uint binding;
         public DescriptorType descriptorType;
+        public uint descriptorCount;
     }
 
     public class ShaderReflection

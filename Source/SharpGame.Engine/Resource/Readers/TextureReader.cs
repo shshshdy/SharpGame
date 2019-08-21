@@ -26,7 +26,7 @@ namespace SharpGame
                 }
 
                 using (var imageSharpTexture
-                     = new ImageSharp.ImageSharpTexture(stream, true, true))
+                     = new ImageSharp.ImageSharpTexture(stream, true, false))
                     return imageSharpTexture.CreateDeviceTexture();
             }
         }

@@ -48,7 +48,6 @@ namespace SharpGame
     public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
         public int Set { get; set; }
-        public bool PerMaterial { get; set; }
         public List<ResourceLayoutBinding> Bindings { get; set; } = new List<ResourceLayoutBinding>();
 
         private VkDescriptorSetLayoutBinding[] bindings;
@@ -122,6 +121,19 @@ namespace SharpGame
         IEnumerator IEnumerable.GetEnumerator()
         {
             return Bindings.GetEnumerator();
+        }
+
+        public bool Contains(uint bd)
+        {
+            foreach (var binding in Bindings)
+            {
+                if (binding.binding == bd)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void Add(ResourceLayoutBinding binding)

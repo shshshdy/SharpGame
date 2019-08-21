@@ -7,30 +7,6 @@ Shader "Basic"
 		CullMode = None
 		FrontFace = CounterClockwise
 
-		ResourceLayout
-		{
-			ResourceLayoutBinding "CameraVS"
-			{
-				DescriptorType = UniformBuffer
-				StageFlags = Vertex
-			}
-			
-			ResourceLayoutBinding "ObjectVS"
-			{
-				DescriptorType = UniformBufferDynamic
-				StageFlags = Vertex
-			}
-		}
-
-		ResourceLayout PerMaterial
-		{			
-			ResourceLayoutBinding "DiffMap"
-			{
-				DescriptorType = CombinedImageSampler
-				StageFlags = Fragment
-			}
-		}
-
 		@VertexShader
 		{
 			#version 450

@@ -259,10 +259,51 @@ namespace SharpGame
             builded_ = true;
             passID = GetID(Name);
 
+            List<ResourceLayout> reslayouts = new List<ResourceLayout>();
             foreach(var sm in ShaderModels)
             {
-                sm?.Build();
+                if(sm != null)
+                {
+                    sm.Build();
+
+                    if(sm.ShaderReflection != null)
+                    {
+                        var descriptors = sm.ShaderReflection.descriptorSets;
+                        ResourceLayout currentLayout = null;
+                        foreach (var des in descriptors)
+                        {
+                            if(currentLayout == null || currentLayout.Set != des.set)
+                            {
+                                currentLayout = new ResourceLayout(des.set);
+                                reslayouts.Add(currentLayout);
+                            }
+
+                            if(!currentLayout.Contains(des.binding))
+                            {
+                                ResourceLayoutBinding resBinding = new ResourceLayoutBinding
+                                {
+                                    name = des.name,
+                                    binding = des.binding,
+                                    descriptorType = des.descriptorType,
+                                    stageFlags = sm.Stage
+                                };
+
+                                currentLayout.Add(resBinding);
+                            }
+                            else
+                            {
+                                Log.Warn("Duplicate binding : " + des.name);
+                            }
+
+
+                        }
+
+                    }
+
+                }
             }
+            reslayouts.Sort((x, y) => { return x.Set - y.Set; });
+            PipelineLayout.ResourceLayout = reslayouts.ToArray();
 
             PipelineLayout.Build();
 
