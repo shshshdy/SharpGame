@@ -13,12 +13,6 @@ using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
-    public struct Semaphores
-    {
-        public VkSemaphore PresentComplete;
-        public VkSemaphore RenderComplete;
-    }
-
     public class Settings
     {
         public UTF8String ApplicationName { get; set; }
@@ -33,7 +27,6 @@ namespace SharpGame
         public Settings Settings { get; } = new Settings();
         internal Stats stats = new Stats();
 
-        public VkInstance VkInstance { get; protected set; }
         public VkPhysicalDeviceFeatures enabledFeatures;
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
 
@@ -57,6 +50,7 @@ namespace SharpGame
 
         private CommandBufferPool primaryCmdPool;
         private CommandBufferPool workCmdPool;
+        private CommandBufferPool computeCmdPool;
 
         public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[RenderContext];
         
@@ -66,13 +60,11 @@ namespace SharpGame
         public uint currentImage;
         public int nextImage;
 
-        private NativeList<Semaphores> semaphores = new NativeList<Semaphores>(1, 1);
+        public Semaphore PresentComplete { get; }
+        public Semaphore RenderComplete { get; }
+
         private DepthStencil depthStencil;
-
-        public NativeList<VkPipelineStageFlags> submitPipelineStages = new NativeList<VkPipelineStageFlags>() { VkPipelineStageFlags.ColorAttachmentOutput };
-
-        private VkSubmitInfo submitInfo;
-
+        
         TransientBufferManager transientVertexBuffer = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
         TransientBufferManager transientIndexBuffer = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
 
@@ -87,29 +79,18 @@ namespace SharpGame
             Settings = settings;
 
             enabledFeatures.samplerAnisotropy = True;
-            VkInstance = Device.CreateInstance(Settings);
+            Device.CreateInstance(Settings);
             device = Device.Init(enabledFeatures, EnabledExtensions);
            
             // Get a graphics queue from the Device
             GraphicsQueue = Queue.GetDeviceQueue(Device.QFIndices.Graphics, 0);
             ComputeQueue = Queue.GetDeviceQueue(Device.QFIndices.Compute, 0);
-
             DepthFormat = Device.GetSupportedDepthFormat();            
-                        // Create synchronization objects
-            Semaphores* pSem = (Semaphores*)semaphores.GetAddress(0);
-            pSem->PresentComplete = Device.CreateSemaphore();
-            pSem->RenderComplete = Device.CreateSemaphore();
-
-            // Set up submit info structure
-            // Semaphores will stay the same during application lifetime
-            // Command buffer submission info is set by each example
-            submitInfo = VkSubmitInfo.New();
-            submitInfo.pWaitDstStageMask = (VkPipelineStageFlags*)submitPipelineStages.Data;
-            submitInfo.waitSemaphoreCount = 1;
-            submitInfo.pWaitSemaphores = &pSem->PresentComplete;
-            submitInfo.signalSemaphoreCount = 1;
-            submitInfo.pSignalSemaphores = &pSem->RenderComplete;
-
+               
+            // Create synchronization objects
+            PresentComplete = new Semaphore();
+            RenderComplete = new Semaphore();
+            
             Texture.Init();
 
 #if EVENT_SYNC
@@ -344,6 +325,7 @@ namespace SharpGame
         {
             primaryCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
             workCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
+            computeCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
         }
 
         protected void CreateCommandBuffers()
@@ -363,18 +345,6 @@ namespace SharpGame
             commandBuffer.End();
 
             GraphicsQueue.Submit(null, PipelineStageFlags.None, commandBuffer, null);
-            /*
-            VkSubmitInfo submitInfo = VkSubmitInfo.New();
-            submitInfo.commandBufferCount = 1;
-
-            fixed (VkCommandBuffer* cb = &commandBuffer.commandBuffer)
-            {
-                submitInfo.pCommandBuffers = cb;
-                vkQueueSubmit(GraphicsQueue, 1, &submitInfo, VkFence.Null);
-            }
-
-            vkQueueWaitIdle(GraphicsQueue);*/
-
             GraphicsQueue.WaitIdle();
 
             commandBuffer.Reset(true);
@@ -444,8 +414,7 @@ namespace SharpGame
             }
 
             uint newBufferSize = Math.Max(MinStagingBufferSize, size);
-            DeviceBuffer newBuffer = DeviceBuffer.Create(BufferUsageFlags.TransferSrc | BufferUsageFlags.TransferDst,
-                MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, size, 1);
+            DeviceBuffer newBuffer = DeviceBuffer.Create(BufferUsageFlags.TransferSrc | BufferUsageFlags.TransferDst, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, size, 1);
             return newBuffer;
         }
 
@@ -481,7 +450,7 @@ namespace SharpGame
 #endif
             Profiler.BeginSample("Acquire");
             // Acquire the next image from the swap chaing
-            VulkanUtil.CheckResult(Swapchain.AcquireNextImage(semaphores[0].PresentComplete, ref currentImage));
+            Swapchain.AcquireNextImage(PresentComplete, ref currentImage);
 
             System.Diagnostics.Debug.Assert(currentImage == nextImage);
             nextImage = ((int)currentImage + 1)%ImageCount;
@@ -492,13 +461,15 @@ namespace SharpGame
         public void EndRender()
         {
             Profiler.BeginSample("Submit");
-            GraphicsQueue.Submit(null, PipelineStageFlags.None, primaryCmdPool[RenderContext], null);
+            GraphicsQueue.Submit(PresentComplete, PipelineStageFlags.ColorAttachmentOutput, primaryCmdPool[RenderContext], RenderComplete);
             Profiler.EndSample();
 
             Profiler.BeginSample("Present");
-            VulkanUtil.CheckResult(Swapchain.QueuePresent(GraphicsQueue.native, currentImage, semaphores[0].RenderComplete));
+
+            Swapchain.QueuePresent(GraphicsQueue, currentImage, RenderComplete);
             
             GraphicsQueue.WaitIdle();
+
             Profiler.EndSample();
 
 #if EVENT_SYNC

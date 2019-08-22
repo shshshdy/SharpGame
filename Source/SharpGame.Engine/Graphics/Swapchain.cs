@@ -36,6 +36,7 @@ namespace SharpGame
             {
                 throw new InvalidOperationException("Couldn't retrieve SDL window info.");
             }
+
             VkResult err;
             if (sysWmInfo.subsystem == SysWMType.Windows)
             {
@@ -372,11 +373,11 @@ namespace SharpGame
         *
         * @return VkResult of the image acquisition
         */
-        public VkResult AcquireNextImage(VkSemaphore presentCompleteSemaphore, ref uint imageIndex)
+        public void AcquireNextImage(Semaphore presentCompleteSemaphore, ref uint imageIndex)
         {
             // By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
             // With that we don't have to handle VK_NOT_READY
-            return vkAcquireNextImageKHR(Device.LogicalDevice, swapchain, ulong.MaxValue, presentCompleteSemaphore, new VkFence(), ref imageIndex);
+            VulkanUtil.CheckResult(vkAcquireNextImageKHR(Device.LogicalDevice, swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref imageIndex));
         }
 
         /**
@@ -388,7 +389,7 @@ namespace SharpGame
         *
         * @return VkResult of the queue presentation
         */
-        public VkResult QueuePresent(VkQueue queue, uint imageIndex, VkSemaphore waitSemaphore = new VkSemaphore())
+        public void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = null)
         {
             VkPresentInfoKHR presentInfo = VkPresentInfoKHR.New();
             presentInfo.pNext = null;
@@ -397,12 +398,12 @@ namespace SharpGame
             presentInfo.pSwapchains = &sc;
             presentInfo.pImageIndices = &imageIndex;
             // Check if a wait semaphore has been specified to wait for before presenting the image
-            if (waitSemaphore.Handle != 0)
+            if (waitSemaphore != null)
             {
-                presentInfo.pWaitSemaphores = &waitSemaphore;
+                presentInfo.pWaitSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphore.native);
                 presentInfo.waitSemaphoreCount = 1;
             }
-            return vkQueuePresentKHR(queue, &presentInfo);
+            VulkanUtil.CheckResult(vkQueuePresentKHR(queue.native, &presentInfo));
         }
     }
 

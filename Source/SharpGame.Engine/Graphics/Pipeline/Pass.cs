@@ -264,7 +264,7 @@ namespace SharpGame
                 {
                     sm.Build();
 
-                    if(sm.ShaderReflection != null)
+                    if(sm.ShaderReflection != null && sm.ShaderReflection.descriptorSets != null)
                     {
                         var descriptors = sm.ShaderReflection.descriptorSets;
                         ResourceLayout currentLayout = null;

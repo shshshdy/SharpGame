@@ -226,7 +226,7 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindComputeResourceSet(PipelineLayout pipelineLayout, int firstSet, ResourceSet resourceSet, uint? dynamicOffset)
+        public unsafe void BindComputeResourceSet(PipelineLayout pipelineLayout, int firstSet, ResourceSet resourceSet, uint? dynamicOffset = null)
         {
             uint dynamicOffsetCount = 0;
             uint val;
