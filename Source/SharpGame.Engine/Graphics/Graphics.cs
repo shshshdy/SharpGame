@@ -491,20 +491,13 @@ namespace SharpGame
 
         public void EndRender()
         {
-            // Command buffer to be sumitted to the queue
-            //submitInfo.commandBufferCount = 1;
-            //submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress((uint)RenderContext);
-
             Profiler.BeginSample("Submit");
-            // Submit to queue
-            //VulkanUtil.CheckResult(vkQueueSubmit(GraphicsQueue, 1, ref submitInfo, VkFence.Null));
-
             GraphicsQueue.Submit(null, PipelineStageFlags.None, primaryCmdPool[RenderContext], null);
             Profiler.EndSample();
 
             Profiler.BeginSample("Present");
             VulkanUtil.CheckResult(Swapchain.QueuePresent(GraphicsQueue.native, currentImage, semaphores[0].RenderComplete));
-            //VulkanUtil.CheckResult(vkQueueWaitIdle(GraphicsQueue));
+            
             GraphicsQueue.WaitIdle();
             Profiler.EndSample();
 

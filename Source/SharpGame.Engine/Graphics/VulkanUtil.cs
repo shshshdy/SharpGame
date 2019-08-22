@@ -34,10 +34,6 @@ namespace SharpGame
             SetImageLayout(cmdbuffer, image, aspectMask, oldImageLayout, newImageLayout, subresourceRange);
         }
 
-        // Create an image memory barrier for changing the layout of
-        // an image and put it into an active command buffer
-        // See chapter 11.4 "Image Layout" for details
-
         public static void SetImageLayout(
             VkCommandBuffer cmdbuffer,
             VkImage image,

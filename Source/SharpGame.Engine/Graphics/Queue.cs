@@ -33,7 +33,7 @@ namespace SharpGame
         /// Gets the queue index.
         /// </summary>
         public uint Index { get; }
-
+/*
         /// <summary>
         /// Submits a sequence of semaphores or command buffers to a queue.
         /// </summary>
@@ -44,7 +44,7 @@ namespace SharpGame
         /// </param>
         /// <exception cref="VulkanException">Vulkan returns an error code.</exception>
         public void Submit(SubmitInfo[] submits, Fence fence = null)
-        {/*
+        {
             int count = submits?.Length ?? 0;
             var nativeSubmits = stackalloc SubmitInfo.Native[count];
             for (int i = 0; i < count; i++)
@@ -54,9 +54,9 @@ namespace SharpGame
             for (int i = 0; i < count; i++)
                 nativeSubmits[i].Free();
 
-            VulkanException.ThrowForInvalidResult(result);*/
-        }
-
+            VulkanException.ThrowForInvalidResult(result);
+        }*/
+/*
         /// <summary>
         /// Submits a sequence of semaphores or command buffers to a queue.
         /// </summary>
@@ -67,12 +67,12 @@ namespace SharpGame
         /// </param>
         /// <exception cref="VulkanException">Vulkan returns an error code.</exception>
         public void Submit(SubmitInfo submit, Fence fence = null)
-        {/*
+        {
             submit.ToNative(out SubmitInfo.Native nativeSubmit);
             Result result = vkQueueSubmit(this, 1, &nativeSubmit, fence);
             nativeSubmit.Free();
-            VulkanException.ThrowForInvalidResult(result);*/
-        }
+            VulkanException.ThrowForInvalidResult(result);
+        }*/
 
         /// <summary>
         /// Submits semaphores or a command buffer to a queue.
@@ -152,7 +152,7 @@ namespace SharpGame
             bindInfo.ToNative(out BindSparseInfo.Native nativeBindInfo);
             Result result = vkQueueBindSparse(this, 1, &nativeBindInfo, fence);
             nativeBindInfo.Free();
-            VulkanException.ThrowForInvalidResult(result);*¡¢
+            VulkanException.ThrowForInvalidResult(result);*/
         }
 
         /// <summary>
