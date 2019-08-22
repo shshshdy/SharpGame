@@ -5,6 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
+    using global::System.Runtime.CompilerServices;
     using static Vulkan.VulkanNative;
 
     public class ImageView : DisposeBase
@@ -32,7 +33,7 @@ namespace SharpGame
                 format = format
             };
 
-            viewCreateInfo.subresourceRange.aspectMask = (VkImageAspectFlags)aspectMask;
+            viewCreateInfo.subresourceRange.aspectMask = aspectMask;
             viewCreateInfo.subresourceRange.baseMipLevel = baseMipLevel;
             viewCreateInfo.subresourceRange.levelCount = numMipLevels;
             viewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -54,6 +55,24 @@ namespace SharpGame
         }
     }
 
+    public struct ImageSubresourceRange
+    {
+        public ImageAspectFlags aspectMask;
+        public uint baseMipLevel;
+        public uint levelCount;
+        public uint baseArrayLayer;
+        public uint layerCount;
+
+        public ImageSubresourceRange(ImageAspectFlags aspectMask, uint baseMipLevel = 0, uint levelCount = 1, uint baseArrayLayer = 0, uint layerCount = 1)
+        {
+            this.aspectMask = aspectMask;
+            this.baseMipLevel = baseMipLevel;
+            this.levelCount = levelCount;
+            this.baseArrayLayer = baseArrayLayer;
+            this.layerCount = layerCount;
+        }
+    }
+
     public struct ImageViewCreateInfo
     {
         public uint flags;
@@ -61,7 +80,7 @@ namespace SharpGame
         public ImageViewType viewType;
         public Format format;
         public ComponentMapping components;
-        public VkImageSubresourceRange subresourceRange;
+        public ImageSubresourceRange subresourceRange;
 
         internal void ToNative(out VkImageViewCreateInfo native)
         {
@@ -71,7 +90,7 @@ namespace SharpGame
             native.viewType = (VkImageViewType)viewType;
             native.format = (VkFormat)format;
             native.components = new VkComponentMapping { r = (VkComponentSwizzle)components.r, g = (VkComponentSwizzle)components.g, b = (VkComponentSwizzle)components.b, a = (VkComponentSwizzle)components.a };
-            native.subresourceRange = subresourceRange;
+            native.subresourceRange = Unsafe.As<ImageSubresourceRange, VkImageSubresourceRange>(ref subresourceRange);
         }
     }
 

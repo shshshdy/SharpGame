@@ -26,21 +26,22 @@ namespace SharpGame
             SamplerAddressMode addressMode, bool anisotropyEnable, BorderColor borderColor = BorderColor.FloatOpaqueWhite)
         {
             // Create sampler
-            SamplerCreateInfo sampler = new SamplerCreateInfo();
-            sampler.magFilter = filter;
-            sampler.minFilter = filter;
-            sampler.mipmapMode = mipmapMode;
-            sampler.addressModeU = addressMode;
-            sampler.addressModeV = addressMode;
-            sampler.addressModeW = addressMode;
-            sampler.mipLodBias = 0.0f;
-            sampler.compareOp = CompareOp.Never;
-            sampler.minLod = 0.0f;
-            sampler.maxLod = float.MaxValue;
-            sampler.borderColor = borderColor;
-            //sampler.maxAnisotropy = 1.0f;
-            sampler.maxAnisotropy = anisotropyEnable ? Device.Properties.limits.maxSamplerAnisotropy : 1;
-            sampler.anisotropyEnable = anisotropyEnable;
+            SamplerCreateInfo sampler = new SamplerCreateInfo
+            {
+                magFilter = filter,
+                minFilter = filter,
+                mipmapMode = mipmapMode,
+                addressModeU = addressMode,
+                addressModeV = addressMode,
+                addressModeW = addressMode,
+                mipLodBias = 0.0f,
+                compareOp = CompareOp.Never,
+                minLod = 0.0f,
+                maxLod = float.MaxValue,
+                borderColor = borderColor,
+                maxAnisotropy = anisotropyEnable ? Device.Properties.limits.maxSamplerAnisotropy : 1,
+                anisotropyEnable = anisotropyEnable
+            };
             return new Sampler(ref sampler);
         }
     }

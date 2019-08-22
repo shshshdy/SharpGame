@@ -20,10 +20,14 @@ namespace SharpGame.Samples
         Particle[] particles;
 
         private CommandBuffer _computeCmdBuffer;
+        Pass _computePipeline;
 
         public override void Init()
         {
             base.Init();
+
+            var shader = Resources.Load<Shader>("");
+            _computePipeline = shader.GetPass("");
 
             Random rand = new Random();
 
@@ -44,30 +48,30 @@ namespace SharpGame.Samples
         private void RecordComputeCommandBuffer()
         {
             // Record particle movements.
-           /*
+    
             var graphicsToComputeBarrier = new BufferMemoryBarrier(storageBuffer,
                 AccessFlags.VertexAttributeRead, AccessFlags.ShaderWrite,
-                Graphics.GraphicsQueue.FamilyIndex, Context.ComputeQueue.FamilyIndex);
+                Graphics.GraphicsQueue.FamilyIndex, Graphics.ComputeQueue.FamilyIndex);
 
-            var computeToGraphicsBarrier = new BufferMemoryBarrier(_storageBuffer,
-                Accesses.ShaderWrite, Accesses.VertexAttributeRead,
-                Context.ComputeQueue.FamilyIndex, Context.GraphicsQueue.FamilyIndex);
+            var computeToGraphicsBarrier = new BufferMemoryBarrier(storageBuffer,
+                AccessFlags.ShaderWrite, AccessFlags.VertexAttributeRead,
+                Graphics.ComputeQueue.FamilyIndex, Graphics.GraphicsQueue.FamilyIndex);
  
             _computeCmdBuffer.Begin();
-
+       
             // Add memory barrier to ensure that the (graphics) vertex shader has fetched attributes
             // before compute starts to write to the buffer.
-            _computeCmdBuffer.CmdPipelineBarrier(PipelineStages.VertexInput, PipelineStages.ComputeShader,
-                bufferMemoryBarriers: new[] { graphicsToComputeBarrier });
-            _computeCmdBuffer.CmdBindPipeline(PipelineBindPoint.Compute, _computePipeline);
-            _computeCmdBuffer.CmdBindDescriptorSet(PipelineBindPoint.Compute, _computePipelineLayout, _computeDescriptorSet);
-            _computeCmdBuffer.CmdDispatch(_storageBuffer.Count / 256, 1, 1);
+            _computeCmdBuffer.PipelineBarrier(PipelineStageFlags.VertexInput, PipelineStageFlags.ComputeShader,
+                ref graphicsToComputeBarrier);
+            _computeCmdBuffer.BindPipeline(PipelineBindPoint.Compute, _computePipeline);
+            _computeCmdBuffer.BindResourceSet(PipelineBindPoint.Compute, _computePipelineLayout, _computeDescriptorSet);
+            _computeCmdBuffer.Dispatch(storageBuffer.Count / 256, 1, 1);
             // Add memory barrier to ensure that compute shader has finished writing to the buffer.
             // Without this the (rendering) vertex shader may display incomplete results (partial
             // data from last frame).
             _computeCmdBuffer.CmdPipelineBarrier(PipelineStages.ComputeShader, PipelineStages.VertexInput,
                 bufferMemoryBarriers: new[] { computeToGraphicsBarrier });
-
+/*
             _computeCmdBuffer.End();*/
         }
     }

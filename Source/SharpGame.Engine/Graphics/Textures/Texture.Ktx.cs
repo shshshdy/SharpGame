@@ -152,44 +152,25 @@ namespace SharpGame
                 subresourceRange);
 
             Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue.native, true);
-            /*
-            // Create sampler
-            SamplerCreateInfo sampler = new SamplerCreateInfo();
-            sampler.magFilter = Filter.Linear;
-            sampler.minFilter = Filter.Linear;
-            sampler.mipmapMode = SamplerMipmapMode.Linear;
-            sampler.addressModeU = SamplerAddressMode.Repeat;
-            sampler.addressModeV = sampler.addressModeU;
-            sampler.addressModeW = sampler.addressModeU;
-            sampler.mipLodBias = 0.0f;
-            sampler.compareOp = CompareOp.Never;
-            sampler.minLod = 0.0f;
-            sampler.maxLod = mipLevels;
-            sampler.borderColor = BorderColor.FloatOpaqueWhite;
-            sampler.maxAnisotropy = 1.0f;
-
-            if (Device.Features.samplerAnisotropy == 1)
-            {
-                sampler.maxAnisotropy = Device.Properties.limits.maxSamplerAnisotropy;
-                sampler.anisotropyEnable = true;
-            }*/
-
-            this.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
+            
+            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
 
             // Create image view
-            ImageViewCreateInfo view = new ImageViewCreateInfo();
-            // Cube map view type
-            view.viewType = layers == 6 ? ImageViewType.ImageCube : ImageViewType.Image2D;
-            view.format = format;
-            view.components = new ComponentMapping(ComponentSwizzle.R, ComponentSwizzle.G, ComponentSwizzle.B, ComponentSwizzle.A );
-            view.subresourceRange = new VkImageSubresourceRange { aspectMask = VkImageAspectFlags.Color, baseMipLevel = 0, layerCount = 1, baseArrayLayer = 0, levelCount = 1 };
+            ImageViewCreateInfo view = new ImageViewCreateInfo
+            {
+                // Cube map view type
+                viewType = layers == 6 ? ImageViewType.ImageCube : ImageViewType.Image2D,
+                format = format,
+                components = new ComponentMapping(ComponentSwizzle.R, ComponentSwizzle.G, ComponentSwizzle.B, ComponentSwizzle.A),
+                subresourceRange = new ImageSubresourceRange { aspectMask = ImageAspectFlags.Color, baseMipLevel = 0, layerCount = 1, baseArrayLayer = 0, levelCount = 1 }
+            };
             // array layers (faces)
             view.subresourceRange.layerCount = layers;
             // Set number of mip levels
             view.subresourceRange.levelCount = (uint)mipLevels;
             view.image = image;
 
-            this.imageView = new ImageView(ref view);
+            imageView = new ImageView(ref view);
 
             // Clean up staging resources
             Device.FreeMemory(stagingMemory);

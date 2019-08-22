@@ -387,6 +387,12 @@ namespace SharpGame
                 imageMemoryBarrierCount, ref pImageMemoryBarriers);
         }
 
+        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ref BufferMemoryBarrier barrier)
+        {
+            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
+                0, 0, null, 0, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier), 1, null);
+        }
+
         public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ref ImageMemoryBarrier barrier)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,

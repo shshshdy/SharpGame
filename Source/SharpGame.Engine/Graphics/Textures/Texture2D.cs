@@ -179,7 +179,7 @@ namespace SharpGame
             };
             // The subresource range describes the set of mip levels (and array layers) that can be accessed through this image view
             // It's possible to create multiple image views for a single image referring to different (and/or overlapping) ranges of the image
-            viewCreateInfo.subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            viewCreateInfo.subresourceRange.aspectMask = ImageAspectFlags.Color;
             viewCreateInfo.subresourceRange.baseMipLevel = 0;
             viewCreateInfo.subresourceRange.baseArrayLayer = 0;
             viewCreateInfo.subresourceRange.layerCount = 1;
@@ -383,7 +383,7 @@ namespace SharpGame
                 viewType = ImageViewType.Image2D,
                 format = format,
                 components = new ComponentMapping { r = ComponentSwizzle.R, g = ComponentSwizzle.G, b = ComponentSwizzle.B, a = ComponentSwizzle.A },
-                subresourceRange = new VkImageSubresourceRange { aspectMask = VkImageAspectFlags.Color, baseMipLevel = 0, levelCount = 1, baseArrayLayer = 0, layerCount = 1 }
+                subresourceRange = new ImageSubresourceRange { aspectMask = ImageAspectFlags.Color, baseMipLevel = 0, levelCount = 1, baseArrayLayer = 0, layerCount = 1 }
             };
             // Linear tiling usually won't support mip maps
             // Only set mip map count if optimal tiling is used
