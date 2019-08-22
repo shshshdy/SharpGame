@@ -24,12 +24,11 @@
     <None Include="$(MSBuildThisFileDirectory)GLSL\tonemap_fs.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\tonemap_vs.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ImGUI.shader" />
-    <None Include="$(MSBuildThisFileDirectory)IrMap.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitSolid.shader" />
+    <None Include="$(MSBuildThisFileDirectory)Particle.shader" />
     <None Include="$(MSBuildThisFileDirectory)Reflect.shader" />
     <None Include="$(MSBuildThisFileDirectory)Skinned.shader" />
     <None Include="$(MSBuildThisFileDirectory)Skybox.shader" />
-    <None Include="$(MSBuildThisFileDirectory)SpMap.shader" />
     <None Include="$(MSBuildThisFileDirectory)UnLit.shader" />
   </ItemGroup>
   <ItemGroup>

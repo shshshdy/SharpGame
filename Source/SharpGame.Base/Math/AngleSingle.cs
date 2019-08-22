@@ -111,7 +111,7 @@ namespace SharpGame
                     break;
 
                 case AngleType.Degree:
-                    radians = MathUtil.DegreesToRadians(angle);
+                    radians = MathUtil.Radians(angle);
                     break;
 
                 case AngleType.Radian:
@@ -183,7 +183,7 @@ namespace SharpGame
         public float Degrees
         {
             get { return MathUtil.RadiansToDegrees(radians); }
-            set { radians = MathUtil.DegreesToRadians(value); }
+            set { radians = MathUtil.Radians(value); }
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace SharpGame
                 float degreesfloor = (float)Math.Floor(degrees);
 
                 degreesfloor += value / 60.0f;
-                radians = MathUtil.DegreesToRadians(degreesfloor);
+                radians = MathUtil.Radians(degreesfloor);
             }
         }
 
@@ -260,7 +260,7 @@ namespace SharpGame
 
                 minutesfloor += value / 60.0f;
                 degreesfloor += minutesfloor / 60.0f;
-                radians = MathUtil.DegreesToRadians(degreesfloor);
+                radians = MathUtil.Radians(degreesfloor);
             }
         }
         

@@ -14,7 +14,7 @@ namespace SharpGame.Samples
 
             var cameraNode = scene.CreateChild("Camera");
             cameraNode.Position = new Vector3(0, 20, -30);
-            cameraNode.Rotation = Quaternion.FromEuler(MathUtil.DegreesToRadians(30), 0, 0);
+            cameraNode.Rotation = Quaternion.FromEuler(MathUtil.Radians(30), 0, 0);
 
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;

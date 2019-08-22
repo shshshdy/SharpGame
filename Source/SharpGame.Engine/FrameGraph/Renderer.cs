@@ -11,6 +11,7 @@ namespace SharpGame
 
         private List<RenderView> views = new List<RenderView>();
 
+        public Graphics Graphics => Graphics.Instance;
 
         public Renderer()
         {
@@ -41,19 +42,17 @@ namespace SharpGame
 
         public void Render()
         {
-            var graphics = Graphics.Instance;
-
             Profiler.BeginSample("Render");
 
-            graphics.BeginRender();
+            Graphics.BeginRender();
 
-            CommandBuffer cmdBuffer = graphics.RenderCmdBuffer;
+            CommandBuffer cmdBuffer = Graphics.RenderCmdBuffer;
 
             cmdBuffer.Begin();
 
             this.SendGlobalEvent(new BeginRender());
 
-            int imageIndex = (int)graphics.currentImage;
+            int imageIndex = (int)Graphics.currentImage;
 
             foreach (var viewport in views)
             {
@@ -64,7 +63,7 @@ namespace SharpGame
 
             cmdBuffer.End();
 
-            graphics.EndRender();
+            Graphics.EndRender();
 
             Profiler.EndSample();
 

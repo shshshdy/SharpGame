@@ -580,4 +580,81 @@ namespace SharpGame
         SecondaryCommandBuffers = 1
     }
 
+    /// <summary>
+    /// Structure specifying an image resolve operation.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ImageResolve
+    {
+        /// <summary>
+        /// Specifies the image subresource of the source image data. Resolve of depth/stencil image
+        /// is not supported.
+        /// </summary>
+        public ImageSubresourceLayers SrcSubresource;
+        /// <summary>
+        /// Selects the initial <c>X</c>, <c>Y</c>, and <c>Z</c> offsets in texels of the sub-region
+        /// of the source image data.
+        /// </summary>
+        public Offset3D SrcOffset;
+        /// <summary>
+        /// Specifies the image subresource of the destination image data. Resolve of depth/stencil
+        /// image is not supported.
+        /// </summary>
+        public ImageSubresourceLayers DstSubresource;
+        /// <summary>
+        /// Selects the initial <c>X</c>, <c>Y</c>, and <c>Z</c> offsets in texels of the sub-region
+        /// of the destination image data.
+        /// </summary>
+        public Offset3D DstOffset;
+        /// <summary>
+        /// The size in texels of the source image to resolve in width, height and depth.
+        /// </summary>
+        public Extent3D Extent;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MemoryBarrier
+    {
+        internal VkMemoryBarrier native;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryBarrier"/> structure.
+        /// </summary>
+        /// <param name="srcAccessMask">Specifies a source access mask.</param>
+        /// <param name="dstAccessMask">Specifies a destination access mask.</param>
+        public MemoryBarrier(AccessFlags srcAccessMask, AccessFlags dstAccessMask)
+        {
+            native = VkMemoryBarrier.New();
+            native.srcAccessMask = (VkAccessFlags)srcAccessMask;
+            native.dstAccessMask = (VkAccessFlags)dstAccessMask;
+        }
+    }
+
+    /// <summary>
+    /// Structure specifying a buffer memory barrier.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BufferMemoryBarrier
+    {
+        internal VkBufferMemoryBarrier native;
+      
+        public BufferMemoryBarrier(DeviceBuffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ulong offset = 0, ulong size = WholeSize)
+            : this(buffer, srcAccessMask, dstAccessMask, uint.MaxValue, uint.MaxValue, offset, size)
+        {
+            native = VkBufferMemoryBarrier.New();
+        }
+
+        public BufferMemoryBarrier(DeviceBuffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask,
+            uint srcQueueFamilyIndex, uint dstQueueFamilyIndex, ulong offset = 0, ulong size = WholeSize)
+        {
+            native = VkBufferMemoryBarrier.New();
+            native.buffer = buffer.buffer;
+            native.offset = offset;
+            native.size = size;
+            native.srcAccessMask = (VkAccessFlags)srcAccessMask;
+            native.dstAccessMask = (VkAccessFlags)dstAccessMask;
+            native.srcQueueFamilyIndex = srcQueueFamilyIndex;
+            native.dstQueueFamilyIndex = dstQueueFamilyIndex;
+        }
+
+    }
 }

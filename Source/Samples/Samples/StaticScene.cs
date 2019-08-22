@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -1)]
+    [SampleDesc(sortOrder = 1)]
     public class StaticScene : Sample
     {
         public override void Init()
@@ -13,7 +13,7 @@ namespace SharpGame.Samples
 
             var cameraNode = scene.CreateChild("Camera");
             cameraNode.Position = new Vector3(0, 20, -30);
-            cameraNode.Rotation = Quaternion.FromEuler(MathUtil.DegreesToRadians(30), 0, 0);
+            cameraNode.Rotation = Quaternion.FromEuler(MathUtil.Radians(30), 0, 0);
 
             camera = cameraNode.CreateComponent<Camera>();
             camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
@@ -40,7 +40,7 @@ namespace SharpGame.Samples
                 {
                     var node = scene.CreateChild("Model");
                     node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20));
-                    node.Rotation = Quaternion.FromEuler(0, MathUtil.DegreesToRadians(MathUtil.Random(0, 90)), 0);
+                    node.Rotation = Quaternion.FromEuler(0, MathUtil.Radians(MathUtil.Random(0, 90)), 0);
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(mat);

@@ -38,8 +38,8 @@ namespace SharpGame
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
 
         public static VkDevice device { get; protected set; }
-        public static VkQueue GraphicsQueue { get; protected set; }
-        public static VkQueue ComputeQueue { get; protected set; }
+        public static Queue GraphicsQueue { get; protected set; }
+        public static Queue ComputeQueue { get; protected set; }
 
         public Format ColorFormat => Swapchain.ColorFormat;
         public Format DepthFormat { get; protected set; }
@@ -91,12 +91,11 @@ namespace SharpGame
             device = Device.Init(enabledFeatures, EnabledExtensions);
            
             // Get a graphics queue from the Device
-            GraphicsQueue = Device.GetDeviceQueue(Device.QFIndices.Graphics, 0);
-            ComputeQueue = Device.GetDeviceQueue(Device.QFIndices.Compute, 0);
+            GraphicsQueue = Queue.GetDeviceQueue(Device.QFIndices.Graphics, 0);
+            ComputeQueue = Queue.GetDeviceQueue(Device.QFIndices.Compute, 0);
 
             DepthFormat = Device.GetSupportedDepthFormat();            
-
-            // Create synchronization objects
+                        // Create synchronization objects
             Semaphores* pSem = (Semaphores*)semaphores.GetAddress(0);
             pSem->PresentComplete = Device.CreateSemaphore();
             pSem->RenderComplete = Device.CreateSemaphore();
@@ -363,6 +362,8 @@ namespace SharpGame
         {
             commandBuffer.End();
 
+            GraphicsQueue.Submit(null, PipelineStageFlags.None, commandBuffer, null);
+            /*
             VkSubmitInfo submitInfo = VkSubmitInfo.New();
             submitInfo.commandBufferCount = 1;
 
@@ -372,7 +373,10 @@ namespace SharpGame
                 vkQueueSubmit(GraphicsQueue, 1, &submitInfo, VkFence.Null);
             }
 
-            vkQueueWaitIdle(GraphicsQueue);
+            vkQueueWaitIdle(GraphicsQueue);*/
+
+            GraphicsQueue.WaitIdle();
+
             commandBuffer.Reset(true);
         }
 
@@ -445,8 +449,6 @@ namespace SharpGame
             return newBuffer;
         }
 
-
-
         public void WaitIdle()
         {
             device.WaitIdle();
@@ -490,23 +492,20 @@ namespace SharpGame
         public void EndRender()
         {
             // Command buffer to be sumitted to the queue
-            submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress((uint)RenderContext);
+            //submitInfo.commandBufferCount = 1;
+            //submitInfo.pCommandBuffers = (VkCommandBuffer*)primaryCmdPool.GetAddress((uint)RenderContext);
 
             Profiler.BeginSample("Submit");
             // Submit to queue
-            VulkanUtil.CheckResult(vkQueueSubmit(GraphicsQueue, 1, ref submitInfo, VkFence.Null));
+            //VulkanUtil.CheckResult(vkQueueSubmit(GraphicsQueue, 1, ref submitInfo, VkFence.Null));
 
+            GraphicsQueue.Submit(null, PipelineStageFlags.None, primaryCmdPool[RenderContext], null);
             Profiler.EndSample();
 
-
             Profiler.BeginSample("Present");
-
-
-            VulkanUtil.CheckResult(Swapchain.QueuePresent(GraphicsQueue, currentImage, semaphores[0].RenderComplete));
-
-            VulkanUtil.CheckResult(vkQueueWaitIdle(GraphicsQueue));
-
+            VulkanUtil.CheckResult(Swapchain.QueuePresent(GraphicsQueue.native, currentImage, semaphores[0].RenderComplete));
+            //VulkanUtil.CheckResult(vkQueueWaitIdle(GraphicsQueue));
+            GraphicsQueue.WaitIdle();
             Profiler.EndSample();
 
 #if EVENT_SYNC
@@ -536,9 +535,9 @@ namespace SharpGame
 
         private int currentFrame;
         public int CurrentFrame => currentFrame;
-
-        private Semaphore renderSem = new Semaphore(0, 1);
-        private Semaphore mainSem = new Semaphore(0, 1);
+        
+        private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
+        private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);
 
         List<System.Action> actions = new List<Action>();
 

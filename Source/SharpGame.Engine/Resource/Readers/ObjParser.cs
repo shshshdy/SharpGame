@@ -11,7 +11,7 @@ namespace SharpGame
     /// </summary>
     public class ObjParser
     {
-        private static readonly string[] s_newline = new string[] { Environment.NewLine };
+        private static readonly string[] s_newline = new string[] { System.Environment.NewLine };
         private static readonly char[] s_whitespaceChars = new char[] { ' ' };
         private static readonly char[] s_slashChar = new char[] { '/' };
 

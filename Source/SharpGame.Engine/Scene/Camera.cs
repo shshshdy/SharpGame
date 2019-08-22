@@ -37,11 +37,11 @@ namespace SharpGame
         [DataMember(Order = 5)]
         public float AspectRatio { get => aspectRatio_; set => SetAspectRatio(value); }
 
-        [IgnoreDataMember]
-        public bool AutoAspectRatio => autoAspectRatio_;
-
         [DataMember(Order = 6)]
         public float Zoom { get => zoom_; set => SetZoom(value); }
+
+        [DataMember(Order = 7)]
+        public bool AutoAspectRatio { get => autoAspectRatio_; set => SetAutoAspectRatio(value); }
 
 
         /// Return projection matrix. It's in D3D convention with depth range 0 - 1.

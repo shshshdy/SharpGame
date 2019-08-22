@@ -151,7 +151,7 @@ namespace SharpGame
                 (VkImageLayout)imageLayout,
                 subresourceRange);
 
-            Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
+            Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue.native, true);
             /*
             // Create sampler
             SamplerCreateInfo sampler = new SamplerCreateInfo();

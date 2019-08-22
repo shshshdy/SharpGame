@@ -6,7 +6,7 @@ using Vulkan;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 9)]
+    [SampleDesc(sortOrder = -9)]
     public class PbrLighting : Sample
     {
         const int kEnvMapSize = 1024;
@@ -49,10 +49,9 @@ namespace SharpGame.Samples
 
             var cameraNode = scene.CreateChild("Camera");
             cameraNode.Position = new Vector3(80.0f, 0.0f, -150);
-            cameraNode.Rotate(Quaternion.FromEuler(0, MathUtil.DegreesToRadians(-45), 0), TransformSpace.LOCAL);
+            cameraNode.Rotate(Quaternion.FromEuler(0, MathUtil.Radians(-45), 0), TransformSpace.LOCAL);
             camera = cameraNode.CreateComponent<Camera>();
-            camera.Fov = MathUtil.DegreesToRadians(60);
-            camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
+            camera.Fov = MathUtil.Radians(60);
 
             envMap = Texture.Create(kEnvMapSize, kEnvMapSize, 6, Format.R16g16b16a16Sfloat, 0, ImageUsageFlags.Storage);
             irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);
@@ -127,9 +126,11 @@ namespace SharpGame.Samples
 
         void Preprocess()
         {
+            Shader shader = Resources.Load<Shader>("shaders/brdf.shader");
+
             {
-                Shader shader = Resources.Load<Shader>("shaders/spmap.shader");
-                Pass pass = shader.Main;
+                Pass pass = shader.GetPass("SpMap");
+
                 uint numMipTailLevels = (uint)kEnvMapLevels - 1;
 
                 // Compute pre-filtered specular environment map.            
@@ -211,8 +212,8 @@ namespace SharpGame.Samples
 
             // Compute diffuse irradiance cubemap
             {
-                Shader shader = Resources.Load<Shader>("shaders/irmap.shader");
-                ResourceLayout resLayout = shader.Main.GetResourceLayout(0);
+                Pass pass = shader.GetPass("IrMap");
+                ResourceLayout resLayout = pass.GetResourceLayout(0);
                 irSet = new ResourceSet(resLayout, cubeMap, irMap);
 
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
@@ -220,8 +221,8 @@ namespace SharpGame.Samples
                     Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(irMap, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General) };
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
 
-                    commandBuffer.BindComputePipeline(shader.Main);
-                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, irSet, null);
+                    commandBuffer.BindComputePipeline(pass);
+                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, irSet, null);
                     commandBuffer.Dispatch(kIrradianceMapSize / 32, kIrradianceMapSize / 32, 6);
 
                     Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(irMap, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
@@ -233,9 +234,8 @@ namespace SharpGame.Samples
 
             // Compute Cook-Torrance BRDF 2D LUT for split-sum approximation.
             {
-                Shader shader = Resources.Load<Shader>("shaders/brdf.shader");
-
-                ResourceLayout resLayout = shader.Main.GetResourceLayout(0);
+                var pass = shader.GetPass("BrdfLUT");
+                ResourceLayout resLayout = pass.GetResourceLayout(0);
                 brdfLUTSet = new ResourceSet(resLayout, brdfLUT);
 
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
@@ -243,8 +243,8 @@ namespace SharpGame.Samples
                     Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(brdfLUT, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General)};
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
 
-                    commandBuffer.BindComputePipeline(shader.Main);
-                    commandBuffer.BindComputeResourceSet(shader.Main.PipelineLayout, 0, brdfLUTSet, null);
+                    commandBuffer.BindComputePipeline(pass);
+                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, brdfLUTSet, null);
                     commandBuffer.Dispatch(kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
 
                     Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(brdfLUT, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };

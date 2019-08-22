@@ -209,7 +209,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="degree">The value to convert.</param>
         /// <returns>The converted value.</returns>
-        public static float DegreesToRadians(float degree)
+        public static float Radians(float degree)
         {
             return degree * (Pi / 180.0f);
         }

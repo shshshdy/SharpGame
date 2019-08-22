@@ -210,6 +210,7 @@ namespace SharpGame
         public DependencyFlags dependencyFlags;
     }
 
+    [Flags]
     public enum AccessFlags
     {
         None = 0,

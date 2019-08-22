@@ -207,7 +207,7 @@ namespace SharpGame
 
             var g = Graphics.Instance;
             this.frameInfo = frameInfo;
-            this.frameInfo.camera = Camera;
+            this.frameInfo.camera = camera;
             this.frameInfo.viewSize = new Int2(g.Width, g.Height);
 
             ubMatrics.Clear();
@@ -246,16 +246,21 @@ namespace SharpGame
             drawables.Clear();
             batches.Clear();
 
-            if (!Scene || !Camera)
+            if (!scene || !camera)
             {
                 return;
+            }
+
+            if(camera.AutoAspectRatio)
+            {
+                camera.SetAspectRatio((float)frameInfo.viewSize.X / (float)frameInfo.viewSize.Y);
             }
 
             Profiler.BeginSample("Culling");
             FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery
             {
                 view = this,
-                camera = Camera
+                camera = camera
             };
 
             Scene.GetDrawables(frustumOctreeQuery, AddDrawable);
