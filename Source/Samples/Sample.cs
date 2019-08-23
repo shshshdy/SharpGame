@@ -168,7 +168,16 @@ namespace SharpGame.Samples
             {
                 foreach(var tex in debugImages)
                 {
-                    ImGUI.Image(tex, new Vector2(tex.width * debugImageHeight / tex.height, debugImageHeight)); ImGui.SameLine();
+                    float scale = tex.width / (float)tex.height;
+                    if(scale > 1)
+                    {
+                        ImGUI.Image(tex, new Vector2(debugImageHeight, debugImageHeight/ scale)); ImGui.SameLine();
+                    }
+                    else
+                    {
+                        ImGUI.Image(tex, new Vector2(scale * debugImageHeight, debugImageHeight)); ImGui.SameLine();
+                    }
+                    
                 }
             }
 
