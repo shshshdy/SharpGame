@@ -35,7 +35,7 @@ namespace SharpGame
         {
         }
 
-        public virtual void Summit(int imageIndex)
+        public virtual void Submit(int imageIndex)
         {
         }
     }

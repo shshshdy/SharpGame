@@ -77,6 +77,20 @@ namespace SharpGame
             Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
         }
 
+        public void Bind(params IBindableResource[] bindables)
+        {
+            System.Diagnostics.Debug.Assert(bindables.Length == writeDescriptorSets.Length);
+
+            writeDescriptorSets = new WriteDescriptorSet[writeDescriptorSets.Length];
+
+            for (uint i = 0; i < writeDescriptorSets.Length; i++)
+            {
+                Bind(i, bindables[i]);
+            }
+
+            UpdateSets();
+        }
+
         public ResourceSet Bind(uint dstBinding, ref DescriptorImageInfo imageInfo)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;

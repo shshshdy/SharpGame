@@ -126,7 +126,7 @@ namespace SharpGame
 
         }
 
-        public override void Summit(int imageIndex)
+        public override void Submit(int imageIndex)
         {
             var g = Graphics.Instance;
             int renderContext = g.RenderContext;
@@ -158,7 +158,7 @@ namespace SharpGame
             }
             else
             {
-                base.Summit(imageIndex);
+                base.Submit(imageIndex);
             }
 
         }

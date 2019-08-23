@@ -248,10 +248,18 @@ namespace SharpGame
             vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
+
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindPipeline(PipelineBindPoint pipelineBindPoint, VkPipeline pass)
+        public void BindPipeline(PipelineBindPoint pipelineBindPoint, Pass pass, Geometry geometry)
         {
-            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pass);
+            var pipeline = pass.GetGraphicsPipeline(renderPass, geometry);           
+            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline);
+        }
+
+        [MethodImpl((MethodImplOptions)0x100)]
+        public void BindPipeline(PipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
+        {
+            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -322,11 +330,13 @@ namespace SharpGame
             var pipe = pass.GetGraphicsPipeline(renderPass, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
 
+            material.PushConstants(pass.PipelineLayout, this);
+
             foreach (var rs in material.ResourceSet)
             {
                 if (rs.Updated)
                 {
-                    BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, rs.Set, rs);
+                    BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
                 }
             }
 
@@ -390,7 +400,7 @@ namespace SharpGame
         public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ref BufferMemoryBarrier barrier)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
-                0, 0, null, 0, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier), 1, null);
+                0, 0, null, 1, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier), 0, null);
         }
 
         public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ref ImageMemoryBarrier barrier)

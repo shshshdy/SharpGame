@@ -185,6 +185,7 @@ namespace SharpGame
             {
                 new ColorBlendAttachment
                 {
+                    blendEnable = true,
                     srcColorBlendFactor = BlendFactor.One,
                     dstColorBlendFactor = BlendFactor.One,
                     colorBlendOp = BlendOp.Add,

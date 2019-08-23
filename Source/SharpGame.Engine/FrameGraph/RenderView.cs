@@ -334,8 +334,8 @@ namespace SharpGame
         {
             Profiler.BeginSample("ViewRender");
 
-            FrameGraph?.Summit(imageIndex);
-            OverlayPass?.Summit(imageIndex);
+            FrameGraph?.Submit(imageIndex);
+            OverlayPass?.Submit(imageIndex);
 
             Profiler.EndSample();
         }

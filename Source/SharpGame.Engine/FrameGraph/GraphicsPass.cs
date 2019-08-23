@@ -92,6 +92,27 @@ namespace SharpGame
             cmdBuffer = null;
         }
 
+        public void DrawFullScreenQuad(CommandBuffer cb, Material material)
+        {
+            var shader = material.Shader;
+            var pass = shader.GetPass(passID);
+            var pipe = pass.GetGraphicsPipeline(renderPass, null);
+
+            cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
+
+            material.PushConstants(pass.PipelineLayout, cb);
+
+            foreach (var rs in material.ResourceSet)
+            {
+                if (rs.Updated)
+                {
+                    cb.BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
+                }
+            }
+
+            cb.Draw(3, 1, 0, 0);
+        }
+
         public void DrawBatch(CommandBuffer cb, SourceBatch batch, ResourceSet resourceSet, ResourceSet resourceSet1, uint? offset = null, uint? offset1 = null)
         {
             var shader = batch.material.Shader;
@@ -125,7 +146,7 @@ namespace SharpGame
             batch.geometry.Draw(cb);
         }
 
-        public override void Summit(int imageIndex)
+        public override void Submit(int imageIndex)
         {
             var g = Graphics.Instance;
             CommandBuffer cb = g.RenderCmdBuffer;

@@ -4,6 +4,7 @@ Shader "Particle"
 	{
 		CullMode = None
 		FrontFace = CounterClockwise
+        BlendMode = Add
 
 		@VertexShader
 		{

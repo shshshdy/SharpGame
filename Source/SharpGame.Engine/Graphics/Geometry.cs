@@ -101,7 +101,7 @@ namespace SharpGame
 
             return true;
         }
-
+        
         [MethodImpl((MethodImplOptions)0x100)]
         public void Draw(CommandBuffer cmdBuffer)
         {

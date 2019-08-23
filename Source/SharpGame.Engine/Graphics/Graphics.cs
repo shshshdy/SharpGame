@@ -16,7 +16,7 @@ namespace SharpGame
     public class Settings
     {
         public UTF8String ApplicationName { get; set; }
-        public bool Validation { get; set; } = false;
+        public bool Validation { get; set; } = true;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
         public bool SingleLoop { get; set; }
@@ -53,7 +53,10 @@ namespace SharpGame
         private CommandBufferPool computeCmdPool;
 
         public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[RenderContext];
-        
+
+        public CommandBuffer ComputeCmdBuffer => computeCmdPool.CommandBuffers[WorkContext];
+        public CommandBuffer submitComputeCmdBuffer;
+
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
 
@@ -62,6 +65,8 @@ namespace SharpGame
 
         public Semaphore PresentComplete { get; }
         public Semaphore RenderComplete { get; }
+
+        Fence computeFence;
 
         private DepthStencil depthStencil;
         
@@ -90,7 +95,8 @@ namespace SharpGame
             // Create synchronization objects
             PresentComplete = new Semaphore();
             RenderComplete = new Semaphore();
-            
+            computeFence = new Fence(FenceCreateFlags.Signaled);
+
             Texture.Init();
 
 #if EVENT_SYNC
@@ -223,7 +229,6 @@ namespace SharpGame
 
         public RenderPass CreateRenderPass(bool clearColor = false, bool clearDepth = false)
         {
-
             AttachmentDescription[] attachments =
             {
                 // Color attachment
@@ -332,6 +337,7 @@ namespace SharpGame
         {
             primaryCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
             workCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
+            computeCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
         }
 
         public CommandBuffer BeginWorkCommandBuffer()
@@ -461,7 +467,17 @@ namespace SharpGame
         public void EndRender()
         {
             Profiler.BeginSample("Submit");
+
+            if(submitComputeCmdBuffer)
+            {
+                ComputeQueue.Submit(null, PipelineStageFlags.None, submitComputeCmdBuffer, null, computeFence);
+                computeFence.Wait();
+                computeFence.Reset();
+                submitComputeCmdBuffer = null;
+            }
+
             GraphicsQueue.Submit(PresentComplete, PipelineStageFlags.ColorAttachmentOutput, primaryCmdPool[RenderContext], RenderComplete);
+
             Profiler.EndSample();
 
             Profiler.BeginSample("Present");
@@ -471,6 +487,7 @@ namespace SharpGame
             GraphicsQueue.WaitIdle();
 
             Profiler.EndSample();
+
 
 #if EVENT_SYNC
 

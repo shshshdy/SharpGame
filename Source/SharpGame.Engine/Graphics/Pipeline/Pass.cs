@@ -417,7 +417,16 @@ namespace SharpGame
             pipelineCreateInfo.basePipelineIndex = -1;
             pipelineCreateInfo.basePipelineHandle = new VkPipeline();
 
-            vertexInput.ToNative(out VkPipelineVertexInputStateCreateInfo vertexInputState);
+            VkPipelineVertexInputStateCreateInfo vertexInputState;
+            if(vertexInput != null)
+            {
+                vertexInput.ToNative(out vertexInputState);
+            }
+            else
+            {
+                vertexInputState = VkPipelineVertexInputStateCreateInfo.New();
+            }
+
             pipelineCreateInfo.pVertexInputState = &vertexInputState;
 
             VkPipelineShaderStageCreateInfo* shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];

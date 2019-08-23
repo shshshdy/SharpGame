@@ -7,11 +7,6 @@ using System.Text;
 
 namespace SharpGame
 {
-    using vec2 = Vector2;
-    using vec3 = Vector3;
-    using vec4 = Vector4;
-    using mat4 = Matrix;
-
     public class FrameGraph : Object
     {
         public RenderTarget[] RenderTargets { get; set; }
@@ -25,6 +20,17 @@ namespace SharpGame
         public void AddGraphicsPass(Action<GraphicsPass, RenderView> onDraw)
         {
             var renderPass = new GraphicsPass
+            {
+                OnDraw = onDraw,
+                FrameGraph = this
+            };
+
+            RenderPassList.Add(renderPass);
+        }
+
+        public void AddComputePass(Action<ComputePass, RenderView> onDraw)
+        {
+            var renderPass = new ComputePass
             {
                 OnDraw = onDraw,
                 FrameGraph = this
@@ -49,11 +55,11 @@ namespace SharpGame
             Profiler.EndSample();
         }
 
-        public void Summit(int imageIndex)
+        public void Submit(int imageIndex)
         {
             foreach (var renderPass in RenderPassList)
             {
-                renderPass.Summit(imageIndex);
+                renderPass.Submit(imageIndex);
             }
 
         }
@@ -64,9 +70,9 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct ObjectVS
     {
-        public mat4 Model;
-        public vec4 UOffset;
-        public vec4 VOffset;
+        public Matrix Model;
+        public Vector4 UOffset;
+        public Vector4 VOffset;
     };
 
     [StructLayout(LayoutKind.Sequential)]
@@ -78,10 +84,10 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct MaterialPS
     {
-        public vec4 MatDiffColor;
-        public vec4 MatEmissiveColor;
-        public vec4 MatEnvMapColor;
-        public vec4 MatSpecColor;
+        public Vector4 MatDiffColor;
+        public Vector4 MatEmissiveColor;
+        public Vector4 MatEnvMapColor;
+        public Vector4 MatSpecColor;
         public float cRoughness;
         public float cMetallic;
     }
