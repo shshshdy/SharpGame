@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -16,10 +17,9 @@ namespace SharpGame.Samples
     {
         const int PARTICLE_COUNT = 256 * 1024;
 
-        FrameGraph frameGraph = new FrameGraph();
-
-        DeviceBuffer storageBuffer;
-        DeviceBuffer uniformBuffer;
+        private FrameGraph frameGraph = new FrameGraph();
+        private DeviceBuffer storageBuffer;
+        private DeviceBuffer uniformBuffer;
 
         struct UBO
         {
@@ -29,16 +29,17 @@ namespace SharpGame.Samples
             public int particleCount;
         };
 
-        Geometry geometry;
-        Material material;
+        private Geometry geometry;
+        private Material material;
 
-        UBO ubo = new UBO();
-        Pass _computePipeline;
-        private ResourceSet _computeResourceSet;
+        private UBO ubo = new UBO();
+        private Pass computePipeline;
+        private ResourceSet computeResourceSet;
 
-        float timer = 0.0f;
-        float animStart = 20.0f;
-        bool animate = true;
+        private float timer = 0.0f;
+        private float animStart = 20.0f;
+        private bool animate = true;
+
 
         public override void Init()
         {
@@ -75,8 +76,8 @@ namespace SharpGame.Samples
                     new[]
                     {
                         new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
-                        new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
-                        new VertexInputAttribute(0, 2, Format.R32g32b32a32Sfloat, 16)
+                        //new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
+                        new VertexInputAttribute(0, 1, Format.R32g32b32a32Sfloat, 16)
                     }
                 )
 
@@ -86,13 +87,16 @@ namespace SharpGame.Samples
 
             material = new Material(shader);
 
-            var tex = Texture.LoadFromFile("textures/particle01_rgba.ktx", Format.R8g8b8a8Unorm);            
+            var tex =  Texture.LoadFromFile("textures/particle01_rgba.ktx", Format.R8g8b8a8Unorm);            
             var tex1 = Texture.LoadFromFile("textures/particle_gradient_rgba.ktx", Format.R8g8b8a8Unorm);
+
+            AddDebugImage(tex);
+            AddDebugImage(tex1);
 
             material.ResourceSet[0].Bind(tex, tex1);
 
-            _computePipeline = shader.GetPass("compute");
-            _computeResourceSet = new ResourceSet(_computePipeline.PipelineLayout.ResourceLayout[0], storageBuffer, uniformBuffer);
+            computePipeline = shader.GetPass("compute");
+            computeResourceSet = new ResourceSet(computePipeline.PipelineLayout.ResourceLayout[0], storageBuffer, uniformBuffer);
 
             frameGraph.AddGraphicsPass(DrawQuad);
             frameGraph.AddComputePass(Docompute);
@@ -163,8 +167,8 @@ namespace SharpGame.Samples
             // Add memory barrier to ensure that the (graphics) vertex shader has fetched attributes
             // before compute starts to write to the buffer.
             cb.PipelineBarrier(PipelineStageFlags.VertexInput, PipelineStageFlags.ComputeShader, ref graphicsToComputeBarrier);
-            cb.BindComputePipeline(_computePipeline);
-            cb.BindComputeResourceSet(_computePipeline.PipelineLayout, 0, _computeResourceSet);
+            cb.BindComputePipeline(computePipeline);
+            cb.BindComputeResourceSet(computePipeline.PipelineLayout, 0, computeResourceSet);
             cb.Dispatch((uint)storageBuffer.Count / 256, 1, 1);
             // Add memory barrier to ensure that compute shader has finished writing to the buffer.
             // Without this the (rendering) vertex shader may display incomplete results (partial
@@ -172,5 +176,6 @@ namespace SharpGame.Samples
             cb.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.VertexInput, ref computeToGraphicsBarrier);
             cb.End();
         }
+
     }
 }

@@ -31,12 +31,31 @@ namespace SharpGame.Samples
         public Graphics Graphics => Graphics.Instance;
         public Renderer Renderer => Renderer.Instance;
 
+        public static bool debugImage = false;
+        protected float debugImageHeight = 200.0f;
+        List<Texture> debugImages = new List<Texture>();
+       
         public Sample()
         {
+            (this).Subscribe((GUIEvent e) => OnDebugImage());
         }
 
         public virtual void Init()
         {
+        }
+
+        public void DebugImage(bool enable, float height = 200.0f)
+        {
+            debugImage = enable;
+            debugImageHeight = height;
+        }
+
+        public void AddDebugImage(params Texture[] textures)
+        {
+            foreach (var tex in textures)
+            {
+                debugImages.Add(tex);
+            }
         }
 
         public virtual void Update()
@@ -106,17 +125,22 @@ namespace SharpGame.Samples
             
         }
 
+        bool openCamera = true;
         public virtual void OnGUI()
         {
             if(camera)
             {
                 if (ImGui.Begin("HUD"))
                 {
-                    ImGui.TextUnformatted("Camera");
-                    ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0:0.00"));
-                    ImGui.TextUnformatted("rot : " + camera.Node.Rotation.ToEuler().ToString("0:0.00"));
-                    ImGui.SliderFloat("rot speed: ", ref rotSpeed, 1, 100);
-                    ImGui.SliderFloat("move speed: ", ref moveSpeed, 1, 100);
+                    if(ImGui.CollapsingHeader("Camera", ref openCamera))
+                    {
+                        ImGui.PushItemWidth(120);
+                        ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0:0.00"));
+                        ImGui.TextUnformatted("rot : " + camera.Node.Rotation.ToEuler().ToString("0:0.00"));
+                        ImGui.SliderFloat("Rotate Speed: ", ref rotSpeed, 1, 100);
+                        ImGui.SliderFloat("Move Speed: ", ref moveSpeed, 1, 100);
+                        ImGui.PopItemWidth();
+                    }
                 }
 
                 ImGui.End();
@@ -125,8 +149,36 @@ namespace SharpGame.Samples
        
         }
 
+        void OnDebugImage()
+        {
+            if(!debugImage || debugImages.Count == 0)
+            {
+                return;
+            }
+
+            var io = ImGui.GetIO();
+            {
+                Vector2 window_pos = new Vector2(10, io.DisplaySize.Y - 10);
+                Vector2 window_pos_pivot = new Vector2(0.0f, 1.0f);
+                ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
+                ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
+            }
+
+            if (ImGui.Begin("DebugImage", ref debugImage, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
+            {
+                foreach(var tex in debugImages)
+                {
+                    ImGUI.Image(tex, new Vector2(tex.width * debugImageHeight / tex.height, debugImageHeight)); ImGui.SameLine();
+                }
+            }
+
+            ImGui.End();
+
+        }
+
         protected override void Destroy()
         {
+            debugImages.Clear();
             scene?.Dispose();
 
             base.Destroy();

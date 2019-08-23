@@ -8,25 +8,23 @@ namespace SharpGame
     {
         public Action<ComputePass, RenderView> OnDraw { get; set; }
 
+        CommandBuffer[] commandBuffers = new CommandBuffer[3];
         public ComputePass()
         {
         }
 
         public override void Draw(RenderView view)
         {
-            cmdBuffer = Graphics.Instance.ComputeCmdBuffer;
-            OnDraw?.Invoke(this, view);
-            //cmdBuffer = null;
+            cmdBuffer = Graphics.Instance.WorkComputeBuffer;
+            commandBuffers[Graphics.Instance.WorkContext] = cmdBuffer;
+            OnDraw?.Invoke(this, view);            
         }
         
         public override void Submit(int imageIndex)
         {
             var g = Graphics.Instance;
-            CommandBuffer cb = g.ComputeCmdBuffer;
-            int renderContext = g.RenderContext;
-            g.submitComputeCmdBuffer = cmdBuffer;
-            //cb.ExecuteCommand(cmdBufferPool[renderContext].CommandBuffers[0]);
-
+            g.submitComputeCmdBuffer = commandBuffers[g.RenderContext];
+            commandBuffers[Graphics.Instance.RenderContext] = null;
         }
     }
 }

@@ -38,7 +38,7 @@ namespace SharpGame.Samples
 
         string[] cubeMaps =
         {
-            "gcanyon_cube.ktx", "papermill.ktx", "pisa_cube.ktx", "uffizi_cube.ktx"
+            "papermill.ktx", "gcanyon_cube.ktx", "pisa_cube.ktx", "uffizi_cube.ktx"
         };
 
         public override void Init()
@@ -87,6 +87,8 @@ namespace SharpGame.Samples
                 mat.SetTexture("roughnessMap", roughnessMap);
                 //mat.SetTexture("aoMap", aoMap);
 
+                //AddDebugImage(colorMap, normalMap, metallicMap, roughnessMap);
+
                 staticModel.SetMaterial(mat);
 
                 pbrMaterial = mat;
@@ -102,9 +104,12 @@ namespace SharpGame.Samples
 
             SetCubeMap(cubeMaps[0]);
 
+            AddDebugImage(envMap);
+            AddDebugImage(irMap);
+            AddDebugImage(brdfLUT);
+
             Renderer.MainView.Attach(camera, scene);
 
-            //(this).Subscribe((GUIEvent e) => OnDebugGUI());
         }
 
         static int NumMipmapLevels(int width, int height)
@@ -271,29 +276,6 @@ namespace SharpGame.Samples
 
             }
         }
-
-        bool debugOpen = true;
-
-        void OnDebugGUI()
-        {
-            var io = ImGui.GetIO();
-            {
-                Vector2 window_pos = new Vector2(10, io.DisplaySize.Y - 10);
-                Vector2 window_pos_pivot = new Vector2(0.0f, 1.0f);
-                ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
-                ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
-            }
-
-            if (ImGui.Begin("Debugger", ref debugOpen, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
-            {
-                ImGUI.Image(brdfLUT, new Vector2(200, 200));
-            }
-
-            ImGui.End();
-
-        }
-
-
 
     }
 

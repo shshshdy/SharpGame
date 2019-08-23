@@ -16,7 +16,7 @@ namespace SharpGame
     public class Settings
     {
         public UTF8String ApplicationName { get; set; }
-        public bool Validation { get; set; } = true;
+        public bool Validation { get; set; } = false;
         public bool Fullscreen { get; set; } = false;
         public bool VSync { get; set; } = false;
         public bool SingleLoop { get; set; }
@@ -54,7 +54,9 @@ namespace SharpGame
 
         public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[RenderContext];
 
-        public CommandBuffer ComputeCmdBuffer => computeCmdPool.CommandBuffers[WorkContext];
+        public CommandBuffer WorkComputeBuffer => computeCmdPool.CommandBuffers[WorkContext];
+        public CommandBuffer RenderComputeBuffer => computeCmdPool.CommandBuffers[RenderContext];
+
         public CommandBuffer submitComputeCmdBuffer;
 
         private RenderPass renderPass;
@@ -330,7 +332,7 @@ namespace SharpGame
         {
             primaryCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
             workCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
-            computeCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
+            computeCmdPool = new CommandBufferPool(ComputeQueue.FamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer);
         }
 
         protected void CreateCommandBuffers()
