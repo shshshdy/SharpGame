@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using ImGuiNET;
 using SharpGame;
 
@@ -22,8 +23,8 @@ namespace SharpGame.Samples
         protected float yaw;
         protected float pitch;
         protected float rotSpeed = 0.5f;
-        protected float wheelSpeed = 150.0f;
-        protected float moveSpeed = 15.0f;
+        protected float wheelSpeed = 50.0f;
+        protected float moveSpeed = 100.0f;
         protected Vector3 offset;
 
         public FileSystem FileSystem => FileSystem.Instance;
@@ -77,7 +78,7 @@ namespace SharpGame.Samples
             offset = Vector3.Zero;
             if (input.IsMouseDown(MouseButton.Right))
             {
-                Vector2 delta = (input.MousePosition - mousePos) * (float)(Time.Delta * rotSpeed * camera.AspectRatio);
+                Vector2 delta = (input.MousePosition - mousePos) * (Time.Delta * rotSpeed * new Vector2(camera.AspectRatio, 1.0f));
 
                 if(pitch == 0)
                 {
@@ -115,11 +116,11 @@ namespace SharpGame.Samples
             if (input.IsMouseDown(MouseButton.Middle))
             {
                 Vector2 delta = input.MousePosition - mousePos;
-                offset.X = -delta.X;
+                offset.X = -delta.X * camera.AspectRatio;
                 offset.Y = delta.Y;
             }
 
-            camera.Node.Translate(offset * (Time.Delta * moveSpeed) + new Vector3(0, 0, input.WheelDelta * (Time.Delta * wheelSpeed)), TransformSpace.LOCAL);
+            camera.Node.Translate(offset * (Time.Delta * moveSpeed) + new Vector3(0, 0, input.WheelDelta * wheelSpeed), TransformSpace.LOCAL);
 
             mousePos = input.MousePosition;
             
@@ -138,7 +139,7 @@ namespace SharpGame.Samples
                         ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0:0.00"));
                         ImGui.TextUnformatted("rot : " + camera.Node.Rotation.ToEuler().ToString("0:0.00"));
                         ImGui.SliderFloat("Rotate Speed: ", ref rotSpeed, 1, 100);
-                        ImGui.SliderFloat("Move Speed: ", ref moveSpeed, 1, 100);
+                        ImGui.SliderFloat("Move Speed: ", ref moveSpeed, 1, 1000);
                         ImGui.PopItemWidth();
                     }
                 }
