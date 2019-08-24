@@ -30,7 +30,8 @@ namespace SharpGame
             {
                 image = texture.image,
                 viewType = (texture.layers == 6) ? ImageViewType.ImageCube : ImageViewType.Image2D,
-                format = format
+                format = format,
+                components = new ComponentMapping(ComponentSwizzle.R, ComponentSwizzle.G, ComponentSwizzle.B, ComponentSwizzle.A),
             };
 
             viewCreateInfo.subresourceRange.aspectMask = aspectMask;
