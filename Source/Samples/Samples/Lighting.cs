@@ -10,8 +10,7 @@ namespace SharpGame.Samples
 
             scene = new Scene();
 
-            var cameraNode = scene.CreateChild("Camera");
-            cameraNode.Position = new Vector3(0.0f, 2.0f, -10);
+            var cameraNode = scene.CreateChild("Camera", new Vector3(0.0f, 2.0f, -10));
           
             camera = cameraNode.CreateComponent<Camera>();
             camera.Fov = MathUtil.Radians(60);

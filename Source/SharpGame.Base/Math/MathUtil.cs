@@ -214,6 +214,10 @@ namespace SharpGame
             return degree * (Pi / 180.0f);
         }
 
+        public static Vector3 Radians(float x, float y, float z)
+        {
+            return new Vector3(x, y, z) * (Pi / 180.0f);
+        }
         /// <summary>
         /// Converts radians to revolutions.
         /// </summary>

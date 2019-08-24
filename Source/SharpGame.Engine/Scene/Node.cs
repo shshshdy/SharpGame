@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Pipes;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -105,8 +106,22 @@ namespace SharpGame
 
         public Node CreateChild(string name)
         {
-            Node newNode = new Node();
-            newNode.Name = name;            
+            Node newNode = new Node
+            {
+                Name = name
+            };
+            AddChild(newNode);
+            return newNode;
+        }
+
+        public Node CreateChild(string name, Vector3 pos = default, Vector3 euler = default)
+        {
+            Node newNode = new Node
+            {
+                Name = name,
+                Position = pos,
+                Rotation = Quaternion.FromEuler(euler.X, euler.Y, euler.Z)
+            };
             AddChild(newNode);
             return newNode;
         }

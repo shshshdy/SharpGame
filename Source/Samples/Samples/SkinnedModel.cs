@@ -12,13 +12,8 @@ namespace SharpGame.Samples
         {
             scene = new Scene();
 
-            var cameraNode = scene.CreateChild("Camera");
-            cameraNode.Position = new Vector3(0, 20, -30);
-            cameraNode.Rotation = Quaternion.FromEuler(MathUtil.Radians(30), 0, 0);
-
+            var cameraNode = scene.CreateChild("Camera", new Vector3(0, 20, -30), MathUtil.Radians(30, 0, 0));
             camera = cameraNode.CreateComponent<Camera>();
-            camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
-            camera.FarClip = 3000.0f;
 
             {
                 var model = GeometricPrimitive.CreatePlaneModel(100, 100);
@@ -42,8 +37,7 @@ namespace SharpGame.Samples
 
                 for (int i = 0; i < 100; i++)
                 {
-                    var node = scene.CreateChild("Model");
-                    node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20));
+                    var node = scene.CreateChild("Model", new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20)));
                     node.Rotation = Quaternion.FromEuler(0, MathUtil.Radians(MathUtil.Random(0, 90)), 0);
 
                     var animMdoel = node.AddComponent<AnimatedModel>();

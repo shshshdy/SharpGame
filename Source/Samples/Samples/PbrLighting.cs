@@ -47,9 +47,7 @@ namespace SharpGame.Samples
 
             scene = new Scene();
 
-            var cameraNode = scene.CreateChild("Camera");
-            cameraNode.Position = new Vector3(80.0f, 0.0f, -150);
-            cameraNode.Rotate(Quaternion.FromEuler(0, MathUtil.Radians(-45), 0), TransformSpace.LOCAL);
+            var cameraNode = scene.CreateChild("Camera", new Vector3(80.0f, 0.0f, -150), MathUtil.Radians(0, -45, 0));
             camera = cameraNode.CreateComponent<Camera>();
             camera.Fov = MathUtil.Radians(60);
 
@@ -94,10 +92,7 @@ namespace SharpGame.Samples
                 pbrMaterial = mat;
             }
 
-            pbrMaterial.ResourceSet[2]
-                .Bind(0, envMap)
-                .Bind(1, irMap)
-                .Bind(2, brdfLUT).UpdateSets();
+            pbrMaterial.ResourceSet[2].Bind(envMap, irMap, brdfLUT);
 
             computeSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, false, BorderColor.FloatTransparentBlack);
             brdfLUTSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);

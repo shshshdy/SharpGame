@@ -18,14 +18,9 @@ namespace SharpGame.Samples
         {
             scene = new Scene();
 
-            var cameraNode = scene.CreateChild("Camera");
-            cameraNode.Position = new Vector3(0, 5, -10);
-            cameraNode.Rotation = Quaternion.FromEuler(MathUtil.Radians(30), 0, 0);
-
+            var cameraNode = scene.CreateChild("Camera", new Vector3(0, 5, -10), MathUtil.Radians(30, 0, 0));
             camera = cameraNode.CreateComponent<Camera>();
-            camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
-            camera.FarClip = 3000.0f;
-
+          
             var cubeMap = Resources.Load<Texture>("textures/cubemap_yokohama_bc3_unorm.ktx");
             {
                 var model = Resources.Load<Model>("Models/cube.obj");
