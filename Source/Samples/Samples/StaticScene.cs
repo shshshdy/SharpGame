@@ -29,7 +29,7 @@ namespace SharpGame.Samples
                 var tex = Texture.LoadFromFile("textures/oak_bark.ktx", Format.R8g8b8a8Unorm, SamplerAddressMode.Repeat);
                 mat.SetTexture("DiffMap", tex);
 
-                var mat1 = new Material("Shaders/LitSolid.shader");
+                var mat1 = new Material("Shaders/LitAlpha.shader");
                 var tex1 = Texture.LoadFromFile("textures/oak_leafs.ktx", Format.R8g8b8a8Unorm, SamplerAddressMode.ClampToEdge);
                 mat1.SetTexture("DiffMap", tex1);
 

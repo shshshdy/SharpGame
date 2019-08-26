@@ -25,6 +25,7 @@
     <None Include="$(MSBuildThisFileDirectory)GLSL\tonemap_fs.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\tonemap_vs.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ImGUI.shader" />
+    <None Include="$(MSBuildThisFileDirectory)LitAlpha.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitSolid.shader" />
     <None Include="$(MSBuildThisFileDirectory)Particle.shader" />
     <None Include="$(MSBuildThisFileDirectory)Reflect.shader" />
