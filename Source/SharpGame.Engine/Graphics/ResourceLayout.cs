@@ -19,7 +19,8 @@ namespace SharpGame
         StorageBuffer = 7,
         UniformBufferDynamic = 8,
         StorageBufferDynamic = 9,
-        InputAttachment = 10
+        InputAttachment = 10,
+        InlineUniformBlockExt = 1000138000,
     }
 
     public class ResourceLayoutBinding

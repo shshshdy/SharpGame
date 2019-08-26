@@ -1,0 +1,24 @@
+{
+  "ShaderResource": {
+    "Type": "Shader",
+    "FileID": "cbc0dc9e-7df2-4eb4-b14b-8c793c45e66b",
+    "FilePath": "Shaders/Basic.shader"
+  },
+  "ShadingMode": "Default",
+  "TextureParameters": [
+    {
+      "name": "DiffMap",
+      "texture": {
+        "Type": "Texture",
+        "FileID": "c314fddf-0197-4134-9e33-f68f313f3930",
+        "FilePath": "textures/TerrainDetail1.png"
+      },
+      "uvOffset": {
+        "X": 0,
+        "Y": 0,
+        "Z": 0,
+        "W": 0
+      }
+    }
+  ]
+}

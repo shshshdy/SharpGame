@@ -212,7 +212,7 @@ namespace SharpGame
 
             ubMatrics.Clear();
 
-            Viewport.Define(0, 0, g.Width, g.Height);
+            Viewport.Define(0, 0/*g.Height*/, g.Width, /*-*/g.Height);
 
             frameUniform.DeltaTime = Time.Delta;
             frameUniform.ElapsedTime = Time.Elapsed;

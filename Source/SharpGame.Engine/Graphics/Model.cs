@@ -9,6 +9,20 @@ using Vulkan;
 
 namespace SharpGame
 {
+    public struct GeometryDesc
+    {
+        /// Primitive type.
+        public PrimitiveTopology primitiveTopology;
+        /// Vertex buffer ref.
+        public int vbRef;
+        /// Index buffer ref.
+        public int ibRef;
+        /// Index start.
+        public int indexStart;
+        /// Index count.
+        public int indexCount;
+    };
+
     [DataContract]
     public class Model : Resource
     {
@@ -28,9 +42,13 @@ namespace SharpGame
             get => indexBuffers; set => indexBuffers = value;
         }
 
-        /// Bounding box.
         [DataMember]
         public BoundingBox BoundingBox { get; set; }
+
+        /// Bounding box.
+        [DataMember]
+        public GeometryDesc[] GeometryDesc { get => geometryDesc; set => geometryDesc = value; }
+        private GeometryDesc[] geometryDesc;
 
         /// Skeleton.
         [DataMember]
@@ -55,19 +73,10 @@ namespace SharpGame
         {
         }
 
-        public Model(params Geometry[] geometries)
-        {
-            SetNumGeometry(geometries.Length);
-
-            for(int i = 0; i < geometries.Length; i++)
-            {
-                this.geometries[i] = new []{ geometries[i] };
-            }
-        }
-
         public void SetNumGeometry(int count)
         {
             Array.Resize(ref geometries, count);
+            Array.Resize(ref geometryDesc, count);
             GeometryCenters.Resize(count);
         }
         
@@ -111,6 +120,39 @@ namespace SharpGame
             Array.Clear(indexBuffers, 0, indexBuffers.Length);
 
             Geometries.Clear();
+        }
+
+        public static Model Create(List<Geometry> geometries, List<BoundingBox> bboxList = null)
+        {
+            Model model = new Model();
+            model.SetNumGeometry(geometries.Count);
+
+            Array.Resize(ref model.vertexBuffers, geometries.Count);
+            Array.Resize(ref model.indexBuffers, geometries.Count);
+
+            BoundingBox bbox = new BoundingBox();
+            for (int i = 0; i < geometries.Count; i++)
+            {
+                model.geometries[i] = new[] { geometries[i] };
+                model.vertexBuffers[i] = geometries[i].VertexBuffers[0];
+                model.IndexBuffers[i] = geometries[i].IndexBuffer;
+
+                ref GeometryDesc desc = ref model.geometryDesc[i];
+                desc.primitiveTopology = geometries[i].PrimitiveTopology;
+                desc.vbRef = i;
+                desc.ibRef = i;
+                desc.indexStart = (int)geometries[i].IndexStart;
+                desc.indexCount = (int)geometries[i].IndexCount;
+
+                if(bboxList != null)
+                {
+                    model.GeometryCenters[i] = bboxList[i].Center;
+                    bbox.Merge(bboxList[i]);
+                }
+            }
+
+            model.BoundingBox = bbox;
+            return model;
         }
 
     }

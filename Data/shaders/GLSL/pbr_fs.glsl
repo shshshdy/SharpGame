@@ -1,6 +1,4 @@
 #version 450 core
-// Physically Based Rendering
-// Copyright (c) 2017-2018 Michał Siejak
 
 // Physically Based shading model: Lambetrtian diffuse BRDF + Cook-Torrance microfacet specular BRDF + IBL for ambient.
 
@@ -8,9 +6,17 @@
 // See: http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
 
 #include "UniformsPS.glsl"
+#include "Pbr.glsl"
+#include "ToneMap.glsl"
 
-const float PI = 3.141592;
-const float Epsilon = 0.00001;
+layout(set=2, binding=0) uniform samplerCube prefilteredMap;
+layout(set=2, binding=1) uniform samplerCube samplerIrradiance;
+layout(set=2, binding=2) uniform sampler2D samplerBRDFLUT;
+
+layout(set=3, binding=0) uniform sampler2D albedoMap;
+layout(set=4, binding=0) uniform sampler2D normalMap;
+layout(set=5, binding=0) uniform sampler2D metallicMap;
+layout(set=6, binding=0) uniform sampler2D roughnessMap;
 
 const int NumLights = 2;
 
@@ -26,79 +32,6 @@ layout(location=0) in Vertex
 
 layout(location=0) out vec4 color;
 
-
-
-// GGX/Towbridge-Reitz normal distribution function.
-// Uses Disney's reparametrization of alpha = roughness^2.
-float ndfGGX(float cosLh, float roughness)
-{
-	float alpha   = roughness * roughness;
-	float alphaSq = alpha * alpha;
-
-	float denom = (cosLh * cosLh) * (alphaSq - 1.0) + 1.0;
-	return alphaSq / (PI * denom * denom);
-}
-
-// Single term for separable Schlick-GGX below.
-float gaSchlickG1(float cosTheta, float k)
-{
-	return cosTheta / (cosTheta * (1.0 - k) + k);
-}
-
-// Schlick-GGX approximation of geometric attenuation function using Smith's method.
-float gaSchlickGGX(float cosLi, float cosLo, float roughness)
-{
-	float r = roughness + 1.0;
-	float k = (r * r) / 8.0; // Epic suggests using this roughness remapping for analytic lights.
-	return gaSchlickG1(cosLi, k) * gaSchlickG1(cosLo, k);
-}
-
-// Shlick's approximation of the Fresnel factor.
-vec3 fresnelSchlick(vec3 F0, float cosTheta)
-{
-	return F0 + (vec3(1.0) - F0) * pow(1.0 - cosTheta, 5.0);
-}
-
-const float gamma     = 2.2;
-const float exposure  = 1.0;
-const float pureWhite = 1.0;
-
-#define MANUAL_SRGB 1
-#define SRGB_FAST_APPROXIMATION 1
-
-vec3 Uncharted2Tonemap(vec3 color)
-{
-	float A = 0.15;
-	float B = 0.50;
-	float C = 0.10;
-	float D = 0.20;
-	float E = 0.02;
-	float F = 0.30;
-	float W = 11.2;
-	return ((color*(A*color+C*B)+D*E)/(color*(A*color+B)+D*F))-E/F;
-}
-
-vec4 tonemap(vec4 color)
-{
-	vec3 outcol = Uncharted2Tonemap(color.rgb * exposure);
-	outcol = outcol * (1.0f / Uncharted2Tonemap(vec3(11.2f)));	
-	return vec4(pow(outcol, vec3(1.0f / gamma)), color.a);
-}
-
-vec4 SRGBtoLINEAR(vec4 srgbIn)
-{
-	#ifdef MANUAL_SRGB
-	#ifdef SRGB_FAST_APPROXIMATION
-	vec3 linOut = pow(srgbIn.xyz,vec3(2.2));
-	#else //SRGB_FAST_APPROXIMATION
-	vec3 bLess = step(vec3(0.04045),srgbIn.xyz);
-	vec3 linOut = mix( srgbIn.xyz/vec3(12.92), pow((srgbIn.xyz+vec3(0.055))/vec3(1.055),vec3(2.4)), bLess );
-	#endif //SRGB_FAST_APPROXIMATION
-	return vec4(linOut,srgbIn.w);;
-	#else //MANUAL_SRGB
-	return srgbIn;
-	#endif //MANUAL_SRGB
-}
 
 void main()
 {
@@ -196,7 +129,7 @@ void main()
 	}
 
 	// Final fragment color.
-	color = vec4(directLighting + ambientLighting, 1.0);
+	//color = vec4(directLighting + ambientLighting, 1.0);
     
 	vec3 c = directLighting + ambientLighting;
 
@@ -209,7 +142,5 @@ void main()
 	// Gamma correction.
 	color = vec4(pow(mappedColor, vec3(1.0/gamma)), 1.0);
   
- 
-
 
 }

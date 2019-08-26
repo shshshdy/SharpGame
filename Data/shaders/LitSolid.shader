@@ -69,6 +69,9 @@ Shader "LitSolid"
 			void main() 
 			{
 				vec4 diffColor = texture(DiffMap, inUV);
+                if(diffColor.a < 0.5) {
+                    discard;
+                }
 
 				vec3 N = normalize(inNormal[2]);
 				vec3 L = -SunlightDir;

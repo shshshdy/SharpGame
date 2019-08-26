@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Vulkan;
@@ -8,12 +9,10 @@ namespace SharpGame
     {
         public static Model CreatePlaneModel(float width, float height)
         {
-            var model = new Model(CreatePlane(width, height));
-
+            var geo = CreatePlane(width, height);
             var boundingBox = new BoundingBox();
-            boundingBox.Define(-width / 2, height / 2);
-            model.BoundingBox = boundingBox;
-
+            boundingBox.Define(-width / 2, height / 2);          
+            var model = Model.Create(new List<Geometry> { geo}, new List<BoundingBox> { boundingBox});
             return model;
         }
 
@@ -45,12 +44,10 @@ namespace SharpGame
 
         public static Model CreateCubeModel(float width, float height, float depth)
         {
-            var model = new Model(CreateCube(width, height, depth));
-
+            var geo = CreateCube(width, height, depth);
             var boundingBox = new BoundingBox();
             boundingBox.Define(-width / 2, width / 2);
-            model.BoundingBox = boundingBox;
-
+            var model = Model.Create(new List<Geometry> { geo }, new List<BoundingBox> { boundingBox });
             return model;
         }
 

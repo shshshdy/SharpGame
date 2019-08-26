@@ -31,6 +31,8 @@ namespace SharpGame
         private static DebugReportCallbackExt debugReportCallbackExt;
         private static UTF8String engineName = "SharpGame";
         private static List<string> supportedExtensions = new List<string>();
+
+
         public static VkInstance CreateInstance(Settings settings)
         {
             bool enableValidation = settings.Validation;
@@ -43,8 +45,13 @@ namespace SharpGame
                 pEngineName = engineName,
             };
 
+            //enabledDeviceExtensions.push_back(VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME);
+            //enabledDeviceExtensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
+            //enabledInstanceExtensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+
             NativeList<IntPtr> instanceExtensions = new NativeList<IntPtr>(2);
             instanceExtensions.Add(Strings.VK_KHR_SURFACE_EXTENSION_NAME);
+            instanceExtensions.Add(Strings.VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 instanceExtensions.Add(Strings.VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -96,6 +103,7 @@ namespace SharpGame
         public static VkDevice Init(VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
             bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute)
         {
+            enabledExtensions.Add(Strings.VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME);
             // Physical Device
             uint gpuCount = 0;
             VulkanUtil.CheckResult(vkEnumeratePhysicalDevices(VkInstance, &gpuCount, null));
@@ -108,11 +116,6 @@ namespace SharpGame
             {
                 throw new InvalidOperationException("Could not enumerate physical devices.");
             }
-
-            // GPU selection
-
-            // Select physical Device to be used for the Vulkan example
-            // Defaults to the first Device unless specified by command line
 
             uint selectedDevice = 0;
             // TODO: Implement arg parsing, etc.
@@ -156,15 +159,12 @@ namespace SharpGame
                         string strExt = UTF8String.FromPointer(ext.extensionName);
                         enabledExtensions.Add((IntPtr)ext.extensionName);
                         supportedExtensions.Add(strExt);
-                        // TODO: fixed-length char arrays are not being parsed correctly.
                     }
                 }
             }
 
             VulkanUtil.CheckResult(CreateLogicalDevice(enabledFeatures, enabledExtensions));
             queue = GetDeviceQueue(Device.QFIndices.Graphics, 0);
-
-
             vkCmdPushDescriptorSetKHR();
             return device;
         }

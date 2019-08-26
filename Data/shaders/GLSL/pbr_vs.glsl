@@ -1,9 +1,4 @@
 #version 450 core
-// Physically Based Rendering
-// Copyright (c) 2017-2018 Michał Siejak
-
-// Physically Based shading model: Vertex program.
-
 #include "UniformsVS.glsl"
 
 layout(location=0) in vec3 position;

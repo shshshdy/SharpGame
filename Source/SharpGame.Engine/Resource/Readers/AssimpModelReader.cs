@@ -12,9 +12,7 @@ namespace SharpGame
 
         protected unsafe override bool OnLoad(Model model, File stream)
         {
-            Assimp.PostProcessSteps assimpFlags = //Assimp.PostProcessSteps.FlipWindingOrder
-           //| Assimp.PostProcessSteps.Triangulate
-           //| Assimp.PostProcessSteps.PreTransformVertices;
+            Assimp.PostProcessSteps assimpFlags = 
             Assimp.PostProcessSteps.CalculateTangentSpace |
             Assimp.PostProcessSteps.Triangulate |
             Assimp.PostProcessSteps.SortByPrimitiveType |
@@ -43,51 +41,20 @@ namespace SharpGame
             model.IndexBuffers = new DeviceBuffer[scene.MeshCount];
             model.SetNumGeometry(scene.MeshCount);
 
-            PrimitiveTopology[] primitiveTopology =
-            {
-                PrimitiveTopology.PointList,
-                PrimitiveTopology.PointList,
-                PrimitiveTopology.LineList,
-                PrimitiveTopology.LineList,
-                PrimitiveTopology.TriangleList,                
-            };
-
             BoundingBox boundingBox = new BoundingBox();
-            VertexLayout vertexLayout = null;
             var shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");
             var shader1 = Resources.Instance.Load<Shader>("Shaders/Litsolid.shader");
+
             string path = FileUtil.GetPath(loadingFile);
 
             // Iterate through all meshes in the file and extract the vertex components
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 Assimp.Mesh mesh = scene.Meshes[m];
-                Geometry geometry;
-                BoundingBox meshBoundingBox;
-                DeviceBuffer vb;
-                DeviceBuffer ib;
-                bool hasTangent = mesh.HasTangentBasis;
-                if (hasTangent)
-                {
-                    ConvertGeomNTB(scale, mesh, out meshBoundingBox, out vb, out ib, out vertexLayout);
-                }
-                else
-                {
-                    ConvertGeom(scale, mesh, out meshBoundingBox, out vb, out ib, out vertexLayout);
-                }
+                ConvertGeometry(mesh, scale, out Geometry geometry, out var meshBoundingBox);
 
-                model.VertexBuffers[m] = vb;
-                model.IndexBuffers[m] = ib;
-
-                geometry = new Geometry
-                {
-                    Name = mesh.Name,
-                    VertexBuffers = new[] { vb },
-                    IndexBuffer = ib,
-                    VertexLayout = vertexLayout
-                };
-
-                geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], 0, (uint)ib.Count);
+                model.VertexBuffers[m] = geometry.VertexBuffers[0];
+                model.IndexBuffers[m] = geometry.IndexBuffer;
                 model.Geometries[m] = new Geometry[] { geometry };
                 model.GeometryCenters[m] = meshBoundingBox.Center;
 
@@ -95,7 +62,7 @@ namespace SharpGame
 
                 if (mesh.MaterialIndex >= 0 && mesh.MaterialIndex < scene.MaterialCount)
                 {
-                    Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], hasTangent ? shader1 : shader);
+                    Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], mesh.HasTangentBasis ? shader1 : shader);
                     model.Materials.Add(mat);
                 }
                 else
@@ -106,10 +73,84 @@ namespace SharpGame
             }
 
             model.BoundingBox = boundingBox;
-            vertexLayout?.Print();
+          
+            ctx.Dispose();
+            return true;
+        }
+
+        public static bool Import(string file, List<Geometry> geoList, List<BoundingBox> bboxList)
+        {
+            Assimp.PostProcessSteps assimpFlags =
+            Assimp.PostProcessSteps.CalculateTangentSpace |
+            Assimp.PostProcessSteps.Triangulate |
+            Assimp.PostProcessSteps.SortByPrimitiveType |
+            Assimp.PostProcessSteps.PreTransformVertices |
+            Assimp.PostProcessSteps.GenerateNormals |
+            Assimp.PostProcessSteps.GenerateUVCoords |
+            Assimp.PostProcessSteps.OptimizeMeshes |
+            Assimp.PostProcessSteps.Debone |
+            Assimp.PostProcessSteps.ValidateDataStructure;
+
+            var ctx = new Assimp.AssimpContext();
+            string ext = FileUtil.GetExtension(file);
+            if (!ctx.IsImportFormatSupported(ext))
+            {
+                ctx.Dispose();
+                return false;
+            }
+
+            File stream = FileSystem.Instance.GetFile(file);
+
+            Assimp.Scene scene = ctx.ImportFileFromStream(stream, assimpFlags);
+            float scale = 1.0f;
+            string path = FileUtil.GetPath(file);
+            // Iterate through all meshes in the file and extract the vertex components
+            for (int m = 0; m < scene.MeshCount; m++)
+            {
+                Assimp.Mesh mesh = scene.Meshes[m];
+                ConvertGeometry(mesh, scale, out Geometry geometry, out var meshBoundingBox);
+                geoList.Add(geometry);
+                bboxList.Add(meshBoundingBox);
+            }
 
             ctx.Dispose();
             return true;
+        }
+
+        private static void ConvertGeometry(Assimp.Mesh mesh, float scale, out Geometry geometry, out BoundingBox meshBoundingBox)
+        {
+            VertexLayout vertexLayout = null;
+            DeviceBuffer vb;
+            DeviceBuffer ib;
+            PrimitiveTopology[] primitiveTopology =
+            {
+                PrimitiveTopology.PointList,
+                PrimitiveTopology.PointList,
+                PrimitiveTopology.LineList,
+                PrimitiveTopology.LineList,
+                PrimitiveTopology.TriangleList,
+            };
+
+            bool hasTangent = mesh.HasTangentBasis;
+            if (hasTangent)
+            {
+                ConvertGeomNTB(scale, mesh, out meshBoundingBox, out vb, out ib, out vertexLayout);
+            }
+            else
+            {
+                ConvertGeom(scale, mesh, out meshBoundingBox, out vb, out ib, out vertexLayout);
+            }
+
+            geometry = new Geometry
+            {
+                Name = mesh.Name,
+                VertexBuffers = new[] { vb },
+                IndexBuffer = ib,
+                VertexLayout = vertexLayout
+            };
+
+            geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], 0, (uint)ib.Count);
+            
         }
 
         private static unsafe void ConvertGeom(float scale, Assimp.Mesh mesh,
@@ -151,6 +192,8 @@ namespace SharpGame
                 }
             }
 
+            vertexLayout.Print();
+                
             vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosNormTex), vertexBuffer.Count, vertexBuffer.Data);
             ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
@@ -199,6 +242,7 @@ namespace SharpGame
                 }
             }
 
+            vertexLayout.Print();
 
             vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTBNTex), vertexBuffer.Count, vertexBuffer.Data);
             ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);

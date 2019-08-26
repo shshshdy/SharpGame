@@ -19,26 +19,37 @@ namespace SharpGame.Samples
                 var node = scene.CreateChild("Plane");
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
-                var mat = Resources.Load<Material>("materials/Stone.material");
+                var mat = Resources.Load<Material>("materials/Grass.material");
             
                 staticModel.SetMaterial(mat);
             }
 
             {               
-                var colorMap = Resources.Load<Texture>("textures/Mushroom.png");
-                var mat = new Material("Shaders/Basic.shader");
-                mat.SetTexture("DiffMap", colorMap);
+                var mat = new Material("Shaders/LitSolid.shader");
+                var tex = Texture.LoadFromFile("textures/oak_bark.ktx", Format.R8g8b8a8Unorm, SamplerAddressMode.Repeat);
+                mat.SetTexture("DiffMap", tex);
 
-                var model = Resources.Load<Model>("Models/Mushroom.mdl");
+                var mat1 = new Material("Shaders/LitSolid.shader");
+                var tex1 = Texture.LoadFromFile("textures/oak_leafs.ktx", Format.R8g8b8a8Unorm, SamplerAddressMode.ClampToEdge);
+                mat1.SetTexture("DiffMap", tex1);
+
+                List<Geometry> geoList = new List<Geometry>();
+                List<BoundingBox> bboxList = new List<BoundingBox>();
+                AssimpModelReader.Import("Models/oak_trunk.dae", geoList, bboxList);
+                AssimpModelReader.Import("Models/oak_leafs.dae", geoList, bboxList);
+                var model = Model.Create(geoList, bboxList);// Resources.Load<Model>("Models/Mushroom.mdl");
 
                 for(int i = 0; i < 400; i++)
                 {
                     var node = scene.CreateChild("Model");
-                    node.Position = new Vector3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20));
+                    node.Position = new Vector3(MathUtil.Random(-40, 20), 0, MathUtil.Random(-40, 20));
                     node.Rotation = Quaternion.FromEuler(0, MathUtil.Radians(MathUtil.Random(0, 90)), 0);
+                    node.Scaling = new Vector3(4.0f);
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
-                    staticModel.SetMaterial(mat);
+                    staticModel.SetMaterial(0, mat);
+                    staticModel.SetMaterial(1, mat1);
+                    //staticModel.SetMaterial(mat);
                 }
             }
 

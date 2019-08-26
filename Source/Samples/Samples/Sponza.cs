@@ -19,7 +19,6 @@ namespace SharpGame.Samples
             {
                 var model = Resources.Load<Model>("Models/crysponza_bubbles/sponza.obj");
                 var node = scene.CreateChild("sponza");
-                node.Scaling = new Vector3(1.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
             }

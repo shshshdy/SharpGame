@@ -47,6 +47,9 @@ Shader "Basic"
 			void main()
             {			   
 				vec4 color = texture(DiffMap, in_TexCoord);
+                if (color.a < 0.5) {
+                    discard;
+                }
 				out_Color = vec4(color.rgb, 1.0);
 			}
 

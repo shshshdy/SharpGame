@@ -1,7 +1,4 @@
 #version 450 core
-// Physically Based Rendering
-// Copyright (c) 2017-2018 Michał Siejak
-
 // Tone-mapping & gamma correction.
 
 const float gamma     = 2.2;

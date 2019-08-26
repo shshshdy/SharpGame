@@ -47,7 +47,7 @@ namespace SharpGame
             }
 
             var resource = new Texture();
-            resource.LoadFromFile(name, Format.Bc3UnormBlock, true);
+            resource.LoadFromFileInternal(name, Format.Bc3UnormBlock);
             return resource;
         }
 

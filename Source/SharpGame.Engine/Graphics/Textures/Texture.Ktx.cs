@@ -9,14 +9,14 @@ namespace SharpGame
     using static Vulkan.VulkanNative;
     public partial class Texture : Resource, IBindableResource
     {
-        public static Texture LoadFromFile(string filename, Format format)
+        public static Texture LoadFromFile(string filename, Format format, SamplerAddressMode samplerAddressMode = SamplerAddressMode.Repeat)
         {
             var tex = new Texture();
-            tex.LoadFromFile(filename, format, false);
+            tex.LoadFromFileInternal(filename, format, samplerAddressMode);
             return tex;
         }
 
-        public unsafe void LoadFromFile(string filename, Format format, bool forceLinearTiling)
+        public unsafe void LoadFromFileInternal(string filename, Format format, SamplerAddressMode samplerAddressMode = SamplerAddressMode.Repeat)
         {
             KtxFile texFile;
             using (var fs = FileSystem.Instance.GetFile(filename))
@@ -153,7 +153,7 @@ namespace SharpGame
 
             Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue.native, true);
             
-            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
+            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == 1);
 
             // Create image view
             ImageViewCreateInfo view = new ImageViewCreateInfo

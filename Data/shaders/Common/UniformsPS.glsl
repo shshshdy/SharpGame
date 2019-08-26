@@ -21,11 +21,3 @@ layout (set = 1, binding = 1) uniform LightPS
 
 };
 
-layout(set=2, binding=0) uniform samplerCube prefilteredMap;
-layout(set=2, binding=1) uniform samplerCube samplerIrradiance;
-layout(set=2, binding=2) uniform sampler2D samplerBRDFLUT;
-
-layout(set=3, binding=0) uniform sampler2D albedoMap;
-layout(set=4, binding=0) uniform sampler2D normalMap;
-layout(set=5, binding=0) uniform sampler2D metallicMap;
-layout(set=6, binding=0) uniform sampler2D roughnessMap;

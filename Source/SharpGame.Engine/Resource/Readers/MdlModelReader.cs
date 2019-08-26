@@ -33,21 +33,6 @@ namespace SharpGame
         public byte[] data_;
     };
 
-    /// Description of a geometry for asynchronous loading.
-    struct GeometryDesc
-    {
-        /// Primitive type.
-        public PrimitiveTopology type_;
-        /// Vertex buffer ref.
-        public int vbRef_;
-        /// Index buffer ref.
-        public int ibRef_;
-        /// Index start.
-        public int indexStart_;
-        /// Index count.
-        public int indexCount_;
-    };
-
     /// Vertex buffer morph data.
     public struct VertexBufferMorph
     {
@@ -241,11 +226,11 @@ namespace SharpGame
                     geometry.LodDistance = distance;
 
                     // Prepare geometry to be defined during EndLoad()
-                    deoDesc[j].type_ = type;
-                    deoDesc[j].vbRef_ = vbRef;
-                    deoDesc[j].ibRef_ = ibRef;
-                    deoDesc[j].indexStart_ = indexStart;
-                    deoDesc[j].indexCount_ = indexCount;
+                    deoDesc[j].primitiveTopology = type;
+                    deoDesc[j].vbRef = vbRef;
+                    deoDesc[j].ibRef = ibRef;
+                    deoDesc[j].indexStart = indexStart;
+                    deoDesc[j].indexCount = indexCount;
 
                     geometryLodLevels[j] = geometry;
                     memoryUse += Unsafe.SizeOf<Geometry>();
@@ -349,10 +334,10 @@ namespace SharpGame
                     Geometry geometry = geometries_[i][j];
                     ref GeometryDesc desc = ref loadGeometries_[i][j];
 
-                    geometry.VertexBuffers = new[] { vertexBuffers_[desc.vbRef_] };
-                    geometry.VertexLayout = loadVBData_[desc.vbRef_].layout;
-                    geometry.IndexBuffer = indexBuffers_[desc.ibRef_];
-                    geometry.SetDrawRange(desc.type_, (uint)desc.indexStart_, (uint)desc.indexCount_);
+                    geometry.VertexBuffers = new[] { vertexBuffers_[desc.vbRef] };
+                    geometry.VertexLayout = loadVBData_[desc.vbRef].layout;
+                    geometry.IndexBuffer = indexBuffers_[desc.ibRef];
+                    geometry.SetDrawRange(desc.primitiveTopology, (uint)desc.indexStart, (uint)desc.indexCount);
                 }
             }
 
@@ -393,7 +378,7 @@ namespace SharpGame
             Format.R32g32Sfloat,
             Format.R8g8b8a8Unorm,
             Format.R32g32b32a32Sfloat,
-            Format.R8g8b8a8Uint,
+            Format.R8g8b8a8Sint,
         };
 
         uint[] semanticSize = { 12, 12, 16, 16, 8, 4, 16, 4 };
