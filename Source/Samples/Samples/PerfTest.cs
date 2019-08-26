@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 0)]
+    [SampleDesc(sortOrder = 1)]
     public class PerfTestScene : Sample
     {
         public override void Init()

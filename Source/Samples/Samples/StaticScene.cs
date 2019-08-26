@@ -4,14 +4,14 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 1)]
+    [SampleDesc(sortOrder = 0)]
     public class StaticScene : Sample
     {
         public override void Init()
         {
             scene = new Scene();
 
-            var cameraNode = scene.CreateChild("Camera", new Vector3(0, 20, -30), MathUtil.Radians(30, 0, 0));
+            var cameraNode = scene.CreateChild("Camera", new Vector3(0, 2, -30), MathUtil.Radians(10, 0, 0));
             camera = cameraNode.CreateComponent<Camera>();
 
             {
@@ -29,7 +29,7 @@ namespace SharpGame.Samples
                 var tex = Texture.LoadFromFile("textures/oak_bark.ktx", Format.R8g8b8a8Unorm, SamplerAddressMode.Repeat);
                 mat.SetTexture("DiffMap", tex);
 
-                var mat1 = new Material("Shaders/LitAlpha.shader");
+                var mat1 = new Material("Shaders/LitSolid.shader");
                 var tex1 = Texture.LoadFromFile("textures/oak_leafs.ktx", Format.R8g8b8a8Unorm, SamplerAddressMode.ClampToEdge);
                 mat1.SetTexture("DiffMap", tex1);
 
@@ -42,14 +42,13 @@ namespace SharpGame.Samples
                 for(int i = 0; i < 400; i++)
                 {
                     var node = scene.CreateChild("Model");
-                    node.Position = new Vector3(MathUtil.Random(-40, 20), 0, MathUtil.Random(-40, 20));
+                    node.Position = new Vector3(MathUtil.Random(-40, 40), 0, MathUtil.Random(-40, 40));
                     node.Rotation = Quaternion.FromEuler(0, MathUtil.Radians(MathUtil.Random(0, 90)), 0);
                     node.Scaling = new Vector3(4.0f);
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(0, mat);
                     staticModel.SetMaterial(1, mat1);
-                    //staticModel.SetMaterial(mat);
                 }
             }
 
