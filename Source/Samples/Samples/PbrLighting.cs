@@ -51,10 +51,9 @@ namespace SharpGame.Samples
             camera = cameraNode.CreateComponent<Camera>();
             camera.Fov = MathUtil.Radians(60);
 
-            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, 6, Format.R16g16b16a16Sfloat, 0, ImageUsageFlags.Storage);
-            irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);
-            brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
-
+            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0, ImageUsageFlags.Storage);
+            irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);
+            brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, ImageViewType.Image2D, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
 
             {
                 var model = GeometricPrimitive.CreateCubeModel(10, 10, 10);
@@ -181,7 +180,7 @@ namespace SharpGame.Samples
                     Span<DescriptorImageInfo> envTextureMipTailDescriptors = stackalloc DescriptorImageInfo[(int)numMipTailLevels];
                     for (uint level = 0; level < numMipTailLevels; ++level)
                     {
-                        var view = ImageView.Create(envMap, Format.R16g16b16a16Sfloat, ImageAspectFlags.Color, level + 1, 1);
+                        var view = ImageView.Create(envMap.image, ImageViewType.ImageCube, Format.R16g16b16a16Sfloat, ImageAspectFlags.Color, level + 1, 1);
                         envTextureMipTailViews.Add(view);
                         envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, ImageLayout.General);
                     }

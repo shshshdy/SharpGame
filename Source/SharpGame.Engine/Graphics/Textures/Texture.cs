@@ -77,7 +77,7 @@ namespace SharpGame
             Purple = CreateTex(Color.Purple);
         }
 
-        public static Texture Create(uint width, uint height, uint layers, Format format, uint levels = 0, ImageUsageFlags additionalUsage = ImageUsageFlags.None)
+        public static Texture Create(uint width, uint height, ImageViewType imageViewType, uint layers, Format format, uint levels = 0, ImageUsageFlags additionalUsage = ImageUsageFlags.None)
         {
             Texture texture = new Texture
             {
@@ -93,8 +93,8 @@ namespace SharpGame
                 usage |= ImageUsageFlags.TransferSrc; // For mipmap generation
             }
 
-            texture.image = Image.Create(width, height, layers, texture.mipLevels, format, 1, usage);
-            texture.imageView = ImageView.Create(texture, format, ImageAspectFlags.Color, 0, RemainingMipLevels);            
+            texture.image = Image.Create(width, height, (imageViewType == ImageViewType.ImageCube || imageViewType == ImageViewType.ImageCubeArray) ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None, layers, texture.mipLevels, format,  SampleCountFlags.Count1, usage);
+            texture.imageView = ImageView.Create(texture.image, imageViewType, format, ImageAspectFlags.Color, 0, RemainingMipLevels);            
             texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, Device.Features.samplerAnisotropy == 1);
             texture.UpdateDescriptor();
             return texture;

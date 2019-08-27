@@ -25,17 +25,17 @@ namespace SharpGame
             Device.Destroy(handle);
         }
 
-        public unsafe static Image Create(uint width, uint height, uint layers, uint levels, Format format, uint samples, ImageUsageFlags usage)
+        public unsafe static Image Create(uint width, uint height, ImageCreateFlags flags, uint layers, uint levels, Format format, SampleCountFlags samples, ImageUsageFlags usage)
         {
             ImageCreateInfo createInfo = new ImageCreateInfo
             {
-                flags = (layers == 6) ? ImageCreateFlags.CubeCompatible : 0,
+                flags = flags,//(layers == 6) ? ImageCreateFlags.CubeCompatible : 0,
                 imageType = ImageType.Image2D,
                 format = format,
                 extent = new Extent3D { width = width, height = height, depth = 1 },
                 mipLevels = levels,
                 arrayLayers = layers,
-                samples = (SampleCountFlags)samples,
+                samples = samples,
                 tiling = ImageTiling.Optimal,
                 usage = usage,
                 sharingMode = SharingMode.Exclusive,

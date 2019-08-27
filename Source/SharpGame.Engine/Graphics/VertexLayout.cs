@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -56,10 +57,24 @@ namespace SharpGame
         {
         }
 
+        public VertexLayout(params VertexInputAttribute[] attributes)
+        {
+            this.attributes = attributes;
+        }
+
         public VertexLayout(VertexInputBinding[] bindings, VertexInputAttribute[] attributes)
         {
             this.bindings = bindings;
             this.attributes = attributes;
+        }
+
+        void Update()
+        {
+            foreach(var attr in attributes)
+            {
+
+            }
+
         }
 
         public override int GetHashCode()
@@ -79,11 +94,13 @@ namespace SharpGame
         public void Print()
         {
             Log.Info("vertex attribute : ");
+
             foreach (var attr in attributes)
             {
                 Log.Info("{{{0}, {1}, {2}}}", attr.location, attr.format, attr.offset);
             }
         }
+
     }
 
 

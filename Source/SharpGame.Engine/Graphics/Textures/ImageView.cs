@@ -24,12 +24,12 @@ namespace SharpGame
         }
 
 
-        public static ImageView Create(Texture texture, Format format, ImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels)
+        public static ImageView Create(Image image, ImageViewType viewType, Format format, ImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels)
         {
             ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
             {
-                image = texture.image,
-                viewType = (texture.layers == 6) ? ImageViewType.ImageCube : ImageViewType.Image2D,
+                image = image,
+                viewType = viewType,// (texture.layers == 6) ? ImageViewType.ImageCube : ImageViewType.Image2D,
                 format = format,
                 components = new ComponentMapping(ComponentSwizzle.R, ComponentSwizzle.G, ComponentSwizzle.B, ComponentSwizzle.A),
             };

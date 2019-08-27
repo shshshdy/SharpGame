@@ -259,6 +259,7 @@ namespace SharpGame
             else
             {
                 Matrix.PerspectiveFovLH(fov_, aspectRatio_, nearClip_, farClip_, out projection_);
+                projection_.M22 = -projection_.M22;
             }
 
             projectionDirty_ = false;

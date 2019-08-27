@@ -27,9 +27,8 @@ namespace SharpGame
         public FastList<TextureParameter> TextureParameters { get; set; }
         public FastList<BufferParameter> BufferParameters { get; set; }
 
-        private List<ResourceSet> resourceSet = new List<ResourceSet>();
         [IgnoreDataMember]
-        public List<ResourceSet> ResourceSet { get => resourceSet; set => resourceSet = value; }
+        public List<ResourceSet> ResourceSet { get; set; } = new List<ResourceSet>();
 
         [IgnoreDataMember]
         public Shader Shader { get; set; }
@@ -83,7 +82,7 @@ namespace SharpGame
 
             foreach (var layout in mainPass.PipelineLayout.ResourceLayout)
             {
-                resourceSet.Add(new ResourceSet(layout));                
+                ResourceSet.Add(new ResourceSet(layout));                
             }
 
             if (TextureParameters != null)
@@ -284,9 +283,19 @@ namespace SharpGame
             UpdateResourceSet(name, buf);
         }
 
+        public void SetResourceSet(int index, params IBindableResource[] res)
+        {
+            if(index < 0 || index >= ResourceSet.Count)
+            {
+                return;
+            }
+
+            ResourceSet[index].Bind(res);
+        }
+
         void UpdateResourceSet(StringID name, IBindableResource tex)
         {
-            foreach (var rs in resourceSet)
+            foreach (var rs in ResourceSet)
             {
                 foreach (var binding in rs.resourceLayout.Bindings)
                 {

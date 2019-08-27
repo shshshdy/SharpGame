@@ -16,7 +16,7 @@ namespace SharpGame
             }
         }
 
-        public ulong passID = 1;
+        protected ulong passID = 1;
 
         public RenderPass renderPass { get; set; }
 

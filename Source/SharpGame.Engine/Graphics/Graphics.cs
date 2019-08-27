@@ -25,6 +25,7 @@ namespace SharpGame
     public unsafe partial class Graphics : System<Graphics>
     {
         public Settings Settings { get; } = new Settings();
+
         internal Stats stats = new Stats();
 
         public VkPhysicalDeviceFeatures enabledFeatures;
@@ -305,7 +306,7 @@ namespace SharpGame
         {
             VkImageView* attachments = stackalloc VkImageView[2];
             // Depth/Stencil attachment is the same for all frame buffers
-            attachments[1] = depthStencil.view;
+            attachments[1] = depthStencil.view.handle;
 
             var frameBufferCreateInfo = new FramebufferCreateInfo
             {
@@ -361,7 +362,7 @@ namespace SharpGame
         protected void CreateDepthStencil()
         {
             depthStencil?.Dispose();         
-            depthStencil = new DepthStencil(Width, Height, DepthFormat);
+            depthStencil = new DepthStencil((uint)Width, (uint)Height, DepthFormat);
         }
         
         public TransientBuffer AllocVertexBuffer(uint count)

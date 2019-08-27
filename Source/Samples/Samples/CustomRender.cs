@@ -41,8 +41,8 @@ namespace SharpGame.Samples
         {
             var resourceLayout = new ResourceLayout(0)
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex, 1),
-                new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex, 1),
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
             };
 
             var mat = new Material("Shaders/Basic.shader");
@@ -68,7 +68,7 @@ namespace SharpGame.Samples
             ubObjectVS.Map();
 
             resourceSet = new ResourceSet(resourceLayout, ubCameraVS, ubObjectVS);
-
+            
             uint offset = 0;
             float gridSize = 15;
             for(int i = 0; i < COUNT; i++)
@@ -153,7 +153,6 @@ namespace SharpGame.Samples
         {
             var m = Matrix.CreateFromYawPitchRoll(yaw, pitch, 0) * Matrix.CreateTranslation(cameraPos);        
             Matrix.Invert(m, out cameraVS.View);
-
 
             var proj = Matrix.CreatePerspectiveFieldOfView((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
             proj.M22 = -proj.M22;

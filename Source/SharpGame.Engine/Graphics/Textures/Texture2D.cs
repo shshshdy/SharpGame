@@ -135,7 +135,7 @@ namespace SharpGame
                 Device.DestroyBuffer(stagingBuffer);
             }
 
-            texture.imageView = ImageView.Create(texture, format, ImageAspectFlags.Color, 0, texture.mipLevels);
+            texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, texture.mipLevels);
             texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);   
             texture.UpdateDescriptor();
             return texture;
