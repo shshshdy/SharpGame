@@ -68,6 +68,8 @@ namespace SharpGame
 
     public class RenderView : Object
     {
+        public static bool NegativeViewport { get; set; } = false;
+
         private Scene scene;
         public Scene Scene => scene;
 
@@ -212,7 +214,14 @@ namespace SharpGame
 
             ubMatrics.Clear();
 
-            Viewport.Define(0, 0/*g.Height*/, g.Width, /*-*/g.Height);
+            if (NegativeViewport)
+            {
+                Viewport.Define(0, g.Height, g.Width, -g.Height);
+            }
+            else
+            {
+                Viewport.Define(0, 0, g.Width, g.Height);
+            }
 
             frameUniform.DeltaTime = Time.Delta;
             frameUniform.ElapsedTime = Time.Elapsed;

@@ -29,6 +29,10 @@ namespace SharpGame
         public byte[] data;
         private VkSpecializationInfo* pSpecializationInfo;
 
+        public SpecializationInfo()
+        {
+        }
+
         public SpecializationInfo(params SpecializationMapEntry[] mapEntries)
         {
             this.mapEntries = mapEntries;

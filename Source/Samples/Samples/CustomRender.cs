@@ -5,8 +5,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
+
 namespace SharpGame.Samples
 {
+    using Vector3 = System.Numerics.Vector3;
+    using Matrix = System.Numerics.Matrix4x4;
+
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraVS
     {
@@ -32,6 +36,7 @@ namespace SharpGame.Samples
         Geometry cube;
         Vector3 cameraPos;
         const int COUNT = 100;
+
         public override void Init()
         {
             var resourceLayout = new ResourceLayout(0)
@@ -65,9 +70,12 @@ namespace SharpGame.Samples
             resourceSet = new ResourceSet(resourceLayout, ubCameraVS, ubObjectVS);
 
             uint offset = 0;
+            float gridSize = 15;
             for(int i = 0; i < COUNT; i++)
             {
-                Matrix worldTransform = Matrix.Translation(15*(i/10), 0, 15 * (i % 10));
+                Matrix worldTransform = Matrix.CreateTranslation(gridSize * (i/10) /*- gridSize * 10 / 2*/,
+                    0, gridSize * (i % 10) /*- gridSize * 10 / 2*/);
+
                 batches[i].offset = offset;
 
                 Utilities.CopyMemory(ubObjectVS.Mapped + (int)offset, Utilities.AsPointer(ref worldTransform), Utilities.SizeOf<Matrix>());
@@ -79,10 +87,13 @@ namespace SharpGame.Samples
 
             frameGraph.AddGraphicsPass(CustomDraw);
 
-            cameraPos = new Vector3(0, 8, -30);
-            pitch = MathUtil.Radians(15);
+            cameraPos = new Vector3(0, 5, 50);
+            //pitch = MathUtil.Radians(15);
+           
+            var m = Matrix.CreateLookAt(cameraPos, Vector3.Zero, Vector3.UnitY);
+            Matrix.Decompose(m, out var s, out var q, out var t);            
 
-            Renderer.Instance.MainView.Attach(null, null, frameGraph);
+            Renderer.MainView.Attach(null, null, frameGraph);
 
         }
 
@@ -97,12 +108,12 @@ namespace SharpGame.Samples
             if (mousePos == Vector2.Zero)
                 mousePos = input.MousePosition;
 
-            offset = Vector3.Zero;
+            offset = default;
             if (input.IsMouseDown(MouseButton.Right))
             {
                 Vector2 delta = (input.MousePosition - mousePos) * Time.Delta * rotSpeed;
-                yaw += delta.X;
-                pitch += delta.Y;
+                yaw += -delta.X;
+                pitch += -delta.Y;
 
                 if (input.IsKeyPressed(Key.W))
                 {
@@ -132,19 +143,20 @@ namespace SharpGame.Samples
                 offset.Y = delta.Y;
             }
 
-            cameraPos += offset * (Time.Delta * moveSpeed);
-            cameraPos += new Vector3(0, 0, input.WheelDelta * (Time.Delta * wheelSpeed));
+            cameraPos += (Vector3)offset * (Time.Delta * moveSpeed);
+            cameraPos += new Vector3(0, 0, -input.WheelDelta * wheelSpeed);
 
             mousePos = input.MousePosition;
         }
 
         void CustomDraw(GraphicsPass pass, RenderView view)
         {
-            var m = Matrix.RotationYawPitchRoll(yaw, pitch, 0) * Matrix.Translation(cameraPos);
-            Matrix.Invert(ref m, out cameraVS.View);
-            
-            var proj = Matrix.PerspectiveFovLH((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
+            var m = Matrix.CreateFromYawPitchRoll(yaw, pitch, 0) * Matrix.CreateTranslation(cameraPos);        
+            Matrix.Invert(m, out cameraVS.View);
 
+
+            var proj = Matrix.CreatePerspectiveFieldOfView((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
+            proj.M22 = -proj.M22;
             cameraVS.ViewProj = cameraVS.View * proj;
             ubCameraVS.SetData(ref cameraVS);
 

@@ -120,6 +120,11 @@ namespace SharpGame
             uiShader = Resources.Instance.Load<Shader>("Shaders/ImGui.shader");
             pass = uiShader.Main;
             pass.VertexLayout = VertexPos2dTexColor.Layout;
+            var specializationInfo = new SpecializationInfo(
+                new SpecializationMapEntry(0, 0, sizeof(uint)),
+                new SpecializationMapEntry(1, 4, sizeof(uint)));
+            specializationInfo.Write(0, RenderView.NegativeViewport? 0 : 1);
+            pass.VertexShader.SpecializationInfo = specializationInfo;
 
             var graphics = Graphics.Instance;
 
