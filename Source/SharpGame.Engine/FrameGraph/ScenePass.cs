@@ -28,6 +28,7 @@ namespace SharpGame
                 {
                     cmdBufferPools[i][j] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
                     cmdBufferPools[i][j].Allocate(CommandBufferLevel.Secondary, 1);
+                    cmdBufferPools[i][j].Name = $"ScenePass_{i}_{j}";
                 }
 
             }
@@ -84,14 +85,14 @@ namespace SharpGame
                     int from = i;
                     int to = Math.Min(i + dpPerBatch, view.batches.Count);
                     int cmdIndex = idx;
-                    var t = Task.Run(
-                        () => {
-                            var cb = GetCmdBufferAt(cmdIndex);
-                            cb.SetViewport(ref view.Viewport);
-                            cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
-                            Draw(view, batches, cb, from, to);
-                            cb.End();
-                        });
+                    var t = Task.Run(() => 
+                    {
+                        var cb = GetCmdBufferAt(cmdIndex);
+                        cb.SetViewport(ref view.Viewport);
+                        cb.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+                        Draw(view, batches, cb, from, to);
+                        cb.End();
+                    });
                     renderTasks.Add(t);
                     idx++;
                 }
@@ -104,6 +105,7 @@ namespace SharpGame
 
                 cmd.SetViewport(ref view.Viewport);
                 cmd.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+                //cmd.SetScissor(new Rect2D((int)view.Viewport.x, (int)view.Viewport.y, (int)view.Viewport.width, (int)view.Viewport.height));
 
                 foreach (var batch in view.batches)
                 {

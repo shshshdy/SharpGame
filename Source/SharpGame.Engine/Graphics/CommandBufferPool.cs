@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Text;
 using System.Threading;
 using Vulkan;
@@ -16,6 +17,8 @@ namespace SharpGame
     public class CommandBufferPool : DisposeBase
     {
         public CommandBuffer[] CommandBuffers { get; private set; }
+        public uint QueueIndex { get; }
+        public string Name {get; set;}
 
         private VkCommandPool cmdPool;
         private NativeList<VkCommandBuffer> cmdBuffers = new NativeList<VkCommandBuffer>();
@@ -26,6 +29,7 @@ namespace SharpGame
 
         public CommandBufferPool(uint queue, CommandPoolCreateFlags commandPoolCreateFlags)
         {
+            QueueIndex = queue;
             cmdPool = Device.CreateCommandPool(queue, (VkCommandPoolCreateFlags)commandPoolCreateFlags);
         }
 
@@ -36,9 +40,7 @@ namespace SharpGame
 
         protected override void Destroy(bool disposing)
         {
-            Free();
-
-            base.Destroy(disposing);
+            //Free();
         }
 
         public void Allocate(CommandBufferLevel commandBufferLevel, uint count)
@@ -70,9 +72,12 @@ namespace SharpGame
 
         public void Free()
         {
-            VulkanNative.vkFreeCommandBuffers(Graphics.device, cmdPool, cmdBuffers.Count, cmdBuffers.Data);
-            cmdBuffers.Count = 0;
-            CommandBuffers = null;
+            if(CommandBuffers != null)
+            {
+                VulkanNative.vkFreeCommandBuffers(Graphics.device, cmdPool, cmdBuffers.Count, cmdBuffers.Data);
+                cmdBuffers.Count = 0;
+                CommandBuffers = null;
+            }
         }
 
         public CommandBuffer Get()

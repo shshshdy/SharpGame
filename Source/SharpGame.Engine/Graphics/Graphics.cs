@@ -373,59 +373,7 @@ namespace SharpGame
         {
             return transientIndexBuffer.Alloc(count);
         }
-
-        private Texture GetFreeStagingTexture(uint width, uint height, uint depth, Format format)
-        {/*
-            uint totalSize = FormatHelpers.GetRegionSize(width, height, depth, format);
-            lock (_stagingResourcesLock)
-            {
-                for (int i = 0; i < _availableStagingTextures.Count; i++)
-                {
-                    VkTexture tex = _availableStagingTextures[i];
-                    if (tex.Memory.Size >= totalSize)
-                    {
-                        _availableStagingTextures.RemoveAt(i);
-                        tex.SetStagingDimensions(width, height, depth, format);
-                        return tex;
-                    }
-                }
-            }
-
-            uint texWidth = Math.Max(256, width);
-            uint texHeight = Math.Max(256, height);
-            Texture newTex = (Texture)ResourceFactory.CreateTexture(TextureDescription.Texture3D(
-                texWidth, texHeight, depth, 1, format, TextureUsage.Staging));
-            newTex.SetStagingDimensions(width, height, depth, format);
-            */
-            return null;
-        }
-
-        private const int MinStagingBufferSize = 64;
-        private const int MaxStagingBufferSize = 512;
-
-        private readonly object _stagingResourcesLock = new object();
-        private readonly List<Texture> _availableStagingTextures = new List<Texture>();
-        private readonly List<DeviceBuffer> _availableStagingBuffers = new List<DeviceBuffer>();
-        private DeviceBuffer GetFreeStagingBuffer(uint size)
-        {
-            lock (_stagingResourcesLock)
-            {
-                for (int i = 0; i < _availableStagingBuffers.Count; i++)
-                {
-                    DeviceBuffer buffer = _availableStagingBuffers[i];
-                    if (buffer.Size >= size)
-                    {
-                        _availableStagingBuffers.RemoveAt(i);
-                        return buffer;
-                    }
-                }
-            }
-
-            uint newBufferSize = Math.Max(MinStagingBufferSize, size);
-            DeviceBuffer newBuffer = DeviceBuffer.Create(BufferUsageFlags.TransferSrc | BufferUsageFlags.TransferDst, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, size, 1);
-            return newBuffer;
-        }
-
+        
         public void WaitIdle()
         {
             device.WaitIdle();

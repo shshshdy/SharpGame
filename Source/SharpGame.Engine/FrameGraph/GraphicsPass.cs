@@ -28,6 +28,7 @@ namespace SharpGame
             for (int i = 0; i < 3; i++)
             {
                 cmdBufferPool[i] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
+                cmdBufferPool[i].Name = "GraphicsPass" + i;
                 cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, 8);
             }
         }
@@ -86,7 +87,7 @@ namespace SharpGame
             cmdBuffer = GetCmdBuffer();
 
             cmdBuffer.SetViewport(ref view.Viewport);
-            cmdBuffer.SetScissor(new Rect2D(0, 0, (int)view.Viewport.width, (int)view.Viewport.height));
+            cmdBuffer.SetScissor(view.ViewRect);
             OnDraw?.Invoke(this, view);
             cmdBuffer?.End();
             cmdBuffer = null;

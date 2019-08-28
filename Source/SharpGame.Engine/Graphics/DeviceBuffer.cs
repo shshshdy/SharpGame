@@ -64,22 +64,22 @@ namespace SharpGame
             Unmap();
         }
 
-        public VkResult Flush(ulong size = WholeSize, ulong offset = 0)
+        public void Flush(ulong size = WholeSize, ulong offset = 0)
         {
             VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
             mappedRange.memory = memory;
             mappedRange.offset = offset;
-            mappedRange.size = size;
-            return vkFlushMappedMemoryRanges(Graphics.device, 1, &mappedRange);
+            mappedRange.size = size;            
+            VulkanUtil.CheckResult(vkFlushMappedMemoryRanges(Graphics.device, 1, &mappedRange));
         }
 
-        public VkResult Invalidate(ulong size = WholeSize, ulong offset = 0)
+        public void Invalidate(ulong size = WholeSize, ulong offset = 0)
         {
             VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
             mappedRange.memory = memory;
             mappedRange.offset = offset;
             mappedRange.size = size;
-            return vkInvalidateMappedMemoryRanges(Graphics.device, 1, &mappedRange);
+            VulkanUtil.CheckResult(vkInvalidateMappedMemoryRanges(Graphics.device, 1, &mappedRange));
         }
 
         protected override void Destroy()

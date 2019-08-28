@@ -279,6 +279,7 @@ namespace SharpGame
         G16B16r162plane422UnormKHR = 1000156032,
         G16B16R163plane444UnormKHR = 1000156033
     }
+
     public enum PolygonMode
     {
         Fill = 0,

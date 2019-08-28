@@ -81,6 +81,7 @@ namespace SharpGame
 
         private Viewport viewport;
         public ref Viewport Viewport => ref viewport;
+        public Rect2D ViewRect => new Rect2D((int)Viewport.x, (int)Viewport.y, (int)Viewport.width, (int)Viewport.height);
 
         public uint ViewMask { get; set; }
         
