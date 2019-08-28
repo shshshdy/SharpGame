@@ -89,6 +89,23 @@ namespace SharpGame
         }
         protected BoundingBox worldBoundingBox_;
 
+
+        /// World-space bounding box.
+        [IgnoreDataMember]
+        public ref Vector3 WorldCenter
+        {
+            get
+            {
+                if (worldBoundingBoxDirty_)
+                {
+                    OnWorldBoundingBoxUpdate();
+                    worldBoundingBoxDirty_ = false;
+                }
+
+                return ref worldCenter_; ;
+            }
+        }
+        protected Vector3 worldCenter_;
         /// Local-space bounding box.
         protected BoundingBox boundingBox_;
 
@@ -98,11 +115,18 @@ namespace SharpGame
         protected SourceBatch[] batches = new SourceBatch[0];
 
         /// Drawable flags.
+        public byte DrawableFlags { get => drawableFlags_; set => drawableFlags_ = value; }
         protected byte drawableFlags_;
+
         /// Bounding box dirty flag.
         protected bool worldBoundingBoxDirty_;
         /// Shadowcaster flag.
+        public bool CastShadows { get => castShadows_; set => castShadows_ = value; }
         protected bool castShadows_;
+
+        protected uint viewMask_;
+        public uint ViewMask { get => viewMask_; set => viewMask_ = value; }
+
         /// Current distance to camera.
         protected float distance_;
         /// LOD scaled distance.
@@ -241,6 +265,7 @@ namespace SharpGame
         protected virtual void OnWorldBoundingBoxUpdate()
         {
             worldBoundingBox_ = boundingBox_.Transformed(ref node_.WorldTransform);
+            worldCenter_ = worldBoundingBox_.Center;
         }
 
         public virtual void Update(ref FrameInfo frameInfo)
