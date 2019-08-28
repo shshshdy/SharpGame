@@ -304,17 +304,16 @@ namespace SharpGame
 
         public Framebuffer[] CreateSwapChainFramebuffers(RenderPass vkRenderPass)
         {
-            VkImageView* attachments = stackalloc VkImageView[2];
+            Span<VkImageView> attachments = stackalloc VkImageView[2];
             // Depth/Stencil attachment is the same for all frame buffers
             attachments[1] = depthStencil.view.handle;
 
             var frameBufferCreateInfo = new FramebufferCreateInfo
             {
-                renderPass = vkRenderPass,
-                attachmentCount = 2,
-                pAttachments = attachments,
-                width = Width,
-                height = Height,
+                renderPass = vkRenderPass,                
+                attachments = attachments,
+                width = (uint)Width,
+                height = (uint)Height,
                 layers = 1
             };
 

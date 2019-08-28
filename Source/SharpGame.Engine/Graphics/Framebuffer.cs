@@ -6,26 +6,25 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public unsafe struct FramebufferCreateInfo
+    public unsafe ref struct FramebufferCreateInfo
     {
-        public uint flags;
         public RenderPass renderPass;
-        public int attachmentCount;
-        public VkImageView* pAttachments;
-        public int width;
-        public int height;
-        public int layers;
+        public uint width;
+        public uint height;
+        public uint layers;
+        public Span<VkImageView> attachments;
+        public uint flags;
 
         public unsafe void ToNative(out VkFramebufferCreateInfo native)
         {
             native = VkFramebufferCreateInfo.New();
             native.flags = flags;
             native.renderPass = renderPass.handle;
-            native.attachmentCount = (uint)attachmentCount;
-            native.pAttachments = (VkImageView*)pAttachments;
-            native.width = (uint)width;
-            native.height = (uint)height;
-            native.layers = (uint)layers;
+            native.attachmentCount = (uint)attachments.Length;
+            native.pAttachments = (VkImageView*)Unsafe.AsPointer(ref attachments[0]);
+            native.width = width;
+            native.height = height;
+            native.layers = layers;
         }
     }
 
@@ -44,6 +43,25 @@ namespace SharpGame
         protected override void Destroy()
         {
             Device.Destroy(handle);
+        }
+
+        public static Framebuffer Create(RenderPass renderPass, uint width, uint height, uint layers, ImageView[] attachments)
+        {
+            Span<VkImageView> views = stackalloc VkImageView[attachments.Length];
+            for(int i = 0; i < views.Length; i++)
+            {
+                views[i] = attachments[i].handle;
+            }
+
+            var framebufferCreateInfo = new FramebufferCreateInfo
+            {
+                renderPass = renderPass,
+                attachments = views,
+                width = width,
+                height = height,
+                layers = 1
+            };
+            return new Framebuffer(ref framebufferCreateInfo);
         }
     }
 }

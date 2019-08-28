@@ -11,7 +11,7 @@ namespace SharpGame
         public Image image;
         public ImageView view;
 
-        public unsafe DepthStencil(uint width, uint height, Format format)
+        public DepthStencil(uint width, uint height, Format format)
         {
             image = Image.Create(width, height, ImageCreateFlags.None, 1, 1, format, SampleCountFlags.Count1, (ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.TransferSrc));
             view = ImageView.Create(image, ImageViewType.Image2D, format, (ImageAspectFlags.Depth | ImageAspectFlags.Stencil), 0, 1);
