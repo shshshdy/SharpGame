@@ -17,12 +17,12 @@ namespace SharpGame
             view = ImageView.Create(image, ImageViewType.Image2D, format, (ImageAspectFlags.Depth | ImageAspectFlags.Stencil), 0, 1);
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            image.Dispose();
-            view.Dispose();
+            image?.Dispose();
+            view?.Dispose();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
     }
 

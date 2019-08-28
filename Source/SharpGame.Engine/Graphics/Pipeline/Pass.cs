@@ -496,7 +496,7 @@ namespace SharpGame
 
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             foreach (var stage in ShaderModels)
             {
@@ -518,7 +518,7 @@ namespace SharpGame
 
             PipelineLayout.Dispose();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
     }

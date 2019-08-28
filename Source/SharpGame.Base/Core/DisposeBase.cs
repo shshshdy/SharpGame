@@ -28,15 +28,21 @@ namespace SharpGame
             {
                 if(disposing)
                 {
-                    Destroy();
                 }
-                
+
+                Destroy(disposing);
+
                 disposed = true;
             }
         }
 
-        protected virtual void Destroy()
+        protected virtual void Destroy(bool disposing)
         {
+        }
+
+        ~DisposeBase()
+        {
+            Dispose(false);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

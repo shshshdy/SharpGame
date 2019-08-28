@@ -15,12 +15,9 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkCreateSemaphore(Device.LogicalDevice, ref createInfo, IntPtr.Zero, out native));
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            if (!IsDisposed)
-                vkDestroySemaphore(Device.LogicalDevice, native, IntPtr.Zero);
-
-            base.Destroy();
+            vkDestroySemaphore(Device.LogicalDevice, native, IntPtr.Zero);
         }
 
     }

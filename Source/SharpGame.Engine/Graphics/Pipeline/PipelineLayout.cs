@@ -78,7 +78,7 @@ namespace SharpGame
             vkCreatePipelineLayout(Graphics.device, ref pipelineLayoutCreateInfo, IntPtr.Zero, out handle);
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             if(handle != 0)
             {

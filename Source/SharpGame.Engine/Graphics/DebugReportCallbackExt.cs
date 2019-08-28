@@ -58,7 +58,7 @@ namespace Vulkan
         /// <summary>
         /// Destroy a debug report callback object.
         /// </summary>
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             VulkanNative.vkDestroyDebugReportCallbackEXT(Parent, handle, null);
             _callback = null;

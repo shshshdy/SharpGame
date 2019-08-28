@@ -30,7 +30,7 @@ namespace SharpGame
             Size = size;
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             foreach(var buf in buffers[0])
             {

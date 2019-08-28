@@ -34,11 +34,11 @@ namespace SharpGame
             get { return CommandBuffers[index]; }
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             Free();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
         public void Allocate(CommandBufferLevel commandBufferLevel, uint count)

@@ -31,12 +31,11 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkWaitForFences(Device.LogicalDevice, 1, ref native, false, timeout));
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            if (!IsDisposed)
-                vkDestroyFence(Device.LogicalDevice, native, IntPtr.Zero);
+            vkDestroyFence(Device.LogicalDevice, native, IntPtr.Zero);
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
         internal unsafe static void Reset(Fence[] fences)

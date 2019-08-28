@@ -28,14 +28,14 @@ namespace SharpGame
             }
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             image?.Dispose();
             view?.Dispose();
             depthImage?.Dispose();
             depthView?.Dispose();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
     }
 }

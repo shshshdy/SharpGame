@@ -20,7 +20,7 @@ namespace SharpGame
             handle = Device.CreateImage(ref native);
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             Device.Destroy(handle);
         }

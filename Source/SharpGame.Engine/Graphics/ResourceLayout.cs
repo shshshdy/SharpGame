@@ -88,7 +88,9 @@ namespace SharpGame
             }
 
             needRebuild = false;
-            Destroy();
+
+            Destroy(true);
+
             bindings = new VkDescriptorSetLayoutBinding[Bindings.Count];
             for (int i = 0; i < Bindings.Count; i++)
             {
@@ -163,7 +165,7 @@ namespace SharpGame
             return null;
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             if (descriptorSetLayout != 0)
             {
