@@ -49,90 +49,55 @@ namespace SharpGame
             texture.deviceMemory = Device.AllocateMemory(ref memAllocInfo);
             Device.BindImageMemory(texture.image.handle, texture.deviceMemory, 0);
 
-            { 
-                // Create a host-visible staging buffer that contains the raw image data
-                VkBuffer stagingBuffer;
-                VkDeviceMemory stagingMemory;
+            {
+                DeviceBuffer stagingBuffer = DeviceBuffer.CreateStagingBuffer(totalBytes, tex2DDataPtr);
+                
+                BufferImageCopy bufferCopyRegion = new BufferImageCopy();
+                bufferCopyRegion.imageSubresource.aspectMask = ImageAspectFlags.Color;
+                bufferCopyRegion.imageSubresource.mipLevel = 0;
+                bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
+                bufferCopyRegion.imageSubresource.layerCount = 1;
+                bufferCopyRegion.imageExtent.width = (uint)w;
+                bufferCopyRegion.imageExtent.height = (uint)h;
+                bufferCopyRegion.imageExtent.depth = 1;
+                bufferCopyRegion.bufferOffset = 0;
+                   
 
-                VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
-                bufferCreateInfo.size = (ulong)totalBytes;
-                // This buffer is used as a transfer source for the buffer copy
-                bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
-                bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
-
-                stagingBuffer = Device.CreateBuffer(ref bufferCreateInfo);
-
-                // Get memory requirements for the staging buffer (alignment, memory type bits)
-                Device.GetBufferMemoryRequirements(stagingBuffer, out memReqs);
-
-                memAllocInfo.allocationSize = memReqs.size;
-                // Get memory type index for a host visible buffer
-                memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
-
-                stagingMemory = Device.AllocateMemory(ref memAllocInfo);
-                Device.BindBufferMemory(stagingBuffer, stagingMemory, 0);
-
-                // Copy texture data into staging buffer
-                IntPtr data = Device.MapMemory(stagingMemory, 0, memReqs.size, 0);
-                Unsafe.CopyBlock((void*)data, tex2DDataPtr, (uint)totalBytes);
-                Device.UnmapMemory(stagingMemory);
-
-                // Setup buffer copy regions for each mip level
-                NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
-
-                uint offset = 0;
-                {
-                    VkBufferImageCopy bufferCopyRegion = new VkBufferImageCopy();
-                    bufferCopyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
-                    bufferCopyRegion.imageSubresource.mipLevel = 0;
-                    bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
-                    bufferCopyRegion.imageSubresource.layerCount = 1;
-                    bufferCopyRegion.imageExtent.width = (uint)w;// tex2D.Faces[0].Mipmaps[i].Width;
-                    bufferCopyRegion.imageExtent.height = (uint)h;// tex2D.Faces[0].Mipmaps[i].Height;
-                    bufferCopyRegion.imageExtent.depth = 1;
-                    bufferCopyRegion.bufferOffset = offset;
-                    bufferCopyRegions.Add(bufferCopyRegion);
-                }
-
-                VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
+                CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
                 // The sub resource range describes the regions of the image we will be transition
-                VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange
+                ImageSubresourceRange subresourceRange = new ImageSubresourceRange
                 {
-                    aspectMask = VkImageAspectFlags.Color,
+                    aspectMask = ImageAspectFlags.Color,
                     baseMipLevel = 0,
                     levelCount = (uint)texture.mipLevels,
                     layerCount = 1
                 };
 
-                VulkanUtil.SetImageLayout(
-                    copyCmd,
-                    texture.image.handle,
-                     VkImageAspectFlags.Color,
-                     VkImageLayout.Undefined,
-                     VkImageLayout.TransferDstOptimal,
+                copyCmd.SetImageLayout(
+                    texture.image,
+                     ImageAspectFlags.Color,
+                     ImageLayout.Undefined,
+                     ImageLayout.TransferDstOptimal,
                     subresourceRange);
 
-                vkCmdCopyBufferToImage(
-                    copyCmd,
+                copyCmd.CopyBufferToImage(                    
                     stagingBuffer,
-                    texture.image.handle,
-                     VkImageLayout.TransferDstOptimal,
-                    bufferCopyRegions.Count,
-                    bufferCopyRegions.Data);
+                    texture.image,
+                     ImageLayout.TransferDstOptimal,
+                    ref bufferCopyRegion);
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
-                VulkanUtil.SetImageLayout(
-                    copyCmd,
-                    texture.image.handle,
-                    VkImageAspectFlags.Color,
-                    VkImageLayout.TransferDstOptimal,
-                    (VkImageLayout)texture.imageLayout,
+                copyCmd.SetImageLayout(                    
+                    texture.image,
+                    ImageAspectFlags.Color,
+                    ImageLayout.TransferDstOptimal,
+                    texture.imageLayout,
                     subresourceRange);
 
-                Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue.native, true);
-                Device.FreeMemory(stagingMemory);
-                Device.DestroyBuffer(stagingBuffer);
+                Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
+
+                stagingBuffer.Dispose();
             }
 
             texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, texture.mipLevels);
@@ -150,64 +115,12 @@ namespace SharpGame
                 height = width;
 
             mipLevels = (uint)tex2D.Mipmaps.Length;
-
-            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
-            VkMemoryRequirements memReqs;
-
-            // Use a separate command buffer for texture loading
-            VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
-
-            // Create a host-visible staging buffer that contains the raw image data
-            VkBuffer stagingBuffer;
-            VkDeviceMemory stagingMemory;
-
-            VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
-            bufferCreateInfo.size = tex2D.GetTotalSize();
-            // This buffer is used as a transfer source for the buffer copy
-            bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
-            bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
-
-            stagingBuffer = Device.CreateBuffer(ref bufferCreateInfo);
-
-            // Get memory requirements for the staging buffer (alignment, memory type bits)
-            Device.GetBufferMemoryRequirements(stagingBuffer, out memReqs);
-
-            memAllocInfo.allocationSize = memReqs.size;
-            // Get memory type index for a host visible buffer
-            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
-
-            stagingMemory = Device.AllocateMemory(ref memAllocInfo);
-
-            Device.BindBufferMemory(stagingBuffer, stagingMemory, 0);
-
-            // Copy texture data into staging buffer
-            IntPtr data = Device.MapMemory( stagingMemory, 0, memReqs.size, 0);
+            
+            DeviceBuffer stagingBuffer;
             byte[] pixelData = tex2D.GetAllTextureData();
             fixed (byte* pixelDataPtr = &pixelData[0])
             {
-                Unsafe.CopyBlock((void*)data, pixelDataPtr, (uint)pixelData.Length);
-            }
-            Device.UnmapMemory(stagingMemory);
-
-            // Setup buffer copy regions for each mip level
-            NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
-            uint offset = 0;
-
-            for (uint i = 0; i < mipLevels; i++)
-            {
-                VkBufferImageCopy bufferCopyRegion = new VkBufferImageCopy();
-                bufferCopyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
-                bufferCopyRegion.imageSubresource.mipLevel = i;
-                bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
-                bufferCopyRegion.imageSubresource.layerCount = 1;
-                bufferCopyRegion.imageExtent.width = tex2D.Mipmaps[i].Width;
-                bufferCopyRegion.imageExtent.height = tex2D.Mipmaps[i].Height;
-                bufferCopyRegion.imageExtent.depth = 1;
-                bufferCopyRegion.bufferOffset = offset;
-
-                bufferCopyRegions.Add(bufferCopyRegion);
-
-                offset += tex2D.Mipmaps[i].SizeInBytes;
+                stagingBuffer = DeviceBuffer.CreateStagingBuffer(tex2D.GetTotalSize(), pixelDataPtr);
             }
 
             // Create optimal tiled target image
@@ -233,54 +146,74 @@ namespace SharpGame
 
             image = new Image(ref imageCreateInfo);
 
-            Device.GetImageMemoryRequirements(image.handle, out memReqs);
+            Device.GetImageMemoryRequirements(image.handle, out var memReqs);
 
+            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
             memAllocInfo.allocationSize = memReqs.size;
             memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
             deviceMemory = Device.AllocateMemory(ref memAllocInfo);
             Device.BindImageMemory(image.handle, deviceMemory, 0);
 
-            VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
-            subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            // Setup buffer copy regions for each mip level
+            Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(mipLevels)];
+            uint offset = 0;
+            int index = 0;
+            for (uint i = 0; i < mipLevels; i++)
+            {
+                BufferImageCopy bufferCopyRegion = new BufferImageCopy();
+                bufferCopyRegion.imageSubresource.aspectMask = ImageAspectFlags.Color;
+                bufferCopyRegion.imageSubresource.mipLevel = i;
+                bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
+                bufferCopyRegion.imageSubresource.layerCount = 1;
+                bufferCopyRegion.imageExtent.width = tex2D.Mipmaps[i].Width;
+                bufferCopyRegion.imageExtent.height = tex2D.Mipmaps[i].Height;
+                bufferCopyRegion.imageExtent.depth = 1;
+                bufferCopyRegion.bufferOffset = offset;
+
+                bufferCopyRegions[index++] = bufferCopyRegion;
+
+                offset += tex2D.Mipmaps[i].SizeInBytes;
+            }
+
+            ImageSubresourceRange subresourceRange = new ImageSubresourceRange();
+            subresourceRange.aspectMask = ImageAspectFlags.Color;
             subresourceRange.baseMipLevel = 0;
             subresourceRange.levelCount = (uint)mipLevels;
             subresourceRange.layerCount = 1;
 
+            // Use a separate command buffer for texture loading
+            CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
+
             // Image barrier for optimal image (target)
             // Optimal image will be used as destination for the copy
-            VulkanUtil.SetImageLayout(
-                copyCmd,
-                image.handle,
-                VkImageAspectFlags.Color,
-                VkImageLayout.Undefined,
-                VkImageLayout.TransferDstOptimal,
+            copyCmd.SetImageLayout(
+                image,
+                ImageAspectFlags.Color,
+                ImageLayout.Undefined,
+                ImageLayout.TransferDstOptimal,
                 subresourceRange);
 
             // Copy mip levels from staging buffer
-            vkCmdCopyBufferToImage(
-                copyCmd,
+            copyCmd.CopyBufferToImage(
                 stagingBuffer,
-                image.handle,
-                VkImageLayout.TransferDstOptimal,
-                bufferCopyRegions.Count,
-                bufferCopyRegions.Data);
+                image,
+                ImageLayout.TransferDstOptimal,
+                bufferCopyRegions);
 
             // Change texture image layout to shader read after all mip levels have been copied
             //this.imageLayout = imageLayout;
-            VulkanUtil.SetImageLayout(
-                copyCmd,
-                image.handle,
-                VkImageAspectFlags.Color,
-                VkImageLayout.TransferDstOptimal,
-                (VkImageLayout)imageLayout,
+            copyCmd.SetImageLayout(
+                image,
+                ImageAspectFlags.Color,
+                ImageLayout.TransferDstOptimal,
+                imageLayout,
                 subresourceRange);
 
-            Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue.native);
+            Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue);
 
             // Clean up staging resources
-            Device.FreeMemory(stagingMemory);
-            Device.DestroyBuffer(stagingBuffer);
+            stagingBuffer.Dispose();
 
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
 

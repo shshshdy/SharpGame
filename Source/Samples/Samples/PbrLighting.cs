@@ -147,14 +147,14 @@ namespace SharpGame.Samples
 
                     Span<ImageMemoryBarrier> preCopyBarriers = stackalloc[]
                     {
-                        new ImageMemoryBarrier(cubeMap, 0, AccessFlags.TransferRead, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferSrcOptimal, ImageAspectFlags.Color, 0, 1),
-                        new ImageMemoryBarrier(envMap, 0, AccessFlags.TransferWrite, ImageLayout.Undefined, ImageLayout.TransferDstOptimal),
+                        new ImageMemoryBarrier(cubeMap.image, 0, AccessFlags.TransferRead, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferSrcOptimal, ImageAspectFlags.Color, 0, 1),
+                        new ImageMemoryBarrier(envMap.image, 0, AccessFlags.TransferWrite, ImageLayout.Undefined, ImageLayout.TransferDstOptimal),
                     };
 
                     Span<ImageMemoryBarrier> postCopyBarriers = stackalloc[]
                     {
-                        new ImageMemoryBarrier(cubeMap, AccessFlags.TransferRead, AccessFlags.ShaderRead, ImageLayout.TransferSrcOptimal, ImageLayout.ShaderReadOnlyOptimal, ImageAspectFlags.Color, 0, 1),
-                        new ImageMemoryBarrier(envMap, AccessFlags.TransferWrite, AccessFlags.ShaderWrite, ImageLayout.TransferDstOptimal, ImageLayout.General),
+                        new ImageMemoryBarrier(cubeMap.image, AccessFlags.TransferRead, AccessFlags.ShaderRead, ImageLayout.TransferSrcOptimal, ImageLayout.ShaderReadOnlyOptimal, ImageAspectFlags.Color, 0, 1),
+                        new ImageMemoryBarrier(envMap.image, AccessFlags.TransferWrite, AccessFlags.ShaderWrite, ImageLayout.TransferDstOptimal, ImageLayout.General),
                     };
 
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer, preCopyBarriers);
@@ -201,7 +201,7 @@ namespace SharpGame.Samples
                         commandBuffer.Dispatch(numGroups, numGroups, 6);
                     }
                   
-                    var barrier = new ImageMemoryBarrier(envMap, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal);
+                    var barrier = new ImageMemoryBarrier(envMap.image, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal);
                     commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, ref barrier);
 
                 }
@@ -217,14 +217,14 @@ namespace SharpGame.Samples
 
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
                 {
-                    Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(irMap, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General) };
+                    Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(irMap.image, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General) };
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
 
                     commandBuffer.BindComputePipeline(pass);
                     commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, irSet, null);
                     commandBuffer.Dispatch(kIrradianceMapSize / 32, kIrradianceMapSize / 32, 6);
 
-                    Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(irMap, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
+                    Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(irMap.image, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
                     commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, postDispatchBarrier);
                 }
 
@@ -239,14 +239,14 @@ namespace SharpGame.Samples
 
                 CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
                 {
-                    Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(brdfLUT, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General)};
+                    Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(brdfLUT.image, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General)};
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
 
                     commandBuffer.BindComputePipeline(pass);
                     commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, brdfLUTSet, null);
                     commandBuffer.Dispatch(kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
 
-                    Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(brdfLUT, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
+                    Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(brdfLUT.image, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
                     commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, postDispatchBarrier);
                 }
 

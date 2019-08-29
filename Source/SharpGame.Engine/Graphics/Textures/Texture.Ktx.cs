@@ -65,18 +65,18 @@ namespace SharpGame
             deviceMemory = Device.AllocateMemory(ref memAllocInfo);
             Device.BindImageMemory(image.handle, deviceMemory, 0);
 
-            VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
+            CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
 
             // Setup buffer copy regions for each face including all of it's miplevels
-            NativeList<VkBufferImageCopy> bufferCopyRegions = new NativeList<VkBufferImageCopy>();
+            Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(layers* mipLevels)];
             uint offset = 0;
-
+            int index = 0;
             for (uint face = 0; face < layers; face++)
             {
                 for (uint level = 0; level < mipLevels; level++)
                 {
-                    VkBufferImageCopy bufferCopyRegion = new VkBufferImageCopy();
-                    bufferCopyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
+                    BufferImageCopy bufferCopyRegion = new BufferImageCopy();
+                    bufferCopyRegion.imageSubresource.aspectMask = ImageAspectFlags.Color;
                     bufferCopyRegion.imageSubresource.mipLevel = level;
                     bufferCopyRegion.imageSubresource.baseArrayLayer = face;
                     bufferCopyRegion.imageSubresource.layerCount = 1;
@@ -85,7 +85,7 @@ namespace SharpGame
                     bufferCopyRegion.imageExtent.depth = 1;
                     bufferCopyRegion.bufferOffset = offset;
 
-                    bufferCopyRegions.Add(bufferCopyRegion);
+                    bufferCopyRegions[index++] = bufferCopyRegion;
 
                     // Increase offset into staging buffer for next level / face
                     offset += texFile.Faces[face].Mipmaps[level].SizeInBytes;
@@ -94,40 +94,36 @@ namespace SharpGame
 
             // Image barrier for optimal image (target)
             // Set initial layout for all array layers (faces) of the optimal (target) tiled texture
-            VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
-            subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            ImageSubresourceRange subresourceRange = new ImageSubresourceRange();
+            subresourceRange.aspectMask = ImageAspectFlags.Color;
             subresourceRange.baseMipLevel = 0;
             subresourceRange.levelCount = (uint)mipLevels;
             subresourceRange.layerCount = layers;
 
-            VulkanUtil.SetImageLayout(
-                copyCmd,
-                image.handle,
-                VkImageAspectFlags.Color,
-                VkImageLayout.Undefined,
-                VkImageLayout.TransferDstOptimal,
+            copyCmd.SetImageLayout(
+                image,
+                ImageAspectFlags.Color,
+                ImageLayout.Undefined,
+                ImageLayout.TransferDstOptimal,
                 subresourceRange);
 
             // Copy the cube map faces from the staging buffer to the optimal tiled image
-            vkCmdCopyBufferToImage(
-                copyCmd,
-                stagingBuffer.buffer,
-                image.handle,
-                VkImageLayout.TransferDstOptimal,
-                bufferCopyRegions.Count,
-                bufferCopyRegions.Data);
+            copyCmd.CopyBufferToImage(                
+                stagingBuffer,
+                image,
+                ImageLayout.TransferDstOptimal,
+                bufferCopyRegions);
 
             // Change texture image layout to shader read after all faces have been copied
             imageLayout = ImageLayout.ShaderReadOnlyOptimal;
-            VulkanUtil.SetImageLayout(
-                copyCmd,
-                image.handle,
-                VkImageAspectFlags.Color,
-                VkImageLayout.TransferDstOptimal,
-                (VkImageLayout)imageLayout,
+            copyCmd.SetImageLayout(
+                image,
+                ImageAspectFlags.Color,
+                ImageLayout.TransferDstOptimal,
+                imageLayout,
                 subresourceRange);
 
-            Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue.native, true);
+            Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
             
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == 1);
 
@@ -149,6 +145,8 @@ namespace SharpGame
             imageView = new ImageView(ref view);
 
             UpdateDescriptor();
+
+            stagingBuffer.Dispose();
         }
 
     }

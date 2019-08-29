@@ -107,7 +107,7 @@ namespace SharpGame
 	        // Iterate through mip chain and consecutively blit from previous level to next level with linear filtering.
 	        for(uint level=1, prevLevelWidth = width, prevLevelHeight = height; level< mipLevels; ++level, prevLevelWidth /= 2, prevLevelHeight /=2 )
             {
-                var preBlitBarrier = new ImageMemoryBarrier(this, 0, AccessFlags.TransferWrite, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, ImageAspectFlags.Color, level, 1);
+                var preBlitBarrier = new ImageMemoryBarrier(image, 0, AccessFlags.TransferWrite, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, ImageAspectFlags.Color, level, 1);
                 commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.Transfer, ref preBlitBarrier);
 
                 ImageBlit region = new ImageBlit
@@ -134,13 +134,13 @@ namespace SharpGame
 
                 commandBuffer.BlitImage(image,  ImageLayout.TransferSrcOptimal, image, ImageLayout.TransferDstOptimal, ref region,  Filter.Linear);
 
-                var postBlitBarrier = new ImageMemoryBarrier(this, AccessFlags.TransferWrite, AccessFlags.TransferRead, ImageLayout.TransferDstOptimal, ImageLayout.TransferSrcOptimal, ImageAspectFlags.Color, level, 1);
+                var postBlitBarrier = new ImageMemoryBarrier(image, AccessFlags.TransferWrite, AccessFlags.TransferRead, ImageLayout.TransferDstOptimal, ImageLayout.TransferSrcOptimal, ImageAspectFlags.Color, level, 1);
                 commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.Transfer, ref postBlitBarrier);
             }
 
             // Transition whole mip chain to shader read only layout.
             {
-		        var barrier = new ImageMemoryBarrier(this, AccessFlags.TransferWrite, 0, ImageLayout.TransferSrcOptimal,  ImageLayout.ShaderReadOnlyOptimal);
+		        var barrier = new ImageMemoryBarrier(image, AccessFlags.TransferWrite, 0, ImageLayout.TransferSrcOptimal,  ImageLayout.ShaderReadOnlyOptimal);
                 commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.BottomOfPipe, ref barrier);
 	        }
 

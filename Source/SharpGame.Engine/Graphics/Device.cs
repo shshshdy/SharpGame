@@ -658,53 +658,6 @@ namespace SharpGame
             vkFreeCommandBuffers(device, cmdPool, count, cmdBuffers);
         }
 
-        public static VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, bool begin = false)
-        {
-            VkCommandBufferAllocateInfo cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
-            cmdBufAllocateInfo.commandPool = commandPool;
-            cmdBufAllocateInfo.level = level;
-            cmdBufAllocateInfo.commandBufferCount = 1;
-
-            VkCommandBuffer cmdBuffer;
-            VulkanUtil.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, out cmdBuffer));
-
-            // If requested, also start recording for the new command buffer
-            if (begin)
-            {
-                VkCommandBufferBeginInfo cmdBufInfo = VkCommandBufferBeginInfo.New();
-                VulkanUtil.CheckResult(vkBeginCommandBuffer(cmdBuffer, ref cmdBufInfo));
-            }
-
-            return cmdBuffer;
-        }
-
-        public static void FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free = true)
-        {
-            VulkanUtil.CheckResult(vkEndCommandBuffer(commandBuffer));
-
-            VkSubmitInfo submitInfo = VkSubmitInfo.New();
-            submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = &commandBuffer;
-
-            // Create fence to ensure that the command buffer has finished executing
-            VkFenceCreateInfo fenceInfo = VkFenceCreateInfo.New();
-            fenceInfo.flags = VkFenceCreateFlags.None;
-            VkFence fence;
-            VulkanUtil.CheckResult(vkCreateFence(device, &fenceInfo, null, &fence));
-
-            // Submit to the queue
-            VulkanUtil.CheckResult(vkQueueSubmit(queue, 1, &submitInfo, fence));
-            // Wait for the fence to signal that command buffer has finished executing
-            VulkanUtil.CheckResult(vkWaitForFences(device, 1, &fence, True, DEFAULT_FENCE_TIMEOUT));
-
-            vkDestroyFence(device, fence, null);
-
-            if (free)
-            {
-                vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
-            }
-        }
-
         public static IntPtr MapMemory(VkDeviceMemory memory, ulong offset, ulong size, uint flags)
         {
             void* mappedLocal;

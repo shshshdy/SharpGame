@@ -101,6 +101,8 @@ namespace SharpGame
             RenderComplete = new Semaphore();
             computeFence = new Fence(FenceCreateFlags.Signaled);
 
+            commandPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
+
             Texture.Init();
 
 #if EVENT_SYNC
@@ -336,7 +338,6 @@ namespace SharpGame
         
         private void CreateCommandPool()
         {
-            commandPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
             primaryCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
             workCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
             computeCmdPool = new CommandBufferPool(ComputeQueue.FamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer);

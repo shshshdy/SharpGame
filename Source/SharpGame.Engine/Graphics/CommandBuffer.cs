@@ -397,6 +397,16 @@ namespace SharpGame
             vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)region.Length, ref Unsafe.As<ImageCopy, VkImageCopy>(ref region[0]));
         }
 
+        public void CopyBufferToImage(DeviceBuffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, ref BufferImageCopy region)
+        {
+            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, 1, ref Unsafe.As<BufferImageCopy, VkBufferImageCopy>(ref region));
+        }
+
+        public void CopyBufferToImage(DeviceBuffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, Span<BufferImageCopy> pRegions)
+        {
+            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, ref Unsafe.As<BufferImageCopy, VkBufferImageCopy>(ref pRegions[0]));
+        }
+
         public void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags,
             uint memoryBarrierCount, ref VkMemoryBarrier pMemoryBarriers, uint bufferMemoryBarrierCount, IntPtr pBufferMemoryBarriers,
             uint imageMemoryBarrierCount, ref VkImageMemoryBarrier pImageMemoryBarriers)
@@ -421,6 +431,138 @@ namespace SharpGame
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, 0, 0, null, 0, null, 
                 (uint)barriers.Length, (VkImageMemoryBarrier*)Unsafe.AsPointer(ref  barriers[0]));
+        }
+
+        // Fixed sub resource on first mip level and layer
+        public void SetImageLayout(
+            Image image,
+            ImageAspectFlags aspectMask,
+            ImageLayout oldImageLayout,
+            ImageLayout newImageLayout,
+            PipelineStageFlags srcStageMask = PipelineStageFlags.AllCommands,
+            PipelineStageFlags dstStageMask = PipelineStageFlags.AllCommands)
+        {
+            ImageSubresourceRange subresourceRange = new ImageSubresourceRange
+            {
+                aspectMask = aspectMask,
+                baseMipLevel = 0,
+                levelCount = 1,
+                layerCount = 1
+            };
+
+            SetImageLayout(image, aspectMask, oldImageLayout, newImageLayout, subresourceRange);
+        }
+
+        public void SetImageLayout(
+            Image image,
+            ImageAspectFlags aspectMask,
+            ImageLayout oldImageLayout,
+            ImageLayout newImageLayout,
+            ImageSubresourceRange subresourceRange,
+            PipelineStageFlags srcStageMask = PipelineStageFlags.AllCommands,
+            PipelineStageFlags dstStageMask = PipelineStageFlags.AllCommands)
+        {
+            // Create an image barrier object
+            ImageMemoryBarrier imageMemoryBarrier = new ImageMemoryBarrier(image)
+            {
+                oldLayout = oldImageLayout,
+                newLayout = newImageLayout,
+                subresourceRange = subresourceRange
+            };
+
+            // Source layouts (old)
+            // Source access mask controls actions that have to be finished on the old layout
+            // before it will be transitioned to the new layout
+            switch (oldImageLayout)
+            {
+                case ImageLayout.Undefined:
+                    // Image layout is undefined (or does not matter)
+                    // Only valid as initial layout
+                    // No flags required, listed only for completeness
+                    imageMemoryBarrier.srcAccessMask = 0;
+                    break;
+
+                case ImageLayout.Preinitialized:
+                    // Image is preinitialized
+                    // Only valid as initial layout for linear images, preserves memory contents
+                    // Make sure host writes have been finished
+                    imageMemoryBarrier.srcAccessMask = AccessFlags.HostWrite;
+                    break;
+
+                case ImageLayout.ColorAttachmentOptimal:
+                    // Image is a color attachment
+                    // Make sure any writes to the color buffer have been finished
+                    imageMemoryBarrier.srcAccessMask = AccessFlags.ColorAttachmentWrite;
+                    break;
+
+                case ImageLayout.DepthStencilAttachmentOptimal:
+                    // Image is a depth/stencil attachment
+                    // Make sure any writes to the depth/stencil buffer have been finished
+                    imageMemoryBarrier.srcAccessMask = AccessFlags.DepthStencilAttachmentWrite;
+                    break;
+
+                case ImageLayout.TransferSrcOptimal:
+                    // Image is a transfer source 
+                    // Make sure any reads from the image have been finished
+                    imageMemoryBarrier.srcAccessMask = AccessFlags.TransferRead;
+                    break;
+
+                case ImageLayout.TransferDstOptimal:
+                    // Image is a transfer destination
+                    // Make sure any writes to the image have been finished
+                    imageMemoryBarrier.srcAccessMask = AccessFlags.TransferWrite;
+                    break;
+
+                case ImageLayout.ShaderReadOnlyOptimal:
+                    // Image is read by a shader
+                    // Make sure any shader reads from the image have been finished
+                    imageMemoryBarrier.srcAccessMask = AccessFlags.ShaderRead;
+                    break;
+            }
+
+            // Target layouts (new)
+            // Destination access mask controls the dependency for the new image layout
+            switch (newImageLayout)
+            {
+                case ImageLayout.TransferDstOptimal:
+                    // Image will be used as a transfer destination
+                    // Make sure any writes to the image have been finished
+                    imageMemoryBarrier.dstAccessMask = AccessFlags.TransferWrite;
+                    break;
+
+                case ImageLayout.TransferSrcOptimal:
+                    // Image will be used as a transfer source
+                    // Make sure any reads from and writes to the image have been finished
+                    imageMemoryBarrier.srcAccessMask = imageMemoryBarrier.srcAccessMask | AccessFlags.TransferRead;
+                    imageMemoryBarrier.dstAccessMask = AccessFlags.TransferRead;
+                    break;
+
+                case ImageLayout.ColorAttachmentOptimal:
+                    // Image will be used as a color attachment
+                    // Make sure any writes to the color buffer have been finished
+                    imageMemoryBarrier.srcAccessMask = AccessFlags.TransferRead;
+                    imageMemoryBarrier.dstAccessMask = AccessFlags.ColorAttachmentWrite;
+                    break;
+
+                case ImageLayout.DepthStencilAttachmentOptimal:
+                    // Image layout will be used as a depth/stencil attachment
+                    // Make sure any writes to depth/stencil buffer have been finished
+                    imageMemoryBarrier.dstAccessMask = imageMemoryBarrier.dstAccessMask | AccessFlags.DepthStencilAttachmentWrite;
+                    break;
+
+                case ImageLayout.ShaderReadOnlyOptimal:
+                    // Image will be read in a shader (sampler, input attachment)
+                    // Make sure any writes to the image have been finished
+                    if (imageMemoryBarrier.srcAccessMask == 0)
+                    {
+                        imageMemoryBarrier.srcAccessMask = AccessFlags.HostWrite | AccessFlags.TransferWrite;
+                    }
+                    imageMemoryBarrier.dstAccessMask = AccessFlags.ShaderRead;
+                    break;
+            }
+
+            // Put barrier inside setup command buffer
+            PipelineBarrier(srcStageMask, dstStageMask, ref imageMemoryBarrier);
         }
 
         public void Reset(bool releaseRes)
@@ -641,6 +783,16 @@ namespace SharpGame
         /// The size in texels of the source image to resolve in width, height and depth.
         /// </summary>
         public Extent3D Extent;
+    }
+
+    public struct BufferImageCopy
+    {
+        public ulong bufferOffset;
+        public uint bufferRowLength;
+        public uint bufferImageHeight;
+        public ImageSubresourceLayers imageSubresource;
+        public Offset3D imageOffset;
+        public Extent3D imageExtent;
     }
 
     [StructLayout(LayoutKind.Sequential)]

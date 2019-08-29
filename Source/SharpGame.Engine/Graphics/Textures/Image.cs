@@ -116,8 +116,16 @@ namespace SharpGame
     public struct ImageMemoryBarrier
     {
         internal VkImageMemoryBarrier barrier;
-        public ImageMemoryBarrier(Texture texture, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout,
-            ImageAspectFlags apectMask = ImageAspectFlags.Color, uint baseMipLevel = 0, uint levelCount = uint.MaxValue)
+        public ImageMemoryBarrier(Image image)
+        {
+            barrier = VkImageMemoryBarrier.New();
+            barrier.image = image.handle;
+            barrier.srcQueueFamilyIndex = uint.MaxValue;
+            barrier.dstQueueFamilyIndex = uint.MaxValue;
+        }
+
+        public ImageMemoryBarrier(Image image, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout,
+            ImageAspectFlags aspectMask = ImageAspectFlags.Color, uint baseMipLevel = 0, uint levelCount = uint.MaxValue)
         {
             barrier = VkImageMemoryBarrier.New();
 
@@ -127,26 +135,57 @@ namespace SharpGame
             barrier.newLayout = (VkImageLayout)newLayout;
             barrier.srcQueueFamilyIndex = uint.MaxValue;
             barrier.dstQueueFamilyIndex = uint.MaxValue;
-            barrier.image = texture.image.handle;
-            barrier.subresourceRange.aspectMask = (VkImageAspectFlags)apectMask;
+            barrier.image = image.handle;
+
+            barrier.subresourceRange.aspectMask = (VkImageAspectFlags)aspectMask;
             barrier.subresourceRange.baseMipLevel = baseMipLevel;
             barrier.subresourceRange.levelCount = levelCount;
             barrier.subresourceRange.layerCount = uint.MaxValue;
 	    }
 
-        public ImageAspectFlags ApectMask { set => barrier.subresourceRange.aspectMask = (VkImageAspectFlags)value; }
-
-        public void SetMipLevels(uint baseMipLevel, uint levelCount = uint.MaxValue)
+        public ImageMemoryBarrier(Image image, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout,
+            ImageSubresourceRange subresourceRange)
         {
-            barrier.subresourceRange.baseMipLevel = baseMipLevel;
-            barrier.subresourceRange.levelCount = levelCount;
+            barrier = VkImageMemoryBarrier.New();
+
+            barrier.srcAccessMask = (VkAccessFlags)srcAccessMask;
+            barrier.dstAccessMask = (VkAccessFlags)dstAccessMask;
+            barrier.oldLayout = (VkImageLayout)oldLayout;
+            barrier.newLayout = (VkImageLayout)newLayout;
+            barrier.srcQueueFamilyIndex = uint.MaxValue;
+            barrier.dstQueueFamilyIndex = uint.MaxValue;
+            barrier.image = image.handle;
+
+            barrier.subresourceRange = new VkImageSubresourceRange
+            {
+                aspectMask = (VkImageAspectFlags)subresourceRange.aspectMask,
+                baseMipLevel = subresourceRange.baseMipLevel,
+                levelCount = subresourceRange.levelCount,
+                baseArrayLayer = subresourceRange.baseArrayLayer,
+                layerCount = subresourceRange.layerCount,
+            };
         }
 
-        public void SetArrayLayers(uint baseArrayLayer, uint layerCount = uint.MaxValue)
+        public AccessFlags srcAccessMask { get => (AccessFlags)barrier.srcAccessMask; set => barrier.srcAccessMask = (VkAccessFlags)value; }
+        public AccessFlags dstAccessMask { get => (AccessFlags)barrier.dstAccessMask; set => barrier.dstAccessMask = (VkAccessFlags)value; }
+        public ImageLayout oldLayout { set => barrier.oldLayout = (VkImageLayout)value; }
+        public ImageLayout newLayout { set => barrier.newLayout = (VkImageLayout)value; }
+
+        public ImageSubresourceRange subresourceRange
         {
-            barrier.subresourceRange.baseArrayLayer = baseArrayLayer;
-            barrier.subresourceRange.layerCount = layerCount;
+            set
+            {
+                barrier.subresourceRange = new VkImageSubresourceRange
+                {
+                    aspectMask = (VkImageAspectFlags)value.aspectMask,
+                    baseMipLevel = value.baseMipLevel,
+                    levelCount = value.levelCount,
+                    baseArrayLayer = value.baseArrayLayer,
+                    layerCount = value.layerCount,
+                };
+             }
         }
+
     }
 
     public struct ImageSubresourceLayers
