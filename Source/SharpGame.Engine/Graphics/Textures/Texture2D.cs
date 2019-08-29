@@ -233,13 +233,13 @@ namespace SharpGame
 
             image = new Image(ref imageCreateInfo);
 
-            vkGetImageMemoryRequirements(Device.LogicalDevice, image.handle, &memReqs);
+            Device.GetImageMemoryRequirements(image.handle, out memReqs);
 
             memAllocInfo.allocationSize = memReqs.size;
-
             memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-            VulkanUtil.CheckResult(vkAllocateMemory(Device.LogicalDevice, &memAllocInfo, null, out deviceMemory));
-            VulkanUtil.CheckResult(vkBindImageMemory(Device.LogicalDevice, image.handle, deviceMemory, 0));
+
+            deviceMemory = Device.AllocateMemory(ref memAllocInfo);
+            Device.BindImageMemory(image.handle, deviceMemory, 0);
 
             VkImageSubresourceRange subresourceRange = new VkImageSubresourceRange();
             subresourceRange.aspectMask = VkImageAspectFlags.Color;
@@ -284,10 +284,6 @@ namespace SharpGame
 
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
 
-            // Create image view
-            // Textures are not directly accessed by the shaders and
-            // are abstracted by image views containing additional
-            // information and sub resource ranges
             ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
             {
                 viewType = ImageViewType.Image2D,
@@ -295,6 +291,7 @@ namespace SharpGame
                 components = new ComponentMapping { r = ComponentSwizzle.R, g = ComponentSwizzle.G, b = ComponentSwizzle.B, a = ComponentSwizzle.A },
                 subresourceRange = new ImageSubresourceRange { aspectMask = ImageAspectFlags.Color, baseMipLevel = 0, levelCount = 1, baseArrayLayer = 0, layerCount = 1 }
             };
+
             // Linear tiling usually won't support mip maps
             // Only set mip map count if optimal tiling is used
             viewCreateInfo.subresourceRange.levelCount = (uint)mipLevels;

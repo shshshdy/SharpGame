@@ -33,76 +33,11 @@ namespace SharpGame
         private static List<string> supportedExtensions = new List<string>();
 
 
-        public static VkInstance CreateInstance(Settings settings)
-        {
-            bool enableValidation = settings.Validation;
-
-            VkApplicationInfo appInfo = new VkApplicationInfo()
-            {
-                sType = VkStructureType.ApplicationInfo,
-                apiVersion = new Version(1, 0, 0),
-                pApplicationName = settings.ApplicationName,
-                pEngineName = engineName,
-            };
-
-            //enabledDeviceExtensions.push_back(VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME);
-            //enabledDeviceExtensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
-            //enabledInstanceExtensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
-
-            NativeList<IntPtr> instanceExtensions = new NativeList<IntPtr>(2);
-            instanceExtensions.Add(Strings.VK_KHR_SURFACE_EXTENSION_NAME);
-            instanceExtensions.Add(Strings.VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                instanceExtensions.Add(Strings.VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                instanceExtensions.Add(Strings.VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
-            }
-            else
-            {
-                throw new PlatformNotSupportedException();
-            }
-
-            VkInstanceCreateInfo instanceCreateInfo = VkInstanceCreateInfo.New();
-            instanceCreateInfo.pApplicationInfo = &appInfo;
-
-            if (instanceExtensions.Count > 0)
-            {
-                if (enableValidation)
-                {
-                    instanceExtensions.Add(Strings.VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-                }
-                instanceCreateInfo.enabledExtensionCount = instanceExtensions.Count;
-                instanceCreateInfo.ppEnabledExtensionNames = (byte**)instanceExtensions.Data;
-            }
-
-            if (enableValidation)
-            {
-                NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr>(1)
-                {
-                    Strings.StandardValidationLayeName
-                };
-                instanceCreateInfo.enabledLayerCount = enabledLayerNames.Count;
-                instanceCreateInfo.ppEnabledLayerNames = (byte**)enabledLayerNames.Data;
-            }
-
-            VkInstance instance;
-            VulkanUtil.CheckResult(vkCreateInstance(&instanceCreateInfo, null, &instance));
-            VkInstance = instance;
-
-            if (settings.Validation)
-            {
-                debugReportCallbackExt = CreateDebugReportCallback();
-            }
-
-            return instance;
-        }
-
-        public static VkDevice Init(VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
+        public static VkDevice Create(Settings settings, VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
             bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute)
         {
+            CreateInstance(settings);
+
             enabledExtensions.Add(Strings.VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME);
             // Physical Device
             uint gpuCount = 0;
@@ -167,6 +102,73 @@ namespace SharpGame
             queue = GetDeviceQueue(Device.QFIndices.Graphics, 0);
             vkCmdPushDescriptorSetKHR();
             return device;
+        }
+
+        static VkInstance CreateInstance(Settings settings)
+        {
+            bool enableValidation = settings.Validation;
+
+            VkApplicationInfo appInfo = new VkApplicationInfo()
+            {
+                sType = VkStructureType.ApplicationInfo,
+                apiVersion = new Version(1, 0, 0),
+                pApplicationName = settings.ApplicationName,
+                pEngineName = engineName,
+            };
+
+            //enabledDeviceExtensions.push_back(VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME);
+            //enabledDeviceExtensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
+            //enabledInstanceExtensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+
+            NativeList<IntPtr> instanceExtensions = new NativeList<IntPtr>(2);
+            instanceExtensions.Add(Strings.VK_KHR_SURFACE_EXTENSION_NAME);
+            instanceExtensions.Add(Strings.VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                instanceExtensions.Add(Strings.VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                instanceExtensions.Add(Strings.VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException();
+            }
+
+            VkInstanceCreateInfo instanceCreateInfo = VkInstanceCreateInfo.New();
+            instanceCreateInfo.pApplicationInfo = &appInfo;
+
+            if (instanceExtensions.Count > 0)
+            {
+                if (enableValidation)
+                {
+                    instanceExtensions.Add(Strings.VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+                }
+                instanceCreateInfo.enabledExtensionCount = instanceExtensions.Count;
+                instanceCreateInfo.ppEnabledExtensionNames = (byte**)instanceExtensions.Data;
+            }
+
+            if (enableValidation)
+            {
+                NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr>(1)
+                {
+                    Strings.StandardValidationLayeName
+                };
+                instanceCreateInfo.enabledLayerCount = enabledLayerNames.Count;
+                instanceCreateInfo.ppEnabledLayerNames = (byte**)enabledLayerNames.Data;
+            }
+
+            VkInstance instance;
+            VulkanUtil.CheckResult(vkCreateInstance(&instanceCreateInfo, null, &instance));
+            VkInstance = instance;
+
+            if (settings.Validation)
+            {
+                debugReportCallbackExt = CreateDebugReportCallback();
+            }
+
+            return instance;
         }
 
         static VkResult CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
@@ -272,7 +274,7 @@ namespace SharpGame
                     }
 
                     VkPipelineCacheCreateInfo pipelineCacheCreateInfo = VkPipelineCacheCreateInfo.New();
-                    VulkanUtil.CheckResult(vkCreatePipelineCache(LogicalDevice, ref pipelineCacheCreateInfo, null, out pipelineCache));
+                    VulkanUtil.CheckResult(vkCreatePipelineCache(device, ref pipelineCacheCreateInfo, null, out pipelineCache));
                     return result;
                 }
             }
@@ -378,6 +380,10 @@ namespace SharpGame
             return Format.Undefined;
         }
 
+        public static void GetPhysicalDeviceFormatProperties(VkFormat format, out VkFormatProperties pFeatures)
+        {
+            vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, out pFeatures);
+        }
 
         public delegate VkResult vkCmdPushDescriptorSetKHRDelegate(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint set, uint descriptorWriteCount, VkWriteDescriptorSet* pDescriptorWrites);
 
@@ -385,6 +391,27 @@ namespace SharpGame
         private static void vkCmdPushDescriptorSetKHR()
         {
             CmdPushDescriptorSetKHR = device.GetProc<vkCmdPushDescriptorSetKHRDelegate>(nameof(vkCmdPushDescriptorSetKHR));
+        }
+
+        public static VkSwapchainKHR  CreateSwapchainKHR(ref VkSwapchainCreateInfoKHR pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateSwapchainKHR(device, ref pCreateInfo, null, out VkSwapchainKHR pSwapchain));
+            return pSwapchain;
+        }
+
+        public static void DestroySwapchainKHR(VkSwapchainKHR swapchain)
+        {
+            vkDestroySwapchainKHR(device, swapchain, null);
+        }
+
+        public static void GetSwapchainImagesKHR(VkSwapchainKHR swapchain, uint* pSwapchainImageCount, VkImage* pSwapchainImages)
+        {
+            VulkanUtil.CheckResult(vkGetSwapchainImagesKHR(device, swapchain, pSwapchainImageCount, pSwapchainImages));
+        }
+
+        public static void AcquireNextImageKHR(VkSwapchainKHR swapchain, ulong timeout, VkSemaphore semaphore, VkFence fence, ref uint pImageIndex)
+        {
+            VulkanUtil.CheckResult(vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, ref pImageIndex));
         }
 
         public static VkSemaphore CreateSemaphore(uint flags = 0)
@@ -479,22 +506,22 @@ namespace SharpGame
             bufferCreateInfo.usage = usageFlags;
             bufferCreateInfo.size = size;
             bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
-            VulkanUtil.CheckResult(vkCreateBuffer(LogicalDevice, &bufferCreateInfo, null, buffer));
+            VulkanUtil.CheckResult(vkCreateBuffer(device, &bufferCreateInfo, null, buffer));
 
             // Create the memory backing up the buffer handle
             VkMemoryRequirements memReqs;
             VkMemoryAllocateInfo memAlloc = VkMemoryAllocateInfo.New();
-            vkGetBufferMemoryRequirements(LogicalDevice, *buffer, &memReqs);
+            vkGetBufferMemoryRequirements(device, *buffer, &memReqs);
             memAlloc.allocationSize = memReqs.size;
             // Find a memory type index that fits the properties of the buffer
             memAlloc.memoryTypeIndex = GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
-            VulkanUtil.CheckResult(vkAllocateMemory(LogicalDevice, &memAlloc, null, memory));
+            VulkanUtil.CheckResult(vkAllocateMemory(device, &memAlloc, null, memory));
 
             // If a pointer to the buffer data has been passed, map the buffer and copy over the data
             if (data != null)
             {
                 void* mapped;
-                VulkanUtil.CheckResult(vkMapMemory(LogicalDevice, *memory, 0, size, 0, &mapped));
+                VulkanUtil.CheckResult(vkMapMemory(device, *memory, 0, size, 0, &mapped));
                 Unsafe.CopyBlock(mapped, data, (uint)size);
                 // If host coherency hasn't been requested, do a manual flush to make writes visible
                 if ((memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
@@ -503,13 +530,13 @@ namespace SharpGame
                     mappedRange.memory = *memory;
                     mappedRange.offset = 0;
                     mappedRange.size = size;
-                    vkFlushMappedMemoryRanges(LogicalDevice, 1, &mappedRange);
+                    vkFlushMappedMemoryRanges(device, 1, &mappedRange);
                 }
-                vkUnmapMemory(LogicalDevice, *memory);
+                vkUnmapMemory(device, *memory);
             }
 
             // Attach the memory to the buffer object
-            VulkanUtil.CheckResult(vkBindBufferMemory(LogicalDevice, *buffer, *memory, 0));
+            VulkanUtil.CheckResult(vkBindBufferMemory(device, *buffer, *memory, 0));
 
         }
 

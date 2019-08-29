@@ -160,6 +160,7 @@ namespace SharpGame
             {
                 if ((memoryPropertyFlags & MemoryPropertyFlags.HostCoherent) == 0)
                 {
+
                     VkBuffer stagingBuffer;
                     VkDeviceMemory stagingMemory;
 

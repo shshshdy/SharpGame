@@ -82,7 +82,7 @@ namespace SharpGame
 
             image = new Image(ref imageCreateInfo);
 
-            vkGetImageMemoryRequirements(Device.LogicalDevice, image.handle, &memReqs);
+            Device.GetImageMemoryRequirements(image.handle, out memReqs);
 
             memAllocInfo.allocationSize = memReqs.size;
             memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);

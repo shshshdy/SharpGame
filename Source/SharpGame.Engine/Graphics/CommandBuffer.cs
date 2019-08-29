@@ -369,6 +369,16 @@ namespace SharpGame
             vkCmdExecuteCommands(commandBuffer, (uint)cmdBuffer.currentIndex, (VkCommandBuffer*)cmdBuffer.GetAddress(0));
         }
 
+        public void CopyBuffer(DeviceBuffer srcBuffer, DeviceBuffer dstBuffer, ref BufferCopy region)
+        {
+            vkCmdCopyBuffer(commandBuffer, srcBuffer.buffer, dstBuffer.buffer, 1, Utilities.AsPointer(ref region));
+        }
+
+        public void CopyBuffer(DeviceBuffer srcBuffer, DeviceBuffer dstBuffer, Span<BufferCopy> pRegions)
+        {
+            vkCmdCopyBuffer(commandBuffer, srcBuffer.buffer, dstBuffer.buffer, (uint)pRegions.Length, Utilities.AsPointer(ref pRegions[0]));
+        }
+
         public void BlitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ref ImageBlit pRegion, Filter filter)
         {
             vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, ref Unsafe.As<ImageBlit, VkImageBlit>(ref pRegion), (VkFilter)filter);
@@ -594,6 +604,13 @@ namespace SharpGame
         /// cref="CommandBuffer.vkCmdNextSubpass"/> or <see cref="CommandBuffer.CmdEndRenderPass"/>.
         /// </summary>
         SecondaryCommandBuffers = 1
+    }
+
+    public struct BufferCopy
+    {
+        public ulong srcOffset;
+        public ulong dstOffset;
+        public ulong size;
     }
 
     /// <summary>

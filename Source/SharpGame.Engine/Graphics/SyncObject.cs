@@ -1,10 +1,30 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using Vulkan;
-using static Vulkan.VulkanNative;
+using System.Collections.Generic;
+using System.Text;
 
 namespace SharpGame
 {
+    using global::System.Runtime.InteropServices;
+    using Vulkan;
+    using static Vulkan.VulkanNative;
+
+    public class Semaphore : DisposeBase
+    {
+        internal VkSemaphore native;
+        internal Semaphore()
+        {
+            var createInfo = VkSemaphoreCreateInfo.New();
+
+            VulkanUtil.CheckResult(vkCreateSemaphore(Device.LogicalDevice, ref createInfo, IntPtr.Zero, out native));
+        }
+
+        protected override void Destroy(bool disposing)
+        {
+            vkDestroySemaphore(Device.LogicalDevice, native, IntPtr.Zero);
+        }
+
+    }
+
     public class Fence : DisposeBase
     {
         internal VkFence native;
@@ -12,7 +32,7 @@ namespace SharpGame
         {
             VkFenceCreateInfo createInfo = VkFenceCreateInfo.New();
             createInfo.flags = (VkFenceCreateFlags)flags;
-            VulkanUtil.CheckResult(vkCreateFence(Device.LogicalDevice, ref createInfo, IntPtr.Zero, out native));           
+            VulkanUtil.CheckResult(vkCreateFence(Device.LogicalDevice, ref createInfo, IntPtr.Zero, out native));
         }
 
         public VkResult GetStatus()
@@ -56,7 +76,7 @@ namespace SharpGame
                 handles[i] = fences[i].native;
 
             VulkanUtil.CheckResult(vkWaitForFences(Device.LogicalDevice, (uint)count, handles, waitAll, timeout));
-            
+
         }
 
     }
@@ -76,5 +96,62 @@ namespace SharpGame
         /// created in the unsignaled state.
         /// </summary>
         Signaled = 1 << 0
+    }
+
+    public unsafe class Event : DisposeBase
+    {
+        VkEvent handle;
+        internal Event()
+        {
+            var createInfo = new EventCreateInfo();
+
+           VulkanUtil.CheckResult(vkCreateEvent(Device.LogicalDevice, ref createInfo.native, null, out handle));
+            
+        }
+
+        public VkResult GetStatus()
+        {
+            VkResult result = vkGetEventStatus(Device.LogicalDevice, handle);
+            if (result != VkResult.EventSet && result != VkResult.EventReset)
+                VulkanUtil.CheckResult(result);
+            return result;
+        }
+
+        public void Set()
+        {
+            VulkanUtil.CheckResult(vkSetEvent(Device.LogicalDevice, handle));
+        }
+
+        public void Reset()
+        {
+            VulkanUtil.CheckResult(vkResetEvent(Device.LogicalDevice, handle));
+        }
+
+        protected override void Destroy(bool disposing)
+        {
+            vkDestroyEvent(Device.LogicalDevice, handle, null);
+
+            base.Destroy(disposing);
+        }
+
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal ref struct EventCreateInfo
+    {
+        internal VkEventCreateInfo native;
+        public EventCreateInfo(EventCreateFlags flags)
+        {
+            native = VkEventCreateInfo.New();
+            native.flags = (uint)flags;
+        }
+        
+    }
+
+    // Is reserved for future use.
+    [Flags]
+    internal enum EventCreateFlags
+    {
+        None = 0
     }
 }

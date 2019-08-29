@@ -20,7 +20,7 @@ namespace SharpGame
 
         public static Queue GetDeviceQueue(uint queueFamilyIndex, uint queueIndex)
         {
-            vkGetDeviceQueue(Device.LogicalDevice, queueFamilyIndex, queueIndex, out VkQueue pQueue);
+            VkQueue pQueue = Device.GetDeviceQueue(queueFamilyIndex, queueIndex);
             return new Queue(pQueue, queueFamilyIndex, queueIndex);
         }
 

@@ -87,8 +87,8 @@ namespace SharpGame
             Settings = settings;
 
             enabledFeatures.samplerAnisotropy = True;
-            Device.CreateInstance(Settings);
-            device = Device.Init(enabledFeatures, EnabledExtensions);
+            
+            device = Device.Create(settings, enabledFeatures, EnabledExtensions);
            
             // Get a graphics queue from the Device
             GraphicsQueue = Queue.GetDeviceQueue(Device.QFIndices.Graphics, 0);

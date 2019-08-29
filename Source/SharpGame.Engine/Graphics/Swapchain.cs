@@ -293,40 +293,37 @@ namespace SharpGame
 
                 // Set additional usage flag for blitting from the swapchain Images if supported
                 VkFormatProperties formatProps;
-                vkGetPhysicalDeviceFormatProperties(Device.PhysicalDevice, (VkFormat)ColorFormat, out formatProps);
+                Device.GetPhysicalDeviceFormatProperties((VkFormat)ColorFormat, out formatProps);
                 if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.BlitDst) != 0)
                 {
                     swapchainCI.imageUsage |= VkImageUsageFlags.TransferSrc;
                 }
 
-                VkSwapchainKHR swapChain;
-                err = vkCreateSwapchainKHR(Device.LogicalDevice, &swapchainCI, null, out swapChain);
-                Debug.Assert(err == VkResult.Success);
-                this.swapchain = swapChain;
-
+                swapchain = Device.CreateSwapchainKHR(ref swapchainCI);
+                
                 // If an existing swap chain is re-created, destroy the old swap chain
                 // This also cleans up all the presentable Images
                 if (oldSwapchain.Handle != 0)
                 {
                     for (uint i = 0; i < ImageCount; i++)
                     {
-                        vkDestroyImageView(Device.LogicalDevice, Buffers[i].View, null);
+                        Device.Destroy(Buffers[i].View);
                     }
 
-                    vkDestroySwapchainKHR(Device.LogicalDevice, oldSwapchain, null);
+                    Device.DestroySwapchainKHR(oldSwapchain);
                 }
 
                 uint imageCount;
-                err = vkGetSwapchainImagesKHR(Device.LogicalDevice, swapChain, &imageCount, null);
-                Debug.Assert(err == VkResult.Success);
-                ImageCount = (int)imageCount;
+                Device.GetSwapchainImagesKHR(swapchain, &imageCount, null);
 
+                ImageCount = (int)imageCount;
                 // Get the swap chain Images
                 Images.Resize(imageCount);
-                err = vkGetSwapchainImagesKHR(Device.LogicalDevice, swapChain, &imageCount, (VkImage*)Images.Data.ToPointer());
-                Images.Count = imageCount;
-                Debug.Assert(err == VkResult.Success);
 
+                Device.GetSwapchainImagesKHR(swapchain, &imageCount, (VkImage*)Images.Data.ToPointer());
+
+                Images.Count = imageCount;
+                
                 // Get the swap chain Buffers containing the image and imageview
                 Buffers.Resize(imageCount);
                 Buffers.Count = imageCount;
@@ -356,10 +353,8 @@ namespace SharpGame
 
                     colorAttachmentView.image = Buffers[i].Image;
 
-                    VkImageView view;
-                    err = vkCreateImageView(Device.LogicalDevice, &colorAttachmentView, null, &view);
-                    Buffers[i].View = view;
-                    Debug.Assert(err == VkResult.Success);
+                    Buffers[i].View = Device.CreateImageView(ref colorAttachmentView);
+                  
                 }
             }
         }
@@ -368,7 +363,7 @@ namespace SharpGame
         {
             // By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
             // With that we don't have to handle VK_NOT_READY
-            VulkanUtil.CheckResult(vkAcquireNextImageKHR(Device.LogicalDevice, swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref imageIndex));
+            Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref imageIndex);
         }
 
         public void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = null)
