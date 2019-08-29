@@ -1,22 +1,20 @@
-﻿using System;
+﻿using Microsoft.Extensions.ObjectPool;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SharpGame
 {
-    public class BucketGrid<T> where T : Drawable
+    public class BucketGrid : IDrawableAccumulator
     {
-        private readonly List<T> CachedList = new List<T>(); 
+        private readonly List<Drawable> CachedList = new List<Drawable>(); 
         private readonly float m_BucketWidth;
         private readonly float m_BucketHeight;
         private readonly int m_NumBucketsWidth;
         private readonly int m_NumBucketsHeight;
 
-        private readonly Queue<T> m_PendingInsertion;
-        private readonly Queue<T> m_PendingRemoval;
-
         private readonly RectangleF m_Region;
-        private readonly List<T>[] m_Buckets;
+        private readonly List<Drawable>[] m_Buckets;
 
         /// <summary>
         /// The number of objects contained in the <see cref="BucketGrid{T}"/>
@@ -26,11 +24,12 @@ namespace SharpGame
             get { return m_Buckets.Where(c => c != null).Sum(c => c.Count); }
         }
 
-        // TODO: uint param type
+        DefaultObjectPool<List<Drawable>> defaultPool;
+
         public BucketGrid(RectangleF region, int numBucketsWidth, int numBucketsHeight)
         {
             m_Region = region;
-            m_Buckets = new List<T>[numBucketsWidth * numBucketsHeight];
+            m_Buckets = new List<Drawable>[numBucketsWidth * numBucketsHeight];
 
             m_NumBucketsWidth = numBucketsWidth;
             m_NumBucketsHeight = numBucketsHeight;
@@ -38,8 +37,8 @@ namespace SharpGame
             m_BucketWidth = region.Width / m_NumBucketsWidth;
             m_BucketHeight = region.Height / m_NumBucketsHeight;
 
-            m_PendingInsertion = new Queue<T>();
-            m_PendingRemoval = new Queue<T>();
+            var defalutPolicy = new DefaultPooledObjectPolicy<List<Drawable>>();
+            defaultPool = new DefaultObjectPool<List<Drawable>>(defalutPolicy);
         }
 
         /// <summary>
@@ -58,73 +57,23 @@ namespace SharpGame
 
                 for (var j = bucket.Count - 1; j >= 0; j--)
                 {
-                    var idx = bucket[j].index;// FindBucketIndex(bucket[j].Position);
+                    var idx = FindBucketIndex(bucket[j].WorldCenter);
                     if (idx == i) continue;
-                    if (m_Buckets[idx] == null) m_Buckets[idx] = new List<T>();
+                    if (m_Buckets[idx] == null) m_Buckets[idx] = defaultPool.Get();
                     m_Buckets[idx].Add(bucket[j]);
                     bucket.RemoveAt(j);
                 }
             }
 
-            lock (m_PendingInsertion)
-            {
-                while (m_PendingInsertion.Count > 0)
-                {
-                    var obj = m_PendingInsertion.Dequeue();
-                    var idx = obj.index;//FindBucketIndex(obj.Position);
-                    if (m_Buckets[idx] == null) m_Buckets[idx] = new List<T>();
-                    m_Buckets[idx].Add(obj);
-                }
-            }
-
-            lock (m_PendingRemoval)
-            {
-                while (m_PendingRemoval.Count > 0)
-                {
-                    var obj = m_PendingRemoval.Dequeue();
-                    var idx = obj.index;//FindBucketIndex(obj.Position);
-                    if (m_Buckets[idx] == null) m_Buckets[idx] = new List<T>();
-                    m_Buckets[idx].Remove(obj);
-                    if (m_Buckets[idx].Count == 0) m_Buckets[idx] = null;
-                }
-            }
         }
-
-        /// <summary>
-        /// Adds the given <see cref="Transformable"/> to the BucketGrid.
-        /// Internal BucketGrid is not updated until the next call to Update.
-        /// </summary>
-        public void Add(T t)
-        {
-#if DEBUG
-            if (t == null)
-                throw new ArgumentException("Cannot add a null object to the BucketGrid");
-#endif
-            lock (m_PendingInsertion)
-                m_PendingInsertion.Enqueue(t);
-        }
-
-        /// <summary>
-        /// Removes the given <see cref="Transformable"/> from the BucketGrid.
-        /// Internal BucketGrid is not updated until the next call to Update.
-        /// </summary>
-        public void Remove(T t)
-        {
-#if DEBUG
-            if (t == null)
-                throw new ArgumentException("Cannot remove a null object from the BucketGrid");
-#endif
-            lock (m_PendingRemoval)
-                m_PendingRemoval.Enqueue(t);
-        }
-
+        
         #region Non-Thread-Safe Queries
 
         /// <summary>
         /// Gets all objects within the given range of the given position.
         /// This version of the query is not thread safe.
         /// </summary>
-        public T[] GetObjectsInRange(Vector2 pos, float range = float.MaxValue)
+        public Drawable[] GetObjectsInRange(Vector2 pos, float range = float.MaxValue)
         {
 #if DEBUG
             if (range < 0f)
@@ -139,7 +88,7 @@ namespace SharpGame
         /// Gets all objects within the given <see cref="FloatRect"/>.
         /// This version of the query is not thread safe.
         /// </summary>
-        public T[] GetObjectsInRect(RectangleF rect)
+        public Drawable[] GetObjectsInRect(RectangleF rect)
         {
             CachedList.Clear();
             ObjectsInRectSearch(rect, CachedList);
@@ -155,7 +104,7 @@ namespace SharpGame
         /// This version of the query is thread safe as long as
         /// <see cref="Update"/> does not execute during the queery.
         /// </summary>
-        public T GetClosestObject(Vector2 pos, float maxDistance = float.MaxValue)
+        public Drawable GetClosestObject(Vector2 pos, float maxDistance = float.MaxValue)
         {
 #if DEBUG
             if (maxDistance < 0f)
@@ -169,7 +118,7 @@ namespace SharpGame
         /// This version of the query is thread safe as long as
         /// <see cref="Update"/> does not execute during the queery.
         /// </summary>
-        public void GetObjectsInRange(Vector2 pos, float range, IList<T> results)
+        public void GetObjectsInRange(Vector2 pos, float range, IList<Drawable> results)
         {
 #if DEBUG
             if (range < 0f)
@@ -185,7 +134,7 @@ namespace SharpGame
         /// This version of the query is thread safe as long as
         /// <see cref="Update"/> does not execute during the queery.
         /// </summary>
-        public void GetObjectsInRect(RectangleF rect, IList<T> results)
+        public void GetObjectsInRect(RectangleF rect, IList<Drawable> results)
         {
 #if DEBUG
             if (results == null)
@@ -203,9 +152,9 @@ namespace SharpGame
             return (xx * xx) + (yy * yy);
         }
 
-        private T NearestNeighborSearch(Vector2 pos, float range)
+        private Drawable NearestNeighborSearch(Vector2 pos, float range)
         {
-            T closest = null;
+            Drawable closest = null;
             var idx = FindBucketIndex(pos);
 
             var bucketRangeX = (int) (range / m_BucketWidth) + 1;
@@ -248,7 +197,7 @@ namespace SharpGame
             return closest;
         }
 
-        private void AllNearestNeighborSearch(Vector2 pos, float range, IList<T> results)
+        private void AllNearestNeighborSearch(Vector2 pos, float range, IList<Drawable> results)
         {
             var idx = FindBucketIndex(pos);
 
@@ -282,7 +231,7 @@ namespace SharpGame
             }
         }
 
-        private void ObjectsInRectSearch(RectangleF rect, ICollection<T> results)
+        private void ObjectsInRectSearch(RectangleF rect, ICollection<Drawable> results)
         {
             var idx = FindBucketIndex(rect.Center);
 
@@ -360,15 +309,65 @@ namespace SharpGame
 
         private int FindBucketIndex(Vector2 pos)
         {
-            // TODO: what happens if pos is out of bounds?
-
             var fromLeft = pos.X - m_Region.Left;
-            var x = (int)(fromLeft / m_BucketWidth);
+            var x = MathUtil.Clamp((int)(fromLeft / m_BucketWidth), 0, m_NumBucketsWidth);
 
             var fromTop = pos.Y - m_Region.Top;
-            var y = (int)(fromTop / m_BucketHeight);
+            var y = MathUtil.Clamp((int)(fromTop / m_BucketHeight), 0, m_NumBucketsHeight);
 
             return x + (y * m_NumBucketsWidth);
+        }
+
+        private int FindBucketIndex(Vector3 pos)
+        {
+            var fromLeft = pos.X - m_Region.Left;
+            var x = MathUtil.Clamp((int)(fromLeft / m_BucketWidth), 0, m_NumBucketsWidth);
+
+            var fromTop = pos.Z - m_Region.Top;
+            var y = MathUtil.Clamp((int)(fromTop / m_BucketHeight), 0, m_NumBucketsHeight);
+
+            return x + (y * m_NumBucketsWidth);
+        }
+
+        public void InsertDrawable(Drawable drawable)
+        {
+            var idx = FindBucketIndex(drawable.WorldCenter);
+            if (m_Buckets[idx] == null) m_Buckets[idx] = defaultPool.Get();
+            m_Buckets[idx].Add(drawable);
+            drawable.index = idx;
+        }
+
+        public void RemoveDrawable(Drawable drawable)
+        {
+            var idx = drawable.index;
+            if (m_Buckets[idx] == null)
+            {
+                Log.Error("Error drawable index.");
+                return;
+            }
+
+            m_Buckets[idx].FastRemove(drawable);
+
+            if (m_Buckets[idx].Count == 0)
+            {
+                defaultPool.Return(m_Buckets[idx]);
+                m_Buckets[idx] = null;
+            }
+        }
+        
+        public void GetDrawables(ISceneQuery query, Action<Drawable> drawables)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Raycast(ref RayQuery query)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RaycastSingle(ref RayQuery query)
+        {
+            throw new NotImplementedException();
         }
     }
 }

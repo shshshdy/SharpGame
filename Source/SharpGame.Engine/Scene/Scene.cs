@@ -111,7 +111,7 @@ namespace SharpGame
             {
                 if(component == accumulator_)
                 {
-                    OnDetachAccumutor(accumulator_);
+                //    OnDetachAccumutor(accumulator_);
                     accumulator_ = null;
                 }
             }
@@ -125,25 +125,26 @@ namespace SharpGame
             }
         }
 
-        void OnDetachAccumutor(IDrawableAccumulator accum)
-        {
-            foreach(Drawable drawable in accum)
-            {
-                InsertDrawable(drawable);
-            }
-        }
+//         void OnDetachAccumutor(IDrawableAccumulator accum)
+//         {
+//             foreach(Drawable drawable in accum)
+//             {
+//                 InsertDrawable(drawable);
+//             }
+//         }
 
         public void InsertDrawable(Drawable drawable)
         {
             Debug.Assert(drawable.index == -1);
 
-            if(accumulator_ != null)
+            drawables_.Add(drawable);
+
+            if (accumulator_ != null)
             {
                 accumulator_.InsertDrawable(drawable);
             }
             else
             {
-                drawables_.Add(drawable);
                 drawable.index = drawables_.Count - 1;
             }
         }
@@ -173,16 +174,6 @@ namespace SharpGame
             }
         }
         
-        public IEnumerator<Drawable> GetEnumerator()
-        {
-            if(accumulator_ != null)
-            {
-                return accumulator_.GetEnumerator();
-            }
-
-            return drawables_.GetEnumerator();
-        }
-
         public void GetDrawables(ISceneQuery query, Action<Drawable> drawables)
         {
             if(accumulator_ != null)

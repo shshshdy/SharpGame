@@ -8,12 +8,12 @@ namespace SharpGame
     {
         Intersection TestOctant(ref BoundingBox box, bool inside);
         /// Intersection test for drawables.
-        void TestDrawables(Memory<Drawable> start, bool inside);
+        void TestDrawables(Span<Drawable> start, bool inside);
     }
 
     public struct OctreeQuery : ISceneQuery
     {
-        public void TestDrawables(Memory<Drawable> start, bool inside)
+        public void TestDrawables(Span<Drawable> start, bool inside)
         {
         }
 
@@ -32,7 +32,7 @@ namespace SharpGame
         public uint viewMask;
         public uint drawableFlags;
 
-        public void TestDrawables(Memory<Drawable> start, bool inside)
+        public void TestDrawables(Span<Drawable> start, bool inside)
         {
         }
 
@@ -49,8 +49,6 @@ namespace SharpGame
     {
         void InsertDrawable(Drawable drawable);
         void RemoveDrawable(Drawable drawable);
-
-        IEnumerator<Drawable> GetEnumerator();
 
         /// Return drawable objects by a query.
         void GetDrawables(ISceneQuery query, Action<Drawable> drawables);

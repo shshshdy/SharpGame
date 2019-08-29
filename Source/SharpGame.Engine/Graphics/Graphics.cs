@@ -366,15 +366,18 @@ namespace SharpGame
         public static void FlushCommandBuffer(CommandBuffer commandBuffer, Queue queue, bool free = true)
         {
             commandBuffer.End();
-            
-            Fence fence = new Fence(FenceCreateFlags.None);
-            queue.Submit(null, PipelineStageFlags.None, commandBuffer, null, fence);
-            fence.Wait();
+
+            using (Fence fence = new Fence(FenceCreateFlags.None))
+            {
+                queue.Submit(null, PipelineStageFlags.None, commandBuffer, null, fence);
+                fence.Wait();
+            }
 
             if (free)
             {
                 commandPool.FreeCommandBuffer(commandBuffer);
             }
+
         }
 
         public CommandBuffer BeginWorkCommandBuffer()

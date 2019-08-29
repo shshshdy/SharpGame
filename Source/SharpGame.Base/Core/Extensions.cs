@@ -62,6 +62,18 @@ namespace SharpGame
 
         }
 
+        public static void FastRemove<T>(this List<T> list, T item)
+        {
+            int index = list.IndexOf(item);
+
+            if(index != -1)
+            {
+                FastRemove(list, index);
+            }
+
+        }
+
+
         public static void Clear<T>(this T[] arr)
         {
             if (arr != null)
