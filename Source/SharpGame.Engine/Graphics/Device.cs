@@ -1,15 +1,14 @@
-﻿// This code has been adapted from the "Vulkan" C++ example repository, by Sascha Willems: https://github.com/SaschaWillems/Vulkan
-// It is a direct translation from the original C++ code and style, with as little transformation as possible.
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Vulkan;
-using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
+    using Vulkan;
+    using static Vulkan.VulkanNative;
+
     public unsafe class Device
     {
         public const ulong DEFAULT_FENCE_TIMEOUT = 100000000000;
@@ -20,10 +19,11 @@ namespace SharpGame
         public static VkPhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
         public static NativeList<VkQueueFamilyProperties> QueueFamilyProperties { get; } = new NativeList<VkQueueFamilyProperties>();
         public static List<string> SuppertedExcentions { get; } = new List<string>();
-        public static VkDevice LogicalDevice => device;
         public static bool EnableDebugMarkers { get; internal set; }
+        public static uint QFGraphics { get; private set; }
+        public static uint QFCompute { get; private set; }
+        public static uint QFTransfer { get; private set; }
 
-        public static QueueFamilyIndices QFIndices;
         private static VkDevice device;
         private static VkQueue queue;
         private static VkCommandPool commandPool;
@@ -99,7 +99,7 @@ namespace SharpGame
             }
 
             VulkanUtil.CheckResult(CreateLogicalDevice(enabledFeatures, enabledExtensions));
-            queue = GetDeviceQueue(Device.QFIndices.Graphics, 0);
+            queue = GetDeviceQueue(QFGraphics, 0);
             vkCmdPushDescriptorSetKHR();
             return device;
         }
@@ -185,11 +185,11 @@ namespace SharpGame
                 // Graphics queue
                 if ((requestedQueueTypes & VkQueueFlags.Graphics) != 0)
                 {
-                    QFIndices.Graphics = GetQueueFamilyIndex(VkQueueFlags.Graphics);
+                    QFGraphics = GetQueueFamilyIndex(VkQueueFlags.Graphics);
                     VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
                     {
                         sType = VkStructureType.DeviceQueueCreateInfo,
-                        queueFamilyIndex = QFIndices.Graphics,
+                        queueFamilyIndex = QFGraphics,
                         queueCount = 1,
                         pQueuePriorities = &defaultQueuePriority
                     };
@@ -197,20 +197,20 @@ namespace SharpGame
                 }
                 else
                 {
-                    QFIndices.Graphics = (uint)NullHandle;
+                    QFGraphics = (uint)NullHandle;
                 }
 
                 // Dedicated compute queue
                 if ((requestedQueueTypes & VkQueueFlags.Compute) != 0)
                 {
-                    QFIndices.Compute = GetQueueFamilyIndex(VkQueueFlags.Compute);
-                    if (QFIndices.Compute != QFIndices.Graphics)
+                    QFCompute = GetQueueFamilyIndex(VkQueueFlags.Compute);
+                    if (QFCompute != QFGraphics)
                     {
                         // If compute family index differs, we need an additional queue create info for the compute queue
                         VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
                         {
                             sType = VkStructureType.DeviceQueueCreateInfo,
-                            queueFamilyIndex = QFIndices.Compute,
+                            queueFamilyIndex = QFCompute,
                             queueCount = 1,
                             pQueuePriorities = &defaultQueuePriority
                         };
@@ -220,20 +220,20 @@ namespace SharpGame
                 else
                 {
                     // Else we use the same queue
-                    QFIndices.Compute = QFIndices.Graphics;
+                    QFCompute = QFGraphics;
                 }
 
                 // Dedicated transfer queue
                 if ((requestedQueueTypes & VkQueueFlags.Transfer) != 0)
                 {
-                    QFIndices.Transfer = GetQueueFamilyIndex(VkQueueFlags.Transfer);
-                    if (QFIndices.Transfer != QFIndices.Graphics && QFIndices.Transfer != QFIndices.Compute)
+                    QFTransfer = GetQueueFamilyIndex(VkQueueFlags.Transfer);
+                    if (QFTransfer != QFGraphics && QFTransfer != QFCompute)
                     {
                         // If compute family index differs, we need an additional queue create info for the transfer queue
                         VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
                         {
                             sType = VkStructureType.DeviceQueueCreateInfo,
-                            queueFamilyIndex = QFIndices.Transfer,
+                            queueFamilyIndex = QFTransfer,
                             queueCount = 1,
                             pQueuePriorities = &defaultQueuePriority
                         };
@@ -243,7 +243,7 @@ namespace SharpGame
                 else
                 {
                     // Else we use the same queue
-                    QFIndices.Transfer = QFIndices.Graphics;
+                    QFTransfer = QFGraphics;
                 }
 
                 // Create the logical device representation
@@ -270,7 +270,7 @@ namespace SharpGame
                     if (result == VkResult.Success)
                     {
                         // Create a default command pool for graphics command buffers
-                        commandPool = CreateCommandPool(QFIndices.Graphics);
+                        commandPool = CreateCommandPool(QFGraphics);
                     }
 
                     VkPipelineCacheCreateInfo pipelineCacheCreateInfo = VkPipelineCacheCreateInfo.New();
@@ -420,6 +420,63 @@ namespace SharpGame
             semaphoreCreateInfo.flags = flags;
             VulkanUtil.CheckResult(vkCreateSemaphore(device, ref semaphoreCreateInfo, null, out VkSemaphore pSemaphore));
             return pSemaphore;
+        }
+
+        public static void Destroy(VkSemaphore semaphore)
+        {
+            vkDestroySemaphore(device, semaphore, null);
+        }
+
+        public static VkEvent CreateEvent(ref VkEventCreateInfo pCreateInfo)
+        {
+            vkCreateEvent(device, ref pCreateInfo, null, out VkEvent pEvent);
+            return pEvent;
+        }
+
+        public static VkResult GetEventStatus(VkEvent evt)
+        {
+            return vkGetEventStatus(device, evt);
+        }
+
+        public static void SetEvent(VkEvent evt)
+        {
+            VulkanUtil.CheckResult(vkSetEvent(device, evt));
+        }
+
+        public static void ResetEvent(VkEvent evt)
+        {
+            VulkanUtil.CheckResult(vkResetEvent(device, evt));
+        }
+
+        public static void Destroy(VkEvent @event)
+        {
+            vkDestroyEvent(device, @event, null);
+        }
+
+        public static VkFence CreateFence(ref VkFenceCreateInfo pCreateInfo)
+        {
+            vkCreateFence(device, ref pCreateInfo, null, out VkFence pFence);
+            return pFence;
+        }
+
+        public static VkResult GetFenceStatus(VkFence fence)
+        {
+            return vkGetFenceStatus(device, fence);
+        }
+
+        public static void ResetFences(uint fenceCount, ref VkFence pFences)
+        {
+            VulkanUtil.CheckResult(vkResetFences(device, fenceCount, ref pFences));
+        }
+
+        public static void WaitForFences(uint fenceCount, ref VkFence pFences, VkBool32 waitAll, ulong timeout)
+        {
+            VulkanUtil.CheckResult(vkWaitForFences(device, fenceCount, ref pFences, waitAll, timeout));
+        }
+
+        public static void Destroy(VkFence fence)
+        {
+            vkDestroyFence(device, fence, null);
         }
 
         public static VkImage CreateImage(ref VkImageCreateInfo pCreateInfo)
@@ -580,6 +637,27 @@ namespace SharpGame
             return cmdPool;
         }
 
+        public static void AllocateCommandBuffers(VkCommandPool cmdPool, VkCommandBufferLevel level,
+            uint count, VkCommandBuffer* cmdBuffers)
+        {
+            VkCommandBufferAllocateInfo cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
+            cmdBufAllocateInfo.commandPool = cmdPool;
+            cmdBufAllocateInfo.level = level;
+            cmdBufAllocateInfo.commandBufferCount = count;
+
+            VulkanUtil.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, cmdBuffers));            
+        }
+
+        public static void ResetCommandPool(VkCommandPool cmdPool, VkCommandPoolResetFlags flags)
+        {
+            vkResetCommandPool(device, cmdPool, flags);
+        }
+
+        public static void FreeCommandBuffers(VkCommandPool cmdPool, uint count, VkCommandBuffer* cmdBuffers)
+        {
+            vkFreeCommandBuffers(device, cmdPool, count, cmdBuffers);
+        }
+
         public static VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, bool begin = false)
         {
             VkCommandBufferAllocateInfo cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
@@ -716,12 +794,7 @@ namespace SharpGame
             vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null);
         }
 
-        public struct QueueFamilyIndices
-        {
-            public uint Graphics;
-            public uint Compute;
-            public uint Transfer;
-        }
+
     }
 
 }

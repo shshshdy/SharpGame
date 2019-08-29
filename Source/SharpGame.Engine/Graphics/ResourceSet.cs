@@ -192,7 +192,7 @@ namespace SharpGame
 
     public struct DescriptorBufferInfo
     {
-        public VkBuffer buffer;
+        internal VkBuffer buffer;
         public ulong offset;
         public ulong range;
 

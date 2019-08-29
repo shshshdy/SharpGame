@@ -124,14 +124,12 @@ namespace SharpGame
     {
         internal VkCommandBuffer commandBuffer;
         public RenderPass renderPass;
-        bool owner = false;
         bool opened = false;
         public bool IsOpen => opened;
 
         internal CommandBuffer(VkCommandBuffer cmdBuffer)
         {
             commandBuffer = cmdBuffer;
-            owner = false;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

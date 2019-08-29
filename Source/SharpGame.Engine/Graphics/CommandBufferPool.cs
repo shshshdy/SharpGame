@@ -43,7 +43,20 @@ namespace SharpGame
             //Free();
         }
 
-        public void Allocate(CommandBufferLevel commandBufferLevel, uint count)
+        public unsafe CommandBuffer AllocateCommandBuffer(CommandBufferLevel commandBufferLevel)
+        {
+            VkCommandBuffer cmdBuffer;
+            Device.AllocateCommandBuffers(cmdPool, (VkCommandBufferLevel)commandBufferLevel, 1, &cmdBuffer);
+            return new CommandBuffer(cmdBuffer);
+        }
+
+        public unsafe void FreeCommandBuffer(CommandBuffer cmdBuffer)
+        {
+            fixed (VkCommandBuffer* cb = &cmdBuffer.commandBuffer)
+                Device.FreeCommandBuffers(cmdPool, 1, cb);
+        }
+
+        public unsafe void Allocate(CommandBufferLevel commandBufferLevel, uint count)
         {
             if(cmdBuffers.Count > 0)
             {
@@ -52,16 +65,7 @@ namespace SharpGame
 
             cmdBuffers.Resize(count);
             cmdBuffers.Count = count;
-
-            var cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
-            cmdBufAllocateInfo.commandPool = cmdPool;
-            cmdBufAllocateInfo.level = (VkCommandBufferLevel)commandBufferLevel;
-            cmdBufAllocateInfo.commandBufferCount = count;
-
-            unsafe
-            {
-                VulkanUtil.CheckResult(VulkanNative.vkAllocateCommandBuffers(Graphics.device, ref cmdBufAllocateInfo, (VkCommandBuffer*)cmdBuffers.Data));
-            }
+            Device.AllocateCommandBuffers(cmdPool, (VkCommandBufferLevel)commandBufferLevel, count, (VkCommandBuffer*)cmdBuffers.Data);
 
             CommandBuffers = new CommandBuffer[count];
             for (int i = 0; i < count; i++)
@@ -70,11 +74,11 @@ namespace SharpGame
             }
         }
 
-        public void Free()
+        public unsafe void Free()
         {
             if(CommandBuffers != null)
             {
-                VulkanNative.vkFreeCommandBuffers(Graphics.device, cmdPool, cmdBuffers.Count, cmdBuffers.Data);
+                Device.FreeCommandBuffers(cmdPool, cmdBuffers.Count, (VkCommandBuffer*)cmdBuffers.Data);
                 cmdBuffers.Count = 0;
                 CommandBuffers = null;
             }
@@ -83,13 +87,13 @@ namespace SharpGame
         public CommandBuffer Get()
         {
             int idx = currentIndex;
-                Interlocked.Increment(ref currentIndex);
+            Interlocked.Increment(ref currentIndex);
             return CommandBuffers[idx % CommandBuffers.Length];
         }
 
         public void Reset()
         {
-            VulkanNative.vkResetCommandPool(Graphics.device, cmdPool, VkCommandPoolResetFlags.None);
+            Device.ResetCommandPool(cmdPool, VkCommandPoolResetFlags.None);
         }
     }
 }

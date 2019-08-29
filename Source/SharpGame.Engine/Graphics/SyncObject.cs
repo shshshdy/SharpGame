@@ -4,6 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
+    using global::System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
     using Vulkan;
     using static Vulkan.VulkanNative;
@@ -13,14 +14,12 @@ namespace SharpGame
         internal VkSemaphore native;
         internal Semaphore()
         {
-            var createInfo = VkSemaphoreCreateInfo.New();
-
-            VulkanUtil.CheckResult(vkCreateSemaphore(Device.LogicalDevice, ref createInfo, IntPtr.Zero, out native));
+            native = Device.CreateSemaphore();
         }
 
         protected override void Destroy(bool disposing)
         {
-            vkDestroySemaphore(Device.LogicalDevice, native, IntPtr.Zero);
+            Device.Destroy(native);
         }
 
     }
@@ -32,28 +31,28 @@ namespace SharpGame
         {
             VkFenceCreateInfo createInfo = VkFenceCreateInfo.New();
             createInfo.flags = (VkFenceCreateFlags)flags;
-            VulkanUtil.CheckResult(vkCreateFence(Device.LogicalDevice, ref createInfo, IntPtr.Zero, out native));
+            native = Device.CreateFence(ref createInfo);
         }
 
         public VkResult GetStatus()
         {
-            VkResult result = vkGetFenceStatus(Device.LogicalDevice, native);
+            VkResult result = Device.GetFenceStatus(native);
             return result;
         }
 
         public void Reset()
         {
-            VulkanUtil.CheckResult(vkResetFences(Device.LogicalDevice, 1, ref native));
+            Device.ResetFences(1, ref native);
         }
 
         public void Wait(ulong timeout = ~0ul)
         {
-            VulkanUtil.CheckResult(vkWaitForFences(Device.LogicalDevice, 1, ref native, false, timeout));
+            Device.WaitForFences(1, ref native, false, timeout);
         }
 
         protected override void Destroy(bool disposing)
         {
-            vkDestroyFence(Device.LogicalDevice, native, IntPtr.Zero);
+            Device.Destroy(native);
 
             base.Destroy(disposing);
         }
@@ -61,21 +60,21 @@ namespace SharpGame
         internal unsafe static void Reset(Fence[] fences)
         {
             int count = fences?.Length ?? 0;
-            VkFence* handles = stackalloc VkFence[count];
+            Span<VkFence> handles = stackalloc VkFence[count];
             for (int i = 0; i < count; i++)
                 handles[i] = fences[i].native;
 
-            VulkanUtil.CheckResult(vkResetFences(Device.LogicalDevice, (uint)count, handles));
+            Device.ResetFences((uint)count, ref handles[0]);
         }
 
         internal unsafe static void Wait(Device parent, Fence[] fences, bool waitAll, ulong timeout)
         {
             int count = fences?.Length ?? 0;
-            VkFence* handles = stackalloc VkFence[count];
+            Span<VkFence> handles = stackalloc VkFence[count];
             for (int i = 0; i < count; i++)
                 handles[i] = fences[i].native;
 
-            VulkanUtil.CheckResult(vkWaitForFences(Device.LogicalDevice, (uint)count, handles, waitAll, timeout));
+            Device.WaitForFences((uint)count, ref handles[0], waitAll, timeout);
 
         }
 
@@ -104,14 +103,12 @@ namespace SharpGame
         internal Event()
         {
             var createInfo = new EventCreateInfo();
-
-           VulkanUtil.CheckResult(vkCreateEvent(Device.LogicalDevice, ref createInfo.native, null, out handle));
-            
+            handle = Device.CreateEvent(ref createInfo.native);            
         }
 
         public VkResult GetStatus()
         {
-            VkResult result = vkGetEventStatus(Device.LogicalDevice, handle);
+            VkResult result = Device.GetEventStatus(handle);
             if (result != VkResult.EventSet && result != VkResult.EventReset)
                 VulkanUtil.CheckResult(result);
             return result;
@@ -119,17 +116,17 @@ namespace SharpGame
 
         public void Set()
         {
-            VulkanUtil.CheckResult(vkSetEvent(Device.LogicalDevice, handle));
+            Device.SetEvent(handle);
         }
 
         public void Reset()
         {
-            VulkanUtil.CheckResult(vkResetEvent(Device.LogicalDevice, handle));
+            Device.ResetEvent(handle);
         }
 
         protected override void Destroy(bool disposing)
         {
-            vkDestroyEvent(Device.LogicalDevice, handle, null);
+            Device.Destroy(handle);
 
             base.Destroy(disposing);
         }

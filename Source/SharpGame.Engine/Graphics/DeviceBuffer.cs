@@ -22,10 +22,36 @@ namespace SharpGame
 
         internal VkBuffer buffer;
         internal VkDeviceMemory memory;
+
         internal DescriptorBufferInfo descriptor;
 
         /** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
         internal MemoryPropertyFlags memoryPropertyFlags;
+
+        public DeviceBuffer()
+        {
+        }
+
+        public DeviceBuffer(ref BufferCreateInfo createInfo, MemoryPropertyFlags memoryPropertyFlags)
+        {
+            buffer = Device.CreateBuffer(ref createInfo.native);
+
+            Device.GetBufferMemoryRequirements(buffer, out VkMemoryRequirements memReqs);
+
+            // Find a memory type index that fits the properties of the buffer
+            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, (VkMemoryPropertyFlags)memoryPropertyFlags);
+
+            // Create the memory backing up the buffer handle
+            MemoryAllocateInfo memAlloc = new MemoryAllocateInfo(memReqs.size, memoryTypeIndex);
+            memory = Device.AllocateMemory(ref memAlloc.native);
+            //buffer.alignment = memReqs.alignment;
+            Size = memAlloc.allocationSize;
+            usageFlags = createInfo.usage;
+            this.memoryPropertyFlags = memoryPropertyFlags;
+
+            Device.BindBufferMemory(buffer, memory, 0);
+
+        }
 
         public ref T Map<T>(ulong offset = 0) where T : struct
         {
@@ -120,16 +146,15 @@ namespace SharpGame
             return Create(usageFlags, memoryPropertyFlags, size, 1, null);
         }
 
+        public static DeviceBuffer CreateStagingBuffer(ulong size, void * data)
+        {
+            return Create(BufferUsageFlags.TransferSrc, MemoryPropertyFlags.HostVisible
+                | MemoryPropertyFlags.HostCoherent, size, 1, data);
+        }
+
         public static DeviceBuffer Create(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, ulong stride, ulong count, void* data = null)
         {
             ulong size = stride * count;
-
-            DeviceBuffer buffer = new DeviceBuffer
-            {
-                Stride = stride,
-                Count = count,
-                Size = size
-            };
 
             // Create the buffer handle
             BufferCreateInfo bufferCreateInfo = new BufferCreateInfo(usageFlags, size);
@@ -138,43 +163,27 @@ namespace SharpGame
                 bufferCreateInfo.usage |= BufferUsageFlags.TransferDst;
             }
 
-            buffer.buffer = Device.CreateBuffer(ref bufferCreateInfo.native);
-            Device.GetBufferMemoryRequirements(buffer.buffer, out VkMemoryRequirements memReqs);
-
-            // Find a memory type index that fits the properties of the buffer
-            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, (VkMemoryPropertyFlags)memoryPropertyFlags);
-
-            // Create the memory backing up the buffer handle
-            MemoryAllocateInfo memAlloc = new MemoryAllocateInfo(memReqs.size, memoryTypeIndex);
-            
-            buffer.memory = Device.AllocateMemory(ref memAlloc.native);
-            //buffer.alignment = memReqs.alignment;
-            buffer.Size = memAlloc.allocationSize;
-            buffer.usageFlags = usageFlags;
-            buffer.memoryPropertyFlags = memoryPropertyFlags;
-
-            Device.BindBufferMemory(buffer.buffer, buffer.memory, 0);
+            DeviceBuffer buffer = new DeviceBuffer(ref bufferCreateInfo, memoryPropertyFlags)
+            {
+                Stride = stride,
+                Count = count,
+                Size = size
+            };
 
             // If a pointer to the buffer data has been passed, map the buffer and copy over the data
             if (data != null)
             {
                 if ((memoryPropertyFlags & MemoryPropertyFlags.HostCoherent) == 0)
                 {
+                    using (DeviceBuffer stagingBuffer = CreateStagingBuffer(size, data))
+                    {
+                        CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
+                        BufferCopy copyRegion = new BufferCopy { size = size };
+                        copyCmd.CopyBuffer(stagingBuffer, buffer, ref copyRegion);
+                        Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
+                        stagingBuffer.Dispose();
+                    }
 
-                    VkBuffer stagingBuffer;
-                    VkDeviceMemory stagingMemory;
-
-                    Device.CreateBuffer(VkBufferUsageFlags.TransferSrc, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                        size, &stagingBuffer, &stagingMemory, data);
-
-                    // Copy from staging buffers
-                    VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
-                    VkBufferCopy copyRegion = new VkBufferCopy { size = size };
-                    vkCmdCopyBuffer(copyCmd, stagingBuffer, buffer.buffer, 1, &copyRegion);
-
-                    Device.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue.native, true);
-                    Device.DestroyBuffer(stagingBuffer);
-                    Device.FreeMemory(stagingMemory);
                 }
                 else
                 {
@@ -187,8 +196,6 @@ namespace SharpGame
 
             // Initialize a default descriptor that covers the whole buffer size
             buffer.SetupDescriptor();
-
-            // Attach the memory to the buffer object
             return buffer;
         }
 
@@ -199,7 +206,6 @@ namespace SharpGame
         public BufferUsageFlags usage { get => (BufferUsageFlags)native.usage; set => native.usage = (VkBufferUsageFlags)value; }
         public ulong size { get => native.size; set => native.size = value; }
         public SharingMode sharingMode { get => (SharingMode)native.sharingMode; set => native.sharingMode = (VkSharingMode)value; }
-        //public uint[] pQueueFamilyIndices { get => native.flags; set => native.flags = value; }
         public uint[] pQueueFamilyIndices;
         public VkBufferCreateFlags flags { get => native.flags; set => native.flags = value; }
 

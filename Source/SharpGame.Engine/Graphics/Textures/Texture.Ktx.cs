@@ -28,39 +28,13 @@ namespace SharpGame
             height = texFile.Header.PixelHeight;
             mipLevels = texFile.Header.NumberOfMipmapLevels;
             layers = (uint)texFile.Faces.Length;
-
-            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
-            VkMemoryRequirements memReqs;
-
-            // Create a host-visible staging buffer that contains the raw image data
-            VkBuffer stagingBuffer;
-            VkDeviceMemory stagingMemory;
-
-            VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
-            bufferCreateInfo.size = texFile.GetTotalSize();
-            // This buffer is used as a transfer source for the buffer copy
-            bufferCreateInfo.usage = VkBufferUsageFlags.TransferSrc;
-            bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
-
-            stagingBuffer = Device.CreateBuffer(ref bufferCreateInfo);
-
-            // Get memory requirements for the staging buffer (alignment, memory type bits)
-            Device.GetBufferMemoryRequirements(stagingBuffer, out memReqs);
-            memAllocInfo.allocationSize = memReqs.size;
-            // Get memory type index for a host visible buffer
-            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
-            stagingMemory = Device.AllocateMemory(ref memAllocInfo);
-            Device.BindBufferMemory(stagingBuffer, stagingMemory, 0);
-
-            // Copy texture data into staging buffer
-            byte* data = (byte*)Device.MapMemory(stagingMemory, 0, memReqs.size, 0);
+            
             byte[] allTextureData = texFile.GetAllTextureData();
+            DeviceBuffer stagingBuffer;
             fixed (byte* texCubeDataPtr = &allTextureData[0])
             {
-                Unsafe.CopyBlock(data, texCubeDataPtr, (uint)allTextureData.Length);
+                stagingBuffer = DeviceBuffer.CreateStagingBuffer(texFile.GetTotalSize(), texCubeDataPtr);
             }
-
-            Device.UnmapMemory(stagingMemory);
 
             // Create optimal tiled target image
             ImageCreateInfo imageCreateInfo = new ImageCreateInfo
@@ -82,13 +56,15 @@ namespace SharpGame
 
             image = new Image(ref imageCreateInfo);
 
-            Device.GetImageMemoryRequirements(image.handle, out memReqs);
+            Device.GetImageMemoryRequirements(image.handle, out var memReqs);
 
+            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
             memAllocInfo.allocationSize = memReqs.size;
             memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
             deviceMemory = Device.AllocateMemory(ref memAllocInfo);
             Device.BindImageMemory(image.handle, deviceMemory, 0);
+
             VkCommandBuffer copyCmd = Device.CreateCommandBuffer(VkCommandBufferLevel.Primary, true);
 
             // Setup buffer copy regions for each face including all of it's miplevels
@@ -135,7 +111,7 @@ namespace SharpGame
             // Copy the cube map faces from the staging buffer to the optimal tiled image
             vkCmdCopyBufferToImage(
                 copyCmd,
-                stagingBuffer,
+                stagingBuffer.buffer,
                 image.handle,
                 VkImageLayout.TransferDstOptimal,
                 bufferCopyRegions.Count,
@@ -171,10 +147,6 @@ namespace SharpGame
             view.image = image;
 
             imageView = new ImageView(ref view);
-
-            // Clean up staging resources
-            Device.FreeMemory(stagingMemory);
-            Device.DestroyBuffer(stagingBuffer);
 
             UpdateDescriptor();
         }

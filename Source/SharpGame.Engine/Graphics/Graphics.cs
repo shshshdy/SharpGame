@@ -53,8 +53,9 @@ namespace SharpGame
         private CommandBufferPool workCmdPool;
         private CommandBufferPool computeCmdPool;
 
-        public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[RenderContext];
+        private static CommandBufferPool commandPool;
 
+        public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[RenderContext];
         public CommandBuffer WorkComputeBuffer => computeCmdPool.CommandBuffers[WorkContext];
         public CommandBuffer RenderComputeBuffer => computeCmdPool.CommandBuffers[RenderContext];
 
@@ -91,8 +92,8 @@ namespace SharpGame
             device = Device.Create(settings, enabledFeatures, EnabledExtensions);
            
             // Get a graphics queue from the Device
-            GraphicsQueue = Queue.GetDeviceQueue(Device.QFIndices.Graphics, 0);
-            ComputeQueue = Queue.GetDeviceQueue(Device.QFIndices.Compute, 0);
+            GraphicsQueue = Queue.GetDeviceQueue(Device.QFGraphics, 0);
+            ComputeQueue = Queue.GetDeviceQueue(Device.QFCompute, 0);
             DepthFormat = Device.GetSupportedDepthFormat();            
                
             // Create synchronization objects
@@ -226,7 +227,6 @@ namespace SharpGame
             };
 
             RenderPassCreateInfo renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            
             renderPass = new RenderPass(ref renderPassInfo);           
         }
 
@@ -328,10 +328,17 @@ namespace SharpGame
             return framebuffers;
         }
         
+        protected void CreateDepthStencil()
+        {
+            depthStencil?.Dispose();         
+            depthStencil = new DepthStencil((uint)Width, (uint)Height, DepthFormat);
+        }
+        
         private void CreateCommandPool()
         {
-            primaryCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
-            workCmdPool = new CommandBufferPool(Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
+            commandPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
+            primaryCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
+            workCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
             computeCmdPool = new CommandBufferPool(ComputeQueue.FamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer);
         }
 
@@ -340,6 +347,33 @@ namespace SharpGame
             primaryCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
             workCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
             computeCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
+        }
+
+        public static CommandBuffer CreateCommandBuffer(CommandBufferLevel level, bool begin = false)
+        {
+            var cmdBuffer = commandPool.AllocateCommandBuffer(level);
+
+            // If requested, also start recording for the new command buffer
+            if (begin)
+            {
+                cmdBuffer.Begin(CommandBufferUsageFlags.None);
+            }
+
+            return cmdBuffer;
+        }
+
+        public static void FlushCommandBuffer(CommandBuffer commandBuffer, Queue queue, bool free = true)
+        {
+            commandBuffer.End();
+            
+            Fence fence = new Fence(FenceCreateFlags.None);
+            queue.Submit(null, PipelineStageFlags.None, commandBuffer, null, fence);
+            fence.Wait();
+
+            if (free)
+            {
+                commandPool.FreeCommandBuffer(commandBuffer);
+            }
         }
 
         public CommandBuffer BeginWorkCommandBuffer()
@@ -358,12 +392,6 @@ namespace SharpGame
             commandBuffer.Reset(true);
         }
 
-        protected void CreateDepthStencil()
-        {
-            depthStencil?.Dispose();         
-            depthStencil = new DepthStencil((uint)Width, (uint)Height, DepthFormat);
-        }
-        
         public TransientBuffer AllocVertexBuffer(uint count)
         {
             return transientVertexBuffer.Alloc(count);
