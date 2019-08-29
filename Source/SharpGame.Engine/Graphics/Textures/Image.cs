@@ -9,19 +9,32 @@ namespace SharpGame
     public class Image : DisposeBase
     {
         internal VkImage handle;
-
         internal VkDeviceMemory memory;
         internal ulong allocationSize;
         internal uint memoryTypeIndex;
 
-        public Image(ref ImageCreateInfo imageCreateInfo)
+        public unsafe Image(ref ImageCreateInfo imageCreateInfo)
         {
             imageCreateInfo.ToNative(out VkImageCreateInfo native);
             handle = Device.CreateImage(ref native);
+
+            Device.GetImageMemoryRequirements(handle, out var memReqs);
+
+            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
+            memAllocInfo.allocationSize = memReqs.size;
+            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
+
+            memory = Device.AllocateMemory(ref memAllocInfo);
+            Device.BindImageMemory(handle, memory, 0);
+
+            allocationSize = memAllocInfo.allocationSize;
+            memoryTypeIndex = memAllocInfo.memoryTypeIndex;
         }
 
         protected override void Destroy(bool disposing)
         {
+            Device.FreeMemory(memory);
+
             Device.Destroy(handle);
         }
 

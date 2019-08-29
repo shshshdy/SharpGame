@@ -20,11 +20,10 @@ namespace SharpGame
         public ImageUsageFlags imageUsageFlags;
         public ImageLayout imageLayout;
 
-        public ImageView imageView;
         public Image image;
+        public ImageView imageView;
         public Sampler sampler;
 
-        internal VkDeviceMemory deviceMemory;
         internal DescriptorImageInfo descriptor;
 
         public Texture()
@@ -36,14 +35,11 @@ namespace SharpGame
             descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);           
         }
 
-
         protected override void Destroy()
         {
-            imageView?.Dispose();
             image?.Dispose();
+            imageView?.Dispose();
             sampler?.Dispose();
-
-            Device.FreeMemory(deviceMemory);
 
             base.Destroy();
         }

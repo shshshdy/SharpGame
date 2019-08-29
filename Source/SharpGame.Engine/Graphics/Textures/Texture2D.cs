@@ -38,17 +38,8 @@ namespace SharpGame
             };
 
             texture.image = new Image(ref imageCreateInfo);
-            Device.GetImageMemoryRequirements(texture.image.handle, out var memReqs);
-
-            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
-            memAllocInfo.allocationSize = memReqs.size;
-            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-
-            ulong totalBytes = memAllocInfo.allocationSize;
-
-            texture.deviceMemory = Device.AllocateMemory(ref memAllocInfo);
-            Device.BindImageMemory(texture.image.handle, texture.deviceMemory, 0);
-
+            
+            ulong totalBytes = texture.image.allocationSize;
             {
                 DeviceBuffer stagingBuffer = DeviceBuffer.CreateStagingBuffer(totalBytes, tex2DDataPtr);
                 
@@ -57,12 +48,11 @@ namespace SharpGame
                 bufferCopyRegion.imageSubresource.mipLevel = 0;
                 bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
                 bufferCopyRegion.imageSubresource.layerCount = 1;
-                bufferCopyRegion.imageExtent.width = (uint)w;
-                bufferCopyRegion.imageExtent.height = (uint)h;
+                bufferCopyRegion.imageExtent.width = w;
+                bufferCopyRegion.imageExtent.height = h;
                 bufferCopyRegion.imageExtent.depth = 1;
                 bufferCopyRegion.bufferOffset = 0;
                    
-
                 CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
                 // The sub resource range describes the regions of the image we will be transition
                 ImageSubresourceRange subresourceRange = new ImageSubresourceRange
@@ -73,30 +63,13 @@ namespace SharpGame
                     layerCount = 1
                 };
 
-                copyCmd.SetImageLayout(
-                    texture.image,
-                     ImageAspectFlags.Color,
-                     ImageLayout.Undefined,
-                     ImageLayout.TransferDstOptimal,
-                    subresourceRange);
-
-                copyCmd.CopyBufferToImage(                    
-                    stagingBuffer,
-                    texture.image,
-                     ImageLayout.TransferDstOptimal,
-                    ref bufferCopyRegion);
+                copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
+                copyCmd.CopyBufferToImage(stagingBuffer, texture.image, ImageLayout.TransferDstOptimal, ref bufferCopyRegion);
+                copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, texture.imageLayout, subresourceRange);
+                Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
-                copyCmd.SetImageLayout(                    
-                    texture.image,
-                    ImageAspectFlags.Color,
-                    ImageLayout.TransferDstOptimal,
-                    texture.imageLayout,
-                    subresourceRange);
-
-                Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
-
                 stagingBuffer.Dispose();
             }
 
@@ -146,15 +119,6 @@ namespace SharpGame
 
             image = new Image(ref imageCreateInfo);
 
-            Device.GetImageMemoryRequirements(image.handle, out var memReqs);
-
-            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
-            memAllocInfo.allocationSize = memReqs.size;
-            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-
-            deviceMemory = Device.AllocateMemory(ref memAllocInfo);
-            Device.BindImageMemory(image.handle, deviceMemory, 0);
-
             // Setup buffer copy regions for each mip level
             Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(mipLevels)];
             uint offset = 0;
@@ -176,45 +140,29 @@ namespace SharpGame
                 offset += tex2D.Mipmaps[i].SizeInBytes;
             }
 
-            ImageSubresourceRange subresourceRange = new ImageSubresourceRange();
-            subresourceRange.aspectMask = ImageAspectFlags.Color;
-            subresourceRange.baseMipLevel = 0;
-            subresourceRange.levelCount = (uint)mipLevels;
-            subresourceRange.layerCount = 1;
+            ImageSubresourceRange subresourceRange = new ImageSubresourceRange
+            {
+                aspectMask = ImageAspectFlags.Color,
+                baseMipLevel = 0,
+                levelCount = mipLevels,
+                layerCount = 1
+            };
 
             // Use a separate command buffer for texture loading
             CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
-
             // Image barrier for optimal image (target)
             // Optimal image will be used as destination for the copy
-            copyCmd.SetImageLayout(
-                image,
-                ImageAspectFlags.Color,
-                ImageLayout.Undefined,
-                ImageLayout.TransferDstOptimal,
-                subresourceRange);
-
+            copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
             // Copy mip levels from staging buffer
-            copyCmd.CopyBufferToImage(
-                stagingBuffer,
-                image,
-                ImageLayout.TransferDstOptimal,
-                bufferCopyRegions);
+            copyCmd.CopyBufferToImage(stagingBuffer, image, ImageLayout.TransferDstOptimal, bufferCopyRegions);
 
-            // Change texture image layout to shader read after all mip levels have been copied
-            //this.imageLayout = imageLayout;
-            copyCmd.SetImageLayout(
-                image,
-                ImageAspectFlags.Color,
-                ImageLayout.TransferDstOptimal,
-                imageLayout,
-                subresourceRange);
-
+            copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, imageLayout, subresourceRange);
             Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue);
-
             // Clean up staging resources
             stagingBuffer.Dispose();
 
+            // Change texture image layout to shader read after all mip levels have been copied
+            //this.imageLayout = imageLayout;
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
 
             ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo

@@ -6,7 +6,6 @@ using Vulkan;
 
 namespace SharpGame
 {
-    using static Vulkan.VulkanNative;
     public partial class Texture : Resource, IBindableResource
     {
         public static Texture LoadFromFile(string filename, Format format, SamplerAddressMode samplerAddressMode = SamplerAddressMode.Repeat)
@@ -56,17 +55,6 @@ namespace SharpGame
 
             image = new Image(ref imageCreateInfo);
 
-            Device.GetImageMemoryRequirements(image.handle, out var memReqs);
-
-            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
-            memAllocInfo.allocationSize = memReqs.size;
-            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-
-            deviceMemory = Device.AllocateMemory(ref memAllocInfo);
-            Device.BindImageMemory(image.handle, deviceMemory, 0);
-
-            CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
-
             // Setup buffer copy regions for each face including all of it's miplevels
             Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(layers* mipLevels)];
             uint offset = 0;
@@ -94,37 +82,23 @@ namespace SharpGame
 
             // Image barrier for optimal image (target)
             // Set initial layout for all array layers (faces) of the optimal (target) tiled texture
-            ImageSubresourceRange subresourceRange = new ImageSubresourceRange();
-            subresourceRange.aspectMask = ImageAspectFlags.Color;
-            subresourceRange.baseMipLevel = 0;
-            subresourceRange.levelCount = (uint)mipLevels;
-            subresourceRange.layerCount = layers;
+            ImageSubresourceRange subresourceRange = new ImageSubresourceRange
+            {
+                aspectMask = ImageAspectFlags.Color,
+                baseMipLevel = 0,
+                levelCount = mipLevels,
+                layerCount = layers
+            };
 
-            copyCmd.SetImageLayout(
-                image,
-                ImageAspectFlags.Color,
-                ImageLayout.Undefined,
-                ImageLayout.TransferDstOptimal,
-                subresourceRange);
-
-            // Copy the cube map faces from the staging buffer to the optimal tiled image
-            copyCmd.CopyBufferToImage(                
-                stagingBuffer,
-                image,
-                ImageLayout.TransferDstOptimal,
-                bufferCopyRegions);
-
-            // Change texture image layout to shader read after all faces have been copied
-            imageLayout = ImageLayout.ShaderReadOnlyOptimal;
-            copyCmd.SetImageLayout(
-                image,
-                ImageAspectFlags.Color,
-                ImageLayout.TransferDstOptimal,
-                imageLayout,
-                subresourceRange);
-
+            CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
+            copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
+            copyCmd.CopyBufferToImage(stagingBuffer, image, ImageLayout.TransferDstOptimal, bufferCopyRegions);
+            copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, imageLayout, subresourceRange);
             Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
             
+            // Change texture image layout to shader read after all faces have been copied
+            imageLayout = ImageLayout.ShaderReadOnlyOptimal;
+
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == 1);
 
             // Create image view
