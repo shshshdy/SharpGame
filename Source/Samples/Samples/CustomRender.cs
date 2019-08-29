@@ -73,8 +73,7 @@ namespace SharpGame.Samples
             float gridSize = 15;
             for(int i = 0; i < COUNT; i++)
             {
-                Matrix worldTransform = Matrix.CreateTranslation(gridSize * (i/10) /*- gridSize * 10 / 2*/,
-                    0, gridSize * (i % 10) /*- gridSize * 10 / 2*/);
+                Matrix worldTransform = Matrix.CreateTranslation(gridSize * (i/10), 0, gridSize * (i % 10));
 
                 batches[i].offset = offset;
 
@@ -90,9 +89,6 @@ namespace SharpGame.Samples
             cameraPos = new Vector3(0, 5, 50);
             //pitch = MathUtil.Radians(15);
            
-            var m = Matrix.CreateLookAt(cameraPos, Vector3.Zero, Vector3.UnitY);
-            Matrix.Decompose(m, out var s, out var q, out var t);            
-
             Renderer.MainView.Attach(null, null, frameGraph);
 
         }

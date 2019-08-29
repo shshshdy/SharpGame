@@ -18,7 +18,7 @@ Shader "Brdf"
 
         @ComputeShader
         {
-            #include "spmap_cs.glsl"
+            #include "spmap.comp"
         }
 
     }
@@ -27,7 +27,7 @@ Shader "Brdf"
     {
         @ComputeShader
         {
-            #include "irmap_cs.glsl"
+            #include "irmap.comp"
         }
     }
 
@@ -35,7 +35,7 @@ Shader "Brdf"
     {
         @ComputeShader
         {
-            #include "spbrdf_cs.glsl"
+            #include "spbrdf.comp"
         }
     }
 

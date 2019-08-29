@@ -9,12 +9,12 @@
 
         @VertexShader
         {
-            #include "pbr_vs.glsl"
+            #include "pbr.vert"
         }
 
         @PixelShader
         {
-            #include "pbr_fs.glsl"
+            #include "pbr.frag"
         }
 
     }
