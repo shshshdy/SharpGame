@@ -8,7 +8,13 @@ using Vulkan;
 
 
 namespace SharpGame
-{    
+{
+    public struct DebugInfo
+    {
+        public int nextImage;
+        public Framebuffer framebuffer;
+    }
+
     public class GraphicsPass : FrameGraphPass
     {
         [IgnoreDataMember]
@@ -18,8 +24,9 @@ namespace SharpGame
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
         public Action<GraphicsPass, RenderView> OnDraw { get; set; }
 
-        private CommandBufferPool[] cmdBufferPool;
+        protected CommandBufferPool[] cmdBufferPool;
 
+        protected DebugInfo[] debugInfo = new DebugInfo[3];
 
         public GraphicsPass()
         {
@@ -36,7 +43,7 @@ namespace SharpGame
         protected CommandBuffer GetCmdBuffer()
         {
             var g = Graphics.Instance;
-            int workContext = g.WorkContext;
+            int workContext = g.nextImage;// g.WorkContext;
             var cb = cmdBufferPool[workContext].Get();
             cb.renderPass = renderPass;
 
@@ -49,6 +56,9 @@ namespace SharpGame
             cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                 | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
 
+            ref DebugInfo info = ref debugInfo[g.nextImage];
+            info.nextImage = g.nextImage;
+            info.framebuffer = framebuffers[g.nextImage];
             return cb;
         }
 
@@ -65,7 +75,7 @@ namespace SharpGame
                 framebuffers = g.Framebuffers;
             }
 
-            int workContext = g.WorkContext;
+            int workContext = g.nextImage;// g.WorkContext;
             cmdBufferPool[workContext].currentIndex = 0;
         }
 
@@ -152,9 +162,9 @@ namespace SharpGame
             var g = Graphics.Instance;
             CommandBuffer cb = g.RenderCmdBuffer;
             var fbs = framebuffers ?? g.Framebuffers;
-            int renderContext = g.RenderContext;
+            int renderContext = imageIndex;// g.RenderContext;
             var fb = fbs[imageIndex];
-            
+
             var renderPassBeginInfo = new RenderPassBeginInfo
             (
                 fb.renderPass, fb,
@@ -163,8 +173,14 @@ namespace SharpGame
             );
 
             cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-
-            cb.ExecuteCommand(cmdBufferPool[renderContext].CommandBuffers[0]);
+            var cmdPool = cmdBufferPool[renderContext];
+            if(cmdPool.currentIndex > 0)
+            {
+                System.Diagnostics.Debug.Assert(imageIndex == debugInfo[imageIndex].nextImage);
+                //System.Diagnostics.Debug.Assert(fb == debugInfo[renderContext].framebuffer);
+            
+                cb.ExecuteCommand(cmdPool[0]);
+            }
             
             cb.EndRenderPass();
         }

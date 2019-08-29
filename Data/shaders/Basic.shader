@@ -38,8 +38,8 @@ Shader "Basic"
 		@PixelShader
 		{
 			#version 450
-
-			layout (set = 1, binding = 0) uniform sampler2D DiffMap;
+#include "UniformsPS.glsl"	
+			layout (set = 2, binding = 0) uniform sampler2D DiffMap;
 
 			layout (location = 0) in vec2 in_TexCoord;
 			layout (location = 0) out vec4 out_Color;

@@ -1,4 +1,5 @@
 ﻿#define MULTI_THREAD
+//#define CMD_POOL
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,19 +10,19 @@ namespace SharpGame
 {
     public class ScenePass : GraphicsPass
     {
-        private CommandBufferPool[][] cmdBufferPools = new CommandBufferPool[2][];
+        private CommandBufferPool[][] cmdBufferPools = new CommandBufferPool[3][];
         FastList<Task> renderTasks = new FastList<Task>();
 
         const int WORK_COUNT = 16;
-        public static bool[] multiThreaded = { true, true };
+        public static bool[] multiThreaded = { true, true, true };
 
         public static bool MultiThreaded = true;
 
         public ScenePass(string name = "main")
         {
             Name = name;
-            
-            for(int i = 0; i < 2; i++)
+#if !CMD_POOL
+            for (int i = 0; i < 3; i++)
             {
                 cmdBufferPools[i] = new CommandBufferPool[WORK_COUNT];
                 for(int j = 0; j < WORK_COUNT; j++)
@@ -32,20 +33,26 @@ namespace SharpGame
                 }
 
             }
+#endif
         }
 
         protected CommandBuffer GetCmdBufferAt(int index)
         {
-            var g = Graphics.Instance;
-            int workContext = g.WorkContext;
+            int workContext = Graphics.Instance.nextImage;// Graphics.Instance.WorkContext;
+#if CMD_POOL
+            var cb = cmdBufferPool[workContext][index];
+            cb.renderPass = renderPass;
+#else
             var cb = cmdBufferPools[workContext][index][0];
             cb.renderPass = renderPass;
             cmdBufferPools[workContext][index].currentIndex = 1;
+#endif
+
             if (!cb.IsOpen)
             {
                 CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
                 {
-                    framebuffer = framebuffers[g.nextImage],
+                    framebuffer = framebuffers[Graphics.Instance.nextImage],
                     renderPass = renderPass
                 };
 
@@ -59,18 +66,21 @@ namespace SharpGame
         protected override void DrawImpl(RenderView view)
         {
             var g = Graphics.Instance;
-            int workContext = g.WorkContext;
+            int workContext = g.nextImage;// g.WorkContext;
             var batches = view.batches.Items;
             multiThreaded[workContext] = MultiThreaded;
 
             if (MultiThreaded)
             {
+#if CMD_POOL
+
+#else
                 for (int i = 0; i < cmdBufferPools[workContext].Length; i++)
                 {
                     var cmd = cmdBufferPools[workContext][i];
                     cmd.currentIndex = 0;
                 }
-
+#endif
                 renderTasks.Clear();
 
                 int dpPerBatch = (int)Math.Ceiling(view.batches.Count / (float)WORK_COUNT);
@@ -85,7 +95,7 @@ namespace SharpGame
                     int from = i;
                     int to = Math.Min(i + dpPerBatch, view.batches.Count);
                     int cmdIndex = idx;
-                    var t = Task.Run(() => 
+                    var t = Task.Run(() =>
                     {
                         var cb = GetCmdBufferAt(cmdIndex);
                         cb.SetViewport(ref view.Viewport);
@@ -96,7 +106,9 @@ namespace SharpGame
                     renderTasks.Add(t);
                     idx++;
                 }
-
+#if CMD_POOL
+                cmdBufferPool[workContext].currentIndex = idx;
+#endif
                 Task.WaitAll(renderTasks.ToArray());
             }
             else
@@ -131,7 +143,7 @@ namespace SharpGame
         public override void Submit(int imageIndex)
         {
             var g = Graphics.Instance;
-            int renderContext = g.RenderContext;
+            int renderContext = imageIndex;// g.RenderContext;
             bool mt = multiThreaded[renderContext];
 
             if (mt)
@@ -148,13 +160,20 @@ namespace SharpGame
                 );
 
                 cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-
+#if CMD_POOL
+                for (int i = 0; i < cmdBufferPool[renderContext].currentIndex; i++)
+                {
+                    var cmd = cmdBufferPool[renderContext][i];                    
+                    cb.ExecuteCommand(cmd);
+                }
+#else
                 for (int i = 0; i < cmdBufferPools[renderContext].Length; i++)
                 {
                     var cmd = cmdBufferPools[renderContext][i];
                     if (cmd.currentIndex > 0)
                         cb.ExecuteCommand(cmd.CommandBuffers[0]);
                 }
+#endif
                 cb.EndRenderPass();
 
             }

@@ -63,8 +63,8 @@ namespace SharpGame
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
 
-        public uint currentImage;
-        public int nextImage;
+        public uint currentImage = (uint)0xffffffff;
+        public int nextImage = 0;
 
         public Semaphore PresentComplete { get; }
         public Semaphore RenderComplete { get; }
@@ -381,6 +381,16 @@ namespace SharpGame
 
         public void BeginRender()
         {
+            Profiler.BeginSample("Acquire");
+            // Acquire the next image from the swap chaing
+            uint cur = currentImage;
+            Swapchain.AcquireNextImage(PresentComplete, ref currentImage);
+            
+            System.Diagnostics.Debug.Assert(currentImage == (cur + 1) % ImageCount);
+
+            //nextImage = ((int)currentImage + 1)%ImageCount;
+            Profiler.EndSample();
+
 #if EVENT_SYNC
             if (!SingleLoop)
             {
@@ -401,16 +411,13 @@ namespace SharpGame
 
             Profiler.BeginSample("MainSemWait");
             MainSemWait();
+            nextImage = ((int)currentImage + 1) % ImageCount;
+
             Profiler.EndSample();
 
 #endif
-            Profiler.BeginSample("Acquire");
-            // Acquire the next image from the swap chaing
-            Swapchain.AcquireNextImage(PresentComplete, ref currentImage);
 
-            System.Diagnostics.Debug.Assert(currentImage == nextImage);
-            nextImage = ((int)currentImage + 1)%ImageCount;
-            Profiler.EndSample();
+
 
         }
 
