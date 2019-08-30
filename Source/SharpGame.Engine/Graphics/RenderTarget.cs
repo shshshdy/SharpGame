@@ -9,24 +9,19 @@ namespace SharpGame
     {
         public Image image;
         public ImageView view;
-
-        public Image depthImage;
-        public ImageView depthView;
-
         public Sampler sampler;
 
-        public RenderTarget(uint width, uint height, Format colorformat, Format depthformat)
+        public RenderTarget(uint width, uint height, Format colorformat, bool depth = false)
         {
-            if (colorformat != Format.Undefined)
+            if (depth)
+            {
+                image = Image.Create(width, height, ImageCreateFlags.None, 1, 1, colorformat, SampleCountFlags.Count1, (ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.TransferSrc));
+                view = ImageView.Create(image, ImageViewType.Image2D, colorformat, (ImageAspectFlags.Depth | ImageAspectFlags.Stencil), 0, 1);
+            }
+            else
             {
                 image = Image.Create(width, height, ImageCreateFlags.None, 1, 1, colorformat, SampleCountFlags.Count1, ImageUsageFlags.ColorAttachment);
                 view = ImageView.Create(image, ImageViewType.Image2D, colorformat, ImageAspectFlags.Color, 0, 1);
-            }
-
-            if (depthformat != Format.Undefined)
-            {
-                depthImage = Image.Create(width, height, ImageCreateFlags.None, 1, 1, depthformat, SampleCountFlags.Count1, (ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.TransferSrc));
-                depthView = ImageView.Create(depthImage, ImageViewType.Image2D, depthformat, (ImageAspectFlags.Depth | ImageAspectFlags.Stencil), 0, 1);
             }
 
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
@@ -36,8 +31,7 @@ namespace SharpGame
         {
             image?.Dispose();
             view?.Dispose();
-            depthImage?.Dispose();
-            depthView?.Dispose();
+            sampler?.Dispose();
 
             base.Destroy(disposing);
         }

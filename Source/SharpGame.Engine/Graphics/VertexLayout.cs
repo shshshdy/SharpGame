@@ -44,7 +44,6 @@ namespace SharpGame
             format = fmt;
             this.offset = offset;
         }
-
         
     }
 
@@ -60,6 +59,7 @@ namespace SharpGame
         public VertexLayout(params VertexInputAttribute[] attributes)
         {
             this.attributes = attributes;
+            Update();
         }
 
         public VertexLayout(VertexInputBinding[] bindings, VertexInputAttribute[] attributes)
@@ -70,11 +70,50 @@ namespace SharpGame
 
         void Update()
         {
+            uint offset = 0;
+            uint size = 0;
             foreach(var attr in attributes)
             {
+                if(attr.binding != 0)
+                {
+                    continue;
+                }
 
+                if(attr.offset > offset)
+                {
+                    offset = attr.offset;
+                    size = GetFormatSize(attr.format);
+                }
             }
 
+            bindings = new[] { new VertexInputBinding(0, offset + size, VertexInputRate.Vertex) };
+        }
+
+        uint GetFormatSize(Format format)
+        {
+            switch(format)
+            {
+                case Format.R8g8b8a8Unorm:
+                case Format.R16g16Unorm:
+                case Format.R16g16Snorm:
+                case Format.R32Uint:
+                case Format.R32Sint:
+                case Format.R32Sfloat:
+                    return 4;
+
+                case Format.R16g16b16a16Unorm:
+                case Format.R16g16b16a16Sfloat:
+                case Format.R32g32Uint:
+                case Format.R32g32Sint:
+                case Format.R32g32Sfloat:
+                    return 8;
+                case Format.R32g32b32Sfloat:
+                    return 12;
+                case Format.R32g32b32a32Sfloat:
+                    return 16;
+            }
+
+            return 0;
         }
 
         public override int GetHashCode()

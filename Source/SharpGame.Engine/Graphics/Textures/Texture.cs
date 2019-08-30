@@ -17,8 +17,8 @@ namespace SharpGame
         public uint depth;
 
         public Format format;
-        public ImageUsageFlags imageUsageFlags;
-        public ImageLayout imageLayout;
+        public ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled;
+        public ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal;
 
         public Image image;
         public ImageView imageView;
@@ -52,6 +52,53 @@ namespace SharpGame
                 ++levels;
             }
             return levels;
+        }
+
+        public void GenerateMipmaps()
+        {
+            CommandBuffer commandBuffer = Graphics.Instance.BeginWorkCommandBuffer();
+
+            // Iterate through mip chain and consecutively blit from previous level to next level with linear filtering.
+            for (uint level = 1, prevLevelWidth = width, prevLevelHeight = height; level < mipLevels; ++level, prevLevelWidth /= 2, prevLevelHeight /= 2)
+            {
+                var preBlitBarrier = new ImageMemoryBarrier(image, 0, AccessFlags.TransferWrite, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, ImageAspectFlags.Color, level, 1);
+                commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.Transfer, ref preBlitBarrier);
+
+                ImageBlit region = new ImageBlit
+                {
+                    srcSubresource = new ImageSubresourceLayers
+                    {
+                        aspectMask = ImageAspectFlags.Color,
+                        mipLevel = level - 1,
+                        baseArrayLayer = 0,
+                        layerCount = layers
+                    },
+
+                    dstSubresource = new ImageSubresourceLayers
+                    {
+                        aspectMask = ImageAspectFlags.Color,
+                        mipLevel = level,
+                        baseArrayLayer = 0,
+                        layerCount = layers
+                    },
+
+                    srcOffsets_1 = new Offset3D((int)(prevLevelWidth), (int)(prevLevelHeight), 1),
+                    dstOffsets_1 = new Offset3D((int)(prevLevelWidth / 2), (int)(prevLevelHeight / 2), 1),
+                };
+
+                commandBuffer.BlitImage(image, ImageLayout.TransferSrcOptimal, image, ImageLayout.TransferDstOptimal, ref region, Filter.Linear);
+
+                var postBlitBarrier = new ImageMemoryBarrier(image, AccessFlags.TransferWrite, AccessFlags.TransferRead, ImageLayout.TransferDstOptimal, ImageLayout.TransferSrcOptimal, ImageAspectFlags.Color, level, 1);
+                commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.Transfer, ref postBlitBarrier);
+            }
+
+            // Transition whole mip chain to shader read only layout.
+            {
+                var barrier = new ImageMemoryBarrier(image, AccessFlags.TransferWrite, 0, ImageLayout.TransferSrcOptimal, ImageLayout.ShaderReadOnlyOptimal);
+                commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.BottomOfPipe, ref barrier);
+            }
+
+            Graphics.Instance.EndWorkCommandBuffer(commandBuffer);
         }
 
         public static Texture White;
@@ -90,57 +137,10 @@ namespace SharpGame
             }
 
             texture.image = Image.Create(width, height, (imageViewType == ImageViewType.ImageCube || imageViewType == ImageViewType.ImageCubeArray) ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None, layers, texture.mipLevels, format,  SampleCountFlags.Count1, usage);
-            texture.imageView = ImageView.Create(texture.image, imageViewType, format, ImageAspectFlags.Color, 0, RemainingMipLevels);            
+            texture.imageView = ImageView.Create(texture.image, imageViewType, format, ImageAspectFlags.Color, 0, RemainingMipLevels, 0, layers);            
             texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, Device.Features.samplerAnisotropy == 1);
             texture.UpdateDescriptor();
             return texture;
-        }
-
-        public void GenerateMipmaps()
-        {             
-            CommandBuffer commandBuffer = Graphics.Instance.BeginWorkCommandBuffer();
-
-	        // Iterate through mip chain and consecutively blit from previous level to next level with linear filtering.
-	        for(uint level=1, prevLevelWidth = width, prevLevelHeight = height; level< mipLevels; ++level, prevLevelWidth /= 2, prevLevelHeight /=2 )
-            {
-                var preBlitBarrier = new ImageMemoryBarrier(image, 0, AccessFlags.TransferWrite, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, ImageAspectFlags.Color, level, 1);
-                commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.Transfer, ref preBlitBarrier);
-
-                ImageBlit region = new ImageBlit
-                {
-                    srcSubresource = new ImageSubresourceLayers
-                    {
-                        aspectMask = ImageAspectFlags.Color,
-                        mipLevel = level - 1,
-                        baseArrayLayer = 0,
-                        layerCount = layers
-                    },
-
-                    dstSubresource = new ImageSubresourceLayers
-                    {
-                        aspectMask = ImageAspectFlags.Color,
-                        mipLevel = level,
-                        baseArrayLayer = 0,
-                        layerCount = layers
-                    },
-
-                    srcOffsets_1 = new Offset3D((int)(prevLevelWidth),  (int)(prevLevelHeight), 1 ),
-                    dstOffsets_1 = new Offset3D((int)(prevLevelWidth / 2),(int)(prevLevelHeight / 2), 1),
-                };
-
-                commandBuffer.BlitImage(image,  ImageLayout.TransferSrcOptimal, image, ImageLayout.TransferDstOptimal, ref region,  Filter.Linear);
-
-                var postBlitBarrier = new ImageMemoryBarrier(image, AccessFlags.TransferWrite, AccessFlags.TransferRead, ImageLayout.TransferDstOptimal, ImageLayout.TransferSrcOptimal, ImageAspectFlags.Color, level, 1);
-                commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.Transfer, ref postBlitBarrier);
-            }
-
-            // Transition whole mip chain to shader read only layout.
-            {
-		        var barrier = new ImageMemoryBarrier(image, AccessFlags.TransferWrite, 0, ImageLayout.TransferSrcOptimal,  ImageLayout.ShaderReadOnlyOptimal);
-                commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.BottomOfPipe, ref barrier);
-	        }
-
-            Graphics.Instance.EndWorkCommandBuffer(commandBuffer);
         }
 
     }

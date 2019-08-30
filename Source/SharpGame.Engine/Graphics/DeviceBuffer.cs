@@ -131,6 +131,11 @@ namespace SharpGame
             return CreateDynamic<T>(BufferUsageFlags.UniformBuffer, count);
         }
 
+        public static DeviceBuffer CreateStagingBuffer(ulong size, void* data)
+        {
+            return Create(BufferUsageFlags.TransferSrc, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, size, 1, data);
+        }
+
         public static DeviceBuffer Create<T>(BufferUsageFlags bufferUsages, T[] data, bool dynamic = false) where T : struct
         {
             return Create(bufferUsages, dynamic,  (ulong)Unsafe.SizeOf<T>(), (ulong)data.Length, Utilities.AsPointer(ref data[0]));
@@ -144,12 +149,6 @@ namespace SharpGame
         public static DeviceBuffer Create(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, ulong size)
         {
             return Create(usageFlags, memoryPropertyFlags, size, 1, null);
-        }
-
-        public static DeviceBuffer CreateStagingBuffer(ulong size, void * data)
-        {
-            return Create(BufferUsageFlags.TransferSrc, MemoryPropertyFlags.HostVisible
-                | MemoryPropertyFlags.HostCoherent, size, 1, data);
         }
 
         public static DeviceBuffer Create(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, ulong stride, ulong count, void* data = null)
