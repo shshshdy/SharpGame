@@ -47,7 +47,7 @@ namespace SharpGame
         {
             ImageCreateInfo createInfo = new ImageCreateInfo
             {
-                flags = flags,//(layers == 6) ? ImageCreateFlags.CubeCompatible : 0,
+                flags = flags,
                 imageType = ImageType.Image2D,
                 format = format,
                 extent = new Extent3D { width = width, height = height, depth = 1 },

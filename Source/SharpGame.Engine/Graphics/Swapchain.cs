@@ -309,7 +309,6 @@ namespace SharpGame
                     for (uint i = 0; i < ImageCount; i++)
                     {
                         Buffers[i].View.Dispose();
-                        //Device.Destroy(Buffers[i].View);
                     }
 
                     Device.DestroySwapchainKHR(oldSwapchain);
@@ -324,41 +323,14 @@ namespace SharpGame
 
                 Device.GetSwapchainImagesKHR(swapchain, &imageCount, (VkImage*)Images.Data.ToPointer());
 
-                Images.Count = imageCount;
-                
+                Images.Count = imageCount;                
                 // Get the swap chain Buffers containing the image and imageview
                 Buffers = new SwapChainBuffer[(int)imageCount];
-                //Buffers.Count = imageCount;
                 for (int i = 0; i < imageCount; i++)
-                {
-                    VkImageViewCreateInfo colorAttachmentView = new VkImageViewCreateInfo();
-                    colorAttachmentView.sType = VkStructureType.ImageViewCreateInfo;
-                    colorAttachmentView.pNext = null;
-                    colorAttachmentView.format = (VkFormat)ColorFormat;
-                    colorAttachmentView.components = new VkComponentMapping()
-                    {
-                        r = VkComponentSwizzle.R,
-                        g = VkComponentSwizzle.G,
-                        b = VkComponentSwizzle.B,
-                        a = VkComponentSwizzle.A
-                    };
-
-                    colorAttachmentView.subresourceRange.aspectMask = VkImageAspectFlags.Color;
-                    colorAttachmentView.subresourceRange.baseMipLevel = 0;
-                    colorAttachmentView.subresourceRange.levelCount = 1;
-                    colorAttachmentView.subresourceRange.baseArrayLayer = 0;
-                    colorAttachmentView.subresourceRange.layerCount = 1;
-                    colorAttachmentView.viewType = VkImageViewType.Image2D;
-                    colorAttachmentView.flags = 0;
-                    
+                {                  
                     var img = new Image(Images[i]);
-                    Buffers[i].Image = img;// Images[i];
+                    Buffers[i].Image = img;
                     Buffers[i].View = ImageView.Create(img, ImageViewType.Image2D, ColorFormat, ImageAspectFlags.Color, 0, 1);
-
-                    //colorAttachmentView.image = Images[i];
-
-                    //Buffers[i].View = Device.CreateImageView(ref colorAttachmentView);
-                  
                 }
             }
         }

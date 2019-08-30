@@ -59,8 +59,9 @@ namespace SharpGame
                 attachments = views,
                 width = width,
                 height = height,
-                layers = 1
+                layers = layers
             };
+
             return new Framebuffer(ref framebufferCreateInfo);
         }
     }

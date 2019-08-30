@@ -4,10 +4,8 @@ using System.Text;
 
 namespace SharpGame
 {
-    using global::System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
     using Vulkan;
-    using static Vulkan.VulkanNative;
 
     public class Semaphore : DisposeBase
     {

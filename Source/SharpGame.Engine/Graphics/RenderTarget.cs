@@ -13,6 +13,8 @@ namespace SharpGame
         public Image depthImage;
         public ImageView depthView;
 
+        public Sampler sampler;
+
         public RenderTarget(uint width, uint height, Format colorformat, Format depthformat)
         {
             if (colorformat != Format.Undefined)
@@ -26,6 +28,8 @@ namespace SharpGame
                 depthImage = Image.Create(width, height, ImageCreateFlags.None, 1, 1, depthformat, SampleCountFlags.Count1, (ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.TransferSrc));
                 depthView = ImageView.Create(depthImage, ImageViewType.Image2D, depthformat, (ImageAspectFlags.Depth | ImageAspectFlags.Stencil), 0, 1);
             }
+
+            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
         }
 
         protected override void Destroy(bool disposing)

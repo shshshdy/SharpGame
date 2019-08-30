@@ -28,8 +28,8 @@ namespace SharpGame
             Device.Destroy(handle);
         }
 
-
-        public static ImageView Create(Image image, ImageViewType viewType, Format format, ImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels)
+        public static ImageView Create(Image image, ImageViewType viewType, Format format, ImageAspectFlags aspectMask,
+            uint baseMipLevel, uint numMipLevels, uint baseArrayLayer = 0, uint arrayLayers = 1)
         {
             ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
             {
@@ -42,8 +42,8 @@ namespace SharpGame
             viewCreateInfo.subresourceRange.aspectMask = aspectMask;
             viewCreateInfo.subresourceRange.baseMipLevel = baseMipLevel;
             viewCreateInfo.subresourceRange.levelCount = numMipLevels;
-            viewCreateInfo.subresourceRange.baseArrayLayer = 0;
-            viewCreateInfo.subresourceRange.layerCount = 1;// RemainingArrayLayers;
+            viewCreateInfo.subresourceRange.baseArrayLayer = baseArrayLayer;
+            viewCreateInfo.subresourceRange.layerCount = arrayLayers;// RemainingArrayLayers;
             return new ImageView(ref viewCreateInfo);
         }
     }
