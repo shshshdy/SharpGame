@@ -10,6 +10,8 @@ namespace SharpGame
         public DeviceBuffer buffer;
         public uint offset;
         public uint size;
+
+        public IntPtr Data => buffer.Mapped + (int)offset;
     }
 
     public class TransientBufferManager : DisposeBase

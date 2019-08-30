@@ -37,7 +37,7 @@ namespace SharpGame
 
         public Format ColorFormat => Swapchain.ColorFormat;
         public Format DepthFormat { get; protected set; }
-        public Swapchain Swapchain { get; } = new Swapchain();
+        public Swapchain Swapchain { get; private set; }
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -72,7 +72,7 @@ namespace SharpGame
 
         Fence computeFence;
 
-        private DepthStencil depthStencil;
+        private RenderTarget depthStencil;
         
         TransientBufferManager transientVertexBuffer = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
         TransientBufferManager transientIndexBuffer = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
@@ -115,7 +115,7 @@ namespace SharpGame
 
         public void Init(IntPtr wnd)
         {
-            Swapchain.InitSurface(wnd);
+            Swapchain = new Swapchain(wnd);
 
             DescriptorPoolManager = new DescriptorPoolManager();
 
@@ -308,7 +308,7 @@ namespace SharpGame
         {
             Span<VkImageView> attachments = stackalloc VkImageView[2];
             // Depth/Stencil attachment is the same for all frame buffers
-            attachments[1] = depthStencil.view.handle;
+            attachments[1] = depthStencil.depthView.handle;
 
             var frameBufferCreateInfo = new FramebufferCreateInfo
             {
@@ -323,7 +323,7 @@ namespace SharpGame
             var framebuffers = new Framebuffer[Swapchain.ImageCount];
             for (uint i = 0; i < framebuffers.Length; i++)
             {
-                attachments[0] = Swapchain.Buffers[i].View;
+                attachments[0] = Swapchain.Buffers[i].View.handle;
                 framebuffers[i] = new Framebuffer(ref frameBufferCreateInfo);
             }
 
@@ -333,7 +333,7 @@ namespace SharpGame
         protected void CreateDepthStencil()
         {
             depthStencil?.Dispose();         
-            depthStencil = new DepthStencil((uint)Width, (uint)Height, DepthFormat);
+            depthStencil = new RenderTarget((uint)Width, (uint)Height, Format.Undefined, DepthFormat);
         }
         
         private void CreateCommandPool()
@@ -448,9 +448,8 @@ namespace SharpGame
             Profiler.EndSample();
 
 #endif
-
-
-
+            transientVertexBuffer.Flush();
+            transientIndexBuffer.Flush();
         }
 
         public void EndRender()
@@ -521,6 +520,10 @@ namespace SharpGame
             Profiler.BeginSample("RenderSemWait");
             WaitRender();
             WakeRender();
+
+            transientVertexBuffer.Reset();
+            transientIndexBuffer.Reset();
+
             Profiler.EndSample();
         }
 

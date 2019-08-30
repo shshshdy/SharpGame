@@ -24,7 +24,7 @@ namespace SharpGame.Samples
         protected float pitch;
         protected float rotSpeed = 0.5f;
         protected float wheelSpeed = 50.0f;
-        protected float moveSpeed = 100.0f;
+        protected float moveSpeed = 10.0f;
         protected Vector3 offset;
 
         public FileSystem FileSystem => FileSystem.Instance;

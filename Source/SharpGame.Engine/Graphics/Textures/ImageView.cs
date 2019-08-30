@@ -12,6 +12,11 @@ namespace SharpGame
     {
         public VkImageView handle;
 
+        internal ImageView(VkImageView handle)
+        {
+            this.handle = handle;
+        }
+
         public ImageView(ref ImageViewCreateInfo imageViewCreateInfo)
         {
             imageViewCreateInfo.ToNative(out VkImageViewCreateInfo native);
@@ -29,7 +34,7 @@ namespace SharpGame
             ImageViewCreateInfo viewCreateInfo = new ImageViewCreateInfo
             {
                 image = image,
-                viewType = viewType,// (texture.layers == 6) ? ImageViewType.ImageCube : ImageViewType.Image2D,
+                viewType = viewType,
                 format = format,
                 components = new ComponentMapping(ComponentSwizzle.R, ComponentSwizzle.G, ComponentSwizzle.B, ComponentSwizzle.A),
             };
@@ -38,7 +43,7 @@ namespace SharpGame
             viewCreateInfo.subresourceRange.baseMipLevel = baseMipLevel;
             viewCreateInfo.subresourceRange.levelCount = numMipLevels;
             viewCreateInfo.subresourceRange.baseArrayLayer = 0;
-            viewCreateInfo.subresourceRange.layerCount = RemainingArrayLayers;
+            viewCreateInfo.subresourceRange.layerCount = 1;// RemainingArrayLayers;
             return new ImageView(ref viewCreateInfo);
         }
     }

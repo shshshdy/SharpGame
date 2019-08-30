@@ -89,6 +89,8 @@ namespace SharpGame
         internal FastList<Light> lights = new FastList<Light>();
         internal FastList<SourceBatch> batches = new FastList<SourceBatch>();
 
+        FrustumQuery frustumOctreeQuery;
+
         private FrameInfo frameInfo;
 
         private FrameUniform frameUniform = new FrameUniform();
@@ -123,6 +125,8 @@ namespace SharpGame
             this.camera = camera;
                         
             FrameGraph = renderPath;
+
+            frustumOctreeQuery = new FrustumQuery(drawables, camera, Drawable.DRAWABLE_ANY, ViewMask);
 
             if (FrameGraph == null)
             {
@@ -200,7 +204,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe uint GetTransform(IntPtr pos, uint count)
         {
-            uint sz = (uint)Utilities.SizeOf<Matrix>() * count;
+            uint sz = count << 6;// (uint)Utilities.SizeOf<Matrix>() * count;
             return ubMatrics.Alloc(sz, pos);
         }
 
@@ -246,8 +250,6 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndView { view = this });
 
-            ubMatrics.Flush();
-
             Profiler.EndSample();
         }
 
@@ -267,11 +269,7 @@ namespace SharpGame
             }
 
             Profiler.BeginSample("Culling");
-            FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery
-            {
-                view = this,
-                camera = camera
-            };
+
 
             Scene.GetDrawables(frustumOctreeQuery, AddDrawable);
             Profiler.EndSample();
@@ -297,7 +295,7 @@ namespace SharpGame
         {
             cameraVS.View = camera.View;
             Matrix.Invert(ref camera.View, out cameraVS.ViewInv);
-            cameraVS.ViewProj = camera.View*camera.Projection;
+            cameraVS.ViewProj = camera.View*camera.VkProjection;
             cameraVS.CameraPos = camera.Node.Position;
             //cameraVS.FrustumSize = camera.Frustum;
             cameraVS.NearClip = camera.NearClip;
@@ -343,7 +341,7 @@ namespace SharpGame
         public void Render(int imageIndex)
         {
             Profiler.BeginSample("ViewRender");
-
+            ubMatrics.Flush(Graphics.Instance.RenderContext);
             FrameGraph?.Submit(imageIndex);
             OverlayPass?.Submit(imageIndex);
 

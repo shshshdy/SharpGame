@@ -50,5 +50,10 @@ namespace SharpGame
         {
             Buffer[Graphics.Instance.WorkContext].Flush(offset, 0);
         }
+
+        public void Flush(int idx)
+        {
+            Buffer[idx].Flush(offset, 0);
+        }
     }
 }

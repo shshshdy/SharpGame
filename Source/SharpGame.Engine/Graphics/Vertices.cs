@@ -13,6 +13,8 @@ namespace SharpGame
         public Vector3 normal;
         public Vector2 texcoord;
 
+        public static int Size => Utilities.SizeOf<VertexPosNormTex>();
+
         public VertexPosNormTex(Vector3 p, Vector3 n, Vector2 uv)
         {
             position = p;
@@ -51,6 +53,8 @@ namespace SharpGame
         public Vector3 bitangent;
         public Vector2 texcoord;
 
+        public static int Size => Utilities.SizeOf<VertexPosTBNTex>();
+
         public static VertexLayout Layout = new VertexLayout
         (
             new[]
@@ -75,6 +79,9 @@ namespace SharpGame
         public Vector3 normal;
         public Vector2 texcoord;
         public Color color;
+
+        public static int Size => Utilities.SizeOf<VertexPosNormTexColor>();
+
         public VertexPosNormTexColor(Vector3 p, Vector3 n, Vector2 uv, Color color)
         {
             position = p;
@@ -105,6 +112,7 @@ namespace SharpGame
         public Vector3 Position;
         public uint Color;
 
+        public static int Size => Utilities.SizeOf<VertexPosColor>();
 
         public static VertexLayout Layout = new VertexLayout
         (
@@ -127,6 +135,7 @@ namespace SharpGame
         public Vector2 TexCoord;
         public uint Color;
 
+        public static int Size => Utilities.SizeOf<VertexPos2dTexColor>();
 
         public static VertexLayout Layout = new VertexLayout
         (

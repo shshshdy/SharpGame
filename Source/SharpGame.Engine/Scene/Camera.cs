@@ -19,6 +19,45 @@ namespace SharpGame
 
         const uint DEFAULT_VIEWMASK = uint.MaxValue;
 
+        /// Near clip distance.
+        float nearClip_ = DEFAULT_NEARCLIP;
+        /// Far clip distance.
+        float farClip_ = DEFAULT_FARCLIP;
+        /// Field of view.
+        float fov_ = DEFAULT_CAMERA_FOV;
+        /// Orthographic view size.
+        float orthoSize_ = DEFAULT_ORTHOSIZE;
+        /// Aspect ratio.
+        float aspectRatio_ = 1.0f;
+        /// Zoom.
+        float zoom_ = 1.0f;
+        /// View mask.
+        uint viewMask_ = uint.MaxValue;
+        /// LOD bias.
+        float lodBias_ = 1.0f;
+        /// View override flags.
+        uint viewOverrideFlags_;
+
+        bool autoAspectRatio_ = true;
+
+        /// Cached view matrix.
+        Matrix view_;
+        /// Cached projection matrix.
+        Matrix projection_;
+        /// Cached vulkan projection matrix.
+        Matrix vkProjection_;
+        /// Cached world space frustum.
+        BoundingFrustum frustum_;
+
+        /// View matrix dirty flag.
+        bool viewDirty_ = true;
+        /// Projection matrix dirty flag.
+        bool projectionDirty_ = true;
+        /// Frustum dirty flag.
+        bool frustumDirty_ = true;
+        /// Orthographic mode flag.
+        bool orthographic_ = false;
+
         [DataMember(Order = 0)]
         public bool Orthographic { get => orthographic_; set => SetOrthographic(value); }
 
@@ -43,7 +82,6 @@ namespace SharpGame
         [DataMember(Order = 7)]
         public bool AutoAspectRatio { get => autoAspectRatio_; set => SetAutoAspectRatio(value); }
 
-
         /// Return projection matrix. It's in D3D convention with depth range 0 - 1.
         [IgnoreDataMember]
         public ref Matrix Projection
@@ -59,6 +97,20 @@ namespace SharpGame
             }
         }
 
+        /// Return projection matrix. It's in D3D convention with depth range 0 - 1.
+        [IgnoreDataMember]
+        public ref Matrix VkProjection
+        {
+            get
+            {
+                if (projectionDirty_)
+                {
+                    UpdateProjection();
+                }
+
+                return ref vkProjection_;
+            }
+        }
         /// Return view matrix.
         [IgnoreDataMember]
         public ref Matrix View
@@ -120,43 +172,6 @@ namespace SharpGame
             }
 
         }
-
-        /// Cached view matrix.
-        Matrix view_;
-        /// Cached projection matrix.
-        Matrix projection_;
-        /// Cached world space frustum.
-        BoundingFrustum frustum_;
-
-        /// View matrix dirty flag.
-        bool viewDirty_ = true;
-        /// Projection matrix dirty flag.
-        bool projectionDirty_ = true;
-        /// Frustum dirty flag.
-        bool frustumDirty_ = true;
-        /// Orthographic mode flag.
-        bool orthographic_ = false;
-
-        /// Near clip distance.
-        float nearClip_ = DEFAULT_NEARCLIP;
-        /// Far clip distance.
-        float farClip_ = DEFAULT_FARCLIP;
-        /// Field of view.
-        float fov_ = DEFAULT_CAMERA_FOV;
-        /// Orthographic view size.
-        float orthoSize_ = DEFAULT_ORTHOSIZE;
-        /// Aspect ratio.
-        float aspectRatio_ = 1.0f;
-        /// Zoom.
-        float zoom_ = 1.0f;
-        /// View mask.
-        uint viewMask_ = uint.MaxValue;
-        /// LOD bias.
-        float lodBias_ = 1.0f;
-        /// View override flags.
-        uint viewOverrideFlags_;
-
-        bool autoAspectRatio_ = true;
 
         public void SetNearClip(float nearClip)
         {
@@ -255,14 +270,45 @@ namespace SharpGame
                 float h = (1.0f / (orthoSize_ * 0.5f)) * zoom_;
                 float w = h / aspectRatio_;
                 Matrix.OrthoLH(w, h, nearClip_, farClip_, false, out projection_);
+                vkProjection_ = projection_;
+                vkProjection_.M22 = -vkProjection_.M22;
             }
             else
             {
-                Matrix.PerspectiveFovLH(fov_, aspectRatio_, nearClip_, farClip_, out projection_);
-                projection_.M22 = -projection_.M22;
+                Matrix.PerspectiveFovLH(fov_, aspectRatio_, nearClip_, farClip_, out projection_);             
+                vkProjection_ = projection_;
+                vkProjection_.M22 = -vkProjection_.M22;
             }
 
             projectionDirty_ = false;
+        }
+
+        public void GetFrustumSize(out Vector3 near, out Vector3 far)
+        {
+            if (orthographic_)
+            {
+                float nearZ = Math.Max(nearClip_, 0.0f);
+                float farZ = Math.Max(farClip_, nearClip_);
+                float halfViewSize = orthoSize_ * 0.5f / zoom_;
+
+                near.Z = nearZ;
+                far.Z = farZ;
+                far.Y = near.Y = halfViewSize;
+                far.X = near.X = near.Y * aspectRatio_;
+            }
+            else
+            {
+                float nearZ = Math.Max(nearClip_, 0.0f);
+                float farZ = Math.Max(farClip_, nearClip_);
+                float halfViewSize = (float)Math.Tan(fov_ * 0.5f) / zoom_;
+
+                near.Z = nearZ;
+                near.Y = near.Z * halfViewSize;
+                near.X = near.Y * aspectRatio_;
+                far.Z = farZ;
+                far.Y = far.Z * halfViewSize;
+                far.X = far.Y * aspectRatio_;
+            }
         }
 
         public float GetHalfViewSize()

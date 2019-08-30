@@ -71,8 +71,11 @@ namespace SharpGame
     public struct ObjectVS
     {
         public Matrix Model;
-        public Vector4 UOffset;
-        public Vector4 VOffset;
+
+        public Vector4 UOffset1;
+        public Vector4 VOffset1;
+        public Vector4 UOffset2;
+        public Vector4 VOffset2;
     };
 
     [StructLayout(LayoutKind.Sequential)]

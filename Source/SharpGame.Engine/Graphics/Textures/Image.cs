@@ -13,6 +13,11 @@ namespace SharpGame
         internal ulong allocationSize;
         internal uint memoryTypeIndex;
 
+        internal Image(VkImage handle)
+        {
+            this.handle = handle;
+        }
+
         public unsafe Image(ref ImageCreateInfo imageCreateInfo)
         {
             imageCreateInfo.ToNative(out VkImageCreateInfo native);

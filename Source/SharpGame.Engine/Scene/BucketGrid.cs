@@ -2,43 +2,76 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 namespace SharpGame
 {
-    public class BucketGrid : IDrawableAccumulator
+    public class BucketGrid : Component, ISpacePartitioner
     {
+        public RectangleF Region { get => m_Region; set => m_Region = value; }
+        private RectangleF m_Region;
+        public float MinHeight { get; set; }
+        public float MaxHeight { get; set; }
+
         private readonly List<Drawable> CachedList = new List<Drawable>(); 
         private readonly float m_BucketWidth;
         private readonly float m_BucketHeight;
         private readonly int m_NumBucketsWidth;
         private readonly int m_NumBucketsHeight;
 
-        private readonly RectangleF m_Region;
-        private readonly List<Drawable>[] m_Buckets;
+        private readonly FastList<Drawable>[] m_Buckets;
+        private readonly BoundingBox[] m_BoundingBoxes;
 
         /// <summary>
         /// The number of objects contained in the <see cref="BucketGrid{T}"/>
         /// </summary>
+        [IgnoreDataMember]
         public int Count
         {
             get { return m_Buckets.Where(c => c != null).Sum(c => c.Count); }
         }
 
-        DefaultObjectPool<List<Drawable>> defaultPool;
+        DefaultObjectPool<FastList<Drawable>> defaultPool;
 
+        public BucketGrid(BoundingBox region, int numBucketsWidth, int numBucketsHeight)
+            : this(new RectangleF(region.Minimum.X, region.Minimum.Z, region.Size.X, region.Size.Z), numBucketsWidth, numBucketsHeight)
+        {
+            MinHeight = region.Minimum.Y;
+            MaxHeight = region.Maximum.Y;
+
+            m_BoundingBoxes = new BoundingBox[numBucketsWidth * numBucketsHeight];
+
+            for (int i = 0; i < numBucketsWidth; i++)
+            {
+                for (int j = 0; j < numBucketsHeight; i++)
+                {
+                    ref BoundingBox bbox = ref m_BoundingBoxes[i + j * numBucketsWidth];
+                    Vector3 min = new Vector3(m_BucketWidth * (i + 1), -1000, m_BucketHeight * (j + 1));
+                    Vector3 max = new Vector3(m_BucketWidth * (i + 1), 1000, m_BucketHeight * (j + 1));
+                    bbox.Define(ref min, ref max);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 2D Mode
+        /// </summary>
+        /// <param name="region"></param>
+        /// <param name="numBucketsWidth"></param>
+        /// <param name="numBucketsHeight"></param>
         public BucketGrid(RectangleF region, int numBucketsWidth, int numBucketsHeight)
         {
             m_Region = region;
-            m_Buckets = new List<Drawable>[numBucketsWidth * numBucketsHeight];
-
+            m_Buckets = new FastList<Drawable>[numBucketsWidth * numBucketsHeight];
             m_NumBucketsWidth = numBucketsWidth;
             m_NumBucketsHeight = numBucketsHeight;
-
             m_BucketWidth = region.Width / m_NumBucketsWidth;
             m_BucketHeight = region.Height / m_NumBucketsHeight;
 
-            var defalutPolicy = new DefaultPooledObjectPolicy<List<Drawable>>();
-            defaultPool = new DefaultObjectPool<List<Drawable>>(defalutPolicy);
+            var defalutPolicy = new DefaultPooledObjectPolicy<FastList<Drawable>>();
+            defaultPool = new DefaultObjectPool<FastList<Drawable>>(defalutPolicy);
+
         }
 
         /// <summary>
@@ -307,24 +340,26 @@ namespace SharpGame
             }
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         private int FindBucketIndex(Vector2 pos)
         {
             var fromLeft = pos.X - m_Region.Left;
-            var x = MathUtil.Clamp((int)(fromLeft / m_BucketWidth), 0, m_NumBucketsWidth);
+            var x = MathUtil.Clamp((int)(fromLeft / m_BucketWidth), 0, m_NumBucketsWidth - 1);
 
             var fromTop = pos.Y - m_Region.Top;
-            var y = MathUtil.Clamp((int)(fromTop / m_BucketHeight), 0, m_NumBucketsHeight);
+            var y = MathUtil.Clamp((int)(fromTop / m_BucketHeight), 0, m_NumBucketsHeight - 1);
 
             return x + (y * m_NumBucketsWidth);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         private int FindBucketIndex(Vector3 pos)
         {
             var fromLeft = pos.X - m_Region.Left;
-            var x = MathUtil.Clamp((int)(fromLeft / m_BucketWidth), 0, m_NumBucketsWidth);
+            var x = MathUtil.Clamp((int)(fromLeft / m_BucketWidth), 0, m_NumBucketsWidth - 1);
 
             var fromTop = pos.Z - m_Region.Top;
-            var y = MathUtil.Clamp((int)(fromTop / m_BucketHeight), 0, m_NumBucketsHeight);
+            var y = MathUtil.Clamp((int)(fromTop / m_BucketHeight), 0, m_NumBucketsHeight - 1);
 
             return x + (y * m_NumBucketsWidth);
         }
@@ -333,13 +368,12 @@ namespace SharpGame
         {
             var idx = FindBucketIndex(drawable.WorldCenter);
             if (m_Buckets[idx] == null) m_Buckets[idx] = defaultPool.Get();
-            m_Buckets[idx].Add(drawable);
-            drawable.index = idx;
+            m_Buckets[idx].Add(drawable);           
         }
 
         public void RemoveDrawable(Drawable drawable)
         {
-            var idx = drawable.index;
+            var idx = FindBucketIndex(drawable.WorldCenter);
             if (m_Buckets[idx] == null)
             {
                 Log.Error("Error drawable index.");

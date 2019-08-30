@@ -5,13 +5,14 @@ using System.Runtime.CompilerServices;
 using Vulkan;
 using static Vulkan.VulkanNative;
 using static SharpGame.Sdl2.Sdl2Native;
+using System.Collections.Generic;
 
 namespace SharpGame
 {
     public struct SwapChainBuffer
     {
-        public VkImage Image;
-        public VkImageView View;
+        public Image Image;
+        public ImageView View;
     }
 
     public unsafe class Swapchain
@@ -23,9 +24,9 @@ namespace SharpGame
         public VkSwapchainKHR swapchain;
         public int ImageCount { get; private set; }
         public NativeList<VkImage> Images { get; set; } = new NativeList<VkImage>();
-        public NativeList<SwapChainBuffer> Buffers { get; set; } = new NativeList<SwapChainBuffer>();
+        public SwapChainBuffer[] Buffers { get; set; }
         
-        public unsafe void InitSurface(IntPtr sdlWindow)
+        public unsafe Swapchain(IntPtr sdlWindow)
         {
             SDL_version version;
             SDL_GetVersion(&version);
@@ -307,7 +308,8 @@ namespace SharpGame
                 {
                     for (uint i = 0; i < ImageCount; i++)
                     {
-                        Device.Destroy(Buffers[i].View);
+                        Buffers[i].View.Dispose();
+                        //Device.Destroy(Buffers[i].View);
                     }
 
                     Device.DestroySwapchainKHR(oldSwapchain);
@@ -325,9 +327,9 @@ namespace SharpGame
                 Images.Count = imageCount;
                 
                 // Get the swap chain Buffers containing the image and imageview
-                Buffers.Resize(imageCount);
-                Buffers.Count = imageCount;
-                for (uint i = 0; i < imageCount; i++)
+                Buffers = new SwapChainBuffer[(int)imageCount];
+                //Buffers.Count = imageCount;
+                for (int i = 0; i < imageCount; i++)
                 {
                     VkImageViewCreateInfo colorAttachmentView = new VkImageViewCreateInfo();
                     colorAttachmentView.sType = VkStructureType.ImageViewCreateInfo;
@@ -348,12 +350,14 @@ namespace SharpGame
                     colorAttachmentView.subresourceRange.layerCount = 1;
                     colorAttachmentView.viewType = VkImageViewType.Image2D;
                     colorAttachmentView.flags = 0;
+                    
+                    var img = new Image(Images[i]);
+                    Buffers[i].Image = img;// Images[i];
+                    Buffers[i].View = ImageView.Create(img, ImageViewType.Image2D, ColorFormat, ImageAspectFlags.Color, 0, 1);
 
-                    Buffers[i].Image = Images[i];
+                    //colorAttachmentView.image = Images[i];
 
-                    colorAttachmentView.image = Buffers[i].Image;
-
-                    Buffers[i].View = Device.CreateImageView(ref colorAttachmentView);
+                    //Buffers[i].View = Device.CreateImageView(ref colorAttachmentView);
                   
                 }
             }

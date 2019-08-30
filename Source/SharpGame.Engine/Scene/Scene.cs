@@ -27,10 +27,12 @@ namespace SharpGame
     }
 
     [DataContract]
-    public class Scene : Node, IDrawableAccumulator
+    public class Scene : Node, ISpacePartitioner
     {
-        protected IDrawableAccumulator accumulator_;
-        protected List<Drawable> drawables_ = new List<Drawable>();
+        protected ISpacePartitioner spacePartitioner;
+
+        internal List<Drawable> drawables = new List<Drawable>();
+
         public Scene()
         {
             NodeAdded(this);
@@ -92,10 +94,10 @@ namespace SharpGame
 
             if(component.Node == this)
             {
-                if(component is IDrawableAccumulator)
+                if(component is ISpacePartitioner)
                 {
-                    accumulator_ = component as IDrawableAccumulator;
-                    OnAttachAccumutor(accumulator_);
+                    spacePartitioner = component as ISpacePartitioner;
+                    OnAttachAccumutor(spacePartitioner);
                 }
             }
         }
@@ -109,80 +111,68 @@ namespace SharpGame
 
             if(component.Node == this)
             {
-                if(component == accumulator_)
+                if(component == spacePartitioner)
                 {
-                //    OnDetachAccumutor(accumulator_);
-                    accumulator_ = null;
+                    spacePartitioner = null;
                 }
             }
         }
 
-        void OnAttachAccumutor(IDrawableAccumulator accum)
+        void OnAttachAccumutor(ISpacePartitioner accum)
         {
-            foreach(Drawable drawable in drawables_)
+            foreach(Drawable drawable in drawables)
             {
                 accum.InsertDrawable(drawable);
             }
         }
-
-//         void OnDetachAccumutor(IDrawableAccumulator accum)
-//         {
-//             foreach(Drawable drawable in accum)
-//             {
-//                 InsertDrawable(drawable);
-//             }
-//         }
-
+        
         public void InsertDrawable(Drawable drawable)
         {
             Debug.Assert(drawable.index == -1);
 
-            drawables_.Add(drawable);
+            drawables.Add(drawable);
 
-            if (accumulator_ != null)
+            if (spacePartitioner != null)
             {
-                accumulator_.InsertDrawable(drawable);
+                spacePartitioner.InsertDrawable(drawable);
             }
-            else
-            {
-                drawable.index = drawables_.Count - 1;
-            }
+
+            drawable.index = drawables.Count - 1;           
         }
 
         public void RemoveDrawable(Drawable drawable)
         {
             Debug.Assert(drawable.index != -1);
 
-            if(accumulator_ != null)
+            if(spacePartitioner != null)
             {
-                accumulator_.RemoveDrawable(drawable);
+                spacePartitioner.RemoveDrawable(drawable);
+            }
+
+            if (drawables.Count > 0 && drawable.index < drawables.Count - 1)
+            {
+                Drawable last = drawables[drawables.Count - 1];
+                drawables.FastRemove(drawable.index);
+                last.index = drawable.index;
             }
             else
             {
-                if(drawables_.Count > 0 && drawable.index < drawables_.Count - 1)
-                {
-                    Drawable last = drawables_[drawables_.Count - 1];                
-                    drawables_.FastRemove(drawable.index);
-                    last.index = drawable.index;               
-                }
-                else
-                {
-                    drawables_.FastRemove(drawable.index);
-                }
-
-                drawable.index = -1;
+                drawables.FastRemove(drawable.index);
             }
+
+            drawable.index = -1;
+
         }
         
         public void GetDrawables(ISceneQuery query, Action<Drawable> drawables)
         {
-            if(accumulator_ != null)
+            if(spacePartitioner != null)
             {
-                accumulator_.GetDrawables(query, drawables);
+                spacePartitioner.GetDrawables(query, drawables);
                 return;
             }
 
-            foreach(Drawable d in drawables_)
+            foreach(Drawable d in this.drawables)
             {
                 drawables(d);
             }
@@ -190,9 +180,9 @@ namespace SharpGame
 
         public void Raycast(ref RayQuery query)
         {
-            if(accumulator_ != null)
+            if(spacePartitioner != null)
             {
-                accumulator_.Raycast(ref query);
+                spacePartitioner.Raycast(ref query);
                 return;
             }
 
@@ -201,9 +191,9 @@ namespace SharpGame
 
         public void RaycastSingle(ref RayQuery query)
         {
-            if(accumulator_ != null)
+            if(spacePartitioner != null)
             {
-                accumulator_.RaycastSingle(ref query);
+                spacePartitioner.RaycastSingle(ref query);
                 return;
             }
 
@@ -212,11 +202,11 @@ namespace SharpGame
 
         public void Update(float timeStep)
         {
-            this.SendEvent(new SceneUpdate { scene = this, timeStep = timeStep });
+            SendEvent(new SceneUpdate { scene = this, timeStep = timeStep });
 
-            this.SendEvent(new SceneSubsystemUpdate { scene = this, timeStep = timeStep });
+            SendEvent(new SceneSubsystemUpdate { scene = this, timeStep = timeStep });
 
-            this.SendEvent(new ScenePostUpdate { scene = this, timeStep = timeStep });
+            SendEvent(new ScenePostUpdate { scene = this, timeStep = timeStep });
         }
 
     }

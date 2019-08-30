@@ -51,12 +51,12 @@ namespace SharpGame
 
         public ImGUI()
         {
-            IntPtr context = ImGuiNET.ImGui.CreateContext();
-            ImGuiNET.ImGui.SetCurrentContext(context);
+            IntPtr context = ImGui.CreateContext();
+            ImGui.SetCurrentContext(context);
             //ImGui.GetIO().Fonts.AddFontDefault();
             File file = FileSystem.Instance.GetFile("fonts/arial.ttf");
             var bytes = file.ReadAllBytes();
-            ImGuiNET.ImGui.GetIO().Fonts.AddFontFromMemoryTTF(Utilities.AsPointer(ref bytes[0]), 32, 15);
+            ImGui.GetIO().Fonts.AddFontFromMemoryTTF(Utilities.AsPointer(ref bytes[0]), 32, 15);
 
             CreateGraphicsResources();
             RecreateFontDeviceTexture();
@@ -64,14 +64,14 @@ namespace SharpGame
             resourceSet = new ResourceSet(resourceLayout, uniformBufferVS);
             resourceSetTex = new ResourceSet(resourceLayoutTex, texture);
 
-            ImGuiStylePtr style = ImGuiNET.ImGui.GetStyle();
+            ImGuiStylePtr style = ImGui.GetStyle();
             style.WindowRounding = 2;
 
             SetOpenTKKeyMappings();
 
             SetPerFrameImGuiData(1f / 60f);
 
-            ImGuiNET.ImGui.NewFrame();
+            ImGui.NewFrame();
 
             this.Subscribe<BeginFrame>((e) => Update());
 
@@ -79,11 +79,11 @@ namespace SharpGame
             {
                 framebuffers = framebuffers,
                 renderPass = renderPass,
+
                 OnDraw = (pass, view) =>
                 {
-
                     var cmdBuffer = pass.CmdBuffer;
-                    RenderImDrawData(cmdBuffer, ImGuiNET.ImGui.GetDrawData());
+                    RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
                 }
             };
 
@@ -134,7 +134,7 @@ namespace SharpGame
 
         private unsafe void RecreateFontDeviceTexture()
         {
-            var io = ImGuiNET.ImGui.GetIO();
+            var io = ImGui.GetIO();
             io.Fonts.GetTexDataAsRGBA32(out byte* out_pixels, out int out_width, out int out_height, out int out_bytes_per_pixel);
 
             Format[] fmts =
@@ -146,7 +146,7 @@ namespace SharpGame
                 Format.R8g8b8a8Unorm,
             };
 
-            texture = SharpGame.Texture.Create2D((uint)out_width, (uint)out_height, fmts[out_bytes_per_pixel], out_pixels);
+            texture = Texture.Create2D((uint)out_width, (uint)out_height, fmts[out_bytes_per_pixel], out_pixels);
             io.Fonts.SetTexID(fontAtlasID);
             io.Fonts.ClearTexData();
         }
@@ -195,7 +195,7 @@ namespace SharpGame
 
         private static unsafe void SetOpenTKKeyMappings()
         {
-            ImGuiIOPtr io = ImGuiNET.ImGui.GetIO();
+            ImGuiIOPtr io = ImGui.GetIO();
             io.KeyMap[(int)ImGuiKey.Tab] = (int)Key.Tab;
             io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Key.Left;
             io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Key.Right;
@@ -219,7 +219,7 @@ namespace SharpGame
 
         private unsafe void SetPerFrameImGuiData(float deltaSeconds)
         {
-            ImGuiIOPtr io = ImGuiNET.ImGui.GetIO();
+            ImGuiIOPtr io = ImGui.GetIO();
             io.DisplaySize = new Vector2(Graphics.Instance.Width, Graphics.Instance.Height);
             io.DisplayFramebufferScale = Vector2.One;// window.ScaleFactor;
             io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
@@ -231,17 +231,17 @@ namespace SharpGame
 
             UpdateImGuiInput();
 
-            ImGuiNET.ImGui.NewFrame();
+            ImGui.NewFrame();
 
             this.SendGlobalEvent(new GUIEvent());
 
-            ImGuiNET.ImGui.Render();
+            ImGui.Render();
 
         }
 
         private unsafe void RenderImDrawData(CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
         {
-            var io = ImGuiNET.ImGui.GetIO();
+            var io = ImGui.GetIO();
             var graphics = Graphics.Instance;
             float width = io.DisplaySize.X;
             float height = io.DisplaySize.Y;
@@ -292,7 +292,7 @@ namespace SharpGame
             cmdBuffer.BindVertexBuffer(0, vb);
             cmdBuffer.BindIndexBuffer(ib, 0, IndexType.Uint16);
 
-            draw_data.ScaleClipRects(ImGuiNET.ImGui.GetIO().DisplayFramebufferScale);
+            draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
 
             int vtx_offset = 0;
             int idx_offset = 0;
@@ -339,7 +339,7 @@ namespace SharpGame
 
         private unsafe void UpdateImGuiInput()
         {
-            var io = ImGuiNET.ImGui.GetIO();
+            var io = ImGui.GetIO();
             var snapshot = Input.Instance.snapshot;
 
             var mousePosition = snapshot.MousePosition;
@@ -417,7 +417,7 @@ namespace SharpGame
         public static void Image(Texture texture, Vector2 size)
         {
             var img = Instance.GetOrCreateImGuiBinding(texture);
-            ImGuiNET.ImGui.Image(img, size);
+            ImGui.Image(img, size);
         }
     }
 }

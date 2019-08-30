@@ -6,37 +6,61 @@ namespace SharpGame
 {
     public interface ISceneQuery
     {
-        Intersection TestOctant(ref BoundingBox box, bool inside);
+        Intersection Test(ref BoundingBox box, bool inside);
         /// Intersection test for drawables.
-        void TestDrawables(Span<Drawable> start, bool inside);
+        void TestDrawables(ArraySegment<Drawable> start, bool inside);
     }
 
-    public struct OctreeQuery : ISceneQuery
+    public class BaseSceneQuery : ISceneQuery
     {
-        public void TestDrawables(Span<Drawable> start, bool inside)
+        public uint viewMask;
+        public uint drawableFlags;
+        public FastList<Drawable> result;
+
+        public BaseSceneQuery(FastList<Drawable> result, uint drawableFlags, uint viewMask)
+        {
+            this.viewMask = viewMask;
+            this.drawableFlags = viewMask;
+            this.result = result;
+        }
+
+        public virtual void TestDrawables(ArraySegment<Drawable> start, bool inside)
         {
         }
 
-        public Intersection TestOctant(ref BoundingBox box, bool inside)
+        public virtual Intersection Test(ref BoundingBox box, bool inside)
         {
             return Intersection.InSide;
         }
 
     }
 
-    public  struct FrustumOctreeQuery : ISceneQuery
+    public class FrustumQuery : BaseSceneQuery
     {
         /// Frustum.
         public Camera camera;
-        public RenderView view;
-        public uint viewMask;
-        public uint drawableFlags;
 
-        public void TestDrawables(Span<Drawable> start, bool inside)
+        public FrustumQuery(FastList<Drawable> result, Camera camera, uint drawableFlags, uint viewMask)
+            : base(result, drawableFlags, viewMask)
         {
+            this.viewMask = viewMask;
+            this.drawableFlags = viewMask;
+            this.result = result;
         }
 
-        public Intersection TestOctant(ref BoundingBox box, bool inside)
+        public override void TestDrawables(ArraySegment<Drawable> start, bool inside)
+        {
+            foreach(Drawable drawable in start)
+            {
+                if ((drawable.DrawableFlags & drawableFlags) != 0 && (drawable.ViewMask & viewMask) != 0)
+                {
+                    if (inside || camera.Frustum.Intersects(ref drawable.WorldBoundingBox))
+                        result.Add(drawable);
+                }
+            }
+        }
+
+        public override Intersection Test(ref BoundingBox box, bool inside)
         {
             if (inside)
                 return Intersection.InSide;
@@ -45,7 +69,7 @@ namespace SharpGame
         }
     }
 
-    public interface IDrawableAccumulator
+    public interface ISpacePartitioner
     {
         void InsertDrawable(Drawable drawable);
         void RemoveDrawable(Drawable drawable);

@@ -50,13 +50,13 @@ namespace SharpGame
         const int MAX_TRIANGLES = 100000;
 
         /// Lines rendered with depth test.
-        List<DebugLine> lines_ = new List<DebugLine>();
+        FastList<DebugLine> lines_ = new FastList<DebugLine>();
         /// Lines rendered without depth test.
-        List<DebugLine> noDepthLines_ = new List<DebugLine>();
+        FastList<DebugLine> noDepthLines_ = new FastList<DebugLine>();
         /// Triangles rendered with depth test.
-        List<DebugTriangle> triangles_ = new List<DebugTriangle>();
+        FastList<DebugTriangle> triangles_ = new FastList<DebugTriangle>();
         /// Triangles rendered without depth test.
-        List<DebugTriangle> noDepthTriangles_ = new List<DebugTriangle>();
+        FastList<DebugTriangle> noDepthTriangles_ = new FastList<DebugTriangle>();
         /// View transform.
         Matrix view_;
         /// Projection transform.
@@ -68,13 +68,11 @@ namespace SharpGame
         /// Line antialiasing flag.
         bool lineAntiAlias_;
 
-        Shader uiShader_;
+        Material debugMaterial_;
 
-        Pass renderState_ ;
         public DebugRenderer()
         {
-            //   uiShader_ = cache.GetResource<Shader>("shaders/default.shader");         
-            //this.SubscribeToEvent<EndFrame>(HandleEndFrame);
+            debugMaterial_ = new Material("shaders/Basic.shader");
         }
 
         public void SetView(Camera camera)
@@ -482,23 +480,16 @@ namespace SharpGame
             AddLine(v3, v0, uintColor, depthTest);
         }
 
-        public unsafe void Render()
+        public unsafe void Render(RenderView view, CommandBuffer cmdBuffer)
         {
             if(!HasContent())
                 return;
-            /*
-            Graphics graphics = GetSubsystem<Graphics>();
-            // Engine does not render when window is closed or device is lost
-            System.Diagnostics.Debug.Assert(graphics && graphics.IsInitialized);
+
+            Graphics graphics = Graphics.Instance;
 
             int numVertices = (lines_.Count + noDepthLines_.Count) * 2 + (triangles_.Count + noDepthTriangles_.Count) * 3;
 
-            var decl = PosColorVertex.Layout;
-
-            if(TransientVertexBuffer.GetAvailableSpace(numVertices, decl) < numVertices)
-                return;
-
-            TransientVertexBuffer vertex_buffer = new TransientVertexBuffer(numVertices, decl);
+            TransientBuffer vertex_buffer = graphics.AllocVertexBuffer((uint)(numVertices * VertexPosColor.Size));
 
             float* dest = (float*)vertex_buffer.Data;
 
@@ -579,21 +570,13 @@ namespace SharpGame
 
                 dest += 12;
             }
-
-            RenderState state = RenderState.ColorWrite |
-            RenderState.AlphaWrite |
-            RenderState.DepthWrite |
-            RenderState.NoCulling |
-            (lineAntiAlias_ ? RenderState.LineAA : 0) |
-            RenderState.Multisampling;
-
-
+         
             int start = 0;
             int count = 0;
 
             if(lines_.Count > 0)
             {
-                count = lines_.Count * 2;
+                count = lines_.Count * 2;   /*
                 graphics.DrawTransient(
                     254, 
                     vertex_buffer,
@@ -602,13 +585,14 @@ namespace SharpGame
                     count,
                     state | RenderState.DepthTestLessEqual | RenderState.PrimitiveLines,
                     uiShaderInstance_
-                );
+                );*/
                 start += count;
             }
 
             if(noDepthLines_.Count > 0)
             {
                 count = noDepthLines_.Count * 2;
+                /*
                 graphics.DrawTransient(
                     254,
                     vertex_buffer,
@@ -617,22 +601,15 @@ namespace SharpGame
                     count,
                     state | RenderState.DepthTestAlways | RenderState.PrimitiveLines,
                     uiShaderInstance_
-                );
+                );*/
 
                 start += count;
             }
-
-            state = RenderState.ColorWrite |
-            RenderState.AlphaWrite |
-            RenderState.BlendAlpha |
-            RenderState.NoCulling |
-            (lineAntiAlias_ ? RenderState.LineAA : 0) |
-            RenderState.Multisampling;
-
+            
             if(triangles_.Count > 0)
             {
                 count = triangles_.Count * 3;
-
+                /*
                 graphics.DrawTransient(
                     254,
                     vertex_buffer,
@@ -641,13 +618,14 @@ namespace SharpGame
                     (int)count,
                     state | RenderState.DepthTestLessEqual | RenderState.PrimitiveTriangles,
                     uiShaderInstance_
-                );
+                );*/
                 start += count;
             }
 
             if(noDepthTriangles_.Count > 0)
             {
                 count = noDepthTriangles_.Count * 3;
+                /*
                 graphics.DrawTransient(
                     254,
                     vertex_buffer,
@@ -656,10 +634,9 @@ namespace SharpGame
                     (int)count,
                     state | RenderState.DepthTestAlways | RenderState.PrimitiveTriangles,
                     uiShaderInstance_
-                );
+                ); */
             }
-            */
-
+           
         }
 
         bool IsInside(ref BoundingBox box)
@@ -685,10 +662,6 @@ namespace SharpGame
             triangles_.Clear();
             noDepthTriangles_.Clear();
         }
-
-
-
-
 
     }
 }

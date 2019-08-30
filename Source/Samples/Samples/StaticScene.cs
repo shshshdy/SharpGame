@@ -44,7 +44,7 @@ namespace SharpGame.Samples
                     var node = scene.CreateChild("Model");
                     node.Position = new Vector3(MathUtil.Random(-40, 40), 0, MathUtil.Random(-40, 40));
                     node.Rotation = Quaternion.FromEuler(0, MathUtil.Radians(MathUtil.Random(0, 90)), 0);
-                    node.Scaling = new Vector3(4.0f);
+                    node.Scaling = new Vector3(MathUtil.Random(2.0f, 4.0f));
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(0, mat);
