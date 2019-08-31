@@ -17,6 +17,7 @@ namespace SharpGame
         public uint depth;
 
         public Format format;
+        public ImageCreateFlags imageCreateFlags = ImageCreateFlags.None;
         public ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled;
         public ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal;
         public SamplerAddressMode samplerAddressMode = SamplerAddressMode.ClampToEdge;
@@ -29,11 +30,6 @@ namespace SharpGame
 
         public Texture()
         {
-        }
-
-        internal void UpdateDescriptor()
-        {
-            descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);           
         }
 
         public unsafe void SetImageData(ImageData[] imageData)
@@ -58,7 +54,7 @@ namespace SharpGame
 
             DeviceBuffer stagingBuffer = DeviceBuffer.CreateStagingBuffer(totalSize, null);
 
-            image = Image.Create(width, height, layers == 6 ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None, layers, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
+            image = Image.Create(width, height, imageCreateFlags/*layers == 6 ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None*/, layers, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
 
             IntPtr mapped = stagingBuffer.Map();
             // Setup buffer copy regions for each face including all of it's miplevels
@@ -167,6 +163,11 @@ namespace SharpGame
             }
 
             Graphics.Instance.EndWorkCommandBuffer(commandBuffer);
+        }
+
+        internal void UpdateDescriptor()
+        {
+            descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
         }
 
         protected override void Destroy()

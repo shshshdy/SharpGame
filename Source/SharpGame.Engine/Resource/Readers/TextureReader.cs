@@ -47,7 +47,14 @@ namespace SharpGame
             KtxFile texFile = KtxFile.Load(stream, false);
             tex.format = Format;
             tex.samplerAddressMode = SamplerAddressMode;
+
+            if(texFile.Faces.Length == 6)
+            {
+                tex.imageCreateFlags = ImageCreateFlags.CubeCompatible;
+            }
+
             tex.SetImageData(texFile.Faces);
+
             return tex;
         }
 

@@ -11,19 +11,10 @@ namespace SharpGame
         public ImageView view;
         public Sampler sampler;
 
-        public RenderTarget(uint width, uint height, Format colorformat, bool depth = false)
+        public RenderTarget(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, ImageAspectFlags aspectMask, SampleCountFlags samples = SampleCountFlags.Count1)
         {
-            if (depth)
-            {
-                image = Image.Create(width, height, ImageCreateFlags.None, 1, 1, colorformat, SampleCountFlags.Count1, (ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.TransferSrc));
-                view = ImageView.Create(image, ImageViewType.Image2D, colorformat, (ImageAspectFlags.Depth | ImageAspectFlags.Stencil), 0, 1);
-            }
-            else
-            {
-                image = Image.Create(width, height, ImageCreateFlags.None, 1, 1, colorformat, SampleCountFlags.Count1, ImageUsageFlags.ColorAttachment);
-                view = ImageView.Create(image, ImageViewType.Image2D, colorformat, ImageAspectFlags.Color, 0, 1);
-            }
-
+            image = Image.Create(width, height, ImageCreateFlags.None, layers, 1, format, SampleCountFlags.Count1, usage);
+            view = ImageView.Create(image, layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
         }
 

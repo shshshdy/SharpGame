@@ -21,10 +21,9 @@ namespace SharpGame
         const uint SHADOW_MAP_CASCADE_COUNT = 4;
         const uint SHADOWMAP_DIM = 2048;
 
+        RenderTarget depthRT;
         Cascade[] cascades = new Cascade[SHADOW_MAP_CASCADE_COUNT];
-        Image depthImage;
-        ImageView depthImageView;
-        Sampler sampler;
+
         public DepthPass() : base(Pass.Depth)
         {
             var depthFormat = Device.GetSupportedDepthFormat();
@@ -76,16 +75,14 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             renderPass = new RenderPass(ref renderPassInfo);
 
-            depthImage = Image.Create(SHADOWMAP_DIM, SHADOWMAP_DIM, ImageCreateFlags.None, SHADOW_MAP_CASCADE_COUNT, 1, depthFormat, SampleCountFlags.Count1, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled);
-            depthImageView = ImageView.Create(depthImage, ImageViewType.Image2DArray, depthFormat, ImageAspectFlags.Depth, 0, 1, 0, SHADOW_MAP_CASCADE_COUNT);
-
+            depthRT = new RenderTarget(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth);
+          
             for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                cascades[i].view = ImageView.Create(depthImage, ImageViewType.Image2D, depthFormat, ImageAspectFlags.Depth, 0, 1, i, 1);
+                cascades[i].view = ImageView.Create(depthRT.image, ImageViewType.Image2D, depthFormat, ImageAspectFlags.Depth, 0, 1, i, 1);
                 cascades[i].frameBuffer = Framebuffer.Create(renderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
             }
 
-            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
 
         }
             

@@ -57,10 +57,10 @@ namespace SharpGame
             for (uint mipLevel = 0; mipLevel < header.NumberOfMipmapLevels; mipLevel++)
             {
                 uint imageSize = file.Read<uint>();
-                if(mipLevel == 11)
+                if(mipLevel == header.NumberOfMipmapLevels - 1)
                 {
                     //bug?
-                    imageSize = 1;
+                    imageSize = 4;
                 }
                 // For cubemap textures, imageSize is actually the size of an individual face.
                 bool isCubemap = header.NumberOfFaces == 6 && header.NumberOfArrayElements == 0;

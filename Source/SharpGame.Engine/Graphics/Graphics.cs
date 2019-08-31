@@ -333,7 +333,7 @@ namespace SharpGame
         protected void CreateDepthStencil()
         {
             depthStencil?.Dispose();         
-            depthStencil = new RenderTarget((uint)Width, (uint)Height, DepthFormat, true);
+            depthStencil = new RenderTarget((uint)Width, (uint)Height, 1, DepthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth | ImageAspectFlags.Stencil);
         }
         
         private void CreateCommandPool()

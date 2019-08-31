@@ -273,9 +273,10 @@ namespace SharpGame
 
         void RotateAround(Vector3 point, Quaternion delta, TransformSpace space)
         {
+#if false
             Vector3 parentSpacePoint;
             Quaternion oldRotation = rotation_;
-#if false
+
     switch (space)
     {
         case TransformSpace.LOCAL:
