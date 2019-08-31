@@ -87,8 +87,13 @@ namespace SharpGame.Samples
 
             material = new Material(shader);
 
-            var tex =  Texture.LoadFromFile("textures/particle01_rgba.ktx", Format.R8g8b8a8Unorm);            
-            var tex1 = Texture.LoadFromFile("textures/particle_gradient_rgba.ktx", Format.R8g8b8a8Unorm);
+            KtxTextureReader texReader = new KtxTextureReader
+            {
+                Format = Format.R8g8b8a8Unorm,
+            };
+
+            var tex = texReader.Load("textures/particle01_rgba.ktx");            
+            var tex1 = texReader.Load("textures/particle_gradient_rgba.ktx");
 
             AddDebugImage(tex);
             AddDebugImage(tex1);

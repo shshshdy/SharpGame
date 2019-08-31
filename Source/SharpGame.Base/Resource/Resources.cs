@@ -124,7 +124,7 @@ namespace SharpGame
             {
                 foreach (var reader in readers)
                 {
-                    var res = reader.Load(resourceName);
+                    var res = reader.LoadResource(resourceName);
                     if (res != null)
                     {
                         RegisterResource(resourceName, res);

@@ -71,10 +71,17 @@ namespace SharpGame.Samples
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel("models/cerberus/cerberus.fbx");
 
-                var colorMap = Texture.LoadFromFile("models/cerberus/albedo.ktx", Format.R8g8b8a8Unorm);// Format.R8g8b8a8Srgb);
-                var normalMap = Texture.LoadFromFile("models/cerberus/normal.ktx", Format.R8g8b8a8Unorm);
-                var metallicMap = Texture.LoadFromFile("models/cerberus/metallic.ktx", Format.R8Unorm);
-                var roughnessMap = Texture.LoadFromFile("models/cerberus/roughness.ktx", Format.R8Unorm);
+                KtxTextureReader texReader = new KtxTextureReader
+                {
+                    Format = Format.R8g8b8a8Unorm,
+                };
+
+                var colorMap = texReader.Load("models/cerberus/albedo.ktx");// Format.R8g8b8a8Srgb);
+                var normalMap = texReader.Load("models/cerberus/normal.ktx");
+                texReader.Format = Format.R8Unorm;
+                var metallicMap = texReader.Load("models/cerberus/metallic.ktx");
+                texReader.Format = Format.R8Unorm;
+                var roughnessMap = texReader.Load("models/cerberus/roughness.ktx");
                 //var aoMap = Texture.LoadFromFile("models/cerberus/ao.ktx", Format.R8Unorm);
 
                 var mat = new Material("Shaders/LitPbr.shader");
@@ -118,7 +125,12 @@ namespace SharpGame.Samples
 
         void SetCubeMap(string cubemap)
         {
-            cubeMap = Texture.LoadFromFile("textures/hdr/" + cubemap, Format.R16g16b16a16Sfloat);
+            KtxTextureReader texReader = new KtxTextureReader
+            {
+                Format = Format.R16g16b16a16Sfloat,
+            };
+
+            cubeMap = texReader.Load("textures/hdr/" + cubemap);
             skyMaterial.SetTexture("EnvMap", cubeMap);
             Preprocess();
         }

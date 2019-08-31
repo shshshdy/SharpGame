@@ -11,7 +11,7 @@ namespace SharpGame
         {
         }
 
-        public override Resource Load(string name)
+        public override Resource LoadResource(string name)
         {
             if (!MatchExtension(name))
             {

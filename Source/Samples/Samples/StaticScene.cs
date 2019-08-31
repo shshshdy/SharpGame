@@ -24,13 +24,19 @@ namespace SharpGame.Samples
                 staticModel.SetMaterial(mat);
             }
 
-            {               
+            {
+                KtxTextureReader texReader = new KtxTextureReader
+                {
+                    Format = Format.R8g8b8a8Unorm,
+                    SamplerAddressMode = SamplerAddressMode.Repeat,
+                };
+
                 var mat = new Material("Shaders/LitSolid.shader");
-                var tex = Texture.LoadFromFile("textures/oak_bark.ktx", Format.R8g8b8a8Unorm, SamplerAddressMode.Repeat);
+                var tex = texReader.Load("textures/oak_bark.ktx");
                 mat.SetTexture("DiffMap", tex);
 
                 var mat1 = new Material("Shaders/LitSolid.shader");
-                var tex1 = Texture.LoadFromFile("textures/oak_leafs.ktx", Format.R8g8b8a8Unorm, SamplerAddressMode.ClampToEdge);
+                var tex1 = texReader.Load("textures/oak_leafs.ktx");
                 mat1.SetTexture("DiffMap", tex1);
 
                 List<Geometry> geoList = new List<Geometry>();

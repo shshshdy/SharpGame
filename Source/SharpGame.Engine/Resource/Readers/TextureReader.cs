@@ -11,7 +11,7 @@ namespace SharpGame
         {
         }
 
-        public override Resource Load(string name)
+        public override Resource LoadResource(string name)
         {
             if (!MatchExtension(name))
             {
@@ -35,20 +35,20 @@ namespace SharpGame
 
     public class KtxTextureReader : ResourceReader<Texture>
     {
+        public Format Format { get; set; } = Format.Bc3UnormBlock;
+        public SamplerAddressMode SamplerAddressMode { get; set; } = SamplerAddressMode.ClampToEdge;
+
         public KtxTextureReader() : base(".ktx")
         {
         }
 
-        public override Resource Load(string name)
+        protected override bool OnLoad(Texture tex, File stream)
         {
-            if (!MatchExtension(name))
-            {
-                return null;
-            }
-
-            var resource = new Texture();
-            resource.LoadFromFileInternal(name, Format.Bc3UnormBlock);
-            return resource;
+            KtxFile texFile = KtxFile.Load(stream, false);
+            tex.format = Format;
+            tex.samplerAddressMode = SamplerAddressMode;
+            tex.SetImageData(texFile.Faces);
+            return tex;
         }
 
     }

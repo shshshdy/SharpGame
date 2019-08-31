@@ -19,6 +19,7 @@ namespace SharpGame
         public Format format;
         public ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled;
         public ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal;
+        public SamplerAddressMode samplerAddressMode = SamplerAddressMode.ClampToEdge;
 
         public Image image;
         public ImageView imageView;
@@ -35,13 +36,80 @@ namespace SharpGame
             descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);           
         }
 
-        protected override void Destroy()
+        public unsafe void SetImageData(ImageData[] imageData)
         {
-            image?.Dispose();
-            imageView?.Dispose();
-            sampler?.Dispose();
+            width = imageData[0].Width;
+            height = imageData[0].Height;
 
-            base.Destroy();
+            mipLevels = (uint)imageData[0].Mipmaps.Length;
+            layers = (uint)imageData.Length;
+
+            uint totalSize = 0;
+            for (int face = 0; face < imageData.Length; face++)
+            {
+                uint numberOfMipmapLevels = (uint)imageData[face].Mipmaps.Length;
+                Debug.Assert(numberOfMipmapLevels == mipLevels);
+                for (int mipLevel = 0; mipLevel < numberOfMipmapLevels; mipLevel++)
+                {
+                    MipmapData mipmap = imageData[face].Mipmaps[mipLevel];
+                    totalSize += mipmap.SizeInBytes;
+                }
+            }
+
+            DeviceBuffer stagingBuffer = DeviceBuffer.CreateStagingBuffer(totalSize, null);
+
+            image = Image.Create(width, height, layers == 6 ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None, layers, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
+
+            IntPtr mapped = stagingBuffer.Map();
+            // Setup buffer copy regions for each face including all of it's miplevels
+            Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(layers * mipLevels)];
+            uint offset = 0;
+            int index = 0;
+            for (uint face = 0; face < layers; face++)
+            {
+                for (uint level = 0; level < mipLevels; level++)
+                {
+                    MipmapData mipmap = imageData[face].Mipmaps[level];
+                    BufferImageCopy bufferCopyRegion = new BufferImageCopy
+                    {
+                        imageSubresource = new ImageSubresourceLayers
+                        {
+                            aspectMask = ImageAspectFlags.Color,
+                            mipLevel = level,
+                            baseArrayLayer = face,
+                            layerCount = 1
+                        },
+
+                        imageExtent = new Extent3D(mipmap.Width, mipmap.Height, 1),
+                        bufferOffset = offset
+                    };
+
+                    bufferCopyRegions[index++] = bufferCopyRegion;
+
+                    Unsafe.CopyBlock((void*)(mapped + (int)offset), Unsafe.AsPointer(ref mipmap.Data[0]), (uint)mipmap.Data.Length);
+
+                    // Increase offset into staging buffer for next level / face
+                    offset += imageData[face].Mipmaps[level].SizeInBytes;
+                }
+            }
+
+            stagingBuffer.Unmap();
+
+            ImageSubresourceRange subresourceRange = new ImageSubresourceRange(ImageAspectFlags.Color, 0, mipLevels, 0, layers);
+            CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
+            copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
+            copyCmd.CopyBufferToImage(stagingBuffer, image, ImageLayout.TransferDstOptimal, bufferCopyRegions);
+            copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, imageLayout, subresourceRange);
+            Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
+            imageLayout = ImageLayout.ShaderReadOnlyOptimal;
+
+            stagingBuffer.Dispose();
+
+            imageView = ImageView.Create(image, layers == 6 ? ImageViewType.ImageCube : ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, mipLevels, 0, layers);
+            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == 1);
+
+            UpdateDescriptor();
+
         }
 
         static int NumMipmapLevels(uint width, uint height)
@@ -101,6 +169,15 @@ namespace SharpGame
             Graphics.Instance.EndWorkCommandBuffer(commandBuffer);
         }
 
+        protected override void Destroy()
+        {
+            image?.Dispose();
+            imageView?.Dispose();
+            sampler?.Dispose();
+
+            base.Destroy();
+        }
+
         public static Texture White;
         public static Texture Gray;
         public static Texture Black;
@@ -127,7 +204,8 @@ namespace SharpGame
                 width = width,
                 height = height,
                 layers = layers,
-                mipLevels = (levels > 0) ? levels : (uint)NumMipmapLevels(width, height)
+                mipLevels = (levels > 0) ? levels : (uint)NumMipmapLevels(width, height),
+
             };
 
             ImageUsageFlags usage = ImageUsageFlags.Sampled | ImageUsageFlags.TransferDst | additionalUsage;
@@ -139,6 +217,57 @@ namespace SharpGame
             texture.image = Image.Create(width, height, (imageViewType == ImageViewType.ImageCube || imageViewType == ImageViewType.ImageCubeArray) ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None, layers, texture.mipLevels, format,  SampleCountFlags.Count1, usage);
             texture.imageView = ImageView.Create(texture.image, imageViewType, format, ImageAspectFlags.Color, 0, RemainingMipLevels, 0, layers);            
             texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, Device.Features.samplerAnisotropy == 1);
+            texture.UpdateDescriptor();
+            return texture;
+        }
+
+        public unsafe static Texture Create2D(uint w, uint h, Format format, byte* tex2DDataPtr, bool dynamic = false)
+        {
+            var texture = new Texture
+            {
+                width = w,
+                height = h,
+                mipLevels = 1,
+                depth = 1,
+                format = format
+            };
+
+            texture.image = Image.Create(w, h, ImageCreateFlags.None, 1, 1, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
+
+            ulong totalBytes = texture.image.allocationSize;
+
+            using (DeviceBuffer stagingBuffer = DeviceBuffer.CreateStagingBuffer(totalBytes, tex2DDataPtr))
+            {
+                BufferImageCopy bufferCopyRegion = new BufferImageCopy
+                {
+                    imageSubresource = new ImageSubresourceLayers
+                    {
+                        aspectMask = ImageAspectFlags.Color,
+                        mipLevel = 0,
+                        baseArrayLayer = 0,
+                        layerCount = 1,
+                    },
+
+                    imageExtent = new Extent3D(w, h, 1),
+                    bufferOffset = 0
+                };
+
+                CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
+                // The sub resource range describes the regions of the image we will be transition
+                ImageSubresourceRange subresourceRange = new ImageSubresourceRange(ImageAspectFlags.Color, 0, 1, 0, 1);
+
+                copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
+                copyCmd.CopyBufferToImage(stagingBuffer, texture.image, ImageLayout.TransferDstOptimal, ref bufferCopyRegion);
+                copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, texture.imageLayout, subresourceRange);
+
+                Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
+
+                // Change texture image layout to shader read after all mip levels have been copied
+                texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
+            }
+
+            texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, texture.mipLevels);
+            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
             texture.UpdateDescriptor();
             return texture;
         }

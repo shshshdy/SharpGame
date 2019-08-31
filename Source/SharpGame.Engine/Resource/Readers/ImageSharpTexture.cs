@@ -89,7 +89,7 @@ namespace SharpGame.ImageSharp
                 imageLayout = ImageLayout.ShaderReadOnlyOptimal,
             };
 
-            tex.SetImage2D(face);
+            tex.SetImageData(new[] { face });
 
             return tex;
 

@@ -7,7 +7,7 @@ namespace SharpGame
     public interface IResourceReader
     {
         Type ResourceType { get; }
-        Resource Load(string name);
+        Resource LoadResource(string name);
     }
     
     public class ResourceReader<T> : IResourceReader where T : Resource
@@ -33,7 +33,9 @@ namespace SharpGame
             return extension.IndexOf(ext, StringComparison.CurrentCultureIgnoreCase) != -1;
         }
 
-        public virtual Resource Load(string name)
+        public T Load(string name) => LoadResource(name) as T;
+
+        public virtual Resource LoadResource(string name)
         {
             loadingFile = name;
 
