@@ -146,7 +146,7 @@ namespace SharpGame
                 Format.R8g8b8a8Unorm,
             };
 
-            texture = Texture.Create2D((uint)out_width, (uint)out_height, fmts[out_bytes_per_pixel], out_pixels);
+            texture = Texture.Create2D((uint)out_width, (uint)out_height, fmts[out_bytes_per_pixel], (IntPtr)out_pixels);
             io.Fonts.SetTexID(fontAtlasID);
             io.Fonts.ClearTexData();
         }
@@ -275,10 +275,10 @@ namespace SharpGame
             {
                 ImDrawListPtr cmd_list = draw_data.CmdListsRange[i];
 
-                vb.SetData((void*)cmd_list.VtxBuffer.Data,
+                vb.SetData(cmd_list.VtxBuffer.Data,
                     vertexOffsetInVertices * (uint)sizeof(ImDrawVert), (uint)cmd_list.VtxBuffer.Size * (uint)sizeof(ImDrawVert));
 
-                ib.SetData((void*)cmd_list.IdxBuffer.Data,
+                ib.SetData(cmd_list.IdxBuffer.Data,
                     indexOffsetInElements * sizeof(ushort), (uint)cmd_list.IdxBuffer.Size * sizeof(ushort));
 
                 vertexOffsetInVertices += (uint)cmd_list.VtxBuffer.Size;

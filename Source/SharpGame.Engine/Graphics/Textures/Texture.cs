@@ -52,7 +52,7 @@ namespace SharpGame
                 }
             }
 
-            DeviceBuffer stagingBuffer = DeviceBuffer.CreateStagingBuffer(totalSize, null);
+            DeviceBuffer stagingBuffer = DeviceBuffer.CreateStagingBuffer(totalSize, IntPtr.Zero);
 
             image = Image.Create(width, height, imageCreateFlags/*layers == 6 ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None*/, layers, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
 
@@ -189,7 +189,7 @@ namespace SharpGame
             Texture CreateTex(Color color)
             {
                 byte* c = &color.R;
-                return Texture.Create2D(1, 1, Format.R8g8b8a8Unorm, c);
+                return Texture.Create2D(1, 1, Format.R8g8b8a8Unorm, (IntPtr)c);
             }
 
             White = CreateTex(Color.White);
@@ -222,7 +222,7 @@ namespace SharpGame
             return texture;
         }
 
-        public unsafe static Texture Create2D(uint w, uint h, Format format, byte* tex2DDataPtr, bool dynamic = false)
+        public unsafe static Texture Create2D(uint w, uint h, Format format, IntPtr tex2DDataPtr, bool dynamic = false)
         {
             var texture = new Texture
             {

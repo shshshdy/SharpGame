@@ -15,9 +15,9 @@ namespace SharpGame
         public DoubleBuffer(uint size)
         {
             this.Size = size;
-            Buffer[0] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
+            Buffer[0] = new DeviceBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
             Buffer[0].Map(0, size);
-            Buffer[1] = DeviceBuffer.Create(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
+            Buffer[1] = new DeviceBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
             Buffer[1].Map(0, size);
         }
 

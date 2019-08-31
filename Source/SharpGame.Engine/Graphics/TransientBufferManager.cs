@@ -99,7 +99,7 @@ namespace SharpGame
         unsafe ref TransientBufferDesc CreateNewBuffer()
         {
             var currentBuffers = buffers[Graphics.Instance.WorkContext];
-            var buffer = DeviceBuffer.Create(BufferUsageFlags, MemoryPropertyFlags.HostVisible, 1, Size);
+            var buffer = new DeviceBuffer(BufferUsageFlags, MemoryPropertyFlags.HostVisible, Size);
             buffer.Map();
             currentBuffers.Add(new TransientBufferDesc { buffer = buffer, size = 0 });
             return ref currentBuffers.At(currentBuffers.Count - 1);

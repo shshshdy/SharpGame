@@ -182,13 +182,11 @@ namespace SharpGame
             }
         }
 
-        /// <summary>
-        /// Native memcpy.
-        /// </summary>
-        /// <param name="dest">The destination memory location</param>
-        /// <param name="src">The source memory location.</param>
-        /// <param name="sizeInBytesToCopy">The count.</param>
-        /// <returns></returns>
+        public static void CopyBlock(IntPtr dest, IntPtr src, int sizeInBytesToCopy)
+        {
+            Unsafe.CopyBlock((void*)dest, (void*)src, (uint)sizeInBytesToCopy);
+        }
+
         public static void CopyMemory(IntPtr dest, IntPtr src, int sizeInBytesToCopy)
         {
             Unsafe.CopyBlockUnaligned((void*)dest, (void*)src, (uint)sizeInBytesToCopy);
@@ -229,15 +227,6 @@ namespace SharpGame
             Marshal.FreeHGlobal(buffer);
         }
 
-        /// <summary>
-        /// Allocates unmanaged memory and copies the specified structure over.
-        /// </summary>
-        /// <typeparam name="T">Type of structure to copy.</typeparam>
-        /// <param name="value">The value to copy.</param>
-        /// <returns>
-        /// A pointer to the newly allocated memory. This memory must be released using the <see
-        /// cref="Free(IntPtr)"/> method.
-        /// </returns>
         public static IntPtr AllocToPointer<T>(ref T value) where T : struct
         {
             IntPtr ptr = Alloc<T>();
@@ -245,16 +234,6 @@ namespace SharpGame
             return ptr;
         }
 
-        /// <summary>
-        /// Allocates unmanaged memory and copies the specified structure over.
-        /// <para>If the value is <c>null</c>, returns <see cref="IntPtr.Zero"/>.</para>
-        /// </summary>
-        /// <typeparam name="T">Type of structure to copy.</typeparam>
-        /// <param name="value">The value to copy.</param>
-        /// <returns>
-        /// A pointer to the newly allocated memory. This memory must be released using the <see
-        /// cref="Free(IntPtr)"/> method.
-        /// </returns>
         public static IntPtr AllocToPointer<T>(ref T? value) where T : struct
         {
             if (!value.HasValue) return IntPtr.Zero;
@@ -264,15 +243,6 @@ namespace SharpGame
             return ptr;
         }
 
-        /// <summary>
-        /// Allocates unmanaged memory and copies the specified structures over.
-        /// <para>If the array is <c>null</c> or empty, returns <see cref="IntPtr.Zero"/>.</para>
-        /// </summary>
-        /// <typeparam name="T">Type of elements to copy.</typeparam>
-        /// <param name="values">The values to copy.</param>
-        /// <returns>
-        /// A pointer to the newly allocated memory. This memory must be released using the <see
-        /// cref="Free(IntPtr)"/> method.
         /// </returns>
         public static IntPtr AllocToPointer<T>(T[] values) where T : struct
         {

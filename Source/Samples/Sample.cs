@@ -23,7 +23,7 @@ namespace SharpGame.Samples
         protected float yaw;
         protected float pitch;
         protected float rotSpeed = 0.5f;
-        protected float wheelSpeed = 50.0f;
+        protected float wheelSpeed = 10.0f;
         protected float moveSpeed = 10.0f;
         protected Vector3 offset;
 

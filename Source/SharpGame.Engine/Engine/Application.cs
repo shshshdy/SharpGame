@@ -24,9 +24,9 @@ namespace SharpGame
             set
             {
                 m_title = value;
-                if(nativeWindow != null)
+                if(window != null)
                 {
-                    nativeWindow.Title = value;
+                    window.Title = value;
                 }
             }
         }
@@ -38,9 +38,9 @@ namespace SharpGame
         public Settings Settings { get; } = new Settings();
         public ref Stats Stats => ref graphics.stats;
 
-        protected IntPtr window;
-        protected Sdl2Window nativeWindow;
+        protected IntPtr windowHandle;
         protected IntPtr windowInstance;
+        protected Sdl2Window window;
 
         protected string workSpace;
         protected Timer timer;
@@ -100,7 +100,7 @@ namespace SharpGame
             Settings.ApplicationName = Name;
 
             graphics = CreateSubsystem<Graphics>(Settings);
-            graphics.Init(nativeWindow.SdlWindowHandle);
+            graphics.Init(window.SdlWindowHandle);
             renderer = CreateSubsystem<Renderer>();
             input = CreateSubsystem<Input>();
 
@@ -114,18 +114,21 @@ namespace SharpGame
         protected virtual void CreateWindow()
         {
             windowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            nativeWindow = new Sdl2Window(Title, 50, 50, Width, Height, SDL_WindowFlags.Resizable, threadedProcessing: false)
+            window = new Sdl2Window(Title, 50, 50, Width, Height, SDL_WindowFlags.Resizable, threadedProcessing: false)
             {
                 X = 50,
                 Y = 50,
                 Visible = true
             };
 
-            nativeWindow.Create();
+            window.Create();
 
-            window = nativeWindow.Handle;
-            nativeWindow.Resized += OnWindowResize;
-            nativeWindow.Closing += OnWindowClosing;
+            windowHandle = window.Handle;
+            window.Resized += OnWindowResize;
+            window.Closing += OnWindowClosing;
+
+            window.KeyDown += Window_KeyDown;
+            window.KeyUp += Window_KeyUp;
         }
 
         public static void Quit()
@@ -156,15 +159,15 @@ namespace SharpGame
 
             Start();
 
-            while (nativeWindow.Exists)
+            while (window.Exists)
             {
                 Profiler.Begin();
                 Time.Tick(timeStep);
                 Stats.Tick(timeStep);
 
-                input.snapshot = nativeWindow.PumpEvents();
+                input.snapshot = window.PumpEvents();
 
-                if (!nativeWindow.Exists)
+                if (!window.Exists)
                 {
                     // Exit early if the window was closed this frame.
                     break;
@@ -224,7 +227,7 @@ namespace SharpGame
 
                 Time.Tick(timeStep);
 
-                input.snapshot = nativeWindow.PumpEvents();
+                input.snapshot = window.PumpEvents();
 
                 UpdateFrame();
 
@@ -239,7 +242,7 @@ namespace SharpGame
             // Flush device to make sure all resources can be freed 
             graphics.WaitIdle();
 
-            nativeWindow.Destroy();
+            window.Destroy();
 
             Destroy();
         }
@@ -371,8 +374,8 @@ namespace SharpGame
         private void OnWindowResize()
         {
             // Recreate swap chain
-            Width = nativeWindow.Width;
-            Height = nativeWindow.Width;
+            Width = window.Width;
+            Height = window.Width;
 
             graphics.Execute(() =>
             {
@@ -382,11 +385,21 @@ namespace SharpGame
 
         }
 
+        private void Window_KeyDown(KeyEvent obj)
+        {
+            input.SetKeyState(obj.Key, obj.Down);
+        }
+
+        private void Window_KeyUp(KeyEvent obj)
+        {
+            input.SetKeyState(obj.Key, obj.Down);
+        }
+
         private void OnWindowClosing()
         {
             if (singleLoop)
             {
-                nativeWindow.Destroy();
+                window.Destroy();
             }
             else
             {

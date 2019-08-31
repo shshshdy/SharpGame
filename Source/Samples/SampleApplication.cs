@@ -27,9 +27,10 @@ namespace SharpGame.Samples
             perfTree = CreateSubsystem<PerfTree>();
 
             this.Subscribe<GUIEvent>(HandleGUI);
-            this.Subscribe<Update>(HandleUpdate);           
+            this.Subscribe<Update>(HandleUpdate);
 
         }
+
 
         public List<(string, string, int, Type)> allSamples = new List<(string, string, int, Type)>();
 
@@ -71,20 +72,20 @@ namespace SharpGame.Samples
             }
         }
 
-        protected override void Destroy()
-        {
-            if (current)
-            {
-                current.Dispose();
-            }
-
-        }
-
         private void HandleUpdate(Update e)
         {
             if (current)
             {
                 current.Update();
+            }
+
+        }
+
+        protected override void Destroy()
+        {
+            if (current)
+            {
+                current.Dispose();
             }
 
         }

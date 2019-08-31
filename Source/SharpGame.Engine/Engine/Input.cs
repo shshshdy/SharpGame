@@ -9,6 +9,8 @@ namespace SharpGame
     {
         public InputSnapshot snapshot;
 
+        bool[] keyState = new bool[256];
+
         public IReadOnlyList<KeyEvent> KeyEvents => snapshot.KeyEvents;
 
         public IReadOnlyList<MouseEvent> MouseEvents => snapshot.MouseEvents;
@@ -26,15 +28,12 @@ namespace SharpGame
 
         public bool IsKeyPressed(Key key)
         {
-            foreach (var k in KeyEvents)
-            {
-                if (k.Down && k.Key == key)
-                {
-                    return true;
-                }
-            }
+            return keyState[(int)key];
+        }
 
-            return false;
+        internal void SetKeyState(Key key, bool down)
+        {
+            keyState[(int)key] = down;
         }
 
     }

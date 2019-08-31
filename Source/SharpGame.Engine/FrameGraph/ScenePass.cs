@@ -21,6 +21,17 @@ namespace SharpGame
         public ScenePass(string name = "main")
         {
             Name = name;
+
+            for (int i = 0; i < 3; i++)
+            {
+                cmdBufferPools[i] = new CommandBufferPool[WORK_COUNT];
+                for (int j = 0; j < WORK_COUNT; j++)
+                {
+                    cmdBufferPools[i][j] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
+                    cmdBufferPools[i][j].Allocate(CommandBufferLevel.Secondary, 1);
+                    cmdBufferPools[i][j].Name = $"ScenePass_{i}_{j}";
+                }
+            }
         }
 
         protected CommandBuffer GetCmdBufferAt(int index)
