@@ -79,7 +79,7 @@ namespace SharpGame
                     continue;
                 }
 
-                if(attr.offset > offset)
+                if(attr.offset >= offset)
                 {
                     offset = attr.offset;
                     size = GetFormatSize(attr.format);
@@ -99,6 +99,8 @@ namespace SharpGame
                 case Format.R32Uint:
                 case Format.R32Sint:
                 case Format.R32Sfloat:
+                case Format.R8g8b8a8Uint:
+                case Format.R8g8b8a8Sint:
                     return 4;
 
                 case Format.R16g16b16a16Unorm:

@@ -31,16 +31,9 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         (
-            new[]
-            {
-                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosNormTex>(), VertexInputRate.Vertex)
-            },
-            new[]
-            {
-                new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-                new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
-                new VertexInputAttribute(0, 2, Format.R32g32Sfloat, 24)
-            }
+            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
+            new VertexInputAttribute(0, 2, Format.R32g32Sfloat, 24)
         );
     }
 
@@ -57,18 +50,11 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         (
-            new[]
-            {
-                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosTBNTex>(), VertexInputRate.Vertex)
-            },
-            new[]
-            {
-                new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-                new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
-                new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 24),
-                new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, 36),
-                new VertexInputAttribute(0, 4, Format.R32g32Sfloat, 48)
-            }
+            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
+            new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 24),
+            new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, 36),
+            new VertexInputAttribute(0, 4, Format.R32g32Sfloat, 48)
         );
     }
 
@@ -92,17 +78,10 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         (
-            new[]
-            {
-                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosNormTexColor>(), VertexInputRate.Vertex)
-            },
-            new[]
-            {
-                new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-                new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
-                new VertexInputAttribute(0, 2, Format.R32g32Sfloat, 24),
-                new VertexInputAttribute(0, 3, Format.R8g8b8a8Unorm, 32)
-            }
+            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
+            new VertexInputAttribute(0, 2, Format.R32g32Sfloat, 24),
+            new VertexInputAttribute(0, 3, Format.R8g8b8a8Unorm, 32)
         );
     }
 
@@ -116,16 +95,9 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         (
-            new[]
-            {
-                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPosColor>(), VertexInputRate.Vertex)
-            },
-            new[]
-            {
-                new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-                new VertexInputAttribute(0, 1, Format.R8g8b8a8Unorm, 12)
-            }
-        );
+            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexInputAttribute(0, 1, Format.R8g8b8a8Unorm, 12)
+         );
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -139,16 +111,9 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         (
-            new[]
-            {
-                new VertexInputBinding(0, (uint)Utilities.SizeOf<VertexPos2dTexColor>(), VertexInputRate.Vertex)
-            },
-            new[]
-            {
-                new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
-                new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
-                new VertexInputAttribute(0, 2, Format.R8g8b8a8Unorm, 16)
-            }
+            new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
+            new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
+            new VertexInputAttribute(0, 2, Format.R8g8b8a8Unorm, 16)
         );
     }
 }

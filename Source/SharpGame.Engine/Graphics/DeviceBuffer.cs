@@ -72,14 +72,9 @@ namespace SharpGame
             
         }
 
-        public static DeviceBuffer CreateDynamic<T>(BufferUsageFlags bufferUsages, ulong count = 1) where T : struct
-        {
-            return new DeviceBuffer(bufferUsages, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, (ulong)Unsafe.SizeOf<T>(), count);
-        }
-
         public static DeviceBuffer CreateUniformBuffer<T>(ulong count = 1) where T : struct
         {
-            return CreateDynamic<T>(BufferUsageFlags.UniformBuffer, count);
+            return Create<T>(BufferUsageFlags.UniformBuffer, true, count);
         }
 
         public static DeviceBuffer CreateStagingBuffer(ulong size, IntPtr data)
@@ -142,7 +137,6 @@ namespace SharpGame
                     BufferCopy copyRegion = new BufferCopy { srcOffset = offset, size = size };
                     copyCmd.CopyBuffer(stagingBuffer, this, ref copyRegion);
                     Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
-                    stagingBuffer.Dispose();
                 }
             }
             else

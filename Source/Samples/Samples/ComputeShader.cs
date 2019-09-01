@@ -69,16 +69,10 @@ namespace SharpGame.Samples
 
                 VertexLayout = new VertexLayout
                 (
-                    new[]
-                    {
-                        new VertexInputBinding(0, 32, VertexInputRate.Vertex)
-                    },
-                    new[]
-                    {
-                        new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
-                        //new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
-                        new VertexInputAttribute(0, 1, Format.R32g32b32a32Sfloat, 16)
-                    }
+                    new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
+                    //new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
+                    new VertexInputAttribute(0, 1, Format.R32g32b32a32Sfloat, 16)
+                    
                 )
 
             };

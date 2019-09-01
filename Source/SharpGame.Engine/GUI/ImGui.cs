@@ -256,13 +256,13 @@ namespace SharpGame
             if (vb == null || draw_data.TotalVtxCount * sizeof(ImDrawVert) > (int)vb.Size)
             {
                 vb?.Dispose();
-                vb = DeviceBuffer.CreateDynamic<ImDrawVert>(BufferUsageFlags.VertexBuffer, (uint)(1.5f * draw_data.TotalVtxCount));
+                vb = DeviceBuffer.Create<ImDrawVert>(BufferUsageFlags.VertexBuffer, true, (uint)(1.5f * draw_data.TotalVtxCount));
             }
 
             if (ib == null || draw_data.TotalIdxCount * sizeof(ushort) > (int)ib.Size)
             {
                 ib?.Dispose();
-                ib = DeviceBuffer.CreateDynamic<ushort>(BufferUsageFlags.IndexBuffer, (uint)(1.5f * draw_data.TotalIdxCount));
+                ib = DeviceBuffer.Create<ushort>(BufferUsageFlags.IndexBuffer, true, (uint)(1.5f * draw_data.TotalIdxCount));
             }
 
             var projection = Matrix4x4.CreateOrthographicOffCenter(0f, width, height, 0.0f, -1.0f, 1.0f);

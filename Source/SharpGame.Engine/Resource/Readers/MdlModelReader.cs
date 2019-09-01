@@ -119,7 +119,6 @@ namespace SharpGame
                         MAX_VERTEX_ELEMENT_SEMANTICS
                     }*/
 
-
                     uint numElements = stream.Read<uint>();
                     FastList<VertexInputAttribute> attrs = new FastList<VertexInputAttribute>();
                     uint offset = 0;
@@ -136,7 +135,7 @@ namespace SharpGame
                     }
 
                     vertexSize = offset;
-                    var layout = new VertexLayout(new[] { new VertexInputBinding(0, offset, VertexInputRate.Vertex)  }, attrs.ToArray());
+                    var layout = new VertexLayout(attrs.ToArray());
                     loadVBData_[i].layout = layout;
                     layout.Print();
                     
@@ -384,7 +383,6 @@ namespace SharpGame
         uint[] semanticSize = { 12, 12, 16, 16, 8, 4, 16, 4 };
         static VertexLayout CreateVertexInputStateCreateInfo(uint mask, out uint stride)
         {
-            List<VertexInputBinding> vertexInputBinding = new List<VertexInputBinding>();
             List<VertexInputAttribute> vertexInputAttributes = new List<VertexInputAttribute>();
             stride = 0;
             uint location = 0;
@@ -443,9 +441,7 @@ namespace SharpGame
                 Log.Info("{{{0}, {1}, {2}}}", attr.location, attr.format, attr.offset);                
             }
 
-            vertexInputBinding.Add(new VertexInputBinding(0, stride, VertexInputRate.Vertex));
-            
-            return new VertexLayout(vertexInputBinding.ToArray(), vertexInputAttributes.ToArray());
+            return new VertexLayout(vertexInputAttributes.ToArray());
         }
     }
 }

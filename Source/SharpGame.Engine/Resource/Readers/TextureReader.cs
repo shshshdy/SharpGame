@@ -36,7 +36,7 @@ namespace SharpGame
     public class KtxTextureReader : ResourceReader<Texture>
     {
         public Format Format { get; set; } = Format.Bc3UnormBlock;
-        public SamplerAddressMode SamplerAddressMode { get; set; } = SamplerAddressMode.ClampToEdge;
+        public SamplerAddressMode SamplerAddressMode { get; set; } = SamplerAddressMode.Repeat;
 
         public KtxTextureReader() : base(".ktx")
         {

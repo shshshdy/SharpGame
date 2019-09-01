@@ -20,7 +20,7 @@ namespace SharpGame
         public ImageCreateFlags imageCreateFlags = ImageCreateFlags.None;
         public ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled;
         public ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal;
-        public SamplerAddressMode samplerAddressMode = SamplerAddressMode.ClampToEdge;
+        public SamplerAddressMode samplerAddressMode = SamplerAddressMode.Repeat;
 
         public Image image;
         public ImageView imageView;
