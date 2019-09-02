@@ -592,7 +592,7 @@ namespace SharpGame
         /// integer clear value is not representable in the target type (e.g. would overflow in
         /// conversion to that type), the clear value is undefined.
         /// </summary>
-        [FieldOffset(0)] public Int4 Int4;
+        //[FieldOffset(0)] public Int4 Int4;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClearColorValue"/> structure.
@@ -618,10 +618,10 @@ namespace SharpGame
         /// integer clear value is not representable in the target type (e.g. would overflow in
         /// conversion to that type), the clear value is undefined.
         /// </param>
-        public ClearColorValue(Int4 value) : this()
-        {
-            Int4 = value;
-        }
+//         public ClearColorValue(Int4 value) : this()
+//         {
+//             Int4 = value;
+//         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClearColorValue"/> structure.

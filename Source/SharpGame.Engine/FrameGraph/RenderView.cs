@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    using vec2 = Vector2;
-    using vec3 = Vector3;
-    using vec4 = Vector4;
-    using mat4 = Matrix;
+//     using vec2 = Vector2;
+//     using vec3 = Vector3;
+//     using vec4 = Vector4;
+//     using mat4 = Matrix;
 
 
     [StructLayout(LayoutKind.Sequential)]
@@ -23,19 +23,19 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraVS
     {
-        public mat4 View;
-        public mat4 ViewInv;
-        public mat4 ViewProj;
-        public vec3 CameraPos;
+        public Matrix View;
+        public Matrix ViewInv;
+        public Matrix ViewProj;
+        public Vector3 CameraPos;
         public float NearClip;
-        public vec3 FrustumSize;
+        public Vector3 FrustumSize;
         public float FarClip;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraPS
     {
-        public vec3 CameraPos;
+        public Vector3 CameraPos;
         float pading1;
         public vec4 DepthReconstruct;
         public vec2 GBufferInvSize;
@@ -49,7 +49,7 @@ namespace SharpGame
     {
         public Color4 AmbientColor;
         public Color4 SunlightColor;
-        public vec3 SunlightDir;
+        public Vector3 SunlightDir;
         public float LightPS_pading1;
 
         public fixed float LightColor[4 * 8];
