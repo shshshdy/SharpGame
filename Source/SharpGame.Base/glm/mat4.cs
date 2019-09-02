@@ -1,13 +1,16 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace SharpGame
 {
     /// <summary>
     /// Represents a 4x4 matrix.
     /// </summary>
-    public unsafe struct mat4
+
+    [StructLayout(LayoutKind.Explicit, Size = 4)]
+    public unsafe partial struct mat4
     {
         #region Construction
 
@@ -43,6 +46,8 @@ namespace SharpGame
         }
 
         #endregion
+
+        public vec3 TranslationVector => new vec3(this[3]);
 
         #region Index Access
 
@@ -96,12 +101,6 @@ namespace SharpGame
 
         #region Multiplication
 
-        /// <summary>
-        /// Multiplies the <paramref name="lhs"/> matrix by the <paramref name="rhs"/> vector.
-        /// </summary>
-        /// <param name="lhs">The LHS matrix.</param>
-        /// <param name="rhs">The RHS vector.</param>
-        /// <returns>The product of <paramref name="lhs"/> and <paramref name="rhs"/>.</returns>
         public static vec4 operator *(mat4 lhs, vec4 rhs)
         {
             return new vec4(
@@ -109,6 +108,15 @@ namespace SharpGame
                 lhs[0, 1] * rhs[0] + lhs[1, 1] * rhs[1] + lhs[2, 1] * rhs[2] + lhs[3, 1] * rhs[3],
                 lhs[0, 2] * rhs[0] + lhs[1, 2] * rhs[1] + lhs[2, 2] * rhs[2] + lhs[3, 2] * rhs[3],
                 lhs[0, 3] * rhs[0] + lhs[1, 3] * rhs[1] + lhs[2, 3] * rhs[2] + lhs[3, 3] * rhs[3]
+            );
+        }
+
+        public static vec3 operator *(mat4 lhs, vec3 rhs)
+        {
+            return new vec3(
+                lhs[0, 0] * rhs[0] + lhs[1, 0] * rhs[1] + lhs[2, 0] * rhs[2] + lhs[3, 0],
+                lhs[0, 1] * rhs[0] + lhs[1, 1] * rhs[1] + lhs[2, 1] * rhs[2] + lhs[3, 1],
+                lhs[0, 2] * rhs[0] + lhs[1, 2] * rhs[1] + lhs[2, 2] * rhs[2] + lhs[3, 2]
             );
         }
 
@@ -207,7 +215,26 @@ namespace SharpGame
         }
         #endregion
 
+        [FieldOffset(0)]
         fixed float value[16];
+
+        public ref float M11 => ref value[0];     
+        public ref float M12 => ref value[1];
+        public ref float M13 => ref value[2];
+        public ref float M14 => ref value[3];
+        public ref float M21 => ref value[4];
+        public ref float M22 => ref value[5];
+        public ref float M23 => ref value[6];
+        public ref float M24 => ref value[7];
+        public ref float M31 => ref value[8];
+        public ref float M32 => ref value[9];
+        public ref float M33 => ref value[10];
+        public ref float M34 => ref value[11];
+        public ref float M41 => ref value[12];
+        public ref float M42 => ref value[13];
+        public ref float M43 => ref value[14];
+        public ref float M44 => ref value[15];
+
     }
 
     public static partial class glm
@@ -220,44 +247,6 @@ namespace SharpGame
         public static mat4 mat4(mat3 m)
         {
             return new mat4(m);
-        }
-
-        public static mat2 inverse(mat2 m)
-        {
-
-            float OneOverDeterminant = (1f) / (
-                +m[0][0] * m[1][1]
-                - m[1][0] * m[0][1]);
-
-            mat2 Inverse = new mat2(
-                +m[1][1] * OneOverDeterminant,
-                -m[0][1] * OneOverDeterminant,
-                -m[1][0] * OneOverDeterminant,
-                +m[0][0] * OneOverDeterminant);
-
-            return Inverse;
-        }
-
-        public static mat3 inverse(mat3 m)
-        {
-            float OneOverDeterminant = (1f) / (
-                +m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
-                - m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
-                + m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]));
-
-            mat3 Inverse = new mat3(0);
-            Inverse[0, 0] = +(m[1][1] * m[2][2] - m[2][1] * m[1][2]) * OneOverDeterminant;
-            Inverse[1, 0] = -(m[1][0] * m[2][2] - m[2][0] * m[1][2]) * OneOverDeterminant;
-            Inverse[2, 0] = +(m[1][0] * m[2][1] - m[2][0] * m[1][1]) * OneOverDeterminant;
-            Inverse[0, 1] = -(m[0][1] * m[2][2] - m[2][1] * m[0][2]) * OneOverDeterminant;
-            Inverse[1, 1] = +(m[0][0] * m[2][2] - m[2][0] * m[0][2]) * OneOverDeterminant;
-            Inverse[2, 1] = -(m[0][0] * m[2][1] - m[2][0] * m[0][1]) * OneOverDeterminant;
-            Inverse[0, 2] = +(m[0][1] * m[1][2] - m[1][1] * m[0][2]) * OneOverDeterminant;
-            Inverse[1, 2] = -(m[0][0] * m[1][2] - m[1][0] * m[0][2]) * OneOverDeterminant;
-            Inverse[2, 2] = +(m[0][0] * m[1][1] - m[1][0] * m[0][1]) * OneOverDeterminant;
-
-            return Inverse;
-
         }
 
         public static mat4 inverse(mat4 m)

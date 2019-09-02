@@ -1,5 +1,6 @@
 ﻿#define UNMANAGED_MATRIX 
 
+
 namespace SharpGame
 {
     using System;
@@ -8,10 +9,11 @@ namespace SharpGame
     using System.Runtime.Serialization;
     using System.Text;
 
+
     public partial class Node
     {
         [DataMember(Order = 8)]
-        public Vector3 Position
+        public vec3 Position
         {
             get
             {
@@ -27,11 +29,11 @@ namespace SharpGame
         }
 
         [IgnoreDataMember]
-        public ref Vector3 PositionRef => ref position_;
-        protected Vector3 position_ = Vector3.Zero;
+        public ref vec3 PositionRef => ref position_;
+        protected vec3 position_ = vec3.Zero;
 
         [DataMember(Order = 9)]
-        public Quaternion Rotation
+        public quat Rotation
         {
             get
             {
@@ -46,11 +48,11 @@ namespace SharpGame
             }
         }
         [IgnoreDataMember]
-        public ref Quaternion RotationRef => ref rotation_;
-        protected Quaternion rotation_ = Quaternion.Identity;
+        public ref quat RotationRef => ref rotation_;
+        protected quat rotation_ = quat.Identity;
 
         [DataMember(Order = 10)]
-        public Vector3 Scaling
+        public vec3 Scaling
         {
             get
             {
@@ -65,8 +67,8 @@ namespace SharpGame
             }
         }
         [IgnoreDataMember]
-        public ref Vector3 ScalingRef => ref scaling_;
-        protected Vector3 scaling_ = Vector3.One;
+        public ref vec3 ScalingRef => ref scaling_;
+        protected vec3 scaling_ = vec3.One;
 
         [IgnoreDataMember]
         public Node Parent => parent_;
@@ -80,16 +82,16 @@ namespace SharpGame
         public bool Dirty => dirty_;
 
         [IgnoreDataMember]
-        public Matrix Transform
+        public mat4 Transform
         {
             get
             {
-                return Matrix.Transformation(ref position_, ref rotation_, ref scaling_);
+                return glm.transformation(ref position_, ref rotation_, ref scaling_);
             }
         }
 
         [IgnoreDataMember]
-        public Vector3 WorldPosition
+        public vec3 WorldPosition
         {
             get
             {
@@ -98,7 +100,7 @@ namespace SharpGame
         }
 
         [IgnoreDataMember]
-        public ref Quaternion WorldRotation
+        public ref quat WorldRotation
         {
             get
             {
@@ -109,14 +111,14 @@ namespace SharpGame
             }
         }
 
-        protected Quaternion worldRotation_;
-        public void SetWorldRotation(Quaternion rotation)
+        protected quat worldRotation_;
+        public void SetWorldRotation(quat rotation)
         {
-            Rotation = ((parent_ == scene_ || !parent_) ? rotation : Quaternion.Invert(parent_.WorldRotation) * rotation);
+            Rotation = ((parent_ == scene_ || !parent_) ? rotation : rotation * glm.inverse(parent_.WorldRotation));
         }
 
         [IgnoreDataMember]
-        public unsafe ref Matrix WorldTransform
+        public unsafe ref mat4 WorldTransform
         {
             get
             {
@@ -124,7 +126,7 @@ namespace SharpGame
                     UpdateWorldTransform();
 
 #if UNMANAGED_MATRIX
-                return ref Unsafe.AsRef<Matrix>((void*)worldTransform_);
+                return ref Unsafe.AsRef<mat4>((void*)worldTransform_);
 #else
                 return ref worldTransform_;
 #endif
@@ -133,24 +135,24 @@ namespace SharpGame
 
 #if UNMANAGED_MATRIX
         [IgnoreDataMember]
-        public IntPtr worldTransform_ = NativePool<Matrix>.Shared.Acquire();
+        public IntPtr worldTransform_ = NativePool<mat4>.Shared.Acquire();
 #else
         [IgnoreDataMember]
         public Matrix worldTransform_;
 #endif
-        public void SetTransform(Vector3 position, Quaternion rotation)
+        public void SetTransform(vec3 position, quat rotation)
         {
             position_ = position;
             rotation_ = rotation;
             MarkDirty();
         }
 
-        public void SetTransform(Vector3 position, Quaternion rotation, float scale)
+        public void SetTransform(vec3 position, quat rotation, float scale)
         {
-            SetTransform(position, rotation, new Vector3(scale, scale, scale));
+            SetTransform(position, rotation, new vec3(scale, scale, scale));
         }
 
-        public void SetTransform(Vector3 position, Quaternion rotation, Vector3 scale)
+        public void SetTransform(vec3 position, quat rotation, vec3 scale)
         {
             position_ = position;
             rotation_ = rotation;
@@ -158,7 +160,7 @@ namespace SharpGame
             MarkDirty();
         }
         
-        public void SetTransformSilent(Vector3 position, Quaternion rotation, Vector3 scale)
+        public void SetTransformSilent(vec3 position, quat rotation, vec3 scale)
         {
             position_ = position;
             rotation_ = rotation;
@@ -167,64 +169,64 @@ namespace SharpGame
 
         public void SetTransform(Matrix matrix)
         {
-            matrix.Decompose(out scaling_, out rotation_, out position_);
+        //    matrix.Decompose(out scaling_, out rotation_, out position_);
             MarkDirty();
         }
 
-        void SetWorldPosition(Vector3 position)
+        void SetWorldPosition(vec3 position)
         {
             Position = ((parent_ == scene_ || parent_ == null) ? position : parent_.WorldToLocal(position));
         }
 /*
-        void SetWorldRotation(Quaternion rotation)
+        void SetWorldRotation(quat rotation)
         {
             Rotation = ((parent_ == scene_ || parent_ == null) ? rotation : 
                     parent_.WorldRotation.Inverse() * rotation);
         }*/
 
-        void SetWorldDirection(Vector3 direction)
+        void SetWorldDirection(vec3 direction)
         {/*
-        Vector3 localDirection = (parent_ == scene_ || parent_ == null) ? direction : parent_.WorldRotation.Inverse() * direction;
-        SetRotation(new Quaternion(Vector3.ForwardLH, localDirection));*/
+        vec3 localDirection = (parent_ == scene_ || parent_ == null) ? direction : parent_.WorldRotation.Inverse() * direction;
+        SetRotation(new quat(vec3.ForwardLH, localDirection));*/
         }
 
         void SetWorldScale(float scale)
         {
-            SetWorldScale(new Vector3(scale, scale, scale));
+            SetWorldScale(new vec3(scale, scale, scale));
         }
 
-        void SetWorldScale(Vector3 scale)
+        void SetWorldScale(vec3 scale)
         {
             //   SetScale((parent_ == scene_ || !parent_) ? scale : scale / parent_.WorldScale);
         }
 
-        void SetWorldTransform(Vector3 position, Quaternion rotation)
+        void SetWorldTransform(vec3 position, quat rotation)
         {
             SetWorldPosition(position);
             SetWorldRotation(rotation);
         }
 
-        void SetWorldTransform(Vector3 position, Quaternion rotation, float scale)
-        {
-            SetWorldPosition(position);
-            SetWorldRotation(rotation);
-            SetWorldScale(scale);
-        }
-
-        void SetWorldTransform(Vector3 position, Quaternion rotation, Vector3 scale)
+        void SetWorldTransform(vec3 position, quat rotation, float scale)
         {
             SetWorldPosition(position);
             SetWorldRotation(rotation);
             SetWorldScale(scale);
         }
 
-        public void Translate(Vector3 delta, TransformSpace space)
+        void SetWorldTransform(vec3 position, quat rotation, vec3 scale)
+        {
+            SetWorldPosition(position);
+            SetWorldRotation(rotation);
+            SetWorldScale(scale);
+        }
+
+        public void Translate(vec3 delta, TransformSpace space)
         {
             switch(space)
             {
                 case TransformSpace.LOCAL:
                     // Note: local space translation disregards local scale for scale-independent movement speed
-                    position_ += Vector3.Transform(delta, rotation_);
+                    position_ += (rotation_ * delta);
                     break;
 
                 case TransformSpace.PARENT:
@@ -240,29 +242,29 @@ namespace SharpGame
 
         }
 
-        public void Rotate(Quaternion delta, TransformSpace space)
+        public void Rotate(quat delta, TransformSpace space)
         {
             switch(space)
             {
                 case TransformSpace.LOCAL:
                     rotation_ = (delta * rotation_);
-                    rotation_.Normalize();
+                    rotation_ = glm.normalize(rotation_);
                     break;
 
                 case TransformSpace.PARENT:
                     rotation_ = (rotation_ * delta);
-                    rotation_.Normalize();
+                    rotation_ = glm.normalize(rotation_);
                     break;
 
                 case TransformSpace.WORLD:
                     if(parent_ == scene_ || parent_ == null)
                     {
                         rotation_ = (rotation_ * delta);
-                        rotation_.Normalize();
+                        rotation_ = glm.normalize(rotation_);
                     }
                     else
                     {
-                        //    Quaternion worldRotation = WorldRotation;
+                        //    quat worldRotation = WorldRotation;
                         //    rotation_ = rotation_ * worldRotation.Inverse() * delta * worldRotation;
                     }
                     break;
@@ -272,11 +274,11 @@ namespace SharpGame
 
         }
 
-        void RotateAround(Vector3 point, Quaternion delta, TransformSpace space)
+        void RotateAround(vec3 point, quat delta, TransformSpace space)
         {
 #if false
-            Vector3 parentSpacePoint;
-            Quaternion oldRotation = rotation_;
+            vec3 parentSpacePoint;
+            quat oldRotation = rotation_;
 
     switch (space)
     {
@@ -299,13 +301,13 @@ namespace SharpGame
             else
             {
                 parentSpacePoint = parent_->GetWorldTransform().Inverse() * point;
-                Quaternion worldRotation = GetWorldRotation();
+                quat worldRotation = GetWorldRotation();
                 rotation_ = rotation_ * worldRotation.Inverse() * delta * worldRotation;
             }
             break;
     }
 
-    Vector3 oldRelativePos = oldRotation.Inverse() * (position_ - parentSpacePoint);
+    vec3 oldRelativePos = oldRotation.Inverse() * (position_ - parentSpacePoint);
     position_ = rotation_ * oldRelativePos + parentSpacePoint;
 
 #endif
@@ -316,29 +318,29 @@ namespace SharpGame
 
         public void Yaw(float angle, TransformSpace space)
         {
-            Rotate(new Quaternion(angle, Vector3.Up), space);
+            Rotate(new quat(angle, vec3.Up), space);
         }
 
         public void Pitch(float angle, TransformSpace space)
         {
-            Rotate(new Quaternion(angle, Vector3.Right), space);
+            Rotate(new quat(angle, vec3.Right), space);
         }
 
         public void Roll(float angle, TransformSpace space)
         {
-            Rotate(new Quaternion(angle, Vector3.ForwardLH), space);
+            Rotate(new quat(angle, vec3.ForwardLH), space);
         }
 
-        public bool LookAt(Vector3 target) => LookAt(target, TransformSpace.LOCAL);
-        public bool LookAt(Vector3 target, TransformSpace space) => LookAt(target, Vector3.Up, space);
-        public bool LookAt(Vector3 target, Vector3 up, TransformSpace space)
+        public bool LookAt(vec3 target) => LookAt(target, TransformSpace.LOCAL);
+        public bool LookAt(vec3 target, TransformSpace space) => LookAt(target, vec3.Up, space);
+        public bool LookAt(vec3 target, vec3 up, TransformSpace space)
         {
-            Vector3 worldSpaceTarget = Vector3.Zero;
+            vec3 worldSpaceTarget = vec3.Zero;
 
             switch(space)
             {
                 case TransformSpace.LOCAL:
-                    Vector3.Transform(ref target, ref WorldTransform, out worldSpaceTarget);
+                    worldSpaceTarget = WorldTransform * target;
                     break;
 
                 case TransformSpace.PARENT:
@@ -350,13 +352,13 @@ namespace SharpGame
                     break;
             }
 
-            Vector3 lookDir = worldSpaceTarget - WorldPosition;
+            vec3 lookDir = worldSpaceTarget - WorldPosition;
             // Check if target is very close, in that case can not reliably calculate lookat direction
-            if(lookDir.Equals(Vector3.Zero))
+            if(lookDir.Equals(vec3.Zero))
                 return false;
 
-            //Quaternion newRotation = Quaternion.LookAtLH(WorldPosition, worldSpaceTarget, up);
-            Quaternion newRotation = Quaternion.RotationLookAtLH(lookDir, up);
+            //quat newRotation = quat.LookAtLH(WorldPosition, worldSpaceTarget, up);
+            quat newRotation = glm.quatLookAt(lookDir, up);
             // Do nothing if setting look rotation failed
             //if (!newRotation.FromLookRotation(lookDir, up))
             //    return false;
@@ -367,39 +369,24 @@ namespace SharpGame
 
         public void Scale(float scale)
         {
-            Scale(new Vector3(scale, scale, scale));
+            Scale(new vec3(scale, scale, scale));
         }
 
-        public void Scale(Vector3 scale)
+        public void Scale(vec3 scale)
         {
             scaling_ *= scale;
             MarkDirty();
         }
 
-        public Vector3 LocalToWorld(Vector3 position)
+        public vec3 LocalToWorld(vec3 position)
         {
-            Vector3.Transform(ref position, ref WorldTransform, out Vector3 ret);
-            return ret;
+            return WorldTransform* position;
         }
 
-        public Vector3 LocalToWorld(Vector4 vector)
+        public vec3 WorldToLocal(vec3 position)
         {
-            Vector4.Transform(ref vector, ref WorldTransform, out Vector4 ret);
-            return (Vector3)ret;
-        }
-
-        public Vector3 WorldToLocal(Vector3 position)
-        {
-            Matrix mat = Matrix.Invert(WorldTransform);
-            Vector3.Transform(ref position, ref mat, out Vector3 ret);
-            return ret;
-        }
-
-        public Vector3 WorldToLocal(Vector4 vector)
-        {
-            Matrix mat = Matrix.Invert(WorldTransform);
-            Vector4.Transform(ref vector, ref mat, out Vector4 ret);
-            return (Vector3)ret;
+            mat4 mat = glm.inverse(WorldTransform);
+            return mat * position;
         }
 
         public void MarkDirty()
@@ -437,7 +424,7 @@ namespace SharpGame
 
         unsafe void UpdateWorldTransform()
         {
-            Matrix xform = Transform;
+            mat4 xform = Transform;
 
             // Assume the root node (scene) has identity transform
             if(parent_ == scene_ || parent_ == null)

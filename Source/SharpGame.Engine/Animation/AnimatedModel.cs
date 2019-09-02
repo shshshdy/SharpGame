@@ -44,13 +44,13 @@ namespace SharpGame
         List<AnimationState> animationStates_ = new List<AnimationState>();
 
         /// Skinning matrices.
-        MativeSpan<Matrix> skinMatrices_;
+        MativeSpan<mat4> skinMatrices_;
         /// Mapping of subgeometry bone indices, used if more bones than skinning shader can manage.
         int[][] geometryBoneMappings_;
         /// Subgeometry skinning matrices, used if more bones than skinning shader can manage.
-        MativeSpan<Matrix>[] geometrySkinMatrices_ = Array.Empty<MativeSpan<Matrix>>();// new Span<Matrix>[0];
+        MativeSpan<mat4>[] geometrySkinMatrices_ = Array.Empty<MativeSpan<mat4>>();// new Span<mat4>[0];
         /// Subgeometry skinning matrix pointers, if more bones than skinning shader can manage.
-        IntPtr[][] geometrySkinMatrixPtrs_;
+        IntPtr[][] geometrySkinmat4Ptrs_;
         /// Bounding box calculated from bones.
         BoundingBox boneBoundingBox_;
         /// Attribute buffer.
@@ -92,12 +92,12 @@ namespace SharpGame
 
             if(!skinMatrices_.IsEmpty)
             {
-                NativePool<Matrix>.Shared.Release(skinMatrices_);
+                NativePool<mat4>.Shared.Release(skinMatrices_);
             }
 
-            foreach(MativeSpan<Matrix> m in geometrySkinMatrices_)
+            foreach(MativeSpan<mat4> m in geometrySkinMatrices_)
             {
-                NativePool<Matrix>.Shared.Release(m);
+                NativePool<mat4>.Shared.Release(m);
             }
 
             geometrySkinMatrices_.Clear();
@@ -124,7 +124,7 @@ namespace SharpGame
                 // If distance is greater than draw distance, no need to update at all
                 if(drawDistance_ > 0.0f && distance > drawDistance_)
                     return;
-                float scale = Vector3.Dot(WorldBoundingBox.Size, MathUtil.DotScale);
+                float scale = glm.dot(WorldBoundingBox.Size, MathUtil.DotScale);
                 animationLodDistance_ = frame.camera.GetLodDistance(distance, scale, lodBias_);
             }
 
@@ -136,7 +136,7 @@ namespace SharpGame
 
         public override void UpdateBatches(ref FrameInfo frame)
         {
-            ref Matrix worldTransform = ref node_.WorldTransform;
+            ref mat4 worldTransform = ref node_.WorldTransform;
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
             distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
 
@@ -148,7 +148,7 @@ namespace SharpGame
             {
                 for(int i = 0; i < batches.Length; ++i)
                 {
-                    Vector3.Transform(ref geometryData_[i].center_, ref worldTransform, out Vector3 worldCenter);
+                    vec3.Transform(ref geometryData_[i].center_, ref worldTransform, out vec3 worldCenter);
                     batches[i].distance = frame.camera.GetDistance(worldCenter);
                 }
             }
@@ -156,7 +156,7 @@ namespace SharpGame
             // Use a transformed version of the model's bounding box instead of world bounding box for LOD scale
             // determination so that animation does not change the scale
             BoundingBox transformedBoundingBox = boundingBox_.Transformed(ref worldTransform);
-            float scale = Vector3.Dot(transformedBoundingBox.Size, MathUtil.DotScale);
+            float scale = vec3.Dot(transformedBoundingBox.Size, MathUtil.DotScale);
             float newLodDistance = frame.camera.GetLodDistance(distance_, scale, lodBias_);
 
             // If model is rendered from several views, use the minimum LOD distance for animation LOD
@@ -224,7 +224,7 @@ namespace SharpGame
                 SetNumGeometries(model.NumGeometries);
 
                 Geometry[][] geometries = model.Geometries;
-                List<Vector3> geometryCenters = model.GeometryCenters;
+                List<vec3> geometryCenters = model.GeometryCenters;
 
                 for(int i = 0; i < geometries_.Length; ++i)
                 {
@@ -267,11 +267,11 @@ namespace SharpGame
                 // Reserve space for skinning matrices
                 if(!skinMatrices_.IsEmpty)
                 {
-                    NativePool<Matrix>.Shared.Release(skinMatrices_);
+                    NativePool<mat4>.Shared.Release(skinMatrices_);
                 }
 
                 int numSkinMatrices = skeleton_.NumBones;
-                skinMatrices_ = NativePool<Matrix>.Shared.Acquire(numSkinMatrices);
+                skinMatrices_ = NativePool<mat4>.Shared.Acquire(numSkinMatrices);
                 SetGeometryBoneMappings();
 
                 // Enable skinning in batches
@@ -598,8 +598,8 @@ namespace SharpGame
             {
                 // The bone bounding box is in local space, so need the node's inverse transform
                 boneBoundingBox_.Clear();
-                Matrix inverseNodeTransform;
-                Matrix.Invert(ref node_.WorldTransform, out inverseNodeTransform);
+                mat4 inverseNodeTransform;
+                mat4.Invert(ref node_.WorldTransform, out inverseNodeTransform);
 
                 Bone[] bones = skeleton_.Bones;
                 foreach(Bone i in bones)
@@ -617,7 +617,7 @@ namespace SharpGame
                     }
                     else if((i.collisionMask_ & Bone.BONECOLLISION_SPHERE) != 0)
                     {
-                        var bs = new BoundingSphere(Vector3.Transform(boneNode.WorldPosition, inverseNodeTransform), i.radius_ * 0.5f);
+                        var bs = new BoundingSphere(vec3.Transform(boneNode.WorldPosition, inverseNodeTransform), i.radius_ * 0.5f);
                         boneBoundingBox_.Merge(ref bs);
                     }
                 }
@@ -802,13 +802,13 @@ namespace SharpGame
 
         void SetGeometryBoneMappings()
         {
-            foreach(MativeSpan<Matrix> m in geometrySkinMatrices_)
+            foreach(MativeSpan<mat4> m in geometrySkinMatrices_)
             {
-                NativePool<Matrix>.Shared.Release(m);
+                NativePool<mat4>.Shared.Release(m);
             }
 
             geometrySkinMatrices_.Clear();
-            geometrySkinMatrixPtrs_.Clear();
+            geometrySkinmat4Ptrs_.Clear();
 
             if(0 == geometryBoneMappings_.Length)
                 return;
@@ -826,18 +826,18 @@ namespace SharpGame
             Array.Resize(ref geometrySkinMatrices_, geometryBoneMappings_.Length);
             for(int i = 0; i < geometryBoneMappings_.Length; ++i)
             {
-                geometrySkinMatrices_[i] = NativePool<Matrix>.Shared.Acquire(geometryBoneMappings_[i].Length);
+                geometrySkinMatrices_[i] = NativePool<mat4>.Shared.Acquire(geometryBoneMappings_[i].Length);
             //    Array.Resize(ref geometrySkinMatrices_[i], geometryBoneMappings_[i].Length);
             }
 
             // Build original-to-skinindex matrix pointer mapping for fast copying
             // Note: at this point layout of geometrySkinMatrices_ cannot be modified or pointers become invalid
-            Array.Resize(ref geometrySkinMatrixPtrs_, skeleton_.NumBones);
+            Array.Resize(ref geometrySkinmat4Ptrs_, skeleton_.NumBones);
             for(int i = 0; i < geometryBoneMappings_.Length; ++i)
             {
-                Array.Resize(ref geometrySkinMatrixPtrs_[i], geometryBoneMappings_[i].Length);
+                Array.Resize(ref geometrySkinmat4Ptrs_[i], geometryBoneMappings_[i].Length);
                 for (int j = 0; j < geometryBoneMappings_[i].Length; ++j)
-                    geometrySkinMatrixPtrs_[geometryBoneMappings_[i][j]][j]= (IntPtr)Unsafe.AsPointer(ref geometrySkinMatrices_[i][j]);
+                    geometrySkinmat4Ptrs_[geometryBoneMappings_[i][j]][j]= (IntPtr)Unsafe.AsPointer(ref geometrySkinMatrices_[i][j]);
             }
         }
 
@@ -900,7 +900,7 @@ namespace SharpGame
             // Note: the model's world transform will be baked in the skin matrices
             Bone[] bones = skeleton_.Bones;
             // Use model's world transform in case a bone is missing
-            ref Matrix worldTransform = ref node_.WorldTransform;
+            ref mat4 worldTransform = ref node_.WorldTransform;
 
             // Skinning with global matrices only
             if(geometrySkinMatrices_.Length == 0)
@@ -926,9 +926,9 @@ namespace SharpGame
                         skinMatrices_[i] = worldTransform;
 
                     // Copy the skin matrix to per-geometry matrices as needed
-                    for(int j = 0; j < geometrySkinMatrixPtrs_[i].Length; ++j)
+                    for(int j = 0; j < geometrySkinmat4Ptrs_[i].Length; ++j)
                     {
-                        *(Matrix*)geometrySkinMatrixPtrs_[i][j] = skinMatrices_[i];
+                        *(mat4*)geometrySkinmat4Ptrs_[i][j] = skinMatrices_[i];
                     }
                 }
             }

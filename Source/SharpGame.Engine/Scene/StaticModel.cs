@@ -226,7 +226,7 @@ namespace SharpGame
         protected struct StaticModelGeometryData
         {
             /// Geometry center.
-            public Vector3 center_;
+            public vec3 center_;
             /// Current LOD level.
             public int lodLevel_;
         };

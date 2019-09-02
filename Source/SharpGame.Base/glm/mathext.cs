@@ -29,6 +29,10 @@ namespace SharpGame
 
     public partial struct vec3
     {
+        public static readonly vec3 Up = new vec3(0, 1, 0);
+        public static readonly vec3 Right = new vec3(1, 0, 0);
+        public static readonly vec3 ForwardLH = new vec3(0, 0, 1);
+
         public static explicit operator System.Numerics.Vector3(vec3 value)
         {
             return new System.Numerics.Vector3(value.X, value.Y, value.Z);
@@ -71,6 +75,11 @@ namespace SharpGame
         {
             return new vec4(value.X, value.Y, value.Z, value.W);
         }
+    }
+
+    public partial struct mat4
+    {
+        public static readonly mat4 Identity = new mat4(1);
     }
 
 }

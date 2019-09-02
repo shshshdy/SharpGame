@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 
+using vec3 = SharpGame.vec3;
+
 namespace SharpGame
 {
     [DataContract]
@@ -41,11 +43,11 @@ namespace SharpGame
         bool autoAspectRatio_ = true;
 
         /// Cached view matrix.
-        Matrix view_;
+        mat4 view_;
         /// Cached projection matrix.
-        Matrix projection_;
+        mat4 projection_;
         /// Cached vulkan projection matrix.
-        Matrix vkProjection_;
+        mat4 vkProjection_;
         /// Cached world space frustum.
         BoundingFrustum frustum_;
 
@@ -84,7 +86,7 @@ namespace SharpGame
 
         /// Return projection matrix. It's in D3D convention with depth range 0 - 1.
         [IgnoreDataMember]
-        public ref Matrix Projection
+        public ref mat4 Projection
         {
             get
             {
@@ -99,7 +101,7 @@ namespace SharpGame
 
         /// Return projection matrix. It's in D3D convention with depth range 0 - 1.
         [IgnoreDataMember]
-        public ref Matrix VkProjection
+        public ref mat4 VkProjection
         {
             get
             {
@@ -113,7 +115,7 @@ namespace SharpGame
         }
         /// Return view matrix.
         [IgnoreDataMember]
-        public ref Matrix View
+        public ref mat4 View
         {
             get
             {
@@ -122,14 +124,14 @@ namespace SharpGame
                     if(node_ != null)
                     {
                         // Note: view matrix is unaffected by node or parent scale
-                        Vector3 worldPosition = node_.WorldPosition;
-                        view_ = Matrix.Transformation(ref worldPosition, ref node_.WorldRotation);
-                        view_.Invert();
+                        vec3 worldPosition = node_.WorldPosition;
+                        view_ = glm.transformation(ref worldPosition, ref node_.WorldRotation);
+                        view_ = glm.inverse(view_);
                         
                     }
                     else
                     {
-                        view_ = Matrix.Identity;
+                        view_ = mat4.Identity;
                     }
 
                     viewDirty_ = false;
@@ -151,7 +153,7 @@ namespace SharpGame
 
                 if(frustumDirty_)
                 {
-                    frustum_.Matrix = View * projection_;
+                //    frustum_.mat4 = View * projection_;
                     frustumDirty_ = false;
                 }
 
@@ -159,7 +161,7 @@ namespace SharpGame
             }
 
         }
-
+        /*
         [IgnoreDataMember]
         public BoundingFrustum ViewSpaceFrustum
         {
@@ -171,7 +173,7 @@ namespace SharpGame
                 return new BoundingFrustum(projection_);
             }
 
-        }
+        }*/
 
         public void SetNearClip(float nearClip)
         {
@@ -269,21 +271,23 @@ namespace SharpGame
             {
                 float h = (1.0f / (orthoSize_ * 0.5f)) * zoom_;
                 float w = h / aspectRatio_;
-                Matrix.OrthoLH(w, h, nearClip_, farClip_, false, out projection_);
+                projection_ = glm.ortho(w, h, nearClip_, farClip_);
+                //mat4.OrthoLH(w, h, nearClip_, farClip_, false, out projection_);
                 vkProjection_ = projection_;
-                vkProjection_.M22 = -vkProjection_.M22;
+                //vkProjection_.M22 = -vkProjection_.M22;
             }
             else
             {
-                Matrix.PerspectiveFovLH(fov_, aspectRatio_, nearClip_, farClip_, out projection_);             
+                projection_ = glm.perspective(fov_, aspectRatio_, nearClip_, farClip_);
+                //mat4.PerspectiveFovLH(fov_, aspectRatio_, nearClip_, farClip_, out projection_);             
                 vkProjection_ = projection_;
-                vkProjection_.M22 = -vkProjection_.M22;
+                //vkProjection_.M22 = -vkProjection_.M22;
             }
 
             projectionDirty_ = false;
         }
-
-        public void GetFrustumSize(out Vector3 near, out Vector3 far)
+        /*
+        public void GetFrustumSize(out vec3 near, out vec3 far)
         {
             if (orthographic_)
             {
@@ -309,7 +313,7 @@ namespace SharpGame
                 far.Y = far.Z * halfViewSize;
                 far.X = far.Y * aspectRatio_;
             }
-        }
+        }*/
 
         public float GetHalfViewSize()
         {
@@ -319,27 +323,27 @@ namespace SharpGame
                 return orthoSize_ * 0.5f / zoom_;
         }
 
-        public float GetDistance(Vector3 worldPos)
+        public float GetDistance(vec3 worldPos)
         {
             if(!orthographic_)
             {
-                Vector3 cameraPos = node_ ? node_.WorldPosition : Vector3.Zero;
+                vec3 cameraPos = node_ ? node_.WorldPosition : vec3.Zero;
                 return (worldPos - cameraPos).Length();
             }
             else
-                return Math.Abs(Vector3.Transform(worldPos, View).Z);
+                return Math.Abs(vec3.Transform(worldPos, View).Z);
         }
 
-        public float GetDistanceSquared(ref Vector3 worldPos)
+        public float GetDistanceSquared(ref vec3 worldPos)
         {
             if(!orthographic_)
             {
-                Vector3 cameraPos = node_ ? node_.WorldPosition : Vector3.Zero;
+                vec3 cameraPos = node_ ? node_.WorldPosition : vec3.Zero;
                 return (worldPos - cameraPos).LengthSquared();
             }
             else
             {
-                float distance = Vector3.Transform(worldPos, View).Z;
+                float distance = vec3.Transform(worldPos, View).Z;
                 return distance * distance;
             }
         }

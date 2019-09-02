@@ -136,7 +136,7 @@ namespace SharpGame
             result = scale(scaling) * rotate(rotation) * translate(translation);
         }
 
-        public static mat4 Transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling)
+        public static mat4 transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling)
         {
             mat4 result;
             transformation(ref translation, ref rotation, ref scaling, out result);

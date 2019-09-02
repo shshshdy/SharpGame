@@ -93,6 +93,86 @@ namespace SharpGame
             }
         }
 
+        public static void Transform(ref vec3 vector, ref quat rotation, out vec3 result)
+        {
+            result = rotation * vector;
+        }
+
+        public static vec3 Transform(vec3 vector, quat rotation)
+        {
+            vec3 result;
+            Transform(ref vector, ref rotation, out result);
+            return result;
+        }
+
+
+        public static void Transform(ref vec3 vector, ref mat3 transform, out vec3 result)
+        {
+            result = transform* vector;
+        }
+
+        public static vec3 Transform(vec3 vector, mat3 transform)
+        {
+            vec3 result;
+            Transform(ref vector, ref transform, out result);
+            return result;
+        }
+
+        public static void Transform(ref vec3 vector, ref mat4 transform, out vec3 result)
+        {
+            vec4 intermediate;
+            Transform(ref vector, ref transform, out intermediate);
+            result = (vec3)intermediate;
+        }
+
+        public static void Transform(ref vec3 vector, ref mat4 transform, out vec4 result)
+        {
+            result = new vec4(
+                (vector.X * transform.M11) + (vector.Y * transform.M21) + (vector.Z * transform.M31) + transform.M41,
+                (vector.X * transform.M12) + (vector.Y * transform.M22) + (vector.Z * transform.M32) + transform.M42,
+                (vector.X * transform.M13) + (vector.Y * transform.M23) + (vector.Z * transform.M33) + transform.M43,
+                (vector.X * transform.M14) + (vector.Y * transform.M24) + (vector.Z * transform.M34) + transform.M44);
+        }
+
+        public static vec3 Transform(vec3 vector, mat4 transform) => Transform(vector, transform);
+
+        public static vec3 Transform(ref vec3 vector, ref mat4 transform)
+        {
+            vec3 result;
+            Transform(ref vector, ref transform, out result);
+            return result;
+        }
+
+        public static void Transform(vec3[] source, ref mat4 transform, vec3[] destination)
+        {
+            if (source == null)
+                throw new ArgumentNullException("source");
+            if (destination == null)
+                throw new ArgumentNullException("destination");
+            if (destination.Length < source.Length)
+                throw new ArgumentOutOfRangeException("destination", "The destination array must be of same length or larger length than the source array.");
+
+            for (int i = 0; i < source.Length; ++i)
+            {
+                Transform(ref source[i], ref transform, out destination[i]);
+            }
+        }
+
+        public static void TransformNormal(ref vec3 normal, ref mat4 transform, out vec3 result)
+        {
+            result = new vec3(
+                (normal.X * transform.M11) + (normal.Y * transform.M21) + (normal.Z * transform.M31),
+                (normal.X * transform.M12) + (normal.Y * transform.M22) + (normal.Z * transform.M32),
+                (normal.X * transform.M13) + (normal.Y * transform.M23) + (normal.Z * transform.M33));
+        }
+
+        public static vec3 TransformNormal(vec3 normal, mat4 transform)
+        {
+            vec3 result;
+            TransformNormal(ref normal, ref transform, out result);
+            return result;
+        }
+
         public static vec3 operator +(vec3 lhs, vec3 rhs)
         {
             return new vec3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);

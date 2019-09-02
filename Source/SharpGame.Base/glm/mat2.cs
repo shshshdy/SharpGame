@@ -196,4 +196,24 @@ namespace SharpGame
 
         private fixed float value[4];
     }
+
+    public static partial class glm
+    {
+        public static mat2 inverse(mat2 m)
+        {
+
+            float OneOverDeterminant = (1f) / (
+                +m[0][0] * m[1][1]
+                - m[1][0] * m[0][1]);
+
+            mat2 Inverse = new mat2(
+                +m[1][1] * OneOverDeterminant,
+                -m[0][1] * OneOverDeterminant,
+                -m[1][0] * OneOverDeterminant,
+                +m[0][0] * OneOverDeterminant);
+
+            return Inverse;
+        }
+
+    }
 }

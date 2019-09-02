@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace SharpGame
 {
 //     using vec2 = Vector2;
-//     using vec3 = Vector3;
+//     using vec3 = vec3;
 //     using vec4 = Vector4;
-//     using mat4 = Matrix;
+//     using mat4 = mat4;
 
 
     [StructLayout(LayoutKind.Sequential)]
@@ -23,19 +23,19 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraVS
     {
-        public Matrix View;
-        public Matrix ViewInv;
-        public Matrix ViewProj;
-        public Vector3 CameraPos;
+        public mat4 View;
+        public mat4 ViewInv;
+        public mat4 ViewProj;
+        public vec3 CameraPos;
         public float NearClip;
-        public Vector3 FrustumSize;
+        public vec3 FrustumSize;
         public float FarClip;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraPS
     {
-        public Vector3 CameraPos;
+        public vec3 CameraPos;
         float pading1;
         public vec4 DepthReconstruct;
         public vec2 GBufferInvSize;
@@ -49,7 +49,7 @@ namespace SharpGame
     {
         public Color4 AmbientColor;
         public Color4 SunlightColor;
-        public Vector3 SunlightDir;
+        public vec3 SunlightDir;
         public float LightPS_pading1;
 
         public fixed float LightColor[4 * 8];
@@ -204,7 +204,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe uint GetTransform(IntPtr pos, uint count)
         {
-            uint sz = count << 6;// (uint)Utilities.SizeOf<Matrix>() * count;
+            uint sz = count << 6;// (uint)Utilities.SizeOf<mat4>() * count;
             return ubMatrics.Alloc(sz, pos);
         }
 
@@ -294,8 +294,9 @@ namespace SharpGame
         private void UpdateViewParameters()
         {
             cameraVS.View = camera.View;
-            Matrix.Invert(ref camera.View, out cameraVS.ViewInv);
-            cameraVS.ViewProj = camera.View*camera.VkProjection;
+            cameraVS.ViewInv = glm.inverse(cameraVS.View);
+            //mat4.Invert(ref camera.View, out cameraVS.ViewInv);
+            cameraVS.ViewProj = camera.VkProjection*camera.View;
             cameraVS.CameraPos = camera.Node.Position;
             //cameraVS.FrustumSize = camera.Frustum;
             cameraVS.NearClip = camera.NearClip;
@@ -326,7 +327,7 @@ namespace SharpGame
         {
             light.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
             light.SunlightColor = new Color4(0.5f);
-            light.SunlightDir = new Vector3(-1, -1, 1);
+            light.SunlightDir = new vec3(-1, -1, 1);
             light.SunlightDir.Normalize();
 
             for(int i = 0; i < 8; i++)

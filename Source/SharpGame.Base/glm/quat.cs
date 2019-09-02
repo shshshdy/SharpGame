@@ -13,6 +13,8 @@ namespace SharpGame
         public float z;
         public float w;
 
+        public readonly static quat Identity = new quat(1, 0, 0, 0);
+
         public float this[int index]
         {
             get
