@@ -1,6 +1,6 @@
 using System;
 
-namespace Glm
+namespace SharpGame
 {
     /// <summary>
     /// Represents a three dimensional vector.
@@ -189,6 +189,31 @@ namespace Glm
         public static vec3 vec3(vec4 v)
         {
             return new vec3(v.x, v.y, v.z);
+        }
+
+        public static float length(vec3 v)
+        {
+            return (float)Math.Sqrt(dot(v, v));
+        }
+
+        public static vec3 cross(vec3 lhs, vec3 rhs)
+        {
+            return new vec3(
+                lhs.y * rhs.z - rhs.y * lhs.z,
+                lhs.z * rhs.x - rhs.z * lhs.x,
+                lhs.x * rhs.y - rhs.x * lhs.y);
+        }
+
+        public static float dot(vec3 a, vec3 b)
+        {
+            vec3 tmp = new vec3(a * b);
+            return tmp.x + tmp.y + tmp.z;
+        }
+
+        public static vec3 normalize(vec3 v)
+        {
+            float sqr = v.x * v.x + v.y * v.y + v.z * v.z;
+            return v * (1.0f / (float)Math.Sqrt(sqr));
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using Glm;
+﻿using SharpGame;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +9,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    using static Glm.glm;
+    using static SharpGame.glm;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraVS
@@ -69,27 +69,13 @@ namespace SharpGame.Samples
             ubCameraVS[1] = DeviceBuffer.CreateUniformBuffer<CameraVS>();
 
             ubObjectVS[0] = DeviceBuffer.CreateUniformBuffer<mat4>(COUNT*4);
-
             ubObjectVS[0].Map();
 
+            ubObjectVS[1] = DeviceBuffer.CreateUniformBuffer<mat4>(COUNT * 4);
+            ubObjectVS[1].Map();
+
             resourceSet[0] = new ResourceSet(resourceLayout, ubCameraVS[0], ubObjectVS[0]);
-            resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], ubObjectVS[0]);
-
-            uint offset = 0;
-            float gridSize = 15;
-
-            for(int i = 0; i < COUNT; i++)
-            {
-                mat4 worldTransform = glm.translate(gridSize * (i/10), 0, gridSize * (i % 10));
-
-                batches[i].offset = offset;
-
-                Utilities.CopyMemory(ubObjectVS[0].Mapped + (int)offset, Utilities.AsPointer(ref worldTransform), Utilities.SizeOf<mat4>());
-
-                offset += (uint)64*4;
-            }
-
-            ubObjectVS[0].Flush();
+            resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], ubObjectVS[1]);
 
             frameGraph.AddGraphicsPass(CustomDraw);
 
@@ -101,6 +87,27 @@ namespace SharpGame.Samples
         }
 
         public override void Update()
+        {
+            uint offset = 0;
+            float gridSize = 15;
+
+            for (int i = 0; i < COUNT; i++)
+            {
+                mat4 worldTransform = translate(gridSize * (i / 10), 0, gridSize * (i % 10));
+
+                batches[i].offset = offset;
+
+                Utilities.CopyMemory(ubObjectVS[Graphics.WorkContext].Mapped + (int)offset, Utilities.AsPointer(ref worldTransform), Utilities.SizeOf<mat4>());
+
+                offset += (uint)64 * 4;
+            }
+
+            ubObjectVS[Graphics.WorkContext].Flush();
+
+            UpdateInput();
+        }
+
+        private void UpdateInput()
         {
             var input = Input.Instance;
             if (input.snapshot == null)
@@ -115,8 +122,8 @@ namespace SharpGame.Samples
             if (input.IsMouseDown(MouseButton.Right))
             {
                 Vector2 delta = (input.MousePosition - mousePos) * Time.Delta * rotSpeed;
-                yaw += -delta.X;
-                pitch += -delta.Y;
+                yaw += delta.X;
+                pitch += delta.Y;
 
                 if (input.IsKeyPressed(Key.W))
                 {
@@ -146,7 +153,7 @@ namespace SharpGame.Samples
                 offset.y = delta.Y;
             }
 
-            cameraPos += (vec3)offset * (Time.Delta * moveSpeed);
+            cameraPos += offset * (Time.Delta * moveSpeed);
             cameraPos += new vec3(0, 0, input.WheelDelta * wheelSpeed);
 
             mousePos = input.MousePosition;
@@ -155,19 +162,12 @@ namespace SharpGame.Samples
         void CustomDraw(GraphicsPass pass, RenderView view)
         {
             mat4 rotM = mat4(1.0f);
-            mat4 transM;
+            
+            rotM = yawPitchRoll(yaw, pitch, 0);
 
-            rotM = rotate(rotM, yaw, vec3(0.0f, 1.0f, 0.0f));
-            rotM = rotate(rotM, pitch, vec3(1.0f, 0.0f, 0.0f));
-
-            transM = translate(mat4(1.0f), cameraPos * vec3(1.0f, 1.0f, -1.0f));
-
-            //var m = mat4.CreateFromYawPitchRoll(yaw, pitch, 0) * translate(cameraPos);        
-            //mat4.Invert(m, out cameraVS.View);
-
-            //cameraVS.View = lookAt(cameraPos, vec3(0, 0, 0), vec3(0, 1, 0));
-            cameraVS.View = rotM * transM;
-
+            var m = translate(cameraPos)* rotM ;
+            cameraVS.View = inverse(m);
+            
             var proj = perspective((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
             proj[1][1] = -proj[1][1];
 

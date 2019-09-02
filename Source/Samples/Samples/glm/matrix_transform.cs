@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Glm
+namespace SharpGame
 {
     public static partial class glm
     {
@@ -73,6 +73,35 @@ namespace Glm
         public static mat4 translate(float x, float y, float z)
         {
             return translate(identity(), new vec3(x, y, z));
+        }
+
+        public static mat4 yawPitchRoll(float yaw, float pitch, float roll)
+        {
+            float tmp_ch = cos(yaw);
+            float tmp_sh = sin(yaw);
+            float tmp_cp = cos(pitch);
+            float tmp_sp = sin(pitch);
+            float tmp_cb = cos(roll);
+            float tmp_sb = sin(roll);
+
+            mat4 Result;
+            Result[0][0] = tmp_ch * tmp_cb + tmp_sh * tmp_sp * tmp_sb;
+            Result[0][1] = tmp_sb * tmp_cp;
+            Result[0][2] = -tmp_sh * tmp_cb + tmp_ch * tmp_sp * tmp_sb;
+            Result[0][3] = (0);
+            Result[1][0] = -tmp_ch * tmp_sb + tmp_sh * tmp_sp * tmp_cb;
+            Result[1][1] = tmp_cb * tmp_cp;
+            Result[1][2] = tmp_sb * tmp_sh + tmp_ch * tmp_sp * tmp_cb;
+            Result[1][3] = (0);
+            Result[2][0] = tmp_sh * tmp_cp;
+            Result[2][1] = -tmp_sp;
+            Result[2][2] = tmp_ch * tmp_cp;
+            Result[2][3] = (0);
+            Result[3][0] = (0);
+            Result[3][1] = (0);
+            Result[3][2] = (0);
+            Result[3][3] = (1);
+            return Result;
         }
 
         public static mat4 ortho(float left, float right, float bottom, float top, float zNear, float zFar)
@@ -180,7 +209,6 @@ namespace Glm
             Result[2][2] = -(farVal + nearVal) / (farVal - nearVal);
             Result[3][2] = -((2) * farVal * nearVal) / (farVal - nearVal);
 #endif
-
             return Result;
         }
 
@@ -211,7 +239,6 @@ namespace Glm
             Result[2][2] = -(zFar + zNear) / (zFar - zNear);
             Result[3][2] = -((2) * zFar * zNear) / (zFar - zNear);
 #endif
-
             return Result;
         }
 
@@ -219,7 +246,6 @@ namespace Glm
         public static mat4 perspectiveLH(float fovy, float aspect, float zNear, float zFar)
         {
             float tanHalfFovy = tan(fovy / (2));
-
             mat4 Result = new mat4(0);
             Result[0][0] = (1) / (aspect * tanHalfFovy);
             Result[1][1] = (1) / (tanHalfFovy);
@@ -232,7 +258,6 @@ namespace Glm
             Result[2][2] = (zFar + zNear) / (zFar - zNear);
             Result[3][2] = -((2) * zFar * zNear) / (zFar - zNear);
 #endif
-
             return Result;
         }
 

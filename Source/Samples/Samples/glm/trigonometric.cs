@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Glm
+namespace SharpGame
 {
     public static partial class glm
     {
@@ -52,6 +52,16 @@ namespace Glm
             return (float)Math.Cos(angle);
         }
 
+        public static vec2 cos(vec2 angle)
+        {
+            return new vec2((float)Math.Cos(angle.x), (float)Math.Cos(angle.y));
+        }
+
+        public static vec3 cos(vec3 angle)
+        {
+            return new vec3((float)Math.Cos(angle.x), (float)Math.Cos(angle.y), (float)Math.Cos(angle.z));
+        }
+
         public static float cosh(float angle)
         {
             return (float)Math.Cosh(angle);
@@ -67,9 +77,29 @@ namespace Glm
             return degrees * (0.01745329251994329576923690768489f);
         }
 
+        public static vec2 radians(vec2 degrees)
+        {
+            return new vec2(radians(degrees.x), radians(degrees.y));
+        }
+
+        public static vec3 radians(vec3 degrees)
+        {
+            return new vec3(radians(degrees.x), radians(degrees.y), radians(degrees.z));
+        }
+
         public static float sin(float angle)
         {
             return (float)Math.Sin(angle);
+        }
+
+        public static vec2 sin(vec2 angle)
+        {
+            return new vec2(sin(angle.x), sin(angle.y));
+        }
+
+        public static vec3 sin(vec3 angle)
+        {
+            return new vec3(sin(angle.x), sin(angle.y), sin(angle.z));
         }
 
         public static float sinh(float angle)
@@ -80,6 +110,16 @@ namespace Glm
         public static float tan(float angle)
         {
             return (float)Math.Tan(angle);
+        }
+
+        public static vec2 tan(vec2 angle)
+        {
+            return new vec2(tan(angle.x), tan(angle.y));
+        }
+
+        public static vec3 tan(vec3 angle)
+        {
+            return new vec3(tan(angle.x), tan(angle.y), tan(angle.z));
         }
 
         public static float tanh(float angle)

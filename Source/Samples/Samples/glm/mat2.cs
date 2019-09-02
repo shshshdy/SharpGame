@@ -1,57 +1,32 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
-namespace Glm
+namespace SharpGame
 {
     /// <summary>
     /// Represents a 2x2 matrix.
     /// </summary>
-    public struct mat2
+    public unsafe struct mat2
     {
         #region Construction
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="mat2"/> struct.
-        /// This matrix is the identity matrix scaled by <paramref name="scale"/>.
-        /// </summary>
-        /// <param name="scale">The scale.</param>
-        public mat2(float scale)
+        public mat2(float m00, float m01, float m10, float m11)
         {
-            cols = new[]
-            {
-                new vec2(scale, 0.0f),
-                new vec2(0.0f, scale)
-            };
+            value[0] = m00; value[1] = m01;
+            value[2] = m10; value[3] = m11;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="mat2"/> struct.
-        /// The matrix is initialised with the <paramref name="cols"/>.
-        /// </summary>
-        /// <param name="cols">The colums of the matrix.</param>
-        public mat2(vec2[] cols)
+        public mat2(float scale)
         {
-            this.cols = new[]
-            {
-                cols[0],
-                cols[1]
-            };
+            value[0] = scale; value[1] = 0.0f;
+            value[2] = 0.0f; value[3] = scale;
         }
 
         public mat2(vec2 a, vec2 b)
         {
-            this.cols = new[]
-            {
-                a, b
-            };
-        }
-
-        public mat2(float a, float b, float c, float d)
-        {
-            this.cols = new[]
-            {
-                new vec2(a,b), new vec2(c,d)
-            };
+            value[0] = a.x; value[1] = a.y;
+            value[2] = b.x; value[3] = b.y;
         }
 
         /// <summary>
@@ -61,13 +36,10 @@ namespace Glm
         public static mat2 identity()
         {
             return new mat2
-            {
-                cols = new[]
-                {
-                    new vec2(1,0),
-                    new vec2(0,1)
-                }
-            };
+            (
+                new vec2(1, 0),
+                new vec2(0, 1)
+            );
         }
 
         #endregion
@@ -82,10 +54,9 @@ namespace Glm
         /// </value>
         /// <param name="column">The column index.</param>
         /// <returns>The column at index <paramref name="column"/>.</returns>
-        public vec2 this[int column]
+        public ref vec2 this[int column]
         {
-            get { return cols[column]; }
-            set { cols[column] = value; }
+            get { return ref Unsafe.As<float, vec2>(ref value[column << 1]); }
         }
 
         /// <summary>
@@ -101,22 +72,13 @@ namespace Glm
         /// </returns>
         public float this[int column, int row]
         {
-            get { return cols[column][row]; }
-            set { cols[column][row] = value; }
+            get { return this[column][row]; }
+            set { this[column][row] = value; }
         }
 
         #endregion
 
         #region Conversion
-
-        /// <summary>
-        /// Returns the matrix as a flat array of elements, column major.
-        /// </summary>
-        /// <returns></returns>
-        public float[] to_array()
-        {
-            return cols.SelectMany(v => v.to_array()).ToArray();
-        }
 
         #endregion
 
@@ -144,20 +106,18 @@ namespace Glm
         /// <returns>The product of <paramref name="lhs"/> and <paramref name="rhs"/>.</returns>
         public static mat2 operator *(mat2 lhs, mat2 rhs)
         {
-            return new mat2(new[]
-            {
-          lhs[0][0] * rhs[0] + lhs[1][0] * rhs[1],
-          lhs[0][1] * rhs[0] + lhs[1][1] * rhs[1]
-            });
+            return new mat2 (
+                lhs[0][0] * rhs[0] + lhs[1][0] * rhs[1],
+                lhs[0][1] * rhs[0] + lhs[1][1] * rhs[1]
+            );
         }
 
         public static mat2 operator *(mat2 lhs, float s)
         {
-            return new mat2(new[]
-            {
+            return new mat2 (
                 lhs[0]*s,
                 lhs[1]*s
-            });
+            );
         }
 
         #endregion
@@ -234,9 +194,6 @@ namespace Glm
         
         #endregion
 
-        /// <summary>
-        /// The columms of the matrix.
-        /// </summary>
-        private vec2[] cols;
+        private fixed float value[4];
     }
 }

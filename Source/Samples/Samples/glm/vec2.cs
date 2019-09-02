@@ -1,6 +1,6 @@
 using System;
 
-namespace Glm
+namespace SharpGame
 {
     /// <summary>
     /// Represents a two dimensional vector.
@@ -162,5 +162,31 @@ namespace Glm
         }
         
         #endregion
+    }
+
+    public static partial class glm
+    {
+        public static vec2 vec2(float x, float y)
+        {
+            return new vec2(x, y);
+        }
+
+        public static float length(vec2 v)
+        {
+            return (float)Math.Sqrt(dot(v, v));
+        }
+
+        public static vec2 normalize(vec2 v)
+        {
+            float sqr = v.x * v.x + v.y * v.y;
+            return v * (1.0f / (float)Math.Sqrt(sqr));
+        }
+
+        public static float dot(vec2 a, vec2 b)
+        {
+            vec2 tmp = new vec2(a * b);
+            return tmp.x + tmp.y;
+        }
+
     }
 }
