@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Glm;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -8,33 +9,35 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    using Vector3 = System.Numerics.Vector3;
-    using Matrix = System.Numerics.Matrix4x4;
+    using static Glm.glm;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraVS
     {
-        public Matrix View;
-        public Matrix ViewInv;
-        public Matrix ViewProj;
-        public Vector3 CameraPos;
+        public mat4 View;
+        public mat4 ViewInv;
+        public mat4 ViewProj;
+        public vec3 CameraPos;
         public float NearClip;
-        public Vector3 FrustumSize;
+        public vec3 FrustumSize;
         public float FarClip;
     }
 
-    [SampleDesc(sortOrder = 6)]
+    [SampleDesc(sortOrder = -6)]
     public class CustomRender : Sample
     {
         FrameGraph frameGraph = new FrameGraph();
         List<SourceBatch> batches = new List<SourceBatch>();
-        ResourceSet resourceSet;
 
         CameraVS cameraVS = new CameraVS();
-        DeviceBuffer ubCameraVS;
-        DeviceBuffer ubObjectVS;
+
+        ResourceSet[] resourceSet = new ResourceSet[2];
+
+        DeviceBuffer[] ubCameraVS = new DeviceBuffer[2];
+        DeviceBuffer[] ubObjectVS = new DeviceBuffer[2];
+
         Geometry cube;
-        Vector3 cameraPos;
+        vec3 cameraPos;
         const int COUNT = 100;
 
         public override void Init()
@@ -62,31 +65,35 @@ namespace SharpGame.Samples
                 batches.Add(batch);
             }
 
-            ubCameraVS = DeviceBuffer.CreateUniformBuffer<CameraVS>();
-            ubObjectVS = DeviceBuffer.CreateUniformBuffer<Matrix>(COUNT*4);
+            ubCameraVS[0] = DeviceBuffer.CreateUniformBuffer<CameraVS>();
+            ubCameraVS[1] = DeviceBuffer.CreateUniformBuffer<CameraVS>();
 
-            ubObjectVS.Map();
+            ubObjectVS[0] = DeviceBuffer.CreateUniformBuffer<mat4>(COUNT*4);
 
-            resourceSet = new ResourceSet(resourceLayout, ubCameraVS, ubObjectVS);
-            
+            ubObjectVS[0].Map();
+
+            resourceSet[0] = new ResourceSet(resourceLayout, ubCameraVS[0], ubObjectVS[0]);
+            resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], ubObjectVS[0]);
+
             uint offset = 0;
             float gridSize = 15;
+
             for(int i = 0; i < COUNT; i++)
             {
-                Matrix worldTransform = Matrix.CreateTranslation(gridSize * (i/10), 0, gridSize * (i % 10));
+                mat4 worldTransform = glm.translate(gridSize * (i/10), 0, gridSize * (i % 10));
 
                 batches[i].offset = offset;
 
-                Utilities.CopyMemory(ubObjectVS.Mapped + (int)offset, Utilities.AsPointer(ref worldTransform), Utilities.SizeOf<Matrix>());
+                Utilities.CopyMemory(ubObjectVS[0].Mapped + (int)offset, Utilities.AsPointer(ref worldTransform), Utilities.SizeOf<mat4>());
 
-                offset += (uint)Utilities.SizeOf<Matrix>()*4;
+                offset += (uint)64*4;
             }
 
-            ubObjectVS.Flush();
+            ubObjectVS[0].Flush();
 
             frameGraph.AddGraphicsPass(CustomDraw);
 
-            cameraPos = new Vector3(0, 5, 50);
+            cameraPos = new vec3(0, 5, -50);
             //pitch = MathUtil.Radians(15);
            
             Renderer.MainView.Attach(null, null, frameGraph);
@@ -104,7 +111,7 @@ namespace SharpGame.Samples
             if (mousePos == Vector2.Zero)
                 mousePos = input.MousePosition;
 
-            offset = default;
+            vec3 offset = default;
             if (input.IsMouseDown(MouseButton.Right))
             {
                 Vector2 delta = (input.MousePosition - mousePos) * Time.Delta * rotSpeed;
@@ -113,52 +120,64 @@ namespace SharpGame.Samples
 
                 if (input.IsKeyPressed(Key.W))
                 {
-                    offset.Z += 1.0f;
+                    offset.z += 1.0f;
                 }
 
                 if (input.IsKeyPressed(Key.S))
                 {
-                    offset.Z -= 1.0f;
+                    offset.z -= 1.0f;
                 }
 
                 if (input.IsKeyPressed(Key.A))
                 {
-                    offset.X -= 1.0f;
+                    offset.x -= 1.0f;
                 }
 
                 if (input.IsKeyPressed(Key.D))
                 {
-                    offset.X += 1.0f;
+                    offset.x += 1.0f;
                 }
             }
 
             if (input.IsMouseDown(MouseButton.Middle))
             {
                 Vector2 delta = input.MousePosition - mousePos;
-                offset.X = -delta.X;
-                offset.Y = delta.Y;
+                offset.x = delta.X;
+                offset.y = delta.Y;
             }
 
-            cameraPos += (Vector3)offset * (Time.Delta * moveSpeed);
-            cameraPos += new Vector3(0, 0, -input.WheelDelta * wheelSpeed);
+            cameraPos += (vec3)offset * (Time.Delta * moveSpeed);
+            cameraPos += new vec3(0, 0, input.WheelDelta * wheelSpeed);
 
             mousePos = input.MousePosition;
         }
 
         void CustomDraw(GraphicsPass pass, RenderView view)
         {
-            var m = Matrix.CreateFromYawPitchRoll(yaw, pitch, 0) * Matrix.CreateTranslation(cameraPos);        
-            Matrix.Invert(m, out cameraVS.View);
+            mat4 rotM = mat4(1.0f);
+            mat4 transM;
 
-            var proj = Matrix.CreatePerspectiveFieldOfView((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
-            proj.M22 = -proj.M22;
-            cameraVS.ViewProj = cameraVS.View * proj;
-            ubCameraVS.SetData(ref cameraVS);
+            rotM = rotate(rotM, yaw, vec3(0.0f, 1.0f, 0.0f));
+            rotM = rotate(rotM, pitch, vec3(1.0f, 0.0f, 0.0f));
+
+            transM = translate(mat4(1.0f), cameraPos * vec3(1.0f, 1.0f, -1.0f));
+
+            //var m = mat4.CreateFromYawPitchRoll(yaw, pitch, 0) * translate(cameraPos);        
+            //mat4.Invert(m, out cameraVS.View);
+
+            //cameraVS.View = lookAt(cameraPos, vec3(0, 0, 0), vec3(0, 1, 0));
+            cameraVS.View = rotM * transM;
+
+            var proj = perspective((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
+            proj[1][1] = -proj[1][1];
+
+            cameraVS.ViewProj = proj*cameraVS.View ;
+            ubCameraVS[Graphics.WorkContext].SetData(ref cameraVS);
 
             for(int i = 0; i < COUNT; i++)
             {
                 var batch = batches[i];
-                pass.DrawBatch(pass.CmdBuffer, batch, resourceSet, null, batch.offset);
+                pass.DrawBatch(pass.CmdBuffer, batch, resourceSet[Graphics.WorkContext], null, batch.offset);
             }
         }
     }
