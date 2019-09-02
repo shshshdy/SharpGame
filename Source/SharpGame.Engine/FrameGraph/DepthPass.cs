@@ -18,7 +18,7 @@ namespace SharpGame
 
     public class DepthPass : ScenePass
     {
-        const uint SHADOW_MAP_CASCADE_COUNT = 4;
+        const int SHADOW_MAP_CASCADE_COUNT = 4;
         const uint SHADOWMAP_DIM = 2048;
 
         RenderTarget depthRT;
@@ -92,12 +92,12 @@ namespace SharpGame
             Calculate frustum split depths and matrices for the shadow map cascades
             Based on https://johanmedestrom.wordpress.com/2016/03/18/opengl-cascaded-shadow-maps/
         */
-        void updateCascades()
-        {/*
-            float cascadeSplits[SHADOW_MAP_CASCADE_COUNT];
-
-            float nearClip = camera.getNearClip();
-            float farClip = camera.getFarClip();
+        void updateCascades(RenderView view)
+        {
+            Span<float> cascadeSplits = stackalloc float[SHADOW_MAP_CASCADE_COUNT];
+            var camera = view.Camera;
+            float nearClip = camera.NearClip;
+            float farClip = camera.FarClip;
             float clipRange = farClip - nearClip;
 
             float minZ = nearClip;
@@ -105,12 +105,12 @@ namespace SharpGame
 
             float range = maxZ - minZ;
             float ratio = maxZ / minZ;
-
+            /*
             // Calculate split depths based on view camera furstum
             // Based on method presentd in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
-            for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+            for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                float p = (i + 1) / static_cast<float>(SHADOW_MAP_CASCADE_COUNT);
+                float p = (i + 1) / (SHADOW_MAP_CASCADE_COUNT);
                 float log = minZ * std::pow(ratio, p);
                 float uniform = minZ + range * p;
                 float d = cascadeSplitLambda * (log - uniform) + uniform;
@@ -118,62 +118,62 @@ namespace SharpGame
             }
 
             // Calculate orthographic projection matrix for each cascade
-            float lastSplitDist = 0.0;
-            for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+            float lastSplitDist = 0.0f;
+            for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
                 float splitDist = cascadeSplits[i];
 
-                glm::vec3 frustumCorners[8] = {
-                glm::vec3(-1.0f,  1.0f, -1.0f),
-                glm::vec3( 1.0f,  1.0f, -1.0f),
-                glm::vec3( 1.0f, -1.0f, -1.0f),
-                glm::vec3(-1.0f, -1.0f, -1.0f),
-                glm::vec3(-1.0f,  1.0f,  1.0f),
-                glm::vec3( 1.0f,  1.0f,  1.0f),
-                glm::vec3( 1.0f, -1.0f,  1.0f),
-                glm::vec3(-1.0f, -1.0f,  1.0f),
-            };
+                Span<Vector3> frustumCorners = stackalloc [] {
+                new Vector3(-1.0f,  1.0f, -1.0f),
+                    new Vector3( 1.0f,  1.0f, -1.0f),
+                    new Vector3( 1.0f, -1.0f, -1.0f),
+                    new Vector3(-1.0f, -1.0f, -1.0f),
+                    new Vector3(-1.0f,  1.0f,  1.0f),
+                    new Vector3( 1.0f,  1.0f,  1.0f),
+                    new Vector3( 1.0f, -1.0f,  1.0f),
+                    new Vector3(-1.0f, -1.0f,  1.0f),
+                };
 
                 // Project frustum corners into world space
                 glm::mat4 invCam = glm::inverse(camera.matrices.perspective * camera.matrices.view);
-                for (uint32_t i = 0; i < 8; i++)
+                for (uint i = 0; i < 8; i++)
                 {
                     glm::vec4 invCorner = invCam * glm::vec4(frustumCorners[i], 1.0f);
                     frustumCorners[i] = invCorner / invCorner.w;
                 }
 
-                for (uint32_t i = 0; i < 4; i++)
+                for (uint i = 0; i < 4; i++)
                 {
-                    glm::vec3 dist = frustumCorners[i + 4] - frustumCorners[i];
+                    Vector3 dist = frustumCorners[i + 4] - frustumCorners[i];
                     frustumCorners[i + 4] = frustumCorners[i] + (dist * splitDist);
                     frustumCorners[i] = frustumCorners[i] + (dist * lastSplitDist);
                 }
 
                 // Get frustum center
-                glm::vec3 frustumCenter = glm::vec3(0.0f);
-                for (uint32_t i = 0; i < 8; i++)
+                Vector3 frustumCenter = Vector3.Zero);
+                for (uint i = 0; i < 8; i++)
                 {
                     frustumCenter += frustumCorners[i];
                 }
                 frustumCenter /= 8.0f;
 
                 float radius = 0.0f;
-                for (uint32_t i = 0; i < 8; i++)
+                for (uint i = 0; i < 8; i++)
                 {
                     float distance = glm::length(frustumCorners[i] - frustumCenter);
                     radius = glm::max(radius, distance);
                 }
                 radius = std::ceil(radius * 16.0f) / 16.0f;
 
-                glm::vec3 maxExtents = glm::vec3(radius);
-                glm::vec3 minExtents = -maxExtents;
+                Vector3 maxExtents = Vector3(radius);
+                Vector3 minExtents = -maxExtents;
 
-                glm::vec3 lightDir = normalize(-lightPos);
-                glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
+                Vector3 lightDir = normalize(-lightPos);
+                glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, Vector3(0.0f, 1.0f, 0.0f));
                 glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 
                 // Store split distance and matrix in cascade
-                cascades[i].splitDepth = (camera.getNearClip() + splitDist * clipRange) * -1.0f;
+                cascades[i].splitDepth = (camera.NearClip + splitDist * clipRange) * -1.0f;
                 cascades[i].viewProjMatrix = lightOrthoMatrix * lightViewMatrix;
 
                 lastSplitDist = cascadeSplits[i];
@@ -185,7 +185,7 @@ namespace SharpGame
         /*
             float angle = glm::radians(timer * 360.0f);
             float radius = 20.0f;
-            lightPos = glm::vec3(cos(angle) * radius, -radius, sin(angle) * radius);*/
+            lightPos = Vector3(cos(angle) * radius, -radius, sin(angle) * radius);*/
         }
 
         void updateUniformBuffers()
