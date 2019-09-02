@@ -2,35 +2,27 @@ using System;
 
 namespace SharpGame
 {
+    using global::System.Globalization;
+    using global::System.Runtime.CompilerServices;
+    using global::System.Runtime.InteropServices;
+    using global::System.Runtime.Serialization;
+    using static glm;
     /// <summary>
     /// Represents a three dimensional vector.
     /// </summary>
-    public struct vec3
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [DataContract]
+    public partial struct vec3 : IEquatable<vec3>, IFormattable
     {
+        [DataMember(Order = 0)]
         public float x;
+        [DataMember(Order = 1)]
         public float y;
+        [DataMember(Order = 2)]
         public float z;
 
         public static readonly vec3 Zero = new vec3(0, 0, 0);
         public static readonly vec3 One = new vec3(1, 1, 1);
-
-        public float this[int index]
-        {
-            get
-            {
-                if (index == 0) return x;
-                else if (index == 1) return y;
-                else if (index == 2) return z;
-                else throw new Exception("Out of range.");
-            }
-            set
-            {
-                if (index == 0) x = value;
-                else if (index == 1) y = value;
-                else if (index == 2) z = value;
-                else throw new Exception("Out of range.");
-            }
-        }
 
         public vec3(float s)
         {
@@ -63,6 +55,42 @@ namespace SharpGame
             this.x = xy.x;
             this.y = xy.y;
             this.z = z;
+        }
+
+        public float X { get => x; set => x = value; }
+        public float Y { get => y; set => y = value; }
+        public float Z { get => z; set => z = value; }
+
+        public float this[int index]
+        {
+            get
+            {
+                if (index == 0) return x;
+                else if (index == 1) return y;
+                else if (index == 2) return z;
+                else throw new Exception("Out of range.");
+            }
+            set
+            {
+                if (index == 0) x = value;
+                else if (index == 1) y = value;
+                else if (index == 2) z = value;
+                else throw new Exception("Out of range.");
+            }
+        }
+
+        public float Length() => length(this);
+        public float LengthSquared() => (x * x) + (y * y) + (z * z);
+        public void Normalize()
+        {
+            float length = Length();
+            if (!MathUtil.IsZero(length))
+            {
+                float inv = 1.0f / length;
+                X *= inv;
+                Y *= inv;
+                Z *= inv;
+            }
         }
 
         public static vec3 operator +(vec3 lhs, vec3 rhs)
@@ -104,79 +132,98 @@ namespace SharpGame
             return new vec3(rhs.x * lhs.x, rhs.y * lhs.y, rhs.z * lhs.z);
         }
 
-        public float[] to_array()
+        public static vec3 operator +(vec3 lhs)
+        {
+            return new vec3(lhs.x, lhs.y, lhs.z);
+        }
+
+        public static vec3 operator -(vec3 lhs)
+        {
+            return new vec3(-lhs.x, -lhs.y, -lhs.z);
+        }
+
+        [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
+        public static bool operator ==(vec3 left, vec3 right)
+        {
+            return left.Equals(ref right);
+        }
+
+        [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
+        public static bool operator !=(vec3 left, vec3 right)
+        {
+            return !left.Equals(ref right);
+        }
+
+        public static explicit operator vec2(vec3 value)
+        {
+            return new vec2(value.X, value.Y);
+        }
+
+        public float[] ToArray()
         {
             return new[] { x, y, z };
         }
-
-        #region Comparision
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
-        /// The Difference is detected by the different values
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (obj.GetType() == typeof(vec3))
-            {
-                var vec = (vec3)obj;
-                if (this.x == vec.x && this.y == vec.y && this.z == vec.z)
-                    return true;
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Implements the operator ==.
-        /// </summary>
-        /// <param name="v1">The first Vector.</param>
-        /// <param name="v2">The second Vector.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator ==(vec3 v1, vec3 v2)
-        {
-            return v1.Equals(v2);
-        }
-
-        /// <summary>
-        /// Implements the operator !=.
-        /// </summary>
-        /// <param name="v1">The first Vector.</param>
-        /// <param name="v2">The second Vector.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator !=(vec3 v1, vec3 v2)
-        {
-            return !v1.Equals(v2);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
-        public override int GetHashCode()
-        {
-            return this.x.GetHashCode() ^ this.y.GetHashCode() ^ this.z.GetHashCode();
-        }
-
-        #endregion
-
-        #region ToString support
-
+ 
         public override string ToString()
         {
-            return String.Format("[{0}, {1}, {2}]", x, y, z);
+            return string.Format(CultureInfo.CurrentCulture, "X:{0} Y:{1} Z:{2}", X, Y, Z);
         }
 
-        #endregion
+        public string ToString(string format)
+        {
+            if (format == null)
+                return ToString();
+
+            return string.Format(CultureInfo.CurrentCulture, "X:{0} Y:{1} Z:{2}", X.ToString(format, CultureInfo.CurrentCulture),
+                Y.ToString(format, CultureInfo.CurrentCulture), Z.ToString(format, CultureInfo.CurrentCulture));
+        }
+
+        public string ToString(IFormatProvider formatProvider)
+        {
+            return string.Format(formatProvider, "X:{0} Y:{1} Z:{2}", X, Y, Z);
+        }
+
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            if (format == null)
+                return ToString(formatProvider);
+
+            return string.Format(formatProvider, "X:{0} Y:{1} Z:{2}", X.ToString(format, formatProvider),
+                Y.ToString(format, formatProvider), Z.ToString(format, formatProvider));
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = X.GetHashCode();
+                hashCode = (hashCode * 397) ^ Y.GetHashCode();
+                hashCode = (hashCode * 397) ^ Z.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
+        public bool Equals(ref vec3 other)
+        {
+            return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z);
+        }
+
+        [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
+        public bool Equals(vec3 other)
+        {
+            return Equals(ref other);
+        }
+
+        public override bool Equals(object value)
+        {
+            if (!(value is Vector3))
+                return false;
+
+            var strongValue = (vec3)value;
+            return Equals(ref strongValue);
+        }
+
     }
 
     public static partial class glm
@@ -194,6 +241,11 @@ namespace SharpGame
         public static float length(vec3 v)
         {
             return (float)Math.Sqrt(dot(v, v));
+        }
+
+        public static float length2(vec3 v)
+        {
+            return v.x * v.x + v.y * v.y + v.z * v.z;
         }
 
         public static vec3 cross(vec3 lhs, vec3 rhs)

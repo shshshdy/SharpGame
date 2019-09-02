@@ -9,38 +9,9 @@ namespace SharpGame
 {
     public static partial class glm
     {
-        public static mat4 rotate(mat4 m, float angle, vec3 v)
+        public static mat4 scale(vec3 v)
         {
-            float c = cos(angle);
-            float s = sin(angle);
-
-            vec3 axis = normalize(v);
-            vec3 temp = (1.0f - c) * axis;
-
-            mat4 rotate = identity();
-            rotate[0, 0] = c + temp[0] * axis[0];
-            rotate[0, 1] = 0 + temp[0] * axis[1] + s * axis[2];
-            rotate[0, 2] = 0 + temp[0] * axis[2] - s * axis[1];
-
-            rotate[1, 0] = 0 + temp[1] * axis[0] - s * axis[2];
-            rotate[1, 1] = c + temp[1] * axis[1];
-            rotate[1, 2] = 0 + temp[1] * axis[2] + s * axis[0];
-
-            rotate[2, 0] = 0 + temp[2] * axis[0] + s * axis[1];
-            rotate[2, 1] = 0 + temp[2] * axis[1] - s * axis[0];
-            rotate[2, 2] = c + temp[2] * axis[2];
-
-            mat4 result = identity();
-            result[0] = m[0] * rotate[0][0] + m[1] * rotate[0][1] + m[2] * rotate[0][2];
-            result[1] = m[0] * rotate[1][0] + m[1] * rotate[1][1] + m[2] * rotate[1][2];
-            result[2] = m[0] * rotate[2][0] + m[1] * rotate[2][1] + m[2] * rotate[2][2];
-            result[3] = m[3];
-            return result;
-        }
-
-        public static mat4 rotate(float angle, vec3 v)
-        {
-            return rotate(identity(), angle, v);
+            return scale(mat4(1.0f), v);
         }
 
         public static mat4 scale(mat4 m, vec3 v)
@@ -53,26 +24,71 @@ namespace SharpGame
             return result;
         }
 
-        public static mat4 scale(vec3 v)
+        public static mat4 rotate(float angle, vec3 v)
         {
-            return scale(identity(), v);
+            return rotate(mat4(1.0f), angle, v);
         }
 
-        public static mat4 translate(mat4 m, vec3 v)
+        public static mat4 rotate(mat4 m, float angle, vec3 v)
         {
-            mat4 result = m;
-            result[3] = m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3];
+            float c = cos(angle);
+            float s = sin(angle);
+
+            vec3 axis = normalize(v);
+            vec3 temp = (1.0f - c) * axis;
+
+            mat4 rotate = mat4(1.0f);
+            rotate[0, 0] = c + temp[0] * axis[0];
+            rotate[0, 1] = 0 + temp[0] * axis[1] + s * axis[2];
+            rotate[0, 2] = 0 + temp[0] * axis[2] - s * axis[1];
+
+            rotate[1, 0] = 0 + temp[1] * axis[0] - s * axis[2];
+            rotate[1, 1] = c + temp[1] * axis[1];
+            rotate[1, 2] = 0 + temp[1] * axis[2] + s * axis[0];
+
+            rotate[2, 0] = 0 + temp[2] * axis[0] + s * axis[1];
+            rotate[2, 1] = 0 + temp[2] * axis[1] - s * axis[0];
+            rotate[2, 2] = c + temp[2] * axis[2];
+
+            mat4 result = mat4(1.0f);
+            result[0] = m[0] * rotate[0][0] + m[1] * rotate[0][1] + m[2] * rotate[0][2];
+            result[1] = m[0] * rotate[1][0] + m[1] * rotate[1][1] + m[2] * rotate[1][2];
+            result[2] = m[0] * rotate[2][0] + m[1] * rotate[2][1] + m[2] * rotate[2][2];
+            result[3] = m[3];
             return result;
+        }
+
+        public static mat4 rotate(quat q)
+        {
+            return mat4_cast(q);
+        }
+
+        public static mat4 rotate(mat4 m, quat q)
+        {
+            mat4 result = mat4_cast(q);
+            return result*m;
         }
 
         public static mat4 translate(vec3 v)
         {
-            return translate(identity(), v);
+            return translate(mat4(1.0f), v.x, v.y, v.z);
         }
 
         public static mat4 translate(float x, float y, float z)
         {
-            return translate(identity(), new vec3(x, y, z));
+            return translate(mat4(1.0f), x, y, z);
+        }
+
+        public static mat4 translate(mat4 m, vec3 v)
+        {
+            return translate(m, v.x, v.y, v.z);
+        }
+
+        public static mat4 translate(mat4 m, float x, float y, float z)
+        {
+            mat4 result = m;
+            result[3] = m[0] * x + m[1] * y + m[2] * z + m[3];
+            return result;
         }
 
         public static mat4 yawPitchRoll(float yaw, float pitch, float roll)
@@ -104,6 +120,29 @@ namespace SharpGame
             return Result;
         }
 
+        public static void transformation(ref vec3 translation, ref quat rotation, out mat4 result)
+        {
+            result = translate(translation) * rotate(rotation);
+        }
+        public static mat4 transformation(ref vec3 translation, ref quat rotation)
+        {
+            mat4 result;
+            transformation(ref translation, ref rotation, out result);
+            return result;
+        }
+
+        public static void transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling, out mat4 result)
+        {
+            result = scale(scaling) * rotate(rotation) * translate(translation);
+        }
+
+        public static mat4 Transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling)
+        {
+            mat4 result;
+            transformation(ref translation, ref rotation, ref scaling, out result);
+            return result;
+        }
+
         public static mat4 ortho(float left, float right, float bottom, float top, float zNear, float zFar)
         {
 #if GLM_LEFT_HANDED
@@ -113,12 +152,7 @@ namespace SharpGame
 #endif
         }
 
-        public static mat4 orthoLH
-        (
-            float left, float right,
-            float bottom, float top,
-            float zNear, float zFar
-        )
+        public static mat4 orthoLH(float left, float right, float bottom, float top, float zNear, float zFar)
         {
             mat4 Result = new mat4(1);
             Result[0][0] = 2 / (right - left);
@@ -156,7 +190,7 @@ namespace SharpGame
 
         public static mat4 ortho(float left, float right, float bottom, float top)
         {
-            var result = identity();
+            var result = mat4(1.0f);
             result[0, 0] = (2f) / (right - left);
             result[1, 1] = (2f) / (top - bottom);
             result[2, 2] = -(1f);
@@ -313,10 +347,8 @@ namespace SharpGame
             Result[2][2] = (zFar + zNear) / (zFar - zNear);
             Result[3][2] = -((2) * zFar * zNear) / (zFar - zNear);
 #endif
-
             return Result;
         }
-
 
         public static mat4 infinitePerspective(float fovy, float aspect, float zNear)
         {
@@ -344,7 +376,6 @@ namespace SharpGame
             Result[3][2] = -(2) * zNear;
             return Result;
         }
-
 
         public static mat4 infinitePerspectiveLH(float fovy, float aspect, float zNear)
         {
@@ -381,7 +412,6 @@ namespace SharpGame
             Result[3][2] = (ep - (2)) * zNear;
             return Result;
         }
-
 
         public static mat4 tweakedInfinitePerspective(float fovy, float aspect, float zNear)
         {
@@ -452,7 +482,7 @@ namespace SharpGame
 #if GLM_LEFT_HANDED
             return lookAtLH(eye, center, up);
 #else
-        return lookAtRH(eye, center, up);
+            return lookAtRH(eye, center, up);
 #endif
         }
 

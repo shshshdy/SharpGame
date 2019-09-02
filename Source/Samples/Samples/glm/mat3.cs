@@ -203,12 +203,15 @@ namespace SharpGame
         }
         #endregion
 
-        /// <summary>
-        /// The columms of the matrix.
-        /// </summary>
-        //private vec3 col1;
-        //private vec3 col2;
-        //private vec3 col3;
         private fixed float value[9];
     }
+
+    public static partial class glm
+    {
+        public static mat3 mat3(float scale)
+        {
+            return new mat3(scale);
+        }
+    }
+
 }

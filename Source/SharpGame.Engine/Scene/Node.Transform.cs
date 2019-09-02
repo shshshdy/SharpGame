@@ -108,6 +108,7 @@ namespace SharpGame
                 return ref worldRotation_;
             }
         }
+
         protected Quaternion worldRotation_;
         public void SetWorldRotation(Quaternion rotation)
         {

@@ -88,6 +88,35 @@ namespace SharpGame
             z = c.x * c.y * s.z - s.x * s.y * c.z;
         }
 
+        public vec3 EulerAngles => vec3(Pitch, Yaw, Roll);
+
+        public float Roll => atan((2) * (this.x * this.y + this.w * this.z), this.w * this.w + this.x * this.x - this.y * this.y - this.z * this.z);
+
+        public float Pitch
+        {
+            get
+            {
+                //return float(atan(float(2) * (q.y * q.z + q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z));
+                float y = (2) * (this.y * this.z + this.w * this.x);
+                float x = w * w - this.x * this.x - this.y * this.y + this.z * this.z;
+
+                if (y == 0 && x == 0)
+                {
+                    return 2 * atan(this.x, this.w);
+                }
+
+                return atan(y, x);
+            }
+        }
+
+        public float Yaw
+        {
+            get
+            {
+                return asin(clamp((-2) * (x * z - w * y), (-1), (1)));
+            }
+        }
+
         public static quat operator +(quat lhs, quat rhs)
         {
             return new quat(lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
@@ -126,7 +155,6 @@ namespace SharpGame
                         p.w * q.z + p.z * q.w + p.x * q.y - p.y * q.x);
         }
 
-
         public static quat operator /(quat lhs, float rhs)
         {
             return new quat(lhs.w / rhs, lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
@@ -142,7 +170,6 @@ namespace SharpGame
             return new quat(-lhs.w, -lhs.x, -lhs.y, -lhs.z);
         }
 
-
         public static vec3 operator *(quat q, vec3 v)
         {
             vec3 QuatVector = vec3(q.x, q.y, q.z);
@@ -151,13 +178,12 @@ namespace SharpGame
             return v + ((uv * q.w) + uuv) * (2);
         }
 
-
         public static vec3 operator *(vec3 v, quat q)
         {
             return inverse(q) * v;
         }
 
-        public float[] to_array()
+        public float[] ToArray()
         {
             return new[] { x, y, z, w };
         }
@@ -240,9 +266,19 @@ namespace SharpGame
             return new quat(w, x, y, z);
         }
 
+        public static quat quat_identity()
+        {
+            return quat((1), (0), (0), (0));
+        }
+
         public static float length(quat q)
         {
             return sqrt(dot(q, q));
+        }
+
+        public static float length2(quat q)
+        {
+            return q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
         }
 
         public static quat normalize(quat q)
@@ -368,114 +404,178 @@ namespace SharpGame
             //return gtc::quaternion::cross(q, quat(cos(AngleRad * float(0.5)), Tmp.x * fSin, Tmp.y * fSin, Tmp.z * fSin));
         }
 
-
-        public static vec3 eulerAngles(quat x)
+        public static mat3 mat3_cast(quat q)
         {
-            return vec3(pitch(x), yaw(x), roll(x));
+            mat3 Result = mat3(1);
+            float qxx = (q.x * q.x);
+            float qyy = (q.y * q.y);
+            float qzz = (q.z * q.z);
+            float qxz = (q.x * q.z);
+            float qxy = (q.x * q.y);
+            float qyz = (q.y * q.z);
+            float qwx = (q.w * q.x);
+            float qwy = (q.w * q.y);
+            float qwz = (q.w * q.z);
+
+            Result[0][0] = (1) - (2) * (qyy + qzz);
+            Result[0][1] = (2) * (qxy + qwz);
+            Result[0][2] = (2) * (qxz - qwy);
+
+            Result[1][0] = (2) * (qxy - qwz);
+            Result[1][1] = (1) - (2) * (qxx + qzz);
+            Result[1][2] = (2) * (qyz + qwx);
+
+            Result[2][0] = (2) * (qxz + qwy);
+            Result[2][1] = (2) * (qyz - qwx);
+            Result[2][2] = (1) - (2) * (qxx + qyy);
+            return Result;
         }
 
 
-        public static float roll(quat q)
+        public static mat4 mat4_cast(quat q)
         {
-            return atan((2) * (q.x * q.y + q.w * q.z), q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z);
+            return mat4(mat3_cast(q));
         }
 
-        public static float pitch(quat q)
+        public static quat quat_cast(mat3 m)
         {
-            //return float(atan(float(2) * (q.y * q.z + q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z));
-            float y = (2) * (q.y * q.z + q.w * q.x);
-            float x = q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z;
+            float fourXSquaredMinus1 = m[0][0] - m[1][1] - m[2][2];
+            float fourYSquaredMinus1 = m[1][1] - m[0][0] - m[2][2];
+            float fourZSquaredMinus1 = m[2][2] - m[0][0] - m[1][1];
+            float fourWSquaredMinus1 = m[0][0] + m[1][1] + m[2][2];
 
-            if (y == 0 && x == 0)
+            int biggestIndex = 0;
+            float fourBiggestSquaredMinus1 = fourWSquaredMinus1;
+            if (fourXSquaredMinus1 > fourBiggestSquaredMinus1)
             {
-                return 2 * atan(q.x, q.w);
+                fourBiggestSquaredMinus1 = fourXSquaredMinus1;
+                biggestIndex = 1;
+            }
+            if (fourYSquaredMinus1 > fourBiggestSquaredMinus1)
+            {
+                fourBiggestSquaredMinus1 = fourYSquaredMinus1;
+                biggestIndex = 2;
+            }
+            if (fourZSquaredMinus1 > fourBiggestSquaredMinus1)
+            {
+                fourBiggestSquaredMinus1 = fourZSquaredMinus1;
+                biggestIndex = 3;
             }
 
-            return atan(y, x);
+            float biggestVal = sqrt(fourBiggestSquaredMinus1 + (1)) * (0.5f);
+            float mult = (0.25f) / biggestVal;
+
+            switch (biggestIndex)
+            {
+                case 0:
+                    return quat(biggestVal, (m[1][2] - m[2][1]) * mult, (m[2][0] - m[0][2]) * mult, (m[0][1] - m[1][0]) * mult);
+                case 1:
+                    return quat((m[1][2] - m[2][1]) * mult, biggestVal, (m[0][1] + m[1][0]) * mult, (m[2][0] + m[0][2]) * mult);
+                case 2:
+                    return quat((m[2][0] - m[0][2]) * mult, (m[0][1] + m[1][0]) * mult, biggestVal, (m[1][2] + m[2][1]) * mult);
+                case 3:
+                    return quat((m[0][1] - m[1][0]) * mult, (m[2][0] + m[0][2]) * mult, (m[1][2] + m[2][1]) * mult, biggestVal);
+                default: // Silence a -Wswitch-default warning in GCC. Should never actually get here. Assert is just for sanity.
+                         //assert(false);
+                    return quat(1, 0, 0, 0);
+            }
         }
 
-        public static float yaw(quat q)
+        public static float angle(quat x)
         {
-            return asin(clamp((-2) * (q.x * q.z - q.w * q.y), (-1), (1)));
+            return acos(x.w) * (2);
         }
 
-        /*
-public static mat3 mat3_cast(quat q)
-{
-    mat < 3, 3, float, Q > Result(float(1));
-    float qxx(q.x* q.x);
-    float qyy(q.y* q.y);
-    float qzz(q.z* q.z);
-    float qxz(q.x* q.z);
-    float qxy(q.x* q.y);
-    float qyz(q.y* q.z);
-    float qwx(q.w* q.x);
-    float qwy(q.w* q.y);
-    float qwz(q.w* q.z);
+        public static vec3 axis(quat x)
+        {
+            float tmp1 = (1) - x.w * x.w;
+            if (tmp1 <= (0))
+                return vec3(0, 0, 1);
+            float tmp2 = (1) / sqrt(tmp1);
+            return vec3(x.x * tmp2, x.y * tmp2, x.z * tmp2);
+        }
 
-    Result[0][0] = float(1) - float(2) * (qyy + qzz);
-    Result[0][1] = float(2) * (qxy + qwz);
-    Result[0][2] = float(2) * (qxz - qwy);
+        public static quat angleAxis(float angle, vec3 v)
+        {
+            quat Result;
+            float a = (angle);
+            float s = sin(a * 0.5f);
 
-    Result[1][0] = float(2) * (qxy - qwz);
-    Result[1][1] = float(1) - float(2) * (qxx + qzz);
-    Result[1][2] = float(2) * (qyz + qwx);
+            Result.w = cos(a * 0.5f);
+            Result.x = v.x * s;
+            Result.y = v.y * s;
+            Result.z = v.z * s;
+            return Result;
+        }
 
-    Result[2][0] = float(2) * (qxz + qwy);
-    Result[2][1] = float(2) * (qyz - qwx);
-    Result[2][2] = float(1) - float(2) * (qxx + qyy);
-    return Result;
-}
+        public static quat rotation(vec3 orig, vec3 dest)
+        {
+            float cosTheta = dot(orig, dest);
+            vec3 rotationAxis;
 
+            if (cosTheta >= (1) - float.Epsilon)
+            {
+                // orig and dest point in the same direction
+                return quat_identity();
+            }
 
-public static mat<4, 4, float, Q> mat4_cast(quat const& q)
-{
-    return mat < 4, 4, float, Q > (mat3_cast(q));
-}
+            if (cosTheta < (-1) + float.Epsilon)
+            {
+                // special case when vectors in opposite directions :
+                // there is no "ideal" rotation axis
+                // So guess one; any will do as long as it's perpendicular to start
+                // This implementation favors a rotation around the Up axis (Y),
+                // since it's often what you want to do.
+                rotationAxis = cross(vec3(0, 0, 1), orig);
+                if (length2(rotationAxis) < float.Epsilon) // bad luck, they were parallel, try again!
+                    rotationAxis = cross(vec3(1, 0, 0), orig);
 
-public static quat quat_cast(mat<3, 3, float, Q> const& m)
-{
-    float fourXSquaredMinus1 = m[0][0] - m[1][1] - m[2][2];
-    float fourYSquaredMinus1 = m[1][1] - m[0][0] - m[2][2];
-    float fourZSquaredMinus1 = m[2][2] - m[0][0] - m[1][1];
-    float fourWSquaredMinus1 = m[0][0] + m[1][1] + m[2][2];
+                rotationAxis = normalize(rotationAxis);
+                return angleAxis(pi(), rotationAxis);
+            }
 
-    int biggestIndex = 0;
-    float fourBiggestSquaredMinus1 = fourWSquaredMinus1;
-    if (fourXSquaredMinus1 > fourBiggestSquaredMinus1)
-    {
-        fourBiggestSquaredMinus1 = fourXSquaredMinus1;
-        biggestIndex = 1;
-    }
-    if (fourYSquaredMinus1 > fourBiggestSquaredMinus1)
-    {
-        fourBiggestSquaredMinus1 = fourYSquaredMinus1;
-        biggestIndex = 2;
-    }
-    if (fourZSquaredMinus1 > fourBiggestSquaredMinus1)
-    {
-        fourBiggestSquaredMinus1 = fourZSquaredMinus1;
-        biggestIndex = 3;
-    }
+            // Implementation from Stan Melax's Game Programming Gems 1 article
+            rotationAxis = cross(orig, dest);
 
-    float biggestVal = sqrt(fourBiggestSquaredMinus1 + (1)) * (0.5);
-    float mult = (0.25) / biggestVal;
+            float s = sqrt(((1) + cosTheta) * (2));
+            float invs = (1) / s;
 
-    switch (biggestIndex)
-    {
-        case 0:
-            return quat(biggestVal, (m[1][2] - m[2][1]) * mult, (m[2][0] - m[0][2]) * mult, (m[0][1] - m[1][0]) * mult);
-        case 1:
-            return quat((m[1][2] - m[2][1]) * mult, biggestVal, (m[0][1] + m[1][0]) * mult, (m[2][0] + m[0][2]) * mult);
-        case 2:
-            return quat((m[2][0] - m[0][2]) * mult, (m[0][1] + m[1][0]) * mult, biggestVal, (m[1][2] + m[2][1]) * mult);
-        case 3:
-            return quat((m[0][1] - m[1][0]) * mult, (m[2][0] + m[0][2]) * mult, (m[1][2] + m[2][1]) * mult, biggestVal);
-        default: // Silence a -Wswitch-default warning in GCC. Should never actually get here. Assert is just for sanity.
-            assert(false);
-            return quat(1, 0, 0, 0);
-    }
-}*/
+            return quat(
+                s * (0.5f),
+                rotationAxis.x * invs,
+                rotationAxis.y * invs,
+                rotationAxis.z * invs);
+        }
 
+        public static quat quatLookAt(vec3 direction, vec3 up)
+        {
+#if GLM_LEFT_HANDED
+            return quatLookAtLH(direction, up);
+#else
+            return quatLookAtRH(direction, up);
+#endif
+        }
+
+        public static quat quatLookAtRH(vec3 direction, vec3 up)
+        {
+            mat3 Result;
+
+            Result[2] = -direction;
+            Result[0] = normalize(cross(up, Result[2]));
+            Result[1] = cross(Result[2], Result[0]);
+
+            return quat_cast(Result);
+        }
+
+        public static quat quatLookAtLH(vec3 direction, vec3 up)
+        {
+            mat3 Result;
+
+            Result[2] = direction;
+            Result[0] = normalize(cross(up, Result[2]));
+            Result[1] = cross(Result[2], Result[0]);
+
+            return quat_cast(Result);
+        }
     }
 }

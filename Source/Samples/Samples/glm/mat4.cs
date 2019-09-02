@@ -37,6 +37,10 @@ namespace SharpGame
             value[8] = m20; value[9] = m21; value[10] = m22; value[11] = m23;
             value[12] = m30; value[13] = m31; value[14] = m32; value[15] = m33;
         }
+        public mat4(mat3 scale)
+            : this(scale[0], scale[1], scale[2], new vec4(0.0f, 0.0f, 0.0f, 1))
+        {
+        }
 
         #endregion
 
@@ -208,20 +212,14 @@ namespace SharpGame
 
     public static partial class glm
     {
-        public static mat4 identity()
-        {
-            return new mat4
-            (
-                new vec4(1,0,0,0),
-                new vec4(0,1,0,0),
-                new vec4(0,0,1,0),
-                new vec4(0,0,0,1)
-            );
-        }
-
         public static mat4 mat4(float scale)
         {
             return new mat4(scale);
+        }
+
+        public static mat4 mat4(mat3 m)
+        {
+            return new mat4(m);
         }
 
         public static mat2 inverse(mat2 m)

@@ -1,11 +1,17 @@
 using System;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace SharpGame
 {
     /// <summary>
     /// Represents a two dimensional vector.
     /// </summary>
-    public struct vec2
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [DataContract]
+    public partial struct vec2 : IEquatable<vec2>, IFormattable
     {
         public float x;
         public float y;
@@ -89,56 +95,107 @@ namespace SharpGame
             return new vec2(lhs.x / rhs, lhs.y / rhs);
         }
 
-        public float[] to_array()
+        public float[] ToArray()
         {
             return new[] { x, y };
         }
 
-        #region Comparision
-        
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
-        /// The Difference is detected by the different values
+        /// Tests for equality between two objects.
         /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals(object obj)
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
+        /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+        [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
+        public static bool operator ==(vec2 left, vec2 right)
         {
-            if (obj.GetType() == typeof(vec2))
-            {
-                var vec = (vec2)obj;
-                if (this.x == vec.x && this.y == vec.y)
-                    return true;
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Implements the operator ==.
-        /// </summary>
-        /// <param name="v1">The first Vector.</param>
-        /// <param name="v2">The second Vector.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator ==(vec2 v1, vec2 v2)
-        {
-            return v1.Equals(v2);
+            return left.Equals(ref right);
         }
 
         /// <summary>
-        /// Implements the operator !=.
+        /// Tests for inequality between two objects.
         /// </summary>
-        /// <param name="v1">The first Vector.</param>
-        /// <param name="v2">The second Vector.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator !=(vec2 v1, vec2 v2)
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
+        /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+        [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
+        public static bool operator !=(vec2 left, vec2 right)
         {
-            return !v1.Equals(v2);
+            return !left.Equals(ref right);
+        }
+
+        /// <summary>
+        /// Performs an explicit conversion from <see cref="vec2"/> to <see cref="Vector3"/>.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The result of the conversion.</returns>
+        public static explicit operator vec3(vec2 value)
+        {
+            return new vec3(value, 0.0f);
+        }
+
+        /// <summary>
+        /// Performs an explicit conversion from <see cref="vec2"/> to <see cref="Vector4"/>.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The result of the conversion.</returns>
+        public static explicit operator vec4(vec2 value)
+        {
+            return new vec4(value.x, value.y, 0.0f, 0.0f);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return string.Format(CultureInfo.CurrentCulture, "X:{0} Y:{1}", x, y);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public string ToString(string format)
+        {
+            if (format == null)
+                return ToString();
+
+            return string.Format(CultureInfo.CurrentCulture, "X:{0} Y:{1}", x.ToString(format, CultureInfo.CurrentCulture), y.ToString(format, CultureInfo.CurrentCulture));
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <param name="formatProvider">The format provider.</param>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public string ToString(IFormatProvider formatProvider)
+        {
+            return string.Format(formatProvider, "X:{0} Y:{1}", x, y);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="formatProvider">The format provider.</param>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            if (format == null)
+                ToString(formatProvider);
+
+            return string.Format(formatProvider, "X:{0} Y:{1}", x.ToString(format, formatProvider), y.ToString(format, formatProvider));
         }
 
         /// <summary>
@@ -149,19 +206,54 @@ namespace SharpGame
         /// </returns>
         public override int GetHashCode()
         {
-            return this.x.GetHashCode() ^ this.y.GetHashCode();
+            unchecked
+            {
+                return (x.GetHashCode() * 397) ^ y.GetHashCode();
+            }
         }
-        
-        #endregion
 
-        #region ToString support
-            
-        public override string ToString()
+        /// <summary>
+        /// Determines whether the specified <see cref="vec2"/> is equal to this instance.
+        /// </summary>
+        /// <param name="other">The <see cref="vec2"/> to compare with this instance.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified <see cref="vec2"/> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
+        public bool Equals(ref vec2 other)
         {
-            return String.Format("[{0}, {1}]", x, y);
+            return MathUtil.NearEqual(other.x, x) && MathUtil.NearEqual(other.y, y);
         }
-        
-        #endregion
+
+        /// <summary>
+        /// Determines whether the specified <see cref="vec2"/> is equal to this instance.
+        /// </summary>
+        /// <param name="other">The <see cref="vec2"/> to compare with this instance.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified <see cref="vec2"/> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
+        public bool Equals(vec2 other)
+        {
+            return Equals(ref other);
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
+        /// </summary>
+        /// <param name="value">The <see cref="System.Object"/> to compare with this instance.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals(object value)
+        {
+            if (!(value is vec2))
+                return false;
+
+            var strongValue = (vec2)value;
+            return Equals(ref strongValue);
+        }
+
     }
 
     public static partial class glm
