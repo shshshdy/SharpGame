@@ -272,16 +272,14 @@ namespace SharpGame
                 float h = (1.0f / (orthoSize_ * 0.5f)) * zoom_;
                 float w = h / aspectRatio_;
                 projection_ = glm.ortho(w, h, nearClip_, farClip_);
-                //mat4.OrthoLH(w, h, nearClip_, farClip_, false, out projection_);
                 vkProjection_ = projection_;
-                vkProjection_[1][1] = -vkProjection_[1][1];
+                vkProjection_.M22 = -vkProjection_.M22;
             }
             else
             {
-                projection_ = glm.perspective(fov_, aspectRatio_, nearClip_, farClip_);
-                //mat4.PerspectiveFovLH(fov_, aspectRatio_, nearClip_, farClip_, out projection_);             
+                projection_ = glm.perspective(fov_, aspectRatio_, nearClip_, farClip_);           
                 vkProjection_ = projection_;
-                vkProjection_[1][1] = -vkProjection_[1][1];
+                vkProjection_.M22 = -vkProjection_.M22;
                 
             }
 

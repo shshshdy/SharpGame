@@ -270,7 +270,7 @@ namespace SharpGame
         {
             // Transform the point into the obb coordinates
             mat4 invTrans;
-            glm.inverse(ref Transformation, out invTrans);
+            glm.inverse(in Transformation, out invTrans);
 
             vec3 locPoint;
             vec3.TransformCoordinate(ref point, ref invTrans, out locPoint);
@@ -306,7 +306,7 @@ namespace SharpGame
         public Intersection Contains(vec3[] points)
         {
             mat4 invTrans;
-            glm.inverse(ref Transformation, out invTrans);
+            glm.inverse(in Transformation, out invTrans);
 
             var containsAll = true;
             var containsAny = false;
@@ -352,7 +352,7 @@ namespace SharpGame
         public Intersection Contains(BoundingSphere sphere, bool IgnoreScale = false)
         {
             mat4 invTrans;
-            glm.inverse(ref Transformation, out invTrans);
+            glm.inverse(in Transformation, out invTrans);
 
             // Transform sphere center into the obb coordinates
             vec3 locCenter;
@@ -496,7 +496,7 @@ namespace SharpGame
             //http://www.3dkingdoms.com/weekly/bbox.cpp
             // Put line in box space
             mat4 invTrans;
-            glm.inverse(ref Transformation, out invTrans);
+            glm.inverse(in Transformation, out invTrans);
 
             vec3 LB1;
             vec3.TransformCoordinate(ref L1, ref invTrans, out LB1);
@@ -547,7 +547,7 @@ namespace SharpGame
             int i, k;
 
             mat4 R;                   // Rotation from B to A
-            glm.inverse(ref Transformation, out R);
+            glm.inverse(in Transformation, out R);
             var AR = new mat4();      // absolute values of R matrix, to use with box extents
 
             for (i = 0; i < 3; i++)
@@ -612,7 +612,7 @@ namespace SharpGame
         {
             // Put ray in box space
             mat4 invTrans;
-            glm.inverse(ref Transformation, out invTrans);
+            glm.inverse(in Transformation, out invTrans);
 
             Ray bRay;
             vec3.TransformNormal(ref ray.Direction, ref invTrans, out bRay.Direction);
@@ -666,105 +666,6 @@ namespace SharpGame
         public BoundingBox GetBoundingBox()
         {
             return BoundingBox.FromPoints(GetCorners());
-        }
-
-        /// <summary>
-        /// Calculates the matrix required to transfer any point from one <see cref="OrientedBoundingBox"/> local coordinates to another.
-        /// </summary>
-        /// <param name="A">The source OrientedBoundingBox.</param>
-        /// <param name="B">The target OrientedBoundingBox.</param>
-        /// <param name="NoMatrixScaleApplied">
-        /// If true, the method will use a fast algorithm which is inapplicable if a scale is applied to the transformation matrix of the OrientedBoundingBox.
-        /// </param>
-        /// <returns></returns>
-        public static mat4 GetBoxToBoxMatrix(ref OrientedBoundingBox A, ref OrientedBoundingBox B, bool NoMatrixScaleApplied = false)
-        {
-            mat4 AtoB_Matrix;
-
-            // Calculate B to A transformation matrix
-            if (NoMatrixScaleApplied)
-            {
-                var RotA = GetRows(ref A.Transformation);
-                var RotB = GetRows(ref B.Transformation);
-                AtoB_Matrix = new mat4();
-                int i, k;
-                for (i = 0; i < 3; i++)
-                    for (k = 0; k < 3; k++)
-                        AtoB_Matrix[i, k] = vec3.Dot(RotB[i], RotA[k]);
-                var v = B.Center - A.Center;
-                AtoB_Matrix.M41 = vec3.Dot(v, RotA[0]);
-                AtoB_Matrix.M42 = vec3.Dot(v, RotA[1]);
-                AtoB_Matrix.M43 = vec3.Dot(v, RotA[2]);
-                AtoB_Matrix.M44 = 1;
-            }
-            else
-            {
-                mat4 AInvMat;
-                glm.inverse(ref A.Transformation, out AInvMat);
-                AtoB_Matrix = B.Transformation * AInvMat;
-            }
-
-            return AtoB_Matrix;
-        }
-
-        /// <summary>
-        /// Merge an OrientedBoundingBox B into another OrientedBoundingBox A, by expanding A to contain B and keeping A orientation.
-        /// </summary>
-        /// <param name="A">The <see cref="OrientedBoundingBox"/> to merge into it.</param>
-        /// <param name="B">The <see cref="OrientedBoundingBox"/> to be merged</param>
-        /// <param name="NoMatrixScaleApplied">
-        /// If true, the method will use a fast algorithm which is inapplicable if a scale is applied to the transformation matrix of the OrientedBoundingBox.
-        /// </param>
-        /// <remarks>
-        /// Unlike merging axis aligned boxes, The operation is not interchangeable, because it keeps A orientation and merge B into it.
-        /// </remarks>
-        public static void Merge(ref OrientedBoundingBox A, ref OrientedBoundingBox B, bool NoMatrixScaleApplied = false)
-        {
-            mat4 AtoB_Matrix = GetBoxToBoxMatrix(ref A, ref B, NoMatrixScaleApplied);
-
-            //Get B corners in A Space
-            var bCorners = B.GetLocalCorners();
-            vec3.TransformCoordinate(bCorners, ref AtoB_Matrix, bCorners);
-
-            //Get A local Bounding Box
-            var A_LocalBB = new BoundingBox(-A.Extents, A.Extents);
-
-            //Find B BoundingBox in A Space
-            var B_LocalBB = BoundingBox.FromPoints(bCorners);
-
-            //Merger A and B local Bounding Boxes
-            BoundingBox mergedBB;
-            BoundingBox.Merge(ref B_LocalBB, ref A_LocalBB, out mergedBB);
-
-            //Find the new Extents and Center, Transform Center back to world
-            var newCenter = mergedBB.Minimum + (mergedBB.Maximum - mergedBB.Minimum) / 2f;
-            A.Extents = mergedBB.Maximum - newCenter;
-            vec3.TransformCoordinate(ref newCenter, ref A.Transformation, out newCenter);
-            A.Transformation.TranslationVector = newCenter;
-        }
-
-        /// <summary>
-        /// Merge this OrientedBoundingBox into another OrientedBoundingBox, keeping the other OrientedBoundingBox orientation.
-        /// </summary>
-        /// <param name="OBB">The other <see cref="OrientedBoundingBox"/> to merge into.</param>
-        /// <param name="NoMatrixScaleApplied">
-        /// If true, the method will use a fast algorithm which is inapplicable if a scale is applied to the transformation matrix of the OrientedBoundingBox.
-        /// </param>
-        public void MergeInto(ref OrientedBoundingBox OBB, bool NoMatrixScaleApplied = false)
-        {
-            Merge(ref OBB, ref this, NoMatrixScaleApplied);
-        }
-
-        /// <summary>
-        /// Merge another OrientedBoundingBox into this OrientedBoundingBox.
-        /// </summary>
-        /// <param name="OBB">The other <see cref="OrientedBoundingBox"/> to merge into this OrientedBoundingBox.</param>
-        /// <param name="NoMatrixScaleApplied">
-        /// If true, the method will use a fast algorithm which is inapplicable if a scale is applied to the transformation matrix of the OrientedBoundingBox.
-        /// </param>
-        public void Add(ref OrientedBoundingBox OBB, bool NoMatrixScaleApplied = false)
-        {
-            Merge(ref this, ref OBB, NoMatrixScaleApplied);
         }
 
         /// <summary>

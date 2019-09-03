@@ -27,6 +27,10 @@ namespace SharpGame
         public static readonly vec3 UnitY = new vec3(0, 1, 0);
         public static readonly vec3 UnitZ = new vec3(0, 0, 1);
 
+        public static readonly vec3 Up = new vec3(0, 1, 0);
+        public static readonly vec3 Right = new vec3(1, 0, 0);
+        public static readonly vec3 ForwardLH = new vec3(0, 0, 1);
+
         public vec3(float s)
         {
             x = y = z = s;
@@ -66,19 +70,17 @@ namespace SharpGame
 
         public float this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (index == 0) return x;
-                else if (index == 1) return y;
-                else if (index == 2) return z;
-                else throw new Exception("Out of range.");
+                System.Diagnostics.Debug.Assert(index >= 0 && index < 3);
+                return Unsafe.Add(ref x, index);
             }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (index == 0) x = value;
-                else if (index == 1) y = value;
-                else if (index == 2) z = value;
-                else throw new Exception("Out of range.");
+                System.Diagnostics.Debug.Assert(index >= 0 && index < 3);
+                Unsafe.Add(ref x, index) = value;
             }
         }
 

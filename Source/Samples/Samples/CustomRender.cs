@@ -167,7 +167,7 @@ namespace SharpGame.Samples
             cameraVS.View = glm.inverse(m);
             
             var proj = glm.perspective((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
-            proj[1][1] = -proj[1][1];
+            proj.M22 = -proj.M22;
 
             cameraVS.ViewProj = proj*cameraVS.View ;
             ubCameraVS[Graphics.WorkContext].SetData(ref cameraVS);

@@ -332,15 +332,6 @@ namespace SharpGame
 
             return result;
         }
-        /// <summary>
-        /// Creates a new frustum relaying on perspective camera parameters
-        /// </summary>
-        /// <param name="cameraParams">The camera params.</param>
-        /// <returns>The bounding frustum from camera params</returns>
-        public static BoundingFrustum FromCamera(FrustumCameraParams cameraParams)
-        {
-            return FromCamera(cameraParams.Position, cameraParams.LookAtDir, cameraParams.UpDir, cameraParams.FOV, cameraParams.ZNear, cameraParams.ZFar, cameraParams.AspectRatio);
-        }
 
         /// <summary>
         /// Returns the 8 corners of the frustum, element0 is Near1 (near right down corner)
@@ -381,24 +372,6 @@ namespace SharpGame
             corners[5] = Get3PlanesInterPoint(ref pFar, ref  pTop, ref  pRight);       //Far2
             corners[6] = Get3PlanesInterPoint(ref pFar, ref  pTop, ref  pLeft);        //Far3
             corners[7] = Get3PlanesInterPoint(ref pFar, ref  pBottom, ref  pLeft);     //Far3
-        }
-
-        /// <summary>
-        /// Extracts perspective camera parameters from the frustum, doesn't work with orthographic frustums.
-        /// </summary>
-        /// <returns>Perspective camera parameters from the frustum</returns>
-        public FrustumCameraParams GetCameraParams()
-        {
-            var corners = GetCorners();
-            var cameraParam = new FrustumCameraParams();
-            cameraParam.Position = Get3PlanesInterPoint(ref pRight, ref pTop, ref pLeft);
-            cameraParam.LookAtDir = pNear.Normal;
-            cameraParam.UpDir = glm.normalize(vec3.Cross(pRight.Normal, pNear.Normal));
-            cameraParam.FOV = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.Normal, pTop.Normal))) * 2);
-            cameraParam.AspectRatio = (corners[6] - corners[5]).Length() / (corners[4] - corners[5]).Length();
-            cameraParam.ZNear = (cameraParam.Position + (pNear.Normal * pNear.D)).Length();
-            cameraParam.ZFar = (cameraParam.Position + (pFar.Normal * pFar.D)).Length();
-            return cameraParam;
         }
 
         /// <summary>
@@ -889,45 +862,5 @@ namespace SharpGame
             }
         }
     }
-    /// <summary>
-    /// Frustum camera parameters.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct FrustumCameraParams
-    {
-        /// <summary>
-        /// Position of the camera.
-        /// </summary>
-        public vec3 Position;
-
-        /// <summary>
-        /// Looking at direction of the camera.
-        /// </summary>
-        public vec3 LookAtDir;
-
-        /// <summary>
-        /// Up direction.
-        /// </summary>
-        public vec3 UpDir;
-
-        /// <summary>
-        /// Field of view.
-        /// </summary>
-        public float FOV;
-
-        /// <summary>
-        /// Z near distance.
-        /// </summary>
-        public float ZNear;
-
-        /// <summary>
-        /// Z far distance.
-        /// </summary>
-        public float ZFar;
-
-        /// <summary>
-        /// Aspect ratio.
-        /// </summary>
-        public float AspectRatio;
-    }
+    
 }

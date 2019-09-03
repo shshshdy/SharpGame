@@ -14,7 +14,7 @@ namespace SharpGame
             return scale(mat4(1.0f), v);
         }
 
-        public static mat4 scale(mat4 m, vec3 v)
+        public static mat4 scale(in mat4 m, vec3 v)
         {
             mat4 result = m;
             result[0] = m[0] * v[0];
@@ -29,7 +29,7 @@ namespace SharpGame
             return rotate(mat4(1.0f), angle, v);
         }
 
-        public static mat4 rotate(mat4 m, float angle, vec3 v)
+        public static mat4 rotate(in mat4 m, float angle, vec3 v)
         {
             float c = cos(angle);
             float s = sin(angle);
@@ -51,9 +51,9 @@ namespace SharpGame
             rotate[2, 2] = c + temp[2] * axis[2];
 
             mat4 result = mat4(1.0f);
-            result[0] = m[0] * rotate[0][0] + m[1] * rotate[0][1] + m[2] * rotate[0][2];
-            result[1] = m[0] * rotate[1][0] + m[1] * rotate[1][1] + m[2] * rotate[1][2];
-            result[2] = m[0] * rotate[2][0] + m[1] * rotate[2][1] + m[2] * rotate[2][2];
+            result[0] = m[0] * rotate.M11 + m[1] * rotate.M12 + m[2] * rotate.M13;
+            result[1] = m[0] * rotate.M21 + m[1] * rotate.M22 + m[2] * rotate.M23;
+            result[2] = m[0] * rotate.M31 + m[1] * rotate.M32 + m[2] * rotate.M33;
             result[3] = m[3];
             return result;
         }
@@ -63,10 +63,10 @@ namespace SharpGame
             return mat4_cast(q);
         }
 
-        public static mat4 rotate(mat4 m, quat q)
+        public static mat4 rotate(in mat4 m, in quat q)
         {
             mat4 result = mat4_cast(q);
-            return result*m;
+            return result * m;
         }
 
         public static mat4 translate(vec3 v)
@@ -79,12 +79,12 @@ namespace SharpGame
             return translate(mat4(1.0f), x, y, z);
         }
 
-        public static mat4 translate(mat4 m, vec3 v)
+        public static mat4 translate(in mat4 m, vec3 v)
         {
             return translate(m, v.x, v.y, v.z);
         }
 
-        public static mat4 translate(mat4 m, float x, float y, float z)
+        public static mat4 translate(in mat4 m, float x, float y, float z)
         {
             mat4 result = m;
             result[3] = m[0] * x + m[1] * y + m[2] * z + m[3];
@@ -100,17 +100,17 @@ namespace SharpGame
             float tmp_cb = cos(roll);
             float tmp_sb = sin(roll);
 
-            Result[0][0] = tmp_ch * tmp_cb + tmp_sh * tmp_sp * tmp_sb;
-            Result[0][1] = tmp_sb * tmp_cp;
-            Result[0][2] = -tmp_sh * tmp_cb + tmp_ch * tmp_sp * tmp_sb;
+            Result.M11 = tmp_ch * tmp_cb + tmp_sh * tmp_sp * tmp_sb;
+            Result.M12 = tmp_sb * tmp_cp;
+            Result.M13 = -tmp_sh * tmp_cb + tmp_ch * tmp_sp * tmp_sb;
 
-            Result[1][0] = -tmp_ch * tmp_sb + tmp_sh * tmp_sp * tmp_cb;
-            Result[1][1] = tmp_cb * tmp_cp;
-            Result[1][2] = tmp_sb * tmp_sh + tmp_ch * tmp_sp * tmp_cb;
+            Result.M21 = -tmp_ch * tmp_sb + tmp_sh * tmp_sp * tmp_cb;
+            Result.M22 = tmp_cb * tmp_cp;
+            Result.M23 = tmp_sb * tmp_sh + tmp_ch * tmp_sp * tmp_cb;
 
-            Result[2][0] = tmp_sh * tmp_cp;
-            Result[2][1] = -tmp_sp;
-            Result[2][2] = tmp_ch * tmp_cp;            
+            Result.M31 = tmp_sh * tmp_cp;
+            Result.M32 = -tmp_sp;
+            Result.M33 = tmp_ch * tmp_cp;
         }
 
         public static mat4 yawPitchRoll(float yaw, float pitch, float roll)
@@ -123,22 +123,22 @@ namespace SharpGame
             float tmp_sb = sin(roll);
 
             mat4 Result;
-            Result[0][0] = tmp_ch * tmp_cb + tmp_sh * tmp_sp * tmp_sb;
-            Result[0][1] = tmp_sb * tmp_cp;
-            Result[0][2] = -tmp_sh * tmp_cb + tmp_ch * tmp_sp * tmp_sb;
-            Result[0][3] = (0);
-            Result[1][0] = -tmp_ch * tmp_sb + tmp_sh * tmp_sp * tmp_cb;
-            Result[1][1] = tmp_cb * tmp_cp;
-            Result[1][2] = tmp_sb * tmp_sh + tmp_ch * tmp_sp * tmp_cb;
-            Result[1][3] = (0);
-            Result[2][0] = tmp_sh * tmp_cp;
-            Result[2][1] = -tmp_sp;
-            Result[2][2] = tmp_ch * tmp_cp;
-            Result[2][3] = (0);
-            Result[3][0] = (0);
-            Result[3][1] = (0);
-            Result[3][2] = (0);
-            Result[3][3] = (1);
+            Result.M11 = tmp_ch * tmp_cb + tmp_sh * tmp_sp * tmp_sb;
+            Result.M12 = tmp_sb * tmp_cp;
+            Result.M13 = -tmp_sh * tmp_cb + tmp_ch * tmp_sp * tmp_sb;
+            Result.M14 = 0;
+            Result.M21 = -tmp_ch * tmp_sb + tmp_sh * tmp_sp * tmp_cb;
+            Result.M22 = tmp_cb * tmp_cp;
+            Result.M23 = tmp_sb * tmp_sh + tmp_ch * tmp_sp * tmp_cb;
+            Result.M24 = 0;
+            Result.M31 = tmp_sh * tmp_cp;
+            Result.M32 = -tmp_sp;
+            Result.M33 = tmp_ch * tmp_cp;
+            Result.M34 = 0;
+            Result.M41 = 0;
+            Result.M42 = 0;
+            Result.M43 = 0;
+            Result.M44 = 1;
             return Result;
         }
 
@@ -146,6 +146,7 @@ namespace SharpGame
         {
             result = translate(translation) * rotate(rotation);
         }
+
         public static mat4 transformation(ref vec3 translation, ref quat rotation)
         {
             mat4 result;
@@ -155,7 +156,7 @@ namespace SharpGame
 
         public static void transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling, out mat4 result)
         {
-            result =translate(translation) *  rotate(rotation) * scale(scaling);
+            result = translate(translation) * rotate(rotation) * scale(scaling);
         }
 
         public static mat4 transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling)
@@ -177,17 +178,17 @@ namespace SharpGame
         public static mat4 orthoLH(float left, float right, float bottom, float top, float zNear, float zFar)
         {
             mat4 Result = new mat4(1);
-            Result[0][0] = 2 / (right - left);
-            Result[1][1] = 2 / (top - bottom);
-            Result[3][0] = -(right + left) / (right - left);
-            Result[3][1] = -(top + bottom) / (top - bottom);
+            Result.M11 = 2 / (right - left);
+            Result.M22 = 2 / (top - bottom);
+            Result.M41 = -(right + left) / (right - left);
+            Result.M42 = -(top + bottom) / (top - bottom);
 
 #if GLM_DEPTH_ZERO_TO_ONE
-            Result[2][2] = (1) / (zFar - zNear);
-            Result[3][2] = -zNear / (zFar - zNear);
+            Result.M33 = 1 / (zFar - zNear);
+            Result.M43 = -zNear / (zFar - zNear);
 #else
-			Result[2][2] = 2 / (zFar - zNear);
-			Result[3][2] = - (zFar + zNear) / (zFar - zNear);
+			Result.M33 = 2 / (zFar - zNear);
+			Result.M43 = - (zFar + zNear) / (zFar - zNear);
 #endif
             return Result;
         }
@@ -195,17 +196,17 @@ namespace SharpGame
         public static mat4 orthoRH(float left, float right, float bottom, float top, float zNear, float zFar)
         {
             mat4 Result = new mat4(1);
-            Result[0][0] = (2) / (right - left);
-            Result[1][1] = (2) / (top - bottom);
-            Result[3][0] = -(right + left) / (right - left);
-            Result[3][1] = -(top + bottom) / (top - bottom);
+            Result.M11 = 2 / (right - left);
+            Result.M22 = 2 / (top - bottom);
+            Result.M41 = -(right + left) / (right - left);
+            Result.M42 = -(top + bottom) / (top - bottom);
 
 #if GLM_DEPTH_ZERO_TO_ONE
-            Result[2][2] = -(1) / (zFar - zNear);
-            Result[3][2] = -zNear / (zFar - zNear);
+            Result.M33 = -1 / (zFar - zNear);
+            Result.M43 = -zNear / (zFar - zNear);
 #else
-			Result[2][2] = - (2) / (zFar - zNear);
-			Result[3][2] = - (zFar + zNear) / (zFar - zNear);
+			Result.M33 = - (2) / (zFar - zNear);
+			Result.M43 = - (zFar + zNear) / (zFar - zNear);
 #endif
             return Result;
         }
@@ -213,9 +214,9 @@ namespace SharpGame
         public static mat4 ortho(float left, float right, float bottom, float top)
         {
             var result = mat4(1.0f);
-            result[0, 0] = (2f) / (right - left);
-            result[1, 1] = (2f) / (top - bottom);
-            result[2, 2] = -(1f);
+            result[0, 0] = 2f / (right - left);
+            result[1, 1] = 2f / (top - bottom);
+            result[2, 2] = -1f;
             result[3, 0] = -(right + left) / (right - left);
             result[3, 1] = -(top + bottom) / (top - bottom);
             return result;
@@ -233,18 +234,18 @@ namespace SharpGame
         public static mat4 frustumLH(float left, float right, float bottom, float top, float nearVal, float farVal)
         {
             mat4 Result = new mat4(0);
-            Result[0][0] = ((2) * nearVal) / (right - left);
-            Result[1][1] = ((2) * nearVal) / (top - bottom);
-            Result[2][0] = (right + left) / (right - left);
-            Result[2][1] = (top + bottom) / (top - bottom);
-            Result[2][3] = (1);
+            Result.M11 = 2 * nearVal / (right - left);
+            Result.M22 = 2 * nearVal / (top - bottom);
+            Result.M31 = (right + left) / (right - left);
+            Result.M32 = (top + bottom) / (top - bottom);
+            Result.M34 = 1;
 
 #if GLM_DEPTH_ZERO_TO_ONE
-            Result[2][2] = farVal / (farVal - nearVal);
-            Result[3][2] = -(farVal * nearVal) / (farVal - nearVal);
+            Result.M33 = farVal / (farVal - nearVal);
+            Result.M43 = -(farVal * nearVal) / (farVal - nearVal);
 #else
-            Result[2][2] = (farVal + nearVal) / (farVal - nearVal);
-            Result[3][2] = -((2) * farVal * nearVal) / (farVal - nearVal);
+            Result.M33 = (farVal + nearVal) / (farVal - nearVal);
+            Result.M43 = -((2) * farVal * nearVal) / (farVal - nearVal);
 #endif
             return Result;
         }
@@ -252,18 +253,18 @@ namespace SharpGame
         public static mat4 frustumRH(float left, float right, float bottom, float top, float nearVal, float farVal)
         {
             mat4 Result = new mat4(0);
-            Result[0][0] = ((2) * nearVal) / (right - left);
-            Result[1][1] = ((2) * nearVal) / (top - bottom);
-            Result[2][0] = (right + left) / (right - left);
-            Result[2][1] = (top + bottom) / (top - bottom);
-            Result[2][3] = (-1);
+            Result.M11 = 2 * nearVal / (right - left);
+            Result.M22 = 2 * nearVal / (top - bottom);
+            Result.M31 = (right + left) / (right - left);
+            Result.M32 = (top + bottom) / (top - bottom);
+            Result.M34 = -1;
 
 #if GLM_DEPTH_ZERO_TO_ONE
-            Result[2][2] = farVal / (nearVal - farVal);
-            Result[3][2] = -(farVal * nearVal) / (farVal - nearVal);
+            Result.M33 = farVal / (nearVal - farVal);
+            Result.M43 = -(farVal * nearVal) / (farVal - nearVal);
 #else
-            Result[2][2] = -(farVal + nearVal) / (farVal - nearVal);
-            Result[3][2] = -((2) * farVal * nearVal) / (farVal - nearVal);
+            Result.M33 = -(farVal + nearVal) / (farVal - nearVal);
+            Result.M43 = -((2) * farVal * nearVal) / (farVal - nearVal);
 #endif
             return Result;
         }
@@ -278,45 +279,42 @@ namespace SharpGame
 #endif
         }
 
-
         public static mat4 perspectiveRH(float fovy, float aspect, float zNear, float zFar)
         {
-            float tanHalfFovy = tan(fovy / (2));
+            float tanHalfFovy = tan(fovy / 2);
 
             mat4 Result = new mat4(0);
-            Result[0][0] = (1) / (aspect * tanHalfFovy);
-            Result[1][1] = (1) / (tanHalfFovy);
-            Result[2][3] = -(1);
+            Result.M11 = 1 / (aspect * tanHalfFovy);
+            Result.M22 = 1 / tanHalfFovy;
+            Result.M34 = -1;
 
 #if GLM_DEPTH_ZERO_TO_ONE
-            Result[2][2] = zFar / (zNear - zFar);
-            Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+            Result.M33 = zFar / (zNear - zFar);
+            Result.M43 = -(zFar * zNear) / (zFar - zNear);
 #else
-            Result[2][2] = -(zFar + zNear) / (zFar - zNear);
-            Result[3][2] = -((2) * zFar * zNear) / (zFar - zNear);
+            Result.M33 = -(zFar + zNear) / (zFar - zNear);
+            Result.M43 = -((2) * zFar * zNear) / (zFar - zNear);
 #endif
             return Result;
         }
-
 
         public static mat4 perspectiveLH(float fovy, float aspect, float zNear, float zFar)
         {
-            float tanHalfFovy = tan(fovy / (2));
+            float tanHalfFovy = tan(fovy / 2);
             mat4 Result = new mat4(0);
-            Result[0][0] = (1) / (aspect * tanHalfFovy);
-            Result[1][1] = (1) / (tanHalfFovy);
-            Result[2][3] = (1);
+            Result.M11 = 1 / (aspect * tanHalfFovy);
+            Result.M22 = 1 / tanHalfFovy;
+            Result.M34 = 1;
 
 #if GLM_DEPTH_ZERO_TO_ONE
-            Result[2][2] = zFar / (zFar - zNear);
-            Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+            Result.M33 = zFar / (zFar - zNear);
+            Result.M43 = -(zFar * zNear) / (zFar - zNear);
 #else
-            Result[2][2] = (zFar + zNear) / (zFar - zNear);
-            Result[3][2] = -((2) * zFar * zNear) / (zFar - zNear);
+            Result.M33 = (zFar + zNear) / (zFar - zNear);
+            Result.M43 = -((2) * zFar * zNear) / (zFar - zNear);
 #endif
             return Result;
         }
-
 
         public static mat4 perspectiveFov(float fov, float width, float height, float zNear, float zFar)
         {
@@ -327,47 +325,45 @@ namespace SharpGame
 #endif
         }
 
-
         public static mat4 perspectiveFovRH(float fov, float width, float height, float zNear, float zFar)
         {
             float rad = fov;
-            float h = cos((0.5f) * rad) / sin((0.5f) * rad);
+            float h = cos(0.5f * rad) / sin(0.5f * rad);
             float w = h * height / width; ///todo max(width , Height) / min(width , Height)?
 
-            mat4 Result = new mat4((0));
-            Result[0][0] = w;
-            Result[1][1] = h;
-            Result[2][3] = -(1);
+            mat4 Result = new mat4(0);
+            Result.M11 = w;
+            Result.M22 = h;
+            Result.M34 = -1;
 
 #if GLM_DEPTH_ZERO_TO_ONE
-            Result[2][2] = zFar / (zNear - zFar);
-            Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+            Result.M33 = zFar / (zNear - zFar);
+            Result.M43 = -(zFar * zNear) / (zFar - zNear);
 #else
-            Result[2][2] = -(zFar + zNear) / (zFar - zNear);
-            Result[3][2] = -((2) * zFar * zNear) / (zFar - zNear);
+            Result.M33 = -(zFar + zNear) / (zFar - zNear);
+            Result.M43 = -((2) * zFar * zNear) / (zFar - zNear);
 #endif
 
             return Result;
         }
 
-
         public static mat4 perspectiveFovLH(float fov, float width, float height, float zNear, float zFar)
         {
             float rad = fov;
-            float h = cos((0.5f) * rad) / sin((0.5f) * rad);
+            float h = cos(0.5f * rad) / sin(0.5f * rad);
             float w = h * height / width; ///todo max(width , Height) / min(width , Height)?
 
             mat4 Result = new mat4(0);
-            Result[0][0] = w;
-            Result[1][1] = h;
-            Result[2][3] = (1);
+            Result.M11 = w;
+            Result.M22 = h;
+            Result.M34 = 1;
 
 #if GLM_DEPTH_ZERO_TO_ONE
-            Result[2][2] = zFar / (zFar - zNear);
-            Result[3][2] = -(zFar * zNear) / (zFar - zNear);
+            Result.M33 = zFar / (zFar - zNear);
+            Result.M43 = -(zFar * zNear) / (zFar - zNear);
 #else
-            Result[2][2] = (zFar + zNear) / (zFar - zNear);
-            Result[3][2] = -((2) * zFar * zNear) / (zFar - zNear);
+            Result.M33 = (zFar + zNear) / (zFar - zNear);
+            Result.M43 = -((2) * zFar * zNear) / (zFar - zNear);
 #endif
             return Result;
         }
@@ -381,57 +377,55 @@ namespace SharpGame
 #endif
         }
 
-
         public static mat4 infinitePerspectiveRH(float fovy, float aspect, float zNear)
         {
-            float range = tan(fovy / (2)) * zNear;
+            float range = tan(fovy / 2) * zNear;
             float left = -range * aspect;
             float right = range * aspect;
             float bottom = -range;
             float top = range;
 
             mat4 Result = new mat4(0);
-            Result[0][0] = ((2) * zNear) / (right - left);
-            Result[1][1] = ((2) * zNear) / (top - bottom);
-            Result[2][2] = -(1);
-            Result[2][3] = -(1);
-            Result[3][2] = -(2) * zNear;
+            Result.M11 = 2 * zNear / (right - left);
+            Result.M22 = 2 * zNear / (top - bottom);
+            Result.M33 = -1;
+            Result.M34 = -1;
+            Result.M43 = -2 * zNear;
             return Result;
         }
 
         public static mat4 infinitePerspectiveLH(float fovy, float aspect, float zNear)
         {
-            float range = tan(fovy / (2)) * zNear;
+            float range = tan(fovy / 2) * zNear;
             float left = -range * aspect;
             float right = range * aspect;
             float bottom = -range;
             float top = range;
 
             mat4 Result = new mat4(0);
-            Result[0][0] = ((2) * zNear) / (right - left);
-            Result[1][1] = ((2) * zNear) / (top - bottom);
-            Result[2][2] = (1);
-            Result[2][3] = (1);
-            Result[3][2] = -(2) * zNear;
+            Result.M11 = 2 * zNear / (right - left);
+            Result.M22 = 2 * zNear / (top - bottom);
+            Result.M33 = 1;
+            Result.M34 = 1;
+            Result.M43 = -2 * zNear;
             return Result;
         }
 
         // Infinite projection matrix: http://www.terathon.com/gdc07_lengyel.pdf
-
         public static mat4 tweakedInfinitePerspective(float fovy, float aspect, float zNear, float ep)
         {
-            float range = tan(fovy / (2)) * zNear;
+            float range = tan(fovy / 2) * zNear;
             float left = -range * aspect;
             float right = range * aspect;
             float bottom = -range;
             float top = range;
 
-            mat4 Result = new mat4((0));
-            Result[0][0] = ((2) * zNear) / (right - left);
-            Result[1][1] = ((2) * zNear) / (top - bottom);
-            Result[2][2] = ep - (1);
-            Result[2][3] = (-1);
-            Result[3][2] = (ep - (2)) * zNear;
+            mat4 Result = new mat4(0);
+            Result.M11 = 2 * zNear / (right - left);
+            Result.M22 = 2 * zNear / (top - bottom);
+            Result.M33 = ep - 1;
+            Result.M34 = -1;
+            Result.M43 = (ep - 2) * zNear;
             return Result;
         }
 
@@ -442,14 +436,14 @@ namespace SharpGame
 
         public static vec3 project(ref vec3 obj, ref mat4 model, ref mat4 proj, ref vec4 viewport)
         {
-            vec4 tmp = vec4(obj, (1));
+            vec4 tmp = vec4(obj, 1);
             tmp = model * tmp;
             tmp = proj * tmp;
 
             tmp /= tmp.w;
 #if GLM_DEPTH_ZERO_TO_ONE
-            tmp.x = tmp.x * (0.5f) + (0.5f);
-            tmp.y = tmp.y * (0.5f) + (0.5f);
+            tmp.x = tmp.x * 0.5f + 0.5f;
+            tmp.y = tmp.y * 0.5f + 0.5f;
 #else
 			tmp = tmp* (0.5) + (0.5);
 #endif
@@ -468,8 +462,8 @@ namespace SharpGame
             tmp.x = (tmp.x - viewport[0]) / viewport[2];
             tmp.y = (tmp.y - viewport[1]) / viewport[3];
 #if GLM_DEPTH_ZERO_TO_ONE
-            tmp.x = tmp.x * (2) - (1);
-            tmp.y = tmp.y * (2) - (1);
+            tmp.x = tmp.x * 2 - 1;
+            tmp.y = tmp.y * 2 - 1;
 #else
         tmp = tmp * (2) - (1);
 #endif
@@ -485,71 +479,246 @@ namespace SharpGame
             //assert(delta.x > (0) && delta.y > (0));
             mat4 Result = mat4(1);
 
-            if (!(delta.x > (0) && delta.y > (0)))
+            if (!(delta.x > 0 && delta.y > 0))
                 return Result; // Error
 
             var Temp = vec3(
-                ((viewport[2]) - (2) * (center.x - (viewport[0]))) / delta.x,
-                ((viewport[3]) - (2) * (center.y - (viewport[1]))) / delta.y,
-                (0));
+                (viewport[2] - 2 * (center.x - viewport[0])) / delta.x,
+                (viewport[3] - 2 * (center.y - viewport[1])) / delta.y,
+                0);
 
             // Translate and scale the picked region to the entire window
             Result = translate(Result, Temp);
-            return scale(Result, vec3((viewport[2]) / delta.x, (viewport[3]) / delta.y, (1)));
+            return scale(Result, vec3(viewport[2] / delta.x, viewport[3] / delta.y, 1));
         }
 
 
-        public static mat4 lookAt(vec3 eye, vec3 center, vec3 up)
+        public static mat4 lookAt(in vec3 eye, in vec3 center, in vec3 up)
         {
 #if GLM_LEFT_HANDED
-            return lookAtLH(eye, center, up);
+            return lookAtLH(in eye, in center, in up);
 #else
-            return lookAtRH(eye, center, up);
+            return lookAtRH(in eye, in center, in up);
 #endif
         }
 
-        public static mat4 lookAtRH(vec3 eye, vec3 center, vec3 up)
+        public static mat4 lookAtRH(in vec3 eye, in vec3 center, in vec3 up)
         {
             vec3 f = normalize(center - eye);
             vec3 s = normalize(cross(f, up));
             vec3 u = cross(s, f);
 
             mat4 Result = mat4(1);
-            Result[0][0] = s.x;
-            Result[1][0] = s.y;
-            Result[2][0] = s.z;
-            Result[0][1] = u.x;
-            Result[1][1] = u.y;
-            Result[2][1] = u.z;
-            Result[0][2] = -f.x;
-            Result[1][2] = -f.y;
-            Result[2][2] = -f.z;
-            Result[3][0] = -dot(s, eye);
-            Result[3][1] = -dot(u, eye);
-            Result[3][2] = dot(f, eye);
+            Result.M11 = s.x;
+            Result.M21 = s.y;
+            Result.M31 = s.z;
+            Result.M12 = u.x;
+            Result.M22 = u.y;
+            Result.M32 = u.z;
+            Result.M13 = -f.x;
+            Result.M23 = -f.y;
+            Result.M33 = -f.z;
+            Result.M41 = -dot(s, eye);
+            Result.M42 = -dot(u, eye);
+            Result.M43 = dot(f, eye);
             return Result;
         }
 
-        public static mat4 lookAtLH(vec3 eye, vec3 center, vec3 up)
+        public static mat4 lookAtLH(in vec3 eye, in vec3 center, in vec3 up)
         {
-            vec3 f = (normalize(center - eye));
-            vec3 s = (normalize(cross(up, f)));
-            vec3 u = (cross(f, s));
+            vec3 f = normalize(center - eye);
+            vec3 s = normalize(cross(up, f));
+            vec3 u = cross(f, s);
 
             mat4 Result = mat4(1);
-            Result[0][0] = s.x;
-            Result[1][0] = s.y;
-            Result[2][0] = s.z;
-            Result[0][1] = u.x;
-            Result[1][1] = u.y;
-            Result[2][1] = u.z;
-            Result[0][2] = f.x;
-            Result[1][2] = f.y;
-            Result[2][2] = f.z;
-            Result[3][0] = -dot(s, eye);
-            Result[3][1] = -dot(u, eye);
-            Result[3][2] = -dot(f, eye);
+            Result.M11 = s.x;
+            Result.M21 = s.y;
+            Result.M31 = s.z;
+            Result.M12 = u.x;
+            Result.M22 = u.y;
+            Result.M32 = u.z;
+            Result.M13 = f.x;
+            Result.M23 = f.y;
+            Result.M33 = f.z;
+            Result.M41 = -dot(s, eye);
+            Result.M42 = -dot(u, eye);
+            Result.M43 = -dot(f, eye);
             return Result;
+        }
+
+        static vec3 combine(vec3 a, vec3 b, float ascl, float bscl)
+        {
+            return (a * ascl) + (b * bscl);
+        }
+
+        static vec3 scale(vec3 v, float desiredLength)
+        {
+            return v * desiredLength / length(v);
+        }
+
+        // Matrix decompose
+        // http://www.opensource.apple.com/source/WebCore/WebCore-514/platform/graphics/transforms/TransformationMatrix.cpp
+        // Decomposes the mode matrix to translations,rotation scale components
+
+        public static bool decompose(ref mat4 ModelMatrix, ref vec3 Scale, ref quat Orientation, ref vec3 Translation, ref vec3 Skew, ref vec4 Perspective)
+        {
+            mat4 LocalMatrix = ModelMatrix;
+
+            // Normalize the matrix.
+            if (epsilonEqual(LocalMatrix.M44, 0, epsilon()))
+            {
+                return false;
+            }
+
+            for (int i = 0; i < 4; ++i)
+                for (int j = 0; j < 4; ++j)
+                    LocalMatrix[i][j] /= LocalMatrix.M44;
+
+            // perspectiveMatrix is used to solve for perspective, but it also provides
+            // an easy way to test for singularity of the upper 3x3 component.
+            mat4 PerspectiveMatrix = LocalMatrix;
+
+            for (int i = 0; i < 3; i++)
+                PerspectiveMatrix[i][3] = 0;
+
+            PerspectiveMatrix.M44 = 1;
+
+            /// TODO: Fixme!
+            if (epsilonEqual(determinant(in PerspectiveMatrix), 0, epsilon()))
+                return false;
+
+            // First, isolate perspective.  This is the messiest.
+            if (
+                epsilonNotEqual(LocalMatrix.M14, 0, epsilon()) ||
+                epsilonNotEqual(LocalMatrix.M24, 0, epsilon()) ||
+                epsilonNotEqual(LocalMatrix.M34, 0, epsilon()))
+            {
+                // rightHandSide is the right hand side of the equation.
+                vec4 RightHandSide = new vec4();
+                RightHandSide.x = LocalMatrix.M14;
+                RightHandSide.y = LocalMatrix.M24;
+                RightHandSide.z = LocalMatrix.M34;
+                RightHandSide.w = LocalMatrix.M44;
+
+                // Solve the equation by inverting PerspectiveMatrix and multiplying
+                // rightHandSide by the inverse.  (This is the easiest way, not
+                // necessarily the best.)
+                mat4 InversePerspectiveMatrix = inverse(PerspectiveMatrix);//   inverse(PerspectiveMatrix, inversePerspectiveMatrix);
+                mat4 TransposedInversePerspectiveMatrix = transpose(InversePerspectiveMatrix);//   transposeMatrix4(inversePerspectiveMatrix, transposedInversePerspectiveMatrix);
+
+                Perspective = TransposedInversePerspectiveMatrix * RightHandSide;
+                //  v4MulPointByMatrix(rightHandSide, transposedInversePerspectiveMatrix, perspectivePoint);
+
+                // Clear the perspective partition
+                LocalMatrix.M14 = LocalMatrix.M24 = LocalMatrix.M34 = 0;
+                LocalMatrix.M44 = 1;
+            }
+            else
+            {
+                // No perspective.
+                Perspective = vec4(0, 0, 0, 1);
+            }
+
+            // Next take care of translation (easy).
+            Translation = vec3(LocalMatrix[3]);
+            LocalMatrix[3] = vec4(0, 0, 0, LocalMatrix[3].w);
+
+            Span<vec3> Row = stackalloc vec3[3];
+            vec3 Pdum3;
+            {
+                // Now get scale and shear.
+                for (int i = 0; i < 3; ++i)
+                    for (int j = 0; j < 3; ++j)
+                        Row[i][j] = LocalMatrix[i][j];
+            }
+            // Compute X scale factor and normalize first row.
+            Scale.x = length(Row[0]);// v3Length(Row[0]);
+
+            Row[0] = scale(Row[0], 1);
+
+            // Compute XY shear factor and make 2nd row orthogonal to 1st.
+            Skew.z = dot(Row[0], Row[1]);
+            Row[1] = combine(Row[1], Row[0], 1, -Skew.z);
+
+            // Now, compute Y scale and normalize 2nd row.
+            Scale.y = length(Row[1]);
+            Row[1] = scale(Row[1], 1);
+            Skew.z /= Scale.y;
+
+            // Compute XZ and YZ shears, orthogonalize 3rd row.
+            Skew.y = dot(Row[0], Row[2]);
+            Row[2] = combine(Row[2], Row[0], 1, -Skew.y);
+            Skew.x = dot(Row[1], Row[2]);
+            Row[2] = combine(Row[2], Row[1], 1, -Skew.x);
+
+            // Next, get Z scale and normalize 3rd row.
+            Scale.z = length(Row[2]);
+            Row[2] = scale(Row[2], 1);
+            Skew.y /= Scale.z;
+            Skew.x /= Scale.z;
+
+            // At this point, the matrix (in rows[]) is orthonormal.
+            // Check for a coordinate system flip.  If the determinant
+            // is -1, then negate the matrix and the scaling factors.
+            Pdum3 = cross(Row[1], Row[2]); // v3Cross(row[1], row[2], Pdum3);
+            if (dot(Row[0], Pdum3) < 0)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    Scale[i] *= -1;
+                    Row[i] *= -1;
+                }
+            }
+
+            // Now, get the rotations out, as described in the gem.
+
+            // FIXME - Add the ability to return either quaternions (which are
+            // easier to recompose with) or Euler angles (rx, ry, rz), which
+            // are easier for authors to deal with. The latter will only be useful
+            // when we fix https://bugs.webkit.org/show_bug.cgi?id=23799, so I
+            // will leave the Euler angle code here for now.
+
+            // ret.rotateY = asin(-Row.M13);
+            // if (cos(ret.rotateY) != 0) {
+            //     ret.rotateX = atan2(Row.M23, Row.M33);
+            //     ret.rotateZ = atan2(Row.M12, Row.M11);
+            // } else {
+            //     ret.rotateX = atan2(-Row.M31, Row.M22);
+            //     ret.rotateZ = 0;
+            // }
+
+            {
+                int i, j, k = 0;
+                float root, trace = Row[0].x + Row[1].y + Row[2].z;
+                if (trace > 0)
+                {
+                    root = sqrt(trace + 1.0f);
+                    Orientation.w = 0.5f * root;
+                    root = 0.5f / root;
+                    Orientation.x = root * (Row[1].z - Row[2].y);
+                    Orientation.y = root * (Row[2].x - Row[0].z);
+                    Orientation.z = root * (Row[0].y - Row[1].x);
+                } // End if > 0
+                else
+                {
+                    Span<int> Next = stackalloc[] { 1, 2, 0 };
+                    i = 0;
+                    if (Row[1].y > Row[0].x) i = 1;
+                    if (Row[2].z > Row[i][i]) i = 2;
+                    j = Next[i];
+                    k = Next[j];
+
+                    root = sqrt(Row[i][i] - Row[j][j] - Row[k][k] + 1.0f);
+
+                    Orientation[i] = 0.5f * root;
+                    root = 0.5f / root;
+                    Orientation[j] = root * (Row[i][j] + Row[j][i]);
+                    Orientation[k] = root * (Row[i][k] + Row[k][i]);
+                    Orientation.w = root * (Row[j][k] - Row[k][j]);
+                } // End if <= 0
+            }
+
+            return true;
         }
     }
 

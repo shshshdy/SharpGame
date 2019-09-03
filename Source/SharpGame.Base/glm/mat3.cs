@@ -10,15 +10,51 @@ namespace SharpGame
     public unsafe struct mat3
     {
         private fixed float value[9];
-        public ref float M11 => ref value[0];
-        public ref float M12 => ref value[1];
-        public ref float M13 => ref value[2];
-        public ref float M21 => ref value[3];
-        public ref float M22 => ref value[4];
-        public ref float M23 => ref value[5];
-        public ref float M31 => ref value[6];
-        public ref float M32 => ref value[7];
-        public ref float M33 => ref value[8];
+        public ref float M11
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[0];
+        }
+        public ref float M12
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[1];
+        }
+        public ref float M13
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[2];
+        }
+        public ref float M21
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[3];
+        }
+        public ref float M22
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[4];
+        }
+        public ref float M23
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[5];
+        }
+        public ref float M31
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[6];
+        }
+        public ref float M32
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[7];
+        }
+        public ref float M33
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[8];
+        }
 
         #region Construction
         public mat3(float m00, float m01, float m02,
@@ -208,7 +244,7 @@ namespace SharpGame
             return new mat3(scale);
         }
 
-        public static mat3 inverse(mat3 m)
+        public static mat3 inverse(in mat3 m)
         {
             float OneOverDeterminant = (1f) / (
                 +m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
@@ -230,6 +266,33 @@ namespace SharpGame
 
         }
 
-    }
+        public static mat3 transpose(in mat3 m)
+		{
+			mat3 Result;
+            Result[0][0] = m[0][0];
+			Result[0][1] = m[1][0];
+			Result[0][2] = m[2][0];
 
+			Result[1][0] = m[0][1];
+			Result[1][1] = m[1][1];
+			Result[1][2] = m[2][1];
+
+			Result[2][0] = m[0][2];
+			Result[2][1] = m[1][2];
+			Result[2][2] = m[2][2];
+			return Result;
+		}
+
+
+        public static float determinant(in mat3 m)
+		{
+			return
+				+ m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
+				- m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
+				+ m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]);
+		}
+
+
+    }
 }
+

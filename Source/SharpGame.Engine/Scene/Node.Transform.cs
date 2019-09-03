@@ -169,7 +169,9 @@ namespace SharpGame
 
         public void SetTransform(mat4 matrix)
         {
-        //    matrix.Decompose(out scaling_, out rotation_, out position_);
+            vec3 v1 = vec3.Zero;
+            vec4 v2 = vec4.Zero;
+            glm.decompose(ref matrix, ref scaling_, ref rotation_, ref position_, ref v1, ref v2);
             MarkDirty();
         }
 

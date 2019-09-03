@@ -4,8 +4,11 @@ using System.Text;
 
 namespace SharpGame
 {
+    using global::System.Runtime.InteropServices;
+    using global::System.Runtime.Serialization;
     using static glm;
-
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [DataContract]
     public struct quat
     {
         public float x;
@@ -50,10 +53,10 @@ namespace SharpGame
 
         public quat(float s, vec3 v)
         {
-            this.x = v.x;
-            this.y = v.y;
-            this.z = v.z;
-            this.w = s;
+            x = v.x;
+            y = v.y;
+            z = v.z;
+            w = s;
         }
 
         public quat(vec3 u, vec3 v)
@@ -90,25 +93,26 @@ namespace SharpGame
             z = c.x * c.y * s.z - s.x * s.y * c.z;
         }
 
-        public quat(float x, float y, float z) : this(new vec3(x, y, z))
+        public quat(float x, float y, float z)
+            : this(new vec3(x, y, z))
         {
         }
 
         public vec3 EulerAngles => vec3(Pitch, Yaw, Roll);
 
-        public float Roll => atan((2) * (this.x * this.y + this.w * this.z), this.w * this.w + this.x * this.x - this.y * this.y - this.z * this.z);
+        public float Roll => atan((2) * (x * y + w * z), w * w + x * x - y * y - z * z);
 
         public float Pitch
         {
             get
             {
                 //return float(atan(float(2) * (q.y * q.z + q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z));
-                float y = (2) * (this.y * this.z + this.w * this.x);
-                float x = w * w - this.x * this.x - this.y * this.y + this.z * this.z;
+                float y = (2) * (this.y * z + w * this.x);
+                float x = w * w - this.x * this.x - this.y * this.y + z * z;
 
                 if (y == 0 && x == 0)
                 {
-                    return 2 * atan(this.x, this.w);
+                    return 2 * atan(this.x, w);
                 }
 
                 return atan(y, x);
@@ -209,7 +213,7 @@ namespace SharpGame
             if (obj.GetType() == typeof(quat))
             {
                 var vec = (quat)obj;
-                if (this.x == vec.x && this.y == vec.y && this.z == vec.z && this.w == vec.w)
+                if (x == vec.x && y == vec.y && z == vec.z && w == vec.w)
                     return true;
             }
 
@@ -249,7 +253,7 @@ namespace SharpGame
         /// </returns>
         public override int GetHashCode()
         {
-            return this.x.GetHashCode() ^ this.y.GetHashCode() ^ this.z.GetHashCode() ^ this.w.GetHashCode();
+            return x.GetHashCode() ^ y.GetHashCode() ^ z.GetHashCode() ^ w.GetHashCode();
         }
 
         #endregion
@@ -329,7 +333,6 @@ namespace SharpGame
 
         public static quat mix(quat x, quat y, float a)
         {
-
             float cosTheta = dot(x, y);
 
             // Perform a linear interpolation when cosTheta is close to 1 to avoid side effect of sin(angle) becoming a zero denominator
