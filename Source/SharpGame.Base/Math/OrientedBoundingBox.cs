@@ -22,7 +22,7 @@ using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-#if false
+
 namespace SharpGame
 {
     /// <summary>
@@ -34,12 +34,12 @@ namespace SharpGame
         /// <summary>
         /// Half lengths of the box along each axis.
         /// </summary>
-        public Vector3 Extents;
+        public vec3 Extents;
 
         /// <summary>
         /// The matrix which aligns and scales the box, and its translation vector represents the center of the box.
         /// </summary>
-        public Matrix Transformation;
+        public mat4 Transformation;
 
         /// <summary>
         /// Creates an <see cref="OrientedBoundingBox"/> from a BoundingBox.
@@ -52,7 +52,7 @@ namespace SharpGame
         {
             var Center = bb.Minimum + (bb.Maximum - bb.Minimum) / 2f;
             Extents = bb.Maximum - Center;
-            Transformation = Matrix.Translation(Center);
+            Transformation = glm.translate(Center);
         }
 
         /// <summary>
@@ -63,11 +63,11 @@ namespace SharpGame
         /// <remarks>
         /// Initially, the OrientedBoundingBox is axis-aligned box, but it can be rotated and transformed later.
         /// </remarks>
-        public OrientedBoundingBox(Vector3 minimum, Vector3 maximum)
+        public OrientedBoundingBox(vec3 minimum, vec3 maximum)
         {
             var Center = minimum + (maximum - minimum) / 2f;
             Extents = maximum - Center;
-            Transformation = Matrix.Translation(Center);
+            Transformation = glm.translate(Center);
         }
 
         /// <summary>
@@ -78,41 +78,41 @@ namespace SharpGame
         /// This method is not for computing the best tight-fitting OrientedBoundingBox.
         /// And initially, the OrientedBoundingBox is axis-aligned box, but it can be rotated and transformed later.
         /// </remarks>
-        public OrientedBoundingBox(Vector3[] points)
+        public OrientedBoundingBox(vec3[] points)
         {
             if (points == null || points.Length == 0)
                 throw new ArgumentNullException("points");
 
-            Vector3 minimum = new Vector3(float.MaxValue);
-            Vector3 maximum = new Vector3(float.MinValue);
+            vec3 minimum = new vec3(float.MaxValue);
+            vec3 maximum = new vec3(float.MinValue);
 
             for (int i = 0; i < points.Length; ++i)
             {
-                Vector3.Min(ref minimum, ref points[i], out minimum);
-                Vector3.Max(ref maximum, ref points[i], out maximum);
+                glm.Min(ref minimum, ref points[i], out minimum);
+                glm.Max(ref maximum, ref points[i], out maximum);
             }
 
             var Center = minimum + (maximum - minimum) / 2f;
             Extents = maximum - Center;
-            Transformation = Matrix.Translation(Center);
+            Transformation = glm.translate(Center);
         }
 
         /// <summary>
         /// Retrieves the eight corners of the bounding box.
         /// </summary>
         /// <returns>An array of points representing the eight corners of the bounding box.</returns>
-        public Vector3[] GetCorners()
+        public vec3[] GetCorners()
         {
-            var xv = new Vector3(Extents.X, 0, 0);
-            var yv = new Vector3(0, Extents.Y, 0);
-            var zv = new Vector3(0, 0, Extents.Z);
-            Vector3.TransformNormal(ref xv, ref Transformation, out xv);
-            Vector3.TransformNormal(ref yv, ref Transformation, out yv);
-            Vector3.TransformNormal(ref zv, ref Transformation, out zv);
+            var xv = new vec3(Extents.X, 0, 0);
+            var yv = new vec3(0, Extents.Y, 0);
+            var zv = new vec3(0, 0, Extents.Z);
+            vec3.TransformNormal(ref xv, ref Transformation, out xv);
+            vec3.TransformNormal(ref yv, ref Transformation, out yv);
+            vec3.TransformNormal(ref zv, ref Transformation, out zv);
 
             var center = Transformation.TranslationVector;
 
-            var corners = new Vector3[8];
+            var corners = new vec3[8];
             corners[0] = center + xv + yv + zv;
             corners[1] = center + xv + yv - zv;
             corners[2] = center - xv + yv - zv;
@@ -133,9 +133,9 @@ namespace SharpGame
         /// While any kind of transformation can be applied, it is recommended to apply scaling using scale method instead, which
         /// scales the Extents and keeps the Transformation matrix for rotation only, and that preserves collision detection accuracy.
         /// </remarks>
-        public void Transform(ref Matrix mat)
+        public void Transform(ref mat4 mat)
         {
-            Transformation *= mat;
+            Transformation = mat * Transformation;
         }
 
         /// <summary>
@@ -146,9 +146,9 @@ namespace SharpGame
         /// While any kind of transformation can be applied, it is recommended to apply scaling using scale method instead, which
         /// scales the Extents and keeps the Transformation matrix for rotation only, and that preserves collision detection accuracy.
         /// </remarks>
-        public void Transform(Matrix mat)
+        public void Transform(mat4 mat)
         {
-            Transformation *= mat;
+            Transformation = mat * Transformation;
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace SharpGame
         /// By keeping Transformation matrix scaling-free, the collision detection methods will be more accurate.
         /// </summary>
         /// <param name="scaling"></param>
-        public void Scale(ref Vector3 scaling)
+        public void Scale(ref vec3 scaling)
         {
             Extents *= scaling;
         }
@@ -166,7 +166,7 @@ namespace SharpGame
         /// By keeping Transformation matrix scaling-free, the collision detection methods will be more accurate.
         /// </summary>
         /// <param name="scaling"></param>
-        public void Scale(Vector3 scaling)
+        public void Scale(vec3 scaling)
         {
             Extents *= scaling;
         }
@@ -185,7 +185,7 @@ namespace SharpGame
         /// Translates the <see cref="OrientedBoundingBox"/> to a new position using a translation vector;
         /// </summary>
         /// <param name="translation">the translation vector.</param>
-        public void Translate(ref Vector3 translation)
+        public void Translate(ref vec3 translation)
         {
             Transformation.TranslationVector += translation;
         }
@@ -194,7 +194,7 @@ namespace SharpGame
         /// Translates the <see cref="OrientedBoundingBox"/> to a new position using a translation vector;
         /// </summary>
         /// <param name="translation">the translation vector.</param>
-        public void Translate(Vector3 translation)
+        public void Translate(vec3 translation)
         {
             Transformation.TranslationVector += translation;
         }
@@ -206,7 +206,7 @@ namespace SharpGame
         /// The property will return the actual size even if the scaling is applied using Scale method, 
         /// but if the scaling is applied to transformation matrix, use GetSize Function instead.
         /// </remarks>
-        public Vector3 Size
+        public vec3 Size
         {
             get
             {
@@ -222,38 +222,38 @@ namespace SharpGame
         /// This method is computationally expensive, so if no scale is applied to the transformation matrix
         /// use <see cref="OrientedBoundingBox.Size"/> property instead.
         /// </remarks>
-        public Vector3 GetSize()
+        public vec3 GetSize()
         {
-            var xv = new Vector3(Extents.X * 2, 0, 0);
-            var yv = new Vector3(0, Extents.Y * 2, 0);
-            var zv = new Vector3(0, 0, Extents.Z * 2);
-            Vector3.TransformNormal(ref xv, ref Transformation, out xv);
-            Vector3.TransformNormal(ref yv, ref Transformation, out yv);
-            Vector3.TransformNormal(ref zv, ref Transformation, out zv);
+            var xv = new vec3(Extents.X * 2, 0, 0);
+            var yv = new vec3(0, Extents.Y * 2, 0);
+            var zv = new vec3(0, 0, Extents.Z * 2);
+            vec3.TransformNormal(ref xv, ref Transformation, out xv);
+            vec3.TransformNormal(ref yv, ref Transformation, out yv);
+            vec3.TransformNormal(ref zv, ref Transformation, out zv);
 
-            return new Vector3(xv.Length(), yv.Length(), zv.Length());
+            return new vec3(xv.Length(), yv.Length(), zv.Length());
         }
 
         /// <summary>
         /// Returns the square size of the <see cref="OrientedBoundingBox"/> taking into consideration the scaling applied to the transformation matrix.
         /// </summary>
         /// <returns>The size of the consideration</returns>
-        public Vector3 GetSizeSquared()
+        public vec3 GetSizeSquared()
         {
-            var xv = new Vector3(Extents.X * 2, 0, 0);
-            var yv = new Vector3(0, Extents.Y * 2, 0);
-            var zv = new Vector3(0, 0, Extents.Z * 2);
-            Vector3.TransformNormal(ref xv, ref Transformation, out xv);
-            Vector3.TransformNormal(ref yv, ref Transformation, out yv);
-            Vector3.TransformNormal(ref zv, ref Transformation, out zv);
+            var xv = new vec3(Extents.X * 2, 0, 0);
+            var yv = new vec3(0, Extents.Y * 2, 0);
+            var zv = new vec3(0, 0, Extents.Z * 2);
+            vec3.TransformNormal(ref xv, ref Transformation, out xv);
+            vec3.TransformNormal(ref yv, ref Transformation, out yv);
+            vec3.TransformNormal(ref zv, ref Transformation, out zv);
 
-            return new Vector3(xv.LengthSquared(), yv.LengthSquared(), zv.LengthSquared());
+            return new vec3(xv.LengthSquared(), yv.LengthSquared(), zv.LengthSquared());
         }
 
         /// <summary>
         /// Returns the center of the <see cref="OrientedBoundingBox"/>.
         /// </summary>
-        public Vector3 Center
+        public vec3 Center
         {
             get
             {
@@ -266,14 +266,14 @@ namespace SharpGame
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(ref Vector3 point)
+        public Intersection Contains(ref vec3 point)
         {
             // Transform the point into the obb coordinates
-            Matrix invTrans;
-            Matrix.Invert(ref Transformation, out invTrans);
+            mat4 invTrans;
+            glm.inverse(ref Transformation, out invTrans);
 
-            Vector3 locPoint;
-            Vector3.TransformCoordinate(ref point, ref invTrans, out locPoint);
+            vec3 locPoint;
+            vec3.TransformCoordinate(ref point, ref invTrans, out locPoint);
 
             locPoint.X = Math.Abs(locPoint.X);
             locPoint.Y = Math.Abs(locPoint.Y);
@@ -293,7 +293,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(Vector3 point)
+        public Intersection Contains(vec3 point)
         {
             return Contains(ref point);
         }
@@ -303,18 +303,18 @@ namespace SharpGame
         /// </summary>
         /// <param name="points">The points array to test.</param>
         /// <returns>The type of containment.</returns>
-        public Intersection Contains(Vector3[] points)
+        public Intersection Contains(vec3[] points)
         {
-            Matrix invTrans;
-            Matrix.Invert(ref Transformation, out invTrans);
+            mat4 invTrans;
+            glm.inverse(ref Transformation, out invTrans);
 
             var containsAll = true;
             var containsAny = false;
 
             for (int i = 0; i < points.Length; i++)
             {
-                Vector3 locPoint;
-                Vector3.TransformCoordinate(ref points[i], ref invTrans, out locPoint);
+                vec3 locPoint;
+                vec3.TransformCoordinate(ref points[i], ref invTrans, out locPoint);
 
                 locPoint.X = Math.Abs(locPoint.X);
                 locPoint.Y = Math.Abs(locPoint.Y);
@@ -351,12 +351,12 @@ namespace SharpGame
         /// </remarks>
         public Intersection Contains(BoundingSphere sphere, bool IgnoreScale = false)
         {
-            Matrix invTrans;
-            Matrix.Invert(ref Transformation, out invTrans);
+            mat4 invTrans;
+            glm.inverse(ref Transformation, out invTrans);
 
             // Transform sphere center into the obb coordinates
-            Vector3 locCenter;
-            Vector3.TransformCoordinate(ref sphere.Center, ref invTrans, out locCenter);
+            vec3 locCenter;
+            vec3.TransformCoordinate(ref sphere.Center, ref invTrans, out locCenter);
 
             float locRadius;
             if (IgnoreScale)
@@ -364,16 +364,16 @@ namespace SharpGame
             else
             {
                 // Transform sphere radius into the obb coordinates
-                Vector3 vRadius = Vector3.UnitX * sphere.Radius;
-                Vector3.TransformNormal(ref vRadius, ref invTrans, out vRadius);
+                vec3 vRadius = vec3.UnitX * sphere.Radius;
+                vec3.TransformNormal(ref vRadius, ref invTrans, out vRadius);
                 locRadius = vRadius.Length();
             }
 
             //Perform regular BoundingBox to BoundingSphere containment check
-            Vector3 minusExtens = -Extents;
-            Vector3 vector;
-            Vector3.Clamp(ref locCenter, ref minusExtens, ref Extents, out vector);
-            float distance = Vector3.DistanceSquared(locCenter, vector);
+            vec3 minusExtens = -Extents;
+            vec3 vector;
+            glm.Clamp(ref locCenter, ref minusExtens, ref Extents, out vector);
+            float distance = vec3.DistanceSquared(locCenter, vector);
 
             if (distance > locRadius * locRadius)
                 return Intersection.OutSide;
@@ -388,12 +388,12 @@ namespace SharpGame
             return Intersection.Intersects;
         }
 
-        private static Vector3[] GetRows(ref Matrix mat)
+        private static vec3[] GetRows(ref mat4 mat)
         {
-            return new Vector3[] {
-                new Vector3(mat.M11,mat.M12,mat.M13),
-                new Vector3(mat.M21,mat.M22,mat.M23),
-                new Vector3(mat.M31,mat.M32,mat.M33)
+            return new vec3[] {
+                new vec3(mat.M11,mat.M12,mat.M13),
+                new vec3(mat.M21,mat.M22,mat.M23),
+                new vec3(mat.M31,mat.M32,mat.M33)
             };
         }
 
@@ -418,8 +418,8 @@ namespace SharpGame
             var RotA = GetRows(ref Transformation);
             var RotB = GetRows(ref obb.Transformation);
 
-            var R = new Matrix();       // Rotation from B to A
-            var AR = new Matrix();      // absolute values of R matrix, to use with box extents
+            var R = new mat4();       // Rotation from B to A
+            var AR = new mat4();      // absolute values of R matrix, to use with box extents
 
             float ExtentA, ExtentB, Separation;
             int i, k;
@@ -428,7 +428,7 @@ namespace SharpGame
             for (i = 0; i < 3; i++)
                 for (k = 0; k < 3; k++)
                 {
-                    R[i, k] = Vector3.Dot(RotA[i], RotB[k]);
+                    R[i, k] = vec3.Dot(RotA[i], RotB[k]);
                     AR[i, k] = Math.Abs(R[i, k]);
                 }
 
@@ -436,13 +436,13 @@ namespace SharpGame
             // Vector separating the centers of Box B and of Box A	
             var vSepWS = obb.Center - Center;
             // Rotated into Box A's coordinates
-            var vSepA = new Vector3(Vector3.Dot(vSepWS, RotA[0]), Vector3.Dot(vSepWS, RotA[1]), Vector3.Dot(vSepWS, RotA[2]));
+            var vSepA = new vec3(vec3.Dot(vSepWS, RotA[0]), vec3.Dot(vSepWS, RotA[1]), vec3.Dot(vSepWS, RotA[2]));
 
             // Test if any of A's basis vectors separate the box
             for (i = 0; i < 3; i++)
             {
                 ExtentA = SizeA[i];
-                ExtentB = Vector3.Dot(SizeB, new Vector3(AR[i, 0], AR[i, 1], AR[i, 2]));
+                ExtentB = vec3.Dot(SizeB, new vec3(AR[i, 0], AR[i, 1], AR[i, 2]));
                 Separation = Math.Abs(vSepA[i]);
 
                 if (Separation > ExtentA + ExtentB)
@@ -452,9 +452,9 @@ namespace SharpGame
             // Test if any of B's basis vectors separate the box
             for (k = 0; k < 3; k++)
             {
-                ExtentA = Vector3.Dot(SizeA, new Vector3(AR[0, k], AR[1, k], AR[2, k]));
+                ExtentA = vec3.Dot(SizeA, new vec3(AR[0, k], AR[1, k], AR[2, k]));
                 ExtentB = SizeB[k];
-                Separation = Math.Abs(Vector3.Dot(vSepA, new Vector3(R[0, k], R[1, k], R[2, k])));
+                Separation = Math.Abs(vec3.Dot(vSepA, new vec3(R[0, k], R[1, k], R[2, k])));
 
                 if (Separation > ExtentA + ExtentB)
                     return Intersection.OutSide;
@@ -487,26 +487,26 @@ namespace SharpGame
         /// For accuracy, The transformation matrix for the <see cref="OrientedBoundingBox"/> must not have any scaling applied to it.
         /// Anyway, scaling using Scale method will keep this method accurate.
         /// </remarks>
-        public Intersection ContainsLine(ref Vector3 L1, ref Vector3 L2)
+        public Intersection ContainsLine(ref vec3 L1, ref vec3 L2)
         {
-            var cornersCheck = Contains(new Vector3[] { L1, L2 });
+            var cornersCheck = Contains(new vec3[] { L1, L2 });
             if (cornersCheck != Intersection.OutSide)
                 return cornersCheck;
 
             //http://www.3dkingdoms.com/weekly/bbox.cpp
             // Put line in box space
-            Matrix invTrans;
-            Matrix.Invert(ref Transformation, out invTrans);
+            mat4 invTrans;
+            glm.inverse(ref Transformation, out invTrans);
 
-            Vector3 LB1;
-            Vector3.TransformCoordinate(ref L1, ref invTrans, out LB1);
-            Vector3 LB2;
-            Vector3.TransformCoordinate(ref L1, ref invTrans, out LB2);
+            vec3 LB1;
+            vec3.TransformCoordinate(ref L1, ref invTrans, out LB1);
+            vec3 LB2;
+            vec3.TransformCoordinate(ref L1, ref invTrans, out LB2);
 
             // Get line midpoint and extent
             var LMid = (LB1 + LB2) * 0.5f;
             var L = (LB1 - LMid);
-            var LExt = new Vector3(Math.Abs(L.X), Math.Abs(L.Y), Math.Abs(L.Z));
+            var LExt = new vec3(Math.Abs(L.X), Math.Abs(L.Y), Math.Abs(L.Z));
 
             // Use Separating Axis Test
             // Separation vector from box center to line center is LMid, since the line is in box space
@@ -546,9 +546,9 @@ namespace SharpGame
             float ExtentA, ExtentB, Separation;
             int i, k;
 
-            Matrix R;                   // Rotation from B to A
-            Matrix.Invert(ref Transformation, out R);
-            var AR = new Matrix();      // absolute values of R matrix, to use with box extents
+            mat4 R;                   // Rotation from B to A
+            glm.inverse(ref Transformation, out R);
+            var AR = new mat4();      // absolute values of R matrix, to use with box extents
 
             for (i = 0; i < 3; i++)
                 for (k = 0; k < 3; k++)
@@ -560,13 +560,13 @@ namespace SharpGame
             // Vector separating the centers of Box B and of Box A	
             var vSepWS = boxCenter - Center;
             // Rotated into Box A's coordinates
-            var vSepA = new Vector3(Vector3.Dot(vSepWS, RotA[0]), Vector3.Dot(vSepWS, RotA[1]), Vector3.Dot(vSepWS, RotA[2]));
+            var vSepA = new vec3(vec3.Dot(vSepWS, RotA[0]), vec3.Dot(vSepWS, RotA[1]), vec3.Dot(vSepWS, RotA[2]));
 
             // Test if any of A's basis vectors separate the box
             for (i = 0; i < 3; i++)
             {
                 ExtentA = SizeA[i];
-                ExtentB = Vector3.Dot(SizeB, new Vector3(AR[i, 0], AR[i, 1], AR[i, 2]));
+                ExtentB = vec3.Dot(SizeB, new vec3(AR[i, 0], AR[i, 1], AR[i, 2]));
                 Separation = Math.Abs(vSepA[i]);
 
                 if (Separation > ExtentA + ExtentB)
@@ -576,9 +576,9 @@ namespace SharpGame
             // Test if any of B's basis vectors separate the box
             for (k = 0; k < 3; k++)
             {
-                ExtentA = Vector3.Dot(SizeA, new Vector3(AR[0, k], AR[1, k], AR[2, k]));
+                ExtentA = vec3.Dot(SizeA, new vec3(AR[0, k], AR[1, k], AR[2, k]));
                 ExtentB = SizeB[k];
-                Separation = Math.Abs(Vector3.Dot(vSepA, new Vector3(R[0, k], R[1, k], R[2, k])));
+                Separation = Math.Abs(vec3.Dot(vSepA, new vec3(R[0, k], R[1, k], R[2, k])));
 
                 if (Separation > ExtentA + ExtentB)
                     return Intersection.OutSide;
@@ -606,17 +606,17 @@ namespace SharpGame
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out Vector3 point)
+        public bool Intersects(ref Ray ray, out vec3 point)
         {
             // Put ray in box space
-            Matrix invTrans;
-            Matrix.Invert(ref Transformation, out invTrans);
+            mat4 invTrans;
+            glm.inverse(ref Transformation, out invTrans);
 
             Ray bRay;
-            Vector3.TransformNormal(ref ray.Direction, ref invTrans, out bRay.Direction);
-            Vector3.TransformCoordinate(ref ray.Position, ref invTrans, out bRay.Position);
+            vec3.TransformNormal(ref ray.Direction, ref invTrans, out bRay.Direction);
+            vec3.TransformCoordinate(ref ray.Position, ref invTrans, out bRay.Position);
 
             //Perform a regular ray to BoundingBox check
             var bb = new BoundingBox(-Extents, Extents);
@@ -624,7 +624,7 @@ namespace SharpGame
 
             //Put the result intersection back to world
             if (intersects)
-                Vector3.TransformCoordinate(ref point, ref Transformation, out point);
+                vec3.TransformCoordinate(ref point, ref Transformation, out point);
 
             return intersects;
         }
@@ -636,17 +636,17 @@ namespace SharpGame
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(ref Ray ray)
         {
-            Vector3 point;
+            vec3 point;
             return Intersects(ref ray, out point);
         }
 
-        private Vector3[] GetLocalCorners()
+        private vec3[] GetLocalCorners()
         {
-            var xv = new Vector3(Extents.X, 0, 0);
-            var yv = new Vector3(0, Extents.Y, 0);
-            var zv = new Vector3(0, 0, Extents.Z);
+            var xv = new vec3(Extents.X, 0, 0);
+            var yv = new vec3(0, Extents.Y, 0);
+            var zv = new vec3(0, 0, Extents.Z);
 
-            var corners = new Vector3[8];
+            var corners = new vec3[8];
             corners[0] = +xv + yv + zv;
             corners[1] = +xv + yv - zv;
             corners[2] = -xv + yv - zv;
@@ -677,30 +677,30 @@ namespace SharpGame
         /// If true, the method will use a fast algorithm which is inapplicable if a scale is applied to the transformation matrix of the OrientedBoundingBox.
         /// </param>
         /// <returns></returns>
-        public static Matrix GetBoxToBoxMatrix(ref OrientedBoundingBox A, ref OrientedBoundingBox B, bool NoMatrixScaleApplied = false)
+        public static mat4 GetBoxToBoxMatrix(ref OrientedBoundingBox A, ref OrientedBoundingBox B, bool NoMatrixScaleApplied = false)
         {
-            Matrix AtoB_Matrix;
+            mat4 AtoB_Matrix;
 
             // Calculate B to A transformation matrix
             if (NoMatrixScaleApplied)
             {
                 var RotA = GetRows(ref A.Transformation);
                 var RotB = GetRows(ref B.Transformation);
-                AtoB_Matrix = new Matrix();
+                AtoB_Matrix = new mat4();
                 int i, k;
                 for (i = 0; i < 3; i++)
                     for (k = 0; k < 3; k++)
-                        AtoB_Matrix[i, k] = Vector3.Dot(RotB[i], RotA[k]);
+                        AtoB_Matrix[i, k] = vec3.Dot(RotB[i], RotA[k]);
                 var v = B.Center - A.Center;
-                AtoB_Matrix.M41 = Vector3.Dot(v, RotA[0]);
-                AtoB_Matrix.M42 = Vector3.Dot(v, RotA[1]);
-                AtoB_Matrix.M43 = Vector3.Dot(v, RotA[2]);
+                AtoB_Matrix.M41 = vec3.Dot(v, RotA[0]);
+                AtoB_Matrix.M42 = vec3.Dot(v, RotA[1]);
+                AtoB_Matrix.M43 = vec3.Dot(v, RotA[2]);
                 AtoB_Matrix.M44 = 1;
             }
             else
             {
-                Matrix AInvMat;
-                Matrix.Invert(ref A.Transformation, out AInvMat);
+                mat4 AInvMat;
+                glm.inverse(ref A.Transformation, out AInvMat);
                 AtoB_Matrix = B.Transformation * AInvMat;
             }
 
@@ -720,11 +720,11 @@ namespace SharpGame
         /// </remarks>
         public static void Merge(ref OrientedBoundingBox A, ref OrientedBoundingBox B, bool NoMatrixScaleApplied = false)
         {
-            Matrix AtoB_Matrix = GetBoxToBoxMatrix(ref A, ref B, NoMatrixScaleApplied);
+            mat4 AtoB_Matrix = GetBoxToBoxMatrix(ref A, ref B, NoMatrixScaleApplied);
 
             //Get B corners in A Space
             var bCorners = B.GetLocalCorners();
-            Vector3.TransformCoordinate(bCorners, ref AtoB_Matrix, bCorners);
+            vec3.TransformCoordinate(bCorners, ref AtoB_Matrix, bCorners);
 
             //Get A local Bounding Box
             var A_LocalBB = new BoundingBox(-A.Extents, A.Extents);
@@ -739,7 +739,7 @@ namespace SharpGame
             //Find the new Extents and Center, Transform Center back to world
             var newCenter = mergedBB.Minimum + (mergedBB.Maximum - mergedBB.Minimum) / 2f;
             A.Extents = mergedBB.Maximum - newCenter;
-            Vector3.TransformCoordinate(ref newCenter, ref A.Transformation, out newCenter);
+            vec3.TransformCoordinate(ref newCenter, ref A.Transformation, out newCenter);
             A.Transformation.TranslationVector = newCenter;
         }
 
@@ -902,4 +902,3 @@ namespace SharpGame
     }
 }
 
-#endif

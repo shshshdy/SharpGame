@@ -261,11 +261,11 @@ namespace SharpGame
                     unsafe
                     {
                         if ((newBuffer.elementMask_ & MASK_POSITION) != 0)
-                            vertexSize += sizeof(Vector3);
+                            vertexSize += sizeof(vec3);
                         if ((newBuffer.elementMask_ & MASK_NORMAL) != 0)
-                            vertexSize += sizeof(Vector3);
+                            vertexSize += sizeof(vec3);
                         if ((newBuffer.elementMask_ & MASK_TANGENT) != 0)
-                            vertexSize += sizeof(Vector3);
+                            vertexSize += sizeof(vec3);
                     }
 
                     newBuffer.dataSize_ = newBuffer.vertexCount_ * (int)vertexSize;

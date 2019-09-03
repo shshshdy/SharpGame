@@ -16,6 +16,12 @@ namespace SharpGame
         public float x;
         public float y;
 
+        public static readonly vec2 Zero = new vec2(0);
+        public static readonly vec2 One = new vec2(1);
+
+        public float X => x;
+        public float Y => y;
+
         public float this[int index]
         {
             get

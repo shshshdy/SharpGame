@@ -9,7 +9,7 @@ namespace SharpGame
 {
 //     using vec2 = Vector2;
 //     using vec3 = vec3;
-//     using vec4 = Vector4;
+//     using vec4 = vec4;
 //     using mat4 = mat4;
 
 
@@ -60,9 +60,9 @@ namespace SharpGame
             return ref Unsafe.As<float, Color4>(ref LightColor[index * 4]);
         }
 
-        public ref Vector4 lightVec(int index)
+        public ref vec4 lightVec(int index)
         {
-            return ref Unsafe.As<float, Vector4>(ref LightVec[index * 4]);
+            return ref Unsafe.As<float, vec4>(ref LightVec[index * 4]);
         }
     }
 
@@ -311,16 +311,16 @@ namespace SharpGame
 
         }
 
-        Vector4[] lightVec = new Vector4[]
+        vec4[] lightVec = new vec4[]
         {
-            new Vector4(-1, 0, 0, 0),
-            new Vector4(1, 0, 0, 0),
-            new Vector4(0, -1, 0, 0),
-            new Vector4(0, 1, 0, 0),
-            new Vector4(1, 1, 0, 0),
-            new Vector4(-1, -1, 0, 0),
-            new Vector4(1, 0, 1, 1),
-            new Vector4(-1, 0,  -1, 0),
+            new vec4(-1, 0, 0, 0),
+            new vec4(1, 0, 0, 0),
+            new vec4(0, -1, 0, 0),
+            new vec4(0, 1, 0, 0),
+            new vec4(1, 1, 0, 0),
+            new vec4(-1, -1, 0, 0),
+            new vec4(1, 0, 1, 1),
+            new vec4(-1, 0,  -1, 0),
         };
 
         private void UpdateLightParameters()
@@ -333,7 +333,7 @@ namespace SharpGame
             for(int i = 0; i < 8; i++)
             {
                 light.color(i) = Color4.White;
-                light.lightVec(i) = Vector4.Normalize(lightVec[i]);
+                light.lightVec(i) = glm.normalize(lightVec[i]);
             }
 
             ubLight.SetData(ref light);

@@ -172,11 +172,11 @@ namespace SharpGame
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 if(mesh.HasTextureCoords(0))
                 {
-                    vertex.texcoord = new Vector2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
+                    vertex.texcoord = new vec2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
                 }
                 else
                 {
-                    vertex.texcoord = Vector2.Zero;
+                    vertex.texcoord = vec2.Zero;
                 }
 
                 vertexBuffer.Add(vertex);
@@ -223,11 +223,11 @@ namespace SharpGame
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 if (mesh.HasTextureCoords(0))
                 {
-                    vertex.texcoord = new Vector2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
+                    vertex.texcoord = new vec2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
                 }
                 else
                 {
-                    vertex.texcoord = Vector2.Zero;
+                    vertex.texcoord = vec2.Zero;
                 }
 
                 vertexBuffer.Add(vertex);

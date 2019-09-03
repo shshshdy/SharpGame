@@ -12,7 +12,7 @@ namespace SharpGame
         public ImageView view;
 
         public float splitDepth;
-        public Matrix viewProjMatrix;
+        public mat4 viewProjMatrix;
 
     }
 

@@ -23,6 +23,9 @@ namespace SharpGame
 
         public static readonly vec3 Zero = new vec3(0, 0, 0);
         public static readonly vec3 One = new vec3(1, 1, 1);
+        public static readonly vec3 UnitX = new vec3(1, 0, 0);
+        public static readonly vec3 UnitY = new vec3(0, 1, 0);
+        public static readonly vec3 UnitZ = new vec3(0, 0, 1);
 
         public vec3(float s)
         {
@@ -249,6 +252,39 @@ namespace SharpGame
             }
         }
 
+        public static void TransformCoordinate(ref vec3 coordinate, ref mat4 transform, out vec3 result)
+        {
+            vec4 vector = new vec4();
+            vector.x = (coordinate.X * transform.M11) + (coordinate.Y * transform.M21) + (coordinate.Z * transform.M31) + transform.M41;
+            vector.y = (coordinate.X * transform.M12) + (coordinate.Y * transform.M22) + (coordinate.Z * transform.M32) + transform.M42;
+            vector.z = (coordinate.X * transform.M13) + (coordinate.Y * transform.M23) + (coordinate.Z * transform.M33) + transform.M43;
+            vector.w = 1f / ((coordinate.X * transform.M14) + (coordinate.Y * transform.M24) + (coordinate.Z * transform.M34) + transform.M44);
+
+            result = new vec3(vector.x * vector.w, vector.y * vector.w, vector.z * vector.w);
+        }
+
+        public static vec3 TransformCoordinate(vec3 coordinate, mat4 transform)
+        {
+            vec3 result;
+            TransformCoordinate(ref coordinate, ref transform, out result);
+            return result;
+        }
+
+        public static void TransformCoordinate(vec3[] source, ref mat4 transform, vec3[] destination)
+        {
+            if (source == null)
+                throw new ArgumentNullException("source");
+            if (destination == null)
+                throw new ArgumentNullException("destination");
+            if (destination.Length < source.Length)
+                throw new ArgumentOutOfRangeException("destination", "The destination array must be of same length or larger length than the source array.");
+
+            for (int i = 0; i < source.Length; ++i)
+            {
+                TransformCoordinate(ref source[i], ref transform, out destination[i]);
+            }
+        }
+
         public static void TransformNormal(ref vec3 normal, ref mat4 transform, out vec3 result)
         {
             result = new vec3(
@@ -388,7 +424,7 @@ namespace SharpGame
 
         public override bool Equals(object value)
         {
-            if (!(value is Vector3))
+            if (!(value is vec3))
                 return false;
 
             var strongValue = (vec3)value;

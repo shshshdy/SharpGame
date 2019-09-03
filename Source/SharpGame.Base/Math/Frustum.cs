@@ -63,8 +63,8 @@ namespace SharpGame
             // Project, perspective divide and merge
             vec3 tV0 = vec3.Transform(ref v0, ref projection);
             vec3 tV1 = vec3.Transform(ref v1, ref projection);
-            rect.Merge(new Vector2(tV0.X, tV0.Y));
-            rect.Merge(new Vector2(tV1.X, tV1.Y));
+            rect.Merge(new vec2(tV0.X, tV0.Y));
+            rect.Merge(new vec2(tV1.X, tV1.Y));
         }
 
 

@@ -47,6 +47,43 @@ using System;
 
 namespace SharpGame
 {
+    public enum Intersection
+    {
+        /// <summary>
+        /// The two bounding volumes don't intersect at all.
+        /// </summary>
+        OutSide,
+        /// <summary>
+        /// The two bounding volumes overlap.
+        /// </summary>
+        Intersects,
+        /// <summary>
+        /// One bounding volume completely contains another.
+        /// </summary>
+        InSide,
+    };
+
+    /// <summary>
+    /// Describes the result of an intersection with a plane in three dimensions.
+    /// </summary>
+    public enum PlaneIntersectionType
+    {
+        /// <summary>
+        /// The object is behind the plane.
+        /// </summary>
+        Back,
+
+        /// <summary>
+        /// The object is in front of the plane.
+        /// </summary>
+        Front,
+
+        /// <summary>
+        /// The object is intersecting the plane.
+        /// </summary>
+        Intersecting
+    };
+
     /*
      * This class is organized so that the least complex objects come first so that the least
      * complex objects will have the most methods in most cases. Note that not all shapes exist

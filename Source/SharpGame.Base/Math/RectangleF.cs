@@ -105,7 +105,7 @@ namespace SharpGame
         }
 
         /// Define from minimum and maximum vectors.
-        public void Define(ref Vector2 min, ref Vector2 max)
+        public void Define(ref vec2 min, ref vec2 max)
         {
             Left = min.X;
             Top = min.Y;
@@ -114,7 +114,7 @@ namespace SharpGame
         }
 
         /// Define from a point.
-        public void Define(ref Vector2 point)
+        public void Define(ref vec2 point)
         {
             Left = point.X;
             Top = point.Y;
@@ -123,8 +123,8 @@ namespace SharpGame
         }
 
         /// Merge a point.
-        public void Merge(Vector2 point) => Merge(ref point);
-        public void Merge(ref Vector2 point)
+        public void Merge(vec2 point) => Merge(ref point);
+        public void Merge(ref vec2 point)
         {
             if(point.X < Left)
                 Left = point.X;
@@ -208,11 +208,11 @@ namespace SharpGame
         /// <value>
         /// The location.
         /// </value>
-        public Vector2 Location
+        public vec2 Location
         {
             get
             {
-                return new Vector2(X, Y);
+                return new vec2(X, Y);
             }
             set
             {
@@ -227,11 +227,11 @@ namespace SharpGame
         /// <value>
         /// The center.
         /// </value>
-        public Vector2 Center
+        public vec2 Center
         {
             get
             {
-                return new Vector2(X + (Width / 2), Y + (Height / 2));
+                return new vec2(X + (Width / 2), Y + (Height / 2));
             }
         }
 
@@ -253,25 +253,25 @@ namespace SharpGame
         /// Gets the position of the top-left corner of the rectangle.
         /// </summary>
         /// <value>The top-left corner of the rectangle.</value>
-        public Vector2 TopLeft { get { return new Vector2(Left, Top); } }
+        public vec2 TopLeft { get { return new vec2(Left, Top); } }
 
         /// <summary>
         /// Gets the position of the top-right corner of the rectangle.
         /// </summary>
         /// <value>The top-right corner of the rectangle.</value>
-        public Vector2 TopRight { get { return new Vector2(Right, Top); } }
+        public vec2 TopRight { get { return new vec2(Right, Top); } }
 
         /// <summary>
         /// Gets the position of the bottom-left corner of the rectangle.
         /// </summary>
         /// <value>The bottom-left corner of the rectangle.</value>
-        public Vector2 BottomLeft { get { return new Vector2(Left, Bottom); } }
+        public vec2 BottomLeft { get { return new vec2(Left, Bottom); } }
 
         /// <summary>
         /// Gets the position of the bottom-right corner of the rectangle.
         /// </summary>
         /// <value>The bottom-right corner of the rectangle.</value>
-        public Vector2 BottomRight { get { return new Vector2(Right, Bottom); } }
+        public vec2 BottomRight { get { return new vec2(Right, Bottom); } }
 
         /// <summary>Changes the position of the rectangle.</summary>
         /// <param name="amount">The values to adjust the position of the rectangle by.</param>
@@ -282,7 +282,7 @@ namespace SharpGame
 
         /// <summary>Changes the position of the rectangle.</summary>
         /// <param name="amount">The values to adjust the position of the rectangle by.</param>
-        public void Offset(Vector2 amount)
+        public void Offset(vec2 amount)
         {
             Offset(amount.X, amount.Y);
         }
@@ -310,7 +310,7 @@ namespace SharpGame
         /// <summary>Determines whether this rectangle contains a specified Point.</summary>
         /// <param name="value">The Point to evaluate.</param>
         /// <param name="result">[OutAttribute] true if the specified Point is contained within this rectangle; false otherwise.</param>
-        public void Contains(ref Vector2 value, out bool result)
+        public void Contains(ref vec2 value, out bool result)
         {
             result = (value.X >= Left && value.X <= Right && value.Y >= Top && value.Y <= Bottom);
         }
@@ -342,11 +342,11 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Checks, if specified <see cref="Vector2"/> is inside <see cref="RectangleF"/>.
+        /// Checks, if specified <see cref="vec2"/> is inside <see cref="RectangleF"/>.
         /// </summary>
-        /// <param name="vector2D">Coordinate <see cref="Vector2"/>.</param>
-        /// <returns><c>true</c> if <see cref="Vector2"/> is inside <see cref="RectangleF"/>, otherwise <c>false</c>.</returns>
-        public bool Contains(Vector2 vector2D)
+        /// <param name="vector2D">Coordinate <see cref="vec2"/>.</param>
+        /// <returns><c>true</c> if <see cref="vec2"/> is inside <see cref="RectangleF"/>, otherwise <c>false</c>.</returns>
+        public bool Contains(vec2 vector2D)
         {
             return Contains(vector2D.X, vector2D.Y);
         }

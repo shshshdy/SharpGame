@@ -9,9 +9,28 @@ namespace SharpGame
     /// Represents a 4x4 matrix.
     /// </summary>
 
-    [StructLayout(LayoutKind.Explicit, Size = 4)]
+    [StructLayout(LayoutKind.Sequential, Size = 4)]
     public unsafe partial struct mat4
     {
+        fixed float value[16];
+
+        public ref float M11 => ref value[0];
+        public ref float M12 => ref value[1];
+        public ref float M13 => ref value[2];
+        public ref float M14 => ref value[3];
+        public ref float M21 => ref value[4];
+        public ref float M22 => ref value[5];
+        public ref float M23 => ref value[6];
+        public ref float M24 => ref value[7];
+        public ref float M31 => ref value[8];
+        public ref float M32 => ref value[9];
+        public ref float M33 => ref value[10];
+        public ref float M34 => ref value[11];
+        public ref float M41 => ref value[12];
+        public ref float M42 => ref value[13];
+        public ref float M43 => ref value[14];
+        public ref float M44 => ref value[15];
+
         #region Construction
 
         public mat4(float scale)
@@ -47,7 +66,7 @@ namespace SharpGame
 
         #endregion
 
-        public vec3 TranslationVector => new vec3(this[3]);
+        public ref vec3 TranslationVector => ref Unsafe.As<vec4, vec3>(ref this[3]);
 
         #region Index Access
 
@@ -256,26 +275,6 @@ namespace SharpGame
         }
         #endregion
 
-        [FieldOffset(0)]
-        fixed float value[16];
-
-        public ref float M11 => ref value[0];     
-        public ref float M12 => ref value[1];
-        public ref float M13 => ref value[2];
-        public ref float M14 => ref value[3];
-        public ref float M21 => ref value[4];
-        public ref float M22 => ref value[5];
-        public ref float M23 => ref value[6];
-        public ref float M24 => ref value[7];
-        public ref float M31 => ref value[8];
-        public ref float M32 => ref value[9];
-        public ref float M33 => ref value[10];
-        public ref float M34 => ref value[11];
-        public ref float M41 => ref value[12];
-        public ref float M42 => ref value[13];
-        public ref float M43 => ref value[14];
-        public ref float M44 => ref value[15];
-
     }
 
     public static partial class glm
@@ -290,7 +289,7 @@ namespace SharpGame
             return new mat4(m);
         }
 
-        public static mat4 inverse(mat4 m)
+        public static void inverse(ref mat4 m, out mat4 result)
         {
             float Coef00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
             float Coef02 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
@@ -344,7 +343,13 @@ namespace SharpGame
 
             float OneOverDeterminant = (1f) / Dot1;
 
-            return Inverse * OneOverDeterminant;
+            result = Inverse * OneOverDeterminant;
+        }
+
+        public static mat4 inverse(mat4 m)
+        {
+            inverse(ref m, out mat4 res);
+            return res;
         }
     }
 }

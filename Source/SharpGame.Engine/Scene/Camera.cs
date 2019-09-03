@@ -204,7 +204,7 @@ namespace SharpGame
             projectionDirty_ = true;
         }
 
-        public void SetOrthoSize(Vector2 orthoSize)
+        public void SetOrthoSize(vec2 orthoSize)
         {
             autoAspectRatio_ = false;
             orthoSize_ = orthoSize.Y;

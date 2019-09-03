@@ -103,9 +103,9 @@ namespace SharpGame.Samples
             corner = 1;
             if (corner != -1)
             {
-                Vector2 window_pos = new Vector2(((corner & 1) != 0) ? io.DisplaySize.X - DISTANCE
+                vec2 window_pos = new vec2(((corner & 1) != 0) ? io.DisplaySize.X - DISTANCE
                     : DISTANCE, (corner & 2) != 0 ? io.DisplaySize.Y - DISTANCE : DISTANCE);
-                Vector2 window_pos_pivot = new Vector2((corner & 1) != 0 ? 1.0f : 0.0f, (corner & 2) != 0 ? 1.0f : 0.0f);
+                vec2 window_pos_pivot = new vec2((corner & 1) != 0 ? 1.0f : 0.0f, (corner & 2) != 0 ? 1.0f : 0.0f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
             }
 
@@ -127,8 +127,8 @@ namespace SharpGame.Samples
             ImGui.End();
 
             {
-                Vector2 window_pos = new Vector2(DISTANCE, DISTANCE);
-                Vector2 window_pos_pivot = new Vector2(0.0f, 0.0f);
+                vec2 window_pos = new vec2(DISTANCE, DISTANCE);
+                vec2 window_pos_pivot = new vec2(0.0f, 0.0f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
                 ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
             }
@@ -157,8 +157,8 @@ namespace SharpGame.Samples
             if (showStats)
             {
                 corner = 0;
-                Vector2 window_pos = new Vector2(io.DisplaySize.X / 2, io.DisplaySize.Y);
-                Vector2 window_pos_pivot = new Vector2(0.5f, 1.0f);
+                vec2 window_pos = new vec2(io.DisplaySize.X / 2, io.DisplaySize.Y);
+                vec2 window_pos_pivot = new vec2(0.5f, 1.0f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
                 ImGui.SetNextWindowSize(io.DisplaySize * 0.6f);
                 ImGui.SetNextWindowBgAlpha(0.5f);

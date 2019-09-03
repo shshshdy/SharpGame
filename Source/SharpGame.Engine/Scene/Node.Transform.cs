@@ -167,7 +167,7 @@ namespace SharpGame
             scaling_ = scale;
         }
 
-        public void SetTransform(Matrix matrix)
+        public void SetTransform(mat4 matrix)
         {
         //    matrix.Decompose(out scaling_, out rotation_, out position_);
             MarkDirty();

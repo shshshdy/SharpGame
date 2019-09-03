@@ -151,9 +151,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator Vector2(vec4 value)
+        public static explicit operator vec2(vec4 value)
         {
-            return new Vector2(value.x, value.y);
+            return new vec2(value.x, value.y);
         }
 
         /// <summary>

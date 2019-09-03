@@ -17,7 +17,7 @@ namespace SharpGame
 
         public IReadOnlyList<char> KeyCharPresses => snapshot.KeyCharPresses;
 
-        public Vector2 MousePosition => (Vector2)snapshot.MousePosition;
+        public vec2 MousePosition => snapshot.MousePosition;
 
         public float WheelDelta => snapshot.WheelDelta;
 

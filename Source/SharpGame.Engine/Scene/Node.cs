@@ -493,7 +493,7 @@ namespace SharpGame
             if (scene_ != null)
                 scene_.NodeRemoved(this);
 
-            NativePool<Matrix>.Shared.Release(worldTransform_);
+            NativePool<mat4>.Shared.Release(worldTransform_);
         }
     }
 

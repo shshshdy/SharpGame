@@ -9,6 +9,17 @@ namespace SharpGame
     /// </summary>
     public unsafe struct mat3
     {
+        private fixed float value[9];
+        public ref float M11 => ref value[0];
+        public ref float M12 => ref value[1];
+        public ref float M13 => ref value[2];
+        public ref float M21 => ref value[3];
+        public ref float M22 => ref value[4];
+        public ref float M23 => ref value[5];
+        public ref float M31 => ref value[6];
+        public ref float M32 => ref value[7];
+        public ref float M33 => ref value[8];
+
         #region Construction
         public mat3(float m00, float m01, float m02,
             float m10, float m11, float m12,
@@ -70,21 +81,6 @@ namespace SharpGame
         {
             get { return this[column][row]; }
             set { this[column][row] = value; }
-        }
-
-        #endregion
-
-        #region Conversion
-
-        /// <summary>
-        /// Returns the <see cref="mat3"/> portion of this matrix.
-        /// </summary>
-        /// <returns>The <see cref="mat3"/> portion of this matrix.</returns>
-        public mat2 to_mat2()
-        {
-            return new mat2(
-          new vec2(this[0][0], this[0][1]),
-          new vec2(this[1][0], this[1][1]));
         }
 
         #endregion
@@ -203,7 +199,6 @@ namespace SharpGame
         }
         #endregion
 
-        private fixed float value[9];
     }
 
     public static partial class glm

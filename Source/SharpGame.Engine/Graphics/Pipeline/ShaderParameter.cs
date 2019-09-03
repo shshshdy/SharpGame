@@ -35,11 +35,11 @@ namespace SharpGame
         [FieldOffset(0)]
         public float floatVal;
         [FieldOffset(0)]
-        public Vector2 vec2Val;
+        public vec2 vec2Val;
         [FieldOffset(0)]
-        public Vector3 vec3Val;
+        public vec3 vec3Val;
         [FieldOffset(0)]
-        public Vector4 vec4Val;
+        public vec4 vec4Val;
         [FieldOffset(0)]
         public Color colorVal;
     }
@@ -48,7 +48,7 @@ namespace SharpGame
     {
         public string name;
         public ResourceRef texture;
-        public Vector4 uvOffset;
+        public vec4 uvOffset;
 
         [IgnoreDataMember]
         public bool IsNull => string.IsNullOrEmpty(name);
@@ -95,15 +95,15 @@ namespace SharpGame
                     uniformType = UniformType.Float;
                     data.floatVal = floatVal;
                     break;
-                case Vector2 vec2Val:
+                case vec2 vec2Val:
                     uniformType = UniformType.Vec2;
                     data.vec2Val = vec2Val;
                     break;
-                case Vector3 vec3Val:
+                case vec3 vec3Val:
                     uniformType = UniformType.Vec3;
                     data.vec3Val = vec3Val;
                     break;
-                case Vector4 vec4Val:
+                case vec4 vec4Val:
                     uniformType = UniformType.Vec4;
                     data.vec4Val = vec4Val;
                     break;

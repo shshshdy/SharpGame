@@ -60,9 +60,9 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct Matrix3x4
     {
-        public Vector4 Column1;
-        public Vector4 Column2;
-        public Vector4 Column3;
+        public vec4 Column1;
+        public vec4 Column2;
+        public vec4 Column3;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]

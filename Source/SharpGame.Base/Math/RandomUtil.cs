@@ -80,39 +80,39 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Gets random <see cref="Vector2"/> within range.
+        /// Gets random <see cref="vec2"/> within range.
         /// </summary>
         /// <param name="random">Current <see cref="System.Random"/>.</param>
         /// <param name="min">Minimum.</param>
         /// <param name="max">Maximum.</param>
-        /// <returns>Random <see cref="Vector2"/>.</returns>
-        public static Vector2 NextVector2(this Random random, Vector2 min, Vector2 max)
+        /// <returns>Random <see cref="vec2"/>.</returns>
+        public static vec2 NextVector2(this Random random, vec2 min, vec2 max)
         {
-            return new Vector2(random.NextFloat(min.X, max.X), random.NextFloat(min.Y, max.Y));
+            return new vec2(random.NextFloat(min.X, max.X), random.NextFloat(min.Y, max.Y));
         }
 
         /// <summary>
-        /// Gets random <see cref="Vector3"/> within range.
+        /// Gets random <see cref="vec3"/> within range.
         /// </summary>
         /// <param name="random">Current <see cref="System.Random"/>.</param>
         /// <param name="min">Minimum.</param>
         /// <param name="max">Maximum.</param>
-        /// <returns>Random <see cref="Vector3"/>.</returns>
-        public static Vector3 NextVector3(this Random random, Vector3 min, Vector3 max)
+        /// <returns>Random <see cref="vec3"/>.</returns>
+        public static vec3 NextVector3(this Random random, vec3 min, vec3 max)
         {
-            return new Vector3(random.NextFloat(min.X, max.X), random.NextFloat(min.Y, max.Y), random.NextFloat(min.Z, max.Z));
+            return new vec3(random.NextFloat(min.X, max.X), random.NextFloat(min.Y, max.Y), random.NextFloat(min.Z, max.Z));
         }
 
         /// <summary>
-        /// Gets random <see cref="Vector4"/> within range.
+        /// Gets random <see cref="vec4"/> within range.
         /// </summary>
         /// <param name="random">Current <see cref="System.Random"/>.</param>
         /// <param name="min">Minimum.</param>
         /// <param name="max">Maximum.</param>
-        /// <returns>Random <see cref="Vector4"/>.</returns>
-        public static Vector4 NextVector4(this Random random, Vector4 min, Vector4 max)
+        /// <returns>Random <see cref="vec4"/>.</returns>
+        public static vec4 NextVector4(this Random random, vec4 min, vec4 max)
         {
-            return new Vector4(random.NextFloat(min.X, max.X), random.NextFloat(min.Y, max.Y), random.NextFloat(min.Z, max.Z), random.NextFloat(min.W, max.W));
+            return new vec4(random.NextFloat(min.x, max.x), random.NextFloat(min.y, max.y), random.NextFloat(min.z, max.z), random.NextFloat(min.w, max.w));
         }
 
         /// <summary>
