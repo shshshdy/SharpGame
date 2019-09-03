@@ -10,8 +10,8 @@ namespace SharpGame
 
     public class AstNode
     {
-        public String token;
-        public String value;
+        public string token;
+        public string value;
         public bool isQuote = false;
 
         ChildMap children;
@@ -25,11 +25,11 @@ namespace SharpGame
         public int ChildCount => children == null ? 0 : children.Count;
         public ChildMap Children => children;
 
-        public int GetChild(String key, out List<AstNode> child)
+        public int GetChild(string key, out List<AstNode> child)
         {
-            if (this.children != null)
+            if (children != null)
             {
-                if (this.children.TryGetValue(key, out child))
+                if (children.TryGetValue(key, out child))
                 {
                     return child.Count;
                 }
@@ -466,7 +466,7 @@ namespace SharpGame
             return true;
         }
 
-        void SetToken(String lexeme, uint line, bool source = false)
+        void SetToken(string lexeme, uint line, bool source = false)
         {
             const char openBracket = '{', closeBracket = '}', quote = '\"';
 

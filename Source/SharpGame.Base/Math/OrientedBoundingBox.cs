@@ -753,7 +753,7 @@ namespace SharpGame
         /// </returns>
         public override string ToString()
         {
-            return String.Format(CultureInfo.CurrentCulture, "Center: {0}, Extents: {1}", Center, Extents);
+            return string.Format(CultureInfo.CurrentCulture, "Center: {0}, Extents: {1}", Center, Extents);
         }
 
         /// <summary>

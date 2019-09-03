@@ -168,7 +168,7 @@ namespace SharpGame
          
         public override string ToString()
         {
-            return String.Format(
+            return string.Format(
                 "[{0}, {1}, {2}; {3}, {4}, {5}; {6}, {7}, {8}]",
                 this[0, 0], this[1, 0], this[2, 0],
                 this[0, 1], this[1, 1], this[2, 1],
@@ -243,11 +243,56 @@ namespace SharpGame
         {
             return new mat3(scale);
         }
+        
+        public static mat3 translate(in mat3 m, vec2 v)
+        {
+            mat3 Result = (m);
+            Result[2] = m[0] * v[0] + m[1] * v[1] + m[2];
+            return Result;
+        }
+
+        public static mat3 rotate(in mat3 m, float angle)
+        {
+            float a = angle;
+            float c = cos(a);
+            float s = sin(a);
+
+            mat3 Result;
+            Result[0] = m[0] * c + m[1] * s;
+            Result[1] = m[0] * -s + m[1] * c;
+            Result[2] = m[2];
+            return Result;
+        }
+
+
+        public static mat3 scale(in mat3 m, vec2 v)
+        {
+            mat3 Result;
+            Result[0] = m[0] * v[0];
+            Result[1] = m[1] * v[1];
+            Result[2] = m[2];
+            return Result;
+        }
+
+        public static void transformation2D(ref vec2 translation, float rotation, ref vec2 scaling, out mat3 result)
+        {
+            result = mat3(1);
+            result = scale(in result, scaling);
+            result = rotate(in result, rotation);
+            result = translate(in result, translation);
+        }
+
+        public static mat3 transformation2D(ref vec2 translation, float rotation, ref vec2 scaling)
+        {
+            mat3 result;
+            transformation2D(ref translation, rotation, ref scaling, out result);
+            return result;
+        }
 
         public static mat3 inverse(in mat3 m)
         {
             float OneOverDeterminant = (1f) / (
-                +m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
+                + m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
                 - m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
                 + m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]));
 
@@ -282,7 +327,6 @@ namespace SharpGame
 			Result[2][2] = m[2][2];
 			return Result;
 		}
-
 
         public static float determinant(in mat3 m)
 		{
