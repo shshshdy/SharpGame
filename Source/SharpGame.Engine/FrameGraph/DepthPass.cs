@@ -24,6 +24,7 @@ namespace SharpGame
         RenderTarget depthRT;
         Cascade[] cascades = new Cascade[SHADOW_MAP_CASCADE_COUNT];
 
+        float cascadeSplitLambda = 0.95f;
         public DepthPass() : base(Pass.Depth)
         {
             var depthFormat = Device.GetSupportedDepthFormat();
@@ -94,6 +95,7 @@ namespace SharpGame
         */
         void updateCascades(RenderView view)
         {
+            vec3 lightDir = view.LightParam.SunlightDir;
             Span<float> cascadeSplits = stackalloc float[SHADOW_MAP_CASCADE_COUNT];
             var camera = view.Camera;
             float nearClip = camera.NearClip;
@@ -105,13 +107,13 @@ namespace SharpGame
 
             float range = maxZ - minZ;
             float ratio = maxZ / minZ;
-            /*
+           
             // Calculate split depths based on view camera furstum
             // Based on method presentd in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
-            for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+            for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
                 float p = (i + 1) / (SHADOW_MAP_CASCADE_COUNT);
-                float log = minZ * std::pow(ratio, p);
+                float log = minZ * (float)Math.Pow(ratio, p);
                 float uniform = minZ + range * p;
                 float d = cascadeSplitLambda * (log - uniform) + uniform;
                 cascadeSplits[i] = (d - nearClip) / clipRange;
@@ -123,61 +125,61 @@ namespace SharpGame
             {
                 float splitDist = cascadeSplits[i];
 
-                Span<Vector3> frustumCorners = stackalloc [] {
-                new Vector3(-1.0f,  1.0f, -1.0f),
-                    new Vector3( 1.0f,  1.0f, -1.0f),
-                    new Vector3( 1.0f, -1.0f, -1.0f),
-                    new Vector3(-1.0f, -1.0f, -1.0f),
-                    new Vector3(-1.0f,  1.0f,  1.0f),
-                    new Vector3( 1.0f,  1.0f,  1.0f),
-                    new Vector3( 1.0f, -1.0f,  1.0f),
-                    new Vector3(-1.0f, -1.0f,  1.0f),
+                Span<vec3> frustumCorners = stackalloc [] {
+                new vec3(-1.0f,  1.0f, -1.0f),
+                    new vec3( 1.0f,  1.0f, -1.0f),
+                    new vec3( 1.0f, -1.0f, -1.0f),
+                    new vec3(-1.0f, -1.0f, -1.0f),
+                    new vec3(-1.0f,  1.0f,  1.0f),
+                    new vec3( 1.0f,  1.0f,  1.0f),
+                    new vec3( 1.0f, -1.0f,  1.0f),
+                    new vec3(-1.0f, -1.0f,  1.0f),
                 };
 
                 // Project frustum corners into world space
-                glm::mat4 invCam = glm::inverse(camera.matrices.perspective * camera.matrices.view);
-                for (uint i = 0; i < 8; i++)
+                mat4 invCam = glm.inverse(camera.Projection * camera.View);
+                for (int j = 0; j < 8; i++)
                 {
-                    glm::vec4 invCorner = invCam * glm::vec4(frustumCorners[i], 1.0f);
-                    frustumCorners[i] = invCorner / invCorner.w;
+                    vec4 invCorner = invCam * glm.vec4(frustumCorners[j], 1.0f);
+                    frustumCorners[j] = (vec3)invCorner / invCorner.w;
                 }
 
-                for (uint i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
                 {
-                    Vector3 dist = frustumCorners[i + 4] - frustumCorners[i];
-                    frustumCorners[i + 4] = frustumCorners[i] + (dist * splitDist);
-                    frustumCorners[i] = frustumCorners[i] + (dist * lastSplitDist);
+                    vec3 dist = frustumCorners[j + 4] - frustumCorners[j];
+                    frustumCorners[j + 4] = frustumCorners[j] + (dist * splitDist);
+                    frustumCorners[j] = frustumCorners[j] + (dist * lastSplitDist);
                 }
 
                 // Get frustum center
-                Vector3 frustumCenter = Vector3.Zero);
-                for (uint i = 0; i < 8; i++)
+                vec3 frustumCenter = vec3.Zero;
+                for (int j = 0; j < 8; j++)
                 {
-                    frustumCenter += frustumCorners[i];
+                    frustumCenter += frustumCorners[j];
                 }
                 frustumCenter /= 8.0f;
 
                 float radius = 0.0f;
-                for (uint i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
                 {
-                    float distance = glm::length(frustumCorners[i] - frustumCenter);
-                    radius = glm::max(radius, distance);
+                    float distance = glm.length(frustumCorners[j] - frustumCenter);
+                    radius = Math.Max(radius, distance);
                 }
-                radius = std::ceil(radius * 16.0f) / 16.0f;
+                radius = (float)Math.Ceiling(radius * 16.0f) / 16.0f;
 
-                Vector3 maxExtents = Vector3(radius);
-                Vector3 minExtents = -maxExtents;
+                vec3 maxExtents = glm.vec3(radius);
+                vec3 minExtents = -maxExtents;
 
-                Vector3 lightDir = normalize(-lightPos);
-                glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, Vector3(0.0f, 1.0f, 0.0f));
-                glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
+                //vec3 lightDir = glm.normalize(-lightPos);
+                mat4 lightViewMatrix = glm.lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm.vec3(0.0f, 1.0f, 0.0f));
+                mat4 lightOrthoMatrix = glm.ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 
                 // Store split distance and matrix in cascade
                 cascades[i].splitDepth = (camera.NearClip + splitDist * clipRange) * -1.0f;
                 cascades[i].viewProjMatrix = lightOrthoMatrix * lightViewMatrix;
 
                 lastSplitDist = cascadeSplits[i];
-            }*/
+            }
         }
 
         void updateLight()
@@ -185,7 +187,7 @@ namespace SharpGame
         /*
             float angle = glm::radians(timer * 360.0f);
             float radius = 20.0f;
-            lightPos = Vector3(cos(angle) * radius, -radius, sin(angle) * radius);*/
+            lightPos = vec3(cos(angle) * radius, -radius, sin(angle) * radius);*/
         }
 
         void updateUniformBuffers()

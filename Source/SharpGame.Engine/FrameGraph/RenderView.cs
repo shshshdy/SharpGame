@@ -84,7 +84,9 @@ namespace SharpGame
         public Rect2D ViewRect => new Rect2D((int)Viewport.x, (int)Viewport.y, (int)Viewport.width, (int)Viewport.height);
 
         public uint ViewMask { get; set; }
-        
+
+        public ref LightPS LightParam => ref light;
+
         internal FastList<Drawable> drawables = new FastList<Drawable>();
         internal FastList<Light> lights = new FastList<Light>();
         internal FastList<SourceBatch> batches = new FastList<SourceBatch>();

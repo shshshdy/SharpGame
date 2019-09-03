@@ -437,6 +437,11 @@ namespace SharpGame
 
     public static partial class glm
     {
+        public static vec3 vec3(float s)
+        {
+            return new vec3(s);
+        }
+
         public static vec3 vec3(float x, float y, float z)
         {
             return new vec3(x, y, z);
