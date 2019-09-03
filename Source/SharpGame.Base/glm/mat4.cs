@@ -141,10 +141,22 @@ namespace SharpGame
             return new mat4(lhs[0]*s, lhs[1]*s, lhs[2]*s, lhs[3]*s);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Multiply(ref mat4 lhs, ref mat4 rhs, out mat4 result)
+        {
+            result = new mat4(
+                   rhs[0][0] * lhs[0] + rhs[0][1] * lhs[1] + rhs[0][2] * lhs[2] + rhs[0][3] * lhs[3],
+                   rhs[1][0] * lhs[0] + rhs[1][1] * lhs[1] + rhs[1][2] * lhs[2] + rhs[1][3] * lhs[3],
+                   rhs[2][0] * lhs[0] + rhs[2][1] * lhs[1] + rhs[2][2] * lhs[2] + rhs[2][3] * lhs[3],
+                   rhs[3][0] * lhs[0] + rhs[3][1] * lhs[1] + rhs[3][2] * lhs[2] + rhs[3][3] * lhs[3]
+               );
+        }
+
         #endregion
 
         #region ToString support
-            
+
         public override string ToString()
         {
             return String.Format(

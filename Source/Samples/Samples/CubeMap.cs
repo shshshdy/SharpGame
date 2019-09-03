@@ -18,14 +18,14 @@ namespace SharpGame.Samples
         {
             scene = new Scene();
 
-            var cameraNode = scene.CreateChild("Camera", new Vector3(0, 5, -10), MathUtil.Radians(30, 0, 0));
+            var cameraNode = scene.CreateChild("Camera", new vec3(0, 5, -10), (vec3)MathUtil.Radians(30, 0, 0));
             camera = cameraNode.CreateComponent<Camera>();
           
             var cubeMap = Resources.Load<Texture>("textures/cubemap_yokohama_bc3_unorm.ktx");
             {
                 var model = Resources.Load<Model>("Models/cube.obj");
                 var node = scene.CreateChild("Sky");
-                node.Scaling = new Vector3(30.0f);
+                node.Scaling = new vec3(30.0f);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
 
@@ -41,7 +41,7 @@ namespace SharpGame.Samples
                 material.SetShaderParameter("lodBias", lodBias);
 
                 var node = scene.CreateChild("Model");
-                node.Scaling = new Vector3(0.1f);
+                node.Scaling = new vec3(0.1f);
 
                 staticModel = node.AddComponent<StaticModel>();
                 SetModel(filenames[0]);

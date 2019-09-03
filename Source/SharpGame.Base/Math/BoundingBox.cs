@@ -336,7 +336,7 @@ namespace SharpGame
         }
 
         /// Return transformed by a 4x4 matrix.
-        public BoundingBox Transformed(ref Matrix transform)
+        public BoundingBox Transformed(ref mat4 transform)
         {
             vec3 center = Center;
             vec3.Transform(ref center, ref transform, out vec3 newCenter);
@@ -367,8 +367,8 @@ namespace SharpGame
         public void Merge(BoundingBox box) => Merge(ref box);
         public void Merge(ref BoundingBox box)
         {
-            vec3.Min(ref Minimum, ref box.Minimum, out Minimum);
-            vec3.Max(ref Maximum, ref box.Maximum, out Maximum);
+            glm.Min(ref Minimum, ref box.Minimum, out Minimum);
+            glm.Max(ref Maximum, ref box.Maximum, out Maximum);
         }
 
         /// Merge another bounding box.
@@ -398,8 +398,8 @@ namespace SharpGame
 
             for (int i = 0; i < points.Length; ++i)
             {
-                vec3.Min(ref min, ref points[i], out min);
-                vec3.Max(ref max, ref points[i], out max);
+                glm.Min(ref min, ref points[i], out min);
+                glm.Max(ref max, ref points[i], out max);
             }
 
             result = new BoundingBox(min, max);
@@ -421,8 +421,8 @@ namespace SharpGame
 
             for (int i = 0; i < points.Length; ++i)
             {
-                vec3.Min(ref min, ref points[i], out min);
-                vec3.Max(ref max, ref points[i], out max);
+                glm.Min(ref min, ref points[i], out min);
+                glm.Max(ref max, ref points[i], out max);
             }
 
             return new BoundingBox(min, max);
@@ -460,8 +460,8 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the newly constructed bounding box.</param>
         public static void Merge(ref BoundingBox value1, ref BoundingBox value2, out BoundingBox result)
         {
-            vec3.Min(ref value1.Minimum, ref value2.Minimum, out result.Minimum);
-            vec3.Max(ref value1.Maximum, ref value2.Maximum, out result.Maximum);
+            glm.Min(ref value1.Minimum, ref value2.Minimum, out result.Minimum);
+            glm.Max(ref value1.Maximum, ref value2.Maximum, out result.Maximum);
         }
 
         /// <summary>
@@ -473,8 +473,8 @@ namespace SharpGame
         public static BoundingBox Merge(BoundingBox value1, BoundingBox value2)
         {
             BoundingBox box;
-            vec3.Min(ref value1.Minimum, ref value2.Minimum, out box.Minimum);
-            vec3.Max(ref value1.Maximum, ref value2.Maximum, out box.Maximum);
+            glm.Min(ref value1.Minimum, ref value2.Minimum, out box.Minimum);
+            glm.Max(ref value1.Maximum, ref value2.Maximum, out box.Maximum);
             return box;
         }
 

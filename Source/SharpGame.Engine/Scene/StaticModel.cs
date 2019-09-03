@@ -84,7 +84,7 @@ namespace SharpGame
                 SetNumGeometries(model.Geometries.Length);
 
                 Geometry[][] geometries = model.Geometries;
-                List<Vector3> geometryCenters = model.GeometryCenters;
+                List<vec3> geometryCenters = model.GeometryCenters;
 
                 for(int i = 0; i < geometries_.Length; ++i)
                 {
@@ -150,15 +150,15 @@ namespace SharpGame
                 batches[0].distance = distance_;
             else
             {
-                ref Matrix worldTransform = ref node_.WorldTransform;
+                ref mat4 worldTransform = ref node_.WorldTransform;
                 for (int i = 0; i < batches.Length; ++i)
                 {
-                    Vector3.Transform(ref geometryData_[i].center_, ref worldTransform, out Vector3 worldCenter);
+                    vec3.Transform(ref geometryData_[i].center_, ref worldTransform, out vec3 worldCenter);
                     batches[i].distance = frame.camera.GetDistance(worldCenter);
                 }
             }
 
-            float scale = Vector3.Dot(worldBoundingBox.Size, MathUtil.DotScale);
+            float scale = vec3.Dot(worldBoundingBox.Size, (vec3)MathUtil.DotScale);
             float newLodDistance = frame.camera.GetLodDistance(distance_, scale, lodBias_);
             
             if (newLodDistance != lodDistance_)

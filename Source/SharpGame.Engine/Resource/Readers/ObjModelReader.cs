@@ -101,7 +101,7 @@ namespace SharpGame
                 geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)ibs[i].Count);
                 geom.VertexLayout = VertexPosNormTex.Layout;
                 model.Geometries[i] = new Geometry[] { geom };
-                model.GeometryCenters.Add(Vector3.Zero);
+                model.GeometryCenters.Add(vec3.Zero);
             }
 
             var shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");

@@ -22,7 +22,7 @@ using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
+#if false
 namespace SharpGame
 {
     /// <summary>
@@ -902,3 +902,4 @@ namespace SharpGame
     }
 }
 
+#endif

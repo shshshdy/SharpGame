@@ -23,10 +23,10 @@ namespace SharpGame
 
             VertexPosNormTexColor[] vertices =
             {                
-                new VertexPosNormTexColor(new Vector3(-w2, 0, -h2), new Vector3(+0, 1, +0), new Vector2(+0, +0), Color.White),
-                new VertexPosNormTexColor(new Vector3(+w2, 0, -h2), new Vector3(+0, 1, +0), new Vector2(+1, +0), Color.White),
-                new VertexPosNormTexColor(new Vector3(+w2, 0, +h2), new Vector3(+0, 1, +0), new Vector2(+1, +1), Color.White),
-                new VertexPosNormTexColor(new Vector3(-w2, 0, +h2), new Vector3(+0, 1, +0), new Vector2(+1, +0), Color.White),
+                new VertexPosNormTexColor(new vec3(-w2, 0, -h2), new vec3(+0, 1, +0), new Vector2(+0, +0), Color.White),
+                new VertexPosNormTexColor(new vec3(+w2, 0, -h2), new vec3(+0, 1, +0), new Vector2(+1, +0), Color.White),
+                new VertexPosNormTexColor(new vec3(+w2, 0, +h2), new vec3(+0, 1, +0), new Vector2(+1, +1), Color.White),
+                new VertexPosNormTexColor(new vec3(-w2, 0, +h2), new vec3(+0, 1, +0), new Vector2(+1, +0), Color.White),
             };
 
             int[] indices = { 0, 1, 2, 0, 2, 3, };

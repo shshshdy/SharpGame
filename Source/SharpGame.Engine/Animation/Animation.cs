@@ -15,11 +15,11 @@ namespace SharpGame
         /// Keyframe time.
         public float time_;
         /// Bone position.
-        public Vector3 position_;
+        public vec3 position_;
         /// Bone rotation.
-        public Quaternion rotation_;
+        public quat rotation_;
         /// Bone scale.
-        public Vector3 scale_;
+        public vec3 scale_;
 
         public static AnimationKeyFrame Null = new AnimationKeyFrame();
     };

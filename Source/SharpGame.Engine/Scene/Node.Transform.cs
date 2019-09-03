@@ -441,7 +441,7 @@ namespace SharpGame
 #if UNMANAGED_MATRIX
                 //Matrix m = xform * parent_.WorldTransform;
                 //Unsafe.Write((void*)worldTransform_, m);
-                Matrix.Multiply(ref xform, ref parent_.WorldTransform, out Unsafe.AsRef<Matrix>((void*)worldTransform_));               
+                mat4.Multiply(ref parent_.WorldTransform, ref xform, out Unsafe.AsRef<mat4>((void*)worldTransform_));               
 
 #else
                 worldTransform_ = xform * parent_.WorldTransform;

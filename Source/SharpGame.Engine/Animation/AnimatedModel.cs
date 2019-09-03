@@ -124,7 +124,7 @@ namespace SharpGame
                 // If distance is greater than draw distance, no need to update at all
                 if(drawDistance_ > 0.0f && distance > drawDistance_)
                     return;
-                float scale = glm.dot(WorldBoundingBox.Size, MathUtil.DotScale);
+                float scale = glm.dot(WorldBoundingBox.Size, (vec3)MathUtil.DotScale);
                 animationLodDistance_ = frame.camera.GetLodDistance(distance, scale, lodBias_);
             }
 
@@ -156,7 +156,7 @@ namespace SharpGame
             // Use a transformed version of the model's bounding box instead of world bounding box for LOD scale
             // determination so that animation does not change the scale
             BoundingBox transformedBoundingBox = boundingBox_.Transformed(ref worldTransform);
-            float scale = vec3.Dot(transformedBoundingBox.Size, MathUtil.DotScale);
+            float scale = vec3.Dot(transformedBoundingBox.Size, (vec3)MathUtil.DotScale);
             float newLodDistance = frame.camera.GetLodDistance(distance_, scale, lodBias_);
 
             // If model is rendered from several views, use the minimum LOD distance for animation LOD
@@ -598,8 +598,8 @@ namespace SharpGame
             {
                 // The bone bounding box is in local space, so need the node's inverse transform
                 boneBoundingBox_.Clear();
-                mat4 inverseNodeTransform;
-                mat4.Invert(ref node_.WorldTransform, out inverseNodeTransform);
+                mat4 inverseNodeTransform
+                = glm.inverse(node_.WorldTransform);
 
                 Bone[] bones = skeleton_.Bones;
                 foreach(Bone i in bones)
@@ -909,7 +909,7 @@ namespace SharpGame
                 {
                     Bone bone = bones[i];
                     if(bone.node_)
-                        skinMatrices_[i] = bone.offsetMatrix_ * bone.node_.WorldTransform;
+                        skinMatrices_[i] = bone.node_.WorldTransform*bone.offsetMatrix_;
                     else
                         skinMatrices_[i] = worldTransform;
                 }
@@ -921,7 +921,7 @@ namespace SharpGame
                 {
                     Bone bone = bones[i];
                     if(bone.node_)
-                        skinMatrices_[i] = bone.offsetMatrix_ * bone.node_.WorldTransform;
+                        skinMatrices_[i] = bone.node_.WorldTransform * bone.offsetMatrix_;
                     else
                         skinMatrices_[i] = worldTransform;
 

@@ -90,6 +90,10 @@ namespace SharpGame
             z = c.x * c.y * s.z - s.x * s.y * c.z;
         }
 
+        public quat(float x, float y, float z) : this(new vec3(x, y, z))
+        {
+        }
+
         public vec3 EulerAngles => vec3(Pitch, Yaw, Roll);
 
         public float Roll => atan((2) * (this.x * this.y + this.w * this.z), this.w * this.w + this.x * this.x - this.y * this.y - this.z * this.z);
@@ -263,6 +267,11 @@ namespace SharpGame
 
     public static partial class glm
     {
+        public static quat quat(vec3 euler)
+        {
+            return new quat(euler);
+        }
+
         public static quat quat(float w, float x, float y, float z)
         {
             return new quat(w, x, y, z);
@@ -547,6 +556,12 @@ namespace SharpGame
                 rotationAxis.x * invs,
                 rotationAxis.y * invs,
                 rotationAxis.z * invs);
+        }
+
+        public static quat quatYawPitchRoll(float yaw, float pitch, float roll)
+        {
+            yawPitchRoll(yaw, pitch, roll, out mat3 res);
+            return quat_cast(res);
         }
 
         public static quat quatLookAt(vec3 direction, vec3 up)

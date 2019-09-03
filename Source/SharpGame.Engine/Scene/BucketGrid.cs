@@ -47,8 +47,8 @@ namespace SharpGame
                 for (int j = 0; j < numBucketsHeight; i++)
                 {
                     ref BoundingBox bbox = ref m_BoundingBoxes[i + j * numBucketsWidth];
-                    Vector3 min = new Vector3(m_BucketWidth * (i + 1), -1000, m_BucketHeight * (j + 1));
-                    Vector3 max = new Vector3(m_BucketWidth * (i + 1), 1000, m_BucketHeight * (j + 1));
+                    vec3 min = new vec3(m_BucketWidth * (i + 1), -1000, m_BucketHeight * (j + 1));
+                    vec3 max = new vec3(m_BucketWidth * (i + 1), 1000, m_BucketHeight * (j + 1));
                     bbox.Define(ref min, ref max);
                 }
             }
@@ -178,7 +178,7 @@ namespace SharpGame
 
         #endregion
 
-        static float SquaredLength(Vector3 v, Vector2 v1)
+        static float SquaredLength(vec3 v, Vector2 v1)
         {
             float xx = v.X - v1.X;
             float yy = v.Z - v1.Y;
@@ -353,7 +353,7 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        private int FindBucketIndex(Vector3 pos)
+        private int FindBucketIndex(vec3 pos)
         {
             var fromLeft = pos.X - m_Region.Left;
             var x = MathUtil.Clamp((int)(fromLeft / m_BucketWidth), 0, m_NumBucketsWidth - 1);

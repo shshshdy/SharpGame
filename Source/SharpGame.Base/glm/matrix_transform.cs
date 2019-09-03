@@ -91,6 +91,28 @@ namespace SharpGame
             return result;
         }
 
+        public static void yawPitchRoll(float yaw, float pitch, float roll, out mat3 Result)
+        {
+            float tmp_ch = cos(yaw);
+            float tmp_sh = sin(yaw);
+            float tmp_cp = cos(pitch);
+            float tmp_sp = sin(pitch);
+            float tmp_cb = cos(roll);
+            float tmp_sb = sin(roll);
+
+            Result[0][0] = tmp_ch * tmp_cb + tmp_sh * tmp_sp * tmp_sb;
+            Result[0][1] = tmp_sb * tmp_cp;
+            Result[0][2] = -tmp_sh * tmp_cb + tmp_ch * tmp_sp * tmp_sb;
+
+            Result[1][0] = -tmp_ch * tmp_sb + tmp_sh * tmp_sp * tmp_cb;
+            Result[1][1] = tmp_cb * tmp_cp;
+            Result[1][2] = tmp_sb * tmp_sh + tmp_ch * tmp_sp * tmp_cb;
+
+            Result[2][0] = tmp_sh * tmp_cp;
+            Result[2][1] = -tmp_sp;
+            Result[2][2] = tmp_ch * tmp_cp;            
+        }
+
         public static mat4 yawPitchRoll(float yaw, float pitch, float roll)
         {
             float tmp_ch = cos(yaw);

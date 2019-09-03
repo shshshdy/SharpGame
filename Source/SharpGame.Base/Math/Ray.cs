@@ -59,19 +59,19 @@ namespace SharpGame
         /// <summary>
         /// The position in three dimensional space where the ray starts.
         /// </summary>
-        public Vector3 Position;
+        public vec3 Position;
 
         /// <summary>
         /// The normalized direction in which the ray points.
         /// </summary>
-        public Vector3 Direction;
+        public vec3 Direction;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Ray"/> struct.
         /// </summary>
         /// <param name="position">The position in three dimensional space of the origin of the ray.</param>
         /// <param name="direction">The normalized direction of the ray.</param>
-        public Ray(Vector3 position, Vector3 direction)
+        public Ray(vec3 position, vec3 direction)
         {
             this.Position = position;
             this.Direction = direction;
@@ -82,7 +82,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Vector3 point)
+        public bool Intersects(ref vec3 point)
         {
             return Collision.RayIntersectsPoint(ref this, ref point);
         }
@@ -94,7 +94,7 @@ namespace SharpGame
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(ref Ray ray)
         {
-            Vector3 point;
+            vec3 point;
             return Collision.RayIntersectsRay(ref this, ref ray, out point);
         }
 
@@ -103,9 +103,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out Vector3 point)
+        public bool Intersects(ref Ray ray, out vec3 point)
         {
             return Collision.RayIntersectsRay(ref this, ref ray, out point);
         }
@@ -138,9 +138,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="plane">The plane to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Plane plane, out Vector3 point)
+        public bool Intersects(ref Plane plane, out vec3 point)
         {
             return Collision.RayIntersectsPlane(ref this, ref plane, out point);
         }
@@ -152,7 +152,7 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public bool Intersects(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
         {
             float distance;
             return Collision.RayIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3, out distance);
@@ -167,7 +167,7 @@ namespace SharpGame
         /// <param name="distance">When the method completes, contains the distance of the intersection,
         /// or 0 if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
+        public bool Intersects(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3, out float distance)
         {
             return Collision.RayIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3, out distance);
         }
@@ -179,9 +179,9 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out Vector3 point)
+        public bool Intersects(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3, out vec3 point)
         {
             return Collision.RayIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3, out point);
         }
@@ -224,9 +224,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref BoundingBox box, out Vector3 point)
+        public bool Intersects(ref BoundingBox box, out vec3 point)
         {
             return Collision.RayIntersectsBox(ref this, ref box, out point);
         }
@@ -269,9 +269,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref BoundingSphere sphere, out Vector3 point)
+        public bool Intersects(ref BoundingSphere sphere, out vec3 point)
         {
             return Collision.RayIntersectsSphere(ref this, ref sphere, out point);
         }
@@ -286,15 +286,15 @@ namespace SharpGame
         /// <returns>Resulting <see cref="Ray"/>.</returns>
         public static Ray GetPickRay(int x, int y, ViewportF viewport, Matrix worldViewProjection)
         {
-            var nearPoint = new Vector3(x, y, 0);
-            var farPoint = new Vector3(x, y, 1);
+            var nearPoint = new vec3(x, y, 0);
+            var farPoint = new vec3(x, y, 1);
 
-            nearPoint = Vector3.Unproject(nearPoint, viewport.X, viewport.Y, viewport.Width, viewport.Height, viewport.MinDepth,
+            nearPoint = vec3.Unproject(nearPoint, viewport.X, viewport.Y, viewport.Width, viewport.Height, viewport.MinDepth,
                                         viewport.MaxDepth, worldViewProjection);
-            farPoint = Vector3.Unproject(farPoint, viewport.X, viewport.Y, viewport.Width, viewport.Height, viewport.MinDepth,
+            farPoint = vec3.Unproject(farPoint, viewport.X, viewport.Y, viewport.Width, viewport.Height, viewport.MinDepth,
                                         viewport.MaxDepth, worldViewProjection);
 
-            Vector3 direction = farPoint - nearPoint;
+            vec3 direction = farPoint - nearPoint;
             direction.Normalize();
 
             return new Ray(nearPoint, direction);

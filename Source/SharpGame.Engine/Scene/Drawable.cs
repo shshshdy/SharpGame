@@ -92,7 +92,7 @@ namespace SharpGame
 
         /// World-space bounding box.
         [IgnoreDataMember]
-        public ref Vector3 WorldCenter
+        public ref vec3 WorldCenter
         {
             get
             {
@@ -105,7 +105,7 @@ namespace SharpGame
                 return ref worldCenter_; ;
             }
         }
-        protected Vector3 worldCenter_;
+        protected vec3 worldCenter_;
         /// Local-space bounding box.
         protected BoundingBox boundingBox_;
 
@@ -285,7 +285,7 @@ namespace SharpGame
                 batches[i].worldTransform = worldTransform;
             }
 
-            float scale = Vector3.Dot(worldBoundingBox.Size, MathUtil.DotScale);
+            float scale = vec3.Dot(worldBoundingBox.Size, (vec3)MathUtil.DotScale);
             float newLodDistance = frame.camera.GetLodDistance(distance_, scale, lodBias_);
 
             if (newLodDistance != lodDistance_)

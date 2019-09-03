@@ -112,6 +112,11 @@ namespace SharpGame
             return new vec4(value.X, value.Y, value.Z, 0);
         }
 
+        public static explicit operator vec3(vec4 value)
+        {
+            return new vec3(value.x, value.y, value.z);
+        }
+
         public float[] ToArray()
         {
             return new[] { x, y, z, w };

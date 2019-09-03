@@ -46,15 +46,15 @@ namespace SharpGame
                     AnimationKeyFrame newKeyFrame = new AnimationKeyFrame();
                     newKeyFrame.time_ = source.Read<float>();
                     if ((newTrack.channelMask_ & Animation.CHANNEL_POSITION) != 0)
-                        newKeyFrame.position_ = source.Read<Vector3>();
+                        newKeyFrame.position_ = source.Read<vec3>();
                     if ((newTrack.channelMask_ & Animation.CHANNEL_ROTATION) != 0)
                     {
                         Quat r = source.Read<Quat>();
-                        newKeyFrame.rotation_ = new Quaternion(r.X, r.Y, r.Z, r.W);// source.Read<Quaternion>();
+                        newKeyFrame.rotation_ = new quat(r.W, r.X, r.Y, r.Z);// source.Read<quat>();
                     }
 
                     if ((newTrack.channelMask_ & Animation.CHANNEL_SCALE) != 0)
-                        newKeyFrame.scale_ = source.Read<Vector3>();
+                        newKeyFrame.scale_ = source.Read<vec3>();
                     newTrack.AddKeyFrame(ref newKeyFrame);
                 }
             }

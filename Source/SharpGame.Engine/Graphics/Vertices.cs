@@ -9,13 +9,13 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPosNormTex
     {
-        public Vector3 position;
-        public Vector3 normal;
+        public vec3 position;
+        public vec3 normal;
         public Vector2 texcoord;
 
         public static int Size => Utilities.SizeOf<VertexPosNormTex>();
 
-        public VertexPosNormTex(Vector3 p, Vector3 n, Vector2 uv)
+        public VertexPosNormTex(vec3 p, vec3 n, Vector2 uv)
         {
             position = p;
             normal = n;
@@ -24,8 +24,8 @@ namespace SharpGame
 
         public VertexPosNormTex(float px, float py, float pz, float nx, float ny, float nz, float u, float v)
         {
-            position = new Vector3(px, py, pz);
-            normal = new Vector3(nx, ny, nz);
+            position = new vec3(px, py, pz);
+            normal = new vec3(nx, ny, nz);
             texcoord = new Vector2(u, v);
         }
 
@@ -40,10 +40,10 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPosTBNTex
     {
-        public Vector3 position;
-        public Vector3 normal;
-        public Vector3 tangent;
-        public Vector3 bitangent;
+        public vec3 position;
+        public vec3 normal;
+        public vec3 tangent;
+        public vec3 bitangent;
         public Vector2 texcoord;
 
         public static int Size => Utilities.SizeOf<VertexPosTBNTex>();
@@ -61,14 +61,14 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPosNormTexColor
     {
-        public Vector3 position;
-        public Vector3 normal;
+        public vec3 position;
+        public vec3 normal;
         public Vector2 texcoord;
         public Color color;
 
         public static int Size => Utilities.SizeOf<VertexPosNormTexColor>();
 
-        public VertexPosNormTexColor(Vector3 p, Vector3 n, Vector2 uv, Color color)
+        public VertexPosNormTexColor(vec3 p, vec3 n, Vector2 uv, Color color)
         {
             position = p;
             normal = n;
@@ -88,7 +88,7 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPosColor
     {
-        public Vector3 Position;
+        public vec3 Position;
         public uint Color;
 
         public static int Size => Utilities.SizeOf<VertexPosColor>();
