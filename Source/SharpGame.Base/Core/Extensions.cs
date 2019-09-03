@@ -9,7 +9,7 @@ namespace SharpGame
 {
     public static class Extensions
     {
-        public static bool Empty(this String str)
+        public static bool Empty(this string str)
         {
             return string.IsNullOrEmpty(str);
         }

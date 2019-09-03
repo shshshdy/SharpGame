@@ -9,6 +9,53 @@ namespace SharpGame
     /// </summary>
     public unsafe struct mat3
     {
+        private fixed float value[9];
+        public ref float M11
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[0];
+        }
+        public ref float M12
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[1];
+        }
+        public ref float M13
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[2];
+        }
+        public ref float M21
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[3];
+        }
+        public ref float M22
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[4];
+        }
+        public ref float M23
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[5];
+        }
+        public ref float M31
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[6];
+        }
+        public ref float M32
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[7];
+        }
+        public ref float M33
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref value[8];
+        }
+
         #region Construction
         public mat3(float m00, float m01, float m02,
             float m10, float m11, float m12,
@@ -74,21 +121,6 @@ namespace SharpGame
 
         #endregion
 
-        #region Conversion
-
-        /// <summary>
-        /// Returns the <see cref="mat3"/> portion of this matrix.
-        /// </summary>
-        /// <returns>The <see cref="mat3"/> portion of this matrix.</returns>
-        public mat2 to_mat2()
-        {
-            return new mat2(
-          new vec2(this[0][0], this[0][1]),
-          new vec2(this[1][0], this[1][1]));
-        }
-
-        #endregion
-
         #region Multiplication
 
         /// <summary>
@@ -136,7 +168,7 @@ namespace SharpGame
          
         public override string ToString()
         {
-            return String.Format(
+            return string.Format(
                 "[{0}, {1}, {2}; {3}, {4}, {5}; {6}, {7}, {8}]",
                 this[0, 0], this[1, 0], this[2, 0],
                 this[0, 1], this[1, 1], this[2, 1],
@@ -203,7 +235,6 @@ namespace SharpGame
         }
         #endregion
 
-        private fixed float value[9];
     }
 
     public static partial class glm
@@ -212,6 +243,100 @@ namespace SharpGame
         {
             return new mat3(scale);
         }
-    }
+        
+        public static mat3 translate(in mat3 m, vec2 v)
+        {
+            mat3 Result = (m);
+            Result[2] = m[0] * v[0] + m[1] * v[1] + m[2];
+            return Result;
+        }
 
+        public static mat3 rotate(in mat3 m, float angle)
+        {
+            float a = angle;
+            float c = cos(a);
+            float s = sin(a);
+
+            mat3 Result;
+            Result[0] = m[0] * c + m[1] * s;
+            Result[1] = m[0] * -s + m[1] * c;
+            Result[2] = m[2];
+            return Result;
+        }
+
+
+        public static mat3 scale(in mat3 m, vec2 v)
+        {
+            mat3 Result;
+            Result[0] = m[0] * v[0];
+            Result[1] = m[1] * v[1];
+            Result[2] = m[2];
+            return Result;
+        }
+
+        public static void transformation2D(ref vec2 translation, float rotation, ref vec2 scaling, out mat3 result)
+        {
+            result = mat3(1);
+            result = scale(in result, scaling);
+            result = rotate(in result, rotation);
+            result = translate(in result, translation);
+        }
+
+        public static mat3 transformation2D(ref vec2 translation, float rotation, ref vec2 scaling)
+        {
+            mat3 result;
+            transformation2D(ref translation, rotation, ref scaling, out result);
+            return result;
+        }
+
+        public static mat3 inverse(in mat3 m)
+        {
+            float OneOverDeterminant = (1f) / (
+                + m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
+                - m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
+                + m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]));
+
+            mat3 Inverse = new mat3(0);
+            Inverse[0, 0] = +(m[1][1] * m[2][2] - m[2][1] * m[1][2]) * OneOverDeterminant;
+            Inverse[1, 0] = -(m[1][0] * m[2][2] - m[2][0] * m[1][2]) * OneOverDeterminant;
+            Inverse[2, 0] = +(m[1][0] * m[2][1] - m[2][0] * m[1][1]) * OneOverDeterminant;
+            Inverse[0, 1] = -(m[0][1] * m[2][2] - m[2][1] * m[0][2]) * OneOverDeterminant;
+            Inverse[1, 1] = +(m[0][0] * m[2][2] - m[2][0] * m[0][2]) * OneOverDeterminant;
+            Inverse[2, 1] = -(m[0][0] * m[2][1] - m[2][0] * m[0][1]) * OneOverDeterminant;
+            Inverse[0, 2] = +(m[0][1] * m[1][2] - m[1][1] * m[0][2]) * OneOverDeterminant;
+            Inverse[1, 2] = -(m[0][0] * m[1][2] - m[1][0] * m[0][2]) * OneOverDeterminant;
+            Inverse[2, 2] = +(m[0][0] * m[1][1] - m[1][0] * m[0][1]) * OneOverDeterminant;
+
+            return Inverse;
+
+        }
+
+        public static mat3 transpose(in mat3 m)
+		{
+			mat3 Result;
+            Result[0][0] = m[0][0];
+			Result[0][1] = m[1][0];
+			Result[0][2] = m[2][0];
+
+			Result[1][0] = m[0][1];
+			Result[1][1] = m[1][1];
+			Result[1][2] = m[2][1];
+
+			Result[2][0] = m[0][2];
+			Result[2][1] = m[1][2];
+			Result[2][2] = m[2][2];
+			return Result;
+		}
+
+        public static float determinant(in mat3 m)
+		{
+			return
+				+ m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
+				- m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
+				+ m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]);
+		}
+
+
+    }
 }
+

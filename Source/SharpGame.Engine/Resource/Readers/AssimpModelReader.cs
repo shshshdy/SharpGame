@@ -167,16 +167,16 @@ namespace SharpGame
             {
                 VertexPosNormTex vertex;
 
-                vertex.position = new Vector3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
-                vertex.normal = new Vector3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
+                vertex.position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
+                vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 if(mesh.HasTextureCoords(0))
                 {
-                    vertex.texcoord = new Vector2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
+                    vertex.texcoord = new vec2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
                 }
                 else
                 {
-                    vertex.texcoord = Vector2.Zero;
+                    vertex.texcoord = vec2.Zero;
                 }
 
                 vertexBuffer.Add(vertex);
@@ -215,19 +215,19 @@ namespace SharpGame
             {
                 VertexPosTBNTex vertex;
 
-                vertex.position = new Vector3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
-                vertex.normal = new Vector3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
-                vertex.tangent = new Vector3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);
-                vertex.bitangent = new Vector3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
+                vertex.position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
+                vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
+                vertex.tangent = new vec3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);
+                vertex.bitangent = new vec3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
 
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 if (mesh.HasTextureCoords(0))
                 {
-                    vertex.texcoord = new Vector2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
+                    vertex.texcoord = new vec2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
                 }
                 else
                 {
-                    vertex.texcoord = Vector2.Zero;
+                    vertex.texcoord = vec2.Zero;
                 }
 
                 vertexBuffer.Add(vertex);

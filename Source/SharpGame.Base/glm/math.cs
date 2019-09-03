@@ -6,6 +6,9 @@ namespace SharpGame
 {
     public static partial class glm
     {
+        const float FLT_EPSILON = 1.192092896e-07F;
+
+        public static float epsilon() => FLT_EPSILON;
 
         public static float pi()
         {
@@ -30,6 +33,16 @@ namespace SharpGame
         public static float abs(float v)
         {
             return Math.Abs(v);
+        }
+
+        public static bool epsilonEqual(float x, float y, float epsilon)
+        {
+            return abs(x - y) < epsilon;
+        }
+
+        public static bool epsilonNotEqual(float x, float y, float epsilon)
+        {
+            return abs(x - y) >= epsilon;
         }
 
         public static float sqrt(float v)

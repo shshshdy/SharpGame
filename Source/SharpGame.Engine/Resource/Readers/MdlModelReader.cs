@@ -91,7 +91,7 @@ namespace SharpGame
             var morphRangeCounts_ = new int[numVertexBuffers];
             loadVBData_ = new VertexBufferDesc[numVertexBuffers];
             var GeometryBoneMappings = new List<int[]>();
-            var GeometryCenters = new List<Vector3>();
+            var GeometryCenters = new List<vec3>();
 
             for (int i = 0; i < numVertexBuffers; ++i)
             {
@@ -261,11 +261,11 @@ namespace SharpGame
                     unsafe
                     {
                         if ((newBuffer.elementMask_ & MASK_POSITION) != 0)
-                            vertexSize += sizeof(Vector3);
+                            vertexSize += sizeof(vec3);
                         if ((newBuffer.elementMask_ & MASK_NORMAL) != 0)
-                            vertexSize += sizeof(Vector3);
+                            vertexSize += sizeof(vec3);
                         if ((newBuffer.elementMask_ & MASK_TANGENT) != 0)
-                            vertexSize += sizeof(Vector3);
+                            vertexSize += sizeof(vec3);
                     }
 
                     newBuffer.dataSize_ = newBuffer.vertexCount_ * (int)vertexSize;
@@ -287,9 +287,9 @@ namespace SharpGame
 
             // Read geometry centers
             for (int i = 0; i < geometries_.Length && !stream.IsEof; ++i)
-                GeometryCenters.Add(stream.Read<Vector3>());
+                GeometryCenters.Add(stream.Read<vec3>());
             while (GeometryCenters.Count < geometries_.Length)
-                GeometryCenters.Add(Vector3.Zero);
+                GeometryCenters.Add(vec3.Zero);
 
             model.VertexBuffers = vertexBuffers_;
             model.IndexBuffers = indexBuffers_;

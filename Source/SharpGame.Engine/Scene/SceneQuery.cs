@@ -95,11 +95,11 @@ namespace SharpGame
     public struct RayQueryResult
     {
         /// Hit position in world space.
-        public Vector3 position_;
+        public vec3 position_;
         /// Hit normal in world space. Negation of ray direction if per-triangle data not available.
-        public Vector3 normal_;
+        public vec3 normal_;
         /// Hit texture position
-        public Vector2 textureUV_;
+        public vec2 textureUV_;
         /// Distance from ray origin.
         public float distance_;
         /// Drawable.

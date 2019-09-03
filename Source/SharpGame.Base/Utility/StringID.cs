@@ -13,7 +13,7 @@ namespace SharpGame
     {
         public string InternID { get; }
 
-        public readonly static StringID Empty = String.Empty;
+        public readonly static StringID Empty = string.Empty;
 
         public StringID(string id)
         {

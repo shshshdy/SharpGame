@@ -114,13 +114,13 @@ namespace SharpGame
             return newNode;
         }
 
-        public Node CreateChild(string name, Vector3 pos = default, Vector3 euler = default)
+        public Node CreateChild(string name, vec3 pos = default, vec3 euler = default)
         {
             Node newNode = new Node
             {
                 Name = name,
                 Position = pos,
-                Rotation = Quaternion.FromEuler(euler.X, euler.Y, euler.Z)
+                Rotation = glm.quat(euler)
             };
             AddChild(newNode);
             return newNode;
@@ -493,7 +493,7 @@ namespace SharpGame
             if (scene_ != null)
                 scene_.NodeRemoved(this);
 
-            NativePool<Matrix>.Shared.Release(worldTransform_);
+            NativePool<mat4>.Shared.Release(worldTransform_);
         }
     }
 

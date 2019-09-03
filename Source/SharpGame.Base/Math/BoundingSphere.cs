@@ -59,7 +59,7 @@ namespace SharpGame
         /// <summary>
         /// The center of the sphere in three dimensional space.
         /// </summary>
-        public Vector3 Center;
+        public vec3 Center;
 
         /// <summary>
         /// The radius of the sphere.
@@ -71,17 +71,17 @@ namespace SharpGame
         /// </summary>
         /// <param name="center">The center of the sphere in three dimensional space.</param>
         /// <param name="radius">The radius of the sphere.</param>
-        public BoundingSphere(Vector3 center, float radius)
+        public BoundingSphere(vec3 center, float radius)
         {
             this.Center = center;
             this.Radius = radius;
         }
         /// Return distance of a point to the surface, or 0 if inside.
-        public float Distance( Vector3 point) { return Math.Max((point - Center).Length() - Radius, 0.0f); }
+        public float Distance( vec3 point) { return Math.Max((point - Center).Length() - Radius, 0.0f); }
         /// Return point on the sphere relative to sphere position.
-        public Vector3 GetLocalPoint(float theta, float phi)
+        public vec3 GetLocalPoint(float theta, float phi)
         {
-            return new Vector3(
+            return new vec3(
                 Radius * (float)Math.Sin(theta) * (float)Math.Sin(phi),
                 Radius * (float)Math.Cos(phi),
                 Radius * (float)Math.Cos(theta) * (float)Math.Sin(phi)
@@ -89,7 +89,7 @@ namespace SharpGame
         }
 
         /// Return point on the sphere.
-        public Vector3 GetPoint(float theta, float phi)
+        public vec3 GetPoint(float theta, float phi)
         {
             return Center + GetLocalPoint(theta, phi);
         }
@@ -122,9 +122,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out Vector3 point)
+        public bool Intersects(ref Ray ray, out vec3 point)
         {
             return Collision.RayIntersectsSphere(ref ray, ref this, out point);
         }
@@ -146,7 +146,7 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public bool Intersects(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
         {
             return Collision.SphereIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
         }
@@ -196,7 +196,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(ref Vector3 point)
+        public Intersection Contains(ref vec3 point)
         {
             return Collision.SphereContainsPoint(ref this, ref point);
         }
@@ -208,7 +208,7 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public Intersection Contains(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
         {
             return Collision.SphereContainsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
         }
@@ -246,7 +246,7 @@ namespace SharpGame
         /// or
         /// count
         /// </exception>
-        public static void FromPoints(Vector3[] points, int start, int count, out BoundingSphere result)
+        public static void FromPoints(vec3[] points, int start, int count, out BoundingSphere result)
         {
             if (points == null)
             {
@@ -268,10 +268,10 @@ namespace SharpGame
             var upperEnd = start + count;
 
             //Find the center of all points.
-            Vector3 center = Vector3.Zero;
+            vec3 center = vec3.Zero;
             for (int i = start; i < upperEnd; ++i)
             {
-                Vector3.Add(ref points[i], ref center, out center);
+                vec3.Add(ref points[i], ref center, out center);
             }
 
             //This is the center of our sphere.
@@ -284,7 +284,7 @@ namespace SharpGame
                 //We are doing a relative distance comparison to find the maximum distance
                 //from the center of our sphere.
                 float distance;
-                Vector3.DistanceSquared(ref center, ref points[i], out distance);
+                vec3.DistanceSquared(ref center, ref points[i], out distance);
 
                 if (distance > radius)
                     radius = distance;
@@ -303,7 +303,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="points">The points that will be contained by the sphere.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding sphere.</param>
-        public static void FromPoints(Vector3[] points, out BoundingSphere result)
+        public static void FromPoints(vec3[] points, out BoundingSphere result)
         {
             if (points == null)
             {
@@ -318,7 +318,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="points">The points that will be contained by the sphere.</param>
         /// <returns>The newly constructed bounding sphere.</returns>
-        public static BoundingSphere FromPoints(Vector3[] points)
+        public static BoundingSphere FromPoints(vec3[] points)
         {
             BoundingSphere result;
             FromPoints(points, out result);
@@ -332,7 +332,7 @@ namespace SharpGame
         /// <param name="result">When the method completes, the newly constructed bounding sphere.</param>
         public static void FromBox(ref BoundingBox box, out BoundingSphere result)
         {
-            Vector3.Lerp(ref box.Minimum, ref box.Maximum, 0.5f, out result.Center);
+            glm.Lerp(ref box.Minimum, ref box.Maximum, 0.5f, out result.Center);
 
             float x = box.Minimum.X - box.Maximum.X;
             float y = box.Minimum.Y - box.Maximum.Y;
@@ -362,7 +362,7 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the newly constructed bounding sphere.</param>
         public static void Merge(ref BoundingSphere value1, ref BoundingSphere value2, out BoundingSphere result)
         {
-            Vector3 difference = value2.Center - value1.Center;
+            vec3 difference = value2.Center - value1.Center;
 
             float length = difference.Length();
             float radius = value1.Radius;
@@ -383,7 +383,7 @@ namespace SharpGame
                 }
             }
 
-            Vector3 vector = difference * (1.0f / length);
+            vec3 vector = difference * (1.0f / length);
             float min = Math.Min(-radius, length - radius2);
             float max = (Math.Max(radius, length + radius2) - min) * 0.5f;
 

@@ -114,7 +114,7 @@ namespace SharpGame
         /// Initializes a new instance of the <see cref="Color3"/> struct.
         /// </summary>
         /// <param name="value">The red, green, and blue components of the color.</param>
-        public Color3(Vector3 value)
+        public Color3(vec3 value)
         {
             Red = value.X;
             Green = value.Y;
@@ -229,9 +229,9 @@ namespace SharpGame
         /// Converts the color into a three component vector.
         /// </summary>
         /// <returns>A three component vector containing the red, green, and blue components of the color.</returns>
-        public Vector3 ToVector3()
+        public vec3 ToVector3()
         {
-            return new Vector3(Red, Green, Blue);
+            return new vec3(Red, Green, Blue);
         }
 
         /// <summary>
@@ -706,21 +706,21 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Color3"/> to <see cref="Vector3"/>.
+        /// Performs an implicit conversion from <see cref="Color3"/> to <see cref="vec3"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator Vector3(Color3 value)
+        public static implicit operator vec3(Color3 value)
         {
-            return new Vector3(value.Red, value.Green, value.Blue);
+            return new vec3(value.Red, value.Green, value.Blue);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Vector3"/> to <see cref="Color3"/>.
+        /// Performs an implicit conversion from <see cref="vec3"/> to <see cref="Color3"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator Color3(Vector3 value)
+        public static implicit operator Color3(vec3 value)
         {
             return new Color3(value.X, value.Y, value.Z);
         }

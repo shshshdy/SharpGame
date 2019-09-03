@@ -47,8 +47,8 @@ namespace SharpGame
                 for (int j = 0; j < numBucketsHeight; i++)
                 {
                     ref BoundingBox bbox = ref m_BoundingBoxes[i + j * numBucketsWidth];
-                    Vector3 min = new Vector3(m_BucketWidth * (i + 1), -1000, m_BucketHeight * (j + 1));
-                    Vector3 max = new Vector3(m_BucketWidth * (i + 1), 1000, m_BucketHeight * (j + 1));
+                    vec3 min = new vec3(m_BucketWidth * (i + 1), -1000, m_BucketHeight * (j + 1));
+                    vec3 max = new vec3(m_BucketWidth * (i + 1), 1000, m_BucketHeight * (j + 1));
                     bbox.Define(ref min, ref max);
                 }
             }
@@ -106,7 +106,7 @@ namespace SharpGame
         /// Gets all objects within the given range of the given position.
         /// This version of the query is not thread safe.
         /// </summary>
-        public Drawable[] GetObjectsInRange(Vector2 pos, float range = float.MaxValue)
+        public Drawable[] GetObjectsInRange(vec2 pos, float range = float.MaxValue)
         {
 #if DEBUG
             if (range < 0f)
@@ -137,7 +137,7 @@ namespace SharpGame
         /// This version of the query is thread safe as long as
         /// <see cref="Update"/> does not execute during the queery.
         /// </summary>
-        public Drawable GetClosestObject(Vector2 pos, float maxDistance = float.MaxValue)
+        public Drawable GetClosestObject(vec2 pos, float maxDistance = float.MaxValue)
         {
 #if DEBUG
             if (maxDistance < 0f)
@@ -151,7 +151,7 @@ namespace SharpGame
         /// This version of the query is thread safe as long as
         /// <see cref="Update"/> does not execute during the queery.
         /// </summary>
-        public void GetObjectsInRange(Vector2 pos, float range, IList<Drawable> results)
+        public void GetObjectsInRange(vec2 pos, float range, IList<Drawable> results)
         {
 #if DEBUG
             if (range < 0f)
@@ -178,14 +178,14 @@ namespace SharpGame
 
         #endregion
 
-        static float SquaredLength(Vector3 v, Vector2 v1)
+        static float SquaredLength(vec3 v, vec2 v1)
         {
             float xx = v.X - v1.X;
             float yy = v.Z - v1.Y;
             return (xx * xx) + (yy * yy);
         }
 
-        private Drawable NearestNeighborSearch(Vector2 pos, float range)
+        private Drawable NearestNeighborSearch(vec2 pos, float range)
         {
             Drawable closest = null;
             var idx = FindBucketIndex(pos);
@@ -230,7 +230,7 @@ namespace SharpGame
             return closest;
         }
 
-        private void AllNearestNeighborSearch(Vector2 pos, float range, IList<Drawable> results)
+        private void AllNearestNeighborSearch(vec2 pos, float range, IList<Drawable> results)
         {
             var idx = FindBucketIndex(pos);
 
@@ -268,7 +268,7 @@ namespace SharpGame
         {
             var idx = FindBucketIndex(rect.Center);
 
-            var range = (rect.Center - rect.Location).Length();
+            var range = glm.length(rect.Center - rect.Location);
 
             var bucketRangeX = (int)(range / m_BucketWidth) + 1;
             if (bucketRangeX < 0) bucketRangeX = m_NumBucketsWidth / 2;
@@ -341,7 +341,7 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        private int FindBucketIndex(Vector2 pos)
+        private int FindBucketIndex(vec2 pos)
         {
             var fromLeft = pos.X - m_Region.Left;
             var x = MathUtil.Clamp((int)(fromLeft / m_BucketWidth), 0, m_NumBucketsWidth - 1);
@@ -353,7 +353,7 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        private int FindBucketIndex(Vector3 pos)
+        private int FindBucketIndex(vec3 pos)
         {
             var fromLeft = pos.X - m_Region.Left;
             var x = MathUtil.Clamp((int)(fromLeft / m_BucketWidth), 0, m_NumBucketsWidth - 1);

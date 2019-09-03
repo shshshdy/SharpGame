@@ -50,8 +50,8 @@ namespace SharpGame
 
         private class ParseContext
         {
-            private List<Vector3> _positions = new List<Vector3>();
-            private List<Vector3> _normals = new List<Vector3>();
+            private List<vec3> _positions = new List<vec3>();
+            private List<vec3> _normals = new List<vec3>();
             private List<Vector2> _texCoords = new List<Vector2>();
 
             private List<ObjFile.MeshGroup> _groups = new List<ObjFile.MeshGroup>();
@@ -198,12 +198,12 @@ namespace SharpGame
                     _currentLineText));
             }
 
-            public void DiscoverPosition(Vector3 position)
+            public void DiscoverPosition(vec3 position)
             {
                 _positions.Add(position);
             }
 
-            public void DiscoverNormal(Vector3 normal)
+            public void DiscoverNormal(vec3 normal)
             {
                 _normals.Add(normal);
             }
@@ -243,7 +243,7 @@ namespace SharpGame
                 return new ObjFile(_positions.ToArray(), _normals.ToArray(), _texCoords.ToArray(), _groups.ToArray(), _materialLibName);
             }
 
-            private Vector3 ParseVector3(string xStr, string yStr, string zStr, string location)
+            private vec3 ParseVector3(string xStr, string yStr, string zStr, string location)
             {
                 try
                 {
@@ -251,7 +251,7 @@ namespace SharpGame
                     float y = float.Parse(yStr);
                     float z = float.Parse(zStr);
 
-                    return new Vector3(x, y, z);
+                    return new vec3(x, y, z);
                 }
                 catch (FormatException fe)
                 {
@@ -342,13 +342,13 @@ namespace SharpGame
     /// </summary>
     public class ObjFile
     {
-        public Vector3[] Positions { get; }
-        public Vector3[] Normals { get; }
+        public vec3[] Positions { get; }
+        public vec3[] Normals { get; }
         public Vector2[] TexCoords { get; }
         public MeshGroup[] MeshGroups { get; }
         public string MaterialLibName { get; }
 
-        public ObjFile(Vector3[] positions, Vector3[] normals, Vector2[] texCoords, MeshGroup[] meshGroups, string materialLibName)
+        public ObjFile(vec3[] positions, vec3[] normals, Vector2[] texCoords, MeshGroup[] meshGroups, string materialLibName)
         {
             Positions = positions;
             Normals = normals;
@@ -414,8 +414,8 @@ namespace SharpGame
 
         private VertexPosNormTex ConstructVertex(FaceVertex key, FaceVertex adjacent1, FaceVertex adjacent2)
         {
-            Vector3 position = Positions[key.PositionIndex - 1];
-            Vector3 normal;
+            vec3 position = Positions[key.PositionIndex - 1];
+            vec3 normal;
             if (key.NormalIndex == -1)
             {
                 normal = ComputeNormal(key, adjacent1, adjacent2);
@@ -431,13 +431,13 @@ namespace SharpGame
             return new VertexPosNormTex(position, normal, texCoord);
         }
 
-        private Vector3 ComputeNormal(FaceVertex v1, FaceVertex v2, FaceVertex v3)
+        private vec3 ComputeNormal(FaceVertex v1, FaceVertex v2, FaceVertex v3)
         {
-            Vector3 pos1 = Positions[v1.PositionIndex - 1];
-            Vector3 pos2 = Positions[v2.PositionIndex - 1];
-            Vector3 pos3 = Positions[v3.PositionIndex - 1];
+            vec3 pos1 = Positions[v1.PositionIndex - 1];
+            vec3 pos2 = Positions[v2.PositionIndex - 1];
+            vec3 pos3 = Positions[v3.PositionIndex - 1];
 
-            return Vector3.Normalize(Vector3.Cross(pos1 - pos2, pos1 - pos3));
+            return glm.normalize(vec3.Cross(pos1 - pos2, pos1 - pos3));
         }
 
         /// <summary>
@@ -569,7 +569,7 @@ namespace SharpGame
             MaterialName = materialName;
         }
 
-        public Vector3[] GetVertexPositions()
+        public vec3[] GetVertexPositions()
         {
             return Vertices.Select(vpnt => vpnt.position).ToArray();
         }

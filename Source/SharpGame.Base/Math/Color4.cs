@@ -122,12 +122,12 @@ namespace SharpGame
         /// Initializes a new instance of the <see cref="Color4"/> struct.
         /// </summary>
         /// <param name="value">The red, green, blue, and alpha components of the color.</param>
-        public Color4(Vector4 value)
+        public Color4(vec4 value)
         {
-            Red = value.X;
-            Green = value.Y;
-            Blue = value.Z;
-            Alpha = value.W;
+            Red = value.x;
+            Green = value.y;
+            Blue = value.z;
+            Alpha = value.w;
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="value">The red, green, and blue components of the color.</param>
         /// <param name="alpha">The alpha component of the color.</param>
-        public Color4(Vector3 value, float alpha)
+        public Color4(vec3 value, float alpha)
         {
             Red = value.X;
             Green = value.Y;
@@ -301,18 +301,18 @@ namespace SharpGame
         /// Converts the color into a three component vector.
         /// </summary>
         /// <returns>A three component vector containing the red, green, and blue components of the color.</returns>
-        public Vector3 ToVector3()
+        public vec3 ToVector3()
         {
-            return new Vector3(Red, Green, Blue);
+            return new vec3(Red, Green, Blue);
         }
 
         /// <summary>
         /// Converts the color into a four component vector.
         /// </summary>
         /// <returns>A four component vector containing all four color components.</returns>
-        public Vector4 ToVector4()
+        public vec4 ToVector4()
         {
-            return new Vector4(Red, Green, Blue, Alpha);
+            return new vec4(Red, Green, Blue, Alpha);
         }
 
         /// <summary>
@@ -802,47 +802,47 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Color4"/> to <see cref="Vector3"/>.
+        /// Performs an explicit conversion from <see cref="Color4"/> to <see cref="vec3"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator Vector3(Color4 value)
+        public static explicit operator vec3(Color4 value)
         {
-            return new Vector3(value.Red, value.Green, value.Blue);
+            return new vec3(value.Red, value.Green, value.Blue);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Color4"/> to <see cref="Vector4"/>.
+        /// Performs an implicit conversion from <see cref="Color4"/> to <see cref="vec4"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator Vector4(Color4 value)
+        public static implicit operator vec4(Color4 value)
         {
-            return new Vector4(value.Red, value.Green, value.Blue, value.Alpha);
+            return new vec4(value.Red, value.Green, value.Blue, value.Alpha);
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector3"/> to <see cref="Color4"/>.
+        /// Performs an explicit conversion from <see cref="vec3"/> to <see cref="Color4"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator Color4(Vector3 value)
+        public static explicit operator Color4(vec3 value)
         {
             return new Color4(value.X, value.Y, value.Z, 1.0f);
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector4"/> to <see cref="Color4"/>.
+        /// Performs an explicit conversion from <see cref="vec4"/> to <see cref="Color4"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator Color4(Vector4 value)
+        public static explicit operator Color4(vec4 value)
         {
-            return new Color4(value.X, value.Y, value.Z, value.W);
+            return new Color4(value.x, value.y, value.z, value.w);
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector3"/> to <see cref="Color4"/>.
+        /// Performs an explicit conversion from <see cref="vec3"/> to <see cref="Color4"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -852,7 +852,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector4"/> to <see cref="Color4"/>.
+        /// Performs an explicit conversion from <see cref="vec4"/> to <see cref="Color4"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>

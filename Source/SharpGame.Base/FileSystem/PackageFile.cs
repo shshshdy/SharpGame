@@ -19,9 +19,9 @@ namespace SharpGame
 
     public class PackageFile : Object
     {
-        Dictionary<String, PackageEntry> entries_ = new Dictionary<string, PackageEntry>();
+        Dictionary<string, PackageEntry> entries_ = new Dictionary<string, PackageEntry>();
         /// File name.
-        String fileName_;
+        string fileName_;
         /// Package file total size.
         int totalSize_ = 0;
         /// Total data size in the package using each entry's actual size if it is a compressed package file.
@@ -32,10 +32,10 @@ namespace SharpGame
         bool compressed_ = false;
 
         /// Return all file entries.
-        public Dictionary<String, PackageEntry> Entries => entries_;
+        public Dictionary<string, PackageEntry> Entries => entries_;
 
         /// Return the package file name.
-        public String Name => fileName_;
+        public string Name => fileName_;
 
         /// Return number of files.
         public int NumFiles => entries_.Count;
@@ -53,24 +53,24 @@ namespace SharpGame
         public bool IsCompressed => compressed_;
 
         /// Return list of file names in the package.
-        public ICollection<String> EntryNames => entries_.Keys;
+        public ICollection<string> EntryNames => entries_.Keys;
 
         public PackageFile()
         {
         }
 
-        public PackageFile(String fileName, int startOffset = 0)
+        public PackageFile(string fileName, int startOffset = 0)
         {
             Open(fileName, startOffset);
         }
 
-        public bool Exists(String fileName)
+        public bool Exists(string fileName)
         {
             bool found = entries_.ContainsKey(fileName);
             return found;
         }
 
-        internal PackageEntry? GetEntry(String fileName)
+        internal PackageEntry? GetEntry(string fileName)
         {
             if(entries_.TryGetValue(fileName, out PackageEntry ret))
             {
@@ -80,14 +80,14 @@ namespace SharpGame
             return null;
         }
 
-        public bool Open(String fileName, int startOffset = 0)
+        public bool Open(string fileName, int startOffset = 0)
         {
             File file = new File(System.IO.File.OpenRead(fileName));
 
             // Check ID, then read the directory
             file.Seek(startOffset);
 
-            String id = file.ReadCString();
+            string id = file.ReadCString();
             if(id != "UPAK" && id != "ULZ4")
             {
                 // If start offset has not been explicitly specified, also try to read package size from the end of file
@@ -121,7 +121,7 @@ namespace SharpGame
 
             for(int i = 0; i < numFiles; ++i)
             {
-                String entryName = file.ReadCString();
+                string entryName = file.ReadCString();
                 PackageEntry newEntry;
                 newEntry.offset_ = file.Read<int>() + startOffset;
                 totalDataSize_ += (newEntry.size_ = file.Read<int>());

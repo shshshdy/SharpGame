@@ -490,9 +490,9 @@ namespace SharpGame
             ref AnimationKeyFrame keyFrame = ref track.keyFrames_.At(frame);
             byte channelMask = track.channelMask_;
 
-            Vector3 newPosition = Vector3.Zero;
-            Quaternion newRotation = Quaternion.Identity;
-            Vector3 newScale = Vector3.Zero;
+            vec3 newPosition = vec3.Zero;
+            quat newRotation = quat.Identity;
+            vec3 newScale = vec3.Zero;
 
             if(interpolate)
             {
@@ -503,11 +503,12 @@ namespace SharpGame
                 float t = timeInterval > 0.0f ? (time_ - keyFrame.time_) / timeInterval : 1.0f;
 
                 if((channelMask & Animation.CHANNEL_POSITION) != 0)
-                    Vector3.Lerp(ref keyFrame.position_, ref nextKeyFrame.position_, t, out newPosition);
-                if((channelMask & Animation.CHANNEL_ROTATION) != 0)
-                    Quaternion.Slerp(ref keyFrame.rotation_, ref nextKeyFrame.rotation_, t, out newRotation);
-                if((channelMask & Animation.CHANNEL_SCALE) != 0)
-                    Vector3.Lerp(ref keyFrame.scale_, ref nextKeyFrame.scale_, t, out newScale);
+                    glm.Lerp(ref keyFrame.position_, ref nextKeyFrame.position_, t, out newPosition);
+                if ((channelMask & Animation.CHANNEL_ROTATION) != 0)
+                    newRotation = glm.slerp(keyFrame.rotation_, nextKeyFrame.rotation_, t);
+                    //glm.slerp(ref keyFrame.rotation_, ref nextKeyFrame.rotation_, t, out newRotation);
+                if ((channelMask & Animation.CHANNEL_SCALE) != 0)
+                    glm.Lerp(ref keyFrame.scale_, ref nextKeyFrame.scale_, t, out newScale);
             }
             else
             {
@@ -523,20 +524,21 @@ namespace SharpGame
             {
                 if((channelMask & Animation.CHANNEL_POSITION) != 0)
                 {
-                    Vector3 delta = newPosition - stateTrack.bone_.initialPosition_;
+                    vec3 delta = newPosition - stateTrack.bone_.initialPosition_;
                     newPosition = node.Position + delta * weight;
                 }
                 if((channelMask & Animation.CHANNEL_ROTATION) != 0)
                 {
-                    Quaternion delta = Quaternion.Invert(stateTrack.bone_.initialRotation_) * newRotation;
-                    newRotation = (node.Rotation * delta);
-                    newRotation.Normalize();
-                    if(!Equals(weight, 1.0f))
-                        Quaternion.Slerp(ref node.RotationRef, ref newRotation, weight, out newRotation);
+                    quat delta =glm.inverse(stateTrack.bone_.initialRotation_)* newRotation;
+                    newRotation = glm.normalize(node.Rotation * delta);
+                   // newRotation.Normalize();
+                    if (!Equals(weight, 1.0f))
+                        newRotation = glm.slerp(node.RotationRef, newRotation, weight);
+                        //quat.Slerp(ref node.RotationRef, ref newRotation, weight, out newRotation);
                 }
                 if((channelMask & Animation.CHANNEL_SCALE) != 0)
                 {
-                    Vector3 delta = newScale - stateTrack.bone_.initialScale_;
+                    vec3 delta = newScale - stateTrack.bone_.initialScale_;
                     newScale = node.Scaling + delta * weight;
                 }
             }
@@ -545,11 +547,12 @@ namespace SharpGame
                 if(!Equals(weight, 1.0f)) // not full weight
                 {
                     if((channelMask & Animation.CHANNEL_POSITION) != 0)
-                        Vector3.Lerp(ref node.PositionRef, ref newPosition, weight, out newPosition);
-                    if((channelMask & Animation.CHANNEL_ROTATION) != 0)
-                        Quaternion.Slerp(ref node.RotationRef, ref newRotation, weight, out newRotation);
-                    if((channelMask & Animation.CHANNEL_SCALE) != 0)
-                        Vector3.Lerp(ref node.ScalingRef, ref newScale, weight, out newScale);
+                        glm.Lerp(ref node.PositionRef, ref newPosition, weight, out newPosition);
+                    if ((channelMask & Animation.CHANNEL_ROTATION) != 0)
+                        //quat.Slerp(ref node.RotationRef, ref newRotation, weight, out newRotation);
+                        newRotation = glm.slerp(node.RotationRef, newRotation, weight);
+                    if ((channelMask & Animation.CHANNEL_SCALE) != 0)
+                        glm.Lerp(ref node.ScalingRef, ref newScale, weight, out newScale);
                 }
             }
 

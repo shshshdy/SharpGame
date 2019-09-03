@@ -18,23 +18,22 @@ namespace SharpGame
         public float z;
         public float w;
 
+        public static readonly vec4 Zero = new vec4(0, 0, 0, 0);
+        public static readonly vec4 One = new vec4(1, 1, 1, 1);
+
         public float this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (index == 0) return x;
-                else if (index == 1) return y;
-                else if (index == 2) return z;
-                else if (index == 3) return w;
-                else throw new Exception("Out of range.");
+                System.Diagnostics.Debug.Assert(index >= 0 && index < 3);
+                return Unsafe.Add(ref x, index);
             }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (index == 0) x = value;
-                else if (index == 1) y = value;
-                else if (index == 2) z = value;
-                else if (index == 3) w = value;
-                else throw new Exception("Out of range.");
+                System.Diagnostics.Debug.Assert(index >= 0 && index < 3);
+                Unsafe.Add(ref x, index) = value;
             }
         }
 
@@ -112,6 +111,11 @@ namespace SharpGame
             return new vec4(value.X, value.Y, value.Z, 0);
         }
 
+        public static explicit operator vec3(vec4 value)
+        {
+            return new vec3(value.x, value.y, value.z);
+        }
+
         public float[] ToArray()
         {
             return new[] { x, y, z, w };
@@ -146,9 +150,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator Vector2(vec4 value)
+        public static explicit operator vec2(vec4 value)
         {
-            return new Vector2(value.x, value.y);
+            return new vec2(value.x, value.y);
         }
 
         /// <summary>

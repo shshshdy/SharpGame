@@ -65,7 +65,7 @@ namespace SharpGame
         /// Geometry bone mappings.
         public List<int[]> GeometryBoneMappings { get; set; }
         /// Geometry centers.
-        public List<Vector3> GeometryCenters { get; set; } = new List<Vector3>();
+        public List<vec3> GeometryCenters { get; set; } = new List<vec3>();
         public List<Material> Materials { get; set; } = new List<Material>();
         public ResourceRefList MaterialList { get; set; }
 

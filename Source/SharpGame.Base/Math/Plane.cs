@@ -59,21 +59,21 @@ namespace SharpGame
         /// <summary>
         /// The normal vector of the plane.
         /// </summary>
-        public Vector3 Normal;
+        public vec3 Normal;
 
         /// <summary>
         /// The distance of the plane along its normal from the origin.
         /// </summary>
         public float D;
 
-        public Vector3 AbsNormal { get { return new Vector3(Math.Abs(Normal.X), Math.Abs(Normal.Y), Math.Abs(Normal.Z)); } }
+        public vec3 AbsNormal { get { return new vec3(Math.Abs(Normal.X), Math.Abs(Normal.Y), Math.Abs(Normal.Z)); } }
         /// <summary>
         /// Initializes a new instance of the <see cref="Plane"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
         public Plane(float value)
         {
-            Normal.X = Normal.Y = Normal.Z = D = value;
+            Normal.x = Normal.y = Normal.z = D = value;
         }
 
         /// <summary>
@@ -85,9 +85,9 @@ namespace SharpGame
         /// <param name="d">The distance of the plane along its normal from the origin.</param>
         public Plane(float a, float b, float c, float d)
         {
-            Normal.X = a;
-            Normal.Y = b;
-            Normal.Z = c;
+            Normal.x = a;
+            Normal.y = b;
+            Normal.z = c;
             D = d;
         }
 
@@ -96,10 +96,10 @@ namespace SharpGame
         /// </summary>
         /// <param name="point">Any point that lies along the plane.</param>
         /// <param name="normal">The normal vector to the plane.</param>
-        public Plane(Vector3 point, Vector3 normal)
+        public Plane(vec3 point, vec3 normal)
         {
             this.Normal = normal;
-            this.D = -Vector3.Dot(normal, point);
+            this.D = -vec3.Dot(normal, point);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="value">The normal of the plane.</param>
         /// <param name="d">The distance of the plane along its normal from the origin</param>
-        public Plane(Vector3 value, float d)
+        public Plane(vec3 value, float d)
         {
             Normal = value;
             D = d;
@@ -119,7 +119,7 @@ namespace SharpGame
         /// <param name="point1">First point of a triangle defining the plane.</param>
         /// <param name="point2">Second point of a triangle defining the plane.</param>
         /// <param name="point3">Third point of a triangle defining the plane.</param>
-        public Plane(Vector3 point1, Vector3 point2, Vector3 point3)
+        public Plane(vec3 point1, vec3 point2, vec3 point3)
         {
             float x1 = point2.X - point1.X;
             float y1 = point2.Y - point1.Y;
@@ -132,13 +132,13 @@ namespace SharpGame
             float xy = (x1 * y2) - (y1 * x2);
             float invPyth = 1.0f / (float)(Math.Sqrt((yz * yz) + (xz * xz) + (xy * xy)));
 
-            Normal.X = yz * invPyth;
-            Normal.Y = xz * invPyth;
-            Normal.Z = xy * invPyth;
+            Normal.x = yz * invPyth;
+            Normal.y = xz * invPyth;
+            Normal.z = xy * invPyth;
             D = -((Normal.X * point1.X) + (Normal.Y * point1.Y) + (Normal.Z * point1.Z));
         }
 
-        public void Define(ref Vector3 point1, ref Vector3 point2, ref Vector3 point3)
+        public void Define(ref vec3 point1, ref vec3 point2, ref vec3 point3)
         {
             float x1 = point2.X - point1.X;
             float y1 = point2.Y - point1.Y;
@@ -170,9 +170,9 @@ namespace SharpGame
             if(values.Length != 4)
                 throw new ArgumentOutOfRangeException("values", "There must be four and only four input values for Plane.");
 
-            Normal.X = values[0];
-            Normal.Y = values[1];
-            Normal.Z = values[2];
+            Normal.x = values[0];
+            Normal.y = values[1];
+            Normal.z = values[2];
             D = values[3];
         }
 
@@ -225,7 +225,7 @@ namespace SharpGame
         }
 
         /// Return signed distance to a point.
-        public float Distance(ref Vector3 point) { return Vector3.Dot(Normal, point) + D; }
+        public float Distance(ref vec3 point) { return vec3.Dot(Normal, point) + D; }
 
         /// <summary>
         /// Creates an array containing the elements of the plane.
@@ -241,7 +241,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public PlaneIntersectionType Intersects(ref Vector3 point)
+        public PlaneIntersectionType Intersects(ref vec3 point)
         {
             return Collision.PlaneIntersectsPoint(ref this, ref point);
         }
@@ -274,9 +274,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out Vector3 point)
+        public bool Intersects(ref Ray ray, out vec3 point)
         {
             return Collision.RayIntersectsPlane(ref ray, ref this, out point);
         }
@@ -310,7 +310,7 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public PlaneIntersectionType Intersects(ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public PlaneIntersectionType Intersects(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
         {
             return Collision.PlaneIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
         }
@@ -336,174 +336,6 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Builds a matrix that can be used to reflect vectors about a plane.
-        /// </summary>
-        /// <param name="plane">The plane for which the reflection occurs. This parameter is assumed to be normalized.</param>
-        /// <param name="result">When the method completes, contains the reflection matrix.</param>
-        public void Reflection(out Matrix result)
-        {
-            float x = this.Normal.X;
-            float y = this.Normal.Y;
-            float z = this.Normal.Z;
-            float x2 = -2.0f * x;
-            float y2 = -2.0f * y;
-            float z2 = -2.0f * z;
-
-            result.M11 = (x2 * x) + 1.0f;
-            result.M12 = y2 * x;
-            result.M13 = z2 * x;
-            result.M14 = 0.0f;
-            result.M21 = x2 * y;
-            result.M22 = (y2 * y) + 1.0f;
-            result.M23 = z2 * y;
-            result.M24 = 0.0f;
-            result.M31 = x2 * z;
-            result.M32 = y2 * z;
-            result.M33 = (z2 * z) + 1.0f;
-            result.M34 = 0.0f;
-            result.M41 = x2 * this.D;
-            result.M42 = y2 * this.D;
-            result.M43 = z2 * this.D;
-            result.M44 = 1.0f;
-        }
-
-        /// <summary>
-        /// Builds a matrix that can be used to reflect vectors about a plane.
-        /// </summary>
-        /// <returns>The reflection matrix.</returns>
-        public Matrix Reflection()
-        {
-            Matrix result;
-            Reflection(out result);
-            return result;
-        }
-
-        /// <summary>
-        /// Creates a matrix that flattens geometry into a shadow from this the plane onto which to project the geometry as a shadow. 
-        /// This plane  is assumed to be normalized
-        /// </summary>
-        /// <param name="light">The light direction. If the W component is 0, the light is directional light; if the
-        /// W component is 1, the light is a point light.</param>
-        /// <param name="result">When the method completes, contains the shadow matrix.</param>
-        public void Shadow(ref Vector4 light, out Matrix result)
-        {
-            float dot = (this.Normal.X * light.X) + (this.Normal.Y * light.Y) + (this.Normal.Z * light.Z) + (this.D * light.W);
-            float x = -this.Normal.X;
-            float y = -this.Normal.Y;
-            float z = -this.Normal.Z;
-            float d = -this.D;
-
-            result.M11 = (x * light.X) + dot;
-            result.M21 = y * light.X;
-            result.M31 = z * light.X;
-            result.M41 = d * light.X;
-            result.M12 = x * light.Y;
-            result.M22 = (y * light.Y) + dot;
-            result.M32 = z * light.Y;
-            result.M42 = d * light.Y;
-            result.M13 = x * light.Z;
-            result.M23 = y * light.Z;
-            result.M33 = (z * light.Z) + dot;
-            result.M43 = d * light.Z;
-            result.M14 = x * light.W;
-            result.M24 = y * light.W;
-            result.M34 = z * light.W;
-            result.M44 = (d * light.W) + dot;
-        }
-
-        /// <summary>
-        /// Creates a matrix that flattens geometry into a shadow from this the plane onto which to project the geometry as a shadow. 
-        /// This plane  is assumed to be normalized
-        /// </summary>
-        /// <param name="light">The light direction. If the W component is 0, the light is directional light; if the
-        /// W component is 1, the light is a point light.</param>
-        /// <returns>The shadow matrix.</returns>
-        public Matrix Shadow(Vector4 light)
-        {
-            Matrix result;
-            Shadow(ref light, out result);
-            return result;
-        }
-
-        /// <summary>
-        /// Builds a Matrix3x3 that can be used to reflect vectors about a plane for which the reflection occurs. 
-        /// This plane is assumed to be normalized
-        /// </summary>
-        /// <param name="result">When the method completes, contains the reflection Matrix3x3.</param>
-        public void Reflection(out Matrix3x3 result)
-        {
-            float x = this.Normal.X;
-            float y = this.Normal.Y;
-            float z = this.Normal.Z;
-            float x2 = -2.0f * x;
-            float y2 = -2.0f * y;
-            float z2 = -2.0f * z;
-
-            result.M11 = (x2 * x) + 1.0f;
-            result.M12 = y2 * x;
-            result.M13 = z2 * x;
-            result.M21 = x2 * y;
-            result.M22 = (y2 * y) + 1.0f;
-            result.M23 = z2 * y;
-            result.M31 = x2 * z;
-            result.M32 = y2 * z;
-            result.M33 = (z2 * z) + 1.0f;
-        }
-
-        /// <summary>
-        /// Builds a Matrix3x3 that can be used to reflect vectors about a plane for which the reflection occurs. 
-        /// This plane is assumed to be normalized
-        /// </summary>
-        /// <returns>The reflection Matrix3x3.</returns>
-        public Matrix3x3 Reflection3x3()
-        {
-            Matrix3x3 result;
-            Reflection(out result);
-            return result;
-        }
-
-        /// <summary>
-        /// Creates a Matrix3x3 that flattens geometry into a shadow.
-        /// </summary>
-        /// <param name="light">The light direction. If the W component is 0, the light is directional light; if the
-        /// W component is 1, the light is a point light.</param>
-        /// <param name="plane">The plane onto which to project the geometry as a shadow. This parameter is assumed to be normalized.</param>
-        /// <param name="result">When the method completes, contains the shadow Matrix3x3.</param>
-        public static void Shadow(ref Vector4 light, ref Plane plane, out Matrix3x3 result)
-        {
-            float dot = (plane.Normal.X * light.X) + (plane.Normal.Y * light.Y) + (plane.Normal.Z * light.Z) + (plane.D * light.W);
-            float x = -plane.Normal.X;
-            float y = -plane.Normal.Y;
-            float z = -plane.Normal.Z;
-            float d = -plane.D;
-
-            result.M11 = (x * light.X) + dot;
-            result.M21 = y * light.X;
-            result.M31 = z * light.X;
-            result.M12 = x * light.Y;
-            result.M22 = (y * light.Y) + dot;
-            result.M32 = z * light.Y;
-            result.M13 = x * light.Z;
-            result.M23 = y * light.Z;
-            result.M33 = (z * light.Z) + dot;
-        }
-
-        /// <summary>
-        /// Creates a Matrix3x3 that flattens geometry into a shadow.
-        /// </summary>
-        /// <param name="light">The light direction. If the W component is 0, the light is directional light; if the
-        /// W component is 1, the light is a point light.</param>
-        /// <param name="plane">The plane onto which to project the geometry as a shadow. This parameter is assumed to be normalized.</param>
-        /// <returns>The shadow Matrix3x3.</returns>
-        public static Matrix3x3 Shadow(Vector4 light, Plane plane)
-        {
-            Matrix3x3 result;
-            Shadow(ref light, ref plane, out result);
-            return result;
-        }
-
-
-        /// <summary>
         /// Scales the plane by the given scaling factor.
         /// </summary>
         /// <param name="value">The plane to scale.</param>
@@ -511,9 +343,9 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the scaled plane.</param>
         public static void Multiply(ref Plane value, float scale, out Plane result)
         {
-            result.Normal.X = value.Normal.X * scale;
-            result.Normal.Y = value.Normal.Y * scale;
-            result.Normal.Z = value.Normal.Z * scale;
+            result.Normal.x = value.Normal.X * scale;
+            result.Normal.y = value.Normal.Y * scale;
+            result.Normal.z = value.Normal.Z * scale;
             result.D = value.D * scale;
         }
 
@@ -534,9 +366,9 @@ namespace SharpGame
         /// <param name="left">The source plane.</param>
         /// <param name="right">The source vector.</param>
         /// <param name="result">When the method completes, contains the dot product of the specified plane and vector.</param>
-        public static void Dot(ref Plane left, ref Vector4 right, out float result)
+        public static void Dot(ref Plane left, ref vec4 right, out float result)
         {
-            result = (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z) + (left.D * right.W);
+            result = (left.Normal.X * right.x) + (left.Normal.Y * right.y) + (left.Normal.Z * right.z) + (left.D * right.w);
         }
 
         /// <summary>
@@ -545,9 +377,9 @@ namespace SharpGame
         /// <param name="left">The source plane.</param>
         /// <param name="right">The source vector.</param>
         /// <returns>The dot product of the specified plane and vector.</returns>
-        public static float Dot(Plane left, Vector4 right)
+        public static float Dot(Plane left, vec4 right)
         {
-            return (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z) + (left.D * right.W);
+            return (left.Normal.X * right.x) + (left.Normal.Y * right.y) + (left.Normal.Z * right.z) + (left.D * right.w);
         }
 
         /// <summary>
@@ -556,7 +388,7 @@ namespace SharpGame
         /// <param name="left">The source plane.</param>
         /// <param name="right">The source vector.</param>
         /// <param name="result">When the method completes, contains the dot product of a specified vector and the normal of the Plane plus the distance value of the plane.</param>
-        public static void DotCoordinate(ref Plane left, ref Vector3 right, out float result)
+        public static void DotCoordinate(ref Plane left, ref vec3 right, out float result)
         {
             result = (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z) + left.D;
         }
@@ -567,7 +399,7 @@ namespace SharpGame
         /// <param name="left">The source plane.</param>
         /// <param name="right">The source vector.</param>
         /// <returns>The dot product of a specified vector and the normal of the Plane plus the distance value of the plane.</returns>
-        public static float DotCoordinate(Plane left, Vector3 right)
+        public static float DotCoordinate(Plane left, vec3 right)
         {
             return (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z) + left.D;
         }
@@ -578,7 +410,7 @@ namespace SharpGame
         /// <param name="left">The source plane.</param>
         /// <param name="right">The source vector.</param>
         /// <param name="result">When the method completes, contains the dot product of the specified vector and the normal of the plane.</param>
-        public static void DotNormal(ref Plane left, ref Vector3 right, out float result)
+        public static void DotNormal(ref Plane left, ref vec3 right, out float result)
         {
             result = (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z);
         }
@@ -589,7 +421,7 @@ namespace SharpGame
         /// <param name="left">The source plane.</param>
         /// <param name="right">The source vector.</param>
         /// <returns>The dot product of the specified vector and the normal of the plane.</returns>
-        public static float DotNormal(Plane left, Vector3 right)
+        public static float DotNormal(Plane left, vec3 right)
         {
             return (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z);
         }
@@ -603,9 +435,9 @@ namespace SharpGame
         {
             float magnitude = 1.0f / (float)(Math.Sqrt((plane.Normal.X * plane.Normal.X) + (plane.Normal.Y * plane.Normal.Y) + (plane.Normal.Z * plane.Normal.Z)));
 
-            result.Normal.X = plane.Normal.X * magnitude;
-            result.Normal.Y = plane.Normal.Y * magnitude;
-            result.Normal.Z = plane.Normal.Z * magnitude;
+            result.Normal.x = plane.Normal.X * magnitude;
+            result.Normal.y = plane.Normal.Y * magnitude;
+            result.Normal.z = plane.Normal.Z * magnitude;
             result.D = plane.D * magnitude;
         }
 
@@ -618,176 +450,6 @@ namespace SharpGame
         {
             float magnitude = 1.0f / (float)(Math.Sqrt((plane.Normal.X * plane.Normal.X) + (plane.Normal.Y * plane.Normal.Y) + (plane.Normal.Z * plane.Normal.Z)));
             return new Plane(plane.Normal.X * magnitude, plane.Normal.Y * magnitude, plane.Normal.Z * magnitude, plane.D * magnitude);
-        }
-
-        /// <summary>
-        /// Transforms a normalized plane by a quaternion rotation.
-        /// </summary>
-        /// <param name="plane">The normalized source plane.</param>
-        /// <param name="rotation">The quaternion rotation.</param>
-        /// <param name="result">When the method completes, contains the transformed plane.</param>
-        public static void Transform(ref Plane plane, ref Quaternion rotation, out Plane result)
-        {
-            float x2 = rotation.X + rotation.X;
-            float y2 = rotation.Y + rotation.Y;
-            float z2 = rotation.Z + rotation.Z;
-            float wx = rotation.W * x2;
-            float wy = rotation.W * y2;
-            float wz = rotation.W * z2;
-            float xx = rotation.X * x2;
-            float xy = rotation.X * y2;
-            float xz = rotation.X * z2;
-            float yy = rotation.Y * y2;
-            float yz = rotation.Y * z2;
-            float zz = rotation.Z * z2;
-
-            float x = plane.Normal.X;
-            float y = plane.Normal.Y;
-            float z = plane.Normal.Z;
-
-            result.Normal.X = ((x * ((1.0f - yy) - zz)) + (y * (xy - wz))) + (z * (xz + wy));
-            result.Normal.Y = ((x * (xy + wz)) + (y * ((1.0f - xx) - zz))) + (z * (yz - wx));
-            result.Normal.Z = ((x * (xz - wy)) + (y * (yz + wx))) + (z * ((1.0f - xx) - yy));
-            result.D = plane.D;
-        }
-
-        /// <summary>
-        /// Transforms a normalized plane by a quaternion rotation.
-        /// </summary>
-        /// <param name="plane">The normalized source plane.</param>
-        /// <param name="rotation">The quaternion rotation.</param>
-        /// <returns>The transformed plane.</returns>
-        public static Plane Transform(Plane plane, Quaternion rotation)
-        {
-            Plane result;
-            float x2 = rotation.X + rotation.X;
-            float y2 = rotation.Y + rotation.Y;
-            float z2 = rotation.Z + rotation.Z;
-            float wx = rotation.W * x2;
-            float wy = rotation.W * y2;
-            float wz = rotation.W * z2;
-            float xx = rotation.X * x2;
-            float xy = rotation.X * y2;
-            float xz = rotation.X * z2;
-            float yy = rotation.Y * y2;
-            float yz = rotation.Y * z2;
-            float zz = rotation.Z * z2;
-
-            float x = plane.Normal.X;
-            float y = plane.Normal.Y;
-            float z = plane.Normal.Z;
-
-            result.Normal.X = ((x * ((1.0f - yy) - zz)) + (y * (xy - wz))) + (z * (xz + wy));
-            result.Normal.Y = ((x * (xy + wz)) + (y * ((1.0f - xx) - zz))) + (z * (yz - wx));
-            result.Normal.Z = ((x * (xz - wy)) + (y * (yz + wx))) + (z * ((1.0f - xx) - yy));
-            result.D = plane.D;
-
-            return result;
-        }
-
-        /// <summary>
-        /// Transforms an array of normalized planes by a quaternion rotation.
-        /// </summary>
-        /// <param name="planes">The array of normalized planes to transform.</param>
-        /// <param name="rotation">The quaternion rotation.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="planes"/> is <c>null</c>.</exception>
-        public static void Transform(Plane[] planes, ref Quaternion rotation)
-        {
-            if(planes == null)
-                throw new ArgumentNullException("planes");
-
-            float x2 = rotation.X + rotation.X;
-            float y2 = rotation.Y + rotation.Y;
-            float z2 = rotation.Z + rotation.Z;
-            float wx = rotation.W * x2;
-            float wy = rotation.W * y2;
-            float wz = rotation.W * z2;
-            float xx = rotation.X * x2;
-            float xy = rotation.X * y2;
-            float xz = rotation.X * z2;
-            float yy = rotation.Y * y2;
-            float yz = rotation.Y * z2;
-            float zz = rotation.Z * z2;
-
-            for(int i = 0; i < planes.Length; ++i)
-            {
-                float x = planes[i].Normal.X;
-                float y = planes[i].Normal.Y;
-                float z = planes[i].Normal.Z;
-
-                /*
-                 * Note:
-                 * Factor common arithmetic out of loop.
-                */
-                planes[i].Normal.X = ((x * ((1.0f - yy) - zz)) + (y * (xy - wz))) + (z * (xz + wy));
-                planes[i].Normal.Y = ((x * (xy + wz)) + (y * ((1.0f - xx) - zz))) + (z * (yz - wx));
-                planes[i].Normal.Z = ((x * (xz - wy)) + (y * (yz + wx))) + (z * ((1.0f - xx) - yy));
-            }
-        }
-
-        /// <summary>
-        /// Transforms a normalized plane by a matrix.
-        /// </summary>
-        /// <param name="plane">The normalized source plane.</param>
-        /// <param name="transformation">The transformation matrix.</param>
-        /// <param name="result">When the method completes, contains the transformed plane.</param>
-        public static void Transform(ref Plane plane, ref Matrix transformation, out Plane result)
-        {
-            float x = plane.Normal.X;
-            float y = plane.Normal.Y;
-            float z = plane.Normal.Z;
-            float d = plane.D;
-
-            Matrix inverse;
-            Matrix.Invert(ref transformation, out inverse);
-
-            result.Normal.X = (((x * inverse.M11) + (y * inverse.M12)) + (z * inverse.M13)) + (d * inverse.M14);
-            result.Normal.Y = (((x * inverse.M21) + (y * inverse.M22)) + (z * inverse.M23)) + (d * inverse.M24);
-            result.Normal.Z = (((x * inverse.M31) + (y * inverse.M32)) + (z * inverse.M33)) + (d * inverse.M34);
-            result.D = (((x * inverse.M41) + (y * inverse.M42)) + (z * inverse.M43)) + (d * inverse.M44);
-        }
-
-        /// <summary>
-        /// Transforms a normalized plane by a matrix.
-        /// </summary>
-        /// <param name="plane">The normalized source plane.</param>
-        /// <param name="transformation">The transformation matrix.</param>
-        /// <returns>When the method completes, contains the transformed plane.</returns>
-        public static Plane Transform(Plane plane, Matrix transformation)
-        {
-            Plane result;
-            float x = plane.Normal.X;
-            float y = plane.Normal.Y;
-            float z = plane.Normal.Z;
-            float d = plane.D;
-
-            transformation.Invert();
-            result.Normal.X = (((x * transformation.M11) + (y * transformation.M12)) + (z * transformation.M13)) + (d * transformation.M14);
-            result.Normal.Y = (((x * transformation.M21) + (y * transformation.M22)) + (z * transformation.M23)) + (d * transformation.M24);
-            result.Normal.Z = (((x * transformation.M31) + (y * transformation.M32)) + (z * transformation.M33)) + (d * transformation.M34);
-            result.D = (((x * transformation.M41) + (y * transformation.M42)) + (z * transformation.M43)) + (d * transformation.M44);
-
-            return result;
-        }
-
-        /// <summary>
-        /// Transforms an array of normalized planes by a matrix.
-        /// </summary>
-        /// <param name="planes">The array of normalized planes to transform.</param>
-        /// <param name="transformation">The transformation matrix.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="planes"/> is <c>null</c>.</exception>
-        public static void Transform(Plane[] planes, ref Matrix transformation)
-        {
-            if(planes == null)
-                throw new ArgumentNullException("planes");
-
-            Matrix inverse;
-            Matrix.Invert(ref transformation, out inverse);
-
-            for(int i = 0; i < planes.Length; ++i)
-            {
-                Transform(ref planes[i], ref transformation, out planes[i]);
-            }
         }
 
         /// <summary>
@@ -901,11 +563,11 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="Vector4"/> is equal to this instance.
+        /// Determines whether the specified <see cref="vec4"/> is equal to this instance.
         /// </summary>
-        /// <param name="value">The <see cref="Vector4"/> to compare with this instance.</param>
+        /// <param name="value">The <see cref="vec4"/> to compare with this instance.</param>
         /// <returns>
-        /// <c>true</c> if the specified <see cref="Vector4"/> is equal to this instance; otherwise, <c>false</c>.
+        /// <c>true</c> if the specified <see cref="vec4"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(ref Plane value)
@@ -914,11 +576,11 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="Vector4"/> is equal to this instance.
+        /// Determines whether the specified <see cref="vec4"/> is equal to this instance.
         /// </summary>
-        /// <param name="value">The <see cref="Vector4"/> to compare with this instance.</param>
+        /// <param name="value">The <see cref="vec4"/> to compare with this instance.</param>
         /// <returns>
-        /// <c>true</c> if the specified <see cref="Vector4"/> is equal to this instance; otherwise, <c>false</c>.
+        /// <c>true</c> if the specified <see cref="vec4"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(Plane value)

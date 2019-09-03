@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Text;
 
+#if false
 namespace SharpGame
 {
     /// Debug rendering line.
     public struct DebugLine
     {
         /// Start position.
-        public Vector3 start_;
+        public vec3 start_;
         /// End position.
-        public Vector3 end_;
+        public vec3 end_;
         /// Color.
         public int color_;
 
-        public DebugLine(Vector3 start, Vector3 end, int color)
+        public DebugLine(vec3 start, vec3 end, int color)
         {
             start_ = start;
             end_ = end;
@@ -26,14 +27,14 @@ namespace SharpGame
     public struct DebugTriangle
     {
         /// Vertex a.
-        public Vector3 v1_;
+        public vec3 v1_;
         /// Vertex b.
-        public Vector3 v2_;
+        public vec3 v2_;
         /// Vertex c.
-        public Vector3 v3_;
+        public vec3 v3_;
         /// Color.
         public int color_;
-        public DebugTriangle(Vector3 v1, Vector3 v2, Vector3 v3, int color)
+        public DebugTriangle(vec3 v1, vec3 v2, vec3 v3, int color)
         {
             v1_ = v1;
             v2_ = v2;
@@ -86,12 +87,12 @@ namespace SharpGame
             frustum_ = camera.Frustum;
         }
 
-        public void AddLine(Vector3 start, Vector3 end, Color color, bool depthTest = true)
+        public void AddLine(vec3 start, vec3 end, Color color, bool depthTest = true)
         {
             AddLine(start, end, color.ToRgba(), depthTest);
         }
 
-        public void AddLine(Vector3 start, Vector3 end, int color, bool depthTest = true)
+        public void AddLine(vec3 start, vec3 end, int color, bool depthTest = true)
         {
             if(lines_.Count + noDepthLines_.Count >= MAX_LINES)
                 return;
@@ -102,12 +103,12 @@ namespace SharpGame
                 noDepthLines_.Add(new DebugLine(start, end, color));
         }
 
-        public void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3, Color color, bool depthTest = true)
+        public void AddTriangle(vec3 v1, vec3 v2, vec3 v3, Color color, bool depthTest = true)
         {
             AddTriangle(v1, v2, v3, color.ToRgba(), depthTest);
         }
 
-        public void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3, int color, bool depthTest = true)
+        public void AddTriangle(vec3 v1, vec3 v2, vec3 v3, int color, bool depthTest = true)
         {
             if(triangles_.Count + noDepthTriangles_.Count >= MAX_TRIANGLES)
                 return;
@@ -118,13 +119,13 @@ namespace SharpGame
                 noDepthTriangles_.Add(new DebugTriangle(v1, v2, v3, color));
         }
 
-        public void AddPolygon(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, Color color, bool depthTest = true)
+        public void AddPolygon(vec3 v1, vec3 v2, vec3 v3, vec3 v4, Color color, bool depthTest = true)
         {
             AddTriangle(v1, v2, v3, color, depthTest);
             AddTriangle(v3, v4, v1, color, depthTest);
         }
 
-        public void AddPolygon(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, int color, bool depthTest = true)
+        public void AddPolygon(vec3 v1, vec3 v2, vec3 v3, vec3 v4, int color, bool depthTest = true)
         {
             AddTriangle(v1, v2, v3, color, depthTest);
             AddTriangle(v3, v4, v1, color, depthTest);
@@ -135,25 +136,25 @@ namespace SharpGame
             if(!node)
                 return;
 
-            Vector3 start = node.WorldPosition;
+            vec3 start = node.WorldPosition;
             Quaternion rotation = node.WorldRotation;
 
-            AddLine(start, start + Vector3.Transform(scale * Vector3.Right, rotation), Color.Red.ToRgba(), depthTest);
-            AddLine(start, start + Vector3.Transform(scale * Vector3.Up, rotation), Color.Green.ToRgba(), depthTest);
-            AddLine(start, start + Vector3.Transform(scale * Vector3.ForwardLH, rotation), Color.Blue.ToRgba(), depthTest);
+            AddLine(start, start + vec3.Transform(scale * vec3.Right, rotation), Color.Red.ToRgba(), depthTest);
+            AddLine(start, start + vec3.Transform(scale * vec3.Up, rotation), Color.Green.ToRgba(), depthTest);
+            AddLine(start, start + vec3.Transform(scale * vec3.ForwardLH, rotation), Color.Blue.ToRgba(), depthTest);
         }
 
         public void AddBoundingBox(ref BoundingBox box, Color color, bool depthTest = true, bool solid = false)
         {
-            Vector3 min = box.Minimum;
-            Vector3 max = box.Maximum;
+            vec3 min = box.Minimum;
+            vec3 max = box.Maximum;
 
-            Vector3 v1 = new Vector3(max.X, min.Y, min.Z);
-            Vector3 v2 = new Vector3(max.X, max.Y, min.Z);
-            Vector3 v3 = new Vector3(min.X, max.Y, min.Z);
-            Vector3 v4 = new Vector3(min.X, min.Y, max.Z);
-            Vector3 v5 = new Vector3(max.X, min.Y, max.Z);
-            Vector3 v6 = new Vector3(min.X, max.Y, max.Z);
+            vec3 v1 = new vec3(max.X, min.Y, min.Z);
+            vec3 v2 = new vec3(max.X, max.Y, min.Z);
+            vec3 v3 = new vec3(min.X, max.Y, min.Z);
+            vec3 v4 = new vec3(min.X, min.Y, max.Z);
+            vec3 v5 = new vec3(max.X, min.Y, max.Z);
+            vec3 v6 = new vec3(min.X, max.Y, max.Z);
 
             int uintColor = color.ToRgba();
 
@@ -185,17 +186,17 @@ namespace SharpGame
 
         public void AddBoundingBox(ref BoundingBox box, ref Matrix transform, Color color, bool depthTest, bool solid)
         {
-            Vector3 min = box.Minimum;
-            Vector3 max = box.Maximum;
+            vec3 min = box.Minimum;
+            vec3 max = box.Maximum;
 
-            Vector3 v0 = Vector3.Transform(min, transform);
-            Vector3 v1 = Vector3.Transform(new Vector3(max.X, min.Y, min.Z), transform);
-            Vector3 v2 = Vector3.Transform(new Vector3(max.X, max.Y, min.Z), transform);
-            Vector3 v3 = Vector3.Transform(new Vector3(min.X, max.Y, min.Z), transform);
-            Vector3 v4 = Vector3.Transform(new Vector3(min.X, min.Y, max.Z), transform);
-            Vector3 v5 = Vector3.Transform(new Vector3(max.X, min.Y, max.Z), transform);
-            Vector3 v6 = Vector3.Transform(new Vector3(min.X, max.Y, max.Z), transform);
-            Vector3 v7 = Vector3.Transform(max, transform);
+            vec3 v0 = vec3.Transform(min, transform);
+            vec3 v1 = vec3.Transform(new vec3(max.X, min.Y, min.Z), transform);
+            vec3 v2 = vec3.Transform(new vec3(max.X, max.Y, min.Z), transform);
+            vec3 v3 = vec3.Transform(new vec3(min.X, max.Y, min.Z), transform);
+            vec3 v4 = vec3.Transform(new vec3(min.X, min.Y, max.Z), transform);
+            vec3 v5 = vec3.Transform(new vec3(max.X, min.Y, max.Z), transform);
+            vec3 v6 = vec3.Transform(new vec3(min.X, max.Y, max.Z), transform);
+            vec3 v7 = vec3.Transform(max, transform);
 
             int uintColor = color.ToRgba();
 
@@ -227,7 +228,7 @@ namespace SharpGame
         /*
         void AddFrustum(const Frustum& frustum, Color color, bool depthTest)
         {
-            const Vector3* vertices = frustum.vertices_;
+            const vec3* vertices = frustum.vertices_;
             int uintColor = color.ToUInt();
 
             AddLine(vertices[0], vertices[1], uintColor, depthTest);
@@ -250,7 +251,7 @@ namespace SharpGame
 
             for(int i = 0; i < poly.faces_.Count; ++i)
             {
-                const PODVector<Vector3>&face = poly.faces_[i];
+                const PODVector<vec3>&face = poly.faces_[i];
                 if(face.Count >= 3)
                 {
                     for(int j = 0; j < face.Count; ++j)
@@ -267,10 +268,10 @@ namespace SharpGame
             {
                 for(float i = 0; i < 360; i += 45)
                 {
-                    Vector3 p1 = sphere.GetPoint(i, j);
-                    Vector3 p2 = sphere.GetPoint(i + 45, j);
-                    Vector3 p3 = sphere.GetPoint(i, j + 45);
-                    Vector3 p4 = sphere.GetPoint(i + 45, j + 45);
+                    vec3 p1 = sphere.GetPoint(i, j);
+                    vec3 p2 = sphere.GetPoint(i + 45, j);
+                    vec3 p3 = sphere.GetPoint(i, j + 45);
+                    vec3 p4 = sphere.GetPoint(i + 45, j + 45);
 
                     AddLine(p1, p2, uintColor, depthTest);
                     AddLine(p3, p4, uintColor, depthTest);
@@ -303,8 +304,8 @@ namespace SharpGame
             for(int j = 0; j < numCircleSegments; ++j)
             {
                 AddLine(
-                    sphere.Center + Vector3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
-                    sphere.Center + Vector3.Transform(sphere.GetLocalPoint((j + 1) * 360.0f / numCircleSegments, halfAngle), rotation),
+                    sphere.Center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
+                    sphere.Center + vec3.Transform(sphere.GetLocalPoint((j + 1) * 360.0f / numCircleSegments, halfAngle), rotation),
                     uintColor);
             }
 
@@ -316,8 +317,8 @@ namespace SharpGame
                 {
                     float nextPhi = i + 1 == numArcSegments - 1 ? halfAngle : (i + 1) * arcStep;
                     AddLine(
-                        sphere.Center + Vector3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, i * arcStep), rotation),
-                        sphere.Center + Vector3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, nextPhi), rotation),
+                        sphere.Center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, i * arcStep), rotation),
+                        sphere.Center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, nextPhi), rotation),
                         uintColor);
                 }
             }
@@ -328,22 +329,22 @@ namespace SharpGame
                 for(int j = 0; j < numCircleSegments; j += step)
                 {
                     AddLine(sphere.Center,
-                        sphere.Center + Vector3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
+                        sphere.Center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
                         uintColor);
                 }
             }
         }
 
-        public void AddCylinder(Vector3 position, float radius, float height, Color color, bool depthTest)
+        public void AddCylinder(vec3 position, float radius, float height, Color color, bool depthTest)
         {
             BoundingSphere sphere = new BoundingSphere(position, radius);
-            Vector3 heightVec = new Vector3(0, height, 0);
-            Vector3 offsetXVec = new Vector3(radius, 0, 0);
-            Vector3 offsetZVec = new Vector3(0, 0, radius);
+            vec3 heightVec = new vec3(0, height, 0);
+            vec3 offsetXVec = new vec3(radius, 0, 0);
+            vec3 offsetZVec = new vec3(0, 0, radius);
             for(float i = 0; i < 360; i += 45)
             {
-                Vector3 p1 = sphere.GetPoint(i, 90);
-                Vector3 p2 = sphere.GetPoint(i + 45, 90);
+                vec3 p1 = sphere.GetPoint(i, 90);
+                vec3 p2 = sphere.GetPoint(i + 45, 90);
                 AddLine(p1, p2, color, depthTest);
                 AddLine(p1 + heightVec, p2 + heightVec, color, depthTest);
             }
@@ -371,8 +372,8 @@ namespace SharpGame
                 if(!boneNode)
                     continue;
 
-                Vector3 start = boneNode.WorldPosition;
-                Vector3 end;
+                vec3 start = boneNode.WorldPosition;
+                vec3 end;
 
                 int j = bones[i].parentIndex_;
                 Node parentNode = boneNode.Parent;
@@ -401,9 +402,9 @@ namespace SharpGame
 
             while(indices < indicesEnd)
             {
-                Vector3 v0 = transform * *((const Vector3*)(&srcData[indices[0] * vertexSize]));
-                Vector3 v1 = transform * *((const Vector3*)(&srcData[indices[1] * vertexSize]));
-                Vector3 v2 = transform * *((const Vector3*)(&srcData[indices[2] * vertexSize]));
+                vec3 v0 = transform * *((const vec3*)(&srcData[indices[0] * vertexSize]));
+                vec3 v1 = transform * *((const vec3*)(&srcData[indices[1] * vertexSize]));
+                vec3 v2 = transform * *((const vec3*)(&srcData[indices[2] * vertexSize]));
 
                 AddLine(v0, v1, uintColor, depthTest);
                 AddLine(v1, v2, uintColor, depthTest);
@@ -419,9 +420,9 @@ namespace SharpGame
 
             while(indices < indicesEnd)
             {
-                Vector3 v0 = transform * *((const Vector3*)(&srcData[indices[0] * vertexSize]));
-                Vector3 v1 = transform * *((const Vector3*)(&srcData[indices[1] * vertexSize]));
-                Vector3 v2 = transform * *((const Vector3*)(&srcData[indices[2] * vertexSize]));
+                vec3 v0 = transform * *((const vec3*)(&srcData[indices[0] * vertexSize]));
+                vec3 v1 = transform * *((const vec3*)(&srcData[indices[1] * vertexSize]));
+                vec3 v2 = transform * *((const vec3*)(&srcData[indices[2] * vertexSize]));
 
                 AddLine(v0, v1, uintColor, depthTest);
                 AddLine(v1, v2, uintColor, depthTest);
@@ -432,17 +433,17 @@ namespace SharpGame
         }
     }*/
         /*
-            void AddCircle(Vector3 center, Vector3 normal, float radius, Color color, int steps, bool depthTest)
+            void AddCircle(vec3 center, vec3 normal, float radius, Color color, int steps, bool depthTest)
             {
-                Quaternion orientation = Quaternion.FromRotationTo(Vector3.Up, normal.Normalized());
-                Vector3 p = orientation * new Vector3(radius, 0, 0) + center;
+                Quaternion orientation = Quaternion.FromRotationTo(vec3.Up, normal.Normalized());
+                vec3 p = orientation * new vec3(radius, 0, 0) + center;
                 int uintColor = color.ToUInt();
 
                 for(int i = 1; i <= steps; ++i)
                 {
                     float angle = (float)i / (float)steps * 360.0f;
-                    Vector3 v(radius* Cos(angle), 0, radius* Sin(angle));
-                Vector3 c = orientation * v + center;
+                    vec3 v(radius* Cos(angle), 0, radius* Sin(angle));
+                vec3 c = orientation * v + center;
                 AddLine(p, c, uintColor, depthTest);
                 p = c;
             }
@@ -451,29 +452,29 @@ namespace SharpGame
         AddLine(center, p, uintColor, depthTest);
         }*/
 
-        void AddCross(Vector3 center, float size, Color color, bool depthTest)
+        void AddCross(vec3 center, float size, Color color, bool depthTest)
         {
             int uintColor = color.ToRgba();
 
             float halfSize = size / 2.0f;
             for(int i = 0; i < 3; ++i)
             {
-                Vector3 start = new Vector3(center.X, center.Y, center.Z);
-                Vector3 end = new Vector3(center.X, center.Y, center.Z);
+                vec3 start = new vec3(center.X, center.Y, center.Z);
+                vec3 end = new vec3(center.X, center.Y, center.Z);
                 start[i] = start[i] - halfSize;
                 end[i] = end[i] + halfSize;
                 AddLine(start, end, uintColor, depthTest);
             }
         }
 
-        void AddQuad(Vector3 center, float width, float height, Color color, bool depthTest)
+        void AddQuad(vec3 center, float width, float height, Color color, bool depthTest)
         {
             int uintColor = color.ToRgba();
 
-            Vector3 v0 = new Vector3(center.X - width / 2, center.Y, center.Z - height / 2);
-            Vector3 v1 = new Vector3(center.X + width / 2, center.Y, center.Z - height / 2);
-            Vector3 v2 = new Vector3(center.X + width / 2, center.Y, center.Z + height / 2);
-            Vector3 v3 = new Vector3(center.X - width / 2, center.Y, center.Z + height / 2);
+            vec3 v0 = new vec3(center.X - width / 2, center.Y, center.Z - height / 2);
+            vec3 v1 = new vec3(center.X + width / 2, center.Y, center.Z - height / 2);
+            vec3 v2 = new vec3(center.X + width / 2, center.Y, center.Z + height / 2);
+            vec3 v3 = new vec3(center.X - width / 2, center.Y, center.Z + height / 2);
             AddLine(v0, v1, uintColor, depthTest);
             AddLine(v1, v2, uintColor, depthTest);
             AddLine(v2, v3, uintColor, depthTest);
@@ -665,3 +666,5 @@ namespace SharpGame
 
     }
 }
+
+#endif

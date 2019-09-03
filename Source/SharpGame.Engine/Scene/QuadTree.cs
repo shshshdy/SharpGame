@@ -159,7 +159,7 @@ namespace SharpGame
         /// Gets all objects within the given range of the given position.
         /// This version of the query is not thread safe.
         /// </summary>
-        public T[] GetObjectsInRange(Vector2 pos, float range = float.MaxValue)
+        public T[] GetObjectsInRange(vec2 pos, float range = float.MaxValue)
         {
 #if DEBUG
             if (range < 0f)
@@ -192,7 +192,7 @@ namespace SharpGame
         /// This version of the query is thread safe as long as
         /// <see cref="Update"/> does not execute during the queery.
         /// </summary>
-        public T GetClosestObject(Vector2 pos, float maxDistance = float.MaxValue)
+        public T GetClosestObject(vec2 pos, float maxDistance = float.MaxValue)
         {
 #if DEBUG
             if (maxDistance < 0f)
@@ -209,7 +209,7 @@ namespace SharpGame
         /// This version of the query is thread safe as long as
         /// <see cref="Update"/> does not execute during the queery.
         /// </summary>
-        public void GetObjectsInRange(Vector2 pos, float range, IList<T> results)
+        public void GetObjectsInRange(vec2 pos, float range, IList<T> results)
         {
 #if DEBUG
             if (range < 0f)
@@ -238,14 +238,14 @@ namespace SharpGame
 
         #region Internal Queries
 
-        static float SquaredLength(Vector3 v, Vector2 v1)
+        static float SquaredLength(vec3 v, vec2 v1)
         {
-            float xx = v.X - v1.X;
-            float yy = v.Z - v1.Y;
+            float xx = v.X - v1.x;
+            float yy = v.Z - v1.y;
             return (xx * xx) + (yy * yy);
         }
 
-        private void NearestNeighborSearch(Vector2 pos, ref float distanceSquared, ref T closest)
+        private void NearestNeighborSearch(vec2 pos, ref float distanceSquared, ref T closest)
         {
             if (m_Leaf)
             {
@@ -312,7 +312,7 @@ namespace SharpGame
             }
         }
 
-        private void AllNearestNeighborsSearch(Vector2 pos, float distanceSquared, IList<T> results)
+        private void AllNearestNeighborsSearch(vec2 pos, float distanceSquared, IList<T> results)
         {
             if (m_Leaf)
             {
@@ -661,17 +661,17 @@ namespace SharpGame
             m_Leaf = !anyChildrenAlive;
         }
 
-        private int GetQuadrant(Vector2 pos)
+        private int GetQuadrant(vec2 pos)
         {
-            if (pos.X < m_Region.Left + (m_Region.Width / 2))
+            if (pos.x < m_Region.Left + (m_Region.Width / 2))
             {
-                return pos.Y < m_Region.Top + (m_Region.Height / 2) 
+                return pos.y < m_Region.Top + (m_Region.Height / 2) 
                     ? NORTH_WEST
                     : SOUTH_WEST;
             }
             else
             {
-                return pos.Y < m_Region.Top + (m_Region.Height / 2) 
+                return pos.y < m_Region.Top + (m_Region.Height / 2) 
                     ? NORTH_EAST
                     : SOUTH_EAST;
             }

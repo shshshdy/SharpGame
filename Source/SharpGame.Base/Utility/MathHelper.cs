@@ -6,27 +6,27 @@ namespace SharpGame
 {
     public static class MathHelper
     {
-        public static Vector2 Max(this RectangleF f)
+        public static vec2 Max(this RectangleF f)
         {
-            return new Vector2(f.Left + f.Width, f.Top + f.Height);
+            return new vec2(f.Left + f.Width, f.Top + f.Height);
         }
 
-        public static Vector2 Min(this RectangleF f)
+        public static vec2 Min(this RectangleF f)
         {
-            return new Vector2(f.Left, f.Top);
+            return new vec2(f.Left, f.Top);
         }
 
-        public static Vector2 Dimensions(this RectangleF f)
+        public static vec2 Dimensions(this RectangleF f)
         {
-            return new Vector2(f.Width, f.Height);
+            return new vec2(f.Width, f.Height);
         }
 
-        public static float SquaredLength(this Vector2 v)
+        public static float SquaredLength(this vec2 v)
         {
             return (v.X * v.X) + (v.Y * v.Y);
         }
 
-        public static float SquaredDistance(this RectangleF f, Vector2 v)
+        public static float SquaredDistance(this RectangleF f, vec2 v)
         {
             var max = f.Max();
 

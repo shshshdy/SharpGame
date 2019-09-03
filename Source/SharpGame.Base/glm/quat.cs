@@ -4,14 +4,19 @@ using System.Text;
 
 namespace SharpGame
 {
+    using global::System.Runtime.InteropServices;
+    using global::System.Runtime.Serialization;
     using static glm;
-
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [DataContract]
     public struct quat
     {
         public float x;
         public float y;
         public float z;
         public float w;
+
+        public readonly static quat Identity = new quat(1, 0, 0, 0);
 
         public float this[int index]
         {
@@ -48,10 +53,10 @@ namespace SharpGame
 
         public quat(float s, vec3 v)
         {
-            this.x = v.x;
-            this.y = v.y;
-            this.z = v.z;
-            this.w = s;
+            x = v.x;
+            y = v.y;
+            z = v.z;
+            w = s;
         }
 
         public quat(vec3 u, vec3 v)
@@ -88,21 +93,26 @@ namespace SharpGame
             z = c.x * c.y * s.z - s.x * s.y * c.z;
         }
 
+        public quat(float x, float y, float z)
+            : this(new vec3(x, y, z))
+        {
+        }
+
         public vec3 EulerAngles => vec3(Pitch, Yaw, Roll);
 
-        public float Roll => atan((2) * (this.x * this.y + this.w * this.z), this.w * this.w + this.x * this.x - this.y * this.y - this.z * this.z);
+        public float Roll => atan((2) * (x * y + w * z), w * w + x * x - y * y - z * z);
 
         public float Pitch
         {
             get
             {
                 //return float(atan(float(2) * (q.y * q.z + q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z));
-                float y = (2) * (this.y * this.z + this.w * this.x);
-                float x = w * w - this.x * this.x - this.y * this.y + this.z * this.z;
+                float y = (2) * (this.y * z + w * this.x);
+                float x = w * w - this.x * this.x - this.y * this.y + z * z;
 
                 if (y == 0 && x == 0)
                 {
-                    return 2 * atan(this.x, this.w);
+                    return 2 * atan(this.x, w);
                 }
 
                 return atan(y, x);
@@ -203,7 +213,7 @@ namespace SharpGame
             if (obj.GetType() == typeof(quat))
             {
                 var vec = (quat)obj;
-                if (this.x == vec.x && this.y == vec.y && this.z == vec.z && this.w == vec.w)
+                if (x == vec.x && y == vec.y && z == vec.z && w == vec.w)
                     return true;
             }
 
@@ -243,7 +253,7 @@ namespace SharpGame
         /// </returns>
         public override int GetHashCode()
         {
-            return this.x.GetHashCode() ^ this.y.GetHashCode() ^ this.z.GetHashCode() ^ this.w.GetHashCode();
+            return x.GetHashCode() ^ y.GetHashCode() ^ z.GetHashCode() ^ w.GetHashCode();
         }
 
         #endregion
@@ -252,7 +262,7 @@ namespace SharpGame
 
         public override string ToString()
         {
-            return String.Format("[{0}, {1}, {2}, {3}]", x, y, z, w);
+            return string.Format("[{0}, {1}, {2}, {3}]", x, y, z, w);
         }
 
         #endregion
@@ -261,6 +271,11 @@ namespace SharpGame
 
     public static partial class glm
     {
+        public static quat quat(vec3 euler)
+        {
+            return new quat(euler);
+        }
+
         public static quat quat(float w, float x, float y, float z)
         {
             return new quat(w, x, y, z);
@@ -318,7 +333,6 @@ namespace SharpGame
 
         public static quat mix(quat x, quat y, float a)
         {
-
             float cosTheta = dot(x, y);
 
             // Perform a linear interpolation when cosTheta is close to 1 to avoid side effect of sin(angle) becoming a zero denominator
@@ -348,7 +362,6 @@ namespace SharpGame
 
             return x * ((1) - a) + (y * a);
         }
-
 
         public static quat slerp(quat x, quat y, float a)
         {
@@ -430,7 +443,6 @@ namespace SharpGame
             Result[2][2] = (1) - (2) * (qxx + qyy);
             return Result;
         }
-
 
         public static mat4 mat4_cast(quat q)
         {
@@ -545,6 +557,12 @@ namespace SharpGame
                 rotationAxis.x * invs,
                 rotationAxis.y * invs,
                 rotationAxis.z * invs);
+        }
+
+        public static quat quatYawPitchRoll(float yaw, float pitch, float roll)
+        {
+            yawPitchRoll(yaw, pitch, roll, out mat3 res);
+            return quat_cast(res);
         }
 
         public static quat quatLookAt(vec3 direction, vec3 up)

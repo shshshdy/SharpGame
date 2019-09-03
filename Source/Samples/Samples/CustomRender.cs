@@ -9,8 +9,6 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    using static SharpGame.glm;
-
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraVS
     {
@@ -93,7 +91,7 @@ namespace SharpGame.Samples
 
             for (int i = 0; i < COUNT; i++)
             {
-                mat4 worldTransform = translate(gridSize * (i / 10), 0, gridSize * (i % 10));
+                mat4 worldTransform = glm.translate(gridSize * (i / 10), 0, gridSize * (i % 10));
 
                 batches[i].offset = offset;
 
@@ -115,13 +113,13 @@ namespace SharpGame.Samples
                 return;
             }
 
-            if (mousePos == Vector2.Zero)
+            if (mousePos == vec2.Zero)
                 mousePos = input.MousePosition;
 
             vec3 offset = default;
             if (input.IsMouseDown(MouseButton.Right))
             {
-                Vector2 delta = (input.MousePosition - mousePos) * Time.Delta * rotSpeed;
+                vec2 delta = (input.MousePosition - mousePos) * Time.Delta * rotSpeed;
                 yaw += delta.X;
                 pitch += delta.Y;
 
@@ -148,7 +146,7 @@ namespace SharpGame.Samples
 
             if (input.IsMouseDown(MouseButton.Middle))
             {
-                Vector2 delta = input.MousePosition - mousePos;
+                vec2 delta = input.MousePosition - mousePos;
                 offset.x = delta.X;
                 offset.y = delta.Y;
             }
@@ -161,15 +159,15 @@ namespace SharpGame.Samples
 
         void CustomDraw(GraphicsPass pass, RenderView view)
         {
-            mat4 rotM = mat4(1.0f);
+            mat4 rotM = glm.mat4(1.0f);
             
-            rotM = yawPitchRoll(yaw, pitch, 0);
+            rotM = glm.yawPitchRoll(yaw, pitch, 0);
 
-            var m = translate(cameraPos)* rotM ;
-            cameraVS.View = inverse(m);
+            var m = glm.translate(cameraPos)* rotM ;
+            cameraVS.View = glm.inverse(m);
             
-            var proj = perspective((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
-            proj[1][1] = -proj[1][1];
+            var proj = glm.perspective((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
+            proj.M22 = -proj.M22;
 
             cameraVS.ViewProj = proj*cameraVS.View ;
             ubCameraVS[Graphics.WorkContext].SetData(ref cameraVS);

@@ -136,23 +136,23 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Vector2"/> to <see cref="Int2"/>.
+        /// Performs an explicit conversion from <see cref="vec2"/> to <see cref="Int2"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator Int2(Vector2 value)
+        public static explicit operator Int2(vec2 value)
         {
             return new Int2((int)value.X, (int)value.Y);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Int2"/> to <see cref="Vector2"/>.
+        /// Performs an implicit conversion from <see cref="Int2"/> to <see cref="vec2"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator Vector2(Int2 value)
+        public static implicit operator vec2(Int2 value)
         {
-            return new Vector2(value.X, value.Y);
+            return new vec2(value.X, value.Y);
         }
         
     }

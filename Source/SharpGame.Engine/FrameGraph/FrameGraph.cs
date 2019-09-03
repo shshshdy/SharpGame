@@ -70,12 +70,12 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct ObjectVS
     {
-        public Matrix Model;
+        public mat4 Model;
 
-        public Vector4 UOffset1;
-        public Vector4 VOffset1;
-        public Vector4 UOffset2;
-        public Vector4 VOffset2;
+        public vec4 UOffset1;
+        public vec4 VOffset1;
+        public vec4 UOffset2;
+        public vec4 VOffset2;
     };
 
     [StructLayout(LayoutKind.Sequential)]
@@ -87,10 +87,10 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct MaterialPS
     {
-        public Vector4 MatDiffColor;
-        public Vector4 MatEmissiveColor;
-        public Vector4 MatEnvMapColor;
-        public Vector4 MatSpecColor;
+        public vec4 MatDiffColor;
+        public vec4 MatEmissiveColor;
+        public vec4 MatEnvMapColor;
+        public vec4 MatSpecColor;
         public float cRoughness;
         public float cMetallic;
     }

@@ -7,9 +7,9 @@ namespace SharpGame.Samples
 {
     public struct Particle
     {
-        public Vector2 pos;                              // Particle position
-        public Vector2 vel;                              // Particle velocity
-        public Vector4 gradientPos;                      // Texture coordiantes for the gradient ramp map
+        public vec2 pos;                              // Particle position
+        public vec2 vel;                              // Particle velocity
+        public vec4 gradientPos;                      // Texture coordiantes for the gradient ramp map
     };
 
     [SampleDesc(sortOrder = 8)]
@@ -55,9 +55,9 @@ namespace SharpGame.Samples
             {
                 ref Particle particle = ref particles[i];
 
-                particle.pos = rand.NextVector2(new Vector2(-1, -1), new Vector2(1, 1));
-                particle.vel = new Vector2(0.0f);
-                particle.gradientPos = new Vector4(particle.pos.X / 2.0f, 0, 0, 0);
+                particle.pos = rand.NextVector2(new vec2(-1, -1), new vec2(1, 1));
+                particle.vel = new vec2(0.0f);
+                particle.gradientPos = new vec4(particle.pos.X / 2.0f, 0, 0, 0);
             }
 
             storageBuffer = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer | BufferUsageFlags.StorageBuffer, particles, true);

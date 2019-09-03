@@ -47,6 +47,43 @@ using System;
 
 namespace SharpGame
 {
+    public enum Intersection
+    {
+        /// <summary>
+        /// The two bounding volumes don't intersect at all.
+        /// </summary>
+        OutSide,
+        /// <summary>
+        /// The two bounding volumes overlap.
+        /// </summary>
+        Intersects,
+        /// <summary>
+        /// One bounding volume completely contains another.
+        /// </summary>
+        InSide,
+    };
+
+    /// <summary>
+    /// Describes the result of an intersection with a plane in three dimensions.
+    /// </summary>
+    public enum PlaneIntersectionType
+    {
+        /// <summary>
+        /// The object is behind the plane.
+        /// </summary>
+        Back,
+
+        /// <summary>
+        /// The object is in front of the plane.
+        /// </summary>
+        Front,
+
+        /// <summary>
+        /// The object is intersecting the plane.
+        /// </summary>
+        Intersecting
+    };
+
     /*
      * This class is organized so that the least complex objects come first so that the least
      * complex objects will have the most methods in most cases. Note that not all shapes exist
@@ -84,18 +121,18 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex to test.</param>
         /// <param name="vertex3">The third vertex to test.</param>
         /// <param name="result">When the method completes, contains the closest point between the two objects.</param>
-        public static void ClosestPointPointTriangle(ref Vector3 point, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out Vector3 result)
+        public static void ClosestPointPointTriangle(ref vec3 point, ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3, out vec3 result)
         {
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 136
 
             //Check if P in vertex region outside A
-            Vector3 ab = vertex2 - vertex1;
-            Vector3 ac = vertex3 - vertex1;
-            Vector3 ap = point - vertex1;
+            vec3 ab = vertex2 - vertex1;
+            vec3 ac = vertex3 - vertex1;
+            vec3 ap = point - vertex1;
 
-            float d1 = Vector3.Dot(ab, ap);
-            float d2 = Vector3.Dot(ac, ap);
+            float d1 = vec3.Dot(ab, ap);
+            float d2 = vec3.Dot(ac, ap);
             if (d1 <= 0.0f && d2 <= 0.0f)
             {
                 result = vertex1; //Barycentric coordinates (1,0,0)
@@ -103,9 +140,9 @@ namespace SharpGame
             }
 
             //Check if P in vertex region outside B
-            Vector3 bp = point - vertex2;
-            float d3 = Vector3.Dot(ab, bp);
-            float d4 = Vector3.Dot(ac, bp);
+            vec3 bp = point - vertex2;
+            float d3 = vec3.Dot(ab, bp);
+            float d4 = vec3.Dot(ac, bp);
             if (d3 >= 0.0f && d4 <= d3)
             {
                 result = vertex2; // Barycentric coordinates (0,1,0)
@@ -122,9 +159,9 @@ namespace SharpGame
             }
 
             //Check if P in vertex region outside C
-            Vector3 cp = point - vertex3;
-            float d5 = Vector3.Dot(ab, cp);
-            float d6 = Vector3.Dot(ac, cp);
+            vec3 cp = point - vertex3;
+            float d5 = vec3.Dot(ab, cp);
+            float d6 = vec3.Dot(ac, cp);
             if (d6 >= 0.0f && d5 <= d6)
             {
                 result = vertex3; //Barycentric coordinates (0,0,1)
@@ -162,13 +199,13 @@ namespace SharpGame
         /// <param name="plane">The plane to test.</param>
         /// <param name="point">The point to test.</param>
         /// <param name="result">When the method completes, contains the closest point between the two objects.</param>
-        public static void ClosestPointPlanePoint(ref Plane plane, ref Vector3 point, out Vector3 result)
+        public static void ClosestPointPlanePoint(ref Plane plane, ref vec3 point, out vec3 result)
         {
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 126
 
             float dot;
-            Vector3.Dot(ref plane.Normal, ref point, out dot);
+            vec3.Dot(ref plane.Normal, ref point, out dot);
             float t = dot - plane.D;
 
             result = point - (t * plane.Normal);
@@ -180,14 +217,14 @@ namespace SharpGame
         /// <param name="box">The box to test.</param>
         /// <param name="point">The point to test.</param>
         /// <param name="result">When the method completes, contains the closest point between the two objects.</param>
-        public static void ClosestPointBoxPoint(ref BoundingBox box, ref Vector3 point, out Vector3 result)
+        public static void ClosestPointBoxPoint(ref BoundingBox box, ref vec3 point, out vec3 result)
         {
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 130
 
-            Vector3 temp;
-            Vector3.Max(ref point, ref box.Minimum, out temp);
-            Vector3.Min(ref temp, ref box.Maximum, out result);
+            vec3 temp;
+            glm.Max(ref point, ref box.Minimum, out temp);
+            glm.Min(ref temp, ref box.Maximum, out result);
         }
 
         /// <summary>
@@ -196,14 +233,14 @@ namespace SharpGame
         /// <param name="sphere"></param>
         /// <param name="point">The point to test.</param>
         /// <param name="result">When the method completes, contains the closest point between the two objects;
-        /// or, if the point is directly in the center of the sphere, contains <see cref="Vector3.Zero"/>.</param>
-        public static void ClosestPointSpherePoint(ref BoundingSphere sphere, ref Vector3 point, out Vector3 result)
+        /// or, if the point is directly in the center of the sphere, contains <see cref="vec3.Zero"/>.</param>
+        public static void ClosestPointSpherePoint(ref BoundingSphere sphere, ref vec3 point, out vec3 result)
         {
             //Source: Jorgy343
             //Reference: None
 
             //Get the unit direction from the sphere's center to the point.
-            Vector3.Subtract(ref point, ref sphere.Center, out result);
+            vec3.Subtract(ref point, ref sphere.Center, out result);
             result.Normalize();
 
             //Multiply the unit direction by the sphere's radius to get a vector
@@ -220,19 +257,19 @@ namespace SharpGame
         /// <param name="sphere1">The first sphere to test.</param>
         /// <param name="sphere2">The second sphere to test.</param>
         /// <param name="result">When the method completes, contains the closest point between the two objects;
-        /// or, if the point is directly in the center of the sphere, contains <see cref="Vector3.Zero"/>.</param>
+        /// or, if the point is directly in the center of the sphere, contains <see cref="vec3.Zero"/>.</param>
         /// <remarks>
         /// If the two spheres are overlapping, but not directly on top of each other, the closest point
         /// is the 'closest' point of intersection. This can also be considered is the deepest point of
         /// intersection.
         /// </remarks>
-        public static void ClosestPointSphereSphere(ref BoundingSphere sphere1, ref BoundingSphere sphere2, out Vector3 result)
+        public static void ClosestPointSphereSphere(ref BoundingSphere sphere1, ref BoundingSphere sphere2, out vec3 result)
         {
             //Source: Jorgy343
             //Reference: None
 
             //Get the unit direction from the first sphere's center to the second sphere's center.
-            Vector3.Subtract(ref sphere2.Center, ref sphere1.Center, out result);
+            vec3.Subtract(ref sphere2.Center, ref sphere1.Center, out result);
             result.Normalize();
 
             //Multiply the unit direction by the first sphere's radius to get a vector
@@ -249,13 +286,13 @@ namespace SharpGame
         /// <param name="plane">The plane to test.</param>
         /// <param name="point">The point to test.</param>
         /// <returns>The distance between the two objects.</returns>
-        public static float DistancePlanePoint(ref Plane plane, ref Vector3 point)
+        public static float DistancePlanePoint(ref Plane plane, ref vec3 point)
         {
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 127
 
             float dot;
-            Vector3.Dot(ref plane.Normal, ref point, out dot);
+            vec3.Dot(ref plane.Normal, ref point, out dot);
             return dot - plane.D;
         }
 
@@ -265,7 +302,7 @@ namespace SharpGame
         /// <param name="box">The box to test.</param>
         /// <param name="point">The point to test.</param>
         /// <returns>The distance between the two objects.</returns>
-        public static float DistanceBoxPoint(ref BoundingBox box, ref Vector3 point)
+        public static float DistanceBoxPoint(ref BoundingBox box, ref vec3 point)
         {
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 131
@@ -348,13 +385,13 @@ namespace SharpGame
         /// <param name="sphere">The sphere to test.</param>
         /// <param name="point">The point to test.</param>
         /// <returns>The distance between the two objects.</returns>
-        public static float DistanceSpherePoint(ref BoundingSphere sphere, ref Vector3 point)
+        public static float DistanceSpherePoint(ref BoundingSphere sphere, ref vec3 point)
         {
             //Source: Jorgy343
             //Reference: None
 
             float distance;
-            Vector3.Distance(ref sphere.Center, ref point, out distance);
+            vec3.Distance(ref sphere.Center, ref point, out distance);
             distance -= sphere.Radius;
 
             return Math.Max(distance, 0f);
@@ -372,7 +409,7 @@ namespace SharpGame
             //Reference: None
 
             float distance;
-            Vector3.Distance(ref sphere1.Center, ref sphere2.Center, out distance);
+            vec3.Distance(ref sphere1.Center, ref sphere2.Center, out distance);
             distance -= sphere1.Radius + sphere2.Radius;
 
             return Math.Max(distance, 0f);
@@ -384,18 +421,18 @@ namespace SharpGame
         /// <param name="ray">The ray to test.</param>
         /// <param name="point">The point to test.</param>
         /// <returns>Whether the two objects intersect.</returns>
-        public static bool RayIntersectsPoint(ref Ray ray, ref Vector3 point)
+        public static bool RayIntersectsPoint(ref Ray ray, ref vec3 point)
         {
             //Source: RayIntersectsSphere
             //Reference: None
 
-            Vector3 m;
-            Vector3.Subtract(ref ray.Position, ref point, out m);
+            vec3 m;
+            vec3.Subtract(ref ray.Position, ref point, out m);
 
             //Same thing as RayIntersectsSphere except that the radius of the sphere (point)
             //is the epsilon for zero.
-            float b = Vector3.Dot(m, ray.Direction);
-            float c = Vector3.Dot(m, m) - MathUtil.Epsilon;
+            float b = vec3.Dot(m, ray.Direction);
+            float c = vec3.Dot(m, m) - MathUtil.Epsilon;
 
             if (c > 0f && b > 0f)
                 return false;
@@ -414,7 +451,7 @@ namespace SharpGame
         /// <param name="ray1">The first ray to test.</param>
         /// <param name="ray2">The second ray to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersect.</returns>
         /// <remarks>
         /// This method performs a ray vs ray intersection test based on the following formula
@@ -426,14 +463,14 @@ namespace SharpGame
         /// of the second ray, det denotes the determinant of a matrix, x denotes the cross
         /// product, [ ] denotes a matrix, and || || denotes the length or magnitude of a vector.
         /// </remarks>
-        public static bool RayIntersectsRay(ref Ray ray1, ref Ray ray2, out Vector3 point)
+        public static bool RayIntersectsRay(ref Ray ray1, ref Ray ray2, out vec3 point)
         {
             //Source: float-Time Rendering, Third Edition
             //Reference: Page 780
 
-            Vector3 cross;
+            vec3 cross;
 
-            Vector3.Cross(ref ray1.Direction, ref ray2.Direction, out cross);
+            vec3.Cross(ref ray1.Direction, ref ray2.Direction, out cross);
             float denominator = cross.Length();
 
             //Lines are parallel.
@@ -444,7 +481,7 @@ namespace SharpGame
                     MathUtil.NearEqual(ray2.Position.Y, ray1.Position.Y) &&
                     MathUtil.NearEqual(ray2.Position.Z, ray1.Position.Z))
                 {
-                    point = Vector3.Zero;
+                    point = vec3.Zero;
                     return true;
                 }
             }
@@ -490,15 +527,15 @@ namespace SharpGame
             float t = dett / denominator;
 
             //The points of intersection.
-            Vector3 point1 = ray1.Position + (s * ray1.Direction);
-            Vector3 point2 = ray2.Position + (t * ray2.Direction);
+            vec3 point1 = ray1.Position + (s * ray1.Direction);
+            vec3 point2 = ray2.Position + (t * ray2.Direction);
 
             //If the points are not equal, no intersection has occurred.
             if (!MathUtil.NearEqual(point2.X, point1.X) ||
                 !MathUtil.NearEqual(point2.Y, point1.Y) ||
                 !MathUtil.NearEqual(point2.Z, point1.Z))
             {
-                point = Vector3.Zero;
+                point = vec3.Zero;
                 return false;
             }
 
@@ -520,7 +557,7 @@ namespace SharpGame
             //Reference: Page 175
 
             float direction;
-            Vector3.Dot(ref plane.Normal, ref ray.Direction, out direction);
+            vec3.Dot(ref plane.Normal, ref ray.Direction, out direction);
 
             if (MathUtil.IsZero(direction))
             {
@@ -529,7 +566,7 @@ namespace SharpGame
             }
 
             float position;
-            Vector3.Dot(ref plane.Normal, ref ray.Position, out position);
+            vec3.Dot(ref plane.Normal, ref ray.Position, out position);
             distance = (-plane.D - position) / direction;
 
             if (distance < 0f)
@@ -547,9 +584,9 @@ namespace SharpGame
         /// <param name="ray">The ray to test.</param>
         /// <param name="plane">The plane to test</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsPlane(ref Ray ray, ref Plane plane, out Vector3 point)
+        public static bool RayIntersectsPlane(ref Ray ray, ref Plane plane, out vec3 point)
         {
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 175
@@ -557,7 +594,7 @@ namespace SharpGame
             float distance;
             if (!RayIntersectsPlane(ref ray, ref plane, out distance))
             {
-                point = Vector3.Zero;
+                point = vec3.Zero;
                 return false;
             }
 
@@ -582,29 +619,29 @@ namespace SharpGame
         /// the ray, no intersection is assumed to have happened. In both cases of assumptions,
         /// this method returns false.
         /// </remarks>
-        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
+        public static bool RayIntersectsTriangle(ref Ray ray, ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3, out float distance)
         {
             //Source: Fast Minimum Storage Ray / Triangle Intersection
             //Reference: http://www.cs.virginia.edu/~gfx/Courses/2003/ImageSynthesis/papers/Acceleration/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
 
             //Compute vectors along two edges of the triangle.
-            Vector3 edge1, edge2;
+            vec3 edge1, edge2;
 
             //Edge 1
-            edge1.X = vertex2.X - vertex1.X;
-            edge1.Y = vertex2.Y - vertex1.Y;
-            edge1.Z = vertex2.Z - vertex1.Z;
+            edge1.x = vertex2.X - vertex1.X;
+            edge1.y = vertex2.Y - vertex1.Y;
+            edge1.z = vertex2.Z - vertex1.Z;
 
             //Edge2
-            edge2.X = vertex3.X - vertex1.X;
-            edge2.Y = vertex3.Y - vertex1.Y;
-            edge2.Z = vertex3.Z - vertex1.Z;
+            edge2.x = vertex3.X - vertex1.X;
+            edge2.y = vertex3.Y - vertex1.Y;
+            edge2.z = vertex3.Z - vertex1.Z;
 
             //Cross product of ray direction and edge2 - first part of determinant.
-            Vector3 directioncrossedge2;
-            directioncrossedge2.X = (ray.Direction.Y * edge2.Z) - (ray.Direction.Z * edge2.Y);
-            directioncrossedge2.Y = (ray.Direction.Z * edge2.X) - (ray.Direction.X * edge2.Z);
-            directioncrossedge2.Z = (ray.Direction.X * edge2.Y) - (ray.Direction.Y * edge2.X);
+            vec3 directioncrossedge2;
+            directioncrossedge2.x = (ray.Direction.Y * edge2.Z) - (ray.Direction.Z * edge2.Y);
+            directioncrossedge2.y = (ray.Direction.Z * edge2.X) - (ray.Direction.X * edge2.Z);
+            directioncrossedge2.z = (ray.Direction.X * edge2.Y) - (ray.Direction.Y * edge2.X);
 
             //Compute the determinant.
             float determinant;
@@ -623,10 +660,10 @@ namespace SharpGame
             float inversedeterminant = 1.0f / determinant;
 
             //Calculate the U parameter of the intersection point.
-            Vector3 distanceVector;
-            distanceVector.X = ray.Position.X - vertex1.X;
-            distanceVector.Y = ray.Position.Y - vertex1.Y;
-            distanceVector.Z = ray.Position.Z - vertex1.Z;
+            vec3 distanceVector;
+            distanceVector.x = ray.Position.X - vertex1.X;
+            distanceVector.y = ray.Position.Y - vertex1.Y;
+            distanceVector.z = ray.Position.Z - vertex1.Z;
 
             float triangleU;
             triangleU = (distanceVector.X * directioncrossedge2.X) + (distanceVector.Y * directioncrossedge2.Y) + (distanceVector.Z * directioncrossedge2.Z);
@@ -640,10 +677,10 @@ namespace SharpGame
             }
 
             //Calculate the V parameter of the intersection point.
-            Vector3 distancecrossedge1;
-            distancecrossedge1.X = (distanceVector.Y * edge1.Z) - (distanceVector.Z * edge1.Y);
-            distancecrossedge1.Y = (distanceVector.Z * edge1.X) - (distanceVector.X * edge1.Z);
-            distancecrossedge1.Z = (distanceVector.X * edge1.Y) - (distanceVector.Y * edge1.X);
+            vec3 distancecrossedge1;
+            distancecrossedge1.x = (distanceVector.Y * edge1.Z) - (distanceVector.Z * edge1.Y);
+            distancecrossedge1.y = (distanceVector.Z * edge1.X) - (distanceVector.X * edge1.Z);
+            distancecrossedge1.z = (distanceVector.X * edge1.Y) - (distanceVector.Y * edge1.X);
 
             float triangleV;
             triangleV = ((ray.Direction.X * distancecrossedge1.X) + (ray.Direction.Y * distancecrossedge1.Y)) + (ray.Direction.Z * distancecrossedge1.Z);
@@ -680,14 +717,14 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out Vector3 point)
+        public static bool RayIntersectsTriangle(ref Ray ray, ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3, out vec3 point)
         {
             float distance;
             if (!RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out distance))
             {
-                point = Vector3.Zero;
+                point = vec3.Zero;
                 return false;
             }
 
@@ -813,14 +850,14 @@ namespace SharpGame
         /// <param name="ray">The ray to test.</param>
         /// <param name="box">The box to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsBox(ref Ray ray, ref BoundingBox box, out Vector3 point)
+        public static bool RayIntersectsBox(ref Ray ray, ref BoundingBox box, out vec3 point)
         {
             float distance;
             if (!RayIntersectsBox(ref ray, ref box, out distance))
             {
-                point = Vector3.Zero;
+                point = vec3.Zero;
                 return false;
             }
 
@@ -841,11 +878,11 @@ namespace SharpGame
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 177
 
-            Vector3 m;
-            Vector3.Subtract(ref ray.Position, ref sphere.Center, out m);
+            vec3 m;
+            vec3.Subtract(ref ray.Position, ref sphere.Center, out m);
 
-            float b = Vector3.Dot(m, ray.Direction);
-            float c = Vector3.Dot(m, m) - (sphere.Radius * sphere.Radius);
+            float b = vec3.Dot(m, ray.Direction);
+            float c = vec3.Dot(m, m) - (sphere.Radius * sphere.Radius);
 
             if (c > 0f && b > 0f)
             {
@@ -875,14 +912,14 @@ namespace SharpGame
         /// <param name="ray">The ray to test.</param>
         /// <param name="sphere">The sphere to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
-        /// or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsSphere(ref Ray ray, ref BoundingSphere sphere, out Vector3 point)
+        public static bool RayIntersectsSphere(ref Ray ray, ref BoundingSphere sphere, out vec3 point)
         {
             float distance;
             if (!RayIntersectsSphere(ref ray, ref sphere, out distance))
             {
-                point = Vector3.Zero;
+                point = vec3.Zero;
                 return false;
             }
 
@@ -896,10 +933,10 @@ namespace SharpGame
         /// <param name="plane">The plane to test.</param>
         /// <param name="point">The point to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static PlaneIntersectionType PlaneIntersectsPoint(ref Plane plane, ref Vector3 point)
+        public static PlaneIntersectionType PlaneIntersectsPoint(ref Plane plane, ref vec3 point)
         {
             float distance;
-            Vector3.Dot(ref plane.Normal, ref point, out distance);
+            vec3.Dot(ref plane.Normal, ref point, out distance);
             distance += plane.D;
 
             if (distance > 0f)
@@ -919,13 +956,13 @@ namespace SharpGame
         /// <returns>Whether the two objects intersected.</returns>
         public static bool PlaneIntersectsPlane(ref Plane plane1, ref Plane plane2)
         {
-            Vector3 direction;
-            Vector3.Cross(ref plane1.Normal, ref plane2.Normal, out direction);
+            vec3 direction;
+            vec3.Cross(ref plane1.Normal, ref plane2.Normal, out direction);
 
             //If direction is the zero vector, the planes are parallel and possibly
             //coincident. It is not an intersection. The dot product will tell us.
             float denominator;
-            Vector3.Dot(ref direction, ref direction, out denominator);
+            vec3.Dot(ref direction, ref direction, out denominator);
 
             if (MathUtil.IsZero(denominator))
                 return false;
@@ -951,13 +988,13 @@ namespace SharpGame
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 207
 
-            Vector3 direction;
-            Vector3.Cross(ref plane1.Normal, ref plane2.Normal, out direction);
+            vec3 direction;
+            vec3.Cross(ref plane1.Normal, ref plane2.Normal, out direction);
 
             //If direction is the zero vector, the planes are parallel and possibly
             //coincident. It is not an intersection. The dot product will tell us.
             float denominator;
-            Vector3.Dot(ref direction, ref direction, out denominator);
+            vec3.Dot(ref direction, ref direction, out denominator);
 
             //We assume the planes are normalized, therefore the denominator
             //only serves as a parallel and coincident check. Otherwise we need
@@ -968,9 +1005,9 @@ namespace SharpGame
                 return false;
             }
 
-            Vector3 point;
-            Vector3 temp = plane1.D * plane2.Normal - plane2.D * plane1.Normal;
-            Vector3.Cross(ref temp, ref direction, out point);
+            vec3 point;
+            vec3 temp = plane1.D * plane2.Normal - plane2.D * plane1.Normal;
+            vec3.Cross(ref temp, ref direction, out point);
 
             line.Position = point;
             line.Direction = direction;
@@ -987,7 +1024,7 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static PlaneIntersectionType PlaneIntersectsTriangle(ref Plane plane, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public static PlaneIntersectionType PlaneIntersectsTriangle(ref Plane plane, ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
         {
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 207
@@ -1016,23 +1053,23 @@ namespace SharpGame
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 161
 
-            Vector3 min;
-            Vector3 max;
+            vec3 min;
+            vec3 max;
 
-            max.X = (plane.Normal.X >= 0.0f) ? box.Minimum.X : box.Maximum.X;
-            max.Y = (plane.Normal.Y >= 0.0f) ? box.Minimum.Y : box.Maximum.Y;
-            max.Z = (plane.Normal.Z >= 0.0f) ? box.Minimum.Z : box.Maximum.Z;
-            min.X = (plane.Normal.X >= 0.0f) ? box.Maximum.X : box.Minimum.X;
-            min.Y = (plane.Normal.Y >= 0.0f) ? box.Maximum.Y : box.Minimum.Y;
-            min.Z = (plane.Normal.Z >= 0.0f) ? box.Maximum.Z : box.Minimum.Z;
+            max.x = (plane.Normal.X >= 0.0f) ? box.Minimum.X : box.Maximum.X;
+            max.y = (plane.Normal.Y >= 0.0f) ? box.Minimum.Y : box.Maximum.Y;
+            max.z = (plane.Normal.Z >= 0.0f) ? box.Minimum.Z : box.Maximum.Z;
+            min.x = (plane.Normal.X >= 0.0f) ? box.Maximum.X : box.Minimum.X;
+            min.y = (plane.Normal.Y >= 0.0f) ? box.Maximum.Y : box.Minimum.Y;
+            min.z = (plane.Normal.Z >= 0.0f) ? box.Maximum.Z : box.Minimum.Z;
 
             float distance;
-            Vector3.Dot(ref plane.Normal, ref max, out distance);
+            vec3.Dot(ref plane.Normal, ref max, out distance);
 
             if (distance + plane.D > 0.0f)
                 return PlaneIntersectionType.Front;
 
-            distance = Vector3.Dot(plane.Normal, min);
+            distance = vec3.Dot(plane.Normal, min);
 
             if (distance + plane.D < 0.0f)
                 return PlaneIntersectionType.Back;
@@ -1052,7 +1089,7 @@ namespace SharpGame
             //Reference: Page 160
 
             float distance;
-            Vector3.Dot(ref plane.Normal, ref sphere.Center, out distance);
+            vec3.Dot(ref plane.Normal, ref sphere.Center, out distance);
             distance += plane.D;
 
             if (distance > sphere.Radius)
@@ -1073,7 +1110,7 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool BoxIntersectsTriangle(ref BoundingBox box, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public static bool BoxIntersectsTriangle(ref BoundingBox box, ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
         {
             if (BoxContainsPoint(ref box, ref vertex1) == ContainmentType.Contains)
                 return true;
@@ -1119,9 +1156,9 @@ namespace SharpGame
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 166
 
-            Vector3 vector;
-            Vector3.Clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out vector);
-            float distance = Vector3.DistanceSquared(sphere.Center, vector);
+            vec3 vector;
+            glm.Clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out vector);
+            float distance = vec3.DistanceSquared(sphere.Center, vector);
 
             return distance <= sphere.Radius * sphere.Radius;
         }
@@ -1134,17 +1171,17 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool SphereIntersectsTriangle(ref BoundingSphere sphere, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public static bool SphereIntersectsTriangle(ref BoundingSphere sphere, ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
         {
             //Source: float-Time Collision Detection by Christer Ericson
             //Reference: Page 167
 
-            Vector3 point;
+            vec3 point;
             ClosestPointPointTriangle(ref sphere.Center, ref vertex1, ref vertex2, ref vertex3, out point);
-            Vector3 v = point - sphere.Center;
+            vec3 v = point - sphere.Center;
 
             float dot;
-            Vector3.Dot(ref v, ref v, out dot);
+            vec3.Dot(ref v, ref v, out dot);
 
             return dot <= sphere.Radius * sphere.Radius;
         }
@@ -1158,7 +1195,7 @@ namespace SharpGame
         public static bool SphereIntersectsSphere(ref BoundingSphere sphere1, ref BoundingSphere sphere2)
         {
             float radiisum = sphere1.Radius + sphere2.Radius;
-            return Vector3.DistanceSquared(sphere1.Center, sphere2.Center) <= radiisum * radiisum;
+            return vec3.DistanceSquared(sphere1.Center, sphere2.Center) <= radiisum * radiisum;
         }
 
         /// <summary>
@@ -1167,7 +1204,7 @@ namespace SharpGame
         /// <param name="box">The box to test.</param>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public static Intersection BoxContainsPoint(ref BoundingBox box, ref Vector3 point)
+        public static Intersection BoxContainsPoint(ref BoundingBox box, ref vec3 point)
         {
             if (box.Minimum.X <= point.X && box.Maximum.X >= point.X &&
                 box.Minimum.Y <= point.Y && box.Maximum.Y >= point.Y &&
@@ -1188,7 +1225,7 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public static ContainmentType BoxContainsTriangle(ref BoundingBox box, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public static ContainmentType BoxContainsTriangle(ref BoundingBox box, ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
         {
             ContainmentType test1 = BoxContainsPoint(ref box, ref vertex1);
             ContainmentType test2 = BoxContainsPoint(ref box, ref vertex2);
@@ -1239,9 +1276,9 @@ namespace SharpGame
         /// <returns>The type of containment the two objects have.</returns>
         public static Intersection BoxContainsSphere(ref BoundingBox box, ref BoundingSphere sphere)
         {
-            Vector3 vector;
-            Vector3.Clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out vector);
-            float distance = Vector3.DistanceSquared(sphere.Center, vector);
+            vec3 vector;
+            glm.Clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out vector);
+            float distance = vec3.DistanceSquared(sphere.Center, vector);
 
             if (distance > sphere.Radius * sphere.Radius)
                 return Intersection.OutSide;
@@ -1262,9 +1299,9 @@ namespace SharpGame
         /// <param name="sphere">The sphere to test.</param>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public static Intersection SphereContainsPoint(ref BoundingSphere sphere, ref Vector3 point)
+        public static Intersection SphereContainsPoint(ref BoundingSphere sphere, ref vec3 point)
         {
-            if (Vector3.DistanceSquared(point, sphere.Center) <= sphere.Radius * sphere.Radius)
+            if (vec3.DistanceSquared(point, sphere.Center) <= sphere.Radius * sphere.Radius)
                 return Intersection.InSide;
 
             return Intersection.OutSide;
@@ -1278,7 +1315,7 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public static Intersection SphereContainsTriangle(ref BoundingSphere sphere, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3)
+        public static Intersection SphereContainsTriangle(ref BoundingSphere sphere, ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
         {
             //Source: Jorgy343
             //Reference: None
@@ -1304,22 +1341,22 @@ namespace SharpGame
         /// <returns>The type of containment the two objects have.</returns>
         public static Intersection SphereContainsBox(ref BoundingSphere sphere, ref BoundingBox box)
         {
-            Vector3 vector;
+            vec3 vector;
 
             if (!BoxIntersectsSphere(ref box, ref sphere))
                 return Intersection.OutSide;
 
             float radiussquared = sphere.Radius * sphere.Radius;
-            vector.X = sphere.Center.X - box.Minimum.X;
-            vector.Y = sphere.Center.Y - box.Maximum.Y;
-            vector.Z = sphere.Center.Z - box.Maximum.Z;
+            vector.x = sphere.Center.X - box.Minimum.X;
+            vector.y = sphere.Center.Y - box.Maximum.Y;
+            vector.z = sphere.Center.Z - box.Maximum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;
 
-            vector.X = sphere.Center.X - box.Maximum.X;
-            vector.Y = sphere.Center.Y - box.Maximum.Y;
-            vector.Z = sphere.Center.Z - box.Maximum.Z;
+            vector.x = sphere.Center.X - box.Maximum.X;
+            vector.y = sphere.Center.Y - box.Maximum.Y;
+            vector.z = sphere.Center.Z - box.Maximum.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;
@@ -1377,7 +1414,7 @@ namespace SharpGame
         /// <returns>The type of containment the two objects have.</returns>
         public static Intersection SphereContainsSphere(ref BoundingSphere sphere1, ref BoundingSphere sphere2)
         {
-            float distance = Vector3.Distance(sphere1.Center, sphere2.Center);
+            float distance = vec3.Distance(sphere1.Center, sphere2.Center);
 
             if (sphere1.Radius + sphere2.Radius < distance)
                 return Intersection.OutSide;
@@ -1387,5 +1424,6 @@ namespace SharpGame
 
             return Intersection.InSide;
         }
+
     }
 }

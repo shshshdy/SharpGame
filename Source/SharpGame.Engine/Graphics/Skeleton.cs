@@ -18,13 +18,13 @@ namespace SharpGame
         /// Parent bone index.
         public int parentIndex_;
         /// Reset position.
-        public Vector3 initialPosition_;
+        public vec3 initialPosition_;
         /// Reset rotation.
-        public Quaternion initialRotation_ = Quaternion.Identity;
+        public quat initialRotation_ = quat.Identity;
         /// Reset scale.
-        public Vector3 initialScale_ = Vector3.One;
+        public vec3 initialScale_ = vec3.One;
         /// Offset matrix.
-        public Matrix offsetMatrix_;
+        public mat4 offsetMatrix_;
         /// Animation enable flag.
         public bool animated_ = true;
         /// Supported collision types.
@@ -60,9 +60,9 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct Matrix3x4
     {
-        public Vector4 Column1;
-        public Vector4 Column2;
-        public Vector4 Column3;
+        public vec4 Column1;
+        public vec4 Column2;
+        public vec4 Column3;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -116,17 +116,18 @@ namespace SharpGame
                 Bone newBone = new Bone();
                 newBone.name_ = source.ReadCString();
                 newBone.parentIndex_ = source.Read<int>();
-                newBone.initialPosition_ = source.Read<Vector3>();
+                newBone.initialPosition_ = source.Read<vec3>();
 
                 Quat r = source.Read<Quat>();
-                newBone.initialRotation_ = new Quaternion(r.X, r.Y, r.Z, r.W);
-                newBone.initialScale_ = source.Read<Vector3>();
+                newBone.initialRotation_ = new quat( r.W,r.X, r.Y, r.Z);
+                newBone.initialScale_ = source.Read<vec3>();
 
                 Matrix3x4 temp = source.Read<Matrix3x4>();
-                newBone.offsetMatrix_.Column1 = temp.Column1;
-                newBone.offsetMatrix_.Column2 = temp.Column2;
-                newBone.offsetMatrix_.Column3 = temp.Column3;
-                newBone.offsetMatrix_.Column4 = Vector4.UnitW;
+                newBone.offsetMatrix_[0] = (vec4)temp.Column1;
+                newBone.offsetMatrix_[1] = (vec4)temp.Column2;
+                newBone.offsetMatrix_[2] = (vec4)temp.Column3;
+                newBone.offsetMatrix_[3] = glm.vec4(0, 0, 0, 1);
+                newBone.offsetMatrix_.Transpose();
 
                 // Read bone collision data
                 newBone.collisionMask_ = source.Read<byte>();

@@ -19,13 +19,13 @@ namespace SharpGame.Samples
 
         protected Scene scene;
         protected Camera camera;
-        protected Vector2 mousePos = Vector2.Zero;
+        protected vec2 mousePos = vec2.Zero;
         protected float yaw;
         protected float pitch;
         protected float rotSpeed = 0.5f;
         protected float wheelSpeed = 10.0f;
         protected float moveSpeed = 10.0f;
-        protected Vector3 offset;
+        protected vec3 offset;
 
         public FileSystem FileSystem => FileSystem.Instance;
         public Resources Resources => Resources.Instance;
@@ -72,17 +72,17 @@ namespace SharpGame.Samples
                 return;
             }
 
-            if (mousePos == Vector2.Zero)
+            if (mousePos == vec2.Zero)
                 mousePos = input.MousePosition;
 
-            offset = Vector3.Zero;
+            offset = vec3.Zero;
             if (input.IsMouseDown(MouseButton.Right))
             {
-                Vector2 delta = (input.MousePosition - mousePos) * (Time.Delta * rotSpeed * new Vector2(camera.AspectRatio, 1.0f));
+                vec2 delta = (input.MousePosition - mousePos) * (Time.Delta * rotSpeed * new vec2(camera.AspectRatio, 1.0f));
 
                 if(pitch == 0)
                 {
-                    var rot = camera.Node.Rotation.ToEuler();
+                    var rot = camera.Node.Rotation.EulerAngles;
                     yaw = rot.Y;
                     pitch = rot.X;
                 }
@@ -90,7 +90,7 @@ namespace SharpGame.Samples
                 yaw += delta.X;
                 pitch += delta.Y;
 
-                camera.Node.Rotation = Quaternion.RotationYawPitchRoll(yaw, pitch, 0);
+                camera.Node.Rotation = glm.quatYawPitchRoll(yaw, pitch, 0);
 
                 if (input.IsKeyPressed(Key.W))
                 {
@@ -115,12 +115,12 @@ namespace SharpGame.Samples
 
             if (input.IsMouseDown(MouseButton.Middle))
             {
-                Vector2 delta = input.MousePosition - mousePos;
+                vec2 delta = input.MousePosition - mousePos;
                 offset.X = -delta.X * camera.AspectRatio;
                 offset.Y = delta.Y;
             }
 
-            camera.Node.Translate(offset * (Time.Delta * moveSpeed) + new Vector3(0, 0, input.WheelDelta * wheelSpeed), TransformSpace.LOCAL);
+            camera.Node.Translate(offset * (Time.Delta * moveSpeed) + new vec3(0, 0, input.WheelDelta * wheelSpeed), TransformSpace.LOCAL);
 
             mousePos = input.MousePosition;
             
@@ -137,7 +137,7 @@ namespace SharpGame.Samples
                     {
                         ImGui.PushItemWidth(120);
                         ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0:0.00"));
-                        ImGui.TextUnformatted("rot : " + camera.Node.Rotation.ToEuler().ToString("0:0.00"));
+                        ImGui.TextUnformatted("rot : " + camera.Node.Rotation.EulerAngles.ToString("0:0.00"));
                         ImGui.SliderFloat("Rotate Speed: ", ref rotSpeed, 1, 100);
                         ImGui.SliderFloat("Move Speed: ", ref moveSpeed, 1, 1000);
                         ImGui.PopItemWidth();
@@ -159,8 +159,8 @@ namespace SharpGame.Samples
 
             var io = ImGui.GetIO();
             {
-                Vector2 window_pos = new Vector2(10, io.DisplaySize.Y - 10);
-                Vector2 window_pos_pivot = new Vector2(0.0f, 1.0f);
+                vec2 window_pos = new vec2(10, io.DisplaySize.Y - 10);
+                vec2 window_pos_pivot = new vec2(0.0f, 1.0f);
                 ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
                 ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
             }
@@ -172,11 +172,11 @@ namespace SharpGame.Samples
                     float scale = tex.width / (float)tex.height;
                     if(scale > 1)
                     {
-                        ImGUI.Image(tex, new Vector2(debugImageHeight, debugImageHeight/ scale)); ImGui.SameLine();
+                        ImGUI.Image(tex, new vec2(debugImageHeight, debugImageHeight/ scale)); ImGui.SameLine();
                     }
                     else
                     {
-                        ImGUI.Image(tex, new Vector2(scale * debugImageHeight, debugImageHeight)); ImGui.SameLine();
+                        ImGUI.Image(tex, new vec2(scale * debugImageHeight, debugImageHeight)); ImGui.SameLine();
                     }
                     
                 }
