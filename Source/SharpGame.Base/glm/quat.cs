@@ -360,7 +360,6 @@ namespace SharpGame
             return x * ((1) - a) + (y * a);
         }
 
-
         public static quat slerp(quat x, quat y, float a)
         {
             quat z = y;
@@ -441,7 +440,6 @@ namespace SharpGame
             Result[2][2] = (1) - (2) * (qxx + qyy);
             return Result;
         }
-
 
         public static mat4 mat4_cast(quat q)
         {

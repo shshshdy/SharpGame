@@ -153,6 +153,35 @@ namespace SharpGame
                );
         }
 
+        public void Transpose()
+        {
+            Transpose(ref this, out this);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transpose(ref mat4 value, out mat4 result)
+        {
+            mat4 temp = new mat4();
+            temp.M11 = value.M11;
+            temp.M12 = value.M21;
+            temp.M13 = value.M31;
+            temp.M14 = value.M41;
+            temp.M21 = value.M12;
+            temp.M22 = value.M22;
+            temp.M23 = value.M32;
+            temp.M24 = value.M42;
+            temp.M31 = value.M13;
+            temp.M32 = value.M23;
+            temp.M33 = value.M33;
+            temp.M34 = value.M43;
+            temp.M41 = value.M14;
+            temp.M42 = value.M24;
+            temp.M43 = value.M34;
+            temp.M44 = value.M44;
+
+            result = temp;
+        }
+
         #endregion
 
         #region ToString support

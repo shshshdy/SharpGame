@@ -920,7 +920,7 @@ namespace SharpGame
                 for(int i = 0; i < bones.Length; ++i)
                 {
                     Bone bone = bones[i];
-                    if(bone.node_)
+                    if (bone.node_)
                         skinMatrices_[i] = bone.node_.WorldTransform * bone.offsetMatrix_;
                     else
                         skinMatrices_[i] = worldTransform;

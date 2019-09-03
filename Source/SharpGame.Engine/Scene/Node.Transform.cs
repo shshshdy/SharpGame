@@ -446,7 +446,7 @@ namespace SharpGame
 #else
                 worldTransform_ = xform * parent_.WorldTransform;
 #endif
-                worldRotation_ = rotation_ * parent_.WorldRotation;
+                worldRotation_ =  parent_.WorldRotation *rotation_;
             }
 
             dirty_ = false;

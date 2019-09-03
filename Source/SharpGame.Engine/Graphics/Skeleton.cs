@@ -127,6 +127,7 @@ namespace SharpGame
                 newBone.offsetMatrix_[1] = (vec4)temp.Column2;
                 newBone.offsetMatrix_[2] = (vec4)temp.Column3;
                 newBone.offsetMatrix_[3] = glm.vec4(0, 0, 0, 1);
+                newBone.offsetMatrix_.Transpose();
 
                 // Read bone collision data
                 newBone.collisionMask_ = source.Read<byte>();

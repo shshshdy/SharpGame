@@ -529,8 +529,8 @@ namespace SharpGame
                 }
                 if((channelMask & Animation.CHANNEL_ROTATION) != 0)
                 {
-                    quat delta = newRotation*glm.inverse(stateTrack.bone_.initialRotation_);
-                    newRotation = glm.normalize( delta *node.Rotation);
+                    quat delta =glm.inverse(stateTrack.bone_.initialRotation_)* newRotation;
+                    newRotation = glm.normalize(node.Rotation * delta);
                    // newRotation.Normalize();
                     if (!Equals(weight, 1.0f))
                         newRotation = glm.slerp(node.RotationRef, newRotation, weight);
