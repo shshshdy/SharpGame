@@ -45,25 +45,34 @@ namespace SharpGame
 
 
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct LightPS
+    public unsafe struct LightParameter
     {
         public Color4 AmbientColor;
         public Color4 SunlightColor;
         public vec3 SunlightDir;
         public float LightPS_pading1;
 
-        public fixed float LightColor[4 * 8];
-        public fixed float LightVec[4 * 8];
+        public vec4 cascadeSplits;
+        fixed float lightMatrices[4 * 16];
 
-        public ref Color4 color(int index)
+        fixed float lightColor[4 * 8];
+        fixed float lightVec[4 * 8];
+
+        public void SetLightColor(int index, Color4 color)
         {
-            return ref Unsafe.As<float, Color4>(ref LightColor[index * 4]);
+            Unsafe.As<float, Color4>(ref lightColor[index * 4]) = color;
         }
 
-        public ref vec4 lightVec(int index)
+        public void SetLightVector(int index, vec4 vec)
         {
-            return ref Unsafe.As<float, vec4>(ref LightVec[index * 4]);
+            Unsafe.As<float, vec4>(ref lightVec[index * 4]) = vec;
         }
+
+        public void SetLightMatrices(int index, ref mat4 mat)
+        {
+            Unsafe.As<float, mat4>(ref lightMatrices[index * 16]) = mat;
+        }
+
     }
 
     public class RenderView : Object
@@ -85,7 +94,7 @@ namespace SharpGame
 
         public uint ViewMask { get; set; }
 
-        public ref LightPS LightParam => ref light;
+        public ref LightParameter LightParam => ref lightParameter;
 
         internal FastList<Drawable> drawables = new FastList<Drawable>();
         internal FastList<Light> lights = new FastList<Light>();
@@ -98,7 +107,7 @@ namespace SharpGame
         private FrameUniform frameUniform = new FrameUniform();
         private CameraVS cameraVS = new CameraVS();
         private CameraPS cameraPS = new CameraPS();
-        private LightPS light = new LightPS();
+        private LightParameter lightParameter = new LightParameter();
 
         internal DeviceBuffer ubFrameInfo;
         internal DeviceBuffer ubCameraVS;
@@ -158,7 +167,7 @@ namespace SharpGame
 
             if (ubLight == null)
             {
-                ubLight = DeviceBuffer.CreateUniformBuffer<LightPS>();
+                ubLight = DeviceBuffer.CreateUniformBuffer<LightParameter>();
             }
 
             if(ubMatrics == null)
@@ -297,7 +306,6 @@ namespace SharpGame
         {
             cameraVS.View = camera.View;
             cameraVS.ViewInv = glm.inverse(cameraVS.View);
-            //mat4.Invert(ref camera.View, out cameraVS.ViewInv);
             cameraVS.ViewProj = camera.VkProjection*camera.View;
             cameraVS.CameraPos = camera.Node.Position;
             //cameraVS.FrustumSize = camera.Frustum;
@@ -327,18 +335,18 @@ namespace SharpGame
 
         private void UpdateLightParameters()
         {
-            light.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
-            light.SunlightColor = new Color4(0.5f);
-            light.SunlightDir = new vec3(-1, -1, 1);
-            light.SunlightDir.Normalize();
+            lightParameter.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
+            lightParameter.SunlightColor = new Color4(0.5f);
+            lightParameter.SunlightDir = new vec3(-1, -1, 1);
+            lightParameter.SunlightDir.Normalize();
 
             for(int i = 0; i < 8; i++)
             {
-                light.color(i) = Color4.White;
-                light.lightVec(i) = glm.normalize(lightVec[i]);
+                lightParameter.SetLightColor(i, Color4.White);
+                lightParameter.SetLightVector(i, glm.normalize(lightVec[i]));
             }
 
-            ubLight.SetData(ref light);
+            ubLight.SetData(ref lightParameter);
         }
 
         public void Render(int imageIndex)

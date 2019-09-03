@@ -503,12 +503,12 @@ namespace SharpGame
                 float t = timeInterval > 0.0f ? (time_ - keyFrame.time_) / timeInterval : 1.0f;
 
                 if((channelMask & Animation.CHANNEL_POSITION) != 0)
-                    glm.Lerp(ref keyFrame.position_, ref nextKeyFrame.position_, t, out newPosition);
+                    glm.lerp(ref keyFrame.position_, ref nextKeyFrame.position_, t, out newPosition);
                 if ((channelMask & Animation.CHANNEL_ROTATION) != 0)
                     newRotation = glm.slerp(keyFrame.rotation_, nextKeyFrame.rotation_, t);
                     //glm.slerp(ref keyFrame.rotation_, ref nextKeyFrame.rotation_, t, out newRotation);
                 if ((channelMask & Animation.CHANNEL_SCALE) != 0)
-                    glm.Lerp(ref keyFrame.scale_, ref nextKeyFrame.scale_, t, out newScale);
+                    glm.lerp(ref keyFrame.scale_, ref nextKeyFrame.scale_, t, out newScale);
             }
             else
             {
@@ -547,12 +547,12 @@ namespace SharpGame
                 if(!Equals(weight, 1.0f)) // not full weight
                 {
                     if((channelMask & Animation.CHANNEL_POSITION) != 0)
-                        glm.Lerp(ref node.PositionRef, ref newPosition, weight, out newPosition);
+                        glm.lerp(ref node.PositionRef, ref newPosition, weight, out newPosition);
                     if ((channelMask & Animation.CHANNEL_ROTATION) != 0)
                         //quat.Slerp(ref node.RotationRef, ref newRotation, weight, out newRotation);
                         newRotation = glm.slerp(node.RotationRef, newRotation, weight);
                     if ((channelMask & Animation.CHANNEL_SCALE) != 0)
-                        glm.Lerp(ref node.ScalingRef, ref newScale, weight, out newScale);
+                        glm.lerp(ref node.ScalingRef, ref newScale, weight, out newScale);
                 }
             }
 

@@ -223,8 +223,8 @@ namespace SharpGame
             //Reference: Page 130
 
             vec3 temp;
-            glm.Max(ref point, ref box.Minimum, out temp);
-            glm.Min(ref temp, ref box.Maximum, out result);
+            glm.max(ref point, ref box.Minimum, out temp);
+            glm.min(ref temp, ref box.Maximum, out result);
         }
 
         /// <summary>
@@ -1157,7 +1157,7 @@ namespace SharpGame
             //Reference: Page 166
 
             vec3 vector;
-            glm.Clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out vector);
+            glm.clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out vector);
             float distance = vec3.DistanceSquared(sphere.Center, vector);
 
             return distance <= sphere.Radius * sphere.Radius;
@@ -1277,7 +1277,7 @@ namespace SharpGame
         public static Intersection BoxContainsSphere(ref BoundingBox box, ref BoundingSphere sphere)
         {
             vec3 vector;
-            glm.Clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out vector);
+            glm.clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out vector);
             float distance = vec3.DistanceSquared(sphere.Center, vector);
 
             if (distance > sphere.Radius * sphere.Radius)

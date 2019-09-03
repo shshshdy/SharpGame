@@ -15,7 +15,7 @@ namespace SharpGame.Samples
             camera = cameraNode.CreateComponent<Camera>();
 
             {
-                var model = GeometricPrimitive.CreatePlaneModel(100, 100);
+                var model = GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32);
                 var node = scene.CreateChild("Plane");
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
@@ -52,6 +52,7 @@ namespace SharpGame.Samples
                     node.Rotation = new quat(new vec3(0, MathUtil.Radians(MathUtil.Random(0, 360)), 0));
                     node.Scaling = new vec3(MathUtil.Random(2.0f, 4.0f));
                     var staticModel = node.AddComponent<StaticModel>();
+                    staticModel.CastShadows = true;
                     staticModel.SetModel(model);
                     staticModel.SetMaterial(0, mat);
                     staticModel.SetMaterial(1, mat1);

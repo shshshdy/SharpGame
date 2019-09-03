@@ -32,7 +32,7 @@ namespace SharpGame
         {
         }
 
-        public unsafe DeviceBuffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropFlags, ulong stride, ulong count, IntPtr data = default)
+        public DeviceBuffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropFlags, ulong stride, ulong count, IntPtr data = default)
         {
             Stride = stride;
             Count = count;
@@ -51,7 +51,8 @@ namespace SharpGame
             Device.GetBufferMemoryRequirements(buffer, out VkMemoryRequirements memReqs);
 
             // Find a memory type index that fits the properties of the buffer
-            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, (VkMemoryPropertyFlags)memoryPropFlags);
+
+            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropFlags);
 
             MemoryAllocateInfo memAlloc = new MemoryAllocateInfo(memReqs.size, memoryTypeIndex);
             memory = Device.AllocateMemory(ref memAlloc.native);

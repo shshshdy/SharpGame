@@ -125,8 +125,9 @@ namespace SharpGame
             {
                 float splitDist = cascadeSplits[i];
 
-                Span<vec3> frustumCorners = stackalloc [] {
-                new vec3(-1.0f,  1.0f, -1.0f),
+                Span<vec3> frustumCorners = stackalloc []
+                {
+                    new vec3(-1.0f,  1.0f, -1.0f),
                     new vec3( 1.0f,  1.0f, -1.0f),
                     new vec3( 1.0f, -1.0f, -1.0f),
                     new vec3(-1.0f, -1.0f, -1.0f),
@@ -177,17 +178,10 @@ namespace SharpGame
                 // Store split distance and matrix in cascade
                 cascades[i].splitDepth = (camera.NearClip + splitDist * clipRange) * -1.0f;
                 cascades[i].viewProjMatrix = lightOrthoMatrix * lightViewMatrix;
+                view.LightParam.SetLightMatrices(i, ref cascades[i].viewProjMatrix);
 
                 lastSplitDist = cascadeSplits[i];
             }
-        }
-
-        void updateLight()
-        {
-        /*
-            float angle = glm::radians(timer * 360.0f);
-            float radius = 20.0f;
-            lightPos = vec3(cos(angle) * radius, -radius, sin(angle) * radius);*/
         }
 
         void updateUniformBuffers()

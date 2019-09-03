@@ -64,10 +64,16 @@ namespace SharpGame
             this.z = z;
         }
 
+        [IgnoreDataMember]
         public float X { get => x; set => x = value; }
+
+        [IgnoreDataMember]
         public float Y { get => y; set => y = value; }
+
+        [IgnoreDataMember]
         public float Z { get => z; set => z = value; }
 
+        [IgnoreDataMember]
         public float this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -201,7 +207,6 @@ namespace SharpGame
             return result;
         }
 
-
         public static void Transform(ref vec3 vector, ref mat3 transform, out vec3 result)
         {
             result = transform* vector;
@@ -326,6 +331,7 @@ namespace SharpGame
         {
             return new vec3(self.x * s, self.y * s, self.z * s);
         }
+
         public static vec3 operator *(float lhs, vec3 rhs)
         {
             return new vec3(rhs.x * lhs, rhs.y * lhs, rhs.z * lhs);
@@ -482,7 +488,7 @@ namespace SharpGame
             return v * (1.0f / (float)Math.Sqrt(sqr));
         }
 
-        public static void Clamp(ref vec3 value, ref vec3 min, ref vec3 max, out vec3 result)
+        public static void clamp(ref vec3 value, ref vec3 min, ref vec3 max, out vec3 result)
         {
             float x = value.X;
             x = (x > max.X) ? max.X : x;
@@ -499,41 +505,41 @@ namespace SharpGame
             result = new vec3(x, y, z);
         }
 
-        public static vec3 Clamp(vec3 value, vec3 min, vec3 max)
+        public static vec3 clamp(vec3 value, vec3 min, vec3 max)
         {
             vec3 result;
-            Clamp(ref value, ref min, ref max, out result);
+            clamp(ref value, ref min, ref max, out result);
             return result;
         }
 
-        public static void Lerp(ref vec3 start, ref vec3 end, float amount, out vec3 result)
+        public static void lerp(ref vec3 start, ref vec3 end, float amount, out vec3 result)
         {
             result.x = MathUtil.Lerp(start.X, end.X, amount);
             result.y = MathUtil.Lerp(start.Y, end.Y, amount);
             result.z = MathUtil.Lerp(start.Z, end.Z, amount);
         }
 
-        public static vec3 Lerp(vec3 start, vec3 end, float amount)
+        public static vec3 lerp(vec3 start, vec3 end, float amount)
         {
             vec3 result;
-            Lerp(ref start, ref end, amount, out result);
+            lerp(ref start, ref end, amount, out result);
             return result;
         }
 
-        public static void SmoothStep(ref vec3 start, ref vec3 end, float amount, out vec3 result)
+        public static void smoothStep(ref vec3 start, ref vec3 end, float amount, out vec3 result)
         {
             amount = MathUtil.SmoothStep(amount);
-            Lerp(ref start, ref end, amount, out result);
+            lerp(ref start, ref end, amount, out result);
         }
 
-        public static vec3 SmoothStep(vec3 start, vec3 end, float amount)
+        public static vec3 smoothStep(vec3 start, vec3 end, float amount)
         {
             vec3 result;
-            SmoothStep(ref start, ref end, amount, out result);
+            smoothStep(ref start, ref end, amount, out result);
             return result;
         }
 
-        public static void Hermite(ref vec3 value1, ref vec3 tangent1, ref vec3 value2, ref vec3 tangent2, float amount, out vec3 result)
+        public static void hermite(ref vec3 value1, ref vec3 tangent1, ref vec3 value2, ref vec3 tangent2, float amount, out vec3 result)
         {
             float squared = amount * amount;
             float cubed = amount * squared;
@@ -547,14 +553,14 @@ namespace SharpGame
             result.z = (((value1.Z * part1) + (value2.Z * part2)) + (tangent1.Z * part3)) + (tangent2.Z * part4);
         }
 
-        public static vec3 Hermite(vec3 value1, vec3 tangent1, vec3 value2, vec3 tangent2, float amount)
+        public static vec3 hermite(vec3 value1, vec3 tangent1, vec3 value2, vec3 tangent2, float amount)
         {
             vec3 result;
-            Hermite(ref value1, ref tangent1, ref value2, ref tangent2, amount, out result);
+            hermite(ref value1, ref tangent1, ref value2, ref tangent2, amount, out result);
             return result;
         }
 
-        public static void CatmullRom(ref vec3 value1, ref vec3 value2, ref vec3 value3, ref vec3 value4, float amount, out vec3 result)
+        public static void catmullRom(ref vec3 value1, ref vec3 value2, ref vec3 value3, ref vec3 value4, float amount, out vec3 result)
         {
             float squared = amount * amount;
             float cubed = amount * squared;
@@ -572,62 +578,38 @@ namespace SharpGame
                 ((((-value1.Z + (3.0f * value2.Z)) - (3.0f * value3.Z)) + value4.Z) * cubed));
         }
 
-        public static vec3 CatmullRom(vec3 value1, vec3 value2, vec3 value3, vec3 value4, float amount)
+        public static vec3 catmullRom(vec3 value1, vec3 value2, vec3 value3, vec3 value4, float amount)
         {
             vec3 result;
-            CatmullRom(ref value1, ref value2, ref value3, ref value4, amount, out result);
+            catmullRom(ref value1, ref value2, ref value3, ref value4, amount, out result);
             return result;
         }
 
-        /// <summary>
-        /// Returns a vector containing the largest components of the specified vectors.
-        /// </summary>
-        /// <param name="left">The first source vector.</param>
-        /// <param name="right">The second source vector.</param>
-        /// <param name="result">When the method completes, contains an new vector composed of the largest components of the source vectors.</param>
-        public static void Max(ref vec3 left, ref vec3 right, out vec3 result)
+        public static void max(ref vec3 left, ref vec3 right, out vec3 result)
         {
             result.x = (left.X > right.X) ? left.X : right.X;
             result.y = (left.Y > right.Y) ? left.Y : right.Y;
             result.z = (left.Z > right.Z) ? left.Z : right.Z;
         }
 
-        /// <summary>
-        /// Returns a vector containing the largest components of the specified vectors.
-        /// </summary>
-        /// <param name="left">The first source vector.</param>
-        /// <param name="right">The second source vector.</param>
-        /// <returns>A vector containing the largest components of the source vectors.</returns>
-        public static vec3 Max(vec3 left, vec3 right)
+        public static vec3 max(vec3 left, vec3 right)
         {
             vec3 result;
-            Max(ref left, ref right, out result);
+            max(ref left, ref right, out result);
             return result;
         }
 
-        /// <summary>
-        /// Returns a vector containing the smallest components of the specified vectors.
-        /// </summary>
-        /// <param name="left">The first source vector.</param>
-        /// <param name="right">The second source vector.</param>
-        /// <param name="result">When the method completes, contains an new vector composed of the smallest components of the source vectors.</param>
-        public static void Min(ref vec3 left, ref vec3 right, out vec3 result)
+        public static void min(ref vec3 left, ref vec3 right, out vec3 result)
         {
             result.x = (left.X < right.X) ? left.X : right.X;
             result.y = (left.Y < right.Y) ? left.Y : right.Y;
             result.z = (left.Z < right.Z) ? left.Z : right.Z;
         }
 
-        /// <summary>
-        /// Returns a vector containing the smallest components of the specified vectors.
-        /// </summary>
-        /// <param name="left">The first source vector.</param>
-        /// <param name="right">The second source vector.</param>
-        /// <returns>A vector containing the smallest components of the source vectors.</returns>
-        public static vec3 Min(vec3 left, vec3 right)
+        public static vec3 min(vec3 left, vec3 right)
         {
             vec3 result;
-            Min(ref left, ref right, out result);
+            min(ref left, ref right, out result);
             return result;
         }
     }

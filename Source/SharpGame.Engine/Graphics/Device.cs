@@ -556,47 +556,6 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkBindBufferMemory(device, buffer, memory, memoryOffset));
         }
 
-        public static void CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, ulong size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = null)
-        {
-            // Create the buffer handle
-            VkBufferCreateInfo bufferCreateInfo = VkBufferCreateInfo.New();
-            bufferCreateInfo.usage = usageFlags;
-            bufferCreateInfo.size = size;
-            bufferCreateInfo.sharingMode = VkSharingMode.Exclusive;
-            VulkanUtil.CheckResult(vkCreateBuffer(device, &bufferCreateInfo, null, buffer));
-
-            // Create the memory backing up the buffer handle
-            VkMemoryRequirements memReqs;
-            VkMemoryAllocateInfo memAlloc = VkMemoryAllocateInfo.New();
-            vkGetBufferMemoryRequirements(device, *buffer, &memReqs);
-            memAlloc.allocationSize = memReqs.size;
-            // Find a memory type index that fits the properties of the buffer
-            memAlloc.memoryTypeIndex = GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
-            VulkanUtil.CheckResult(vkAllocateMemory(device, &memAlloc, null, memory));
-
-            // If a pointer to the buffer data has been passed, map the buffer and copy over the data
-            if (data != null)
-            {
-                void* mapped;
-                VulkanUtil.CheckResult(vkMapMemory(device, *memory, 0, size, 0, &mapped));
-                Unsafe.CopyBlock(mapped, data, (uint)size);
-                // If host coherency hasn't been requested, do a manual flush to make writes visible
-                if ((memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
-                {
-                    VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
-                    mappedRange.memory = *memory;
-                    mappedRange.offset = 0;
-                    mappedRange.size = size;
-                    vkFlushMappedMemoryRanges(device, 1, &mappedRange);
-                }
-                vkUnmapMemory(device, *memory);
-            }
-
-            // Attach the memory to the buffer object
-            VulkanUtil.CheckResult(vkBindBufferMemory(device, *buffer, *memory, 0));
-
-        }
-
         private static uint FindMemoryType(uint typeFilter, VkMemoryPropertyFlags properties)
         {
             vkGetPhysicalDeviceMemoryProperties(PhysicalDevice, out VkPhysicalDeviceMemoryProperties memProperties);
@@ -670,33 +629,23 @@ namespace SharpGame
             vkUnmapMemory(device, memory);
         }
 
-        public static uint GetMemoryType(uint typeBits, VkMemoryPropertyFlags properties, uint* memTypeFound = null)
+        public static uint GetMemoryType(uint typeBits, MemoryPropertyFlags properties)
         {
             for (uint i = 0; i < MemoryProperties.memoryTypeCount; i++)
             {
                 if ((typeBits & 1) == 1)
                 {
-                    if ((MemoryProperties.GetMemoryType(i).propertyFlags & properties) == properties)
+                    if ((((MemoryPropertyFlags)MemoryProperties.GetMemoryType(i).propertyFlags) & properties) == properties)
                     {
-                        if (memTypeFound != null)
-                        {
-                            *memTypeFound = True;
-                        }
                         return i;
+                        
                     }
                 }
                 typeBits >>= 1;
             }
 
-            if (memTypeFound != null)
-            {
-                *memTypeFound = False;
-                return 0;
-            }
-            else
-            {
-                throw new InvalidOperationException("Could not find a matching memory type");
-            }
+            return 0;
+            
         }
 
         public static VkShaderModule CreateShaderModule(ref VkShaderModuleCreateInfo shaderModuleCreateInfo)

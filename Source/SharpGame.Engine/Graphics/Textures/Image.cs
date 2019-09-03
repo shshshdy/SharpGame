@@ -27,7 +27,7 @@ namespace SharpGame
 
             VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
             memAllocInfo.allocationSize = memReqs.size;
-            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
+            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, MemoryPropertyFlags.DeviceLocal);
 
             memory = Device.AllocateMemory(ref memAllocInfo);
             Device.BindImageMemory(handle, memory, 0);
@@ -67,7 +67,7 @@ namespace SharpGame
            
             VkMemoryAllocateInfo allocateInfo = VkMemoryAllocateInfo.New();
             allocateInfo.allocationSize = memoryRequirements.size;
-            allocateInfo.memoryTypeIndex = Device.GetMemoryType(memoryRequirements.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal, null);
+            allocateInfo.memoryTypeIndex = Device.GetMemoryType(memoryRequirements.memoryTypeBits, MemoryPropertyFlags.DeviceLocal);
             image.memory = Device.AllocateMemory(ref allocateInfo);
 
             Device.BindImageMemory(image.handle, image.memory, 0);

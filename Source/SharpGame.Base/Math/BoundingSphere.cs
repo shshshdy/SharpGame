@@ -332,7 +332,7 @@ namespace SharpGame
         /// <param name="result">When the method completes, the newly constructed bounding sphere.</param>
         public static void FromBox(ref BoundingBox box, out BoundingSphere result)
         {
-            glm.Lerp(ref box.Minimum, ref box.Maximum, 0.5f, out result.Center);
+            glm.lerp(ref box.Minimum, ref box.Maximum, 0.5f, out result.Center);
 
             float x = box.Minimum.X - box.Maximum.X;
             float y = box.Minimum.Y - box.Maximum.Y;

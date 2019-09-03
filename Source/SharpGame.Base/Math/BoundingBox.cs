@@ -346,8 +346,8 @@ namespace SharpGame
         public void Merge(BoundingBox box) => Merge(ref box);
         public void Merge(ref BoundingBox box)
         {
-            glm.Min(ref Minimum, ref box.Minimum, out Minimum);
-            glm.Max(ref Maximum, ref box.Maximum, out Maximum);
+            glm.min(ref Minimum, ref box.Minimum, out Minimum);
+            glm.max(ref Maximum, ref box.Maximum, out Maximum);
         }
 
         /// Merge another bounding box.
@@ -377,8 +377,8 @@ namespace SharpGame
 
             for (int i = 0; i < points.Length; ++i)
             {
-                glm.Min(ref min, ref points[i], out min);
-                glm.Max(ref max, ref points[i], out max);
+                glm.min(ref min, ref points[i], out min);
+                glm.max(ref max, ref points[i], out max);
             }
 
             result = new BoundingBox(min, max);
@@ -400,8 +400,8 @@ namespace SharpGame
 
             for (int i = 0; i < points.Length; ++i)
             {
-                glm.Min(ref min, ref points[i], out min);
-                glm.Max(ref max, ref points[i], out max);
+                glm.min(ref min, ref points[i], out min);
+                glm.max(ref max, ref points[i], out max);
             }
 
             return new BoundingBox(min, max);
@@ -439,8 +439,8 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the newly constructed bounding box.</param>
         public static void Merge(ref BoundingBox value1, ref BoundingBox value2, out BoundingBox result)
         {
-            glm.Min(ref value1.Minimum, ref value2.Minimum, out result.Minimum);
-            glm.Max(ref value1.Maximum, ref value2.Maximum, out result.Maximum);
+            glm.min(ref value1.Minimum, ref value2.Minimum, out result.Minimum);
+            glm.max(ref value1.Maximum, ref value2.Maximum, out result.Maximum);
         }
 
         /// <summary>
@@ -452,8 +452,8 @@ namespace SharpGame
         public static BoundingBox Merge(BoundingBox value1, BoundingBox value2)
         {
             BoundingBox box;
-            glm.Min(ref value1.Minimum, ref value2.Minimum, out box.Minimum);
-            glm.Max(ref value1.Maximum, ref value2.Maximum, out box.Maximum);
+            glm.min(ref value1.Minimum, ref value2.Minimum, out box.Minimum);
+            glm.max(ref value1.Maximum, ref value2.Maximum, out box.Maximum);
             return box;
         }
 

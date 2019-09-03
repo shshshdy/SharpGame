@@ -88,8 +88,8 @@ namespace SharpGame
 
             for (int i = 0; i < points.Length; ++i)
             {
-                glm.Min(ref minimum, ref points[i], out minimum);
-                glm.Max(ref maximum, ref points[i], out maximum);
+                glm.min(ref minimum, ref points[i], out minimum);
+                glm.max(ref maximum, ref points[i], out maximum);
             }
 
             var Center = minimum + (maximum - minimum) / 2f;
@@ -372,7 +372,7 @@ namespace SharpGame
             //Perform regular BoundingBox to BoundingSphere containment check
             vec3 minusExtens = -Extents;
             vec3 vector;
-            glm.Clamp(ref locCenter, ref minusExtens, ref Extents, out vector);
+            glm.clamp(ref locCenter, ref minusExtens, ref Extents, out vector);
             float distance = vec3.DistanceSquared(locCenter, vector);
 
             if (distance > locRadius * locRadius)

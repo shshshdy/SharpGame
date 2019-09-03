@@ -7,16 +7,16 @@ namespace SharpGame
 {
     public class GeometricPrimitive
     {
-        public static Model CreatePlaneModel(float width, float height)
+        public static Model CreatePlaneModel(float width, float height, float tileX = 1.0f, float tileZ = 1.0f)
         {
-            var geo = CreatePlane(width, height);
+            var geo = CreatePlane(width, height, tileX, tileZ);
             var boundingBox = new BoundingBox();
             boundingBox.Define(-width / 2, height / 2);          
             var model = Model.Create(new List<Geometry> { geo}, new List<BoundingBox> { boundingBox});
             return model;
         }
 
-        public static Geometry CreatePlane(float width, float height)
+        public static Geometry CreatePlane(float width, float height, float tileX = 1.0f, float tileZ = 1.0f)
         {
             float w2 = 0.5f * width;
             float h2 = 0.5f * height;
@@ -24,9 +24,9 @@ namespace SharpGame
             VertexPosNormTexColor[] vertices =
             {                
                 new VertexPosNormTexColor(new vec3(-w2, 0, -h2), new vec3(+0, 1, +0), new Vector2(+0, +0), Color.White),
-                new VertexPosNormTexColor(new vec3(+w2, 0, -h2), new vec3(+0, 1, +0), new Vector2(+1, +0), Color.White),
-                new VertexPosNormTexColor(new vec3(+w2, 0, +h2), new vec3(+0, 1, +0), new Vector2(+1, +1), Color.White),
-                new VertexPosNormTexColor(new vec3(-w2, 0, +h2), new vec3(+0, 1, +0), new Vector2(+1, +0), Color.White),
+                new VertexPosNormTexColor(new vec3(+w2, 0, -h2), new vec3(+0, 1, +0), new Vector2(+tileX, +0), Color.White),
+                new VertexPosNormTexColor(new vec3(+w2, 0, +h2), new vec3(+0, 1, +0), new Vector2(+tileX, +tileZ), Color.White),
+                new VertexPosNormTexColor(new vec3(-w2, 0, +h2), new vec3(+0, 1, +0), new Vector2(+tileX, +0), Color.White),
             };
 
             int[] indices = { 0, 1, 2, 0, 2, 3, };
