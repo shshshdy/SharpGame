@@ -22,7 +22,7 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe uint Alloc(uint size, IntPtr data)
+        public uint Alloc(uint size, IntPtr data)
         {
             uint uboAlignment = (uint)Device.Properties.limits.minUniformBufferOffsetAlignment;
             uint dynamicAlignment = ((size / uboAlignment) * uboAlignment + ((size % uboAlignment) > 0 ? uboAlignment : 0));
@@ -34,8 +34,8 @@ namespace SharpGame
             }
 #endif
             var mappedBuf = Buffer[Graphics.Instance.WorkContext].Mapped;
-            void* buf = (void*)(mappedBuf + (int)offset);
-            Unsafe.CopyBlock(buf, (void*)data, size);
+            IntPtr buf = (mappedBuf + (int)offset);
+            Utilities.CopyBlock(buf, data, (int)size);
             uint oldOffset = offset;
             offset += dynamicAlignment;
             return oldOffset;

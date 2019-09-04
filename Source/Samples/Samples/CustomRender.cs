@@ -77,7 +77,7 @@ namespace SharpGame.Samples
 
             frameGraph.AddGraphicsPass(CustomDraw);
 
-            cameraPos = new vec3(0, 5, -50);
+            cameraPos = new vec3(0, 5, 50);
             //pitch = MathUtil.Radians(15);
            
             Renderer.MainView.Attach(null, null, frameGraph);

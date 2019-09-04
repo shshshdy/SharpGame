@@ -16,7 +16,7 @@ namespace SharpGame
 
     }
 
-    public class DepthPass : ScenePass
+    public class ShadowPass : ScenePass
     {
         const int SHADOW_MAP_CASCADE_COUNT = 4;
         const uint SHADOWMAP_DIM = 2048;
@@ -25,7 +25,7 @@ namespace SharpGame
         Cascade[] cascades = new Cascade[SHADOW_MAP_CASCADE_COUNT];
 
         float cascadeSplitLambda = 0.95f;
-        public DepthPass() : base(Pass.Depth)
+        public ShadowPass() : base(Pass.Depth)
         {
             var depthFormat = Device.GetSupportedDepthFormat();
 
@@ -87,7 +87,10 @@ namespace SharpGame
 
         }
 
+        protected override void DrawImpl(RenderView view)
+        {
 
+        }
 
         /*
             Calculate frustum split depths and matrices for the shadow map cascades
@@ -178,13 +181,14 @@ namespace SharpGame
                 // Store split distance and matrix in cascade
                 cascades[i].splitDepth = (camera.NearClip + splitDist * clipRange) * -1.0f;
                 cascades[i].viewProjMatrix = lightOrthoMatrix * lightViewMatrix;
+
                 view.LightParam.SetLightMatrices(i, ref cascades[i].viewProjMatrix);
 
                 lastSplitDist = cascadeSplits[i];
             }
         }
 
-        void updateUniformBuffers()
+        void updateUniformBuffers(RenderView view)
         {
         /*
             for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
@@ -193,19 +197,13 @@ namespace SharpGame
             }
             memcpy(depthPass.uniformBuffer.mapped, &depthPass.ubo, sizeof(depthPass.ubo));
 
-            uboVS.projection = camera.matrices.perspective;
-            uboVS.view = camera.matrices.view;
-            uboVS.model = glm::mat4(1.0f);
-
-            uboVS.lightDir = normalize(-lightPos);
-
-            memcpy(uniformBuffers.VS.mapped, &uboVS, sizeof(uboVS));
-
-            for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+            */
+            for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                uboFS.cascadeSplits[i] = cascades[i].splitDepth;
-                uboFS.cascadeViewProjMat[i] = cascades[i].viewProjMatrix;
+                view.LightParam.cascadeSplits[i] = cascades[i].splitDepth;
+                view.LightParam.SetLightMatrices(i, ref cascades[i].viewProjMatrix);
             }
+            /*
             uboFS.inverseViewMat = glm::inverse(camera.matrices.view);
             uboFS.lightDir = normalize(-lightPos);
             uboFS.colorCascades = colorCascades;

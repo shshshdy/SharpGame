@@ -279,8 +279,7 @@ namespace SharpGame
             {
                 projection_ = glm.perspective(fov_, aspectRatio_, nearClip_, farClip_);           
                 vkProjection_ = projection_;
-                vkProjection_.M22 = -vkProjection_.M22;
-                
+                vkProjection_.M22 = -vkProjection_.M22;                
             }
 
             projectionDirty_ = false;

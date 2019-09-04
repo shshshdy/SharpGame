@@ -12,7 +12,7 @@ namespace SharpGame.Samples
         {
             scene = new Scene();
 
-            var cameraNode = scene.CreateChild("Camera", new vec3(0, 20, -30), (vec3)MathUtil.Radians(30, 0, 0));
+            var cameraNode = scene.CreateChild("Camera", new vec3(0, 20, -30), glm.radians(30, 0, 0));
             camera = cameraNode.CreateComponent<Camera>();
 
             {

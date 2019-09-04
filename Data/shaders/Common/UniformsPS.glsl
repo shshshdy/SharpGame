@@ -21,4 +21,4 @@ layout (set = 1, binding = 1) uniform LightPS
 	vec4 LightVec[8];
 };
 
-layout (set = 1, binding =2) uniform sampler2DArray shadowMap;
+//layout (set = 1, binding =2) uniform sampler2DArray shadowMap;

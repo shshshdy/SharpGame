@@ -36,7 +36,7 @@ namespace SharpGame
 
         protected CommandBuffer GetCmdBufferAt(int index)
         {
-            int workContext = Graphics.Instance.nextImage;// Graphics.Instance.WorkContext;
+            int workContext = Graphics.Instance.nextImage;
             var cb = cmdBufferPools[workContext][index][0];
             cb.renderPass = renderPass;
             cmdBufferPools[workContext][index].currentIndex = 1;
@@ -133,7 +133,7 @@ namespace SharpGame
         public override void Submit(int imageIndex)
         {
             var g = Graphics.Instance;
-            int renderContext = imageIndex;// g.RenderContext;
+            int renderContext = imageIndex;
             bool mt = multiThreaded[renderContext];
 
             if (mt)

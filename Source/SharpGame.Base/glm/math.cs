@@ -145,6 +145,11 @@ namespace SharpGame
             return new vec3(radians(degrees.x), radians(degrees.y), radians(degrees.z));
         }
 
+        public static vec3 radians(float x, float y, float z)
+        {
+            return new vec3(radians(x), radians(y), radians(z));
+        }
+
         public static float sin(float angle)
         {
             return (float)Math.Sin(angle);

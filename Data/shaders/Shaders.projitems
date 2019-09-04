@@ -17,7 +17,7 @@
     <None Include="$(MSBuildThisFileDirectory)Common\Transform.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsPS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)Depth.shader" />
+    <None Include="$(MSBuildThisFileDirectory)Shadow.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\irmap.comp" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\pbr.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\pbr.vert" />

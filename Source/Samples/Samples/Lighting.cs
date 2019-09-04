@@ -13,11 +13,10 @@ namespace SharpGame.Samples
             var cameraNode = scene.CreateChild("Camera", new vec3(0.0f, 2.0f, -10));
           
             camera = cameraNode.CreateComponent<Camera>();
-            camera.Fov = MathUtil.Radians(60);
-            camera.AspectRatio = (float)Graphics.Width / Graphics.Height;
+            camera.Fov = glm.radians(60);
 
             var node = scene.CreateChild("Mesh");
-            node.Yaw(MathUtil.Radians(90), TransformSpace.LOCAL);
+            node.Yaw(glm.radians(90), TransformSpace.LOCAL);
 
             var staticModel = node.AddComponent<StaticModel>();
             staticModel.SetModel("models/voyager/voyager.dae");

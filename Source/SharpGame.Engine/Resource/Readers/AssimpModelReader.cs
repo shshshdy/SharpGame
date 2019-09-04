@@ -167,7 +167,7 @@ namespace SharpGame
             {
                 VertexPosNormTex vertex;
 
-                vertex.position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
+                vertex.position = new vec3(mesh.Vertices[v].X, -mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 if(mesh.HasTextureCoords(0))

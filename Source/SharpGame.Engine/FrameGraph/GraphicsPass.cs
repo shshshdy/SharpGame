@@ -43,7 +43,7 @@ namespace SharpGame
         protected CommandBuffer GetCmdBuffer()
         {
             var g = Graphics.Instance;
-            int workContext = g.nextImage;// g.WorkContext;
+            int workContext = g.nextImage;
             var cb = cmdBufferPool[workContext].Get();
             cb.renderPass = renderPass;
 
@@ -75,7 +75,7 @@ namespace SharpGame
                 framebuffers = g.Framebuffers;
             }
 
-            int workContext = g.nextImage;// g.WorkContext;
+            int workContext = g.nextImage;
             cmdBufferPool[workContext].currentIndex = 0;
         }
 
