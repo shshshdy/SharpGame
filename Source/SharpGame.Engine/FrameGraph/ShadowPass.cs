@@ -24,6 +24,8 @@ namespace SharpGame
         RenderTarget depthRT;
         Cascade[] cascades = new Cascade[SHADOW_MAP_CASCADE_COUNT];
 
+        DoubleBuffer ubShadow;
+
         float cascadeSplitLambda = 0.95f;
         public ShadowPass() : base(Pass.Depth)
         {
@@ -84,11 +86,52 @@ namespace SharpGame
                 cascades[i].frameBuffer = Framebuffer.Create(renderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
             }
 
+            ubShadow = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));
 
         }
 
         protected override void DrawImpl(RenderView view)
         {
+            updateCascades(view);
+            updateUniformBuffers(view);
+
+            //todo:multi thread
+            for(int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+            {
+                var cmd = GetCmdBuffer();
+                cmd.SetViewport(ref view.Viewport);
+                cmd.SetScissor(view.ViewRect);
+                foreach (var batch in view.batches)
+                {
+                    DrawBatch(cmd, batch, view.VSSet, view.PSSet, batch.offset);
+                }
+            }
+
+        }
+
+        public override void Submit(int imageIndex)
+        {
+            var g = Graphics.Instance;
+            CommandBuffer cb = g.RenderCmdBuffer;
+            var fbs = framebuffers ?? g.Framebuffers;
+            var fb = fbs[imageIndex];
+            var cmdPool = cmdBufferPool[imageIndex];
+
+            for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+            {
+                var renderPassBeginInfo = new RenderPassBeginInfo
+                (
+                    fb.renderPass, fb,
+                    new Rect2D(0, 0, g.Width, g.Height),
+                    ClearColorValue, ClearDepthStencilValue
+                );
+
+                cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
+               
+                cb.ExecuteCommand(cmdPool[i]);
+
+                cb.EndRenderPass();
+            }
 
         }
 
@@ -190,24 +233,19 @@ namespace SharpGame
 
         void updateUniformBuffers(RenderView view)
         {
-        /*
-            for (uint32_t i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+            uint offset = 0;
+            for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                depthPass.ubo.cascadeViewProjMat[i] = cascades[i].viewProjMatrix;
+                ubShadow.SetData(ref cascades[i].viewProjMatrix, offset);
+                offset += 64;
             }
-            memcpy(depthPass.uniformBuffer.mapped, &depthPass.ubo, sizeof(depthPass.ubo));
+            ubShadow.Flush();
 
-            */
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
                 view.LightParam.cascadeSplits[i] = cascades[i].splitDepth;
                 view.LightParam.SetLightMatrices(i, ref cascades[i].viewProjMatrix);
             }
-            /*
-            uboFS.inverseViewMat = glm::inverse(camera.matrices.view);
-            uboFS.lightDir = normalize(-lightPos);
-            uboFS.colorCascades = colorCascades;
-            memcpy(uniformBuffers.FS.mapped, &uboFS, sizeof(uboFS));*/
         }
     }
 }

@@ -153,8 +153,9 @@ namespace SharpGame
 
                 if(frustumDirty_)
                 {
-                //    frustum_.mat4 = View * projection_;
-                    frustumDirty_ = false;
+                    //    frustum_.mat4 = View * projection_;
+                    //frustum_ = BoundingFrustum.FromCamera(Node.WorldPosition, Node.Forw)
+                        frustumDirty_ = false;
                 }
 
                 return ref frustum_;

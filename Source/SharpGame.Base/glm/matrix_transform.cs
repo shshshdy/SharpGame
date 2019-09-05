@@ -11,7 +11,10 @@ namespace SharpGame
     {
         public static mat4 scale(vec3 v)
         {
-            return scale(mat4(1.0f), v);
+            return new mat4(v.x, 0.0f, 0.0f, 0.0f,
+            0.0f, v.y, 0.0f, 0.0f,
+            0.0f, 0.0f, v.z, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f);
         }
 
         public static mat4 scale(in mat4 m, vec3 v)
@@ -26,7 +29,25 @@ namespace SharpGame
 
         public static mat4 rotate(float angle, vec3 v)
         {
-            return rotate(mat4(1.0f), angle, v);
+            float c = cos(angle);
+            float s = sin(angle);
+
+            vec3 axis = normalize(v);
+            vec3 temp = (1.0f - c) * axis;
+
+            mat4 result = mat4(1.0f);
+            result[0, 0] = c + temp[0] * axis[0];
+            result[0, 1] = 0 + temp[0] * axis[1] + s * axis[2];
+            result[0, 2] = 0 + temp[0] * axis[2] - s * axis[1];
+
+            result[1, 0] = 0 + temp[1] * axis[0] - s * axis[2];
+            result[1, 1] = c + temp[1] * axis[1];
+            result[1, 2] = 0 + temp[1] * axis[2] + s * axis[0];
+
+            result[2, 0] = 0 + temp[2] * axis[0] + s * axis[1];
+            result[2, 1] = 0 + temp[2] * axis[1] - s * axis[0];
+            result[2, 2] = c + temp[2] * axis[2];
+            return result;
         }
 
         public static mat4 rotate(in mat4 m, float angle, vec3 v)
@@ -76,7 +97,11 @@ namespace SharpGame
 
         public static mat4 translate(float x, float y, float z)
         {
-            return translate(mat4(1.0f), x, y, z);
+            return new mat4(
+                0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 0.0f,
+                x, y, z, 1.0f);
         }
 
         public static mat4 translate(in mat4 m, vec3 v)
@@ -156,7 +181,7 @@ namespace SharpGame
 
         public static void transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling, out mat4 result)
         {
-            result = translate(translation) * rotate(rotation) * scale(scaling);
+           result = translate(translation) * rotate(rotation) * scale(scaling);
         }
 
         public static mat4 transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling)

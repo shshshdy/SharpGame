@@ -114,7 +114,7 @@ namespace SharpGame
         internal DeviceBuffer ubCameraPS;
         internal DeviceBuffer ubLight;
 
-        internal DoubleBuffer ubMatrics;
+        internal DynamicBuffer ubMatrics;
 
         private ResourceLayout perObjectResLayout;
 
@@ -173,7 +173,7 @@ namespace SharpGame
             if(ubMatrics == null)
             {
                 uint size = 6400 * 1024;
-                ubMatrics = new DoubleBuffer(size);
+                ubMatrics = new DynamicBuffer(size);
             }
 
             perObjectResLayout = new ResourceLayout(0)
@@ -254,6 +254,8 @@ namespace SharpGame
             }
 
             UpdateLightParameters();
+
+            ubMatrics.Flush();
 
             FrameGraph.Draw(this);
 
@@ -352,7 +354,7 @@ namespace SharpGame
         public void Render(int imageIndex)
         {
             Profiler.BeginSample("ViewRender");
-            ubMatrics.Flush(Graphics.Instance.RenderContext);
+            //ubMatrics.Flush(Graphics.Instance.RenderContext);
             FrameGraph?.Submit(imageIndex);
             OverlayPass?.Submit(imageIndex);
 

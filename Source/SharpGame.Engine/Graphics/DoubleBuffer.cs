@@ -8,17 +8,58 @@ namespace SharpGame
 {
     public class DoubleBuffer : DisposeBase
     {
-        public DeviceBuffer[] Buffer { get; } = new DeviceBuffer[2];
+        DeviceBuffer[] buffers = new DeviceBuffer[2];
+        public DeviceBuffer Buffer => buffers[Graphics.Instance.WorkContext];
+        public IntPtr Mapped => buffers[Graphics.Instance.WorkContext].Mapped;
+
+
+        public DoubleBuffer(BufferUsageFlags bufferUsage, uint size)
+        {
+            buffers[0] = new DeviceBuffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
+            buffers[0].Map(0, size);
+            buffers[1] = new DeviceBuffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
+            buffers[1].Map(0, size);
+        }
+
+        public DeviceBuffer this[int index] => buffers[index];
+        
+        public void SetData<T>(ref T data, uint offset = 0) where T : struct
+        {
+            SetData(Utilities.AsPointer(ref data), offset, (uint)Unsafe.SizeOf<T>());
+        }
+
+        public void SetData(IntPtr data, ulong offset, ulong size)
+        {
+            Utilities.CopyBlock(Mapped + (int)offset, data, (int)size);
+        }
+
+        public void Flush(ulong size = ulong.MaxValue, ulong offset = 0)
+        {
+            Buffer.Flush(size, offset);
+        }
+
+        protected override void Destroy(bool disposing)
+        {
+            base.Destroy(disposing);
+
+            buffers[0]?.Dispose();
+            buffers[1]?.Dispose();
+        }
+    }
+
+
+    public class DynamicBuffer : DisposeBase
+    {
+        public DoubleBuffer Buffer { get; }
         public uint Size { get; }
+
         uint offset;
 
-        public DoubleBuffer(uint size)
+        public DynamicBuffer(uint size)
         {
             this.Size = size;
-            Buffer[0] = new DeviceBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
-            Buffer[0].Map(0, size);
-            Buffer[1] = new DeviceBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible, size);
-            Buffer[1].Map(0, size);
+            Buffer = new DoubleBuffer(BufferUsageFlags.UniformBuffer, size);
+            
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -33,9 +74,7 @@ namespace SharpGame
                 return 0;
             }
 #endif
-            var mappedBuf = Buffer[Graphics.Instance.WorkContext].Mapped;
-            IntPtr buf = (mappedBuf + (int)offset);
-            Utilities.CopyBlock(buf, data, (int)size);
+            Buffer.SetData(data, offset, size);
             uint oldOffset = offset;
             offset += dynamicAlignment;
             return oldOffset;
@@ -48,12 +87,20 @@ namespace SharpGame
 
         public void Flush()
         {
-            Buffer[Graphics.Instance.WorkContext].Flush(offset, 0);
+            Buffer.Flush(offset, 0);
         }
 
-        public void Flush(int idx)
+        public void Flush(int index)
         {
-            Buffer[idx].Flush(offset, 0);
+            Buffer[index].Flush(offset, 0);
+        }
+
+        protected override void Destroy(bool disposing)
+        {
+            base.Destroy(disposing);
+
+            Buffer?.Dispose();
+
         }
     }
 }

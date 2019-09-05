@@ -199,7 +199,7 @@ namespace SharpGame
 
         void SetWorldScale(vec3 scale)
         {
-            //   SetScale((parent_ == scene_ || !parent_) ? scale : scale / parent_.WorldScale);
+            //Scaling = ((parent_ == scene_ || !parent_) ? scale : scale / parent_.WorldScaling);
         }
 
         void SetWorldTransform(vec3 position, quat rotation)
