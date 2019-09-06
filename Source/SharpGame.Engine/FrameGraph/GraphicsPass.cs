@@ -28,8 +28,10 @@ namespace SharpGame
 
         protected DebugInfo[] debugInfo = new DebugInfo[3];
 
-        public GraphicsPass()
+        public GraphicsPass(string name = "")
         {
+            Name = name;
+
             cmdBufferPool = new CommandBufferPool[3];
 
             for (int i = 0; i < 3; i++)

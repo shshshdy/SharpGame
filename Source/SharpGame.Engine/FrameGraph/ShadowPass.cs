@@ -16,7 +16,7 @@ namespace SharpGame
 
     }
 
-    public class ShadowPass : ScenePass
+    public class ShadowPass : GraphicsPass
     {
         const int SHADOW_MAP_CASCADE_COUNT = 4;
         const uint SHADOWMAP_DIM = 2048;
@@ -98,7 +98,18 @@ namespace SharpGame
             //todo:multi thread
             for(int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                var cmd = GetCmdBuffer();
+                int workContext = Graphics.Instance.nextImage;
+                var cmd = cmdBufferPool[workContext].Get();
+                cmd.renderPass = renderPass;
+
+                CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
+                {
+                    framebuffer = cascades[i].frameBuffer,
+                    renderPass = renderPass
+                };
+
+                cmd.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
+                    | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
                 cmd.SetViewport(ref view.Viewport);
                 cmd.SetScissor(view.ViewRect);
                 foreach (var batch in view.batches)
@@ -113,16 +124,16 @@ namespace SharpGame
         {
             var g = Graphics.Instance;
             CommandBuffer cb = g.RenderCmdBuffer;
-            var fbs = framebuffers ?? g.Framebuffers;
-            var fb = fbs[imageIndex];
+      
             var cmdPool = cmdBufferPool[imageIndex];
 
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
+                var fb = cascades[i].frameBuffer;
                 var renderPassBeginInfo = new RenderPassBeginInfo
                 (
                     fb.renderPass, fb,
-                    new Rect2D(0, 0, g.Width, g.Height),
+                    new Rect2D(0, 0, fb.Width, fb.Height),
                     ClearColorValue, ClearDepthStencilValue
                 );
 

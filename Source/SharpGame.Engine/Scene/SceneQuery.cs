@@ -4,14 +4,14 @@ using System.Text;
 
 namespace SharpGame
 {
-    public interface ISceneQuery
+    public abstract class SceneQuery
     {
-        Intersection Test(ref BoundingBox box, bool inside);
+        public abstract Intersection Test(ref BoundingBox box, bool inside);
         /// Intersection test for drawables.
-        void TestDrawables(ArraySegment<Drawable> start, bool inside);
+         public abstract void TestDrawables(ArraySegment<Drawable> start, bool inside);
     }
 
-    public class BaseSceneQuery : ISceneQuery
+    public class BaseSceneQuery : SceneQuery
     {
         public uint viewMask;
         public uint drawableFlags;
@@ -24,11 +24,11 @@ namespace SharpGame
             this.result = result;
         }
 
-        public virtual void TestDrawables(ArraySegment<Drawable> start, bool inside)
+        public override void TestDrawables(ArraySegment<Drawable> start, bool inside)
         {
         }
 
-        public virtual Intersection Test(ref BoundingBox box, bool inside)
+        public override Intersection Test(ref BoundingBox box, bool inside)
         {
             return Intersection.InSide;
         }
@@ -75,7 +75,7 @@ namespace SharpGame
         void RemoveDrawable(Drawable drawable);
 
         /// Return drawable objects by a query.
-        void GetDrawables(ISceneQuery query, Action<Drawable> drawables);
+        void GetDrawables(SceneQuery query, Action<Drawable> drawables);
 
         /// Return drawable objects by a ray query.
         void Raycast(ref RayQuery query);

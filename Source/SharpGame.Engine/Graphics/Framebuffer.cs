@@ -32,12 +32,16 @@ namespace SharpGame
     {
         internal VkFramebuffer handle;
         public RenderPass renderPass { get; }
+        public uint Width { get; }
+        public uint Height { get; }
 
         public Framebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
         {
             renderPass = framebufferCreateInfo.renderPass;
             framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
-            handle = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);       
+            handle = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);
+            Width = vkFramebufferCreateInfo.width;
+            Height = vkFramebufferCreateInfo.height;
         }
 
         protected override void Destroy(bool disposing)

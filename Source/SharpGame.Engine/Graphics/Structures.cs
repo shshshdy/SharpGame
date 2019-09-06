@@ -20,6 +20,14 @@ namespace SharpGame
             this.height = height;
         }
 
+        public Rect2D(int x, int y, uint width, uint height)
+        {
+            this.x = x;
+            this.y = y;
+            this.width = (int)width;
+            this.height = (int)height;
+        }
+
         public bool Equals(ref Rect2D other)
         {
             return x == other.y && y == other.y && width == other.width && height == other.height;

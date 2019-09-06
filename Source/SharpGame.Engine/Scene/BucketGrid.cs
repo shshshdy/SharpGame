@@ -389,7 +389,7 @@ namespace SharpGame
             }
         }
         
-        public void GetDrawables(ISceneQuery query, Action<Drawable> drawables)
+        public void GetDrawables(SceneQuery query, Action<Drawable> drawables)
         {
             throw new NotImplementedException();
         }

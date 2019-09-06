@@ -1,4 +1,4 @@
-Shader "Depth"
+Shader "Shadow"
 {
 	Properties
     {
@@ -9,6 +9,20 @@ Shader "Depth"
 	{
 		CullMode = None
 		FrontFace = CounterClockwise
+
+        PushConstant position
+        {
+            StageFlags = Vertex
+            Offset = 0
+            Size = 16
+        }
+
+        PushConstant cascadeIndex
+        {
+            StageFlags = Vertex
+            Offset = 16
+            Size = 4
+        }
 
 		@VertexShader
 		{

@@ -13,6 +13,7 @@
     <None Include="$(MSBuildThisFileDirectory)Brdf.shader" />
     <None Include="$(MSBuildThisFileDirectory)Common\Lighting.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Pbr.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\Shadow.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\ToneMap.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Transform.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsPS.glsl" />
