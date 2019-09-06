@@ -27,6 +27,14 @@ namespace SharpGame
         DoubleBuffer ubShadow;
 
         float cascadeSplitLambda = 0.95f;
+
+        Shader shaderDepth;
+
+        ResourceSet[] vsSet = new ResourceSet[2];
+
+        FastList<Drawable> casters = new FastList<Drawable>();
+
+        ResourceSet VSSet => vsSet[Graphics.Instance.WorkContext];
         public ShadowPass() : base(Pass.Depth)
         {
             var depthFormat = Device.GetSupportedDepthFormat();
@@ -88,15 +96,23 @@ namespace SharpGame
 
             ubShadow = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));
 
+            shaderDepth = Resources.Instance.Load<Shader>("shaders/shadow.shader");
+
+            vsSet[0] = new ResourceSet(shaderDepth.Main.GetResourceLayout(0), ubShadow[0]);
+            vsSet[1] = new ResourceSet(shaderDepth.Main.GetResourceLayout(0), ubShadow[1]);
         }
+
 
         protected override void DrawImpl(RenderView view)
         {
             updateCascades(view);
             updateUniformBuffers(view);
 
+            casters.Clear();
+
+
             //todo:multi thread
-            for(int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+            for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
                 int workContext = Graphics.Instance.nextImage;
                 var cmd = cmdBufferPool[workContext].Get();
@@ -110,11 +126,13 @@ namespace SharpGame
 
                 cmd.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                     | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
-                cmd.SetViewport(ref view.Viewport);
-                cmd.SetScissor(view.ViewRect);
+
+                //cmd.SetViewport(ref view.Viewport);
+               // cmd.SetScissor(view.ViewRect);
+
                 foreach (var batch in view.batches)
                 {
-                    DrawBatch(cmd, batch, view.VSSet, view.PSSet, batch.offset);
+                    DrawBatch(cmd, batch, VSSet, view.PSSet, batch.offset);
                 }
             }
 
@@ -124,7 +142,13 @@ namespace SharpGame
         {
             var g = Graphics.Instance;
             CommandBuffer cb = g.RenderCmdBuffer;
-      
+
+            Viewport viewport = new Viewport(0, 0, (float)SHADOWMAP_DIM, (float)SHADOWMAP_DIM, 0.0f, 1.0f);           
+            Rect2D scissor = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
+
+            cb.SetViewport(ref viewport);
+            cb.SetScissor(scissor);
+
             var cmdPool = cmdBufferPool[imageIndex];
 
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
@@ -134,7 +158,7 @@ namespace SharpGame
                 (
                     fb.renderPass, fb,
                     new Rect2D(0, 0, fb.Width, fb.Height),
-                    ClearColorValue, ClearDepthStencilValue
+                    ClearDepthStencilValue
                 );
 
                 cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);

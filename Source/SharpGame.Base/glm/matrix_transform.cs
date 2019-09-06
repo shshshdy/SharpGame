@@ -169,7 +169,9 @@ namespace SharpGame
 
         public static void transformation(ref vec3 translation, ref quat rotation, out mat4 result)
         {
-            result = translate(translation) * rotate(rotation);
+            //result = translate(translation) * rotate(rotation);
+            result = rotate(rotation);
+            result.TranslationVector = translation;
         }
 
         public static mat4 transformation(ref vec3 translation, ref quat rotation)
@@ -181,7 +183,9 @@ namespace SharpGame
 
         public static void transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling, out mat4 result)
         {
-           result = translate(translation) * rotate(rotation) * scale(scaling);
+            //result = translate(translation) * rotate(rotation) * scale(scaling);
+            result = scale(rotate(rotation), scaling);
+            result.TranslationVector = translation;
         }
 
         public static mat4 transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling)

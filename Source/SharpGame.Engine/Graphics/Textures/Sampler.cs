@@ -22,6 +22,15 @@ namespace SharpGame
             base.Destroy(disposing);
         }
 
+        public static Sampler Default;
+        public static Sampler ClampToEdge;
+
+        public static void Init()
+        {
+            Default = Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, true);
+            ClampToEdge = Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+        }
+
         public static Sampler Create(Filter filter, SamplerMipmapMode mipmapMode,
             SamplerAddressMode addressMode, bool anisotropyEnable, BorderColor borderColor = BorderColor.FloatOpaqueWhite)
         {

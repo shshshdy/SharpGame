@@ -44,8 +44,11 @@ namespace SharpGame
             }
         }
 
-        private readonly Dictionary<Texture, ResourceSetInfo> _setsByView = new Dictionary<Texture, ResourceSetInfo>();
+        private readonly Dictionary<Texture, ResourceSetInfo> _setsByTexture = new Dictionary<Texture, ResourceSetInfo>();
+        private readonly Dictionary<ImageView, ResourceSetInfo> _setsByView = new Dictionary<ImageView, ResourceSetInfo>();
+
         private readonly Dictionary<IntPtr, ResourceSetInfo> _viewsById = new Dictionary<IntPtr, ResourceSetInfo>();
+
         private readonly List<IDisposable> _ownedResources = new List<IDisposable>();
         private int _lastAssignedID = 100;
 
@@ -153,12 +156,12 @@ namespace SharpGame
 
         public IntPtr GetOrCreateImGuiBinding(Texture texture)
         {
-            if (!_setsByView.TryGetValue(texture, out ResourceSetInfo rsi))
+            if (!_setsByTexture.TryGetValue(texture, out ResourceSetInfo rsi))
             {
                 ResourceSet resourceSet = new ResourceSet(resourceLayoutTex, texture);
                 rsi = new ResourceSetInfo(GetNextImGuiBindingID(), resourceSet);
 
-                _setsByView.Add(texture, rsi);
+                _setsByTexture.Add(texture, rsi);
                 _viewsById.Add(rsi.ImGuiBinding, rsi);
                 _ownedResources.Add(resourceSet);
             }
@@ -166,7 +169,33 @@ namespace SharpGame
             return rsi.ImGuiBinding;
         }
 
-        public void RemoveImGuiBinding(Texture textureView)
+        public void RemoveImGuiBinding(Texture texture)
+        {
+            if (_setsByTexture.TryGetValue(texture, out ResourceSetInfo rsi))
+            {
+                _setsByTexture.Remove(texture);
+                _viewsById.Remove(rsi.ImGuiBinding);
+                _ownedResources.Remove(rsi.ResourceSet);
+                rsi.ResourceSet.Dispose();
+            }
+        }
+
+        public IntPtr GetOrCreateImGuiBinding(ImageView textureView)
+        {
+            if (!_setsByView.TryGetValue(textureView, out ResourceSetInfo rsi))
+            {
+                ResourceSet resourceSet = new ResourceSet(resourceLayoutTex, textureView);
+                rsi = new ResourceSetInfo(GetNextImGuiBindingID(), resourceSet);
+
+                _setsByView.Add(textureView, rsi);
+                _viewsById.Add(rsi.ImGuiBinding, rsi);
+                _ownedResources.Add(resourceSet);
+            }
+
+            return rsi.ImGuiBinding;
+        }
+
+        public void RemoveImGuiBinding(ImageView textureView)
         {
             if (_setsByView.TryGetValue(textureView, out ResourceSetInfo rsi))
             {
@@ -415,6 +444,12 @@ namespace SharpGame
         }
 
         public static void Image(Texture texture, Vector2 size)
+        {
+            var img = Instance.GetOrCreateImGuiBinding(texture);
+            ImGui.Image(img, size);
+        }
+
+        public static void Image(ImageView texture, Vector2 size)
         {
             var img = Instance.GetOrCreateImGuiBinding(texture);
             ImGui.Image(img, size);

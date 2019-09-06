@@ -132,9 +132,17 @@ namespace SharpGame
                     break;
                 case DescriptorType.CombinedImageSampler:
                     {
-                        var texture = bindable as Texture;
-                        writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-                            descriptorType, ref texture.descriptor, 1);
+                        if(bindable is Texture texture)
+                        {
+                            writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+                                descriptorType, ref texture.descriptor, 1);
+                        }
+                        else if(bindable is ImageView textureView)
+                        {
+                            var descriptor = new DescriptorImageInfo(Sampler.ClampToEdge, textureView, ImageLayout.ShaderReadOnlyOptimal);
+                            writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+                                descriptorType, ref descriptor, 1);
+                        }
                     }
                     break;
                 case DescriptorType.SampledImage:
@@ -188,6 +196,7 @@ namespace SharpGame
                 imageLayout = (VkImageLayout)imageLayout,
             };
         }
+
     }
 
     public struct DescriptorBufferInfo

@@ -127,6 +127,8 @@ namespace SharpGame
 
         public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
         {
+            CreateBuffers();
+
             Attach(camera, scene, renderPath);
         }
 
@@ -144,38 +146,19 @@ namespace SharpGame
                 FrameGraph = new FrameGraph();
                 FrameGraph.AddRenderPass(new ScenePass());
             }
-
-            CreateBuffers();
         }
 
         protected void CreateBuffers()
         {
-            if (ubFrameInfo == null)
-            {
-                ubFrameInfo = DeviceBuffer.CreateUniformBuffer<FrameUniform>();
-            }
+            ubFrameInfo = DeviceBuffer.CreateUniformBuffer<FrameUniform>();
+            ubCameraVS = DeviceBuffer.CreateUniformBuffer<CameraVS>();
+            ubCameraPS = DeviceBuffer.CreateUniformBuffer<CameraPS>();
+            ubLight = DeviceBuffer.CreateUniformBuffer<LightParameter>();
 
-            if (ubCameraVS == null)
-            {
-                ubCameraVS = DeviceBuffer.CreateUniformBuffer<CameraVS>();
-            }
+            uint size = 6400 * 1024;
 
-            if (ubCameraPS == null)
-            {
-                ubCameraPS = DeviceBuffer.CreateUniformBuffer<CameraPS>();
-            }
-
-            if (ubLight == null)
-            {
-                ubLight = DeviceBuffer.CreateUniformBuffer<LightParameter>();
-            }
-
-            if(ubMatrics == null)
-            {
-                uint size = 6400 * 1024;
-                ubMatrics = new DynamicBuffer(size);
-            }
-
+            ubMatrics = new DynamicBuffer(size);
+           
             perObjectResLayout = new ResourceLayout(0)
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),

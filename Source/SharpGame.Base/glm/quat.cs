@@ -446,7 +446,29 @@ namespace SharpGame
 
         public static mat4 mat4_cast(quat q)
         {
-            return mat4(mat3_cast(q));
+            mat4 Result = mat4(1);
+            float qxx = (q.x * q.x);
+            float qyy = (q.y * q.y);
+            float qzz = (q.z * q.z);
+            float qxz = (q.x * q.z);
+            float qxy = (q.x * q.y);
+            float qyz = (q.y * q.z);
+            float qwx = (q.w * q.x);
+            float qwy = (q.w * q.y);
+            float qwz = (q.w * q.z);
+
+            Result[0][0] = (1) - (2) * (qyy + qzz);
+            Result[0][1] = (2) * (qxy + qwz);
+            Result[0][2] = (2) * (qxz - qwy);
+
+            Result[1][0] = (2) * (qxy - qwz);
+            Result[1][1] = (1) - (2) * (qxx + qzz);
+            Result[1][2] = (2) * (qyz + qwx);
+
+            Result[2][0] = (2) * (qxz + qwy);
+            Result[2][1] = (2) * (qyz - qwx);
+            Result[2][2] = (1) - (2) * (qxx + qyy);
+            return Result;
         }
 
         public static quat quat_cast(mat3 m)

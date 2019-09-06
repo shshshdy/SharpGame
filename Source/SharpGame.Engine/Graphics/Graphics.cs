@@ -104,7 +104,7 @@ namespace SharpGame
             commandPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
 
             Texture.Init();
-
+            Sampler.Init();
 #if EVENT_SYNC
             _renderComandsReady = new ManualResetEvent(false);
             _renderActive = new ManualResetEvent(false);
