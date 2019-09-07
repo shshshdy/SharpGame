@@ -32,31 +32,12 @@ namespace SharpGame.Samples
         public Graphics Graphics => Graphics.Instance;
         public Renderer Renderer => Renderer.Instance;
 
-        public static bool debugImage = false;
-        protected float debugImageHeight = 200.0f;
-        List<Texture> debugImages = new List<Texture>();
-       
         public Sample()
         {
-            (this).Subscribe((GUIEvent e) => OnDebugImage());
         }
 
         public virtual void Init()
         {
-        }
-
-        public void DebugImage(bool enable, float height = 200.0f)
-        {
-            debugImage = enable;
-            debugImageHeight = height;
-        }
-
-        public void AddDebugImage(params Texture[] textures)
-        {
-            foreach (var tex in textures)
-            {
-                debugImages.Add(tex);
-            }
         }
 
         public virtual void Update()
@@ -150,45 +131,8 @@ namespace SharpGame.Samples
        
         }
 
-        void OnDebugImage()
-        {
-            if(!debugImage || debugImages.Count == 0)
-            {
-                return;
-            }
-
-            var io = ImGui.GetIO();
-            {
-                vec2 window_pos = new vec2(10, io.DisplaySize.Y - 10);
-                vec2 window_pos_pivot = new vec2(0.0f, 1.0f);
-                ImGui.SetNextWindowPos(window_pos, ImGuiCond.Always, window_pos_pivot);
-                ImGui.SetNextWindowBgAlpha(0.5f); // Transparent background
-            }
-
-            if (ImGui.Begin("DebugImage", ref debugImage, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav))
-            {
-                foreach(var tex in debugImages)
-                {
-                    float scale = tex.width / (float)tex.height;
-                    if(scale > 1)
-                    {
-                        ImGUI.Image(tex, new vec2(debugImageHeight, debugImageHeight/ scale)); ImGui.SameLine();
-                    }
-                    else
-                    {
-                        ImGUI.Image(tex, new vec2(scale * debugImageHeight, debugImageHeight)); ImGui.SameLine();
-                    }
-                    
-                }
-            }
-
-            ImGui.End();
-
-        }
-
         protected override void Destroy()
         {
-            debugImages.Clear();
             scene?.Dispose();
 
             base.Destroy();

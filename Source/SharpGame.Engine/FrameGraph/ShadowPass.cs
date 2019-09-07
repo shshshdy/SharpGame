@@ -28,11 +28,11 @@ namespace SharpGame
 
         float cascadeSplitLambda = 0.95f;
 
-        Shader shaderDepth;
+        Shader depthShader;
 
         ResourceSet[] vsSet = new ResourceSet[2];
 
-        FastList<Drawable> casters = new FastList<Drawable>();
+        FastList<SourceBatch> casters = new FastList<SourceBatch>();
 
         ResourceSet VSSet => vsSet[Graphics.Instance.WorkContext];
         public ShadowPass() : base(Pass.Depth)
@@ -92,14 +92,17 @@ namespace SharpGame
             {
                 cascades[i].view = ImageView.Create(depthRT.image, ImageViewType.Image2D, depthFormat, ImageAspectFlags.Depth, 0, 1, i, 1);
                 cascades[i].frameBuffer = Framebuffer.Create(renderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
+                Renderer.Instance.AddDebugImage(cascades[i].view);
             }
 
             ubShadow = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));
 
-            shaderDepth = Resources.Instance.Load<Shader>("shaders/shadow.shader");
+            depthShader = Resources.Instance.Load<Shader>("shaders/shadow.shader");
 
-            vsSet[0] = new ResourceSet(shaderDepth.Main.GetResourceLayout(0), ubShadow[0]);
-            vsSet[1] = new ResourceSet(shaderDepth.Main.GetResourceLayout(0), ubShadow[1]);
+            vsSet[0] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[0]);
+            vsSet[1] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[1]);
+
+            //ClearDepthStencilValue = new ClearDepthStencilValue(0, 0);
         }
 
 
@@ -110,6 +113,17 @@ namespace SharpGame
 
             casters.Clear();
 
+            view.Scene.GetDrawables(null, (drawable) =>
+            {
+                if(drawable.CastShadows)
+                {
+                    foreach (SourceBatch batch in drawable.Batches)
+                    {
+                        casters.Add(batch);
+                        //batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+                    }
+                }
+            });
 
             //todo:multi thread
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
@@ -127,15 +141,39 @@ namespace SharpGame
                 cmd.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                     | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
 
-                //cmd.SetViewport(ref view.Viewport);
-               // cmd.SetScissor(view.ViewRect);
+                Viewport viewport = new Viewport(0, 0, (float)SHADOWMAP_DIM, (float)SHADOWMAP_DIM, 0.0f, 1.0f);
+                Rect2D scissor = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
 
-                foreach (var batch in view.batches)
+                cmd.SetViewport(ref viewport);
+                cmd.SetScissor(scissor);
+
+                foreach (var batch in casters)
                 {
-                    DrawBatch(cmd, batch, VSSet, view.PSSet, batch.offset);
+                    DrawShadowBatch(cmd, batch, (uint)i, VSSet, null);
                 }
             }
 
+        }
+
+        public void DrawShadowBatch(CommandBuffer cb, SourceBatch batch, uint cascade, ResourceSet resourceSet, ResourceSet resourceSet1)
+        {
+            var shader = depthShader;
+
+            var pass = shader.Main;// shader.GetPass(passID);
+            var pipe = pass.GetGraphicsPipeline(renderPass, batch.geometry);
+
+            cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet.Set, resourceSet);
+
+            if (resourceSet1 != null)
+            {
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet1.Set, resourceSet1);
+            }
+
+            cb.PushConstants(pass.PipelineLayout, ShaderStage.Vertex, 0, 64, batch.worldTransform);
+            cb.PushConstants(pass.PipelineLayout, ShaderStage.Vertex, 64, ref cascade);
+
+            batch.geometry.Draw(cb);
         }
 
         public override void Submit(int imageIndex)
@@ -220,7 +258,7 @@ namespace SharpGame
 
                 // Project frustum corners into world space
                 mat4 invCam = glm.inverse(camera.Projection * camera.View);
-                for (int j = 0; j < 8; i++)
+                for (int j = 0; j < 8; j++)
                 {
                     vec4 invCorner = invCam * glm.vec4(frustumCorners[j], 1.0f);
                     frustumCorners[j] = (vec3)invCorner / invCorner.w;

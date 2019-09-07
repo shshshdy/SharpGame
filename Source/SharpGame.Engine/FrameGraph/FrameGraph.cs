@@ -28,6 +28,17 @@ namespace SharpGame
             RenderPassList.Add(renderPass);
         }
 
+        public void InsertGraphicsPass(int index, Action<GraphicsPass, RenderView> onDraw)
+        {
+            var renderPass = new GraphicsPass
+            {
+                OnDraw = onDraw,
+                FrameGraph = this
+            };
+
+            InsertRenderPass(index, renderPass);
+        }
+
         public void AddComputePass(Action<ComputePass, RenderView> onDraw)
         {
             var renderPass = new ComputePass
@@ -37,6 +48,12 @@ namespace SharpGame
             };
 
             RenderPassList.Add(renderPass);
+        }
+
+        public void InsertRenderPass(int index, FrameGraphPass renderPass)
+        {
+            renderPass.FrameGraph = this;
+            RenderPassList.Insert(index, renderPass);
         }
 
         public void AddRenderPass(FrameGraphPass renderPass)

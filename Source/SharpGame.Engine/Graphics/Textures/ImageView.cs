@@ -10,17 +10,28 @@ namespace SharpGame
 
     public class ImageView : DisposeBase, IBindableResource
     {
+        public Image Image { get; }
+        public uint Width => Image.extent.width;
+        public uint Height => Image.extent.height;
+
         public VkImageView handle;
 
-        internal ImageView(VkImageView handle)
+        DescriptorImageInfo descriptor;
+
+        internal ref DescriptorImageInfo Descriptor
         {
-            this.handle = handle;
+            get
+            {
+                descriptor = new DescriptorImageInfo(Sampler.ClampToEdge, this, ImageLayout.ShaderReadOnlyOptimal);
+                return ref descriptor;
+            }
         }
 
         public ImageView(ref ImageViewCreateInfo imageViewCreateInfo)
         {
             imageViewCreateInfo.ToNative(out VkImageViewCreateInfo native);
             handle = Device.CreateImageView(ref native);
+            Image = imageViewCreateInfo.image;
         }
 
         protected override void Destroy(bool disposing)

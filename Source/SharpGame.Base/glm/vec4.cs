@@ -26,13 +26,13 @@ namespace SharpGame
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                System.Diagnostics.Debug.Assert(index >= 0 && index < 3);
+                System.Diagnostics.Debug.Assert(index >= 0 && index < 4);
                 return Unsafe.Add(ref x, index);
             }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                System.Diagnostics.Debug.Assert(index >= 0 && index < 3);
+                System.Diagnostics.Debug.Assert(index >= 0 && index < 4);
                 Unsafe.Add(ref x, index) = value;
             }
         }

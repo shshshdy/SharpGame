@@ -7,12 +7,6 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-//     using vec2 = Vector2;
-//     using vec3 = vec3;
-//     using vec4 = vec4;
-//     using mat4 = mat4;
-
-
     [StructLayout(LayoutKind.Sequential)]
     public struct FrameUniform
     {
@@ -35,6 +29,7 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraPS
     {
+        public mat4 ViewInv;
         public vec3 CameraPos;
         float pading1;
         public vec4 DepthReconstruct;
@@ -125,11 +120,9 @@ namespace SharpGame
         public ResourceSet PSSet => psResourceSet[Graphics.Instance.WorkContext];
         ResourceSet[] psResourceSet = new ResourceSet[2];
 
-        public RenderView(Camera camera = null, Scene scene = null, FrameGraph renderPath = null)
+        public RenderView()
         {
             CreateBuffers();
-
-            Attach(camera, scene, renderPath);
         }
 
         public void Attach(Camera camera, Scene scene, FrameGraph renderPath = null)
@@ -141,11 +134,6 @@ namespace SharpGame
 
             frustumOctreeQuery = new FrustumQuery(drawables, camera, Drawable.DRAWABLE_ANY, ViewMask);
 
-            if (FrameGraph == null)
-            {
-                FrameGraph = new FrameGraph();
-                FrameGraph.AddRenderPass(new ScenePass());
-            }
         }
 
         protected void CreateBuffers()
@@ -210,6 +198,13 @@ namespace SharpGame
             this.frameInfo = frameInfo;
             this.frameInfo.camera = camera;
             this.frameInfo.viewSize = new Int2(g.Width, g.Height);
+
+            if (FrameGraph == null)
+            {
+                FrameGraph = new FrameGraph();
+                FrameGraph.AddRenderPass(new ShadowPass());
+                FrameGraph.AddRenderPass(new ScenePass());
+            }
 
             ubMatrics.Clear();
 
@@ -299,9 +294,11 @@ namespace SharpGame
 
             ubCameraVS.SetData(ref cameraVS);
 
+            cameraPS.ViewInv = cameraVS.ViewInv;
             cameraPS.CameraPos = camera.Node.Position;
             cameraPS.NearClip = camera.NearClip;
             cameraPS.FarClip = camera.FarClip;
+
             ubCameraPS.SetData(ref cameraPS);
 
         }

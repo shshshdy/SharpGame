@@ -139,9 +139,8 @@ namespace SharpGame
                         }
                         else if(bindable is ImageView textureView)
                         {
-                            var descriptor = new DescriptorImageInfo(Sampler.ClampToEdge, textureView, ImageLayout.ShaderReadOnlyOptimal);
                             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-                                descriptorType, ref descriptor, 1);
+                                descriptorType, ref textureView.Descriptor, 1);
                         }
                     }
                     break;

@@ -8,6 +8,12 @@ namespace SharpGame
 {
     public class Image : DisposeBase
     {
+        public ImageType imageType;
+        public Format format;
+        public Extent3D extent;
+        public uint mipLevels;
+        public uint arrayLayers;
+
         internal VkImage handle;
         internal VkDeviceMemory memory;
         internal ulong allocationSize;
@@ -19,7 +25,7 @@ namespace SharpGame
         }
 
         public unsafe Image(ref ImageCreateInfo imageCreateInfo)
-        {
+        {            
             imageCreateInfo.ToNative(out VkImageCreateInfo native);
             handle = Device.CreateImage(ref native);
 
@@ -31,6 +37,12 @@ namespace SharpGame
 
             memory = Device.AllocateMemory(ref memAllocInfo);
             Device.BindImageMemory(handle, memory, 0);
+
+            imageType = imageCreateInfo.imageType;
+            format = imageCreateInfo.format;
+            extent = imageCreateInfo.extent;
+            mipLevels = imageCreateInfo.mipLevels;
+            arrayLayers = imageCreateInfo.arrayLayers;
 
             allocationSize = memAllocInfo.allocationSize;
             memoryTypeIndex = memAllocInfo.memoryTypeIndex;

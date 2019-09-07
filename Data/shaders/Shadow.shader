@@ -10,17 +10,17 @@ Shader "Shadow"
 		CullMode = None
 		FrontFace = CounterClockwise
 
-        PushConstant position
+        PushConstant model
         {
             StageFlags = Vertex
             Offset = 0
-            Size = 16
+            Size = 64
         }
 
         PushConstant cascadeIndex
         {
             StageFlags = Vertex
-            Offset = 16
+            Offset = 64
             Size = 4
         }
 
@@ -35,7 +35,7 @@ Shader "Shadow"
             #define SHADOW_MAP_CASCADE_COUNT 4
 
             layout(push_constant) uniform PushConsts{
-                vec4 position;
+                mat4 model;
                 uint cascadeIndex;
             } pushConsts;
 
@@ -52,8 +52,8 @@ Shader "Shadow"
             void main()
             {
                 outUV = inUV;
-                vec3 pos = inPos + pushConsts.position.xyz;
-                gl_Position = ubo.cascadeViewProjMat[pushConsts.cascadeIndex] * vec4(pos, 1.0);
+                vec4 pos = pushConsts.model * vec4(inPos, 1);
+                gl_Position = ubo.cascadeViewProjMat[pushConsts.cascadeIndex] * pos;
             }
 		}
 		

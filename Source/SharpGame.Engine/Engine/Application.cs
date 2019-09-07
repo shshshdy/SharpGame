@@ -103,7 +103,7 @@ namespace SharpGame
             graphics.Init(window.SdlWindowHandle);
             renderer = CreateSubsystem<Renderer>();
             input = CreateSubsystem<Input>();
-
+            renderer.Initialize();
         }
 
         protected virtual void Init()
