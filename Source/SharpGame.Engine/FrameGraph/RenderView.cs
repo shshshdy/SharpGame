@@ -160,10 +160,11 @@ namespace SharpGame
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
                 new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
 
-            psResourceSet[0] = new ResourceSet(psResLayout, ubCameraPS, ubLight);
-            psResourceSet[1] = new ResourceSet(psResLayout, ubCameraPS, ubLight);
+            psResourceSet[0] = new ResourceSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT.view);
+            psResourceSet[1] = new ResourceSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT.view);
         }
 
         public void AddDrawable(Drawable drawable)
@@ -202,7 +203,7 @@ namespace SharpGame
             if (FrameGraph == null)
             {
                 FrameGraph = new FrameGraph();
-                FrameGraph.AddRenderPass(new ShadowPass());
+                //FrameGraph.AddRenderPass(new ShadowPass());
                 FrameGraph.AddRenderPass(new ScenePass());
             }
 

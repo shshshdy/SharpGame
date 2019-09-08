@@ -1,6 +1,4 @@
 
-#ifdef SHADOW
-
 const mat4 biasMat = mat4( 
 	0.5, 0.0, 0.0, 0.0,
 	0.0, 0.5, 0.0, 0.0,
@@ -42,5 +40,3 @@ float filterPCF(vec4 sc, uint cascadeIndex)
 	}
 	return shadowFactor / count;
 }
-
-#endif

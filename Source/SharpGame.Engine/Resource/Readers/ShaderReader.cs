@@ -105,6 +105,12 @@ namespace SharpGame
             foreach (var pass in shader.Pass)
             {
                 var binding = pass.PipelineLayout.GetBinding(key);
+                if(binding == null)
+                {
+                    Log.Warn("Unknown property : " + key);
+                    continue;
+                }
+
                 if (binding.IsTexture)
                 {
                     prop = new ShaderProperty

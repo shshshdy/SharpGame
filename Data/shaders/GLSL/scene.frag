@@ -1,20 +1,25 @@
 #version 450
+
 #include "UniformsPS.glsl"
+
+
+#define ambient 0.3
+
 #include "Shadow.glsl"
 
-layout (set = 1, binding = 0) uniform sampler2D DiffMap;
+layout (set = 2, binding = 0) uniform sampler2D DiffMap;
 
 layout (location = 0) in vec3 inNormal;
 layout (location = 2) in vec3 inViewPos;
 layout (location = 3) in vec3 inPos;
 layout (location = 4) in vec2 inUV;
 
-layout (constant_id = 0) const int enablePCF = 0;
+layout (constant_id = 0) const int enablePCF = 1;
 
 layout (location = 0) out vec4 outFragColor;
 
-#define ambient 0.3
-
+#define SHADOW_MAP_CASCADE_COUNT 4
+/*
 layout (set = 0, binding = 2) uniform UBO {
 	vec4 cascadeSplits;
 	mat4 cascadeViewProjMat[SHADOW_MAP_CASCADE_COUNT];
@@ -23,6 +28,7 @@ layout (set = 0, binding = 2) uniform UBO {
 	float _pad;
 	int colorCascades;
 } ubo;
+*/
 
 void main() 
 {	
@@ -34,13 +40,13 @@ void main()
 	// Get cascade index for the current fragment's view position
 	uint cascadeIndex = 0;
 	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; ++i) {
-		if(inViewPos.z < ubo.cascadeSplits[i]) {	
+		if(inViewPos.z < cascadeSplits[i]) {	
 			cascadeIndex = i + 1;
 		}
 	}
 
 	// Depth compare for shadowing
-	vec4 shadowCoord = (biasMat * ubo.cascadeViewProjMat[cascadeIndex]) * vec4(inPos, 1.0);	
+	vec4 shadowCoord = (biasMat * LightMatrices[cascadeIndex]) * vec4(inPos, 1.0);	
 
 	float shadow = 0;
 	if (enablePCF == 1) {
@@ -51,7 +57,7 @@ void main()
 
 	// Directional light
 	vec3 N = normalize(inNormal);
-	vec3 L = normalize(-ubo.lightDir);
+	vec3 L = normalize(-SunlightDir);
 	vec3 H = normalize(L + inViewPos);
 	float diffuse = max(dot(N, L), ambient);
 	vec3 lightColor = vec3(1.0);
@@ -60,7 +66,7 @@ void main()
 	outFragColor.a = color.a;
 
 	// Color cascades (if enabled)
-	if (ubo.colorCascades == 1) {
+	//if (ubo.colorCascades == 1) {
 		switch(cascadeIndex) {
 			case 0 : 
 				outFragColor.rgb *= vec3(1.0f, 0.25f, 0.25f);
@@ -75,5 +81,5 @@ void main()
 				outFragColor.rgb *= vec3(1.0f, 1.0f, 0.25f);
 				break;
 		}
-	}
+	//}
 }
