@@ -53,14 +53,14 @@ namespace SharpGame
     {
         None = 0,
         VS = 1,
-        PS = 2
+        PS = 2,
+        PBR = 4,
     }
 
     public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
         public int Set { get; set; }
         public DefaultResourcSet DefaultResourcSet { get; set; } = DefaultResourcSet.None;
-
         public List<ResourceLayoutBinding> Bindings { get; set; } = new List<ResourceLayoutBinding>();
 
         private VkDescriptorSetLayoutBinding[] bindings;

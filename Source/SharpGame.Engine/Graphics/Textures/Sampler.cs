@@ -46,7 +46,7 @@ namespace SharpGame
                 mipLodBias = 0.0f,
                 compareOp = CompareOp.Never,
                 minLod = 0.0f,
-                maxLod = float.MaxValue,
+                maxLod = 1.0f,// float.MaxValue,
                 borderColor = borderColor,
                 maxAnisotropy = anisotropyEnable ? Device.Properties.limits.maxSamplerAnisotropy : 1,
                 anisotropyEnable = anisotropyEnable

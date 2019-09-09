@@ -79,10 +79,10 @@ namespace SharpGame
                 {
                     srcSubpass = VulkanNative.SubpassExternal,
                     dstSubpass = 0,
-                    srcStageMask = PipelineStageFlags.BottomOfPipe,
-                    dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
-                    srcAccessMask = AccessFlags.MemoryRead,
-                    dstAccessMask = (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
+                    srcStageMask = PipelineStageFlags.FragmentShader,// PipelineStageFlags.BottomOfPipe,
+                    dstStageMask = PipelineStageFlags.EarlyFragmentTests,// PipelineStageFlags.ColorAttachmentOutput,
+                    srcAccessMask = AccessFlags.ShaderRead,// AccessFlags.MemoryRead,
+                    dstAccessMask = AccessFlags.DepthStencilAttachmentWrite,// (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
                     dependencyFlags = DependencyFlags.ByRegion
                 },
 
@@ -90,10 +90,10 @@ namespace SharpGame
                 {
                     srcSubpass = 0,
                     dstSubpass = VulkanNative.SubpassExternal,
-                    srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
-                    dstStageMask = PipelineStageFlags.BottomOfPipe,
-                    srcAccessMask = (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
-                    dstAccessMask = AccessFlags.MemoryRead,
+                    srcStageMask = PipelineStageFlags.LateFragmentTests,// PipelineStageFlags.ColorAttachmentOutput,
+                    dstStageMask = PipelineStageFlags.FragmentShader,// PipelineStageFlags.BottomOfPipe,
+                    srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,//(AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
+                    dstAccessMask = AccessFlags.ShaderRead,// AccessFlags.MemoryRead,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
             };

@@ -328,15 +328,7 @@ namespace SharpGame
             var pipe = pass.GetGraphicsPipeline(renderPass, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
 
-            material.PushConstants(pass.PipelineLayout, this);
-
-            foreach (var rs in material.ResourceSet)
-            {
-                if (rs.Updated)
-                {
-                    BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
-                }
-            }
+            material.BindResourceSet(pass.passIndex, this);
 
             geometry.Draw(this);
         }

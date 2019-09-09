@@ -92,7 +92,7 @@ namespace SharpGame.Samples
             Renderer.AddDebugImage(tex);
             Renderer.AddDebugImage(tex1);
 
-            material.ResourceSet[0].Bind(tex, tex1);
+            material.PipelineResourceSet[0].ResourceSet[0].Bind(tex, tex1);
 
             computePipeline = shader.GetPass("compute");
             computeResourceSet = new ResourceSet(computePipeline.PipelineLayout.ResourceLayout[0], storageBuffer, uniformBuffer);

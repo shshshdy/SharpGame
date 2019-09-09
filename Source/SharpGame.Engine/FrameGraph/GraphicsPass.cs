@@ -113,15 +113,7 @@ namespace SharpGame
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
 
-            material.PushConstants(pass.PipelineLayout, cb);
-
-            foreach (var rs in material.ResourceSet)
-            {
-                if (rs.Updated)
-                {
-                    cb.BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
-                }
-            }
+            material.BindResourceSet(pass.passIndex, cb);
 
             cb.Draw(3, 1, 0, 0);
         }
@@ -139,36 +131,14 @@ namespace SharpGame
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
 
-            uint numDS = 0;
-            uint numOffsets = 0;
-            Span<VkDescriptorSet> ds = stackalloc VkDescriptorSet[8];
-            Span<uint> offsets = stackalloc uint[8];
-            ds[(int)numDS++] = resourceSet.descriptorSet;
-            if(offset.HasValue)
-            offsets[(int)numOffsets++] = offset.Value;
-            //cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet.Set, resourceSet, offset);
-            //resourceSet.UpdateSets();
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet.Set, resourceSet, offset);
 
             if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.PS) != 0)
             {
-                ds[(int)numDS++] = resourceSet1.descriptorSet;
-                if (offset1.HasValue)
-                    offsets[(int)numOffsets++] = offset1.Value;
-               // cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet1.Set, resourceSet1, offset1);
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet1.Set, resourceSet1, offset1);
             }
 
-            batch.material.PushConstants(pass.PipelineLayout, cb);
-
-            foreach (var rs in batch.material.ResourceSet)
-            {
-                if (rs.Updated)
-                {
-                    ds[(int)numDS++] = rs.descriptorSet;
-                    //cb.BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
-                }
-            }
-
-           VulkanNative.vkCmdBindDescriptorSets(cb.commandBuffer, (VkPipelineBindPoint.Graphics), pass.PipelineLayout.handle, (uint)0, numDS, ref ds[0], numOffsets, ref offsets[0]);
+            batch.material.BindResourceSet(pass.passIndex, cb);
             batch.geometry.Draw(cb);
         }
 

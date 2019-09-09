@@ -25,6 +25,7 @@ namespace SharpGame
             polygonMode = PolygonMode.Fill,
             cullMode = CullMode.Back,
             frontFace = FrontFace.CounterClockwise,
+            depthClampEnable = true,
             lineWidth = 1.0f
         };
 
@@ -168,6 +169,7 @@ namespace SharpGame
             {
                 new ColorBlendAttachment
                 {
+                    blendEnable = false,
                     srcColorBlendFactor = BlendFactor.One,
                     dstColorBlendFactor = BlendFactor.Zero,
                     colorBlendOp = BlendOp.Add,

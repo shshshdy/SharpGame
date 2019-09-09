@@ -24,6 +24,8 @@ namespace SharpGame
         public static uint QFCompute { get; private set; }
         public static uint QFTransfer { get; private set; }
 
+        public static int MaxPushConstantsSize => (int)Device.Properties.limits.maxPushConstantsSize;
+
         private static VkDevice device;
         private static VkQueue queue;
         private static VkCommandPool commandPool;

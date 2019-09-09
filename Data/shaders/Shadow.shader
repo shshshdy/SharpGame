@@ -7,8 +7,8 @@ Shader "Shadow"
 
 	Pass "main"
 	{
-		CullMode = None
-		FrontFace = CounterClockwise
+		CullMode = Back
+		FrontFace = Clockwise
 
         PushConstant model
         {

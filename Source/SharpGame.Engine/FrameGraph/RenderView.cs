@@ -142,7 +142,7 @@ namespace SharpGame
             ubFrameInfo = DeviceBuffer.CreateUniformBuffer<FrameUniform>();
 
             ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
-            uint size = 64 * 1000;
+            uint size = 64 * 1000 * 100;
             //ubMatrics = new DynamicBuffer(size);
             ubMatrics = new DynamicBuffer(size);
 

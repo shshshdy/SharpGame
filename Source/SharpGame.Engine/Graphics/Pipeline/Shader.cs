@@ -49,6 +49,7 @@ namespace SharpGame
 
         public void Add(Pass pass)
         {
+            pass.passIndex = Pass.Count;
             Pass.Add(pass);
             passFlags |= pass.passID;
         }
@@ -110,9 +111,11 @@ namespace SharpGame
 
         protected override bool OnBuild()
         {
+            int idx = 0;
             foreach (var pass in Pass)
             {
                 pass.Build();
+                pass.passIndex = idx++;
             }
 
             return true;
