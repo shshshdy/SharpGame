@@ -164,6 +164,8 @@ namespace SharpGame
                 {
                     DrawShadowBatch(cmd, batch, (uint)i, VSSet, null);
                 }
+
+                cmd.End();
             }
 
         }
@@ -244,7 +246,7 @@ namespace SharpGame
             // Based on method presentd in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                float p = (i + 1) / (SHADOW_MAP_CASCADE_COUNT);
+                float p = (i + 1) / (float)(SHADOW_MAP_CASCADE_COUNT);
                 float log = minZ * (float)Math.Pow(ratio, p);
                 float uniform = minZ + range * p;
                 float d = cascadeSplitLambda * (log - uniform) + uniform;
@@ -308,7 +310,7 @@ namespace SharpGame
                 mat4 lightOrthoMatrix = glm.ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 
                 // Store split distance and matrix in cascade
-                cascades[i].splitDepth = (camera.NearClip + splitDist * clipRange) * -1.0f;
+                cascades[i].splitDepth = (camera.NearClip + splitDist * clipRange)/* * -1.0f*/;
                 cascades[i].viewProjMatrix = lightOrthoMatrix * lightViewMatrix;
 
                 view.LightParam.SetLightMatrices(i, ref cascades[i].viewProjMatrix);

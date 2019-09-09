@@ -23,7 +23,7 @@ namespace SharpGame.Samples
             
                 staticModel.SetMaterial(mat);
             }
-
+           // if (false)
             {
                 KtxTextureReader texReader = new KtxTextureReader
                 {
@@ -45,7 +45,7 @@ namespace SharpGame.Samples
                 AssimpModelReader.Import("Models/oak_leafs.dae", geoList, bboxList);
                 var model = Model.Create(geoList, bboxList);// Resources.Load<Model>("Models/Mushroom.mdl");
 
-                for(int i = 0; i < 400; i++)
+                for(int i = 0; i < 100; i++)
                 {
                     var node = scene.CreateChild("Model");
                     node.Position = new vec3(MathUtil.Random(-40, 40), 0, MathUtil.Random(-40, 40));

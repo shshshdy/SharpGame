@@ -98,9 +98,9 @@ namespace SharpGame
         public static mat4 translate(float x, float y, float z)
         {
             return new mat4(
-                0.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
                 x, y, z, 1.0f);
         }
 

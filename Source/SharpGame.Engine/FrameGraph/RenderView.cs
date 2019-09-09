@@ -105,13 +105,14 @@ namespace SharpGame
         private LightParameter lightParameter = new LightParameter();
 
         internal DeviceBuffer ubFrameInfo;
-        internal DeviceBuffer ubCameraVS;
+        public DoubleBuffer ubCameraVS;
+        public DynamicBuffer ubMatrics;
+
         internal DeviceBuffer ubCameraPS;
         internal DeviceBuffer ubLight;
 
-        internal DynamicBuffer ubMatrics;
 
-        private ResourceLayout perObjectResLayout;
+        private ResourceLayout vsResLayout;
 
         public ResourceSet VSSet => vsResourceSet[Graphics.Instance.WorkContext];
         ResourceSet[] vsResourceSet = new ResourceSet[2];
@@ -139,22 +140,23 @@ namespace SharpGame
         protected void CreateBuffers()
         {
             ubFrameInfo = DeviceBuffer.CreateUniformBuffer<FrameUniform>();
-            ubCameraVS = DeviceBuffer.CreateUniformBuffer<CameraVS>();
+
+            ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
+            uint size = 64 * 1000;
+            //ubMatrics = new DynamicBuffer(size);
+            ubMatrics = new DynamicBuffer(size);
+
             ubCameraPS = DeviceBuffer.CreateUniformBuffer<CameraPS>();
             ubLight = DeviceBuffer.CreateUniformBuffer<LightParameter>();
 
-            uint size = 6400 * 1024;
-
-            ubMatrics = new DynamicBuffer(size);
-           
-            perObjectResLayout = new ResourceLayout(0)
+            vsResLayout = new ResourceLayout(0)
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
                 new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
             };
 
-            vsResourceSet[0] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics.Buffer[0]);
-            vsResourceSet[1] = new ResourceSet(perObjectResLayout, ubCameraVS, ubMatrics.Buffer[1]);
+            vsResourceSet[0] = new ResourceSet(vsResLayout, ubCameraVS[0], ubMatrics.Buffer[0]);
+            vsResourceSet[1] = new ResourceSet(vsResLayout, ubCameraVS[1], ubMatrics.Buffer[1]);
 
             psResLayout = new ResourceLayout(1)
             {
@@ -203,7 +205,7 @@ namespace SharpGame
             if (FrameGraph == null)
             {
                 FrameGraph = new FrameGraph();
-                //FrameGraph.AddRenderPass(new ShadowPass());
+                FrameGraph.AddRenderPass(new ShadowPass());
                 FrameGraph.AddRenderPass(new ScenePass());
             }
 
@@ -226,15 +228,15 @@ namespace SharpGame
             this.SendGlobalEvent(new BeginView { view = this });
 
             UpdateDrawables();
+            ubMatrics.Flush();
 
-            if(camera != null)
+            if (camera != null)
             {
                 UpdateViewParameters();
             }
 
             UpdateLightParameters();
 
-            ubMatrics.Flush();
 
             FrameGraph.Draw(this);
 
@@ -294,6 +296,7 @@ namespace SharpGame
             cameraVS.FarClip = camera.FarClip;
 
             ubCameraVS.SetData(ref cameraVS);
+            ubCameraVS.Flush();
 
             cameraPS.ViewInv = cameraVS.ViewInv;
             cameraPS.CameraPos = camera.Node.Position;

@@ -16,7 +16,7 @@ namespace SharpGame
         const int WORK_COUNT = 16;
         public static bool[] multiThreaded = { true, true, true };
 
-        public static bool MultiThreaded = true;
+        public static bool MultiThreaded = false;
 
         public ScenePass(string name = "main")
         {

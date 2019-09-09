@@ -85,6 +85,12 @@ namespace SharpGame
 
         public Graphics(Settings settings)
         {
+#if DEBUG
+            settings.Validation = false;
+#else
+            settings.Validation = false;
+#endif
+
             Settings = settings;
 
             enabledFeatures.samplerAnisotropy = True;

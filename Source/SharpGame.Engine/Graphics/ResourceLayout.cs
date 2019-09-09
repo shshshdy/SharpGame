@@ -48,9 +48,19 @@ namespace SharpGame
         }
     }
 
+    [Flags]
+    public enum DefaultResourcSet : int
+    {
+        None = 0,
+        VS = 1,
+        PS = 2
+    }
+
     public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
         public int Set { get; set; }
+        public DefaultResourcSet DefaultResourcSet { get; set; } = DefaultResourcSet.None;
+
         public List<ResourceLayoutBinding> Bindings { get; set; } = new List<ResourceLayoutBinding>();
 
         private VkDescriptorSetLayoutBinding[] bindings;
@@ -113,6 +123,16 @@ namespace SharpGame
             foreach (var binding in bindings)
             {
                 descriptorResourceCounts[(int)binding.descriptorType] += 1;
+            }
+
+            if (GetBinding("CameraVS") != null)
+            {
+                DefaultResourcSet |= DefaultResourcSet.VS;
+            }
+
+            if (GetBinding("CameraPS") != null)
+            {
+                DefaultResourcSet |= DefaultResourcSet.PS;
             }
 
             return this;

@@ -185,7 +185,7 @@ namespace SharpGame
         public static void CopyBlock(IntPtr dest, IntPtr src, int sizeInBytesToCopy)
         {
             Unsafe.CopyBlock((void*)dest, (void*)src, (uint)sizeInBytesToCopy);
-        }
+        } 
 
         public static void CopyMemory(IntPtr dest, IntPtr src, int sizeInBytesToCopy)
         {

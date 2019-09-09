@@ -116,11 +116,11 @@ namespace SharpGame
             Mapped = IntPtr.Zero;
         }
 
-        public void SetupDescriptor(ulong size = WholeSize, ulong offset = 0)
+        public void SetupDescriptor()
         {
-            descriptor.offset = offset;
+            descriptor.offset = 0;
             descriptor.buffer = buffer;
-            descriptor.range = size;
+            descriptor.range = WholeSize;// Size;
         }
 
         public void SetData<T>(ref T data, uint offset = 0) where T : struct

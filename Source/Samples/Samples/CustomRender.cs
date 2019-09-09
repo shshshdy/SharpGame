@@ -31,8 +31,8 @@ namespace SharpGame.Samples
 
         ResourceSet[] resourceSet = new ResourceSet[2];
 
-        DeviceBuffer[] ubCameraVS = new DeviceBuffer[2];
-        DeviceBuffer[] ubObjectVS = new DeviceBuffer[2];
+        DoubleBuffer ubCameraVS;
+        DynamicBuffer ubObjectVS;
 
         Geometry cube;
         vec3 cameraPos;
@@ -63,21 +63,18 @@ namespace SharpGame.Samples
                 batches.Add(batch);
             }
 
-            ubCameraVS[0] = DeviceBuffer.CreateUniformBuffer<CameraVS>();
-            ubCameraVS[1] = DeviceBuffer.CreateUniformBuffer<CameraVS>();
+            ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint) Utilities.SizeOf<CameraVS>());
 
-            ubObjectVS[0] = DeviceBuffer.CreateUniformBuffer<mat4>(COUNT*4);
-            ubObjectVS[0].Map();
+            ubObjectVS = new DynamicBuffer(COUNT * 4 * 64);
 
-            ubObjectVS[1] = DeviceBuffer.CreateUniformBuffer<mat4>(COUNT * 4);
-            ubObjectVS[1].Map();
+            //ubObjectVS = Renderer.MainView.ubMatrics;
 
-            resourceSet[0] = new ResourceSet(resourceLayout, ubCameraVS[0], ubObjectVS[0]);
-            resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], ubObjectVS[1]);
+            resourceSet[0] = new ResourceSet(resourceLayout, ubCameraVS[0], ubObjectVS.Buffer[0]);
+            resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], ubObjectVS.Buffer[1]);
 
             frameGraph.AddGraphicsPass(CustomDraw);
 
-            cameraPos = new vec3(0, 5, 50);
+            cameraPos = new vec3(0, 5, -50);
             //pitch = MathUtil.Radians(15);
            
             Renderer.MainView.Attach(null, null, frameGraph);
@@ -86,21 +83,20 @@ namespace SharpGame.Samples
 
         public override void Update()
         {
-            uint offset = 0;
+            var ub = ubObjectVS;
+            
+            ub.Clear();
+
             float gridSize = 15;
 
             for (int i = 0; i < COUNT; i++)
             {
                 mat4 worldTransform = glm.translate(gridSize * (i / 10), 0, gridSize * (i % 10));
 
-                batches[i].offset = offset;
-
-                Utilities.CopyMemory(ubObjectVS[Graphics.WorkContext].Mapped + (int)offset, Utilities.AsPointer(ref worldTransform), Utilities.SizeOf<mat4>());
-
-                offset += (uint)64 * 4;
+                batches[i].offset = ub.Alloc(64, Utilities.AsPointer(ref worldTransform));
             }
 
-            ubObjectVS[Graphics.WorkContext].Flush();
+            ub.Flush();            
 
             UpdateInput();
         }
@@ -159,23 +155,28 @@ namespace SharpGame.Samples
 
         void CustomDraw(GraphicsPass pass, RenderView view)
         {
+            var rs = resourceSet[Graphics.WorkContext];
+            var ub = ubCameraVS;
+
             mat4 rotM = glm.mat4(1.0f);
             
             rotM = glm.yawPitchRoll(yaw, pitch, 0);
 
             var m = glm.translate(cameraPos)* rotM ;
+
             cameraVS.View = glm.inverse(m);
-            
+
             var proj = glm.perspective((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
             proj.M22 = -proj.M22;
 
-            cameraVS.ViewProj = proj*cameraVS.View ;
-            ubCameraVS[Graphics.WorkContext].SetData(ref cameraVS);
+            cameraVS.ViewProj = proj * cameraVS.View ;
+            ub.SetData(ref cameraVS);
+            ub.Flush();
 
-            for(int i = 0; i < COUNT; i++)
+            for (int i = 0; i < COUNT; i++)
             {
                 var batch = batches[i];
-                pass.DrawBatch(pass.CmdBuffer, batch, resourceSet[Graphics.WorkContext], null, batch.offset);
+                pass.DrawBatch(pass.CmdBuffer, batch, rs, null, batch.offset);
             }
         }
     }

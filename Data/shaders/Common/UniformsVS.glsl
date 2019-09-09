@@ -16,6 +16,8 @@ layout (binding = 1) uniform ObjectVS_dynamic
     mat4 Model;	
     vec4 UOffset;
     vec4 VOffset;
+    vec4 UOffset1;
+    vec4 VOffset1;
 };
 
 layout (binding = 1) uniform SkinVS_dynamic

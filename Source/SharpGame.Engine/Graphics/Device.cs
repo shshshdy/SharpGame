@@ -80,6 +80,8 @@ namespace SharpGame
                 (VkQueueFamilyProperties*)QueueFamilyProperties.Data.ToPointer());
             QueueFamilyProperties.Count = queueFamilyCount;
 
+            //enabledExtensions.Add(Strings.VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT);
+
             // Get list of supported extensions
             uint extCount = 0;
             vkEnumerateDeviceExtensionProperties(physicalDevice, (byte*)null, ref extCount, null);
@@ -393,7 +395,7 @@ namespace SharpGame
             CmdPushDescriptorSetKHR = device.GetProc<vkCmdPushDescriptorSetKHRDelegate>(nameof(vkCmdPushDescriptorSetKHR));
         }
 
-        public static VkSwapchainKHR  CreateSwapchainKHR(ref VkSwapchainCreateInfoKHR pCreateInfo)
+        public static VkSwapchainKHR CreateSwapchainKHR(ref VkSwapchainCreateInfoKHR pCreateInfo)
         {
             VulkanUtil.CheckResult(vkCreateSwapchainKHR(device, ref pCreateInfo, null, out VkSwapchainKHR pSwapchain));
             return pSwapchain;
@@ -604,7 +606,7 @@ namespace SharpGame
             cmdBufAllocateInfo.level = level;
             cmdBufAllocateInfo.commandBufferCount = count;
 
-            VulkanUtil.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, cmdBuffers));            
+            VulkanUtil.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, cmdBuffers));
         }
 
         public static void ResetCommandPool(VkCommandPool cmdPool, VkCommandPoolResetFlags flags)
@@ -638,14 +640,14 @@ namespace SharpGame
                     if ((((MemoryPropertyFlags)MemoryProperties.GetMemoryType(i).propertyFlags) & properties) == properties)
                     {
                         return i;
-                        
+
                     }
                 }
                 typeBits >>= 1;
             }
 
             return 0;
-            
+
         }
 
         public static VkShaderModule CreateShaderModule(ref VkShaderModuleCreateInfo shaderModuleCreateInfo)
@@ -663,6 +665,12 @@ namespace SharpGame
         {
             VulkanUtil.CheckResult(vkCreateGraphicsPipelines(device, pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
             return pPipelines;
+        }
+
+        public static VkPipelineLayout CreatePipelineLayout(ref VkPipelineLayoutCreateInfo pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreatePipelineLayout(device, ref pCreateInfo, null, out VkPipelineLayout pPipelineLayout));
+            return pPipelineLayout;
         }
 
         public static VkPipeline CreateComputePipeline(ref VkComputePipelineCreateInfo pCreateInfos)

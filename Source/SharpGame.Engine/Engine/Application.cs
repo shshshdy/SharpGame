@@ -89,7 +89,6 @@ namespace SharpGame
             cache.RegisterAssertReader(new AssimpModelReader());
             
             cache.RegisterAssertReader(new SharpTextureReader());
-            //cache.RegisterAssertReader(new KtxTexture2DReader());
             cache.RegisterAssertReader(new KtxTextureReader());
 
             cache.RegisterAssertReader(new AnimationReader());
@@ -114,7 +113,7 @@ namespace SharpGame
         protected virtual void CreateWindow()
         {
             windowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            window = new Sdl2Window(Title, 50, 50, Width, Height, SDL_WindowFlags.Resizable, threadedProcessing: false)
+            window = new Sdl2Window(Title, 50, 50, Width, Height, /*SDL_WindowFlags.Resizable*/0, threadedProcessing: false)
             {
                 X = 50,
                 Y = 50,

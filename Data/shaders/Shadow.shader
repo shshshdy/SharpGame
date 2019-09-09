@@ -14,14 +14,7 @@ Shader "Shadow"
         {
             StageFlags = Vertex
             Offset = 0
-            Size = 64
-        }
-
-        PushConstant cascadeIndex
-        {
-            StageFlags = Vertex
-            Offset = 64
-            Size = 4
+            Size = 68
         }
 
 		@VertexShader

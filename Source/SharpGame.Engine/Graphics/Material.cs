@@ -82,6 +82,7 @@ namespace SharpGame
 
             foreach (var layout in mainPass.PipelineLayout.ResourceLayout)
             {
+                if(layout.DefaultResourcSet == DefaultResourcSet.None)
                 ResourceSet.Add(new ResourceSet(layout));                
             }
 
