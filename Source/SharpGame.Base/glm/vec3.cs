@@ -29,7 +29,7 @@ namespace SharpGame
 
         public static readonly vec3 Up = new vec3(0, 1, 0);
         public static readonly vec3 Right = new vec3(1, 0, 0);
-        public static readonly vec3 ForwardLH = new vec3(0, 0, 1);
+        public static readonly vec3 Forward = new vec3(0, 0, 1);
 
         public vec3(float s)
         {

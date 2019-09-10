@@ -53,7 +53,11 @@ namespace SharpGame
 
         [IgnoreDataMember]
         public vec3 EulerAngles { get => rotation_.EulerAngles; set => rotation_ = glm.quat(value); }
-       
+
+        public void SetDirection(in vec3 direction)
+        {
+            Rotation = glm.rotation(vec3.Forward, direction);
+        }
 
         [DataMember(Order = 10)]
         public vec3 Scaling
@@ -118,7 +122,7 @@ namespace SharpGame
         protected quat worldRotation_;
         public void SetWorldRotation(quat rotation)
         {
-            Rotation = ((parent_ == scene_ || !parent_) ? rotation : rotation * glm.inverse(parent_.WorldRotation));
+            Rotation = ((parent_ == scene_ || !parent_) ? rotation :  glm.inverse(parent_.WorldRotation) * rotation);
         }
 
         [IgnoreDataMember]
@@ -179,54 +183,48 @@ namespace SharpGame
             MarkDirty();
         }
 
-        void SetWorldPosition(vec3 position)
+        public void SetWorldPosition(vec3 position)
         {
             Position = ((parent_ == scene_ || parent_ == null) ? position : parent_.WorldToLocal(position));
         }
-/*
-        void SetWorldRotation(quat rotation)
-        {
-            Rotation = ((parent_ == scene_ || parent_ == null) ? rotation : 
-                    parent_.WorldRotation.Inverse() * rotation);
-        }*/
 
-        void SetWorldDirection(vec3 direction)
-        {/*
-        vec3 localDirection = (parent_ == scene_ || parent_ == null) ? direction : parent_.WorldRotation.Inverse() * direction;
-        SetRotation(new quat(vec3.ForwardLH, localDirection));*/
+        public void SetWorldDirection(vec3 direction)
+        {
+            vec3 localDirection = (parent_ == scene_ || parent_ == null) ? direction : glm.inverse(parent_.WorldRotation) * direction;
+            Rotation = glm.rotation(vec3.Forward, localDirection);
         }
 
-        void SetWorldScale(float scale)
+        public void SetWorldScale(float scale)
         {
             SetWorldScale(new vec3(scale, scale, scale));
         }
 
-        void SetWorldScale(vec3 scale)
+        public void SetWorldScale(vec3 scale)
         {
             //Scaling = ((parent_ == scene_ || !parent_) ? scale : scale / parent_.WorldScaling);
         }
 
-        void SetWorldTransform(vec3 position, quat rotation)
+        public void SetWorldTransform(vec3 position, quat rotation)
         {
             SetWorldPosition(position);
             SetWorldRotation(rotation);
         }
 
-        void SetWorldTransform(vec3 position, quat rotation, float scale)
-        {
-            SetWorldPosition(position);
-            SetWorldRotation(rotation);
-            SetWorldScale(scale);
-        }
-
-        void SetWorldTransform(vec3 position, quat rotation, vec3 scale)
+        public void SetWorldTransform(vec3 position, quat rotation, float scale)
         {
             SetWorldPosition(position);
             SetWorldRotation(rotation);
             SetWorldScale(scale);
         }
 
-        public void Translate(vec3 delta, TransformSpace space)
+        public void SetWorldTransform(vec3 position, quat rotation, vec3 scale)
+        {
+            SetWorldPosition(position);
+            SetWorldRotation(rotation);
+            SetWorldScale(scale);
+        }
+
+        public void Translate(vec3 delta, TransformSpace space = TransformSpace.LOCAL)
         {
             switch(space)
             {
@@ -248,12 +246,12 @@ namespace SharpGame
 
         }
 
-        public void Rotate(quat delta, TransformSpace space)
+        public void Rotate(quat delta, TransformSpace space = TransformSpace.LOCAL)
         {
             switch(space)
             {
                 case TransformSpace.LOCAL:
-                    rotation_ = (delta * rotation_);
+                    rotation_ = (  rotation_ * delta);
                     rotation_ = glm.normalize(rotation_);
                     break;
 
@@ -265,13 +263,13 @@ namespace SharpGame
                 case TransformSpace.WORLD:
                     if(parent_ == scene_ || parent_ == null)
                     {
-                        rotation_ = (rotation_ * delta);
+                        rotation_ = (delta * rotation_);
                         rotation_ = glm.normalize(rotation_);
                     }
                     else
                     {
-                        //    quat worldRotation = WorldRotation;
-                        //    rotation_ = rotation_ * worldRotation.Inverse() * delta * worldRotation;
+                        quat worldRotation = WorldRotation;
+                        rotation_ = rotation_ * glm.inverse(worldRotation) * delta * worldRotation;
                     }
                     break;
             }
@@ -280,43 +278,41 @@ namespace SharpGame
 
         }
 
-        void RotateAround(vec3 point, quat delta, TransformSpace space)
+        public void RotateAround(vec3 point, quat delta, TransformSpace space)
         {
-#if false
-            vec3 parentSpacePoint;
+            vec3 parentSpacePoint = vec3.Zero;
             quat oldRotation = rotation_;
 
-    switch (space)
-    {
-        case TransformSpace.LOCAL:
-            parentSpacePoint = GetTransform() * point;
-            rotation_ = (rotation_ * delta).Normalized();
-            break;
-
-        case TransformSpace.PARENT:
-            parentSpacePoint = point;
-            rotation_ = (delta * rotation_).Normalized();
-            break;
-
-        case TransformSpace.WORLD:
-            if (parent_ == scene_ || !parent_)
+            switch (space)
             {
-                parentSpacePoint = point;
-                rotation_ = (delta * rotation_).Normalized();
-            }
-            else
-            {
-                parentSpacePoint = parent_->GetWorldTransform().Inverse() * point;
-                quat worldRotation = GetWorldRotation();
-                rotation_ = rotation_ * worldRotation.Inverse() * delta * worldRotation;
-            }
-            break;
-    }
+                case TransformSpace.LOCAL:
+                    parentSpacePoint = Transform * point;
+                    rotation_ = glm.normalize(rotation_ * delta);
+                    break;
 
-    vec3 oldRelativePos = oldRotation.Inverse() * (position_ - parentSpacePoint);
-    position_ = rotation_ * oldRelativePos + parentSpacePoint;
+                case TransformSpace.PARENT:
+                    parentSpacePoint = point;
+                    rotation_ = glm.normalize(delta * rotation_);
+                    break;
 
-#endif
+                case TransformSpace.WORLD:
+                    if (parent_ == scene_ || !parent_)
+                    {
+                        parentSpacePoint = point;
+                        rotation_ = glm.normalize(delta * rotation_);
+                    }
+                    else
+                    {
+                        parentSpacePoint = glm.inverse(parent_.WorldTransform) * point;
+                        quat worldRotation = WorldRotation;
+                        rotation_ = rotation_ * glm.inverse(worldRotation) * delta * worldRotation;
+                    }
+                    break;
+            }
+
+            vec3 oldRelativePos = glm.inverse(oldRotation) * (position_ - parentSpacePoint);
+            position_ = rotation_ * oldRelativePos + parentSpacePoint;
+
             MarkDirty();
 
         }
@@ -334,7 +330,7 @@ namespace SharpGame
 
         public void Roll(float angle, TransformSpace space)
         {
-            Rotate(new quat(angle, vec3.ForwardLH), space);
+            Rotate(new quat(angle, vec3.Forward), space);
         }
 
         public bool LookAt(vec3 target) => LookAt(target, TransformSpace.LOCAL);
@@ -359,15 +355,12 @@ namespace SharpGame
             }
 
             vec3 lookDir = worldSpaceTarget - WorldPosition;
+
             // Check if target is very close, in that case can not reliably calculate lookat direction
             if(lookDir.Equals(vec3.Zero))
                 return false;
 
-            //quat newRotation = quat.LookAtLH(WorldPosition, worldSpaceTarget, up);
-            quat newRotation = glm.quatLookAt(lookDir, up);
-            // Do nothing if setting look rotation failed
-            //if (!newRotation.FromLookRotation(lookDir, up))
-            //    return false;
+            quat newRotation = glm.quatLookAt(lookDir, up);           
 
             SetWorldRotation(newRotation);
             return true;
@@ -450,7 +443,7 @@ namespace SharpGame
                 mat4.Multiply(ref parent_.WorldTransform, ref xform, out Unsafe.AsRef<mat4>((void*)worldTransform_));               
 
 #else
-                worldTransform_ = xform * parent_.WorldTransform;
+                worldTransform_ =  parent_.WorldTransform * xform;
 #endif
                 worldRotation_ =  parent_.WorldRotation *rotation_;
             }

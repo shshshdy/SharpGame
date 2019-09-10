@@ -24,6 +24,7 @@ namespace SharpGame.Samples
             };
 
             camera = scene.GetComponent<Camera>(true);
+            camera.Node.LookAt(vec3.Zero);
 
             {
                 var model = GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32);
@@ -55,7 +56,7 @@ namespace SharpGame.Samples
                 AssimpModelReader.Import("Models/oak_leafs.dae", geoList, bboxList);
                 var model = Model.Create(geoList, bboxList);// Resources.Load<Model>("Models/Mushroom.mdl");
 
-                for(int i = 0; i < 100; i++)
+                for(int i = 0; i < 400; i++)
                 {
                     var node = scene.CreateChild("Model");
                     node.Position = new vec3(MathUtil.Random(-40, 40), 0, MathUtil.Random(-40, 40));

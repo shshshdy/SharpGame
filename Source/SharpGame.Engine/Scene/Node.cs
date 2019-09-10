@@ -191,7 +191,6 @@ namespace SharpGame
                 scene_.NodeRemoved(child);
 
             children_.RemoveAt(i);
-        //    child.Release();
         }
 
         public void RemoveAllChildren()
@@ -441,7 +440,6 @@ namespace SharpGame
 
             component.SetNode(null);
             components_.RemoveAt(index);
-            //component.Release();
         }
 
         public void RemoveAllComponents()
