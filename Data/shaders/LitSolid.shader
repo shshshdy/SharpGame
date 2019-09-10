@@ -105,7 +105,7 @@ Shader "LitSolid"
             #version 450
 
             layout(location = 0) in vec3 inPos;
-            layout(location = 1) in vec2 inUV;
+            layout(location = 4) in vec2 inUV;
 
             // todo: pass via specialization constant
 #define SHADOW_MAP_CASCADE_COUNT 4

@@ -132,6 +132,8 @@ namespace SharpGame
                     }
 
                 }
+                ImGui.Spacing();
+                ImGui.SliderFloat("Image Height", ref debugImageHeight, 100, 1000);
             }
 
             ImGui.End();
