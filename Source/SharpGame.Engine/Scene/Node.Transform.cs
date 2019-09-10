@@ -278,7 +278,7 @@ namespace SharpGame
 
         }
 
-        public void RotateAround(vec3 point, quat delta, TransformSpace space)
+        public void RotateAround(vec3 point, quat delta, TransformSpace space = TransformSpace.LOCAL)
         {
             vec3 parentSpacePoint = vec3.Zero;
             quat oldRotation = rotation_;
@@ -360,7 +360,11 @@ namespace SharpGame
             if(lookDir.Equals(vec3.Zero))
                 return false;
 
-            quat newRotation = glm.quatLookAt(lookDir, up);           
+            quat newRotation = glm.quatLookDirection(lookDir, up);
+
+            //if (!newRotation.FromLookRotation(lookDir, up))
+            //    return false;
+            //= glm.quatLookDirection(lookDir, up);           
 
             SetWorldRotation(newRotation);
             return true;

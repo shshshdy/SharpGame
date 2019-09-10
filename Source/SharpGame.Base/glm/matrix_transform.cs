@@ -167,6 +167,60 @@ namespace SharpGame
             return Result;
         }
 
+        public static quat quatLookAt(vec3 eye, vec3 target, vec3 up)
+        {
+#if GLM_LEFT_HANDED
+            return quatLookAtLH(eye, target, up);
+#else
+            return quatLookAtRH(eye, target, up);
+#endif
+        }
+
+        public static quat quatLookDirection(vec3 direction, vec3 up)
+        {
+#if GLM_LEFT_HANDED
+            return quatLookDirectionLH(direction, up);
+#else
+            return quatLookDirectionRH(direction, up);
+#endif
+        }
+
+        public static quat quatLookAtRH(vec3 eye, vec3 target, vec3 up)
+        {
+            vec3 dir = target - eye;
+
+            return quatLookDirectionRH(dir, up);
+        }
+
+        public static quat quatLookAtLH(vec3 eye, vec3 target, vec3 up)
+        {
+            vec3 dir = target - eye;
+
+            return quatLookDirectionLH(dir, up);
+        }
+
+        public static quat quatLookDirectionRH(vec3 direction, vec3 up)
+        {
+            mat3 Result;
+
+            Result[2] = -normalize(direction);
+            Result[0] = normalize(cross(up, Result[2]));
+            Result[1] = cross(Result[2], Result[0]);
+
+            return quat_cast(Result);
+        }
+
+        public static quat quatLookDirectionLH(vec3 direction, vec3 up)
+        {
+            mat3 Result;
+
+            Result[2] = normalize(direction);
+            Result[0] = normalize(cross(up, Result[2]));
+            Result[1] = cross(Result[2], Result[0]);
+
+            return quat_cast(Result);
+        }
+
         public static void transformation(ref vec3 translation, ref quat rotation, out mat4 result)
         {
             //result = translate(translation) * rotate(rotation);

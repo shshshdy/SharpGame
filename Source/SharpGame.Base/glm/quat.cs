@@ -6,6 +6,7 @@ namespace SharpGame
 {
     using global::System.Runtime.InteropServices;
     using global::System.Runtime.Serialization;
+    using System.Xml;
     using static glm;
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     [DataContract]
@@ -587,35 +588,5 @@ namespace SharpGame
             return quat_cast(res);
         }
 
-        public static quat quatLookAt(vec3 direction, vec3 up)
-        {
-#if GLM_LEFT_HANDED
-            return quatLookAtLH(direction, up);
-#else
-            return quatLookAtRH(direction, up);
-#endif
-        }
-
-        public static quat quatLookAtRH(vec3 direction, vec3 up)
-        {
-            mat3 Result;
-
-            Result[2] = -direction;
-            Result[0] = normalize(cross(up, Result[2]));
-            Result[1] = cross(Result[2], Result[0]);
-
-            return quat_cast(Result);
-        }
-
-        public static quat quatLookAtLH(vec3 direction, vec3 up)
-        {
-            mat3 Result;
-
-            Result[2] = direction;
-            Result[0] = normalize(cross(up, Result[2]));
-            Result[1] = cross(Result[2], Result[0]);
-
-            return quat_cast(Result);
-        }
     }
 }
