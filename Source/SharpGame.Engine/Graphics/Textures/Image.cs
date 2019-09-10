@@ -73,18 +73,6 @@ namespace SharpGame
             };
 
             Image image = new Image(ref createInfo);
-//          
-//             VkMemoryRequirements memoryRequirements;
-//             Device.GetImageMemoryRequirements(image.handle, out memoryRequirements);
-//            
-//             VkMemoryAllocateInfo allocateInfo = VkMemoryAllocateInfo.New();
-//             allocateInfo.allocationSize = memoryRequirements.size;
-//             allocateInfo.memoryTypeIndex = Device.GetMemoryType(memoryRequirements.memoryTypeBits, MemoryPropertyFlags.DeviceLocal);
-//             image.memory = Device.AllocateMemory(ref allocateInfo);
-// 
-//             Device.BindImageMemory(image.handle, image.memory, 0);
-//             image.allocationSize = allocateInfo.allocationSize;
-//             image.memoryTypeIndex = allocateInfo.memoryTypeIndex;
             return image;
         }
 

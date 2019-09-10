@@ -265,10 +265,20 @@ namespace SharpGame
             }
         }
 
-        public void BindResourceSet(int pass, CommandBuffer cmd)
+        public void Bind(int pass, CommandBuffer cmd)
         {
             pipelineResourceSet[pass].PushConstants(cmd);
             pipelineResourceSet[pass].BindGraphicsResourceSet(cmd);
+        }
+
+        public void BindResourceSets(int pass, CommandBuffer cmd)
+        {
+            pipelineResourceSet[pass].BindGraphicsResourceSet(cmd);
+        }
+
+        public void PushConstants(int pass, CommandBuffer cmd)
+        {
+            pipelineResourceSet[pass].PushConstants(cmd);
         }
 
         protected override void Destroy()

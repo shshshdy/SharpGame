@@ -189,5 +189,11 @@ namespace SharpGame
         {
             return (float)Math.Tanh(angle);
         }
+
+        public static void hash_combine(ref uint seed, ref uint hash)
+        {
+            hash += 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            seed ^= hash;
+        }
     }
 }

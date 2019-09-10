@@ -9,21 +9,31 @@ namespace SharpGame.Samples
     {
         public override void Init()
         {
-            scene = new Scene();
+            scene = new Scene()
+            {
+                new Node("Camera", new vec3(0, 2, -30), glm.radians(10, 0, 0) )
+                {
+                    new Camera
+                    {
+                        NearClip = 0.5f,
+                        FarClip = 100,
+                    },
 
-            var cameraNode = scene.CreateChild("Camera", new vec3(0, 2, -30), glm.radians(10, 0, 0));
-            camera = cameraNode.CreateComponent<Camera>();
+                },
+
+            };
+
+            camera = scene.GetComponent<Camera>(true);
 
             {
                 var model = GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32);
                 var node = scene.CreateChild("Plane");
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
-                var mat = Resources.Load<Material>("materials/Grass.material");
-            
+                var mat = Resources.Load<Material>("materials/Grass.material");            
                 staticModel.SetMaterial(mat);
             }
-           // if (false)
+
             {
                 KtxTextureReader texReader = new KtxTextureReader
                 {

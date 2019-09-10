@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace SharpGame
     };
 
     [DataContract]
-    public partial class Node : Object
+    public partial class Node : Object, IEnumerable<Component>
     {
         #region ATTRIBUTE
 
@@ -59,6 +60,13 @@ namespace SharpGame
 
         public Node()
         {
+        }
+
+        public Node(string name, vec3 pos = default, vec3 euler = default)
+        {
+            Name = name;
+            Position = pos;
+            EulerAngles = euler;
         }
 
         public void SetFlags(uint flags, bool recurse)
@@ -303,7 +311,9 @@ namespace SharpGame
             return t;
         }
 
-        public T GetComponent<T>() where T : Component => GetComponent(typeof(T)) as T;
+        public T GetComponent<T>(bool recursive = false) where T : Component
+            => GetComponent(typeof(T), recursive) as T;
+
         public void GetComponents<T>(List<T> dest, bool recursive = false) where T : Component
         {
             dest.Clear();
@@ -494,6 +504,26 @@ namespace SharpGame
                 scene_.NodeRemoved(this);
 
             NativePool<mat4>.Shared.Release(worldTransform_);
+        }
+
+        public void Add(Component component)
+        {
+            AddComponent(component);
+        }
+
+        public void Add(Node child)
+        {
+            AddChild(child);
+        }
+
+        public IEnumerator<Component> GetEnumerator()
+        {
+            return ComponentList.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ComponentList.GetEnumerator();
         }
     }
 

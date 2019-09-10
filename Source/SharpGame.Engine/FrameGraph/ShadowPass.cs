@@ -50,7 +50,7 @@ namespace SharpGame
         FastList<SourceBatch> casters = new FastList<SourceBatch>();
 
         ResourceSet VSSet => vsSet[Graphics.Instance.WorkContext];
-        public ShadowPass() : base(Pass.Depth)
+        public ShadowPass() : base(Pass.Shadow)
         {
             var depthFormat = Device.GetSupportedDepthFormat();
 
@@ -172,9 +172,9 @@ namespace SharpGame
 
         public void DrawShadowBatch(CommandBuffer cb, SourceBatch batch, uint cascade, ResourceSet resourceSet, ResourceSet resourceSet1)
         {
-            var shader = depthShader;
+            var shader = batch.material.Shader;
 
-            var pass = shader.Main;// shader.GetPass(passID);
+            var pass = /*shader.Main;//*/ shader.GetPass(passID);
             var pipe = pass.GetGraphicsPipeline(renderPass, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
@@ -184,6 +184,8 @@ namespace SharpGame
             {
                 cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet1.Set, resourceSet1);
             }
+
+            batch.material.BindResourceSets(pass.passIndex, cb);
 
             cb.PushConstants(pass.PipelineLayout, ShaderStage.Vertex, 0, 64, batch.worldTransform);
             cb.PushConstants(pass.PipelineLayout, ShaderStage.Vertex, 64, ref cascade);

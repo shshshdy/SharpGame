@@ -113,7 +113,7 @@ namespace SharpGame
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
 
-            material.BindResourceSet(pass.passIndex, cb);
+            material.Bind(pass.passIndex, cb);
 
             cb.Draw(3, 1, 0, 0);
         }
@@ -138,7 +138,7 @@ namespace SharpGame
                 cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet1.Set, resourceSet1, offset1);
             }
 
-            batch.material.BindResourceSet(pass.passIndex, cb);
+            batch.material.Bind(pass.passIndex, cb);
             batch.geometry.Draw(cb);
         }
 

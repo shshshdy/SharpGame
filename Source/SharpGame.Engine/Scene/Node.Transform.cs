@@ -51,6 +51,10 @@ namespace SharpGame
         public ref quat RotationRef => ref rotation_;
         protected quat rotation_ = quat.Identity;
 
+        [IgnoreDataMember]
+        public vec3 EulerAngles { get => rotation_.EulerAngles; set => rotation_ = glm.quat(value); }
+       
+
         [DataMember(Order = 10)]
         public vec3 Scaling
         {
