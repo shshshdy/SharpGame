@@ -110,8 +110,10 @@ namespace SharpGame
         {
             foreach (var rs in ResourceSet)
             {
-                if(rs.Updated)
-                cmd.BindGraphicsResourceSet(pipelineLayout, rs.Set, rs);
+                if (rs.Updated)
+                {
+                    cmd.BindGraphicsResourceSet(pipelineLayout, rs.Set, rs);
+                }
             }
         }
 

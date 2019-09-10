@@ -30,7 +30,7 @@ namespace SharpGame
                 {
                     var depthFormat = Device.GetSupportedDepthFormat();
                     depthRT = new RenderTarget(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth);
-
+                    depthRT.SetDescriptor(true);
                 }
 
                 return depthRT;
@@ -79,10 +79,10 @@ namespace SharpGame
                 {
                     srcSubpass = VulkanNative.SubpassExternal,
                     dstSubpass = 0,
-                    srcStageMask = PipelineStageFlags.FragmentShader,// PipelineStageFlags.BottomOfPipe,
-                    dstStageMask = PipelineStageFlags.EarlyFragmentTests,// PipelineStageFlags.ColorAttachmentOutput,
-                    srcAccessMask = AccessFlags.ShaderRead,// AccessFlags.MemoryRead,
-                    dstAccessMask = AccessFlags.DepthStencilAttachmentWrite,// (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
+                    srcStageMask = PipelineStageFlags.FragmentShader,
+                    dstStageMask = PipelineStageFlags.EarlyFragmentTests,
+                    srcAccessMask = AccessFlags.ShaderRead,
+                    dstAccessMask = AccessFlags.DepthStencilAttachmentWrite,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
 
@@ -90,10 +90,10 @@ namespace SharpGame
                 {
                     srcSubpass = 0,
                     dstSubpass = VulkanNative.SubpassExternal,
-                    srcStageMask = PipelineStageFlags.LateFragmentTests,// PipelineStageFlags.ColorAttachmentOutput,
-                    dstStageMask = PipelineStageFlags.FragmentShader,// PipelineStageFlags.BottomOfPipe,
-                    srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,//(AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
-                    dstAccessMask = AccessFlags.ShaderRead,// AccessFlags.MemoryRead,
+                    srcStageMask = PipelineStageFlags.LateFragmentTests,
+                    dstStageMask = PipelineStageFlags.FragmentShader,
+                    srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,
+                    dstAccessMask = AccessFlags.ShaderRead,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
             };
@@ -121,8 +121,8 @@ namespace SharpGame
 
         protected override void DrawImpl(RenderView view)
         {
-            updateCascades(view);
-            updateUniformBuffers(view);
+            UpdateCascades(view);
+            UpdateUniformBuffers(view);
 
             casters.Clear();
 
@@ -229,7 +229,7 @@ namespace SharpGame
             Calculate frustum split depths and matrices for the shadow map cascades
             Based on https://johanmedestrom.wordpress.com/2016/03/18/opengl-cascaded-shadow-maps/
         */
-        void updateCascades(RenderView view)
+        void UpdateCascades(RenderView view)
         {
             vec3 lightDir = view.LightParam.SunlightDir;
             Span<float> cascadeSplits = stackalloc float[SHADOW_MAP_CASCADE_COUNT];
@@ -307,12 +307,10 @@ namespace SharpGame
                 vec3 maxExtents = glm.vec3(radius);
                 vec3 minExtents = -maxExtents;
 
-                //vec3 lightDir = glm.normalize(-lightPos);
                 mat4 lightViewMatrix = glm.lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm.vec3(0.0f, 1.0f, 0.0f));
                 mat4 lightOrthoMatrix = glm.ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
-
                 // Store split distance and matrix in cascade
-                cascades[i].splitDepth = (camera.NearClip + splitDist * clipRange)/* * -1.0f*/;
+                cascades[i].splitDepth = (camera.NearClip + splitDist * clipRange);
                 cascades[i].viewProjMatrix = lightOrthoMatrix * lightViewMatrix;
 
                 view.LightParam.SetLightMatrices(i, ref cascades[i].viewProjMatrix);
@@ -321,7 +319,7 @@ namespace SharpGame
             }
         }
 
-        void updateUniformBuffers(RenderView view)
+        void UpdateUniformBuffers(RenderView view)
         {
             uint offset = 0;
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)

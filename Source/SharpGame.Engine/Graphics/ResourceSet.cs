@@ -137,6 +137,11 @@ namespace SharpGame
                             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
                                 descriptorType, ref texture.descriptor, 1);
                         }
+                        else if (bindable is RenderTarget renderTarget)
+                        {
+                            writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+                                descriptorType, ref renderTarget.descriptor, 1);
+                        }
                         else if(bindable is ImageView textureView)
                         {
                             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,

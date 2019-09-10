@@ -67,7 +67,7 @@ namespace SharpGame
         [DataMember]
         public ShaderReflection ShaderReflection { get; set; }
 
-        internal string FileName {get;set; }
+        internal string FileName { get; set; }
 
         public SpecializationInfo SpecializationInfo { get; set; }
 
