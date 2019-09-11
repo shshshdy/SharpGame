@@ -103,7 +103,6 @@ Shader "Skinned"
 
 				mat3 tbn = mat3(inTangent, inBitangent, inNormal);
 
-				//vec3 N = normalize(inNormal);
 				vec3 N = normalize(tbn * DecodeNormal(texture(NormalMap, inUV)));
 				vec3 L = -SunlightDir;
 

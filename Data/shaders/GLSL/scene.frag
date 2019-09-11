@@ -33,7 +33,6 @@ void main()
 	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; ++i) {
 		if(inViewPos.z > cascadeSplits[i]) {	
 			cascadeIndex = i + 1;
-            //break;
 		}
 	}
 

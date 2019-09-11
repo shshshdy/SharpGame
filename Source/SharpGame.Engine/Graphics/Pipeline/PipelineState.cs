@@ -25,7 +25,7 @@ namespace SharpGame
             polygonMode = PolygonMode.Fill,
             cullMode = CullMode.Back,
             frontFace = FrontFace.CounterClockwise,
-            depthClampEnable = true,
+            depthClampEnable = false,
             lineWidth = 1.0f
         };
 

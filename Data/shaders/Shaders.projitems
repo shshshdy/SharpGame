@@ -18,8 +18,12 @@
     <None Include="$(MSBuildThisFileDirectory)Common\Transform.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsPS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\general.frag" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\general.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\scene.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\scene.vert" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\shadow.frag" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\shadow.vert" />
     <None Include="$(MSBuildThisFileDirectory)Scene.shader" />
     <None Include="$(MSBuildThisFileDirectory)Shadow.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\irmap.comp" />
@@ -30,7 +34,7 @@
     <None Include="$(MSBuildThisFileDirectory)GLSL\tonemap.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\tonemap.vert" />
     <None Include="$(MSBuildThisFileDirectory)ImGUI.shader" />
-    <None Include="$(MSBuildThisFileDirectory)LitAlpha.shader" />
+    <None Include="$(MSBuildThisFileDirectory)LitParticle.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitSolid.shader" />
     <None Include="$(MSBuildThisFileDirectory)Particle.shader" />
     <None Include="$(MSBuildThisFileDirectory)Reflect.shader" />

@@ -7,7 +7,7 @@ Shader "Scene"
 
 	Pass "main"
 	{
-		CullMode = None
+		CullMode = Back
 		FrontFace = CounterClockwise
 
 		@VertexShader

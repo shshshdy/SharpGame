@@ -54,7 +54,7 @@ namespace SharpGame.Samples
                 List<BoundingBox> bboxList = new List<BoundingBox>();
                 AssimpModelReader.Import("Models/oak_trunk.dae", geoList, bboxList);
                 AssimpModelReader.Import("Models/oak_leafs.dae", geoList, bboxList);
-                var model = Model.Create(geoList, bboxList);// Resources.Load<Model>("Models/Mushroom.mdl");
+                var model = Model.Create(geoList, bboxList);
 
                 for(int i = 0; i < 400; i++)
                 {
