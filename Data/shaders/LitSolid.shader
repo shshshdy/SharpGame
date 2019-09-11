@@ -8,6 +8,7 @@ Shader "LitSolid"
 	Pass "main"
 	{
         CullMode = Back
+		FrontFace = Clockwise
 				
 		@VertexShader
 		{

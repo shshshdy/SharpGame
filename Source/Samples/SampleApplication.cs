@@ -120,8 +120,6 @@ namespace SharpGame.Samples
                 }
 
                 ImGui.Separator();
-
-
             }
 
             ImGui.End();

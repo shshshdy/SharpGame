@@ -17,8 +17,8 @@ namespace SharpGame
             Assimp.PostProcessSteps.Triangulate |
             Assimp.PostProcessSteps.SortByPrimitiveType |
             Assimp.PostProcessSteps.PreTransformVertices |
-            Assimp.PostProcessSteps.GenerateNormals |
-            Assimp.PostProcessSteps.GenerateUVCoords |
+            //Assimp.PostProcessSteps.GenerateNormals |
+            //Assimp.PostProcessSteps.GenerateUVCoords |
             Assimp.PostProcessSteps.OptimizeMeshes |
             Assimp.PostProcessSteps.Debone |
             Assimp.PostProcessSteps.ValidateDataStructure;
@@ -81,13 +81,15 @@ namespace SharpGame
         public static bool Import(string file, List<Geometry> geoList, List<BoundingBox> bboxList)
         {
             Assimp.PostProcessSteps assimpFlags =
+            Assimp.PostProcessSteps.FlipWindingOrder |
             Assimp.PostProcessSteps.CalculateTangentSpace |
             Assimp.PostProcessSteps.Triangulate |
             Assimp.PostProcessSteps.SortByPrimitiveType |
             Assimp.PostProcessSteps.PreTransformVertices |
-            Assimp.PostProcessSteps.GenerateNormals |
-            Assimp.PostProcessSteps.GenerateUVCoords |
-            Assimp.PostProcessSteps.OptimizeMeshes |
+            //Assimp.PostProcessSteps.GenerateNormals |
+            Assimp.PostProcessSteps.GenerateSmoothNormals|
+            //Assimp.PostProcessSteps.GenerateUVCoords |
+            //Assimp.PostProcessSteps.OptimizeMeshes |
             Assimp.PostProcessSteps.Debone |
             Assimp.PostProcessSteps.ValidateDataStructure;
 

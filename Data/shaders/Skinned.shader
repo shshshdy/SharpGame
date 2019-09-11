@@ -92,11 +92,6 @@ Shader "Skinned"
 
 			layout(location = 0) out vec4 outFragColor;
 
-			vec3 DecodeNormal(vec4 normalInput)
-			{
-				return normalize(normalInput.rgb * 2.0 - 1.0);
-			}
-
 			void main() 
 			{
 				vec4 diffColor = texture(DiffMap, inUV);
