@@ -6,8 +6,10 @@ layout(location = 0) in vec2 inUV;
 
 void main()
 {
+#ifdef TEX_LOCATION
     float alpha = texture(DiffMap, inUV).a;
     if (alpha < 0.5) {
         discard;
     }
+#endif
 }

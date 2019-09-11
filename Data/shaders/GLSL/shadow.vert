@@ -1,8 +1,9 @@
 #version 450
 
 layout(location = 0) in vec3 inPos;
-layout(location = 4) in vec2 inUV;
-
+#ifdef TEX_LOCATION
+layout(location = TEX_LOCATION) in vec2 inUV;
+#endif
 // todo: pass via specialization constant
 #define SHADOW_MAP_CASCADE_COUNT 4
 
@@ -23,7 +24,9 @@ out gl_PerVertex{
 
 void main()
 {
+#ifdef TEX_LOCATION
     outUV = inUV;
+#endif
     vec4 pos = pushConsts.model * vec4(inPos, 1);
     gl_Position = ubo.cascadeViewProjMat[pushConsts.cascadeIndex] * pos;
 }

@@ -148,6 +148,24 @@ namespace SharpGame
         [IgnoreDataMember]
         public Matrix worldTransform_;
 #endif
+        public Node WithPosition(vec3 pos)
+        {
+            Position = pos;
+            return this;
+        }
+
+        public Node WithRotation(vec3 rot)
+        {
+            EulerAngles = rot;
+            return this;
+        }
+
+        public Node WithScaling(vec3 s)
+        {
+            Scaling = s;
+            return this;
+        }
+
         public void SetTransform(vec3 position, quat rotation)
         {
             position_ = position;

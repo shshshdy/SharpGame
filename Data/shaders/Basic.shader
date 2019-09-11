@@ -53,7 +53,32 @@ Shader "Basic"
 			}
 
 		}
-		
+
+        Pass "shadow"
+        {
+            CullMode = Back
+            FrontFace = Clockwise
+
+            PushConstant model
+            {
+                StageFlags = Vertex
+                Offset = 0
+                Size = 68
+            }
+
+            @VertexShader
+            {
+                #define TEX_LOCATION 2
+                #include "shadow.vert"
+            }
+
+            @PixelShader
+            {
+                #define TEX_LOCATION 2
+                #include "shadow.frag"
+            }
+
+        }
 	}
 
 }

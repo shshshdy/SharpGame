@@ -12,8 +12,9 @@ namespace SharpGame.Samples
         {
             scene = new Scene();
 
-            var cameraNode = scene.CreateChild("Camera", new vec3(0, 20, -30), glm.radians(30, 0, 0));
-            camera = cameraNode.CreateComponent<Camera>();
+            var camera = scene.CreateChild("Camera").
+                WithPosition(new vec3(0, 20, -30)).WithRotation(glm.radians(30, 0, 0))
+                        .CreateComponent<Camera>();
             camera.FarClip = 3000.0f;
 
             {
