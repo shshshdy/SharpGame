@@ -204,7 +204,7 @@ namespace SharpGame
         public void BindComputePipeline(Pass pass)
         {
             var pipe = pass.GetComputePipeline();
-            vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Compute, pass.computeHandle);
+            vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Compute, pipe.handle);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -251,13 +251,13 @@ namespace SharpGame
         public void BindPipeline(PipelineBindPoint pipelineBindPoint, Pass pass, Geometry geometry)
         {
             var pipeline = pass.GetGraphicsPipeline(renderPass, geometry);           
-            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline);
+            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.handle);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindPipeline(PipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
+        public void BindPipeline(PipelineBindPoint pipelineBindPoint, Pipeline pipeline)
         {
-            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline);
+            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.handle);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

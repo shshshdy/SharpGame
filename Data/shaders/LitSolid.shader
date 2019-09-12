@@ -8,7 +8,7 @@ Shader "LitSolid"
 	Pass "main"
 	{
         CullMode = Back
-		FrontFace = Clockwise
+		FrontFace = CounterClockwise
 				
 		@VertexShader
 		{
@@ -25,8 +25,8 @@ Shader "LitSolid"
 
     Pass "shadow"
     {
-        CullMode = Back
-        FrontFace = Clockwise
+        CullMode = Front
+        FrontFace = CounterClockwise
 
         PushConstant model
         {

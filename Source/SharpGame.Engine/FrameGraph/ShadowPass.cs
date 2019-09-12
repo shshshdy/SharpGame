@@ -173,8 +173,7 @@ namespace SharpGame
         public void DrawShadowBatch(CommandBuffer cb, SourceBatch batch, uint cascade, ResourceSet resourceSet, ResourceSet resourceSet1)
         {
             var shader = batch.material.Shader;
-
-            var pass = /*shader.Main;//*/ shader.GetPass(passID);
+            var pass = shader.GetPass(passID);
             var pipe = pass.GetGraphicsPipeline(renderPass, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);

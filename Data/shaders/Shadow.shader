@@ -19,14 +19,14 @@ Shader "Shadow"
 
 		@VertexShader
         {
-    #define TEX_LOCATION 1
-    #include "shadow.vert"
+            #define TEX_LOCATION 1
+            #include "shadow.vert"
         }
 
         @PixelShader
         {
-    #define TEX_LOCATION 1
-    #include "shadow.frag"
+            #define TEX_LOCATION 1
+            #include "shadow.frag"
         }
 
 		

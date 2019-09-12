@@ -28,7 +28,6 @@ Shader "UI"
 			layout (location = 0) out vec4 vsout_color;
 			layout (location = 1) out vec2 vsout_texCoord;
 
-			layout (constant_id = 0) const bool IsClipSpaceYInverted = true;
 			layout (constant_id = 1) const bool UseLegacyColorSpaceHandling = false;
 
 			out gl_PerVertex 
@@ -51,11 +50,8 @@ Shader "UI"
 					vsout_color.rgb = SrgbToLinear(vsin_color.rgb);
 				}*/
 				vsout_texCoord = vsin_texCoord;
+                gl_Position.y = -gl_Position.y;
 				
-				if (IsClipSpaceYInverted)
-				{
-					gl_Position.y = -gl_Position.y;
-				}
 			}
 
 		}

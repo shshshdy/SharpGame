@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 
-#if false
 namespace SharpGame
 {
     /// Debug rendering line.
@@ -59,11 +58,11 @@ namespace SharpGame
         /// Triangles rendered without depth test.
         FastList<DebugTriangle> noDepthTriangles_ = new FastList<DebugTriangle>();
         /// View transform.
-        Matrix view_;
+        mat4 view_;
         /// Projection transform.
-        Matrix projection_;
+        mat4 projection_;
         /// Projection transform in API-specific format.
-        Matrix gpuProjection_;
+        mat4 vkProjection_;
         /// View frustum.
         BoundingFrustum frustum_;
         /// Line antialiasing flag.
@@ -73,7 +72,7 @@ namespace SharpGame
 
         public DebugRenderer()
         {
-            debugMaterial_ = new Material("shaders/Basic.shader");
+            debugMaterial_ = new Material("shaders/Debug.shader");
         }
 
         public void SetView(Camera camera)
@@ -83,7 +82,7 @@ namespace SharpGame
 
             view_ = camera.View;
             projection_ = camera.Projection;
-            //gpuProjection_ = camera->GetGPUProjection();
+            vkProjection_ = camera.VkProjection;
             frustum_ = camera.Frustum;
         }
 
@@ -137,11 +136,11 @@ namespace SharpGame
                 return;
 
             vec3 start = node.WorldPosition;
-            Quaternion rotation = node.WorldRotation;
+            quat rotation = node.WorldRotation;
 
             AddLine(start, start + vec3.Transform(scale * vec3.Right, rotation), Color.Red.ToRgba(), depthTest);
             AddLine(start, start + vec3.Transform(scale * vec3.Up, rotation), Color.Green.ToRgba(), depthTest);
-            AddLine(start, start + vec3.Transform(scale * vec3.ForwardLH, rotation), Color.Blue.ToRgba(), depthTest);
+            AddLine(start, start + vec3.Transform(scale * vec3.Forward, rotation), Color.Blue.ToRgba(), depthTest);
         }
 
         public void AddBoundingBox(ref BoundingBox box, Color color, bool depthTest = true, bool solid = false)
@@ -184,7 +183,7 @@ namespace SharpGame
             }
         }
 
-        public void AddBoundingBox(ref BoundingBox box, ref Matrix transform, Color color, bool depthTest, bool solid)
+        public void AddBoundingBox(ref BoundingBox box, ref mat4 transform, Color color, bool depthTest, bool solid)
         {
             vec3 min = box.Minimum;
             vec3 max = box.Maximum;
@@ -281,7 +280,7 @@ namespace SharpGame
             }
         }
 
-        public void AddSphereSector(ref BoundingSphere sphere, ref Quaternion rotation, float angle,
+        public void AddSphereSector(ref BoundingSphere sphere, ref quat rotation, float angle,
             bool drawLines, Color color, bool depthTest = true)
         {
             if(angle <= 0.0f)
@@ -435,7 +434,7 @@ namespace SharpGame
         /*
             void AddCircle(vec3 center, vec3 normal, float radius, Color color, int steps, bool depthTest)
             {
-                Quaternion orientation = Quaternion.FromRotationTo(vec3.Up, normal.Normalized());
+                quat orientation = quat.FromRotationTo(vec3.Up, normal.Normalized());
                 vec3 p = orientation * new vec3(radius, 0, 0) + center;
                 int uintColor = color.ToUInt();
 
@@ -572,16 +571,19 @@ namespace SharpGame
                 dest += 12;
             }
          
-            int start = 0;
-            int count = 0;
+            uint start = 0;
+            uint count = 0;
 
             if(lines_.Count > 0)
             {
-                count = lines_.Count * 2;   /*
+                count = (uint)lines_.Count * 2;
+
+                cmdBuffer.Draw(count, 1, start, 0);
+                /*
                 graphics.DrawTransient(
                     254, 
                     vertex_buffer,
-                    Matrix.Identity, 
+                    mat4.Identity, 
                     start, 
                     count,
                     state | RenderState.DepthTestLessEqual | RenderState.PrimitiveLines,
@@ -592,12 +594,12 @@ namespace SharpGame
 
             if(noDepthLines_.Count > 0)
             {
-                count = noDepthLines_.Count * 2;
+                count = (uint)noDepthLines_.Count * 2;
                 /*
                 graphics.DrawTransient(
                     254,
                     vertex_buffer,
-                    Matrix.Identity,
+                    mat4.Identity,
                     start,
                     count,
                     state | RenderState.DepthTestAlways | RenderState.PrimitiveLines,
@@ -609,12 +611,12 @@ namespace SharpGame
             
             if(triangles_.Count > 0)
             {
-                count = triangles_.Count * 3;
+                count = (uint)triangles_.Count * 3;
                 /*
                 graphics.DrawTransient(
                     254,
                     vertex_buffer,
-                    Matrix.Identity,
+                    mat4.Identity,
                     start,
                     (int)count,
                     state | RenderState.DepthTestLessEqual | RenderState.PrimitiveTriangles,
@@ -625,12 +627,12 @@ namespace SharpGame
 
             if(noDepthTriangles_.Count > 0)
             {
-                count = noDepthTriangles_.Count * 3;
+                count = (uint)noDepthTriangles_.Count * 3;
                 /*
                 graphics.DrawTransient(
                     254,
                     vertex_buffer,
-                    Matrix.Identity,
+                    mat4.Identity,
                     start,
                     (int)count,
                     state | RenderState.DepthTestAlways | RenderState.PrimitiveTriangles,
@@ -667,4 +669,3 @@ namespace SharpGame
     }
 }
 
-#endif

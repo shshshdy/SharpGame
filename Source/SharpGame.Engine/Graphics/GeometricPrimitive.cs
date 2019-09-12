@@ -29,7 +29,7 @@ namespace SharpGame
                 new VertexPosNormTex(new vec3(-w2, 0, +h2), new vec2(+tileX, +0), new vec3(+0, 1, +0)),
             };
 
-            int[] indices = { 0, 2, 1, 0, 3, 2, };
+            int[] indices = { 0, 1, 2, 0, 2, 3, };
 
             var geom = new Geometry
             {

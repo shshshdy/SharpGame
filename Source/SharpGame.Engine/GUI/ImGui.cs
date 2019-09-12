@@ -21,6 +21,7 @@ namespace SharpGame
         Texture texture;
         Shader uiShader;
         Pass pass;
+        Pipeline pipeline;
         ResourceLayout resourceLayout;
         ResourceSet resourceSet;
         ResourceLayout resourceLayoutTex;
@@ -120,9 +121,9 @@ namespace SharpGame
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
             };
 
-            uiShader = Resources.Instance.Load<Shader>("Shaders/ImGui.shader");
+            uiShader = Resources.Instance.Load<Shader>("Shaders/ImGui.shader");           
             pass = uiShader.Main;
-            pass.VertexLayout = VertexPos2dTexColor.Layout;
+
             var specializationInfo = new SpecializationInfo(
                 new SpecializationMapEntry(0, 0, sizeof(uint)),
                 new SpecializationMapEntry(1, 4, sizeof(uint)));
@@ -133,6 +134,7 @@ namespace SharpGame
 
             renderPass = graphics.CreateRenderPass();
             framebuffers = graphics.CreateSwapChainFramebuffers(renderPass);
+            pipeline = pass.CreateGraphicsPipeline(renderPass, VertexPos2dTexColor.Layout, PrimitiveTopology.TriangleList);
         }
 
         private unsafe void RecreateFontDeviceTexture()
@@ -314,8 +316,6 @@ namespace SharpGame
                 indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
             }
             
-            var pipeline = pass.GetGraphicsPipeline(graphics.RenderPass, null);
-
             cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, 0, resourceSet);
             cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.BindVertexBuffer(0, vb);

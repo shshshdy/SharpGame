@@ -18,6 +18,7 @@
     <None Include="$(MSBuildThisFileDirectory)Common\Transform.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsPS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Debug.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\general.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\general.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\shadow.frag" />

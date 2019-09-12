@@ -211,8 +211,8 @@ namespace SharpGame
         [IgnoreDataMember]
         public VertexLayout VertexLayout { get; set; }
 
-        internal VkPipeline computeHandle;
-        ConcurrentDictionary<long, VkPipeline> pipelines = new ConcurrentDictionary<long, VkPipeline>();
+        internal Pipeline computeHandle;
+        ConcurrentDictionary<long, Pipeline> pipelines = new ConcurrentDictionary<long, Pipeline>();
 
         public Pass()
         {
@@ -409,14 +409,21 @@ namespace SharpGame
             return default;
         }
 
-        internal unsafe VkPipeline GetGraphicsPipeline(RenderPass renderPass, Geometry geometry)
+        public Pipeline GetGraphicsPipeline(RenderPass renderPass, Geometry geometry)
         {
             var vertexInput = geometry != null ? geometry.VertexLayout : VertexLayout;
+            var primitiveTopology = (geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
+
             if (pipelines.TryGetValue(vertexInput.GetHashCode(), out var pipe))
             {
                 return pipe;
             }
-                     
+
+            return CreateGraphicsPipeline(renderPass, vertexInput, primitiveTopology);            
+        }
+
+        public unsafe Pipeline CreateGraphicsPipeline(RenderPass renderPass, VertexLayout vertexInput, PrimitiveTopology primitiveTopology)
+        {
             VkGraphicsPipelineCreateInfo pipelineCreateInfo = VkGraphicsPipelineCreateInfo.New();
             pipelineCreateInfo.layout = PipelineLayout.handle;
             pipelineCreateInfo.renderPass = renderPass.handle;
@@ -425,7 +432,7 @@ namespace SharpGame
             pipelineCreateInfo.basePipelineHandle = new VkPipeline();
 
             VkPipelineVertexInputStateCreateInfo vertexInputState;
-            if(vertexInput != null)
+            if (vertexInput != null)
             {
                 vertexInput.ToNative(out vertexInputState);
             }
@@ -442,7 +449,7 @@ namespace SharpGame
             pipelineCreateInfo.pStages = shaderStageCreateInfos;
 
             var pipelineInputAssemblyStateCreateInfo = VkPipelineInputAssemblyStateCreateInfo.New();
-            pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)(geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
+            pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)primitiveTopology;
             pipelineInputAssemblyStateCreateInfo.flags = 0;
             pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = false;
             pipelineCreateInfo.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo;
@@ -472,20 +479,19 @@ namespace SharpGame
                 pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
             }
 
-            var handle = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
-
+            var handle = new Pipeline(Device.CreateGraphicsPipeline(ref pipelineCreateInfo));
             pipelines.TryAdd(vertexInput.GetHashCode(), handle);
             return handle;
         }
 
-        internal unsafe VkPipeline GetComputePipeline()
+        public unsafe Pipeline GetComputePipeline()
         {
             if (!IsComputeShader)
             {
-                return 0;
+                return null;
             }
 
-            if (computeHandle != 0)
+            if (computeHandle != null)
             {
                 return computeHandle;
             }
@@ -494,7 +500,7 @@ namespace SharpGame
             pipelineCreateInfo.stage = GetComputeStageCreateInfo();
             pipelineCreateInfo.layout = PipelineLayout.handle;
 
-            computeHandle = Device.CreateComputePipeline(ref pipelineCreateInfo);
+            computeHandle = new Pipeline(Device.CreateComputePipeline(ref pipelineCreateInfo));
             return computeHandle;
 
         }
@@ -508,15 +514,15 @@ namespace SharpGame
 
             foreach (var kvp in pipelines)
             {
-                Device.DestroyPipeline(kvp.Value);
+                kvp.Value.Dispose();
             }
 
             pipelines.Clear();
 
-            if (computeHandle != 0)
+            if (computeHandle != null)
             {
-                Device.DestroyPipeline(computeHandle);
-                computeHandle = 0;
+                computeHandle.Dispose();
+                computeHandle = null;
             }
 
             PipelineLayout.Dispose();
