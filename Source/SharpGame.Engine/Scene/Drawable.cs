@@ -72,6 +72,9 @@ namespace SharpGame
         [IgnoreDataMember]
         internal int index = -1;
 
+        internal Octant Octant { get; set; }
+
+
         /// World-space bounding box.
         [IgnoreDataMember]
         public ref BoundingBox WorldBoundingBox

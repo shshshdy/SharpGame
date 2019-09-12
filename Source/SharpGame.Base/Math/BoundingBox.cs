@@ -294,6 +294,10 @@ namespace SharpGame
             return Contains(ref box);
         }
 
+        public Intersection IsInside(ref BoundingBox box)
+        {
+            return Collision.BoxContainsBox(ref box, ref this);
+        }
         /// <summary>
         /// Determines whether the current objects contains a <see cref="BoundingSphere"/>.
         /// </summary>
