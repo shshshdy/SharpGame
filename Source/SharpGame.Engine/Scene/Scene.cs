@@ -33,6 +33,9 @@ namespace SharpGame
 
         internal List<Drawable> drawables = new List<Drawable>();
 
+        internal bool threadedUpdate_ = false;
+        public bool IsThreadedUpdate => threadedUpdate_;
+
         public Scene()
         {
             NodeAdded(this);
@@ -178,7 +181,7 @@ namespace SharpGame
             }
         }
 
-        public void Raycast(ref RayQuery query)
+        public void Raycast(ref RayOctreeQuery query)
         {
             if(spacePartitioner != null)
             {
@@ -189,7 +192,7 @@ namespace SharpGame
             throw new NotImplementedException();
         }
 
-        public void RaycastSingle(ref RayQuery query)
+        public void RaycastSingle(ref RayOctreeQuery query)
         {
             if(spacePartitioner != null)
             {

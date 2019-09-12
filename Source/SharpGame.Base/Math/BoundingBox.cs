@@ -74,6 +74,12 @@ namespace SharpGame
             this.Maximum = maximum;
         }
 
+        public BoundingBox(float min, float max)
+        {
+            Minimum = new vec3(min, min, min);
+            Maximum = new vec3(max, max, max);
+        }
+
         public void Clear()
         {
             Minimum = new vec3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);

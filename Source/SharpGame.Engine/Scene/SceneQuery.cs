@@ -6,36 +6,36 @@ namespace SharpGame
 {
     public abstract class SceneQuery
     {
-        public abstract Intersection Test(ref BoundingBox box, bool inside);
-        /// Intersection test for drawables.
-         public abstract void TestDrawables(ArraySegment<Drawable> start, bool inside);
-    }
-
-    public class BaseSceneQuery : SceneQuery
-    {
         public uint viewMask;
         public uint drawableFlags;
         public FastList<Drawable> result;
+        public abstract Intersection TestOctant(ref BoundingBox box, bool inside);
+        /// Intersection test for drawables.
+        public abstract void TestDrawables(Span<Drawable> start, bool inside);
+    }
 
-        public BaseSceneQuery(FastList<Drawable> result, uint drawableFlags, uint viewMask)
+    public class OctreeQuery : SceneQuery
+    {
+
+        public OctreeQuery(FastList<Drawable> result, uint drawableFlags, uint viewMask)
         {
             this.viewMask = viewMask;
             this.drawableFlags = viewMask;
             this.result = result;
         }
 
-        public override void TestDrawables(ArraySegment<Drawable> start, bool inside)
+        public override void TestDrawables(Span<Drawable> start, bool inside)
         {
         }
 
-        public override Intersection Test(ref BoundingBox box, bool inside)
+        public override Intersection TestOctant(ref BoundingBox box, bool inside)
         {
             return Intersection.InSide;
         }
 
     }
 
-    public class FrustumQuery : BaseSceneQuery
+    public class FrustumQuery : OctreeQuery
     {
         /// Frustum.
         public Camera camera;
@@ -48,7 +48,7 @@ namespace SharpGame
             this.result = result;
         }
 
-        public override void TestDrawables(ArraySegment<Drawable> start, bool inside)
+        public override void TestDrawables(Span<Drawable> start, bool inside)
         {
             foreach(Drawable drawable in start)
             {
@@ -60,7 +60,7 @@ namespace SharpGame
             }
         }
 
-        public override Intersection Test(ref BoundingBox box, bool inside)
+        public override Intersection TestOctant(ref BoundingBox box, bool inside)
         {
             if (inside)
                 return Intersection.InSide;
@@ -78,9 +78,9 @@ namespace SharpGame
         void GetDrawables(SceneQuery query, Action<Drawable> drawables);
 
         /// Return drawable objects by a ray query.
-        void Raycast(ref RayQuery query);
+        void Raycast(ref RayOctreeQuery query);
         /// Return the closest drawable object by a ray query.
-        void RaycastSingle(ref RayQuery query);
+        void RaycastSingle(ref RayOctreeQuery query);
     }
 
     /// Graphics raycast detail level.
@@ -111,7 +111,7 @@ namespace SharpGame
         
     }
 
-    public struct RayQuery
+    public struct RayOctreeQuery
     {
         /// Result vector reference.
         public List<RayQueryResult> result_;

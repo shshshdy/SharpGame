@@ -143,6 +143,8 @@ namespace SharpGame
         /// Last visible frame number.
         protected int viewFrameNumber_;
 
+        public bool updateQueued_ = false;
+
         public Drawable()
         {
         }
@@ -204,6 +206,9 @@ namespace SharpGame
             else if(!enabled && index != -1)
                 RemoveFromScene();
         }
+
+        /// Process octree raycast. May be called from a worker thread.
+        public virtual void ProcessRayQuery(RayOctreeQuery query, List<RayQueryResult> results) { }
 
         public override void OnNodeSet(Node node)
         {

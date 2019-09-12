@@ -394,12 +394,12 @@ namespace SharpGame
             throw new NotImplementedException();
         }
 
-        public void Raycast(ref RayQuery query)
+        public void Raycast(ref RayOctreeQuery query)
         {
             throw new NotImplementedException();
         }
 
-        public void RaycastSingle(ref RayQuery query)
+        public void RaycastSingle(ref RayOctreeQuery query)
         {
             throw new NotImplementedException();
         }

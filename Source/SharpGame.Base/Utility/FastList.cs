@@ -577,6 +577,11 @@ namespace SharpGame
             return destinationArray;
         }
 
+        public Span<T> AsSpan()
+        {
+            return items.AsSpan(0, size);
+        }
+
         public void TrimExcess()
         {
             var num = (int) (Items.Length*0.9);
