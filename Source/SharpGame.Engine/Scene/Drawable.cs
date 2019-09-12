@@ -72,7 +72,7 @@ namespace SharpGame
         [IgnoreDataMember]
         internal int index = -1;
 
-        internal Octant Octant { get; set; }
+        internal Octant octant;
 
 
         /// World-space bounding box.
@@ -208,7 +208,9 @@ namespace SharpGame
         }
 
         /// Process octree raycast. May be called from a worker thread.
-        public virtual void ProcessRayQuery(RayOctreeQuery query, List<RayQueryResult> results) { }
+        public virtual void ProcessRayQuery(RayOctreeQuery query, List<RayQueryResult> results)
+        {
+        }
 
         public override void OnNodeSet(Node node)
         {
@@ -226,11 +228,16 @@ namespace SharpGame
 
         public override void OnMarkedDirty(Node node)
         {
-            worldBoundingBoxDirty_ = true;           
+            worldBoundingBoxDirty_ = true;
+
+            if (!updateQueued_ && octant != null)
+                octant.Root.QueueUpdate(this);
         }
 
         public void MarkForUpdate()
         {
+            if (!updateQueued_ && octant != null)
+                octant.Root.QueueUpdate(this);
         }
 
         void AddToScene()
@@ -256,7 +263,14 @@ namespace SharpGame
             if(index >= 0)
             {
                 Scene scene = Scene;
-                
+                if(octant != null)
+                {
+
+                    Octree octree = octant.Root;
+                    if (updateQueued_)
+                        octree.CancelUpdate(this);
+                }
+
                 scene.RemoveDrawable(this);
             }
         }

@@ -95,7 +95,7 @@ namespace SharpGame
         internal FastList<Light> lights = new FastList<Light>();
         internal FastList<SourceBatch> batches = new FastList<SourceBatch>();
 
-        FrustumQuery frustumOctreeQuery;
+        FrustumOctreeQuery frustumOctreeQuery;
 
         private FrameInfo frameInfo;
 
@@ -133,7 +133,7 @@ namespace SharpGame
                         
             FrameGraph = renderPath;
 
-            frustumOctreeQuery = new FrustumQuery(drawables, camera, Drawable.DRAWABLE_ANY, ViewMask);
+            frustumOctreeQuery = new FrustumOctreeQuery(drawables, camera, Drawable.DRAWABLE_ANY, ViewMask);
 
         }
 

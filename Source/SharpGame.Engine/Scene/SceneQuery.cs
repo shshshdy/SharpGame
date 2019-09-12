@@ -4,18 +4,11 @@ using System.Text;
 
 namespace SharpGame
 {
-    public abstract class SceneQuery
+    public abstract class OctreeQuery
     {
         public uint viewMask;
         public uint drawableFlags;
         public FastList<Drawable> result;
-        public abstract Intersection TestOctant(ref BoundingBox box, bool inside);
-        /// Intersection test for drawables.
-        public abstract void TestDrawables(Span<Drawable> start, bool inside);
-    }
-
-    public class OctreeQuery : SceneQuery
-    {
 
         public OctreeQuery(FastList<Drawable> result, uint drawableFlags, uint viewMask)
         {
@@ -24,23 +17,17 @@ namespace SharpGame
             this.result = result;
         }
 
-        public override void TestDrawables(Span<Drawable> start, bool inside)
-        {
-        }
-
-        public override Intersection TestOctant(ref BoundingBox box, bool inside)
-        {
-            return Intersection.InSide;
-        }
+        public abstract void TestDrawables(Span<Drawable> start, bool inside);
+        public abstract Intersection TestOctant(ref BoundingBox box, bool inside);     
 
     }
 
-    public class FrustumQuery : OctreeQuery
+    public class FrustumOctreeQuery : OctreeQuery
     {
         /// Frustum.
         public Camera camera;
 
-        public FrustumQuery(FastList<Drawable> result, Camera camera, uint drawableFlags, uint viewMask)
+        public FrustumOctreeQuery(FastList<Drawable> result, Camera camera, uint drawableFlags, uint viewMask)
             : base(result, drawableFlags, viewMask)
         {
             this.viewMask = viewMask;
@@ -69,13 +56,34 @@ namespace SharpGame
         }
     }
 
+    /// %Frustum octree query for shadowcasters.
+    public class ShadowCasterOctreeQuery : FrustumOctreeQuery
+    {
+         public ShadowCasterOctreeQuery(FastList<Drawable> result, in Camera frustum, byte drawableFlags = 0xff,  uint viewMask = 0xffffffff) 
+            : base(result, frustum, drawableFlags, viewMask)
+        {
+        }
+
+        public override void TestDrawables(Span<Drawable> start, bool inside)
+        {
+            foreach (Drawable drawable in start)
+            {
+                if ((drawable.DrawableFlags & drawableFlags) != 0 && (drawable.ViewMask & viewMask) != 0)
+                {
+                    if (inside || camera.Frustum.Intersects(ref drawable.WorldBoundingBox))
+                        result.Add(drawable);
+                }
+            }
+        }
+    }
+
     public interface ISpacePartitioner
     {
         void InsertDrawable(Drawable drawable);
         void RemoveDrawable(Drawable drawable);
 
         /// Return drawable objects by a query.
-        void GetDrawables(SceneQuery query, Action<Drawable> drawables);
+        void GetDrawables(OctreeQuery query, Action<Drawable> drawables);
 
         /// Return drawable objects by a ray query.
         void Raycast(ref RayOctreeQuery query);
