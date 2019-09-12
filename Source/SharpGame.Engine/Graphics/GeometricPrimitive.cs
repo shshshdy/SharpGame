@@ -21,21 +21,21 @@ namespace SharpGame
             float w2 = 0.5f * width;
             float h2 = 0.5f * height;
 
-            VertexPosNormTexColor[] vertices =
+            VertexPosNormTex[] vertices =
             {                
-                new VertexPosNormTexColor(new vec3(-w2, 0, -h2), new vec3(+0, 1, +0), new Vector2(+0, +0), Color.White),
-                new VertexPosNormTexColor(new vec3(+w2, 0, -h2), new vec3(+0, 1, +0), new Vector2(+tileX, +0), Color.White),
-                new VertexPosNormTexColor(new vec3(+w2, 0, +h2), new vec3(+0, 1, +0), new Vector2(+tileX, +tileZ), Color.White),
-                new VertexPosNormTexColor(new vec3(-w2, 0, +h2), new vec3(+0, 1, +0), new Vector2(+tileX, +0), Color.White),
+                new VertexPosNormTex(new vec3(-w2, 0, -h2), new vec2(+0, +0),   new vec3(+0, 1, +0)),
+                new VertexPosNormTex(new vec3(+w2, 0, -h2), new vec2(+tileX, +0), new vec3(+0, 1, +0)),
+                new VertexPosNormTex(new vec3(+w2, 0, +h2), new vec2(+tileX, +tileZ), new vec3(+0, 1, +0)),
+                new VertexPosNormTex(new vec3(-w2, 0, +h2), new vec2(+tileX, +0), new vec3(+0, 1, +0)),
             };
 
-            int[] indices = { 0, 1, 2, 0, 2, 3, };
+            int[] indices = { 0, 2, 1, 0, 3, 2, };
 
             var geom = new Geometry
             {
                 VertexBuffers = new[] { DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
                 IndexBuffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices),
-                VertexLayout = VertexPosNormTexColor.Layout
+                VertexLayout = VertexPosNormTex.Layout
             };
 
             geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length);

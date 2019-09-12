@@ -2,7 +2,7 @@
   "ShaderResource": {
     "Type": "Shader",
     "FileID": "cbc0dc9e-7df2-4eb4-b14b-8c793c45e66b",
-    "FilePath": "Shaders/Scene.shader"
+    "FilePath": "Shaders/LitSolid.shader"
   },
   "ShadingMode": "Default",
   "TextureParameters": [

@@ -17,6 +17,7 @@ Shader "LitSolid"
 		
 		@PixelShader
 		{
+            #define SHADOW
             #include "general.frag"
 		}
 		
@@ -36,13 +37,13 @@ Shader "LitSolid"
 
         @VertexShader
         {
-            #define TEX_LOCATION 4
+            #define TEX_LOCATION 1
             #include "shadow.vert"
         }
 
         @PixelShader
         {
-            #define TEX_LOCATION 4
+            #define TEX_LOCATION 1            
             #include "shadow.frag"
         }
 

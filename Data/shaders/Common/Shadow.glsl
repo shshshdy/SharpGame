@@ -6,6 +6,28 @@ const mat4 biasMat = mat4(
 	0.5, 0.5, 0.0, 1.0 
 );
 
+#define ambient 0.3
+
+uint GetCascadeIndex(float viewZ)
+{
+    // Get cascade index for the current fragment's view position
+	uint cascadeIndex = 0;
+	for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; ++i) {
+		if(viewZ > cascadeSplits[i]) {	
+			cascadeIndex = i + 1;
+		}
+	}
+
+    return cascadeIndex;
+}
+
+vec4 GetShadowPos(uint cascadeIndex, vec3 worldPos)
+{
+	// Depth compare for shadowing
+	vec4 shadowCoord = (biasMat * LightMatrices[cascadeIndex]) * vec4(worldPos, 1.0);
+    return shadowCoord;
+}
+
 float textureProj(vec4 shadowCoord, vec2 offset, uint cascadeIndex)
 {
 	float shadow = 1.0;

@@ -428,7 +428,7 @@ namespace SharpGame
 
             Vector2 texCoord = key.TexCoordIndex == -1 ? Vector2.Zero : TexCoords[key.TexCoordIndex - 1];
 
-            return new VertexPosNormTex(position, normal, texCoord);
+            return new VertexPosNormTex(position, texCoord, normal);
         }
 
         private vec3 ComputeNormal(FaceVertex v1, FaceVertex v2, FaceVertex v3)

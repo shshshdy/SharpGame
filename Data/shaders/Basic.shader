@@ -17,8 +17,8 @@ Shader "Basic"
 			#include "UniformsVS.glsl"
   
             layout(location = 0) in vec3 in_Position;
-            layout(location = 1) in vec3 in_Normal;
-            layout(location = 2) in vec2 in_TexCoord;
+            layout(location = 1) in vec2 in_TexCoord;
+            layout(location = 2) in vec3 in_Normal;
 
             layout (location = 0) out vec2 out_TexCoord;
 
@@ -68,13 +68,13 @@ Shader "Basic"
 
             @VertexShader
             {
-                #define TEX_LOCATION 2
+                #define TEX_LOCATION 1
                 #include "shadow.vert"
             }
 
             @PixelShader
             {
-                #define TEX_LOCATION 2
+                #define TEX_LOCATION 1
                 #include "shadow.frag"
             }
 

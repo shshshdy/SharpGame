@@ -378,12 +378,7 @@ namespace SharpGame
             if(lookDir.Equals(vec3.Zero))
                 return false;
 
-            quat newRotation = glm.quatLookDirection(lookDir, up);
-
-            //if (!newRotation.FromLookRotation(lookDir, up))
-            //    return false;
-            //= glm.quatLookDirection(lookDir, up);           
-
+            quat newRotation = glm.quatLookDirection(lookDir, up);         
             SetWorldRotation(newRotation);
             return true;
         }
@@ -460,10 +455,7 @@ namespace SharpGame
             else
             {
 #if UNMANAGED_MATRIX
-                //Matrix m = xform * parent_.WorldTransform;
-                //Unsafe.Write((void*)worldTransform_, m);
                 mat4.Multiply(ref parent_.WorldTransform, ref xform, out Unsafe.AsRef<mat4>((void*)worldTransform_));               
-
 #else
                 worldTransform_ =  parent_.WorldTransform * xform;
 #endif

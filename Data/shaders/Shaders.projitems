@@ -20,11 +20,8 @@
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\general.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\general.vert" />
-    <None Include="$(MSBuildThisFileDirectory)GLSL\scene.frag" />
-    <None Include="$(MSBuildThisFileDirectory)GLSL\scene.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\shadow.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\shadow.vert" />
-    <None Include="$(MSBuildThisFileDirectory)Scene.shader" />
     <None Include="$(MSBuildThisFileDirectory)Shadow.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\irmap.comp" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\pbr.frag" />

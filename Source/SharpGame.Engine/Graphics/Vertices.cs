@@ -10,12 +10,12 @@ namespace SharpGame
     public struct VertexPosNormTex
     {
         public vec3 position;
-        public vec3 normal;
         public vec2 texcoord;
+        public vec3 normal;
 
         public static int Size => Utilities.SizeOf<VertexPosNormTex>();
 
-        public VertexPosNormTex(vec3 p, vec3 n, vec2 uv)
+        public VertexPosNormTex(vec3 p, vec2 uv, vec3 n)
         {
             position = p;
             normal = n;
@@ -25,15 +25,15 @@ namespace SharpGame
         public VertexPosNormTex(float px, float py, float pz, float nx, float ny, float nz, float u, float v)
         {
             position = new vec3(px, py, pz);
-            normal = new vec3(nx, ny, nz);
             texcoord = new vec2(u, v);
+            normal = new vec3(nx, ny, nz);
         }
 
         public static VertexLayout Layout = new VertexLayout
         (
             new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
-            new VertexInputAttribute(0, 2, Format.R32g32Sfloat, 24)
+            new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 12),
+            new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 20)
         );
     }
 
@@ -41,20 +41,20 @@ namespace SharpGame
     public struct VertexPosTBNTex
     {
         public vec3 position;
+        public vec2 texcoord;
         public vec3 normal;
         public vec3 tangent;
         public vec3 bitangent;
-        public vec2 texcoord;
 
         public static int Size => Utilities.SizeOf<VertexPosTBNTex>();
 
         public static VertexLayout Layout = new VertexLayout
         (
             new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
-            new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 24),
-            new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, 36),
-            new VertexInputAttribute(0, 4, Format.R32g32Sfloat, 48)
+            new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 12),
+            new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 20),
+            new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, 32),
+            new VertexInputAttribute(0, 4, Format.R32g32b32Sfloat, 44)            
         );
     }
 
@@ -62,8 +62,8 @@ namespace SharpGame
     public struct VertexPosNormTexColor
     {
         public vec3 position;
-        public vec3 normal;
         public vec2 texcoord;
+        public vec3 normal;
         public Color color;
 
         public static int Size => Utilities.SizeOf<VertexPosNormTexColor>();
@@ -79,8 +79,8 @@ namespace SharpGame
         public static VertexLayout Layout = new VertexLayout
         (
             new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexInputAttribute(0, 1, Format.R32g32b32Sfloat, 12),
-            new VertexInputAttribute(0, 2, Format.R32g32Sfloat, 24),
+            new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
+            new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 20),
             new VertexInputAttribute(0, 3, Format.R8g8b8a8Unorm, 32)
         );
     }
