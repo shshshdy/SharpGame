@@ -21,12 +21,12 @@ namespace SharpGame
             float w2 = 0.5f * width;
             float h2 = 0.5f * height;
 
-            VertexPosNormTex[] vertices =
+            VertexPosTexNorm[] vertices =
             {                
-                new VertexPosNormTex(new vec3(-w2, 0, -h2), new vec2(+0, +0),   new vec3(+0, 1, +0)),
-                new VertexPosNormTex(new vec3(+w2, 0, -h2), new vec2(+tileX, +0), new vec3(+0, 1, +0)),
-                new VertexPosNormTex(new vec3(+w2, 0, +h2), new vec2(+tileX, +tileZ), new vec3(+0, 1, +0)),
-                new VertexPosNormTex(new vec3(-w2, 0, +h2), new vec2(+tileX, +0), new vec3(+0, 1, +0)),
+                new VertexPosTexNorm(new vec3(-w2, 0, -h2), new vec2(+0, +0),   new vec3(+0, 1, +0)),
+                new VertexPosTexNorm(new vec3(+w2, 0, -h2), new vec2(+tileX, +0), new vec3(+0, 1, +0)),
+                new VertexPosTexNorm(new vec3(+w2, 0, +h2), new vec2(+tileX, +tileZ), new vec3(+0, 1, +0)),
+                new VertexPosTexNorm(new vec3(-w2, 0, +h2), new vec2(+tileX, +0), new vec3(+0, 1, +0)),
             };
 
             int[] indices = { 0, 1, 2, 0, 2, 3, };
@@ -35,7 +35,7 @@ namespace SharpGame
             {
                 VertexBuffers = new[] { DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
                 IndexBuffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices),
-                VertexLayout = VertexPosNormTex.Layout
+                VertexLayout = VertexPosTexNorm.Layout
             };
 
             geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length);
@@ -57,38 +57,38 @@ namespace SharpGame
             float h2 = 0.5f * height;
             float d2 = 0.5f * depth;
 
-            VertexPosNormTex[] vertices =
+            VertexPosTexNorm[] vertices =
             {
                 // Fill in the front face vertex data.
-                new VertexPosNormTex(-w2, +h2, -d2, +0, +0, -1, +0, +0),
-                new VertexPosNormTex(-w2, -h2, -d2, +0, +0, -1, +0, +1),
-                new VertexPosNormTex(+w2, -h2, -d2, +0, +0, -1, +1, +1),
-                new VertexPosNormTex(+w2, +h2, -d2, +0, +0, -1, +1, +0),
+                new VertexPosTexNorm(-w2, +h2, -d2, +0, +0, -1, +0, +0),
+                new VertexPosTexNorm(-w2, -h2, -d2, +0, +0, -1, +0, +1),
+                new VertexPosTexNorm(+w2, -h2, -d2, +0, +0, -1, +1, +1),
+                new VertexPosTexNorm(+w2, +h2, -d2, +0, +0, -1, +1, +0),
                 // Fill in the back face vertex data.
-                new VertexPosNormTex(-w2, +h2, +d2, +0, +0, +1, +1, +0),
-                new VertexPosNormTex(+w2, +h2, +d2, +0, +0, +1, +0, +0),
-                new VertexPosNormTex(+w2, -h2, +d2, +0, +0, +1, +0, +1),
-                new VertexPosNormTex(-w2, -h2, +d2, +0, +0, +1, +1, +1),
+                new VertexPosTexNorm(-w2, +h2, +d2, +0, +0, +1, +1, +0),
+                new VertexPosTexNorm(+w2, +h2, +d2, +0, +0, +1, +0, +0),
+                new VertexPosTexNorm(+w2, -h2, +d2, +0, +0, +1, +0, +1),
+                new VertexPosTexNorm(-w2, -h2, +d2, +0, +0, +1, +1, +1),
                 // Fill in the top face vertex data.
-                new VertexPosNormTex(-w2, -h2, -d2, +0, +1, +0, +0, +0),
-                new VertexPosNormTex(-w2, -h2, +d2, +0, +1, +0, +0, +1),
-                new VertexPosNormTex(+w2, -h2, +d2, +0, +1, +0, +1, +1),
-                new VertexPosNormTex(+w2, -h2, -d2, +0, +1, +0, +1, +0),
+                new VertexPosTexNorm(-w2, -h2, -d2, +0, +1, +0, +0, +0),
+                new VertexPosTexNorm(-w2, -h2, +d2, +0, +1, +0, +0, +1),
+                new VertexPosTexNorm(+w2, -h2, +d2, +0, +1, +0, +1, +1),
+                new VertexPosTexNorm(+w2, -h2, -d2, +0, +1, +0, +1, +0),
                 // Fill in the bottom face vertex data.
-                new VertexPosNormTex(-w2, +h2, -d2, +0, -1, +0, +1, +0),
-                new VertexPosNormTex(+w2, +h2, -d2, +0, -1, +0, +0, +0),
-                new VertexPosNormTex(+w2, +h2, +d2, +0, -1, +0, +0, +1),
-                new VertexPosNormTex(-w2, +h2, +d2, +0, -1, +0, +1, +1),
+                new VertexPosTexNorm(-w2, +h2, -d2, +0, -1, +0, +1, +0),
+                new VertexPosTexNorm(+w2, +h2, -d2, +0, -1, +0, +0, +0),
+                new VertexPosTexNorm(+w2, +h2, +d2, +0, -1, +0, +0, +1),
+                new VertexPosTexNorm(-w2, +h2, +d2, +0, -1, +0, +1, +1),
                 // Fill in the left face vertex data.
-                new VertexPosNormTex(-w2, +h2, +d2, -1, +0, +0, +0, +0),
-                new VertexPosNormTex(-w2, -h2, +d2, -1, +0, +0, +0, +1),
-                new VertexPosNormTex(-w2, -h2, -d2, -1, +0, +0, +1, +1),
-                new VertexPosNormTex(-w2, +h2, -d2, -1, +0, +0, +1, +0),
+                new VertexPosTexNorm(-w2, +h2, +d2, -1, +0, +0, +0, +0),
+                new VertexPosTexNorm(-w2, -h2, +d2, -1, +0, +0, +0, +1),
+                new VertexPosTexNorm(-w2, -h2, -d2, -1, +0, +0, +1, +1),
+                new VertexPosTexNorm(-w2, +h2, -d2, -1, +0, +0, +1, +0),
                 // Fill in the right face vertex data.
-                new VertexPosNormTex(+w2, +h2, -d2, +1, +0, +0, +0, +0),
-                new VertexPosNormTex(+w2, -h2, -d2, +1, +0, +0, +0, +1),
-                new VertexPosNormTex(+w2, -h2, +d2, +1, +0, +0, +1, +1),
-                new VertexPosNormTex(+w2, +h2, +d2, +1, +0, +0, +1, +0)
+                new VertexPosTexNorm(+w2, +h2, -d2, +1, +0, +0, +0, +0),
+                new VertexPosTexNorm(+w2, -h2, -d2, +1, +0, +0, +0, +1),
+                new VertexPosTexNorm(+w2, -h2, +d2, +1, +0, +0, +1, +1),
+                new VertexPosTexNorm(+w2, +h2, +d2, +1, +0, +0, +1, +0)
             };
 
             int[] indices =
@@ -111,7 +111,7 @@ namespace SharpGame
             {
                 VertexBuffers = new[] { DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
                 IndexBuffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices),
-                VertexLayout = VertexPosNormTex.Layout
+                VertexLayout = VertexPosTexNorm.Layout
             };
 
             geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length);

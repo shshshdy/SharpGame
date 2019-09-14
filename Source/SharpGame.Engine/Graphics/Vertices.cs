@@ -7,22 +7,22 @@ using Vulkan;
 namespace SharpGame
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPosNormTex
+    public struct VertexPosTexNorm
     {
         public vec3 position;
         public vec2 texcoord;
         public vec3 normal;
 
-        public static int Size => Utilities.SizeOf<VertexPosNormTex>();
+        public static int Size => Utilities.SizeOf<VertexPosTexNorm>();
 
-        public VertexPosNormTex(vec3 p, vec2 uv, vec3 n)
+        public VertexPosTexNorm(vec3 p, vec2 uv, vec3 n)
         {
             position = p;
             normal = n;
             texcoord = uv;
         }
 
-        public VertexPosNormTex(float px, float py, float pz, float nx, float ny, float nz, float u, float v)
+        public VertexPosTexNorm(float px, float py, float pz, float nx, float ny, float nz, float u, float v)
         {
             position = new vec3(px, py, pz);
             texcoord = new vec2(u, v);
@@ -38,7 +38,7 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPosTBNTex
+    public struct VertexPosTexNTB
     {
         public vec3 position;
         public vec2 texcoord;
@@ -46,7 +46,7 @@ namespace SharpGame
         public vec3 tangent;
         public vec3 bitangent;
 
-        public static int Size => Utilities.SizeOf<VertexPosTBNTex>();
+        public static int Size => Utilities.SizeOf<VertexPosTexNTB>();
 
         public static VertexLayout Layout = new VertexLayout
         (
@@ -59,16 +59,16 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPosNormTexColor
+    public struct VertexPosTexNormColor
     {
         public vec3 position;
         public vec2 texcoord;
         public vec3 normal;
         public Color color;
 
-        public static int Size => Utilities.SizeOf<VertexPosNormTexColor>();
+        public static int Size => Utilities.SizeOf<VertexPosTexNormColor>();
 
-        public VertexPosNormTexColor(vec3 p, vec3 n, vec2 uv, Color color)
+        public VertexPosTexNormColor(vec3 p, vec3 n, vec2 uv, Color color)
         {
             position = p;
             normal = n;

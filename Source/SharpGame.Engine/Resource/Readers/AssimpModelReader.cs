@@ -159,16 +159,16 @@ namespace SharpGame
         private static unsafe void ConvertGeom(float scale, Assimp.Mesh mesh,
             out BoundingBox meshBoundingBox, out DeviceBuffer vb, out DeviceBuffer ib, out VertexLayout vertexLayout)
         {
-            NativeList<VertexPosNormTex> vertexBuffer = new NativeList<VertexPosNormTex>();
+            NativeList<VertexPosTexNorm> vertexBuffer = new NativeList<VertexPosTexNorm>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
             
             meshBoundingBox = new BoundingBox();
 
-            vertexLayout = VertexPosNormTex.Layout;
+            vertexLayout = VertexPosTexNorm.Layout;
 
             for (int v = 0; v < mesh.VertexCount; v++)
             {
-                VertexPosNormTex vertex;
+                VertexPosTexNorm vertex;
 
                 vertex.position = new vec3(mesh.Vertices[v].X, -mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
@@ -197,7 +197,7 @@ namespace SharpGame
 
             vertexLayout.Print();
                 
-            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosNormTex), vertexBuffer.Count, vertexBuffer.Data);
+            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNorm), vertexBuffer.Count, vertexBuffer.Data);
             ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
             vertexBuffer.Dispose();
@@ -207,16 +207,16 @@ namespace SharpGame
         private static unsafe void ConvertGeomNTB(float scale, Assimp.Mesh mesh,
             out BoundingBox meshBoundingBox, out DeviceBuffer vb, out DeviceBuffer ib, out VertexLayout vertexLayout)
         {
-            NativeList<VertexPosTBNTex> vertexBuffer = new NativeList<VertexPosTBNTex>();
+            NativeList<VertexPosTexNTB> vertexBuffer = new NativeList<VertexPosTexNTB>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
 
             meshBoundingBox = new BoundingBox();
 
-            vertexLayout = VertexPosTBNTex.Layout;
+            vertexLayout = VertexPosTexNTB.Layout;
 
             for (int v = 0; v < mesh.VertexCount; v++)
             {
-                VertexPosTBNTex vertex;
+                VertexPosTexNTB vertex;
 
                 vertex.position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
@@ -247,7 +247,7 @@ namespace SharpGame
 
             vertexLayout.Print();
 
-            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTBNTex), vertexBuffer.Count, vertexBuffer.Data);
+            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNTB), vertexBuffer.Count, vertexBuffer.Data);
             ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
             vertexBuffer.Dispose();

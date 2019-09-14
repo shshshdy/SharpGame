@@ -366,7 +366,7 @@ namespace SharpGame
         {
             Dictionary<FaceVertex, uint> vertexMap = new Dictionary<FaceVertex, uint>();
             ushort[] indices = new ushort[group.Faces.Length * 3];
-            List<VertexPosNormTex> vertices = new List<VertexPosNormTex>();
+            List<VertexPosTexNorm> vertices = new List<VertexPosTexNorm>();
 
             for (int i = 0; i < group.Faces.Length; i++)
             {
@@ -395,7 +395,7 @@ namespace SharpGame
 
         public uint GetOrCreate(
             Dictionary<FaceVertex, uint> vertexMap,
-            List<VertexPosNormTex> vertices,
+            List<VertexPosTexNorm> vertices,
             FaceVertex key,
             FaceVertex adjacent1,
             FaceVertex adjacent2)
@@ -403,7 +403,7 @@ namespace SharpGame
             uint index;
             if (!vertexMap.TryGetValue(key, out index))
             {
-                VertexPosNormTex vertex = ConstructVertex(key, adjacent1, adjacent2);
+                VertexPosTexNorm vertex = ConstructVertex(key, adjacent1, adjacent2);
                 vertices.Add(vertex);
                 index = checked((uint)(vertices.Count - 1));
                 vertexMap.Add(key, index);
@@ -412,7 +412,7 @@ namespace SharpGame
             return index;
         }
 
-        private VertexPosNormTex ConstructVertex(FaceVertex key, FaceVertex adjacent1, FaceVertex adjacent2)
+        private VertexPosTexNorm ConstructVertex(FaceVertex key, FaceVertex adjacent1, FaceVertex adjacent2)
         {
             vec3 position = Positions[key.PositionIndex - 1];
             vec3 normal;
@@ -428,7 +428,7 @@ namespace SharpGame
 
             Vector2 texCoord = key.TexCoordIndex == -1 ? Vector2.Zero : TexCoords[key.TexCoordIndex - 1];
 
-            return new VertexPosNormTex(position, texCoord, normal);
+            return new VertexPosTexNorm(position, texCoord, normal);
         }
 
         private vec3 ComputeNormal(FaceVertex v1, FaceVertex v2, FaceVertex v3)
@@ -544,7 +544,7 @@ namespace SharpGame
         /// <summary>
         /// The vertices of the mesh.
         /// </summary>
-        public VertexPosNormTex[] Vertices { get; }
+        public VertexPosTexNorm[] Vertices { get; }
 
         /// <summary>
         /// The indices of the mesh.
@@ -562,7 +562,7 @@ namespace SharpGame
         /// <param name="vertices">The vertices.</param>
         /// <param name="indices">The indices.</param>
         /// <param name="materialName">The name of the associated MTL <see cref="MaterialDefinition"/>.</param>
-        public ConstructedMeshInfo(VertexPosNormTex[] vertices, ushort[] indices, string materialName)
+        public ConstructedMeshInfo(VertexPosTexNorm[] vertices, ushort[] indices, string materialName)
         {
             Vertices = vertices;
             Indices = indices;

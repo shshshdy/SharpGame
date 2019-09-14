@@ -29,7 +29,7 @@ namespace SharpGame
 
             List<DeviceBuffer> ibs = new List<DeviceBuffer>();
             List<MeshGroup> meshGroups = new List<MeshGroup>();
-            List<VertexPosNormTex> vertices = new List<VertexPosNormTex>();
+            List<VertexPosTexNorm> vertices = new List<VertexPosTexNorm>();
   
             foreach(MeshGroup group in objFile.MeshGroups)
             {
@@ -99,7 +99,7 @@ namespace SharpGame
                 };
 
                 geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)ibs[i].Count);
-                geom.VertexLayout = VertexPosNormTex.Layout;
+                geom.VertexLayout = VertexPosTexNorm.Layout;
                 model.Geometries[i] = new Geometry[] { geom };
                 model.GeometryCenters.Add(vec3.Zero);
             }

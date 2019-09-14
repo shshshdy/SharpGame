@@ -68,11 +68,24 @@ namespace SharpGame
         /// Line antialiasing flag.
         bool lineAntiAlias_;
 
-        Material debugMaterial_;
+
+        Shader debugShader;
+
+        Pipeline pipelineDepthLines;
+        Pipeline pipelineNoDepthLines;
+
+        Pipeline pipelineDepth;
+        Pipeline pipelineNoDepth;
 
         public DebugRenderer()
         {
-            debugMaterial_ = new Material("shaders/Debug.shader");
+            debugShader = Resources.Instance.Load<Shader>("shaders/Debug.shader");
+
+            pipelineDepthLines = debugShader.Pass[0].CreateGraphicsPipeline(Graphics.Instance.RenderPass, VertexPosColor.Layout, PrimitiveTopology.LineList);
+            pipelineNoDepthLines = debugShader.Pass[1].CreateGraphicsPipeline(Graphics.Instance.RenderPass, VertexPosColor.Layout, PrimitiveTopology.LineList);
+
+            pipelineDepth = debugShader.Pass[0].CreateGraphicsPipeline(Graphics.Instance.RenderPass, VertexPosColor.Layout, PrimitiveTopology.TriangleList);
+            pipelineNoDepth = debugShader.Pass[1].CreateGraphicsPipeline(Graphics.Instance.RenderPass, VertexPosColor.Layout, PrimitiveTopology.TriangleList);
         }
 
         public void SetView(Camera camera)
@@ -451,7 +464,7 @@ namespace SharpGame
         AddLine(center, p, uintColor, depthTest);
         }*/
 
-        void AddCross(vec3 center, float size, Color color, bool depthTest)
+        public void AddCross(vec3 center, float size, Color color, bool depthTest)
         {
             int uintColor = color.ToRgba();
 
@@ -466,7 +479,7 @@ namespace SharpGame
             }
         }
 
-        void AddQuad(vec3 center, float width, float height, Color color, bool depthTest)
+        public void AddQuad(vec3 center, float width, float height, Color color, bool depthTest)
         {
             int uintColor = color.ToRgba();
 
@@ -574,37 +587,24 @@ namespace SharpGame
             uint start = 0;
             uint count = 0;
 
-            if(lines_.Count > 0)
+            cmdBuffer.BindVertexBuffer(0, vertex_buffer.buffer);
+
+            if (lines_.Count > 0)
             {
                 count = (uint)lines_.Count * 2;
-
-                cmdBuffer.Draw(count, 1, start, 0);
-                /*
-                graphics.DrawTransient(
-                    254, 
-                    vertex_buffer,
-                    mat4.Identity, 
-                    start, 
-                    count,
-                    state | RenderState.DepthTestLessEqual | RenderState.PrimitiveLines,
-                    uiShaderInstance_
-                );*/
+                cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelineDepthLines);
+                cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.VSSet, 0);
+                cmdBuffer.Draw(count, 1, start, 0);                
                 start += count;
             }
 
             if(noDepthLines_.Count > 0)
             {
                 count = (uint)noDepthLines_.Count * 2;
-                /*
-                graphics.DrawTransient(
-                    254,
-                    vertex_buffer,
-                    mat4.Identity,
-                    start,
-                    count,
-                    state | RenderState.DepthTestAlways | RenderState.PrimitiveLines,
-                    uiShaderInstance_
-                );*/
+
+                cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelineNoDepthLines);
+                cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.VSSet, 0);
+                cmdBuffer.Draw(count, 1, start, 0);
 
                 start += count;
             }
@@ -612,32 +612,20 @@ namespace SharpGame
             if(triangles_.Count > 0)
             {
                 count = (uint)triangles_.Count * 3;
-                /*
-                graphics.DrawTransient(
-                    254,
-                    vertex_buffer,
-                    mat4.Identity,
-                    start,
-                    (int)count,
-                    state | RenderState.DepthTestLessEqual | RenderState.PrimitiveTriangles,
-                    uiShaderInstance_
-                );*/
+
+                cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelineDepth);
+                cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.VSSet, 0);
+                cmdBuffer.Draw(count, 1, start, 0);
                 start += count;
             }
 
             if(noDepthTriangles_.Count > 0)
             {
                 count = (uint)noDepthTriangles_.Count * 3;
-                /*
-                graphics.DrawTransient(
-                    254,
-                    vertex_buffer,
-                    mat4.Identity,
-                    start,
-                    (int)count,
-                    state | RenderState.DepthTestAlways | RenderState.PrimitiveTriangles,
-                    uiShaderInstance_
-                ); */
+
+                cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelineNoDepth);
+                cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.VSSet, 0);
+                cmdBuffer.Draw(count, 1, start, 0);
             }
            
         }

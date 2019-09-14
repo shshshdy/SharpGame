@@ -203,6 +203,8 @@ namespace SharpGame
             }
 
             ubMatrics.Clear();
+            mat4 m = mat4.Identity;
+            GetTransform(Utilities.AsPointer(ref m), 1);
 
             if (NegativeViewport)
             {
@@ -222,8 +224,6 @@ namespace SharpGame
 
             UpdateDrawables();
 
-            ubMatrics.Flush();
-
             if (camera != null)
             {
                 UpdateViewParameters();
@@ -237,6 +237,8 @@ namespace SharpGame
             OverlayPass?.Draw(this);
 
             this.SendGlobalEvent(new EndView { view = this });
+
+            ubMatrics.Flush();
 
             Profiler.EndSample();
         }

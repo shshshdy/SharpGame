@@ -1,44 +1,35 @@
 Shader "Debug"
 {
-	Pass "main"
+	Pass
 	{
 		CullMode = None
+		DepthTest = true
 
 		@VertexShader
 		{
-			#version 450
-			
-			#include "UniformsVS.glsl"
-  
-            layout(location = 0) in vec3 in_Position;
-            layout(location = 1) in vec4 in_Color;
-
-            layout (location = 0) out vec4 out_Color;
-
-			out gl_PerVertex
-			{
-				vec4 gl_Position;
-			};
-
-			void main() 
-			{
-                out_Color = in_Color;
-				gl_Position = ViewProj * Model* vec4(in_Position.xyz, 1.0);
-			}
-
+			#include "debug.vert"
 		}
 		
 		@PixelShader
 		{
-			#version 450
-			layout (location = 0) in vec4 in_Color;
-			layout (location = 0) out vec4 out_Color;
+			#include "debug.frag"
+		}
 
-			void main()
-            {
-				out_Color = in_Color;
-			}
+	}
 
+	Pass "NoDepth"
+	{
+		CullMode = None
+		DepthTest = false
+
+		@VertexShader
+		{
+			#include "debug.vert"
+		}
+
+		@PixelShader
+		{
+			#include "debug.frag"
 		}
 
 	}
