@@ -231,6 +231,84 @@ namespace SharpGame
             return Collision.RayIntersectsBox(ref this, ref box, out point);
         }
 
+        public float HitDistance(in BoundingBox box)
+        {
+            // If undefined, no hit (infinite distance)
+            if (!box.Defined())
+                return float.PositiveInfinity;
+
+            // Check for ray origin being inside the box
+            if (box.Contains(ref this.Position) == Intersection.InSide)
+                return 0.0f;
+
+            float dist = float.PositiveInfinity;
+
+            // Check for intersecting in the X-direction
+            if (Position.x < box.Minimum.x && Direction.x > 0.0f)
+            {
+                float x = (box.Minimum.x - Position.x) / Direction.x;
+                if (x < dist)
+                {
+                    vec3 point = Position + x * Direction;
+                    if (point.y >= box.Minimum.y && point.y <= box.Maximum.y && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
+                        dist = x;
+                }
+            }
+            if (Position.x > box.Maximum.x && Direction.x < 0.0f)
+            {
+                float x = (box.Maximum.x - Position.x) / Direction.x;
+                if (x < dist)
+                {
+                    vec3 point = Position + x * Direction;
+                    if (point.y >= box.Minimum.y && point.y <= box.Maximum.y && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
+                        dist = x;
+                }
+            }
+            // Check for intersecting in the Y-direction
+            if (Position.y < box.Minimum.y && Direction.y > 0.0f)
+            {
+                float x = (box.Minimum.y - Position.y) / Direction.y;
+                if (x < dist)
+                {
+                    vec3 point = Position + x * Direction;
+                    if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
+                        dist = x;
+                }
+            }
+            if (Position.y > box.Maximum.y && Direction.y < 0.0f)
+            {
+                float x = (box.Maximum.y - Position.y) / Direction.y;
+                if (x < dist)
+                {
+                    vec3 point = Position + x * Direction;
+                    if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
+                        dist = x;
+                }
+            }
+            // Check for intersecting in the Z-direction
+            if (Position.z < box.Minimum.z && Direction.z > 0.0f)
+            {
+                float x = (box.Minimum.z - Position.z) / Direction.z;
+                if (x < dist)
+                {
+                    vec3 point = Position + x * Direction;
+                    if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.y >= box.Minimum.y && point.y <= box.Maximum.y)
+                        dist = x;
+                }
+            }
+            if (Position.z > box.Maximum.z && Direction.z < 0.0f)
+            {
+                float x = (box.Maximum.z - Position.z) / Direction.z;
+                if (x < dist)
+                {
+                    vec3 point = Position + x * Direction;
+                    if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.y >= box.Minimum.y && point.y <= box.Maximum.y)
+                        dist = x;
+                }
+            }
+
+            return dist;
+        }
         /// <summary>
         /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
         /// </summary>

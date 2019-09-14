@@ -61,11 +61,11 @@ namespace SharpGame
 
     public class Drawable : Component
     {
-        public const uint DRAWABLE_GEOMETRY = 0x1;
-        public const uint DRAWABLE_LIGHT = 0x2;
-        public const uint DRAWABLE_ZONE = 0x4;
-        public const uint DRAWABLE_GEOMETRY2D = 0x8;
-        public const uint DRAWABLE_ANY = 0xff;
+        public const byte DRAWABLE_GEOMETRY = 0x1;
+        public const byte DRAWABLE_LIGHT = 0x2;
+        public const byte DRAWABLE_ZONE = 0x4;
+        public const byte DRAWABLE_GEOMETRY2D = 0x8;
+        public const byte DRAWABLE_ANY = 0xff;
 
         public GeometryType GeometryType { get; set; }
 
@@ -119,10 +119,10 @@ namespace SharpGame
 
         /// Drawable flags.
         public byte DrawableFlags { get => drawableFlags_; set => drawableFlags_ = value; }
-        protected byte drawableFlags_;
+        protected byte drawableFlags_ = DRAWABLE_GEOMETRY;
 
         /// Bounding box dirty flag.
-        protected bool worldBoundingBoxDirty_;
+        protected bool worldBoundingBoxDirty_ = true;
         /// Shadowcaster flag.
         public bool CastShadows { get => castShadows_; set => castShadows_ = value; }
         protected bool castShadows_;
@@ -143,7 +143,8 @@ namespace SharpGame
         /// Last visible frame number.
         protected int viewFrameNumber_;
 
-        public bool updateQueued_ = false;
+        internal bool updateQueued_ = false;
+        internal float sortValue;
 
         public Drawable()
         {
@@ -260,10 +261,10 @@ namespace SharpGame
 
         void RemoveFromScene()
         {
-            if(index >= 0)
+            Scene scene = Scene;
+            if (scene)
             {
-                Scene scene = Scene;
-                if(octant != null)
+                if (octant != null)
                 {
 
                     Octree octree = octant.Root;
@@ -290,12 +291,12 @@ namespace SharpGame
             worldCenter_ = worldBoundingBox_.Center;
         }
 
-        public virtual void Update(ref FrameInfo frameInfo)
+        public virtual void Update(in FrameInfo frameInfo)
         {
             viewFrameNumber_ = frameInfo.frameNumber;
         }
 
-        public virtual void UpdateBatches(ref FrameInfo frame)
+        public virtual void UpdateBatches(in FrameInfo frame)
         {
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
             IntPtr worldTransform = node_.worldTransform_;
@@ -314,16 +315,15 @@ namespace SharpGame
                 lodDistance_ = newLodDistance;
         }
 
-        public virtual void UpdateGeometry(ref FrameInfo frameInfo)
+        public virtual void UpdateGeometry(in FrameInfo frameInfo)
         {
         }
 
-        /*
         public virtual void DrawDebugGeometry(DebugRenderer debug, bool depthTest)
         {
             if (debug && IsEnabledEffective())
                 debug.AddBoundingBox(ref WorldBoundingBox, Color.Green, depthTest, false);
-        }*/
+        }
 
 
     }

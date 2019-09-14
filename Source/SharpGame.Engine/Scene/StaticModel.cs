@@ -140,7 +140,7 @@ namespace SharpGame
 
         }
 
-        public override void UpdateBatches(ref FrameInfo frame)
+        public override void UpdateBatches(in FrameInfo frame)
         {
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
             

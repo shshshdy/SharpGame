@@ -246,39 +246,15 @@ namespace SharpGame
             return Intersects(ref sphere);
         }
 
-        /// <summary>
-        /// Determines whether the current objects contains a point.
-        /// </summary>
-        /// <param name="point">The point to test.</param>
-        /// <returns>The type of containment the two objects have.</returns>
         public Intersection Contains(ref vec3 point)
         {
             return Collision.BoxContainsPoint(ref this, ref point);
         }
 
-        /// <summary>
-        /// Determines whether the current objects contains a point.
-        /// </summary>
-        /// <param name="point">The point to test.</param>
-        /// <returns>The type of containment the two objects have.</returns>
         public Intersection Contains(vec3 point)
         {
             return Contains(ref point);
         }
-
-        /* This implementation is wrong
-        /// <summary>
-        /// Determines whether the current objects contains a triangle.
-        /// </summary>
-        /// <param name="vertex1">The first vertex of the triangle to test.</param>
-        /// <param name="vertex2">The second vertex of the triangle to test.</param>
-        /// <param name="vertex3">The third vertex of the triangle to test.</param>
-        /// <returns>The type of containment the two objects have.</returns>
-        public ContainmentType Contains(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
-        {
-            return Collision.BoxContainsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
-        }
-        */
 
         /// <summary>
         /// Determines whether the current objects contains a <see cref="BoundingBox"/>.
@@ -300,10 +276,6 @@ namespace SharpGame
             return Contains(ref box);
         }
 
-        public Intersection IsInside(ref BoundingBox box)
-        {
-            return Collision.BoxContainsBox(ref box, ref this);
-        }
         /// <summary>
         /// Determines whether the current objects contains a <see cref="BoundingSphere"/>.
         /// </summary>

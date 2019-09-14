@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    public class Octree : Component
+    public class Octree : Component, ISpacePartitioner
     {
         const float DEFAULT_OCTREE_SIZE = 1000.0f;
         const int DEFAULT_OCTREE_LEVELS = 8;
@@ -18,13 +19,13 @@ namespace SharpGame
         int numLevels_;
 
         /// Drawable objects that require update.
-        FastList<Drawable> drawableUpdates_;
+        FastList<Drawable> drawableUpdates_ = new FastList<Drawable>();
         /// Drawable objects that were inserted during threaded update phase.
-        FastList<Drawable> threadedDrawableUpdates_;
+        FastList<Drawable> threadedDrawableUpdates_ = new FastList<Drawable>();
         /// Mutex for octree reinsertions.
-        object octreeMutex_;
+        object octreeMutex_ = new object();
         /// Ray query temporary list of drawables.
-        FastList<Drawable> rayQueryDrawables_;
+        FastList<Drawable> rayQueryDrawables_ = new FastList<Drawable>();
 
         List<Octant> freeList = new List<Octant>();
 
@@ -33,10 +34,6 @@ namespace SharpGame
             var bbox = new BoundingBox(-DEFAULT_OCTREE_SIZE, DEFAULT_OCTREE_SIZE);
             Root = new Octant(in bbox, 0, null, this, -1);
             numLevels_ = DEFAULT_OCTREE_LEVELS;
-            // If the engine is running headless, subscribe to RenderUpdate events for manually updating the octree
-            // to allow raycasts and animation update
-            //if (!GetSubsystem<Graphics>())
-            //    SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(Octree, HandleRenderUpdate));
         }
 
         protected override void Destroy()
@@ -46,12 +43,11 @@ namespace SharpGame
             Root.ResetRoot();
 
             base.Destroy();
-
         }
 
         public Octant GetOctant(in BoundingBox box, int level, Octant parent, Octree root, int index)
         {
-            if(!freeList.Empty())
+            if (!freeList.Empty())
             {
                 var octant = freeList.Pop();
 
@@ -96,8 +92,65 @@ namespace SharpGame
             numLevels_ = Math.Max(numLevels, 1);
         }
 
-        public void Update(ref FrameInfo frame)
+        public void Update(FrameInfo frame)
         {
+            Scene scene = Scene;
+            // Let drawables update themselves before reinsertion. This can be used for animation
+            if (!drawableUpdates_.Empty())
+            {
+
+                // Perform updates in worker threads. Notify the scene that a threaded update is going on and components
+                // (for example physics objects) should not perform non-threadsafe work when marked dirty
+
+                scene.BeginThreadedUpdate();
+                Parallel.ForEach(drawableUpdates_, drawable => drawable.Update(in frame));
+                scene.EndThreadedUpdate();
+            }
+
+            // If any drawables were inserted during threaded update, update them now from the main thread
+            if (!threadedDrawableUpdates_.Empty())
+            {
+
+                foreach (Drawable drawable in threadedDrawableUpdates_)
+                {
+                    if (drawable)
+                    {
+                        drawable.Update(in frame);
+                        drawableUpdates_.Add(drawable);
+                    }
+                }
+
+                threadedDrawableUpdates_.Clear();
+            }
+
+            // Notify drawable update being finished. Custom animation (eg. IK) can be done at this point
+
+            scene.SendEvent(new SceneDrawableUpdateFinished { scene = scene, timeStep = frame.timeStep });
+
+            // Reinsert drawables that have been moved or resized, or that have been newly added to the octree and do not sit inside
+            // the proper octant yet
+            if (!drawableUpdates_.Empty())
+            {
+                foreach (Drawable drawable in drawableUpdates_)
+                {
+                    drawable.updateQueued_ = false;
+                    Octant octant = drawable.octant;
+                    ref BoundingBox box = ref drawable.WorldBoundingBox;
+
+                    // Skip if no octant or does not belong to this octree anymore
+                    if (octant == null || octant.Root != this)
+                        continue;
+
+                    // Skip if still fits the current octant
+                    if (/*drawable->IsOccludee() &&*/ octant.CullingBox.Contains(ref box) == Intersection.InSide && octant.CheckDrawableFit(in box))
+                        continue;
+
+                    InsertDrawable(drawable);
+
+                }
+            }
+
+            drawableUpdates_.Clear();
         }
 
         public void AddManualDrawable(Drawable drawable)
@@ -118,56 +171,72 @@ namespace SharpGame
                 octant.RemoveDrawable(drawable);
         }
 
-        void GetDrawables(OctreeQuery query)
+        public void GetDrawables(OctreeQuery query, Action<Drawable> visitor)
         {
-            query.result.Clear();
-            Root.GetDrawablesInternal(query, false);
+            Root.GetDrawablesInternal(query, false, visitor);
         }
 
-        void Raycast(RayOctreeQuery query)
+        public void InsertDrawable(Drawable drawable)
+        {
+            Root.InsertDrawable(drawable);
+        }
+
+        public void RemoveDrawable(Drawable drawable)
+        {
+            Root.RemoveDrawable(drawable);
+        }
+
+        static int CompareDrawables(Drawable lhs, Drawable rhs)
+        {
+            return lhs.sortValue < rhs.sortValue ? -1 : lhs.sortValue > rhs.sortValue ? 1 : 0;
+        }
+
+        static int CompareRayQueryResults(RayQueryResult lhs, RayQueryResult rhs)
+        {
+            return lhs.distance_ < rhs.distance_ ? -1 : (lhs.distance_ > rhs.distance_ ? 1 : 0);
+        }
+
+        public void Raycast(ref RayOctreeQuery query)
         {
             query.result_.Clear();
             Root.GetDrawablesInternal(query);
-            query.result_.Sort((lhs,rhs) => lhs.distance_ < rhs.distance_ ? -1 : (lhs.distance_ < rhs.distance_ ? 0 : 1));
+            query.result_.Sort(CompareRayQueryResults);
         }
 
-        void RaycastSingle(RayOctreeQuery query)
+        public void RaycastSingle(ref RayOctreeQuery query)
         {
-            /*
-query.result_.Clear();
-    rayQueryDrawables_.Clear();
-    GetDrawablesOnlyInternal(query, rayQueryDrawables_);
+            query.result_.Clear();
+            rayQueryDrawables_.Clear();
+            Root.GetDrawablesOnlyInternal(query, rayQueryDrawables_);
 
-    // Sort by increasing hit distance to AABB
-    for (PODVector<Drawable*>::Iterator i = rayQueryDrawables_.Begin(); i != rayQueryDrawables_.End(); ++i)
-    {
-        Drawable* drawable = *i;
-drawable->SetSortValue(query.ray_.HitDistance(drawable->GetWorldBoundingBox()));
-    }
+            // Sort by increasing hit distance to AABB
+            foreach (Drawable drawable in rayQueryDrawables_)
+            {
+                drawable.sortValue = (query.ray_.HitDistance(in drawable.WorldBoundingBox));
+            }
 
-    Sort(rayQueryDrawables_.Begin(), rayQueryDrawables_.End(), CompareDrawables);
+            rayQueryDrawables_.Sort(CompareDrawables);
 
-// Then do the actual test according to the query, and early-out as possible
-float closestHit = M_INFINITY;
-    for (PODVector<Drawable*>::Iterator i = rayQueryDrawables_.Begin(); i != rayQueryDrawables_.End(); ++i)
-    {
-        Drawable* drawable = *i;
-        if (drawable->GetSortValue() < Min(closestHit, query.maxDistance_))
-        {
-            unsigned oldSize = query.result_.Size();
-drawable->ProcessRayQuery(query, query.result_);
-            if (query.result_.Size() > oldSize)
-                closestHit = Min(closestHit, query.result_.Back().distance_);
-        }
-        else
-            break;
-    }
+            // Then do the actual test according to the query, and early-out as possible
+            float closestHit = float.PositiveInfinity;
+            foreach (Drawable drawable in rayQueryDrawables_)
+            {
+                if (drawable.sortValue < Math.Min(closestHit, query.maxDistance_))
+                {
+                    int oldSize = query.result_.Count;
+                    drawable.ProcessRayQuery(query, query.result_);
+                    if (query.result_.Count > oldSize)
+                        closestHit = Math.Min(closestHit, query.result_.Back().distance_);
+                }
+                else
+                    break;
+            }
 
-    if (query.result_.Size() > 1)
-    {
-        Sort(query.result_.Begin(), query.result_.End(), CompareRayQueryResults);
-query.result_.Resize(1);
-    }*/
+            if (query.result_.Count > 1)
+            {
+                query.result_.Sort(CompareRayQueryResults);
+                query.result_.Resize(1);
+            }
         }
 
         public void QueueUpdate(Drawable drawable)
@@ -194,11 +263,12 @@ query.result_.Resize(1);
             drawable.updateQueued_ = false;
         }
 
-        void DrawDebugGeometry(bool depthTest)
+        public void DrawDebugGeometry(bool depthTest)
         {
             var debug = GetComponent<DebugRenderer>();
             Root.DrawDebugGeometry(debug, depthTest);
         }
+
 
     }
 }

@@ -95,7 +95,7 @@ namespace SharpGame
         internal FastList<Light> lights = new FastList<Light>();
         internal FastList<SourceBatch> batches = new FastList<SourceBatch>();
 
-        FrustumOctreeQuery frustumOctreeQuery;
+        FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery();
 
         private FrameInfo frameInfo;
 
@@ -133,7 +133,6 @@ namespace SharpGame
                         
             FrameGraph = renderPath;
 
-            frustumOctreeQuery = new FrustumOctreeQuery(drawables, camera, Drawable.DRAWABLE_ANY, ViewMask);
 
         }
 
@@ -180,12 +179,6 @@ namespace SharpGame
             }
         }
 
-        public void AddBatch(SourceBatch batch)
-        {
-            batches.Add(batch);
-            batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
-        }
-
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe uint GetTransform(IntPtr pos, uint count)
         {
@@ -228,6 +221,7 @@ namespace SharpGame
             this.SendGlobalEvent(new BeginView { view = this });
 
             UpdateDrawables();
+
             ubMatrics.Flush();
 
             if (camera != null)
@@ -264,24 +258,17 @@ namespace SharpGame
 
             Profiler.BeginSample("Culling");
 
-
+            frustumOctreeQuery.Init(camera, Drawable.DRAWABLE_ANY, ViewMask);
             Scene.GetDrawables(frustumOctreeQuery, AddDrawable);
-            Profiler.EndSample();
-            
-            Profiler.BeginSample("UpdateDrawable");
-            
-            Parallel.ForEach(drawables, drawable => drawable.Update(ref frameInfo));
 
             Profiler.EndSample();
-            
+
             Profiler.BeginSample("UpdateBatches");
-
-            Parallel.ForEach(drawables, drawable => drawable.UpdateBatches(ref frameInfo));
-
+            Parallel.ForEach(drawables, drawable => drawable.UpdateBatches(in frameInfo));
             Profiler.EndSample();
 
             Profiler.BeginSample("UpdateGeometry");
-            Parallel.ForEach(drawables, drawable => drawable.UpdateGeometry(ref frameInfo));
+            Parallel.ForEach(drawables, drawable => drawable.UpdateGeometry(in frameInfo));
             Profiler.EndSample();
         }
 

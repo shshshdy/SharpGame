@@ -8,16 +8,8 @@ namespace SharpGame
     {
         public uint viewMask;
         public uint drawableFlags;
-        public FastList<Drawable> result;
 
-        public OctreeQuery(FastList<Drawable> result, uint drawableFlags, uint viewMask)
-        {
-            this.viewMask = viewMask;
-            this.drawableFlags = viewMask;
-            this.result = result;
-        }
-
-        public abstract void TestDrawables(Span<Drawable> start, bool inside);
+        public abstract void TestDrawables(Span<Drawable> start, bool inside, Action<Drawable> visitor);
         public abstract Intersection TestOctant(ref BoundingBox box, bool inside);     
 
     }
@@ -27,22 +19,30 @@ namespace SharpGame
         /// Frustum.
         public Camera camera;
 
-        public FrustumOctreeQuery(FastList<Drawable> result, Camera camera, uint drawableFlags, uint viewMask)
-            : base(result, drawableFlags, viewMask)
+        public FrustumOctreeQuery()
         {
-            this.viewMask = viewMask;
-            this.drawableFlags = viewMask;
-            this.result = result;
         }
 
-        public override void TestDrawables(Span<Drawable> start, bool inside)
+        public FrustumOctreeQuery(Camera camera, uint drawableFlags, uint viewMask)
+        {
+            Init(camera, drawableFlags, viewMask);
+        }
+
+        public void Init(Camera camera, uint drawableFlags, uint viewMask)
+        {
+            this.camera = camera;
+            this.viewMask = viewMask;
+            this.drawableFlags = viewMask;
+        }
+
+        public override void TestDrawables(Span<Drawable> start, bool inside, Action<Drawable> visitor)
         {
             foreach(Drawable drawable in start)
             {
-                if ((drawable.DrawableFlags & drawableFlags) != 0 && (drawable.ViewMask & viewMask) != 0)
+                //if ((drawable.DrawableFlags & drawableFlags) != 0 && (drawable.ViewMask & viewMask) != 0)
                 {
                     if (inside || camera.Frustum.Intersects(ref drawable.WorldBoundingBox))
-                        result.Add(drawable);
+                        visitor(drawable);
                 }
             }
         }
@@ -59,19 +59,14 @@ namespace SharpGame
     /// %Frustum octree query for shadowcasters.
     public class ShadowCasterOctreeQuery : FrustumOctreeQuery
     {
-         public ShadowCasterOctreeQuery(FastList<Drawable> result, in Camera frustum, byte drawableFlags = 0xff,  uint viewMask = 0xffffffff) 
-            : base(result, frustum, drawableFlags, viewMask)
-        {
-        }
-
-        public override void TestDrawables(Span<Drawable> start, bool inside)
+        public override void TestDrawables(Span<Drawable> start, bool inside, Action<Drawable> visitor)
         {
             foreach (Drawable drawable in start)
             {
                 if ((drawable.DrawableFlags & drawableFlags) != 0 && (drawable.ViewMask & viewMask) != 0)
                 {
                     if (inside || camera.Frustum.Intersects(ref drawable.WorldBoundingBox))
-                        result.Add(drawable);
+                        visitor(drawable);
                 }
             }
         }
@@ -82,8 +77,10 @@ namespace SharpGame
         void InsertDrawable(Drawable drawable);
         void RemoveDrawable(Drawable drawable);
 
+        void Update(FrameInfo frame);
+
         /// Return drawable objects by a query.
-        void GetDrawables(OctreeQuery query, Action<Drawable> drawables);
+        void GetDrawables(OctreeQuery query, Action<Drawable> visitor);
 
         /// Return drawable objects by a ray query.
         void Raycast(ref RayOctreeQuery query);

@@ -26,8 +26,14 @@ namespace SharpGame
         public float timeStep;
     }
 
+    public struct SceneDrawableUpdateFinished
+    {
+        public Scene scene;
+        public float timeStep;
+    }
+
     [DataContract]
-    public class Scene : Node, ISpacePartitioner
+    public class Scene : Node
     {
         protected ISpacePartitioner spacePartitioner;
 
@@ -35,6 +41,7 @@ namespace SharpGame
 
         internal bool threadedUpdate_ = false;
         public bool IsThreadedUpdate => threadedUpdate_;
+        List<Component> delayedDirtyComponents_ = new List<Component>();
 
         public Scene()
         {
@@ -167,17 +174,17 @@ namespace SharpGame
 
         }
         
-        public void GetDrawables(OctreeQuery query, Action<Drawable> drawables)
+        public void GetDrawables(OctreeQuery query, Action<Drawable> visitor)
         {
             if(spacePartitioner != null)
             {
-                spacePartitioner.GetDrawables(query, drawables);
+                spacePartitioner.GetDrawables(query, visitor);
                 return;
             }
 
             foreach(Drawable d in this.drawables)
             {
-                drawables(d);
+                visitor(d);
             }
         }
 
@@ -210,6 +217,46 @@ namespace SharpGame
             SendEvent(new SceneSubsystemUpdate { scene = this, timeStep = timeStep });
 
             SendEvent(new ScenePostUpdate { scene = this, timeStep = timeStep });
+        }
+
+        public void BeginThreadedUpdate()
+        {
+            threadedUpdate_ = true;
+        }
+
+        public void EndThreadedUpdate()
+        {
+            if (!threadedUpdate_)
+                return;
+
+            threadedUpdate_ = false;
+
+            if (!delayedDirtyComponents_.Empty())
+            {
+                foreach(var c in delayedDirtyComponents_)
+                {
+                    c.OnMarkedDirty(c.Node);
+                }
+
+                delayedDirtyComponents_.Clear();
+            }
+        }
+
+        public void DelayedMarkedDirty(Component component)
+        {
+            delayedDirtyComponents_.Push(component);
+        }
+
+        public void RenderUpdate(FrameInfo frameInfo)
+        {
+
+            Profiler.BeginSample("UpdateDrawable");
+
+            spacePartitioner?.Update(frameInfo);
+            //Parallel.ForEach(drawables, drawable => drawable.Update(in frameInfo));
+
+            Profiler.EndSample();
+
         }
 
     }

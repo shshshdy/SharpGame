@@ -48,6 +48,7 @@ namespace SharpGame
         ResourceSet[] vsSet = new ResourceSet[2];
 
         FastList<SourceBatch> casters = new FastList<SourceBatch>();
+        FrustumOctreeQuery shadowCasterQuery = new FrustumOctreeQuery();
 
         ResourceSet VSSet => vsSet[Graphics.Instance.WorkContext];
         public ShadowPass() : base(Pass.Shadow)
@@ -126,7 +127,9 @@ namespace SharpGame
 
             casters.Clear();
 
-            view.Scene.GetDrawables(null, (drawable) =>
+            shadowCasterQuery.Init(view.Camera, Drawable.DRAWABLE_ANY, view.ViewMask);
+
+            view.Scene.GetDrawables(shadowCasterQuery, (drawable) =>
             {
                 if(drawable.CastShadows)
                 {

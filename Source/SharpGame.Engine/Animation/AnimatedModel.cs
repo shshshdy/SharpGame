@@ -103,7 +103,7 @@ namespace SharpGame
             geometrySkinMatrices_.Clear();
         }
 
-        public override void Update(ref FrameInfo frame)
+        public override void Update(in FrameInfo frame)
         {
             // If node was invisible last frame, need to decide animation LOD distance here
             // If headless, retain the current animation distance (should be 0)
@@ -129,12 +129,12 @@ namespace SharpGame
             }
 
             if(animationDirty_ || animationOrderDirty_)
-                UpdateAnimation(ref frame);
+                UpdateAnimation(in frame);
             else if(boneBoundingBoxDirty_)
                 UpdateBoneBoundingBox();
         }
 
-        public override void UpdateBatches(ref FrameInfo frame)
+        public override void UpdateBatches(in FrameInfo frame)
         {
             ref mat4 worldTransform = ref node_.WorldTransform;
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
@@ -175,21 +175,21 @@ namespace SharpGame
             }
         }
 
-        public override void UpdateGeometry(ref FrameInfo frame)
+        public override void UpdateGeometry(in FrameInfo frame)
         {
-            base.UpdateGeometry(ref frame);
+            base.UpdateGeometry(in frame);
 
             // Late update in case the model came into view and animation was dirtied in the meanwhile
             if(forceAnimationUpdate_)
             {
-                UpdateAnimation(ref frame);
+                UpdateAnimation(in frame);
                 forceAnimationUpdate_ = false;
             }
             
             if(skinningDirty_)
                 UpdateSkinning();
         }
-        /*
+        
         public override void DrawDebugGeometry(DebugRenderer debug, bool depthTest)
         {
             if(debug && IsEnabledEffective())
@@ -197,7 +197,7 @@ namespace SharpGame
                 debug.AddBoundingBox(ref WorldBoundingBox, Color.Green, depthTest);
                 debug.AddSkeleton(skeleton_, new Color(0.75f, 0.75f, 0.75f), depthTest);
             }
-        }*/
+        }
 
         public void SetModel(Model model, bool createBones = true)
         {
@@ -841,7 +841,7 @@ namespace SharpGame
             }
         }
 
-        void UpdateAnimation(ref FrameInfo frame)
+        void UpdateAnimation(in FrameInfo frame)
         {
             // If using animation LOD, accumulate time and see if it is time to update
             if(animationLodBias_ > 0.0f && animationLodDistance_ > 0.0f)

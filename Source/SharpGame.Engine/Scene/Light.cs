@@ -13,12 +13,17 @@ namespace SharpGame
     };
 
     [DataContract]
-    public class Light : Component
+    public class Light : Drawable
     {  
         public LightType LightType { get; set; }
 
         [DataMember(Order = 1)]
         public Color Color { get; set; }
+
+        public Light()
+        {
+            drawableFlags_ = DRAWABLE_LIGHT;
+        }
 
         /*
         public virtual void DrawDebugGeometry(DebugRenderer debug, bool depthTest)

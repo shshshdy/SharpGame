@@ -148,6 +148,44 @@ namespace SharpGame
         [IgnoreDataMember]
         public Matrix worldTransform_;
 #endif
+
+
+        /// Return direction in world space.
+        public vec3 WorldDirection
+        {
+            get
+            {
+                if (dirty_)
+                    UpdateWorldTransform();
+
+                return worldRotation_ * vec3.Forward;
+            }
+    }
+
+        /// Return node's up vector in world space.
+        public vec3 WorldUp
+        {
+            get
+            {
+                if (dirty_)
+                    UpdateWorldTransform();
+
+                return worldRotation_ * vec3.Up;
+            }
+}
+
+        /// Return node's right vector in world space.
+        public vec3 WorldRight
+        {
+            get
+            {
+                if (dirty_)
+                    UpdateWorldTransform();
+
+                return worldRotation_ * vec3.Right;
+            }
+        }
+
         public Node WithPosition(vec3 pos)
         {
             Position = pos;

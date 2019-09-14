@@ -7,48 +7,6 @@ using System.Text;
 namespace SharpGame
 {
 
-    public struct OctantChildran : IEnumerable<Octant>
-    {
-        Octant c1, c2, c3, c4, c5, c6, c7, c8;
-
-        public Octant this[int index]
-        {
-            get
-            {
-                return Unsafe.Add(ref c1, index);
-            }
-            set
-            {
-                Unsafe.Add(ref c1, index) = value;
-            }
-        }
-
-        public IEnumerator<Octant> GetEnumerator()
-        {
-            yield return c1;
-            yield return c2;
-            yield return c3;
-            yield return c4;
-            yield return c5;
-            yield return c6;
-            yield return c7;
-            yield return c8;
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            yield return c1;
-            yield return c2;
-            yield return c3;
-            yield return c4;
-            yield return c5;
-            yield return c6;
-            yield return c7;
-            yield return c8;
-        }
-
-    }
-
     public class Octant
     {
         public const int NUM_OCTANTS = 8;
@@ -58,10 +16,9 @@ namespace SharpGame
         /// Bounding box used for drawable object fitting.
         BoundingBox cullingBox_;
         /// Drawable objects.
-        internal FastList<Drawable> drawables_;
+        internal FastList<Drawable> drawables_ = new FastList<Drawable>();
         /// Child octants.
-        //Octant[] children_;//[NUM_OCTANTS];
-        OctantChildran children_;
+        FixedArray8<Octant> children_;
         /// World bounding box center.
         vec3 center_;
         /// World bounding box half size.
@@ -179,7 +136,7 @@ namespace SharpGame
             // Also if drawable is outside the root octant bounds, insert to root
             bool insertHere;
             if (this == root_.Root)
-                insertHere = /*!drawable->IsOccludee() ||*/ cullingBox_.IsInside(ref box) != Intersection.InSide || CheckDrawableFit(box);
+                insertHere = /*!drawable->IsOccludee() ||*/ cullingBox_.Contains(ref box) != Intersection.InSide || CheckDrawableFit(box);
             else
                 insertHere = CheckDrawableFit(box);
 
@@ -205,7 +162,7 @@ namespace SharpGame
             }
         }
 
-        bool CheckDrawableFit(in BoundingBox box)
+        public bool CheckDrawableFit(in BoundingBox box)
         {
             vec3 boxSize = box.Size;
 
@@ -299,7 +256,7 @@ namespace SharpGame
             }
         }
 
-        internal void GetDrawablesInternal(OctreeQuery query, bool inside)
+        internal void GetDrawablesInternal(OctreeQuery query, bool inside, Action<Drawable> visitor)
         {
             if (this != root_.Root)
             {
@@ -315,12 +272,12 @@ namespace SharpGame
 
             if (drawables_.Count > 0)
             {
-                query.TestDrawables(drawables_.AsSpan(), inside);
+                query.TestDrawables(drawables_.AsSpan(), inside, visitor);
             }
 
             foreach (var child in children_)
             {
-                child?.GetDrawablesInternal(query, inside);
+                child?.GetDrawablesInternal(query, inside, visitor);
             }
         }
 
@@ -346,7 +303,7 @@ namespace SharpGame
             }
         }
 
-        void GetDrawablesOnlyInternal(RayOctreeQuery query, FastList<Drawable> drawables)
+        internal void GetDrawablesOnlyInternal(RayOctreeQuery query, FastList<Drawable> drawables)
         {
             if (!query.ray_.Intersects(ref cullingBox_, out float octantDist))
             {

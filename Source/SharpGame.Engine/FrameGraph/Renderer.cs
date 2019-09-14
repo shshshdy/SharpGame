@@ -46,6 +46,8 @@ namespace SharpGame
 
             foreach (var viewport in views)
             {
+                viewport.Scene?.RenderUpdate(frameInfo);
+
                 viewport.Update(ref frameInfo);
             }
 
