@@ -14,7 +14,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup> 
     <PackageReference Include="DelegatesFactory" Version="1.2.0" />
     <PackageReference Include="Hocon" Version="1.1.0" />
     <PackageReference Include="MessagePack" Version="1.7.3.7" />

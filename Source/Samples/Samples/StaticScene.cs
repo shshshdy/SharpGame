@@ -24,6 +24,7 @@ namespace SharpGame.Samples
             };
 
             scene.AddComponent<Octree>();
+            scene.AddComponent<DebugRenderer>();
 
             camera = scene.GetComponent<Camera>(true);
             camera.Node.LookAt(vec3.Zero);

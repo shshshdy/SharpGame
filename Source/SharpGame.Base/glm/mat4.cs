@@ -112,6 +112,8 @@ namespace SharpGame
             get => ref value[15];
         }
 
+        public IntPtr Data => (IntPtr)Unsafe.AsPointer(ref value[0]);
+
         #region Construction
 
         public mat4(float scale)

@@ -191,6 +191,7 @@ namespace SharpGame
             Profiler.BeginSample("ViewUpdate");
 
             var g = Graphics.Instance;
+
             this.frameInfo = frameInfo;
             this.frameInfo.camera = camera;
             this.frameInfo.viewSize = new Int2(g.Width, g.Height);
@@ -203,6 +204,7 @@ namespace SharpGame
             }
 
             ubMatrics.Clear();
+
             mat4 m = mat4.Identity;
             GetTransform(Utilities.AsPointer(ref m), 1);
 
@@ -220,10 +222,20 @@ namespace SharpGame
 
             ubFrameInfo.SetData(ref frameUniform);
 
+            drawables.Clear();
+            batches.Clear();
+
             this.SendGlobalEvent(new BeginView { view = this });
 
             UpdateDrawables();
 
+            this.SendGlobalEvent(new EndView { view = this });
+
+            Profiler.EndSample();
+        }
+
+        public void Render()
+        {            
             if (camera != null)
             {
                 UpdateViewParameters();
@@ -231,29 +243,23 @@ namespace SharpGame
 
             UpdateLightParameters();
 
+            UpdateGeometry();
 
             FrameGraph.Draw(this);
 
             OverlayPass?.Draw(this);
 
-            this.SendGlobalEvent(new EndView { view = this });
-
             ubMatrics.Flush();
-
-            Profiler.EndSample();
         }
 
         private void UpdateDrawables()
         {
-            drawables.Clear();
-            batches.Clear();
-
             if (!scene || !camera)
             {
                 return;
             }
 
-            if(camera.AutoAspectRatio)
+            if (camera.AutoAspectRatio)
             {
                 camera.SetAspectRatio((float)frameInfo.viewSize.X / (float)frameInfo.viewSize.Y);
             }
@@ -265,6 +271,10 @@ namespace SharpGame
 
             Profiler.EndSample();
 
+        }
+
+        private void UpdateGeometry()
+        {
             Profiler.BeginSample("UpdateBatches");
             Parallel.ForEach(drawables, drawable => drawable.UpdateBatches(in frameInfo));
             Profiler.EndSample();
@@ -324,10 +334,10 @@ namespace SharpGame
             ubLight.SetData(ref lightParameter);
         }
 
-        public void Render(int imageIndex)
+        public void Submit(int imageIndex)
         {
-            Profiler.BeginSample("ViewRender");
-            //ubMatrics.Flush(Graphics.Instance.RenderContext);
+            Profiler.BeginSample("Submit");
+
             FrameGraph?.Submit(imageIndex);
             OverlayPass?.Submit(imageIndex);
 

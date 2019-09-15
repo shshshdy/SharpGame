@@ -14,6 +14,13 @@ namespace SharpGame
 
         public Graphics Graphics => Graphics.Instance;
 
+        public ref bool DrawDebug => ref drawDebug;
+        bool drawDebug;
+        public ref bool DebugDepthTest => ref debugDepthTest;
+        bool debugDepthTest;
+
+
+
         public static bool debugImage = false;
         protected float debugImageHeight = 200.0f;
         List<ImageView> debugImages = new List<ImageView>();
@@ -36,7 +43,7 @@ namespace SharpGame
             return view;
         }
 
-        public void RenderUpdate()
+        public void Update()
         {
             var frameInfo = new FrameInfo
             {
@@ -51,11 +58,53 @@ namespace SharpGame
                 viewport.Update(ref frameInfo);
             }
 
+            DrawDebugGeometry();
         }
 
         public void Render()
         {
-            Profiler.BeginSample("Render");
+            this.SendGlobalEvent(new BeginRender());
+
+            foreach (var viewport in views)
+            {
+                viewport.Render();
+            }
+
+            this.SendGlobalEvent(new EndRender());
+        }
+
+        private void DrawDebugGeometry()
+        {
+
+            foreach (var viewport in views)
+            {
+                if (viewport.Scene == null)
+                {
+                    continue;
+                }
+
+                var debug = viewport.Scene.GetComponent<DebugRenderer>();
+                if (debug == null || !debug.IsEnabledEffective())
+                {
+                    continue;
+                }
+
+                foreach (var drawable in viewport.drawables)
+                {
+                    drawable.DrawDebugGeometry(debug, debugDepthTest);
+                }
+
+                foreach (var light in viewport.lights)
+                {
+                    light.DrawDebugGeometry(debug, debugDepthTest);
+                }
+
+            }
+        }
+
+        public void Submit()
+        {
+            Profiler.BeginSample("Submit");
 
             Graphics.BeginRender();
 
@@ -63,17 +112,13 @@ namespace SharpGame
 
             cmdBuffer.Begin();
 
-            this.SendGlobalEvent(new BeginRender());
-
             int imageIndex = (int)Graphics.currentImage;
 
             foreach (var viewport in views)
             {
-                viewport.Render(imageIndex);
+                viewport.Submit(imageIndex);
             }
           
-            this.SendGlobalEvent(new EndRender());
-
             cmdBuffer.End();
 
             Graphics.EndRender();

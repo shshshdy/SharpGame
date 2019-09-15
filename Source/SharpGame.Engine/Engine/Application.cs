@@ -174,7 +174,7 @@ namespace SharpGame
                
                 UpdateFrame();
 
-                renderer.Render();
+                renderer.Submit();
 
                 ApplyFrameLimit();
                 Profiler.End();
@@ -259,7 +259,7 @@ namespace SharpGame
                 }
 
                 Profiler.Begin();
-                renderer.Render();
+                renderer.Submit();
                 Profiler.End();
 
             }
@@ -299,7 +299,9 @@ namespace SharpGame
                 timeDelta = Time.Delta
             });
 
-            renderer.RenderUpdate();
+            renderer.Update();
+
+            renderer.Render();
 
             this.SendGlobalEvent(new EndFrame());
 
