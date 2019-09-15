@@ -302,8 +302,18 @@ namespace SharpGame
             vec3 center = Center;
             vec3.Transform(ref center, ref transform, out vec3 newCenter);
             vec3 oldEdge = Size * 0.5f;
-            vec3.TransformNormal(ref oldEdge, ref transform, out vec3 newEdge);
+            vec3 newEdge;
+            newEdge = RotateExtents(in oldEdge, in transform);
+            //vec3.TransformNormal(ref oldEdge, ref transform, out newEdge);
             return new BoundingBox(newCenter - newEdge, newCenter + newEdge);
+        }
+
+        vec3 RotateExtents(in vec3 extents, in mat4 rotation)
+        {
+            vec3 newExtents = new vec3();
+            for (int i = 0; i < 3; i++)
+                newExtents[i] = Math.Abs(rotation.Get(i, 0) * extents.x) + Math.Abs(rotation.Get(i, 1) * extents.y) + Math.Abs(rotation.Get(i, 2) * extents.z);
+            return newExtents;
         }
 
         /// Merge a point.

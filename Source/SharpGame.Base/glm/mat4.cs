@@ -165,6 +165,8 @@ namespace SharpGame
             set { this[column][row] = value; }
         }
 
+        public ref float Get(int row, int column) { return ref value[row + (column * 4)]; }
+
         #endregion
 
         #region Conversion
