@@ -312,6 +312,8 @@ namespace SharpGame
         public void Draw(uint vertexCount, uint instanceCount, uint firstVertex, uint firstInstance)
         {
             vkCmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+            Interlocked.Increment(ref Stats.drawCall);
+            Interlocked.Add(ref Stats.triCount, (int)vertexCount / 3);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -319,7 +321,7 @@ namespace SharpGame
         {
             vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
             Interlocked.Increment(ref Stats.drawCall);
-            Interlocked.Add(ref Stats.triCount, (int)indexCount / 2);
+            Interlocked.Add(ref Stats.triCount, (int)indexCount / 3);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

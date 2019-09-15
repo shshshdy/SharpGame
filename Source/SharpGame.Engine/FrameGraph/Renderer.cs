@@ -14,12 +14,11 @@ namespace SharpGame
 
         public Graphics Graphics => Graphics.Instance;
 
-        public ref bool DrawDebug => ref drawDebug;
-        bool drawDebug;
-        public ref bool DebugDepthTest => ref debugDepthTest;
-        bool debugDepthTest;
+        public static ref bool DrawDebug => ref drawDebug;
+        static bool drawDebug;
 
-
+        public static ref bool DebugDepthTest => ref debugDepthTest;
+        static bool debugDepthTest;
 
         public static bool debugImage = false;
         protected float debugImageHeight = 200.0f;
@@ -58,7 +57,10 @@ namespace SharpGame
                 viewport.Update(ref frameInfo);
             }
 
-            DrawDebugGeometry();
+            if(drawDebug)
+            {
+                DrawDebugGeometry();
+            }
         }
 
         public void Render()

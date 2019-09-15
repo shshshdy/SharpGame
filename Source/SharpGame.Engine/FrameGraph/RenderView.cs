@@ -81,7 +81,12 @@ namespace SharpGame
         public Camera Camera => camera;
 
         public FrameGraph FrameGraph { get; set; }
+
         public GraphicsPass OverlayPass { get; set; }
+
+        public bool DrawDebug { get => Renderer.DrawDebug && drawDebug; set => drawDebug = value; }
+        bool drawDebug = true;
+        GraphicsPass debugPass;
 
         private Viewport viewport;
         public ref Viewport Viewport => ref viewport;
@@ -121,9 +126,38 @@ namespace SharpGame
         public ResourceSet PSSet => psResourceSet[Graphics.Instance.WorkContext];
         ResourceSet[] psResourceSet = new ResourceSet[2];
 
+        Graphics Graphics => Graphics.Instance;
+        Renderer Renderer => Renderer.Instance;
+
         public RenderView()
         {
             CreateBuffers();
+
+            var renderPass = Graphics.CreateRenderPass();
+            debugPass = new GraphicsPass
+            {
+                renderPass = renderPass,//  Graphics.RenderPass,
+
+                framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),// Graphics.Framebuffers,
+
+                OnDraw = (pass, view) =>
+                {
+                    if(view.Scene == null)
+                    {
+                        return;
+                    }
+
+                    var debug = view.Scene.GetComponent<DebugRenderer>();
+                    if (debug == null)
+                    {
+                        return;
+                    }
+
+
+                    var cmdBuffer = pass.CmdBuffer;
+                    debug.Render(view, cmdBuffer);
+                }
+            };
         }
 
         public void Attach(Camera camera, Scene scene, FrameGraph renderPath = null)
@@ -132,8 +166,6 @@ namespace SharpGame
             this.camera = camera;
                         
             FrameGraph = renderPath;
-
-
         }
 
         protected void CreateBuffers()
@@ -186,13 +218,13 @@ namespace SharpGame
             return ubMatrics.Alloc(sz, pos);
         }
 
-        public void Update(ref FrameInfo frameInfo)
+        public void Update(ref FrameInfo frame)
         {
             Profiler.BeginSample("ViewUpdate");
 
             var g = Graphics.Instance;
 
-            this.frameInfo = frameInfo;
+            this.frameInfo = frame;
             this.frameInfo.camera = camera;
             this.frameInfo.viewSize = new Int2(g.Width, g.Height);
 
@@ -217,12 +249,13 @@ namespace SharpGame
                 Viewport.Define(0, 0, g.Width, g.Height);
             }
 
-            frameUniform.DeltaTime = Time.Delta;
-            frameUniform.ElapsedTime = Time.Elapsed;
-
-            ubFrameInfo.SetData(ref frameUniform);
+            if (camera && camera.AutoAspectRatio)
+            {
+                camera.SetAspectRatio((float)frameInfo.viewSize.X / (float)frameInfo.viewSize.Y);
+            }
 
             drawables.Clear();
+            lights.Clear();
             batches.Clear();
 
             this.SendGlobalEvent(new BeginView { view = this });
@@ -235,7 +268,12 @@ namespace SharpGame
         }
 
         public void Render()
-        {            
+        {
+            frameUniform.DeltaTime = Time.Delta;
+            frameUniform.ElapsedTime = Time.Elapsed;
+
+            ubFrameInfo.SetData(ref frameUniform);
+
             if (camera != null)
             {
                 UpdateViewParameters();
@@ -247,6 +285,11 @@ namespace SharpGame
 
             FrameGraph.Draw(this);
 
+            if (DrawDebug)
+            {
+                debugPass?.Draw(this);
+            }
+
             OverlayPass?.Draw(this);
 
             ubMatrics.Flush();
@@ -257,11 +300,6 @@ namespace SharpGame
             if (!scene || !camera)
             {
                 return;
-            }
-
-            if (camera.AutoAspectRatio)
-            {
-                camera.SetAspectRatio((float)frameInfo.viewSize.X / (float)frameInfo.viewSize.Y);
             }
 
             Profiler.BeginSample("Culling");
@@ -339,6 +377,12 @@ namespace SharpGame
             Profiler.BeginSample("Submit");
 
             FrameGraph?.Submit(imageIndex);
+
+            if (DrawDebug)
+            {
+                debugPass?.Submit(imageIndex);
+            }
+
             OverlayPass?.Submit(imageIndex);
 
             Profiler.EndSample();
