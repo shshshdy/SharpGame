@@ -70,6 +70,7 @@ namespace SharpGame.Samples
 
             {
                 var node = scene.CreateChild("Mesh");
+                node.EulerAngles = glm.radians(0, 180, 0);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel("models/cerberus/cerberus.fbx");
 

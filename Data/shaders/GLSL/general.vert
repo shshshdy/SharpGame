@@ -5,10 +5,18 @@
 			
 #include "UniformsVS.glsl"
 
+#define TBN
+
 layout(location = 0) in vec3 inPos;
 layout(location = 1) in vec2 inUV;
 layout(location = 2) in vec3 inNormal;
+
+#ifdef TBN
+layout(location = 3) in vec3 inTangent;
+layout(location = 4) in vec3 inBitangent;
+#else
 layout(location = 3) in vec4 inTangent;
+#endif
 
 layout(location = 0) out vec4 outWorldPos;
 layout(location = 1) out vec2 outUV;
@@ -28,6 +36,11 @@ void main()
 	outWorldPos = worldPos;
 	outUV = inUV;
     outViewPos = (View * worldPos).xyz;
-    vec3 bitangent = cross(inTangent.xyz, inNormal) * inTangent.w;
+
+	#ifdef TBN
+	outNormal = mat3(Model) * mat3(inTangent, inBitangent, inNormal);
+	#else
+    vec3 bitangent = cross(inNormal, inTangent.xyz)*inTangent.w;
 	outNormal = mat3(Model) * mat3(inTangent, bitangent, inNormal);
+	#endif
 }

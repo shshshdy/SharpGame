@@ -216,7 +216,7 @@ namespace SharpGame
                 vec3 tmp = glm.normalize(t - n * vec3.Dot(n, t));
 
                 var tangent = new vec4(tmp.x, tmp.y, tmp.z, 0);
-                tangent.w = -1.0f;// (vec3.Dot(vec3.Cross(n, t), tan2[a]) < 0.0f) ? -1.0f : 1.0f;
+                tangent.w = (vec3.Dot(vec3.Cross(t, n), tan2[a]) < 0.0f) ? -1.0f : 1.0f;
                 newVertex.tangent = tangent;
             }
 

@@ -29,7 +29,6 @@ void main()
 	vec3 N = normalize(inNormal * DecodeNormal(texture(NormalMap, inUV)));
 	//vec3 N = normalize(inNormal[2]);
 	vec3 L = -SunlightDir;
-    
     uint cascadeIndex = GetCascadeIndex(inViewPos.z);
 	// Depth compare for shadowing
 	vec4 shadowCoord = GetShadowPos(cascadeIndex, inWorldPos.xyz);	
@@ -40,8 +39,10 @@ void main()
     shadow = filterPCF(shadowCoord / shadowCoord.w, cascadeIndex);
     #endif
 
+	float NDotL = max(dot(N, L), 0.0);
     vec3 viewVec = CameraPos.xyz - inWorldPos.xyz;
-	vec3 diffuse = diffColor.rgb * max(dot(N, L), 0.0)*shadow;
+	vec3 diffuse = diffColor.rgb * NDotL * shadow;
+    //outFragColor = vec4(NDotL);return;
 	vec3 specular = vec3(0.75) * BlinnPhong(N, viewVec, L, 16.0);
 	outFragColor = vec4(diffColor.rgb * AmbientColor.xyz + diffuse + specular, 1.0);
 }

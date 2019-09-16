@@ -24,3 +24,9 @@ layout (binding = 1) uniform SkinVS_dynamic
 {
     mat4 SkinMatrices[MATRICES_COUNT];
 };
+
+//layout(constant_id=0) const int TransformMode = 0;
+//layout(constant_id=1) const int MatricesCount = 0;
+//layout(constant_id=2) const int ShadingmMode = 64;
+//layout(constant_id=3) const int LightCount = 2;
+//layout(constant_id=4) const int HasNormalMap = 0;

@@ -149,18 +149,6 @@ namespace SharpGame
                 }
             };
 
-
-            lightParameter.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
-            lightParameter.SunlightColor = new Color4(0.5f);
-            lightParameter.SunlightDir = new vec3(-1, -1, 1);
-            lightParameter.SunlightDir.Normalize();
-
-            for (int i = 0; i < 8; i++)
-            {
-                lightParameter.lightColor[i] = Color4.White;
-                lightParameter.lightVec[i] = glm.normalize(lightVec[i]);
-            }
-
         }
 
         public void Attach(Camera camera, Scene scene, FrameGraph frameGraph = null)
@@ -370,7 +358,22 @@ namespace SharpGame
                 lightParameter.SunlightColor = env.SunlightColor;
                 lightParameter.SunlightDir = env.SunlightDir;
             }
-            
+            else
+            {
+
+                lightParameter.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
+                lightParameter.SunlightColor = new Color4(0.5f);
+                lightParameter.SunlightDir = new vec3(-1, -1, 1);
+                lightParameter.SunlightDir.Normalize();
+
+                for (int i = 0; i < 8; i++)
+                {
+                    lightParameter.lightColor[i] = Color4.White;
+                    lightParameter.lightVec[i] = glm.normalize(lightVec[i]);
+                }
+
+            }
+
             ubLight.SetData(ref lightParameter);
         }
 

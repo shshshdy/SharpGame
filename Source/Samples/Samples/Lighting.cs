@@ -8,7 +8,13 @@ namespace SharpGame.Samples
         {
             base.Init();
 
-            scene = new Scene();
+            scene = new Scene
+            {
+                new Environment
+                {
+                    SunlightDir = glm.normalize(new vec3(-1.0f, -1.0f, 0.0f))
+                },
+            };
 
             var cameraNode = scene.CreateChild("Camera", new vec3(-10.0f, -13.0f, 0));
             cameraNode.EulerAngles = glm.radians(0, 90, 0);

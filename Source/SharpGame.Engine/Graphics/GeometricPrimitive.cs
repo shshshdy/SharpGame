@@ -7,9 +7,9 @@ namespace SharpGame
 {
     public class GeometricPrimitive
     {
-        public static Model CreatePlaneModel(float width, float height, float tileX = 1.0f, float tileZ = 1.0f)
+        public static Model CreatePlaneModel(float width, float height, float tileX = 1.0f, float tileZ = 1.0f, bool hasTangent = false)
         {
-            var geo = CreatePlane(width, height, tileX, tileZ);
+            var geo = hasTangent ? CreatePlaneTangent(width, height, tileX, tileZ) : CreatePlane(width, height, tileX, tileZ);
             var boundingBox = new BoundingBox();
             boundingBox.Define(-width / 2, height / 2);          
             var model = Model.Create(new List<Geometry> { geo}, new List<BoundingBox> { boundingBox});
@@ -36,6 +36,32 @@ namespace SharpGame
                 VertexBuffers = new[] { DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
                 IndexBuffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTexNorm.Layout
+            };
+
+            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length);
+            return geom;
+        }
+
+        public static Geometry CreatePlaneTangent(float width, float height, float tileX = 1.0f, float tileZ = 1.0f)
+        {
+            float w2 = 0.5f * width;
+            float h2 = 0.5f * height;
+
+            VertexPosTexNTB[] vertices =
+            {
+                new VertexPosTexNTB(new vec3(-w2, 0, -h2), new vec2(+0, +0), new vec3(+0, 1, +0), new vec3(-1, 0, 0), new vec3(0, 0, -1)),
+                new VertexPosTexNTB(new vec3(+w2, 0, -h2), new vec2(+tileX, +0), new vec3(+0, 1, +0), new vec3(-1, 0, 0), new vec3(0, 0, -1)),
+                new VertexPosTexNTB(new vec3(+w2, 0, +h2), new vec2(+tileX, +tileZ), new vec3(+0, 1, +0), new vec3(-1, 0, 0), new vec3(0, 0, -1)),
+                new VertexPosTexNTB(new vec3(-w2, 0, +h2), new vec2(+tileX, +0), new vec3(+0, 1, +0), new vec3(-1, 0, 0), new vec3(0, 0, -1)),
+            };
+
+            int[] indices = { 0, 1, 2, 0, 2, 3, };
+
+            var geom = new Geometry
+            {
+                VertexBuffers = new[] { DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
+                IndexBuffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexLayout = VertexPosTexNTB.Layout
             };
 
             geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length);

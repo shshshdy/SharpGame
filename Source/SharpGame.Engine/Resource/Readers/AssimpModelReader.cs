@@ -18,17 +18,15 @@ namespace SharpGame
 
             Assimp.PostProcessSteps assimpFlags = 
             Assimp.PostProcessSteps.CalculateTangentSpace |
-            //Assimp.PostProcessSteps.Triangulate |
-            //Assimp.PostProcessSteps.SortByPrimitiveType |
-            //Assimp.PostProcessSteps.PreTransformVertices |
+            Assimp.PostProcessSteps.Triangulate |
+            Assimp.PostProcessSteps.SortByPrimitiveType |
+            Assimp.PostProcessSteps.PreTransformVertices |
             Assimp.PostProcessSteps.MakeLeftHanded |
             //Assimp.PostProcessSteps.GenerateNormals |
             //Assimp.PostProcessSteps.GenerateUVCoords |
-            //Assimp.PostProcessSteps.OptimizeMeshes |
-            //Assimp.PostProcessSteps.Debone |
-            //Assimp.PostProcessSteps.ValidateDataStructure
-            0
-            ;
+            Assimp.PostProcessSteps.OptimizeMeshes |
+            Assimp.PostProcessSteps.Debone |
+            Assimp.PostProcessSteps.ValidateDataStructure;
 
             var ctx = new Assimp.AssimpContext();
             string ext = FileUtil.GetExtension(loadingFile);
@@ -180,7 +178,7 @@ namespace SharpGame
             {
                 VertexPosTexNorm vertex;
 
-                vertex.position = new vec3(mesh.Vertices[v].X, -mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
+                vertex.position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 if(mesh.HasTextureCoords(0))
@@ -217,21 +215,21 @@ namespace SharpGame
         private static unsafe void ConvertGeomNTB(float scale, Assimp.Mesh mesh,
             out BoundingBox meshBoundingBox, out DeviceBuffer vb, out DeviceBuffer ib, out VertexLayout vertexLayout)
         {
-            NativeList<VertexPosTexNormTangent> vertexBuffer = new NativeList<VertexPosTexNormTangent>();
+            NativeList<VertexPosTexNTB> vertexBuffer = new NativeList<VertexPosTexNTB>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
 
             meshBoundingBox = new BoundingBox();
 
-            vertexLayout = VertexPosTexNormTangent.Layout;
+            vertexLayout = VertexPosTexNTB.Layout;
 
             for (int v = 0; v < mesh.VertexCount; v++)
             {
-                VertexPosTexNormTangent vertex;
+                VertexPosTexNTB vertex;
 
                 vertex.position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
-                vertex.tangent = new vec4(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z, -1);
-                //vertex.bitangent = new vec3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
+                vertex.tangent = new vec3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);//, 1);
+                vertex.bitangent = new vec3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
 
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 if (mesh.HasTextureCoords(0))
@@ -257,7 +255,7 @@ namespace SharpGame
 
             vertexLayout.Print();
 
-            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNormTangent), vertexBuffer.Count, vertexBuffer.Data);
+            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNTB), vertexBuffer.Count, vertexBuffer.Data);
             ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
             vertexBuffer.Dispose();

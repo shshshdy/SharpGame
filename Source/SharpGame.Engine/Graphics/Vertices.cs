@@ -46,6 +46,15 @@ namespace SharpGame
         public vec3 tangent;
         public vec3 bitangent;
 
+        public VertexPosTexNTB(vec3 p, vec2 uv, vec3 n, vec3 t, vec3 b)
+        {
+            position = p;
+            normal = n;
+            texcoord = uv;
+            tangent = t;
+            bitangent = b;
+        }
+
         public static int Size => Utilities.SizeOf<VertexPosTexNTB>();
 
         public static VertexLayout Layout = new VertexLayout
@@ -65,6 +74,14 @@ namespace SharpGame
         public vec2 texcoord;
         public vec3 normal;
         public vec4 tangent;
+
+        public VertexPosTexNormTangent(vec3 p, vec2 uv, vec3 n, vec4 t)
+        {
+            position = p;
+            normal = n;
+            texcoord = uv;
+            tangent = t;
+        }
 
         public static int Size => Utilities.SizeOf<VertexPosTexNormTangent>();
 
