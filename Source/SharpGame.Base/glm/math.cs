@@ -130,6 +130,21 @@ namespace SharpGame
             return radians * (57.295779513082320876798154814105f);
         }
 
+        public static vec2 degrees(vec2 radians)
+        {
+            return new vec2(degrees(radians.x), degrees(radians.y));
+        }
+
+        public static vec3 degrees(vec3 radians)
+        {
+            return new vec3(degrees(radians.x), degrees(radians.y), degrees(radians.z));
+        }
+
+        public static vec3 degrees(float x, float y, float z)
+        {
+            return new vec3(degrees(x), degrees(y), degrees(z));
+        }
+
         public static float radians(float degrees)
         {
             return degrees * (0.01745329251994329576923690768489f);

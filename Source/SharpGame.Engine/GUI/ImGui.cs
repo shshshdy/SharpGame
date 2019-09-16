@@ -443,6 +443,20 @@ namespace SharpGame
             io.KeySuper = _winKeyDown;
         }
 
+        public static Color4 Color4(string label, Color4 color)
+        {
+            Vector4 c = new Vector4(color.Red, color.Green, color.Blue, color.Alpha);
+            ImGui.ColorEdit4(label, ref c);
+            return new Color4(c.X, c.Y, c.Z, c.W);
+        }
+
+        public static Color4 ColorPicker4(string label, Color4 color)
+        {
+            Vector4 c = new Vector4(color.Red, color.Green, color.Blue, color.Alpha);
+            ImGui.ColorPicker4(label, ref c);
+            return new Color4(c.X, c.Y, c.Z, c.W);
+        }
+
         public static void Image(Texture texture, Vector2 size)
         {
             var img = Instance.GetOrCreateImGuiBinding(texture);

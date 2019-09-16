@@ -12,17 +12,23 @@ namespace SharpGame
 
         protected unsafe override bool OnLoad(Model model, File stream)
         {
+            var filePath = FileUtil.StandardlizeFile(stream.Name);
+            filePath = FileUtil.GetPath(stream.Name);
+            FileSystem.AddResourceDir(filePath + "textures");
+
             Assimp.PostProcessSteps assimpFlags = 
             Assimp.PostProcessSteps.CalculateTangentSpace |
-            Assimp.PostProcessSteps.Triangulate |
-            Assimp.PostProcessSteps.SortByPrimitiveType |
-            Assimp.PostProcessSteps.PreTransformVertices |
+            //Assimp.PostProcessSteps.Triangulate |
+            //Assimp.PostProcessSteps.SortByPrimitiveType |
+            //Assimp.PostProcessSteps.PreTransformVertices |
             Assimp.PostProcessSteps.MakeLeftHanded |
-            Assimp.PostProcessSteps.GenerateNormals |
-            Assimp.PostProcessSteps.GenerateUVCoords |
-            Assimp.PostProcessSteps.OptimizeMeshes |
-            Assimp.PostProcessSteps.Debone |
-            Assimp.PostProcessSteps.ValidateDataStructure;
+            //Assimp.PostProcessSteps.GenerateNormals |
+            //Assimp.PostProcessSteps.GenerateUVCoords |
+            //Assimp.PostProcessSteps.OptimizeMeshes |
+            //Assimp.PostProcessSteps.Debone |
+            //Assimp.PostProcessSteps.ValidateDataStructure
+            0
+            ;
 
             var ctx = new Assimp.AssimpContext();
             string ext = FileUtil.GetExtension(loadingFile);
@@ -76,6 +82,10 @@ namespace SharpGame
             model.BoundingBox = boundingBox;
           
             ctx.Dispose();
+
+
+            FileSystem.RemoveResourceDir(filePath);
+            FileSystem.RemoveResourceDir(filePath + "textures");
             return true;
         }
 
@@ -207,21 +217,21 @@ namespace SharpGame
         private static unsafe void ConvertGeomNTB(float scale, Assimp.Mesh mesh,
             out BoundingBox meshBoundingBox, out DeviceBuffer vb, out DeviceBuffer ib, out VertexLayout vertexLayout)
         {
-            NativeList<VertexPosTexNTB> vertexBuffer = new NativeList<VertexPosTexNTB>();
+            NativeList<VertexPosTexNormTangent> vertexBuffer = new NativeList<VertexPosTexNormTangent>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
 
             meshBoundingBox = new BoundingBox();
 
-            vertexLayout = VertexPosTexNTB.Layout;
+            vertexLayout = VertexPosTexNormTangent.Layout;
 
             for (int v = 0; v < mesh.VertexCount; v++)
             {
-                VertexPosTexNTB vertex;
+                VertexPosTexNormTangent vertex;
 
                 vertex.position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
                 vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
-                vertex.tangent = new vec3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);
-                vertex.bitangent = new vec3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
+                vertex.tangent = new vec4(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z, -1);
+                //vertex.bitangent = new vec3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
 
                 // Texture coordinates and colors may have multiple channels, we only use the first [0] one
                 if (mesh.HasTextureCoords(0))
@@ -247,7 +257,7 @@ namespace SharpGame
 
             vertexLayout.Print();
 
-            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNTB), vertexBuffer.Count, vertexBuffer.Data);
+            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNormTangent), vertexBuffer.Count, vertexBuffer.Data);
             ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
             vertexBuffer.Dispose();
@@ -260,16 +270,40 @@ namespace SharpGame
 
             if (aiMaterial.HasTextureDiffuse)
             {
-                Texture tex = Resources.Instance.Load<Texture>(path + aiMaterial.TextureDiffuse.FilePath);
+                string texPath = FileUtil.CombinePath(path, aiMaterial.TextureDiffuse.FilePath);
+                Texture tex = Resources.Instance.Load<Texture>(texPath);
                 if(tex != null)
                 {
                     material.SetTexture("DiffMap", tex.ResourceRef);
+                }
+                else
+                {                   
+                    tex = Resources.Instance.Load<Texture>(texPath.Replace(".ktx", "_bc3_unorm.ktx"));
+                    if (tex != null)
+                    {
+                        material.SetTexture("DiffMap", tex.ResourceRef);
+                    }
                 }
             }
             else
             {
                 material.SetTexture("DiffMap", Texture.White);
             }
+
+            if (aiMaterial.HasTextureNormal)
+            {
+                Texture tex = Resources.Instance.Load<Texture>(FileUtil.CombinePath(path, aiMaterial.TextureNormal.FilePath));
+                if (tex != null)
+                {
+                    material.SetTexture("NormalMap", tex.ResourceRef);
+                }
+            }
+            else
+            {
+                material.SetTexture("NormalMap", Texture.Blue);
+            }
+
+
             return material;
         }
 

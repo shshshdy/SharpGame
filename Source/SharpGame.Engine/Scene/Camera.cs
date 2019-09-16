@@ -286,7 +286,7 @@ namespace SharpGame
 
             projectionDirty_ = false;
         }
-        /*
+
         public void GetFrustumSize(out vec3 near, out vec3 far)
         {
             if (orthographic_)
@@ -295,10 +295,10 @@ namespace SharpGame
                 float farZ = Math.Max(farClip_, nearClip_);
                 float halfViewSize = orthoSize_ * 0.5f / zoom_;
 
-                near.Z = nearZ;
-                far.Z = farZ;
-                far.Y = near.Y = halfViewSize;
-                far.X = near.X = near.Y * aspectRatio_;
+                near.z = nearZ;
+                far.z = farZ;
+                far.y = near.y = halfViewSize;
+                far.x = near.x = near.y * aspectRatio_;
             }
             else
             {
@@ -306,14 +306,14 @@ namespace SharpGame
                 float farZ = Math.Max(farClip_, nearClip_);
                 float halfViewSize = (float)Math.Tan(fov_ * 0.5f) / zoom_;
 
-                near.Z = nearZ;
-                near.Y = near.Z * halfViewSize;
-                near.X = near.Y * aspectRatio_;
-                far.Z = farZ;
-                far.Y = far.Z * halfViewSize;
-                far.X = far.Y * aspectRatio_;
+                near.z = nearZ;
+                near.y = near.z * halfViewSize;
+                near.x = near.y * aspectRatio_;
+                far.z = farZ;
+                far.y = far.z * halfViewSize;
+                far.x = far.y * aspectRatio_;
             }
-        }*/
+        }
 
         public float GetHalfViewSize()
         {

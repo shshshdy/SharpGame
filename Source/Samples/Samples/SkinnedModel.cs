@@ -44,7 +44,6 @@ namespace SharpGame.Samples
                     animMdoel.SetModel(model);
                     animMdoel.SetMaterial(mat);
 
-
                     AnimationState state = animMdoel.AddAnimationState(walkAnimation);
                     // The state would fail to create (return null) if the animation was not found
                     if (state != null)

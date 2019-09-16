@@ -183,6 +183,7 @@ namespace SharpGame
         public static Texture Gray;
         public static Texture Black;
         public static Texture Purple;
+        public static Texture Blue;
 
         public unsafe static void Init()
         {
@@ -196,6 +197,7 @@ namespace SharpGame
             Gray = CreateTex(Color.Gray);
             Black = CreateTex(Color.Black);
             Purple = CreateTex(Color.Purple);
+            Blue = CreateTex(Color.Blue);
         }
 
         public static Texture Create(uint width, uint height, ImageViewType imageViewType, uint layers, Format format, uint levels = 0, ImageUsageFlags additionalUsage = ImageUsageFlags.None)
@@ -295,7 +297,6 @@ namespace SharpGame
             NumberOfMipmapLevels = numberOfMipmapLevels;
             Mipmaps = new MipmapData[numberOfMipmapLevels];
         }
-
 
         public ulong GetTotalSize()
         {

@@ -48,24 +48,14 @@ namespace SharpGame
         public float LightPS_pading1;
 
         public vec4 cascadeSplits;
-        fixed float lightMatrices[4 * 16];
+        public FixedArray4<mat4> lightMatrices;
 
-        fixed float lightColor[4 * 8];
-        fixed float lightVec[4 * 8];
-
-        public void SetLightColor(int index, Color4 color)
-        {
-            Unsafe.As<float, Color4>(ref lightColor[index * 4]) = color;
-        }
-
-        public void SetLightVector(int index, vec4 vec)
-        {
-            Unsafe.As<float, vec4>(ref lightVec[index * 4]) = vec;
-        }
-
+        public FixedArray8<Color4> lightColor;
+        public FixedArray8<vec4> lightVec;
+        
         public void SetLightMatrices(int index, ref mat4 mat)
         {
-            Unsafe.As<float, mat4>(ref lightMatrices[index * 16]) = mat;
+            lightMatrices[index] = mat;
         }
 
     }
@@ -158,14 +148,27 @@ namespace SharpGame
                     debug.Render(view, cmdBuffer);
                 }
             };
+
+
+            lightParameter.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
+            lightParameter.SunlightColor = new Color4(0.5f);
+            lightParameter.SunlightDir = new vec3(-1, -1, 1);
+            lightParameter.SunlightDir.Normalize();
+
+            for (int i = 0; i < 8; i++)
+            {
+                lightParameter.lightColor[i] = Color4.White;
+                lightParameter.lightVec[i] = glm.normalize(lightVec[i]);
+            }
+
         }
 
-        public void Attach(Camera camera, Scene scene, FrameGraph renderPath = null)
+        public void Attach(Camera camera, Scene scene, FrameGraph frameGraph = null)
         {
             this.scene = scene;
             this.camera = camera;
                         
-            FrameGraph = renderPath;
+            FrameGraph = frameGraph;
         }
 
         protected void CreateBuffers()
@@ -328,6 +331,7 @@ namespace SharpGame
             cameraVS.ViewInv = glm.inverse(cameraVS.View);
             cameraVS.ViewProj = camera.VkProjection*camera.View;
             cameraVS.CameraPos = camera.Node.Position;
+            //camera.GetHalfViewSize()
             //cameraVS.FrustumSize = camera.Frustum;
             cameraVS.NearClip = camera.NearClip;
             cameraVS.FarClip = camera.FarClip;
@@ -358,17 +362,15 @@ namespace SharpGame
 
         private void UpdateLightParameters()
         {
-            lightParameter.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
-            lightParameter.SunlightColor = new Color4(0.5f);
-            lightParameter.SunlightDir = new vec3(-1, -1, 1);
-            lightParameter.SunlightDir.Normalize();
+            Environment env = scene?.GetComponent<Environment>();
 
-            for(int i = 0; i < 8; i++)
+            if(env)
             {
-                lightParameter.SetLightColor(i, Color4.White);
-                lightParameter.SetLightVector(i, glm.normalize(lightVec[i]));
+                lightParameter.AmbientColor = env.AmbientColor;
+                lightParameter.SunlightColor = env.SunlightColor;
+                lightParameter.SunlightDir = env.SunlightDir;
             }
-
+            
             ubLight.SetData(ref lightParameter);
         }
 

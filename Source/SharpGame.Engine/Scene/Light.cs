@@ -25,9 +25,8 @@ namespace SharpGame
             drawableFlags_ = DRAWABLE_LIGHT;
         }
 
-        /*
-        public virtual void DrawDebugGeometry(DebugRenderer debug, bool depthTest)
+        public override void DrawDebugGeometry(DebugRenderer debug, bool depthTest)
         {
-        }*/
+        }
     }
 }

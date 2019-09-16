@@ -216,7 +216,7 @@ namespace SharpGame
                 vec3 tmp = glm.normalize(t - n * vec3.Dot(n, t));
 
                 var tangent = new vec4(tmp.x, tmp.y, tmp.z, 0);
-                tangent.w = (vec3.Dot(vec3.Cross(n, t), tan2[a]) < 0.0f) ? -1.0f : 1.0f;
+                tangent.w = -1.0f;// (vec3.Dot(vec3.Cross(n, t), tan2[a]) < 0.0f) ? -1.0f : 1.0f;
                 newVertex.tangent = tangent;
             }
 
@@ -243,7 +243,7 @@ namespace SharpGame
             }
             else
             {
-                material.SetTexture("NormalMap", Texture.White);
+                material.SetTexture("NormalMap", Texture.Blue);
             }
 
             if (!string.IsNullOrEmpty(materialDef.SpecularColorTexture))

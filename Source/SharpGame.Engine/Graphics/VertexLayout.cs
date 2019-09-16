@@ -47,6 +47,23 @@ namespace SharpGame
         
     }
 
+    [Flags]
+    public enum VertexMask
+    {
+        Position = 0x1,
+        Texcoord1 = 0x2,
+        Normal = 0x4,
+        Tangent = 0x8,
+        BlendWeights = 0x10,
+        BlendIndices = 0x20,
+        Color = 0x40,
+        Texcoord2 = 0x80,
+        InstanceMatrix1 = 0x100,
+        InstanceMatrix2 = 0x200,
+        InstanceMatrix3 = 0x400,
+        InstanceMatrix4 = 0x800,
+    }
+
     public class VertexLayout
     {
         public VertexInputBinding[] bindings;
@@ -113,6 +130,9 @@ namespace SharpGame
                     return 12;
                 case Format.R32g32b32a32Sfloat:
                     return 16;
+                default:
+                    Log.Error("Error format size : " + format);
+                    break;
             }
 
             return 0;

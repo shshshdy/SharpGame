@@ -76,6 +76,28 @@ namespace SharpGame
             }
         }
 
+        public static string CombinePath(string dir, string path)
+        {
+            if (path.StartsWith("/"))
+            {
+                if (dir.EndsWith("/"))
+                {
+                    return dir + path.Substring(1);
+                }
+                else
+                    return dir + path;
+            }
+            else
+            {
+                if (dir.EndsWith("/"))
+                {
+                    return dir + path;
+                }
+                else
+                    return dir + "/" + path;
+            }
+        }
+
         public static string GetPath(string fullPath)
         {
             string path, file, extension;

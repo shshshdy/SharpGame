@@ -136,8 +136,8 @@ namespace SharpGame.Samples
                     if(ImGui.CollapsingHeader("Camera", ref openCamera))
                     {
                         ImGui.PushItemWidth(120);
-                        ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0:0.00"));
-                        ImGui.TextUnformatted("rot : " + camera.Node.Rotation.EulerAngles.ToString("0:0.00"));
+                        ImGui.TextUnformatted("pos : " + camera.Node.Position.ToString("0.00"));
+                        ImGui.TextUnformatted("rot : " + camera.Node.Rotation.EulerAngles.ToString("0.00"));
                         ImGui.SliderFloat("Rotate Speed: ", ref rotSpeed, 1, 100);
                         ImGui.SliderFloat("Move Speed: ", ref moveSpeed, 1, 1000);
                         ImGui.PopItemWidth();
@@ -146,6 +146,22 @@ namespace SharpGame.Samples
 
                 ImGui.End();
              
+            }
+
+            Environment env = scene?.GetComponent<Environment>();
+            if(env)
+            {
+                if (ImGui.Begin("HUD"))
+                {
+                    env.AmbientColor = ImGUI.Color4("Ambient Color", env.AmbientColor);
+                    env.SunlightColor = ImGUI.Color4("Sunlight Color", env.SunlightColor);
+
+                    Vector3 dir = (Vector3)env.SunlightDir;
+                    ImGui.SliderFloat3("Light dir", ref dir, -1.0f, 1.0f);
+                    env.SunlightDir = (vec3)dir;
+                }
+
+                ImGui.End();
             }
        
         }

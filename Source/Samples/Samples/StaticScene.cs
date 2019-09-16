@@ -11,6 +11,14 @@ namespace SharpGame.Samples
         {
             scene = new Scene()
             {
+                new Octree
+                {
+                },
+
+                new DebugRenderer
+                {
+                },
+
                 new Node("Camera", new vec3(0, 2, -30), glm.radians(10, 0, 0) )
                 {
                     new Camera
@@ -23,15 +31,13 @@ namespace SharpGame.Samples
 
             };
 
-            scene.AddComponent<Octree>();
-            scene.AddComponent<DebugRenderer>();
-
             camera = scene.GetComponent<Camera>(true);
             camera.Node.LookAt(vec3.Zero);
 
             {
-                var model = GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32);
+                var model = Resources.Load<Model>("models/plane.obj");// GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32);
                 var node = scene.CreateChild("Plane");
+                node.Scaling = new vec3(5, 5, 5);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
                 var mat = Resources.Load<Material>("materials/Grass.material");            

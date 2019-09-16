@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -10,6 +11,7 @@ namespace SharpGame
     /// </summary>
 
     [StructLayout(LayoutKind.Sequential, Size = 4)]
+    [DebuggerDisplay("M11 = {M11} M12 = {M12} M13 = {M13} M14 = {M14}")]
     public unsafe partial struct mat4
     {
         fixed float value[16];

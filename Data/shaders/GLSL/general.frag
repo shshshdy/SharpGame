@@ -7,7 +7,7 @@
 #include "Lighting.glsl"
 #include "Shadow.glsl"
 
-layout (set = 2, binding = 0) uniform sampler2D DiffMap;
+layout(set = 2, binding = 0) uniform sampler2D DiffMap;
 layout(set = 3, binding = 0) uniform sampler2D NormalMap;
 layout(set = 4, binding = 0) uniform sampler2D SpecMap;
 layout(set = 5, binding = 0) uniform sampler2D EmissiveMap;
@@ -26,8 +26,8 @@ void main()
         discard;
     }
 
-	//vec3 N = normalize(inNormal * DecodeNormal(texture(NormalMap, inUV)));
-	vec3 N = normalize(inNormal[2]);
+	vec3 N = normalize(inNormal * DecodeNormal(texture(NormalMap, inUV)));
+	//vec3 N = normalize(inNormal[2]);
 	vec3 L = -SunlightDir;
     
     uint cascadeIndex = GetCascadeIndex(inViewPos.z);

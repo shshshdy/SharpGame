@@ -312,7 +312,7 @@ namespace SharpGame
                     break;
 
                 case TransformSpace.PARENT:
-                    rotation_ = (rotation_ * delta);
+                    rotation_ = (delta * rotation_);
                     rotation_ = glm.normalize(rotation_);
                     break;
 
@@ -374,17 +374,17 @@ namespace SharpGame
         }
 
 
-        public void Yaw(float angle, TransformSpace space)
+        public void Yaw(float angle, TransformSpace space = TransformSpace.LOCAL)
         {
             Rotate(new quat(angle, vec3.Up), space);
         }
 
-        public void Pitch(float angle, TransformSpace space)
+        public void Pitch(float angle, TransformSpace space = TransformSpace.LOCAL)
         {
             Rotate(new quat(angle, vec3.Right), space);
         }
 
-        public void Roll(float angle, TransformSpace space)
+        public void Roll(float angle, TransformSpace space = TransformSpace.LOCAL)
         {
             Rotate(new quat(angle, vec3.Forward), space);
         }

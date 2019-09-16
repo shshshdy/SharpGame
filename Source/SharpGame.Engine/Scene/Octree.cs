@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,8 +14,10 @@ namespace SharpGame
         const int DEFAULT_OCTREE_LEVELS = 8;
         const int NUM_OCTANTS = 8;
 
+        [IgnoreDataMember]
         public Octant Root { get; }
 
+        [IgnoreDataMember]
         public int NumLevels => numLevels_;
         int numLevels_;
 
@@ -45,7 +48,7 @@ namespace SharpGame
             base.Destroy();
         }
 
-        public Octant GetOctant(in BoundingBox box, int level, Octant parent, Octree root, int index)
+        internal Octant GetOctant(in BoundingBox box, int level, Octant parent, Octree root, int index)
         {
             if (!freeList.Empty())
             {
@@ -61,7 +64,7 @@ namespace SharpGame
             return new Octant(in box, level, parent, root, index);
         }
 
-        public void Free(Octant octant)
+        internal void Free(Octant octant)
         {
             octant.Free();
 
@@ -71,7 +74,7 @@ namespace SharpGame
         /// Update octree size.
         void UpdateOctreeSize() { SetSize(in Root.WorldBoundingBox, numLevels_); }
 
-        void DrawDebugGeometry(DebugRenderer debug, bool depthTest)
+        public void DrawDebugGeometry(DebugRenderer debug, bool depthTest)
         {
             if (debug)
             {

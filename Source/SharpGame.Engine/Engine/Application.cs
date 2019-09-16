@@ -87,7 +87,8 @@ namespace SharpGame
             cache.RegisterAssertReader(new MdlModelReader());
             cache.RegisterAssertReader(new ObjModelReader());
             cache.RegisterAssertReader(new AssimpModelReader());
-            
+
+            cache.RegisterAssertReader(new DDSTextureReader());
             cache.RegisterAssertReader(new SharpTextureReader());
             cache.RegisterAssertReader(new KtxTextureReader());
 

@@ -10,23 +10,17 @@ namespace SharpGame.Samples
 
             scene = new Scene();
 
-            var cameraNode = scene.CreateChild("Camera", new vec3(0.0f, 2.0f, -10));
-          
+            var cameraNode = scene.CreateChild("Camera", new vec3(-10.0f, -13.0f, 0));
+            cameraNode.EulerAngles = glm.radians(0, 90, 0);
+
             camera = cameraNode.CreateComponent<Camera>();
             camera.Fov = glm.radians(60);
 
             var node = scene.CreateChild("Mesh");
-            node.Yaw(glm.radians(90), TransformSpace.LOCAL);
 
             var staticModel = node.AddComponent<StaticModel>();
-            staticModel.SetModel("models/voyager/voyager.dae");
-
-            var colorMap = Resources.Load<Texture>("models/voyager/voyager_bc3_unorm.ktx");
-
-            var mat = new Material("Shaders/LitSolid.shader");
-            mat.SetTexture("DiffMap", colorMap);
-            staticModel.SetMaterial(mat);
-
+            staticModel.SetModel("models/sibenik/sibenik.dae");// "models/voyager/voyager.dae");
+            
             Renderer.MainView.Attach(camera, scene);
         }
 

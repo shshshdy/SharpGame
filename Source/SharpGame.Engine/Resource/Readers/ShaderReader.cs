@@ -18,8 +18,8 @@ namespace SharpGame
             var filePath = FileUtil.StandardlizeFile(stream.Name);
             filePath = FileUtil.GetPath(stream.Name);           
             FileSystem.AddResourceDir(filePath);
-            FileSystem.AddResourceDir(filePath + "GLSL");
             FileSystem.AddResourceDir(filePath + "Common");
+            FileSystem.AddResourceDir(filePath + "GLSL");
 
             try
             {
