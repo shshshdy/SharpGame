@@ -90,6 +90,12 @@ namespace SharpGame
             Items[size++] = item;
         }
 
+        public void Resize(int sz)
+        {
+            EnsureCapacity(sz);
+            size = sz;
+        }
+
         public void IncreaseCapacity(int index)
         {
             EnsureCapacity(size + index);

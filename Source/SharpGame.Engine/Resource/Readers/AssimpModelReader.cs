@@ -17,9 +17,9 @@ namespace SharpGame
             Assimp.PostProcessSteps.Triangulate |
             Assimp.PostProcessSteps.SortByPrimitiveType |
             Assimp.PostProcessSteps.PreTransformVertices |
-            //Assimp.PostProcessSteps.MakeLeftHanded |
-            //Assimp.PostProcessSteps.GenerateNormals |
-            //Assimp.PostProcessSteps.GenerateUVCoords |
+            Assimp.PostProcessSteps.MakeLeftHanded |
+            Assimp.PostProcessSteps.GenerateNormals |
+            Assimp.PostProcessSteps.GenerateUVCoords |
             Assimp.PostProcessSteps.OptimizeMeshes |
             Assimp.PostProcessSteps.Debone |
             Assimp.PostProcessSteps.ValidateDataStructure;

@@ -52,7 +52,7 @@ namespace SharpGame
         {
             private List<vec3> _positions = new List<vec3>();
             private List<vec3> _normals = new List<vec3>();
-            private List<Vector2> _texCoords = new List<Vector2>();
+            private List<vec2> _texCoords = new List<vec2>();
 
             private List<ObjFile.MeshGroup> _groups = new List<ObjFile.MeshGroup>();
 
@@ -344,11 +344,11 @@ namespace SharpGame
     {
         public vec3[] Positions { get; }
         public vec3[] Normals { get; }
-        public Vector2[] TexCoords { get; }
+        public vec2[] TexCoords { get; }
         public MeshGroup[] MeshGroups { get; }
         public string MaterialLibName { get; }
 
-        public ObjFile(vec3[] positions, vec3[] normals, Vector2[] texCoords, MeshGroup[] meshGroups, string materialLibName)
+        public ObjFile(vec3[] positions, vec3[] normals, vec2[] texCoords, MeshGroup[] meshGroups, string materialLibName)
         {
             Positions = positions;
             Normals = normals;
@@ -366,7 +366,7 @@ namespace SharpGame
         {
             Dictionary<FaceVertex, uint> vertexMap = new Dictionary<FaceVertex, uint>();
             ushort[] indices = new ushort[group.Faces.Length * 3];
-            List<VertexPosTexNorm> vertices = new List<VertexPosTexNorm>();
+            FastList<VertexPosTexNorm> vertices = new FastList<VertexPosTexNorm>();
 
             for (int i = 0; i < group.Faces.Length; i++)
             {
@@ -395,7 +395,7 @@ namespace SharpGame
 
         public uint GetOrCreate(
             Dictionary<FaceVertex, uint> vertexMap,
-            List<VertexPosTexNorm> vertices,
+            FastList<VertexPosTexNorm> vertices,
             FaceVertex key,
             FaceVertex adjacent1,
             FaceVertex adjacent2)
@@ -426,7 +426,7 @@ namespace SharpGame
             }
 
 
-            Vector2 texCoord = key.TexCoordIndex == -1 ? Vector2.Zero : TexCoords[key.TexCoordIndex - 1];
+            vec2 texCoord = key.TexCoordIndex == -1 ? vec2.Zero : TexCoords[key.TexCoordIndex - 1];
 
             return new VertexPosTexNorm(position, texCoord, normal);
         }

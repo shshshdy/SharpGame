@@ -8,8 +8,7 @@
 layout(location = 0) in vec3 inPos;
 layout(location = 1) in vec2 inUV;
 layout(location = 2) in vec3 inNormal;
-layout(location = 3) in vec3 inTangent;
-layout(location = 4) in vec3 inBitangent;
+layout(location = 3) in vec4 inTangent;
 
 layout(location = 0) out vec4 outWorldPos;
 layout(location = 1) out vec2 outUV;
@@ -29,6 +28,6 @@ void main()
 	outWorldPos = worldPos;
 	outUV = inUV;
     outViewPos = (View * worldPos).xyz;
-				
-	outNormal = mat3(Model) * mat3(inTangent, inBitangent, inNormal);
+    vec3 bitangent = cross(inTangent.xyz, inNormal) * inTangent.w;
+	outNormal = mat3(Model) * mat3(inTangent, bitangent, inNormal);
 }

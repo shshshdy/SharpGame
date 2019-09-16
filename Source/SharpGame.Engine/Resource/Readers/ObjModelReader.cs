@@ -29,9 +29,11 @@ namespace SharpGame
 
             List<DeviceBuffer> ibs = new List<DeviceBuffer>();
             List<MeshGroup> meshGroups = new List<MeshGroup>();
-            List<VertexPosTexNorm> vertices = new List<VertexPosTexNorm>();
-  
-            foreach(MeshGroup group in objFile.MeshGroups)
+            FastList<VertexPosTexNorm> vertices = new FastList<VertexPosTexNorm>();
+            FastList<VertexPosTexNormTangent> tangentVertices = new FastList<VertexPosTexNormTangent>();
+            List<uint[]> trianglesList = new List<uint[]>();
+
+            foreach (MeshGroup group in objFile.MeshGroups)
             {
                 int indexCount = group.Faces.Length * 3;
                 if(indexCount == 0)
@@ -40,7 +42,7 @@ namespace SharpGame
                 }
 
                 meshGroups.Add(group);
-
+                uint[] triangles;
                 if (vertexCount > ushort.MaxValue)
                 {
                     uint[] indices = new uint[indexCount];
@@ -58,6 +60,7 @@ namespace SharpGame
                     }
 
                     ibs.Add(DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
+                    triangles = indices;
                 }
                 else
                 {
@@ -76,11 +79,23 @@ namespace SharpGame
                     }
 
                     ibs.Add(DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
+
+                    triangles = new uint[indices.Length];
+                    for(int i = 0; i < indices.Length; i++)
+                    {
+                        triangles[i] = indices[i];
+                    }
                 }
 
+                tangentVertices.Resize(vertices.Count);
+
+                trianglesList.Add(triangles);
             }
 
-            DeviceBuffer vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices.ToArray(), false);
+            CalculateMeshTangents(vertices, tangentVertices, trianglesList);
+            //DeviceBuffer vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices.ToArray(), false);
+            DeviceBuffer vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, tangentVertices.Items, false);
+
             Model model = new Model
             {
                 VertexBuffers = new[] { vb },
@@ -99,12 +114,12 @@ namespace SharpGame
                 };
 
                 geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)ibs[i].Count);
-                geom.VertexLayout = VertexPosTexNorm.Layout;
+                geom.VertexLayout = VertexPosTexNormTangent.Layout;
                 model.Geometries[i] = new Geometry[] { geom };
                 model.GeometryCenters.Add(vec3.Zero);
             }
 
-            var shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");
+            var shader = Resources.Instance.Load<Shader>("Shaders/LitSolid.shader");
 
             if (!string.IsNullOrEmpty(objFile.MaterialLibName))
             {
@@ -127,82 +142,85 @@ namespace SharpGame
 
             return model;
         }
-        /*
-        public static void calculateMeshTangents(Mesh mesh)
+  
+        public static void CalculateMeshTangents(FastList<VertexPosTexNorm> vertices,
+            FastList<VertexPosTexNormTangent> tangentVertices, List<uint[]> trianglesList)
         {
             //speed up math by copying the mesh arrays
-            int[] triangles = mesh.triangles;
-            vec3[] vertices = mesh.vertices;
-            vec2[] uv = mesh.uv;
-            vec3[] normals = mesh.normals;
-
             //variable definitions
-            int triangleCount = triangles.Length;
-            int vertexCount = vertices.Length;
+            int vertexCount = vertices.Count;
 
             vec3[] tan1 = new vec3[vertexCount];
             vec3[] tan2 = new vec3[vertexCount];
 
             vec4[] tangents = new vec4[vertexCount];
 
-            for (long a = 0; a < triangleCount; a += 3)
+            foreach (var triangles in trianglesList)
             {
-                long i1 = triangles[a + 0];
-                long i2 = triangles[a + 1];
-                long i3 = triangles[a + 2];
+                int triangleCount = triangles.Length;
+                for (long a = 0; a < triangleCount; a += 3)
+                {
+                    int i1 = (int)triangles[a + 0];
+                    int i2 = (int)triangles[a + 1];
+                    int i3 = (int)triangles[a + 2];
 
-                vec3 v1 = vertices[i1];
-                vec3 v2 = vertices[i2];
-                vec3 v3 = vertices[i3];
+                    vec3 v1 = vertices[i1].position;
+                    vec3 v2 = vertices[i2].position;
+                    vec3 v3 = vertices[i3].position;
 
-                vec2 w1 = uv[i1];
-                vec2 w2 = uv[i2];
-                vec2 w3 = uv[i3];
+                    vec2 w1 = vertices[i1].texcoord;
+                    vec2 w2 = vertices[i2].texcoord;
+                    vec2 w3 = vertices[i3].texcoord;
 
-                float x1 = v2.x - v1.x;
-                float x2 = v3.x - v1.x;
-                float y1 = v2.y - v1.y;
-                float y2 = v3.y - v1.y;
-                float z1 = v2.z - v1.z;
-                float z2 = v3.z - v1.z;
+                    float x1 = v2.x - v1.x;
+                    float x2 = v3.x - v1.x;
+                    float y1 = v2.y - v1.y;
+                    float y2 = v3.y - v1.y;
+                    float z1 = v2.z - v1.z;
+                    float z2 = v3.z - v1.z;
 
-                float s1 = w2.x - w1.x;
-                float s2 = w3.x - w1.x;
-                float t1 = w2.y - w1.y;
-                float t2 = w3.y - w1.y;
+                    float s1 = w2.x - w1.x;
+                    float s2 = w3.x - w1.x;
+                    float t1 = w2.y - w1.y;
+                    float t2 = w3.y - w1.y;
 
-                float r = 1.0f / (s1 * t2 - s2 * t1);
+                    float r = 1.0f / (s1 * t2 - s2 * t1);
 
-                vec3 sdir = new vec3((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
-                vec3 tdir = new vec3((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
+                    vec3 sdir = new vec3((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
+                    vec3 tdir = new vec3((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
 
-                tan1[i1] += sdir;
-                tan1[i2] += sdir;
-                tan1[i3] += sdir;
+                    tan1[i1] += sdir;
+                    tan1[i2] += sdir;
+                    tan1[i3] += sdir;
 
-                tan2[i1] += tdir;
-                tan2[i2] += tdir;
-                tan2[i3] += tdir;
+                    tan2[i1] += tdir;
+                    tan2[i2] += tdir;
+                    tan2[i3] += tdir;
+                }
             }
 
-
-            for (long a = 0; a < vertexCount; ++a)
+            for (int a = 0; a < vertexCount; ++a)
             {
-                vec3 n = normals[a];
+                vec3 n = vertices[a].normal;
                 vec3 t = tan1[a];
+                if(t == vec3.Zero)
+                {
+                    continue;
+                }
+
+                ref var newVertex = ref tangentVertices.At(a);
+                newVertex.position = vertices[a].position;
+                newVertex.texcoord = vertices[a].texcoord;
+                newVertex.normal = vertices[a].normal;
 
                 vec3 tmp = glm.normalize(t - n * vec3.Dot(n, t));
-                tangents[a] = new vec4(tmp.x, tmp.y, tmp.z, 0);
-                //vec3.OrthoNormalize(ref n, ref t);
-                //tangents[a].x = t.x;
-                //tangents[a].y = t.y;
-                //tangents[a].z = t.z;
 
-                tangents[a].w = (vec3.Dot(vec3.Cross(n, t), tan2[a]) < 0.0f) ? -1.0f : 1.0f;
+                var tangent = new vec4(tmp.x, tmp.y, tmp.z, 0);
+                tangent.w = (vec3.Dot(vec3.Cross(n, t), tan2[a]) < 0.0f) ? -1.0f : 1.0f;
+                newVertex.tangent = tangent;
             }
 
-            mesh.tangents = tangents;
-        }*/
+        }
 
         Material ConvertMaterial(string path, MaterialDefinition materialDef, Shader shader)
         {
@@ -211,14 +229,32 @@ namespace SharpGame
             if (!string.IsNullOrEmpty(materialDef.DiffuseTexture))
             {
                 Texture tex = Resources.Instance.Load<Texture>(path + materialDef.DiffuseTexture);
-                material.SetTexture("DiffMap", tex.ResourceRef);
-                
+                material.SetTexture("DiffMap", tex.ResourceRef);                
             }
             else
             {
                 material.SetTexture("DiffMap", Texture.White);
             }
 
+            if (!string.IsNullOrEmpty(materialDef.BumpMap))
+            {
+                Texture tex = Resources.Instance.Load<Texture>(path + materialDef.BumpMap);
+                material.SetTexture("NormalMap", tex.ResourceRef);
+            }
+            else
+            {
+                material.SetTexture("NormalMap", Texture.White);
+            }
+
+            if (!string.IsNullOrEmpty(materialDef.SpecularColorTexture))
+            {
+                Texture tex = Resources.Instance.Load<Texture>(path + materialDef.SpecularColorTexture);
+                material.SetTexture("SpecMap", tex.ResourceRef);
+            }
+            else
+            {
+                material.SetTexture("SpecMap", Texture.White);
+            }
             return material;
         }
     }
