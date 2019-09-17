@@ -99,6 +99,7 @@ namespace SharpGame
     {
         public static readonly string Shadow = "shadow";
         public static readonly string Depth = "depth";
+        public static readonly string LightCompute = "lightCompute";
         public static readonly string Clear = "clear";
         public static readonly string Main = "main";
 

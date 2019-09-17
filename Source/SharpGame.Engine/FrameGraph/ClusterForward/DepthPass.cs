@@ -6,5 +6,8 @@ namespace SharpGame
 {
     public class DepthPass : GraphicsPass
     {
+        public DepthPass() : base(Pass.Depth)
+        {
+        }
     }
 }

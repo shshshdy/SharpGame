@@ -124,30 +124,30 @@ namespace SharpGame
             CreateBuffers();
 
             var renderPass = Graphics.CreateRenderPass();
+
             debugPass = new GraphicsPass
             {
-                renderPass = renderPass,//  Graphics.RenderPass,
-
-                framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),// Graphics.Framebuffers,
-
-                OnDraw = (pass, view) =>
-                {
-                    if(view.Scene == null)
-                    {
-                        return;
-                    }
-
-                    var debug = view.Scene.GetComponent<DebugRenderer>();
-                    if (debug == null)
-                    {
-                        return;
-                    }
-
-
-                    var cmdBuffer = pass.CmdBuffer;
-                    debug.Render(view, cmdBuffer);
-                }
+                renderPass = renderPass,
+                framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
             };
+
+            debugPass.Add((pass, view) =>
+            {
+                if (view.Scene == null)
+                {
+                    return;
+                }
+
+                var debug = view.Scene.GetComponent<DebugRenderer>();
+                if (debug == null)
+                {
+                    return;
+                }
+
+
+                var cmdBuffer = pass.CmdBuffer;
+                debug.Render(view, cmdBuffer);
+            });
 
         }
 
@@ -193,13 +193,21 @@ namespace SharpGame
 
         public void AddDrawable(Drawable drawable)
         {
-            drawables.Add(drawable);
-
-            foreach (SourceBatch batch in drawable.Batches)
+            if(drawable.DrawableFlags == Drawable.DRAWABLE_LIGHT)
             {
-                batches.Add(batch);
-                batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+                lights.Add(drawable as Light);
             }
+            else
+            {
+                drawables.Add(drawable);
+
+                foreach (SourceBatch batch in drawable.Batches)
+                {
+                    batches.Add(batch);
+                    batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+                }
+            }
+        
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

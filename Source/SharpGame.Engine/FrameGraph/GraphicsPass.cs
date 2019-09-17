@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
@@ -15,14 +16,14 @@ namespace SharpGame
         public Framebuffer framebuffer;
     }
 
-    public class GraphicsPass : FrameGraphPass
+    public class GraphicsPass : FrameGraphPass, IEnumerable<Action<GraphicsPass, RenderView>>
     {
         [IgnoreDataMember]
         public Framebuffer[] framebuffers;
 
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
-        public Action<GraphicsPass, RenderView> OnDraw { get; set; }
+        protected List<Action<GraphicsPass, RenderView>> Subpasses { get; } = new List<Action<GraphicsPass, RenderView>>();
 
         protected CommandBufferPool[] cmdBufferPool;
 
@@ -40,6 +41,11 @@ namespace SharpGame
                 cmdBufferPool[i].Name = "GraphicsPass" + i;
                 cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, 8);
             }
+        }
+
+        public void Add(Action<GraphicsPass, RenderView> subpass)
+        {
+            Subpasses.Add(subpass);
         }
 
         protected CommandBuffer GetCmdBuffer()
@@ -100,7 +106,18 @@ namespace SharpGame
 
             cmdBuffer.SetViewport(ref view.Viewport);
             cmdBuffer.SetScissor(view.ViewRect);
-            OnDraw?.Invoke(this, view);
+
+            for (int i = 0; i < Subpasses.Count; i++)
+            {
+                var action = Subpasses[i];
+                action.Invoke(this, view);
+                
+                if(i != Subpasses.Count - 1)
+                {
+                    cmdBuffer.NextSubpass(SubpassContents.Inline);
+                }
+            }
+
             cmdBuffer?.End();
             cmdBuffer = null;
         }
@@ -170,6 +187,15 @@ namespace SharpGame
             cb.EndRenderPass();
         }
 
+        public IEnumerator<Action<GraphicsPass, RenderView>> GetEnumerator()
+        {
+            return ((IEnumerable<Action<GraphicsPass, RenderView>>)Subpasses).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<Action<GraphicsPass, RenderView>>)Subpasses).GetEnumerator();
+        }
     }
 
 

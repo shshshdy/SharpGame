@@ -31,19 +31,19 @@ namespace SharpGame
         {
             var renderPass = new GraphicsPass
             {
-                OnDraw = onDraw,
-                FrameGraph = this
+                onDraw
             };
 
-            RenderPassList.Add(renderPass);
+            renderPass.Add(onDraw);
+
+            AddRenderPass(renderPass);
         }
 
         public void InsertGraphicsPass(int index, Action<GraphicsPass, RenderView> onDraw)
         {
             var renderPass = new GraphicsPass
             {
-                OnDraw = onDraw,
-                FrameGraph = this
+                onDraw
             };
 
             InsertRenderPass(index, renderPass);
