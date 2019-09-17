@@ -116,7 +116,6 @@ namespace SharpGame
             vsSet[0] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[0]);
             vsSet[1] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[1]);
 
-            //ClearDepthStencilValue = new ClearDepthStencilValue(0, 0);
         }
 
 

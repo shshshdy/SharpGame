@@ -19,6 +19,13 @@
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsPS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Debug.shader" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\calc_grid_offsets.comp" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\calc_light_grids.comp" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\calc_light_list.comp" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\clustering.frag" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\clustering.vert" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_forward.frag" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_forward.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\debug.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\debug.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\general.frag" />

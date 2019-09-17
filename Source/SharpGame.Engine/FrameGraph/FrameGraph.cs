@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
@@ -7,11 +8,20 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class FrameGraph : Object
+    public class FrameGraph : Object, IEnumerable<FrameGraphPass>
     {
         public RenderTarget[] RenderTargets { get; set; }
 
         public List<FrameGraphPass> RenderPassList { get; set; } = new List<FrameGraphPass>();
+
+        public static FrameGraph Simple()
+        {
+            return new FrameGraph
+            {
+                new ShadowPass(),
+                new ScenePass()
+            };
+        }
 
         public FrameGraph()
         {
@@ -81,6 +91,21 @@ namespace SharpGame
 
         }
 
+        public void Add(FrameGraphPass renderPass)
+        {
+            renderPass.FrameGraph = this;
+            RenderPassList.Add(renderPass);
+        }
+
+        public IEnumerator<FrameGraphPass> GetEnumerator()
+        {
+            return RenderPassList.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)RenderPassList).GetEnumerator();
+        }
     }
 
 
@@ -99,17 +124,6 @@ namespace SharpGame
     public unsafe struct SkinVS
     {
         fixed float SkinMatrices[16*64];
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct MaterialPS
-    {
-        public vec4 MatDiffColor;
-        public vec4 MatEmissiveColor;
-        public vec4 MatEnvMapColor;
-        public vec4 MatSpecColor;
-        public float cRoughness;
-        public float cMetallic;
     }
 
 }

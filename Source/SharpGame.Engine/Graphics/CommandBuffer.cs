@@ -401,6 +401,16 @@ namespace SharpGame
             vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, ref Unsafe.As<BufferImageCopy, VkBufferImageCopy>(ref pRegions[0]));
         }
 
+        public void WriteTimestamp(PipelineStageFlags pipelineStage, VkQueryPool queryPool, uint query)
+        {
+            vkCmdWriteTimestamp(commandBuffer, (VkPipelineStageFlags)pipelineStage, queryPool, (uint)query);
+        }
+
+        public void NextSubpass(SubpassContents contents)
+        {
+            vkCmdNextSubpass(commandBuffer, (VkSubpassContents)contents);
+        }
+
         public void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags,
             uint memoryBarrierCount, ref VkMemoryBarrier pMemoryBarriers, uint bufferMemoryBarrierCount, IntPtr pBufferMemoryBarriers,
             uint imageMemoryBarrierCount, ref VkImageMemoryBarrier pImageMemoryBarriers)

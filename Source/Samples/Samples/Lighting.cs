@@ -1,7 +1,7 @@
 ﻿
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 2)]
+    [SampleDesc(sortOrder = -2)]
     public class Lighting : Sample
     {
         public override void Init()
@@ -20,7 +20,6 @@ namespace SharpGame.Samples
             cameraNode.EulerAngles = glm.radians(0, 90, 0);
 
             camera = cameraNode.CreateComponent<Camera>();
-            camera.Fov = glm.radians(60);
 
             var node = scene.CreateChild("Mesh");
 

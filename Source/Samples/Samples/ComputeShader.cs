@@ -127,7 +127,7 @@ namespace SharpGame.Samples
 
             if (animate)
             {
-                ubo.destX = (float)Math.Sin(MathUtil.Radians(timer * 360.0f)) * 0.75f;
+                ubo.destX = (float)Math.Sin(glm.radians(timer * 360.0f)) * 0.75f;
                 ubo.destY = 0.0f;
             }
             else

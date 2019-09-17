@@ -290,10 +290,19 @@ namespace SharpGame
 
             if (aiMaterial.HasTextureNormal)
             {
-                Texture tex = Resources.Instance.Load<Texture>(FileUtil.CombinePath(path, aiMaterial.TextureNormal.FilePath));
+                string texPath = FileUtil.CombinePath(path, aiMaterial.TextureNormal.FilePath);
+                Texture tex = Resources.Instance.Load<Texture>(texPath);
                 if (tex != null)
                 {
                     material.SetTexture("NormalMap", tex.ResourceRef);
+                }
+                else
+                {
+                    tex = Resources.Instance.Load<Texture>(texPath.Replace(".ktx", "_bc3_unorm.ktx"));
+                    if (tex != null)
+                    {
+                        material.SetTexture("DiffMap", tex.ResourceRef);
+                    }
                 }
             }
             else

@@ -66,9 +66,12 @@ namespace SharpGame
 
         internal void Free(Octant octant)
         {
-            octant.Free();
+            if(octant != null)
+            {
+                octant.Free();
 
-            freeList.Add(octant);
+                freeList.Add(octant);
+            }
         }
 
         /// Update octree size.

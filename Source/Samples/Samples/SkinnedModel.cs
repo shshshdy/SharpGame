@@ -10,7 +10,10 @@ namespace SharpGame.Samples
         List<AnimatedModel> animators_ = new List<AnimatedModel>();
         public override void Init()
         {
-            scene = new Scene();
+            scene = new Scene
+            {
+                new Octree { },
+            };
 
             var cameraNode = scene.CreateChild("Camera", new vec3(0, 20, -30), glm.radians(30, 0, 0));
             camera = cameraNode.CreateComponent<Camera>();
@@ -38,7 +41,7 @@ namespace SharpGame.Samples
                 for (int i = 0; i < 100; i++)
                 {
                     var node = scene.CreateChild("Model", new vec3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20)));
-                    node.Rotation = new quat(0, MathUtil.Radians(MathUtil.Random(0, 90)), 0);
+                    node.Rotation = new quat(0, glm.radians(MathUtil.Random(0, 90)), 0);
 
                     var animMdoel = node.AddComponent<AnimatedModel>();
                     animMdoel.SetModel(model);

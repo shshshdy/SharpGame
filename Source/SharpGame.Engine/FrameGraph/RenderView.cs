@@ -221,9 +221,7 @@ namespace SharpGame
 
             if (FrameGraph == null)
             {
-                FrameGraph = new FrameGraph();
-                FrameGraph.AddRenderPass(new ShadowPass());
-                FrameGraph.AddRenderPass(new ScenePass());
+                FrameGraph =  FrameGraph.Simple();
             }
 
             ubMatrics.Clear();
