@@ -31,7 +31,7 @@ namespace SharpGame
 
         public Buffer this[int index] => buffers[index];
 
-        public void CreateView(Format format, ulong offset, ulong range)
+        public void CreateView(Format format, ulong offset = 0, ulong range = ulong.MaxValue)
         {
             buffers[0].CreateView(format, offset, range);
             buffers[1].CreateView(format, offset, range);

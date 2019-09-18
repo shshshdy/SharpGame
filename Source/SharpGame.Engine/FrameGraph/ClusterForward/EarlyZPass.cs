@@ -4,9 +4,9 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class DepthPass : GraphicsPass
+    public class EarlyZPass : GraphicsPass
     {
-        public DepthPass() : base(Pass.Depth)
+        public EarlyZPass() : base(Pass.Depth)
         {
         }
     }

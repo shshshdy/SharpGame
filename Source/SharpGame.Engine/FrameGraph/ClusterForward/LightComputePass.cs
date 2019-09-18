@@ -32,19 +32,21 @@ namespace SharpGame
         uint TILE_COUNT_Z = 256;
 
         private DoubleBuffer ubo;
+        private DoubleBuffer light_pos_ranges;
+        private DoubleBuffer light_colors;
 
-        private Buffer p_grid_flags_;
-        private Buffer p_light_bounds_;
-        private Buffer p_grid_light_counts_;
-        private Buffer p_grid_light_count_total_;
-        private Buffer p_grid_light_count_offsets_;
-        private Buffer p_light_list_;
-        private Buffer p_grid_light_counts_compare_;
+        private Buffer grid_flags;
+        private Buffer light_bounds;
+        private Buffer grid_light_counts;
+        private Buffer grid_light_count_total;
+        private Buffer grid_light_count_offsets;
+        private Buffer light_list;
+        private Buffer grid_light_counts_compare;
 
         private Shader clusterLight;
         private ResourceLayout resourceLayout0;
         private ResourceLayout resourceLayout1;
-        private ResourceSet resourceSet0;
+        private ResourceSet[] resourceSet0 = new ResourceSet[2];
         private ResourceSet resourceSet1;
         public LightComputePass()
         {
@@ -86,47 +88,59 @@ namespace SharpGame
                 size = (uint)queue_families.Length;
             }
 
-            ubo = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<UBO>());
+            ubo = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible,
+                (uint)Utilities.SizeOf<UBO>(), sharingMode, queue_families);
 
 
+            light_pos_ranges = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible,
+                MAX_NUM_LIGHTS * 4 * sizeof(float), sharingMode, queue_families);
+            light_pos_ranges.CreateView(Format.R32g32b32a32Sfloat);
 
+            light_colors = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible,
+                MAX_NUM_LIGHTS * sizeof(uint), sharingMode, queue_families);
+            light_colors.CreateView(Format.R8g8b8a8Unorm);
 
-
+            resourceSet0[0] = new ResourceSet(resourceLayout0, ubo[0], light_pos_ranges[0], light_colors[0]);
+            resourceSet0[1] = new ResourceSet(resourceLayout0, ubo[1], light_pos_ranges[1], light_colors[1]);
 
             uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
-            p_grid_flags_ = Buffer.CreateTexelBuffer(
+            grid_flags = Buffer.CreateTexelBuffer(
                 BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
                 max_grid_count, Format.R8Uint, sharingMode, queue_families);
 
-            p_light_bounds_ = Buffer.CreateTexelBuffer(
+            light_bounds = Buffer.CreateTexelBuffer(
                 BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
                      MAX_NUM_LIGHTS * 6 * sizeof(uint), Format.R32Uint,
                      sharingMode, queue_families); // max tile count 1d (z 256)
 
-            p_grid_light_counts_ = Buffer.CreateTexelBuffer(
+            grid_light_counts = Buffer.CreateTexelBuffer(
                 BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
                                   max_grid_count * sizeof(uint), Format.R32Uint,
                                   sharingMode, queue_families); // light count / grid
 
-            p_grid_light_count_total_ = Buffer.CreateTexelBuffer(
+            grid_light_count_total = Buffer.CreateTexelBuffer(
                 BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
                                    1 * sizeof(uint), Format.R32Uint,
                                    sharingMode, queue_families); // light count total * max grid count
 
-            p_grid_light_count_offsets_ = Buffer.CreateTexelBuffer(
+            grid_light_count_offsets = Buffer.CreateTexelBuffer(
                 BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
                                      max_grid_count * sizeof(uint), Format.R32Uint,
                                      sharingMode, queue_families); // same as above
 
-            p_light_list_ = Buffer.CreateTexelBuffer(
+            light_list = Buffer.CreateTexelBuffer(
                 BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
                                1024 * 1024 * sizeof(uint), Format.R32Uint,
                                sharingMode, queue_families); // light idx
 
-            p_grid_light_counts_compare_ = Buffer.CreateTexelBuffer(
+            grid_light_counts_compare = Buffer.CreateTexelBuffer(
                 BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
                                       max_grid_count * sizeof(uint), Format.R32Uint,
                                       sharingMode, queue_families); // light count / grid
+
+            resourceSet1 = new ResourceSet(resourceLayout1,
+                grid_flags, light_bounds, grid_light_counts, grid_light_count_total,
+                grid_light_count_offsets, light_list, grid_light_counts_compare);
         }
 
         void DoCompute(ComputePass renderPass, RenderView view)
@@ -239,31 +253,6 @@ namespace SharpGame
 
             cmd_buf.End();
 
-
-
-#if false
-            var graphicsToComputeBarrier = new BufferMemoryBarrier(p_grid_flags_,
-                AccessFlags.VertexAttributeRead, AccessFlags.ShaderWrite,
-                Graphics.GraphicsQueue.FamilyIndex, Graphics.ComputeQueue.FamilyIndex);
-
-            var computeToGraphicsBarrier = new BufferMemoryBarrier(p_grid_flags_,
-                AccessFlags.ShaderWrite, AccessFlags.VertexAttributeRead,
-                Graphics.ComputeQueue.FamilyIndex, Graphics.GraphicsQueue.FamilyIndex);
-
-            cb.Begin();
-
-            // Add memory barrier to ensure that the (graphics) vertex shader has fetched attributes
-            // before compute starts to write to the buffer.
-            cb.PipelineBarrier(PipelineStageFlags.VertexInput, PipelineStageFlags.ComputeShader, ref graphicsToComputeBarrier);
-            cb.BindComputePipeline(computePipeline);
-            cb.BindComputeResourceSet(computePipeline.PipelineLayout, 0, computeResourceSet);
-            cb.Dispatch((uint)p_grid_flags_.Count / 256, 1, 1);
-            // Add memory barrier to ensure that compute shader has finished writing to the buffer.
-            // Without this the (rendering) vertex shader may display incomplete results (partial
-            // data from last frame).
-            cb.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.VertexInput, ref computeToGraphicsBarrier);
-            cb.End();
-#endif
 
         }
 
