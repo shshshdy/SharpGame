@@ -127,7 +127,7 @@ namespace SharpGame
         public bool CastShadows { get => castShadows_; set => castShadows_ = value; }
         protected bool castShadows_;
 
-        protected uint viewMask_;
+        protected uint viewMask_ = 0xffffffff;
         public uint ViewMask { get => viewMask_; set => viewMask_ = value; }
 
         /// Current distance to camera.

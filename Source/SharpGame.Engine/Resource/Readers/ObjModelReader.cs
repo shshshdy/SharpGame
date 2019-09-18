@@ -98,12 +98,13 @@ namespace SharpGame
 
             Model model = new Model
             {
-                VertexBuffers = new[] { vb },
-                IndexBuffers = ibs.ToArray(),
+                VertexBuffers = { vb },
+                IndexBuffers = ibs,
                 BoundingBox = BoundingBox.FromPoints(objFile.Positions)                
             };
 
-            model.Geometries = new Geometry[meshGroups.Count][];
+            model.Geometries = new List<Geometry[]>();
+            model.Geometries.Resize(meshGroups.Count);
             for (int i = 0; i < meshGroups.Count; i++)
             {
                 var geom = new Geometry

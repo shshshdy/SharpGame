@@ -76,9 +76,9 @@ namespace SharpGame
 
             int memoryUse = Unsafe.SizeOf<Model>();
 
-            DeviceBuffer[] vertexBuffers_;
-            DeviceBuffer[] indexBuffers_;
-            Geometry[][] geometries_ = new Geometry[0][];
+            List<DeviceBuffer> vertexBuffers_;
+            List<DeviceBuffer> indexBuffers_;
+            List<Geometry[]> geometries_ = new List<Geometry[]>();
 
             VertexBufferDesc[] loadVBData_;
             IndexBufferDesc[] loadIBData_;
@@ -86,7 +86,8 @@ namespace SharpGame
 
             // Read vertex buffers
             int numVertexBuffers = (int)stream.Read<uint>();
-            vertexBuffers_ = new DeviceBuffer[numVertexBuffers];
+            vertexBuffers_ = new List<DeviceBuffer>();//[numVertexBuffers];
+            vertexBuffers_.Resize(numVertexBuffers);
             var morphRangeStarts_ = new int[numVertexBuffers];
             var morphRangeCounts_ = new int[numVertexBuffers];
             loadVBData_ = new VertexBufferDesc[numVertexBuffers];
@@ -150,7 +151,8 @@ namespace SharpGame
 
             // Read index buffers
             int numIndexBuffers = (int)stream.Read<uint>();
-            indexBuffers_ = new DeviceBuffer[numIndexBuffers];
+            indexBuffers_ = new List<DeviceBuffer>();//[numIndexBuffers];
+            indexBuffers_.Resize(numIndexBuffers);
             loadIBData_ = new IndexBufferDesc[numIndexBuffers];
             for (int i = 0; i < numIndexBuffers; ++i)
             {
@@ -166,7 +168,7 @@ namespace SharpGame
             // Read geometries
             int numGeometries = stream.Read<int>();
             loadGeometries_ = new List<GeometryDesc[]>(numGeometries);
-            Array.Resize(ref geometries_, numGeometries);
+            geometries_.Resize(numGeometries);
 
             for (int i = 0; i < numGeometries; ++i)
             {
@@ -203,7 +205,7 @@ namespace SharpGame
                     int indexStart = stream.Read<int>();
                     int indexCount = stream.Read<int>();
 
-                    if (vbRef >= vertexBuffers_.Length)
+                    if (vbRef >= vertexBuffers_.Count)
                     {
                         Log.Error("Vertex buffer index out of bounds");
                         loadVBData_ = null;
@@ -212,7 +214,7 @@ namespace SharpGame
                         return false;
                     }
 
-                    if (ibRef >= indexBuffers_.Length)
+                    if (ibRef >= indexBuffers_.Count)
                     {
                         Log.Error("Index buffer index out of bounds");
                         loadVBData_ = null;
@@ -286,9 +288,9 @@ namespace SharpGame
             var boundingBox_ = stream.Read<BoundingBox>();
 
             // Read geometry centers
-            for (int i = 0; i < geometries_.Length && !stream.IsEof; ++i)
+            for (int i = 0; i < geometries_.Count && !stream.IsEof; ++i)
                 GeometryCenters.Add(stream.Read<vec3>());
-            while (GeometryCenters.Count < geometries_.Length)
+            while (GeometryCenters.Count < geometries_.Count)
                 GeometryCenters.Add(vec3.Zero);
 
             model.VertexBuffers = vertexBuffers_;
@@ -303,30 +305,28 @@ namespace SharpGame
             //model.morphRangeCounts_ = morphRangeCounts_;
             model.MemoryUse = memoryUse;
 
-            for (int i = 0; i < vertexBuffers_.Length; ++i)
+            for (int i = 0; i < vertexBuffers_.Count; ++i)
             {
-                ref DeviceBuffer buffer = ref vertexBuffers_[i];
                 ref VertexBufferDesc desc = ref loadVBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false
+                    vertexBuffers_[i] = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false
                         , (uint)desc.vertexSize_, (uint)desc.vertexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
 
             // Upload index buffer data
-            for (int i = 0; i < indexBuffers_.Length; ++i)
+            for (int i = 0; i < indexBuffers_.Count; ++i)
             {
-                ref DeviceBuffer buffer = ref indexBuffers_[i];
                 ref IndexBufferDesc desc = ref loadIBData_[i];
                 if (desc.data_ != null)
                 {
-                    buffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, (uint)desc.indexSize_, (uint)desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
+                    indexBuffers_[i] = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, (uint)desc.indexSize_, (uint)desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
 
             // Set up geometries
-            for (int i = 0; i < geometries_.Length; ++i)
+            for (int i = 0; i < geometries_.Count; ++i)
             {
                 for (int j = 0; j < geometries_[i].Length; ++j)
                 {

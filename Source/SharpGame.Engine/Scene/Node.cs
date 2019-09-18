@@ -21,8 +21,6 @@ namespace SharpGame
     [DataContract]
     public partial class Node : Object, IEnumerable<Component>
     {
-        #region ATTRIBUTE
-
         [DataMember(Order = 0)]
         public int ID { get; set; }
 
@@ -48,10 +46,6 @@ namespace SharpGame
         [DataMember(Order = 12)]
         public List<Node> Children => children_;
         protected List<Node> children_ = new List<Node>();
-
-
-        #endregion
-
 
         protected bool dirty_ = true;
 

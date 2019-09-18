@@ -187,17 +187,16 @@ namespace SharpGame
 
         public unsafe static void Init()
         {
-            Texture CreateTex(Color color)
-            {
-                byte* c = &color.R;
-                return Texture.Create2D(1, 1, Format.R8g8b8a8Unorm, (IntPtr)c);
-            }
+            White = CreateByColor(Color.White);
+            Gray = CreateByColor(Color.Gray);
+            Black = CreateByColor(Color.Black);
+            Purple = CreateByColor(Color.Purple);
+            Blue = CreateByColor(Color.Blue);
+        }
 
-            White = CreateTex(Color.White);
-            Gray = CreateTex(Color.Gray);
-            Black = CreateTex(Color.Black);
-            Purple = CreateTex(Color.Purple);
-            Blue = CreateTex(Color.Blue);
+        public static Texture CreateByColor(Color color)
+        {
+            return Texture.Create2D(1, 1, Format.R8g8b8a8Unorm, Utilities.AsPointer(ref color));
         }
 
         public static Texture Create(uint width, uint height, ImageViewType imageViewType, uint layers, Format format, uint levels = 0, ImageUsageFlags additionalUsage = ImageUsageFlags.None)

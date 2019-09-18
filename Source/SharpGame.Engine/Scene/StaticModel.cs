@@ -81,9 +81,9 @@ namespace SharpGame
 
             if(model_ != null)
             {             
-                SetNumGeometries(model.Geometries.Length);
+                SetNumGeometries(model.Geometries.Count);
 
-                Geometry[][] geometries = model.Geometries;
+                List<Geometry[]> geometries = model.Geometries;
                 List<vec3> geometryCenters = model.GeometryCenters;
 
                 for(int i = 0; i < geometries_.Length; ++i)

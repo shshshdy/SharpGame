@@ -82,7 +82,7 @@ namespace SharpGame
         public ref Viewport Viewport => ref viewport;
         public Rect2D ViewRect => new Rect2D((int)Viewport.x, (int)Viewport.y, (int)Viewport.width, (int)Viewport.height);
 
-        public uint ViewMask { get; set; }
+        public uint ViewMask { get; set; } = 1;
 
         public ref LightParameter LightParam => ref lightParameter;
 

@@ -27,17 +27,17 @@ namespace SharpGame
     public class Model : Resource
     {
         /// Vertex buffers.
-        private DeviceBuffer[] vertexBuffers;
+        private List<DeviceBuffer> vertexBuffers;
         [DataMember]
-        public DeviceBuffer[] VertexBuffers
+        public List<DeviceBuffer> VertexBuffers
         {
             get => vertexBuffers; set => vertexBuffers = value;
         }
 
         /// Index buffers.
-        private DeviceBuffer[] indexBuffers;
+        private List<DeviceBuffer> indexBuffers;
         [DataMember]
-        public DeviceBuffer[] IndexBuffers
+        public List<DeviceBuffer> IndexBuffers
         {
             get => indexBuffers; set => indexBuffers = value;
         }
@@ -47,8 +47,8 @@ namespace SharpGame
 
         /// Bounding box.
         [DataMember]
-        public GeometryDesc[] GeometryDesc { get => geometryDesc; set => geometryDesc = value; }
-        private GeometryDesc[] geometryDesc;
+        public FastList<GeometryDesc> GeometryDesc { get => geometryDesc; set => geometryDesc = value; }
+        private FastList<GeometryDesc> geometryDesc;
 
         /// Skeleton.
         [DataMember]
@@ -56,11 +56,11 @@ namespace SharpGame
 
         /// Geometries.
         [IgnoreDataMember]
-        public Geometry[][] Geometries { get => geometries; set => geometries = value; }
-        private Geometry[][] geometries = new Geometry[0][];
+        public List<Geometry[]> Geometries { get => geometries; set => geometries = value; }
+        private List<Geometry[]> geometries = new List<Geometry[]>();
 
         [IgnoreDataMember]
-        public int NumGeometries => geometries.Length;
+        public int NumGeometries => geometries.Count;
 
         /// Geometry bone mappings.
         public List<int[]> GeometryBoneMappings { get; set; }
@@ -74,20 +74,20 @@ namespace SharpGame
         }
 
         public void SetNumGeometry(int count)
-        {
-            Array.Resize(ref geometries, count);
-            Array.Resize(ref geometryDesc, count);
+        {            
+            geometries.Resize(count);
+            geometryDesc.Resize(count);
             GeometryCenters.Resize(count);
         }
         
         public int GetNumGeometryLodLevels(int index)
         {
-            return index < geometries.Length ? geometries[index].Length : 0;
+            return index < geometries.Count ? geometries[index].Length : 0;
         }
 
         public Geometry GetGeometry(int index, int lodLevel)
         {
-            if (index >= geometries.Length || geometries[index].Empty())
+            if (index >= geometries.Count || geometries[index].Empty())
                 return null;
 
             if (lodLevel >= geometries[index].Length)
@@ -110,14 +110,14 @@ namespace SharpGame
                 vb.Dispose();
             }
 
-            Array.Clear(vertexBuffers, 0, vertexBuffers.Length);
+            vertexBuffers.Clear();
 
             foreach (var ib in indexBuffers)
             {
                 ib.Dispose();
             }
 
-            Array.Clear(indexBuffers, 0, indexBuffers.Length);
+            indexBuffers.Clear();
 
             Geometries.Clear();
         }
@@ -127,8 +127,8 @@ namespace SharpGame
             Model model = new Model();
             model.SetNumGeometry(geometries.Count);
 
-            Array.Resize(ref model.vertexBuffers, geometries.Count);
-            Array.Resize(ref model.indexBuffers, geometries.Count);
+            model.vertexBuffers.Resize(geometries.Count);
+            model.indexBuffers.Resize(geometries.Count);
 
             BoundingBox bbox = new BoundingBox();
             for (int i = 0; i < geometries.Count; i++)
@@ -137,7 +137,7 @@ namespace SharpGame
                 model.vertexBuffers[i] = geometries[i].VertexBuffers[0];
                 model.IndexBuffers[i] = geometries[i].IndexBuffer;
 
-                ref GeometryDesc desc = ref model.geometryDesc[i];
+                ref GeometryDesc desc = ref model.geometryDesc.At(i);
                 desc.primitiveTopology = geometries[i].PrimitiveTopology;
                 desc.vbRef = i;
                 desc.ibRef = i;

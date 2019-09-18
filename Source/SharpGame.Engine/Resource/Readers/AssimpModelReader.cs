@@ -36,15 +36,11 @@ namespace SharpGame
                 return false;
             }
 
-            //Assimp.Scene scene = ctx.ImportFileFromStream(stream, assimpFlags, ext);
-            Assimp.Scene scene = ctx.ImportFile(stream.Name, assimpFlags);
+            Assimp.Scene scene = ctx.ImportFileFromStream(stream, assimpFlags, ext);
+            //Assimp.Scene scene = ctx.ImportFile(stream.Name, assimpFlags);
 
             // Generate vertex buffer from ASSIMP scene data
             float scale = 1.0f;
-
-            model.VertexBuffers = new DeviceBuffer[scene.MeshCount];
-            model.IndexBuffers = new DeviceBuffer[scene.MeshCount];
-            model.SetNumGeometry(scene.MeshCount);
 
             BoundingBox boundingBox = new BoundingBox();
             var shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");
@@ -52,22 +48,21 @@ namespace SharpGame
 
             string path = FileUtil.GetPath(loadingFile);
 
+            model.VertexBuffers = new List<DeviceBuffer>();
+            model.IndexBuffers = new List<DeviceBuffer>();
+            
             // Iterate through all meshes in the file and extract the vertex components
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 Assimp.Mesh mesh = scene.Meshes[m];
-                ConvertGeometry(mesh, scale, out Geometry geometry, out var meshBoundingBox);
-
-                model.VertexBuffers[m] = geometry.VertexBuffers[0];
-                model.IndexBuffers[m] = geometry.IndexBuffer;
-                model.Geometries[m] = new Geometry[] { geometry };
-                model.GeometryCenters[m] = meshBoundingBox.Center;
-
-                boundingBox.Merge(ref meshBoundingBox);
-
                 if (mesh.MaterialIndex >= 0 && mesh.MaterialIndex < scene.MaterialCount)
                 {
                     Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], mesh.HasTangentBasis ? shader1 : shader);
+                    if(mat == null)
+                    {
+                        continue;
+                    }
+
                     model.Materials.Add(mat);
                 }
                 else
@@ -75,12 +70,20 @@ namespace SharpGame
                     Log.Error("No material : " + mesh.Name);
                 }
 
+                ConvertGeometry(mesh, scale, out Geometry geometry, out var meshBoundingBox);
+
+                model.VertexBuffers.Add(geometry.VertexBuffers[0]);
+                model.IndexBuffers.Add(geometry.IndexBuffer);
+                model.Geometries.Add(new [] { geometry });
+                model.GeometryCenters.Add(meshBoundingBox.Center);
+
+                boundingBox.Merge(ref meshBoundingBox);
+
             }
 
             model.BoundingBox = boundingBox;
           
             ctx.Dispose();
-
 
             FileSystem.RemoveResourceDir(filePath);
             FileSystem.RemoveResourceDir(filePath + "textures");
@@ -285,7 +288,16 @@ namespace SharpGame
             }
             else
             {
-                material.SetTexture("DiffMap", Texture.White);
+                if(aiMaterial.HasColorDiffuse)
+                {
+                    Color c = new Color(aiMaterial.ColorDiffuse[0], aiMaterial.ColorDiffuse[1], aiMaterial.ColorDiffuse[2], aiMaterial.ColorDiffuse[3]);
+                    material.SetTexture("DiffMap", Texture.CreateByColor(c));
+                }
+                else
+                {
+                    material.SetTexture("DiffMap", Texture.White);
+                }
+
             }
 
             if (aiMaterial.HasTextureNormal)
@@ -301,7 +313,7 @@ namespace SharpGame
                     tex = Resources.Instance.Load<Texture>(texPath.Replace(".ktx", "_bc3_unorm.ktx"));
                     if (tex != null)
                     {
-                        material.SetTexture("DiffMap", tex.ResourceRef);
+                        material.SetTexture("NormalMap", tex.ResourceRef);
                     }
                 }
             }

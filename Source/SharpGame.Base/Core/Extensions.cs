@@ -24,6 +24,21 @@ namespace SharpGame
             return list.Count == 0;
         }
 
+        public static void Resize<T>(this List<T> list, int size)
+        {
+            if(list.Count > size)
+            {
+                list.RemoveRange(size, list.Count - size);
+            }
+            else if(list.Count < size)
+            {
+                for(int i = 0; i < size - list.Count; i++)
+                {
+                    list.Add(default);
+                }
+            }
+        }
+
         public static void Push<T>(this List<T> list, T item)
         {
             list.Add(item);
@@ -32,17 +47,6 @@ namespace SharpGame
         public static T Back<T>(this List<T> list)
         {
             return list[list.Count - 1];
-        }
-
-        public static void Resize<T>(this List<T> list, int size)
-        {
-            for(int i = list.Count; i < size; i++)
-                list.Add(default(T));
-
-            while(list.Count > size)
-            {
-                list.Pop();
-            }
         }
 
         public static T Pop<T>(this List<T> list)

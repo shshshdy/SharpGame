@@ -223,7 +223,7 @@ namespace SharpGame
                 // Copy the subgeometry & LOD level structure
                 SetNumGeometries(model.NumGeometries);
 
-                Geometry[][] geometries = model.Geometries;
+                List<Geometry[]> geometries = model.Geometries;
                 List<vec3> geometryCenters = model.GeometryCenters;
 
                 for(int i = 0; i < geometries_.Length; ++i)

@@ -39,7 +39,7 @@ namespace SharpGame
         {
             foreach(Drawable drawable in start)
             {
-                //if ((drawable.DrawableFlags & drawableFlags) != 0 && (drawable.ViewMask & viewMask) != 0)
+                if ((drawable.DrawableFlags & drawableFlags) != 0 && (drawable.ViewMask & viewMask) != 0)
                 {
                     if (inside || camera.Frustum.Intersects(ref drawable.WorldBoundingBox))
                         visitor(drawable);
