@@ -86,7 +86,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            settings.Validation = false;
+            settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -105,7 +105,7 @@ namespace SharpGame
             // Create synchronization objects
             PresentComplete = new Semaphore();
             RenderComplete = new Semaphore();
-            computeFence = new Fence(FenceCreateFlags.Signaled);
+            computeFence = new Fence(FenceCreateFlags.None);
 
             commandPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
 

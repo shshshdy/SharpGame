@@ -55,7 +55,8 @@ namespace SharpGame
             Device.Destroy(handle);
         }
 
-        public unsafe static Image Create(uint width, uint height, ImageCreateFlags flags, uint layers, uint levels, Format format, SampleCountFlags samples, ImageUsageFlags usage)
+        public unsafe static Image Create(uint width, uint height, ImageCreateFlags flags, uint layers, uint levels, Format format, SampleCountFlags samples,
+            ImageUsageFlags usage)
         {
             ImageCreateInfo createInfo = new ImageCreateInfo
             {

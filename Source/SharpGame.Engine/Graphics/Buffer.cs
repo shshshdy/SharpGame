@@ -78,7 +78,7 @@ namespace SharpGame
             }
 
             SetupDescriptor();
-            
+
         }
 
         public static Buffer CreateUniformBuffer<T>(ulong count = 1) where T : struct
@@ -94,7 +94,7 @@ namespace SharpGame
         public static Buffer CreateTexelBuffer(BufferUsageFlags flags, ulong size, Format format, SharingMode sharingMode, uint[] queueFamilyIndices)
         {
             var buffer = new Buffer(flags, MemoryPropertyFlags.DeviceLocal, size, 1, sharingMode, queueFamilyIndices);
-            buffer.CreateView(format, 0, WholeSize);
+            
             return buffer;
         }
 
@@ -141,7 +141,6 @@ namespace SharpGame
         public void CreateView(Format format, ulong offset, ulong range)
         {
             view = new BufferView(this, format, offset, range);
-            //imageDescriptor = new DescriptorImageInfo()
         }
 
         public void SetData<T>(ref T data, uint offset = 0) where T : struct

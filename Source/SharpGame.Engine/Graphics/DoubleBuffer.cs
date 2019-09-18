@@ -12,7 +12,6 @@ namespace SharpGame
         public Buffer Buffer => buffers[Graphics.Instance.WorkContext];
         public IntPtr Mapped => buffers[Graphics.Instance.WorkContext].Mapped;
 
-
         public DoubleBuffer(BufferUsageFlags bufferUsage, uint size)
         {
             buffers[0] = new Buffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
@@ -21,8 +20,23 @@ namespace SharpGame
             buffers[1].Map(0, size);
         }
 
+        public DoubleBuffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropFlags, ulong size, 
+            SharingMode sharingMode = SharingMode.Exclusive, uint[] queueFamilyIndices = null)
+        {
+            buffers[0] = new Buffer(usageFlags, memoryPropFlags, size, 1, sharingMode, queueFamilyIndices);
+            buffers[0].Map(0, size);
+            buffers[1] = new Buffer(usageFlags, memoryPropFlags, size, 1, sharingMode, queueFamilyIndices);
+            buffers[1].Map(0, size);
+        }
+
         public Buffer this[int index] => buffers[index];
-        
+
+        public void CreateView(Format format, ulong offset, ulong range)
+        {
+            buffers[0].CreateView(format, offset, range);
+            buffers[1].CreateView(format, offset, range);
+        }
+
         public void SetData<T>(ref T data, uint offset = 0) where T : struct
         {
             SetData(Utilities.AsPointer(ref data), offset, (uint)Unsafe.SizeOf<T>());

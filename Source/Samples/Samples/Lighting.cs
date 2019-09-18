@@ -4,6 +4,7 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = -2)]
     public class Lighting : Sample
     {
+        FrameGraph frameGraph;
         public override void Init()
         {
             base.Init();
@@ -25,8 +26,16 @@ namespace SharpGame.Samples
 
             var staticModel = node.AddComponent<StaticModel>();
             staticModel.SetModel("models/sibenik/sibenik_bubble.fbx");// "models/voyager/voyager.dae");
-            
-            Renderer.MainView.Attach(camera, scene);
+
+            frameGraph = new FrameGraph
+            {
+                new ShadowPass(),
+                new LightComputePass(),
+                new ScenePass()
+
+            };
+
+            Renderer.MainView.Attach(camera, scene, frameGraph);
         }
 
 

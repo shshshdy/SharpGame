@@ -13,17 +13,12 @@ namespace SharpGame
 
         internal DescriptorImageInfo descriptor;
 
-        public RenderTarget(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, ImageAspectFlags aspectMask, SampleCountFlags samples = SampleCountFlags.Count1)
+        public RenderTarget(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, ImageAspectFlags aspectMask,
+            SampleCountFlags samples = SampleCountFlags.Count1, ImageLayout imageLayout = ImageLayout.Undefined)
         {
             image = Image.Create(width, height, ImageCreateFlags.None, layers, 1, format, SampleCountFlags.Count1, usage);
             view = ImageView.Create(image, layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
-
-        }
-
-        public void SetDescriptor(bool depth)
-        {
-            var imageLayout = depth ? ImageLayout.DepthStencilReadOnlyOptimal : ImageLayout.ShaderReadOnlyOptimal;
             descriptor = new DescriptorImageInfo(sampler, view, imageLayout);
         }
 
