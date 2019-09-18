@@ -10,8 +10,8 @@ namespace SharpGame
     {
         public string Name { get; set; }
 
-        private DeviceBuffer[] vertexBuffers_;
-        public DeviceBuffer[] VertexBuffers
+        private Buffer[] vertexBuffers_;
+        public Buffer[] VertexBuffers
         {
             get => vertexBuffers_;
             set
@@ -28,7 +28,7 @@ namespace SharpGame
             }
         }
 
-        public DeviceBuffer IndexBuffer { get; set; }
+        public Buffer IndexBuffer { get; set; }
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
         public uint VertexStart { get; set; }
         public uint VertexCount { get; set; }

@@ -7,7 +7,7 @@ namespace SharpGame
 {
     public struct TransientBuffer
     {
-        public DeviceBuffer buffer;
+        public Buffer buffer;
         public uint offset;
         public uint size;
 
@@ -18,7 +18,7 @@ namespace SharpGame
     {
         public struct TransientBufferDesc
         {
-            public DeviceBuffer buffer;
+            public Buffer buffer;
             public uint size;
         }
 
@@ -99,7 +99,7 @@ namespace SharpGame
         unsafe ref TransientBufferDesc CreateNewBuffer()
         {
             var currentBuffers = buffers[Graphics.Instance.WorkContext];
-            var buffer = new DeviceBuffer(BufferUsageFlags, MemoryPropertyFlags.HostVisible, Size);
+            var buffer = new Buffer(BufferUsageFlags, MemoryPropertyFlags.HostVisible, Size);
             buffer.Map();
             currentBuffers.Add(new TransientBufferDesc { buffer = buffer, size = 0 });
             return ref currentBuffers.At(currentBuffers.Count - 1);

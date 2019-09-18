@@ -51,8 +51,8 @@ namespace SharpGame
 
             string path = FileUtil.GetPath(loadingFile);
 
-            model.VertexBuffers = new List<DeviceBuffer>();
-            model.IndexBuffers = new List<DeviceBuffer>();
+            model.VertexBuffers = new List<Buffer>();
+            model.IndexBuffers = new List<Buffer>();
             
             // Iterate through all meshes in the file and extract the vertex components
             for (int m = 0; m < scene.MeshCount; m++)
@@ -139,8 +139,8 @@ namespace SharpGame
         private static void ConvertGeometry(Assimp.Mesh mesh, float scale, bool hasNormalMap, out Geometry geometry, out BoundingBox meshBoundingBox)
         {
             VertexLayout vertexLayout = null;
-            DeviceBuffer vb;
-            DeviceBuffer ib;
+            Buffer vb;
+            Buffer ib;
             PrimitiveTopology[] primitiveTopology =
             {
                 PrimitiveTopology.PointList,
@@ -173,7 +173,7 @@ namespace SharpGame
         }
 
         private static unsafe void ConvertGeom(float scale, Assimp.Mesh mesh,
-            out BoundingBox meshBoundingBox, out DeviceBuffer vb, out DeviceBuffer ib, out VertexLayout vertexLayout)
+            out BoundingBox meshBoundingBox, out Buffer vb, out Buffer ib, out VertexLayout vertexLayout)
         {
             NativeList<VertexPosTexNorm> vertexBuffer = new NativeList<VertexPosTexNorm>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
@@ -213,15 +213,15 @@ namespace SharpGame
 
             vertexLayout.Print();
                 
-            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNorm), vertexBuffer.Count, vertexBuffer.Data);
-            ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
+            vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNorm), vertexBuffer.Count, vertexBuffer.Data);
+            ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
             vertexBuffer.Dispose();
             indexBuffer.Dispose();
         }
 
         private static unsafe void ConvertGeomNTB(float scale, Assimp.Mesh mesh,
-            out BoundingBox meshBoundingBox, out DeviceBuffer vb, out DeviceBuffer ib, out VertexLayout vertexLayout)
+            out BoundingBox meshBoundingBox, out Buffer vb, out Buffer ib, out VertexLayout vertexLayout)
         {
             NativeList<VertexPosTexNTB> vertexBuffer = new NativeList<VertexPosTexNTB>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
@@ -263,8 +263,8 @@ namespace SharpGame
 
             vertexLayout.Print();
 
-            vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNTB), vertexBuffer.Count, vertexBuffer.Data);
-            ib = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
+            vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNTB), vertexBuffer.Count, vertexBuffer.Data);
+            ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
             vertexBuffer.Dispose();
             indexBuffer.Dispose();

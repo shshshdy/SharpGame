@@ -9,7 +9,7 @@ namespace SharpGame
 {
     public interface IBindableResource { }
     
-    public class DeviceBuffer : RefCounted, IBindableResource
+    public class Buffer : RefCounted, IBindableResource
     {
         public ulong Stride { get; set; }
         public ulong Count { get; set; }
@@ -18,21 +18,28 @@ namespace SharpGame
 
         public IntPtr Mapped { get; private set; }
 
-        internal VkBuffer buffer;
-        internal VkDeviceMemory memory;
         internal DescriptorBufferInfo descriptor;
         internal MemoryPropertyFlags memoryPropertyFlags;
 
-        public DeviceBuffer()
+        Format viewFormat;
+
+        internal VkBuffer buffer;
+        internal VkDeviceMemory memory;
+
+        public BufferView view;
+        internal DescriptorImageInfo imageDescriptor;
+
+        public Buffer()
         {
         }
 
-        public DeviceBuffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, ulong size)
-            : this(usageFlags, memoryPropertyFlags, size, 1)
+        public Buffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropertyFlags, ulong size, SharingMode sharingMode = SharingMode.Exclusive)
+            : this(usageFlags, memoryPropertyFlags, size, 1, sharingMode)
         {
         }
 
-        public DeviceBuffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropFlags, ulong stride, ulong count, IntPtr data = default)
+        public Buffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropFlags, ulong stride, ulong count,
+            SharingMode sharingMode = SharingMode.Exclusive, uint[] queueFamilyIndices = null, IntPtr data = default)
         {
             Stride = stride;
             Count = count;
@@ -40,7 +47,8 @@ namespace SharpGame
             ulong size = stride * count;
 
             // Create the buffer handle
-            BufferCreateInfo bufferCreateInfo = new BufferCreateInfo(usageFlags, size);
+            BufferCreateInfo bufferCreateInfo = new BufferCreateInfo(usageFlags, size, queueFamilyIndices);
+            bufferCreateInfo.sharingMode = sharingMode;
             if (data != null && (memoryPropertyFlags & MemoryPropertyFlags.HostCoherent) == 0)
             {
                 bufferCreateInfo.usage |= BufferUsageFlags.TransferDst;
@@ -73,29 +81,36 @@ namespace SharpGame
             
         }
 
-        public static DeviceBuffer CreateUniformBuffer<T>(ulong count = 1) where T : struct
+        public static Buffer CreateUniformBuffer<T>(ulong count = 1) where T : struct
         {
             return Create<T>(BufferUsageFlags.UniformBuffer, true, count);
         }
 
-        public static DeviceBuffer CreateStagingBuffer(ulong size, IntPtr data)
+        public static Buffer CreateStagingBuffer(ulong size, IntPtr data)
         {
-            return new DeviceBuffer(BufferUsageFlags.TransferSrc, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, size, 1, data);
+            return new Buffer(BufferUsageFlags.TransferSrc, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, size, 1, SharingMode.Exclusive, null, data);
         }
 
-        public static DeviceBuffer Create<T>(BufferUsageFlags bufferUsages, T[] data, bool dynamic = false) where T : struct
+        public static Buffer CreateTexelBuffer(BufferUsageFlags flags, ulong size, Format format, SharingMode sharingMode, uint[] queueFamilyIndices)
+        {
+            var buffer = new Buffer(flags, MemoryPropertyFlags.DeviceLocal, size, 1, sharingMode, queueFamilyIndices);
+            buffer.CreateView(format, 0, WholeSize);
+            return buffer;
+        }
+
+        public static Buffer Create<T>(BufferUsageFlags bufferUsages, T[] data, bool dynamic = false) where T : struct
         {
             return Create(bufferUsages, dynamic, (ulong)Unsafe.SizeOf<T>(), (ulong)data.Length, Utilities.AsPointer(ref data[0]));
         }
 
-        public static DeviceBuffer Create<T>(BufferUsageFlags bufferUsages, bool dynamic, ulong count = 1, IntPtr data = default) where T : struct
+        public static Buffer Create<T>(BufferUsageFlags bufferUsages, bool dynamic, ulong count = 1, IntPtr data = default) where T : struct
         {
             return Create(bufferUsages, dynamic, (ulong)Unsafe.SizeOf<T>(), count, data);
         }
 
-        public static DeviceBuffer Create(BufferUsageFlags usageFlags, bool dynamic, ulong stride, ulong count, IntPtr data = default)
+        public static Buffer Create(BufferUsageFlags usageFlags, bool dynamic, ulong stride, ulong count, IntPtr data = default)
         {
-            return new DeviceBuffer(usageFlags, dynamic ? MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent : MemoryPropertyFlags.DeviceLocal, stride, count, data);
+            return new Buffer(usageFlags, dynamic ? MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent : MemoryPropertyFlags.DeviceLocal, stride, count, SharingMode.Exclusive, null, data);
         }
 
         public ref T Map<T>(ulong offset = 0) where T : struct
@@ -123,6 +138,12 @@ namespace SharpGame
             descriptor.range = WholeSize;// Size;
         }
 
+        public void CreateView(Format format, ulong offset, ulong range)
+        {
+            view = new BufferView(this, format, offset, range);
+            //imageDescriptor = new DescriptorImageInfo()
+        }
+
         public void SetData<T>(ref T data, uint offset = 0) where T : struct
         {
             SetData(Utilities.AsPointer(ref data), (uint)offset, (uint)Unsafe.SizeOf<T>());
@@ -132,7 +153,7 @@ namespace SharpGame
         {
             if ((memoryPropertyFlags & MemoryPropertyFlags.HostCoherent) == 0)
             {
-                using (DeviceBuffer stagingBuffer = CreateStagingBuffer(size, data))
+                using (Buffer stagingBuffer = CreateStagingBuffer(size, data))
                 {
                     CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
                     BufferCopy copyRegion = new BufferCopy { srcOffset = offset, size = size };
@@ -178,6 +199,8 @@ namespace SharpGame
             {
                 Device.FreeMemory(memory);
             }
+
+            view?.Dispose();
         }
 
 
@@ -193,10 +216,15 @@ namespace SharpGame
 
         internal VkBufferCreateInfo native;
 
-        public BufferCreateInfo(BufferUsageFlags usage, ulong size)
+        public unsafe BufferCreateInfo(BufferUsageFlags usage, ulong size, uint[] queueFamilyIndices = null)
         {
             native = VkBufferCreateInfo.New();
-            pQueueFamilyIndices = null;
+            pQueueFamilyIndices = queueFamilyIndices;
+            if(queueFamilyIndices != null)
+            {
+                native.queueFamilyIndexCount = (uint)queueFamilyIndices.Length;
+                native.pQueueFamilyIndices = (uint*)Unsafe.AsPointer(ref pQueueFamilyIndices[0]);
+            }
             this.usage = usage;
             this.size = size;
         }

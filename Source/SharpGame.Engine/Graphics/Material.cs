@@ -232,7 +232,7 @@ namespace SharpGame
             UpdateResourceSet(name, tex);
         }
 
-        public void SetBuffer(StringID name, DeviceBuffer buf)
+        public void SetBuffer(StringID name, Buffer buf)
         {
             if (BufferParameters == null)
             {

@@ -160,17 +160,23 @@ namespace SharpGame
                     break;
 
                 case DescriptorType.UniformTexelBuffer:
-                    break;
                 case DescriptorType.StorageTexelBuffer:
+                    {
+                        var buffer = bindable as Buffer;
+                        writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+                            descriptorType, ref buffer.descriptor, buffer.view);
+                    }
                     break;
 
                 case DescriptorType.UniformBuffer:
                 case DescriptorType.StorageBuffer:
                 case DescriptorType.UniformBufferDynamic:
                 case DescriptorType.StorageBufferDynamic:
-                    var buffer = bindable as DeviceBuffer;                    
-                    writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-                        descriptorType, ref buffer.descriptor, 1);
+                    {
+                        var buffer = bindable as Buffer;
+                        writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+                            descriptorType, ref buffer.descriptor, 1);
+                    }
                     
                     break;
                 case DescriptorType.InputAttachment:
@@ -209,7 +215,7 @@ namespace SharpGame
         public ulong offset;
         public ulong range;
 
-        public DescriptorBufferInfo(DeviceBuffer buffer, ulong offset, ulong range)
+        public DescriptorBufferInfo(Buffer buffer, ulong offset, ulong range)
         {
             this.buffer = buffer.buffer;
             this.offset = offset;
@@ -247,6 +253,22 @@ namespace SharpGame
             native.dstBinding = binding;
             native.pImageInfo = (VkDescriptorImageInfo*)Unsafe.AsPointer(ref imageInfo);
             native.descriptorCount = descriptorCount;
+        }
+
+        public unsafe WriteDescriptorSet(uint binding,
+            VkDescriptorSet dstSet,
+            DescriptorType type,
+            ref DescriptorBufferInfo bufferInfo,
+            BufferView bufferView)
+        {
+            native = VkWriteDescriptorSet.New();
+            native.dstSet = dstSet;
+            native.descriptorType = (VkDescriptorType)type;
+            native.dstBinding = binding;
+            native.descriptorCount = 1;
+            native.pBufferInfo = (VkDescriptorBufferInfo*)Unsafe.AsPointer(ref bufferInfo);            
+            native.pTexelBufferView = (VkBufferView*)Unsafe.AsPointer(ref bufferView.view);
+            
         }
     }
 

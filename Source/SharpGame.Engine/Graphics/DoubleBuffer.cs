@@ -8,20 +8,20 @@ namespace SharpGame
 {
     public class DoubleBuffer : DisposeBase
     {
-        DeviceBuffer[] buffers = new DeviceBuffer[2];
-        public DeviceBuffer Buffer => buffers[Graphics.Instance.WorkContext];
+        Buffer[] buffers = new Buffer[2];
+        public Buffer Buffer => buffers[Graphics.Instance.WorkContext];
         public IntPtr Mapped => buffers[Graphics.Instance.WorkContext].Mapped;
 
 
         public DoubleBuffer(BufferUsageFlags bufferUsage, uint size)
         {
-            buffers[0] = new DeviceBuffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
+            buffers[0] = new Buffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
             buffers[0].Map(0, size);
-            buffers[1] = new DeviceBuffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
+            buffers[1] = new Buffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
             buffers[1].Map(0, size);
         }
 
-        public DeviceBuffer this[int index] => buffers[index];
+        public Buffer this[int index] => buffers[index];
         
         public void SetData<T>(ref T data, uint offset = 0) where T : struct
         {

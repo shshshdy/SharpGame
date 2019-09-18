@@ -59,7 +59,7 @@ namespace SharpGame
     public struct BufferParameter
     {
         public string name;
-        public DeviceBuffer buffer;
+        public Buffer buffer;
 
         [IgnoreDataMember]
         public bool IsNull => string.IsNullOrEmpty(name);

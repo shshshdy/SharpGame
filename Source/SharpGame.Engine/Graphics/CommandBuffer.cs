@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Vulkan;
+﻿using Vulkan;
 
 namespace SharpGame
 {
+    using global::System;
     using global::System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
     using System.Threading;
@@ -273,14 +271,14 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindVertexBuffer(uint firstBinding, DeviceBuffer buffer)
+        public void BindVertexBuffer(uint firstBinding, Buffer buffer)
         {
             ulong pOffsets = 0;
             vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, ref buffer.buffer, ref pOffsets);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindIndexBuffer(DeviceBuffer buffer, ulong offset, IndexType indexType)
+        public unsafe void BindIndexBuffer(Buffer buffer, ulong offset, IndexType indexType)
         {
             vkCmdBindIndexBuffer(commandBuffer, buffer.buffer, offset, (VkIndexType)indexType);
         }
@@ -361,12 +359,12 @@ namespace SharpGame
             vkCmdExecuteCommands(commandBuffer, (uint)cmdBuffer.currentIndex, (VkCommandBuffer*)cmdBuffer.GetAddress(0));
         }
 
-        public void CopyBuffer(DeviceBuffer srcBuffer, DeviceBuffer dstBuffer, ref BufferCopy region)
+        public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, ref BufferCopy region)
         {
             vkCmdCopyBuffer(commandBuffer, srcBuffer.buffer, dstBuffer.buffer, 1, Utilities.AsPointer(ref region));
         }
 
-        public void CopyBuffer(DeviceBuffer srcBuffer, DeviceBuffer dstBuffer, Span<BufferCopy> pRegions)
+        public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, Span<BufferCopy> pRegions)
         {
             vkCmdCopyBuffer(commandBuffer, srcBuffer.buffer, dstBuffer.buffer, (uint)pRegions.Length, Utilities.AsPointer(ref pRegions[0]));
         }
@@ -391,12 +389,12 @@ namespace SharpGame
             vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)region.Length, ref Unsafe.As<ImageCopy, VkImageCopy>(ref region[0]));
         }
 
-        public void CopyBufferToImage(DeviceBuffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, ref BufferImageCopy region)
+        public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, ref BufferImageCopy region)
         {
             vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, 1, ref Unsafe.As<BufferImageCopy, VkBufferImageCopy>(ref region));
         }
 
-        public void CopyBufferToImage(DeviceBuffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, Span<BufferImageCopy> pRegions)
+        public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, Span<BufferImageCopy> pRegions)
         {
             vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, ref Unsafe.As<BufferImageCopy, VkBufferImageCopy>(ref pRegions[0]));
         }
@@ -824,13 +822,13 @@ namespace SharpGame
     {
         internal VkBufferMemoryBarrier native;
       
-        public BufferMemoryBarrier(DeviceBuffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ulong offset = 0, ulong size = WholeSize)
+        public BufferMemoryBarrier(Buffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ulong offset = 0, ulong size = WholeSize)
             : this(buffer, srcAccessMask, dstAccessMask, uint.MaxValue, uint.MaxValue, offset, size)
         {
             native = VkBufferMemoryBarrier.New();
         }
 
-        public BufferMemoryBarrier(DeviceBuffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask,
+        public BufferMemoryBarrier(Buffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask,
             uint srcQueueFamilyIndex, uint dstQueueFamilyIndex, ulong offset = 0, ulong size = WholeSize)
         {
             native = VkBufferMemoryBarrier.New();

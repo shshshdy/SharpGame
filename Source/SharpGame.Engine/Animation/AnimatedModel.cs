@@ -18,7 +18,7 @@ namespace SharpGame
         Skeleton skeleton_ = new Skeleton();
 
         /// Morph vertex buffers.
-        DeviceBuffer[] morphVertexBuffers_;
+        Buffer[] morphVertexBuffers_;
 
         /// Vertex morphs.
         ModelMorph[] morphs_;

@@ -15,9 +15,9 @@ namespace SharpGame
 
     public class ImGUI : System<ImGUI>
     {
-        DeviceBuffer[] vertexBuffer = new DeviceBuffer[2];
-        DeviceBuffer[] indexBuffer = new DeviceBuffer[2];
-        DeviceBuffer uniformBufferVS = new DeviceBuffer();
+        Buffer[] vertexBuffer = new Buffer[2];
+        Buffer[] indexBuffer = new Buffer[2];
+        Buffer uniformBufferVS = new Buffer();
         Texture texture;
         Shader uiShader;
         Pass pass;
@@ -109,7 +109,7 @@ namespace SharpGame
 
         unsafe void CreateGraphicsResources()
         {
-            uniformBufferVS = DeviceBuffer.CreateUniformBuffer<Matrix4x4>();
+            uniformBufferVS = Buffer.CreateUniformBuffer<Matrix4x4>();
 
             resourceLayout = new ResourceLayout(0)
             {
@@ -282,18 +282,18 @@ namespace SharpGame
                 return;
             }
 
-            ref DeviceBuffer vb = ref vertexBuffer[graphics.WorkContext];
-            ref DeviceBuffer ib = ref indexBuffer[graphics.WorkContext];
+            ref Buffer vb = ref vertexBuffer[graphics.WorkContext];
+            ref Buffer ib = ref indexBuffer[graphics.WorkContext];
             if (vb == null || draw_data.TotalVtxCount * sizeof(ImDrawVert) > (int)vb.Size)
             {
                 vb?.Dispose();
-                vb = DeviceBuffer.Create<ImDrawVert>(BufferUsageFlags.VertexBuffer, true, (uint)(1.5f * draw_data.TotalVtxCount));
+                vb = Buffer.Create<ImDrawVert>(BufferUsageFlags.VertexBuffer, true, (uint)(1.5f * draw_data.TotalVtxCount));
             }
 
             if (ib == null || draw_data.TotalIdxCount * sizeof(ushort) > (int)ib.Size)
             {
                 ib?.Dispose();
-                ib = DeviceBuffer.Create<ushort>(BufferUsageFlags.IndexBuffer, true, (uint)(1.5f * draw_data.TotalIdxCount));
+                ib = Buffer.Create<ushort>(BufferUsageFlags.IndexBuffer, true, (uint)(1.5f * draw_data.TotalIdxCount));
             }
 
             var projection = Matrix4x4.CreateOrthographicOffCenter(0f, width, height, 0.0f, -1.0f, 1.0f);

@@ -27,17 +27,17 @@ namespace SharpGame
     public class Model : Resource
     {
         /// Vertex buffers.
-        private List<DeviceBuffer> vertexBuffers;
+        private List<Buffer> vertexBuffers;
         [DataMember]
-        public List<DeviceBuffer> VertexBuffers
+        public List<Buffer> VertexBuffers
         {
             get => vertexBuffers; set => vertexBuffers = value;
         }
 
         /// Index buffers.
-        private List<DeviceBuffer> indexBuffers;
+        private List<Buffer> indexBuffers;
         [DataMember]
-        public List<DeviceBuffer> IndexBuffers
+        public List<Buffer> IndexBuffers
         {
             get => indexBuffers; set => indexBuffers = value;
         }

@@ -27,7 +27,7 @@ namespace SharpGame
             int vertexCount = Math.Max(objFile.Positions.Length, objFile.Normals.Length);
             vertexCount = Math.Max(vertexCount, objFile.TexCoords.Length);
 
-            List<DeviceBuffer> ibs = new List<DeviceBuffer>();
+            List<Buffer> ibs = new List<Buffer>();
             List<MeshGroup> meshGroups = new List<MeshGroup>();
             FastList<VertexPosTexNorm> vertices = new FastList<VertexPosTexNorm>();
             FastList<VertexPosTexNormTangent> tangentVertices = new FastList<VertexPosTexNormTangent>();
@@ -59,7 +59,7 @@ namespace SharpGame
                         indices[(i * 3) + 1] = index2;
                     }
 
-                    ibs.Add(DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
+                    ibs.Add(Buffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
                     triangles = indices;
                 }
                 else
@@ -78,7 +78,7 @@ namespace SharpGame
                         indices[(i * 3) + 1] = (ushort)index2;
                     }
 
-                    ibs.Add(DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
+                    ibs.Add(Buffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
 
                     triangles = new uint[indices.Length];
                     for(int i = 0; i < indices.Length; i++)
@@ -94,11 +94,11 @@ namespace SharpGame
 
             CalculateMeshTangents(vertices, tangentVertices, trianglesList);
             //DeviceBuffer vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices.ToArray(), false);
-            DeviceBuffer vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, tangentVertices.Items, false);
+            Buffer vb = Buffer.Create(BufferUsageFlags.VertexBuffer, tangentVertices.Items, false);
 
             Model model = new Model
             {
-                VertexBuffers = new List<DeviceBuffer> { vb },
+                VertexBuffers = new List<Buffer> { vb },
                 IndexBuffers = ibs,
                 BoundingBox = BoundingBox.FromPoints(objFile.Positions)                
             };
@@ -109,7 +109,7 @@ namespace SharpGame
                 var geom = new Geometry
                 {
                     Name = meshGroups[i].Name,
-                    VertexBuffers = new DeviceBuffer[] { vb },
+                    VertexBuffers = new Buffer[] { vb },
                     IndexBuffer = ibs[i]
                 };
 

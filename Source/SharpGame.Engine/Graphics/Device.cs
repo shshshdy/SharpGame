@@ -544,6 +544,12 @@ namespace SharpGame
             return buffer;
         }
 
+        public static VkBufferView CreateBufferView(ref VkBufferViewCreateInfo pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateBufferView(device, ref pCreateInfo, null, out VkBufferView pView));
+            return pView;
+        }
+
         public static void GetBufferMemoryRequirements(VkBuffer buffer, out VkMemoryRequirements pMemoryRequirements)
         {
             vkGetBufferMemoryRequirements(device, buffer, out pMemoryRequirements);
@@ -689,6 +695,11 @@ namespace SharpGame
         public static void DestroyBuffer(VkBuffer buffer)
         {
             vkDestroyBuffer(device, buffer, null);
+        }
+
+        public static void DestroyBufferView(VkBufferView view)
+        {
+            vkDestroyBufferView(device, view, null);
         }
 
         public static void FreeMemory(VkDeviceMemory memory)

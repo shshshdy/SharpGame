@@ -52,7 +52,7 @@ namespace SharpGame
                 }
             }
 
-            DeviceBuffer stagingBuffer = DeviceBuffer.CreateStagingBuffer(totalSize, IntPtr.Zero);
+            Buffer stagingBuffer = Buffer.CreateStagingBuffer(totalSize, IntPtr.Zero);
 
             image = Image.Create(width, height, imageCreateFlags/*layers == 6 ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None*/, layers, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
 
@@ -238,7 +238,7 @@ namespace SharpGame
 
             ulong totalBytes = texture.image.allocationSize;
 
-            using (DeviceBuffer stagingBuffer = DeviceBuffer.CreateStagingBuffer(totalBytes, tex2DDataPtr))
+            using (Buffer stagingBuffer = Buffer.CreateStagingBuffer(totalBytes, tex2DDataPtr))
             {
                 BufferImageCopy bufferCopyRegion = new BufferImageCopy
                 {

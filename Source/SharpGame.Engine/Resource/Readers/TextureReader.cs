@@ -66,7 +66,7 @@ namespace SharpGame
                     newData = new byte[image.Height * tightStride];
                     for (int i = 0; i < image.Height; i++)
                     {
-                        Buffer.BlockCopy(image.Data, i * image.Stride, newData, i * tightStride, tightStride);
+                        System.Buffer.BlockCopy(image.Data, i * image.Stride, newData, i * tightStride, tightStride);
                     }
                 }
                 else

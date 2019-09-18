@@ -99,12 +99,12 @@ namespace SharpGame
         private CameraPS cameraPS = new CameraPS();
         private LightParameter lightParameter = new LightParameter();
 
-        internal DeviceBuffer ubFrameInfo;
+        internal Buffer ubFrameInfo;
         public DoubleBuffer ubCameraVS;
         public DynamicBuffer ubMatrics;
 
-        internal DeviceBuffer ubCameraPS;
-        internal DeviceBuffer ubLight;
+        internal Buffer ubCameraPS;
+        internal Buffer ubLight;
 
 
         private ResourceLayout vsResLayout;
@@ -161,15 +161,15 @@ namespace SharpGame
 
         protected void CreateBuffers()
         {
-            ubFrameInfo = DeviceBuffer.CreateUniformBuffer<FrameUniform>();
+            ubFrameInfo = Buffer.CreateUniformBuffer<FrameUniform>();
 
             ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
             uint size = 64 * 1000 * 100;
             //ubMatrics = new DynamicBuffer(size);
             ubMatrics = new DynamicBuffer(size);
 
-            ubCameraPS = DeviceBuffer.CreateUniformBuffer<CameraPS>();
-            ubLight = DeviceBuffer.CreateUniformBuffer<LightParameter>();
+            ubCameraPS = Buffer.CreateUniformBuffer<CameraPS>();
+            ubLight = Buffer.CreateUniformBuffer<LightParameter>();
 
             vsResLayout = new ResourceLayout(0)
             {

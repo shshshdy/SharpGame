@@ -18,8 +18,8 @@ namespace SharpGame.Samples
         const int PARTICLE_COUNT = 256 * 1024;
 
         private FrameGraph frameGraph = new FrameGraph();
-        private DeviceBuffer storageBuffer;
-        private DeviceBuffer uniformBuffer;
+        private Buffer storageBuffer;
+        private Buffer uniformBuffer;
 
         struct UBO
         {
@@ -60,8 +60,8 @@ namespace SharpGame.Samples
                 particle.gradientPos = new vec4(particle.pos.X / 2.0f, 0, 0, 0);
             }
 
-            storageBuffer = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer | BufferUsageFlags.StorageBuffer, particles, true);
-            uniformBuffer = DeviceBuffer.CreateUniformBuffer<UBO>();
+            storageBuffer = Buffer.Create(BufferUsageFlags.VertexBuffer | BufferUsageFlags.StorageBuffer, particles, true);
+            uniformBuffer = Buffer.CreateUniformBuffer<UBO>();
 
             geometry = new Geometry
             {

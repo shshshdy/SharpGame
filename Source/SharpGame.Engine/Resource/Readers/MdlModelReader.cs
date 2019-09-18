@@ -76,8 +76,8 @@ namespace SharpGame
 
             int memoryUse = Unsafe.SizeOf<Model>();
 
-            List<DeviceBuffer> vertexBuffers_;
-            List<DeviceBuffer> indexBuffers_;
+            List<Buffer> vertexBuffers_;
+            List<Buffer> indexBuffers_;
             List<Geometry[]> geometries_ = new List<Geometry[]>();
 
             VertexBufferDesc[] loadVBData_;
@@ -86,7 +86,7 @@ namespace SharpGame
 
             // Read vertex buffers
             int numVertexBuffers = (int)stream.Read<uint>();
-            vertexBuffers_ = new List<DeviceBuffer>();//[numVertexBuffers];
+            vertexBuffers_ = new List<Buffer>();//[numVertexBuffers];
             vertexBuffers_.Resize(numVertexBuffers);
             var morphRangeStarts_ = new int[numVertexBuffers];
             var morphRangeCounts_ = new int[numVertexBuffers];
@@ -151,7 +151,7 @@ namespace SharpGame
 
             // Read index buffers
             int numIndexBuffers = (int)stream.Read<uint>();
-            indexBuffers_ = new List<DeviceBuffer>();//[numIndexBuffers];
+            indexBuffers_ = new List<Buffer>();//[numIndexBuffers];
             indexBuffers_.Resize(numIndexBuffers);
             loadIBData_ = new IndexBufferDesc[numIndexBuffers];
             for (int i = 0; i < numIndexBuffers; ++i)
@@ -310,7 +310,7 @@ namespace SharpGame
                 ref VertexBufferDesc desc = ref loadVBData_[i];
                 if (desc.data_ != null)
                 {
-                    vertexBuffers_[i] = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, false
+                    vertexBuffers_[i] = Buffer.Create(BufferUsageFlags.VertexBuffer, false
                         , (uint)desc.vertexSize_, (uint)desc.vertexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
@@ -321,7 +321,7 @@ namespace SharpGame
                 ref IndexBufferDesc desc = ref loadIBData_[i];
                 if (desc.data_ != null)
                 {
-                    indexBuffers_[i] = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, false, (uint)desc.indexSize_, (uint)desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
+                    indexBuffers_[i] = Buffer.Create(BufferUsageFlags.IndexBuffer, false, (uint)desc.indexSize_, (uint)desc.indexCount_, Utilities.AsPointer(ref desc.data_[0]));
                 }
             }
 

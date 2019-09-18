@@ -33,8 +33,8 @@ namespace SharpGame
 
             var geom = new Geometry
             {
-                VertexBuffers = new[] { DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
-                IndexBuffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexBuffers = new[] { Buffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
+                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTexNorm.Layout
             };
 
@@ -59,8 +59,8 @@ namespace SharpGame
 
             var geom = new Geometry
             {
-                VertexBuffers = new[] { DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
-                IndexBuffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexBuffers = new[] { Buffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
+                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTexNTB.Layout
             };
 
@@ -135,8 +135,8 @@ namespace SharpGame
 
             var geom = new Geometry
             {
-                VertexBuffers = new[] { DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
-                IndexBuffer = DeviceBuffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexBuffers = new[] { Buffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
+                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTexNorm.Layout
             };
 
