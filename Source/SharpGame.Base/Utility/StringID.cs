@@ -11,17 +11,21 @@ namespace SharpGame
     [MessagePackFormatter(typeof(StringIDFormatter))]
     public struct StringID : IEquatable<StringID>
     {
-        public string InternID { get; }
+        public string Str { get; }
+
+        [IgnoreDataMember]
+        public int Hash { get; }
 
         public readonly static StringID Empty = string.Empty;
 
-        public StringID(string id)
+        public StringID(string str)
         {
-            InternID = string.Intern(id);
+            Str = str;
+            Hash = str.GetHashCode();
         }
 
         [IgnoreDataMember]
-        public bool IsNullOrEmpty => string.IsNullOrEmpty(InternID);
+        public bool IsNullOrEmpty => string.IsNullOrEmpty(Str);
 
         public static implicit operator StringID(string value)
         {
@@ -30,7 +34,7 @@ namespace SharpGame
 
         public static implicit operator string(StringID value)
         {
-            return value.InternID;
+            return value.Str;
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
@@ -48,7 +52,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(ref StringID other)
         {
-            return InternID == other.InternID;
+            return Hash == other.Hash;
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
@@ -68,12 +72,12 @@ namespace SharpGame
 
         public override int GetHashCode()
         {
-            return InternID.GetHashCode();
+            return Hash;
         }
 
         public override string ToString()
         {
-            return InternID;
+            return Str;
         }
 
         // serialize/deserialize internal field.
@@ -81,7 +85,7 @@ namespace SharpGame
         {
             public int Serialize(ref byte[] bytes, int offset, StringID value, IFormatterResolver formatterResolver)
             {
-                return formatterResolver.GetFormatterWithVerify<string>().Serialize(ref bytes, offset, value.InternID, formatterResolver);
+                return formatterResolver.GetFormatterWithVerify<string>().Serialize(ref bytes, offset, value.Str, formatterResolver);
             }
 
             public StringID Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)

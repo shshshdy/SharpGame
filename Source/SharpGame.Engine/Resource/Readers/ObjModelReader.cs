@@ -98,13 +98,12 @@ namespace SharpGame
 
             Model model = new Model
             {
-                VertexBuffers = { vb },
+                VertexBuffers = new List<DeviceBuffer> { vb },
                 IndexBuffers = ibs,
                 BoundingBox = BoundingBox.FromPoints(objFile.Positions)                
             };
 
             model.Geometries = new List<Geometry[]>();
-            model.Geometries.Resize(meshGroups.Count);
             for (int i = 0; i < meshGroups.Count; i++)
             {
                 var geom = new Geometry
@@ -116,7 +115,7 @@ namespace SharpGame
 
                 geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)ibs[i].Count);
                 geom.VertexLayout = VertexPosTexNormTangent.Layout;
-                model.Geometries[i] = new Geometry[] { geom };
+                model.Geometries.Add(new Geometry[] { geom });
                 model.GeometryCenters.Add(vec3.Zero);
             }
 

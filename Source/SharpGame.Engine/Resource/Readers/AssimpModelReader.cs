@@ -6,6 +6,19 @@ namespace SharpGame
 {
     public class AssimpModelReader : ResourceReader<Model>
     {
+        public Assimp.PostProcessSteps assimpFlags =
+        Assimp.PostProcessSteps.CalculateTangentSpace |
+        Assimp.PostProcessSteps.Triangulate |
+        Assimp.PostProcessSteps.SortByPrimitiveType |
+        Assimp.PostProcessSteps.PreTransformVertices |
+        Assimp.PostProcessSteps.MakeLeftHanded |
+        //Assimp.PostProcessSteps.GenerateNormals |
+        Assimp.PostProcessSteps.GenerateSmoothNormals |
+        Assimp.PostProcessSteps.GenerateUVCoords |
+        Assimp.PostProcessSteps.OptimizeMeshes |
+        Assimp.PostProcessSteps.Debone |
+        Assimp.PostProcessSteps.ValidateDataStructure;
+
         public AssimpModelReader() : base("")
         {
         }
@@ -14,19 +27,9 @@ namespace SharpGame
         {
             var filePath = FileUtil.StandardlizeFile(stream.Name);
             filePath = FileUtil.GetPath(stream.Name);
+            FileSystem.AddResourceDir(filePath);
             FileSystem.AddResourceDir(filePath + "textures");
 
-            Assimp.PostProcessSteps assimpFlags = 
-            Assimp.PostProcessSteps.CalculateTangentSpace |
-            Assimp.PostProcessSteps.Triangulate |
-            Assimp.PostProcessSteps.SortByPrimitiveType |
-            Assimp.PostProcessSteps.PreTransformVertices |
-            Assimp.PostProcessSteps.MakeLeftHanded |
-            //Assimp.PostProcessSteps.GenerateNormals |
-            //Assimp.PostProcessSteps.GenerateUVCoords |
-            Assimp.PostProcessSteps.OptimizeMeshes |
-            Assimp.PostProcessSteps.Debone |
-            Assimp.PostProcessSteps.ValidateDataStructure;
 
             var ctx = new Assimp.AssimpContext();
             string ext = FileUtil.GetExtension(loadingFile);
@@ -36,8 +39,8 @@ namespace SharpGame
                 return false;
             }
 
-            Assimp.Scene scene = ctx.ImportFileFromStream(stream, assimpFlags, ext);
-            //Assimp.Scene scene = ctx.ImportFile(stream.Name, assimpFlags);
+            //Assimp.Scene scene = ctx.ImportFileFromStream(stream, assimpFlags, ext);
+            Assimp.Scene scene = ctx.ImportFile(stream.Name, assimpFlags);
 
             // Generate vertex buffer from ASSIMP scene data
             float scale = 1.0f;
@@ -55,8 +58,10 @@ namespace SharpGame
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 Assimp.Mesh mesh = scene.Meshes[m];
+                bool hasNormalMap = false;
                 if (mesh.MaterialIndex >= 0 && mesh.MaterialIndex < scene.MaterialCount)
                 {
+                    hasNormalMap = scene.Materials[mesh.MaterialIndex].HasTextureNormal;
                     Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], mesh.HasTangentBasis ? shader1 : shader);
                     if(mat == null)
                     {
@@ -70,7 +75,7 @@ namespace SharpGame
                     Log.Error("No material : " + mesh.Name);
                 }
 
-                ConvertGeometry(mesh, scale, out Geometry geometry, out var meshBoundingBox);
+                ConvertGeometry(mesh, scale, hasNormalMap, out Geometry geometry, out var meshBoundingBox);
 
                 model.VertexBuffers.Add(geometry.VertexBuffers[0]);
                 model.IndexBuffers.Add(geometry.IndexBuffer);
@@ -100,8 +105,8 @@ namespace SharpGame
             Assimp.PostProcessSteps.PreTransformVertices |
             //Assimp.PostProcessSteps.GenerateNormals |
             Assimp.PostProcessSteps.GenerateSmoothNormals|
-            //Assimp.PostProcessSteps.GenerateUVCoords |
-            //Assimp.PostProcessSteps.OptimizeMeshes |
+            Assimp.PostProcessSteps.GenerateUVCoords |
+            Assimp.PostProcessSteps.OptimizeMeshes |
             Assimp.PostProcessSteps.Debone |
             Assimp.PostProcessSteps.ValidateDataStructure;
 
@@ -122,7 +127,7 @@ namespace SharpGame
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 Assimp.Mesh mesh = scene.Meshes[m];
-                ConvertGeometry(mesh, scale, out Geometry geometry, out var meshBoundingBox);
+                ConvertGeometry(mesh, scale, true, out Geometry geometry, out var meshBoundingBox);
                 geoList.Add(geometry);
                 bboxList.Add(meshBoundingBox);
             }
@@ -131,7 +136,7 @@ namespace SharpGame
             return true;
         }
 
-        private static void ConvertGeometry(Assimp.Mesh mesh, float scale, out Geometry geometry, out BoundingBox meshBoundingBox)
+        private static void ConvertGeometry(Assimp.Mesh mesh, float scale, bool hasNormalMap, out Geometry geometry, out BoundingBox meshBoundingBox)
         {
             VertexLayout vertexLayout = null;
             DeviceBuffer vb;
@@ -145,7 +150,7 @@ namespace SharpGame
                 PrimitiveTopology.TriangleList,
             };
 
-            bool hasTangent = mesh.HasTangentBasis;
+            bool hasTangent = mesh.HasTangentBasis /*&& hasNormalMap*/;
             if (hasTangent)
             {
                 ConvertGeomNTB(scale, mesh, out meshBoundingBox, out vb, out ib, out vertexLayout);
@@ -278,7 +283,13 @@ namespace SharpGame
                     material.SetTexture("DiffMap", tex.ResourceRef);
                 }
                 else
-                {                   
+                {
+                    int idx = texPath.LastIndexOfAny(new[] { '\\', '/' });
+                    if(idx != -1)
+                    {
+                        texPath = texPath.Substring(idx + 1);
+                    }
+
                     tex = Resources.Instance.Load<Texture>(texPath.Replace(".ktx", "_bc3_unorm.ktx"));
                     if (tex != null)
                     {

@@ -16,7 +16,7 @@ namespace SharpGame.Samples
                 },
             };
 
-            var cameraNode = scene.CreateChild("Camera", new vec3(-10.0f, -13.0f, 0));
+            var cameraNode = scene.CreateChild("Camera", new vec3(-8.0f, -5.0f, 0));
             cameraNode.EulerAngles = glm.radians(0, 90, 0);
 
             camera = cameraNode.CreateComponent<Camera>();
@@ -24,7 +24,7 @@ namespace SharpGame.Samples
             var node = scene.CreateChild("Mesh");
 
             var staticModel = node.AddComponent<StaticModel>();
-            staticModel.SetModel("models/sibenik/sibenik.dae");// "models/voyager/voyager.dae");
+            staticModel.SetModel("models/sibenik/sibenik_bubble.fbx");// "models/voyager/voyager.dae");
             
             Renderer.MainView.Attach(camera, scene);
         }

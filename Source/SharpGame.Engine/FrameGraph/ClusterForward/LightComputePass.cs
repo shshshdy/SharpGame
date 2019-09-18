@@ -30,7 +30,8 @@ namespace SharpGame
         {
             OnDraw = DoCompute;
 
-            storageBuffer = DeviceBuffer.Create(BufferUsageFlags.StorageTexelBuffer, false, 111, 1);
+            storageBuffer = new DeviceBuffer(BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
+                MemoryPropertyFlags.DeviceLocal, 111, 1);
         }
 
         void DoCompute(ComputePass renderPass, RenderView view)

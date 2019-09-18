@@ -6,7 +6,6 @@ using Vulkan;
 namespace SharpGame
 {
     using global::System.Runtime.CompilerServices;
-    using static Vulkan.VulkanNative;
 
     public class ImageView : DisposeBase, IBindableResource
     {
