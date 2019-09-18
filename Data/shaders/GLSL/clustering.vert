@@ -1,23 +1,11 @@
 #version 450 core
+			
+#include "UniformsVS.glsl"
 
 layout (location= 0) in vec3 pos_in;
-
-layout(set = 0, binding = 0) uniform UBO
-{
-    mat4 view;
-    mat4 normal;
-    mat4 model;
-    mat4 projection_clip;
-
-    vec2 tile_size; // xy
-    uvec2 grid_dim; // xy
-
-    vec3 cam_pos;
-    float cam_far;
-
-    vec2 resolution;
-    uint num_lights;
-} ubo_in;
+#ifdef ALPHA_TEST
+layout(location = 1) in vec2 inUV;
+#endif
 
 out gl_PerVertex
 {
@@ -26,8 +14,17 @@ out gl_PerVertex
 
 layout (location= 0) out vec4 world_pos_out;
 
+#ifdef ALPHA_TEST
+layout(location = 1) out vec2 outUV;
+#endif
+
 void main(void)
 {
-    world_pos_out = ubo_in.model * vec4(pos_in, 1.f);
-    gl_Position = ubo_in.projection_clip * ubo_in.view * world_pos_out;
+    world_pos_out = Model * vec4(pos_in, 1.f);
+	
+#ifdef TEX_LOCATION
+    outUV = inUV;
+#endif
+
+    gl_Position = ViewProj * world_pos_out;
 }

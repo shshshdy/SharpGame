@@ -171,7 +171,7 @@ namespace SharpGame
         unsafe bool Tokenize(char* buf, int size)
         {
             // Set up some constant characters of interest
-            const char quote = '\"', slash = '/', backslash = '\\', openbrace = '{', closebrace = '}', colon = ':', star = '*', cr = '\r', lf = '\n';
+            const char quote = '\"', slash = '/', backslash = '\\', openbrace = '{', closebrace = '}', /*colon = ':',*/ star = '*', cr = '\r', lf = '\n';
             char c = '0', lastc = '0';
 
             StringBuilder lexeme = new StringBuilder();

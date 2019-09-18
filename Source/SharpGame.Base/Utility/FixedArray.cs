@@ -9,8 +9,9 @@ namespace SharpGame
     public struct FixedArray2<T> : IEnumerable<T>
     {
         T item1;
+#pragma warning disable CS0649
         T item2;
-
+#pragma warning restore CS0649
         public T this[int index]
         {
             get
@@ -38,8 +39,9 @@ namespace SharpGame
 
     public struct FixedArray3<T> : IEnumerable<T>
     {
+#pragma warning disable CS0649
         T item1, item2, item3;
-
+#pragma warning restore CS0649
         public T this[int index]
         {
             get
@@ -68,8 +70,9 @@ namespace SharpGame
 
     public struct FixedArray4<T> : IEnumerable<T>
     {
+#pragma warning disable CS0649
         T item1, item2, item3, item4;
-
+#pragma warning restore CS0649
         public T this[int index]
         {
             get
@@ -99,8 +102,9 @@ namespace SharpGame
 
     public struct FixedArray6<T> : IEnumerable<T>
     {
+#pragma warning disable CS0649
         T item1, item2, item3, item4, item5, item6;
-
+#pragma warning restore CS0649
         public T this[int index]
         {
             get
@@ -132,7 +136,9 @@ namespace SharpGame
 
     public struct FixedArray8<T> : IEnumerable<T>
     {
+#pragma warning disable CS0649
         T item1, item2, item3, item4, item5, item6, item7, item8;
+#pragma warning restore CS0649
 
         public T this[int index]
         {

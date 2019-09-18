@@ -25,8 +25,12 @@ namespace SharpGame
         public FastList<TextureParameter> TextureParameters { get; set; }
         public FastList<BufferParameter> BufferParameters { get; set; }
 
+        public bool AlphaBlend { get; set; }
+        public bool AlphaTest { get; set; }
+
         [IgnoreDataMember]
         public Shader Shader { get; set; }
+
 
         [IgnoreDataMember]
         public PipelineResourceSet[] PipelineResourceSet => pipelineResourceSet;

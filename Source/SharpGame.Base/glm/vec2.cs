@@ -22,21 +22,24 @@ namespace SharpGame
         public float X => x;
         public float Y => y;
 
+
+        [IgnoreDataMember]
         public float this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (index == 0) return x;
-                else if (index == 1) return y;
-                else throw new Exception("Out of range.");
+                System.Diagnostics.Debug.Assert(index >= 0 && index < 2);
+                return Unsafe.Add(ref x, index);
             }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (index == 0) x = value;
-                else if (index == 1) y = value;
-                else throw new Exception("Out of range.");
+                System.Diagnostics.Debug.Assert(index >= 0 && index < 2);
+                Unsafe.Add(ref x, index) = value;
             }
         }
+
 
         public vec2(float s)
         {

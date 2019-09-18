@@ -4,10 +4,12 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class EarlyZPass : GraphicsPass
+    public class EarlyZPass : ScenePass
     {
-        public EarlyZPass() : base(Pass.Depth)
+        Shader depthShader;
+        public EarlyZPass() : base(Pass.EarlyZ)
         {
+            depthShader = Resources.Instance.Load<Shader>("shaders/shadow.shader");
         }
     }
 }

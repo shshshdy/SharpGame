@@ -23,6 +23,24 @@ Shader "LitSolid"
 		
 	}
 
+	Pass "early_z"
+	{
+		CullMode = Back
+		
+		FrontFace = CounterClockwise
+
+		@VertexShader
+		{
+			#include "clustering.vert"
+		}
+
+		@PixelShader
+		{            
+			#include "clustering.frag"
+		}
+
+	}
+
     Pass "shadow"
     {
         CullMode = Front

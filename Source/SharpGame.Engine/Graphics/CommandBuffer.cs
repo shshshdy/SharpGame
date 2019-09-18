@@ -417,10 +417,25 @@ namespace SharpGame
                 imageMemoryBarrierCount, ref pImageMemoryBarriers);
         }
 
-        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ref BufferMemoryBarrier barrier)
+        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags,
+            uint memoryBarrierCount, MemoryBarrier* pMemoryBarriers, uint bufferMemoryBarrierCount, BufferMemoryBarrier* pBufferMemoryBarriers,
+            uint imageMemoryBarrierCount, ImageMemoryBarrier* pImageMemoryBarriers)
+        {
+            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, (VkDependencyFlags)dependencyFlags, memoryBarrierCount, (VkMemoryBarrier*)pMemoryBarriers,
+                bufferMemoryBarrierCount, (VkBufferMemoryBarrier *) pBufferMemoryBarriers,
+                imageMemoryBarrierCount, (VkImageMemoryBarrier*)pImageMemoryBarriers);
+        }
+
+        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ref BufferMemoryBarrier barrier, uint bufferMemoryBarrierCount = 1)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
-                0, 0, null, 1, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier), 0, null);
+                0, 0, null, bufferMemoryBarrierCount, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier), 0, null);
+        }
+
+        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, Span<BufferMemoryBarrier> barrier)
+        {
+            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
+                0, 0, null, (uint)barrier.Length, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier[0]), 0, null);
         }
 
         public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ref ImageMemoryBarrier barrier)
