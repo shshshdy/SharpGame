@@ -322,7 +322,7 @@ namespace SharpGame
 
         IncludeResult IncludeHandler(string requestedSource, string requestingSource, CompileOptions.IncludeType type)
         {
-            using (var file = FileSystem.GetFile(requestedSource))
+            using (var file = FileSystem.Instance.GetFile(requestedSource))
             {
                 var content = file.ReadAllText();
                 return new IncludeResult(requestedSource, content);
@@ -338,14 +338,16 @@ namespace SharpGame
             }
         }
 
+
         ShaderModule LoadShaderModel(ShaderStage shaderStage, string code, string[] defs)
         {
             var c = new ShaderCompiler();
-            var o = new CompileOptions
+
+            CompileOptions o = new CompileOptions
             {
                 Language = CompileOptions.InputLanguage.GLSL,
                 Target = CompileOptions.Environment.Vulkan,
-                IncludeCallback = IncludeHandler
+                IncludeCallback = new CompileOptions.IncludeHandler(IncludeHandler)
             };
 
             ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;
