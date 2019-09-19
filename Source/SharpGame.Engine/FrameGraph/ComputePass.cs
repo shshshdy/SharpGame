@@ -15,16 +15,15 @@ namespace SharpGame
 
         public override void Draw(RenderView view)
         {
-            cmdBuffer = Graphics.Instance.WorkComputeBuffer;
-            commandBuffers[Graphics.Instance.WorkContext] = cmdBuffer;
+            cmdBuffer = Graphics.WorkComputeBuffer;
+            commandBuffers[Graphics.WorkContext] = cmdBuffer;
             OnDraw?.Invoke(this, view);            
         }
         
         public override void Submit(int imageIndex)
         {
-            var g = Graphics.Instance;
-            g.submitComputeCmdBuffer = commandBuffers[g.RenderContext];
-            commandBuffers[Graphics.Instance.RenderContext] = null;
+            Graphics.submitComputeCmdBuffer = commandBuffers[Graphics.RenderContext];
+            commandBuffers[Graphics.RenderContext] = null;
         }
     }
 }

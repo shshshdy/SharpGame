@@ -51,7 +51,7 @@ namespace SharpGame
         FastList<SourceBatch> casters = new FastList<SourceBatch>();
         FrustumOctreeQuery shadowCasterQuery = new FrustumOctreeQuery();
 
-        ResourceSet VSSet => vsSet[Graphics.Instance.WorkContext];
+        ResourceSet VSSet => vsSet[Graphics.WorkContext];
         public ShadowPass() : base(Pass.Shadow)
         {
             var depthFormat = Device.GetSupportedDepthFormat();
@@ -160,7 +160,6 @@ namespace SharpGame
                 }
 
                 cmd.End();
-
 
                 EndRenderPass(view);
             }

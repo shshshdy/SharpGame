@@ -13,6 +13,8 @@ namespace SharpGame
 {
     public class GraphicsPass : FrameGraphPass, IEnumerable<Action<GraphicsPass, RenderView>>
     {
+        public const int WORK_COUNT = 16;
+
         [IgnoreDataMember]
         public Framebuffer[] framebuffers;
 
@@ -20,7 +22,7 @@ namespace SharpGame
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
         protected List<Action<GraphicsPass, RenderView>> Subpasses { get; } = new List<Action<GraphicsPass, RenderView>>();
 
-        protected CommandBufferPool[] cmdBufferPool;
+        protected CommandBufferPool[][] cmdBufferPools = new CommandBufferPool[WORK_COUNT][];
 
         protected FastList<RenderPassInfo>[] renderPassInfo = new []
         {
@@ -36,17 +38,22 @@ namespace SharpGame
             new FastListPool<CommandBuffer>()
         };
 
+        FastList<Task> renderTasks = new FastList<Task>();
+
+        public static bool MultiThreaded = false;
+
         public GraphicsPass(string name = "")
         {
             Name = name;
 
-            cmdBufferPool = new CommandBufferPool[3];
-
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < WORK_COUNT; i++)
             {
-                cmdBufferPool[i] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
-                cmdBufferPool[i].Name = $"GraphicsPass {Name} CmdPool {i}";
-                cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, 8);
+                cmdBufferPools[i] = new CommandBufferPool[3];
+                for (int j = 0; j < 3; j++)
+                {
+                    cmdBufferPools[i][j] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
+                    cmdBufferPools[i][j].Allocate(CommandBufferLevel.Secondary, 8);
+                }
             }
         }
 
@@ -55,22 +62,24 @@ namespace SharpGame
             Subpasses.Add(subpass);
         }
 
-        protected CommandBuffer GetCmdBuffer()
+        protected CommandBuffer GetCmdBuffer(int index = 0)
         {
-            int workContext = Graphics.nextImage;
-            var cb = cmdBufferPool[workContext].Get();
+            int workContext = Graphics.Instance.nextImage;
+            var cb = cmdBufferPools[index][workContext].Get();
             cb.renderPass = CurrentRenderPass.RenderPass;
 
             CurrentRenderPass.AddCommandBuffer(cb);
-
-            CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
+            if (!cb.IsOpen)
             {
-                framebuffer = CurrentRenderPass.Framebuffer,
-                renderPass = CurrentRenderPass.RenderPass
-            };
+                CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
+                {
+                    framebuffer = CurrentRenderPass.Framebuffer,
+                    renderPass = CurrentRenderPass.RenderPass
+                };
 
-            cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
-                | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
+                cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
+                    | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
+            }
 
             return cb;
         }
@@ -89,7 +98,12 @@ namespace SharpGame
 
             int workContext = Graphics.nextImage;
 
-            cmdBufferPool[workContext].currentIndex = 0;
+            for (int i = 0; i < cmdBufferPools.Length; i++)
+            {
+                var cmd = cmdBufferPools[i][workContext];
+                cmd.currentIndex = 0;
+            }
+
             renderPassInfo[workContext].Clear();
         }
 
@@ -169,6 +183,66 @@ namespace SharpGame
             cmdBuffer = null;
 
             EndRenderPass(view);
+        }
+
+        public void DrawBatches(RenderView view, SourceBatch[] batches, CommandBuffer cb)
+        {
+            var cmd = cb;
+
+            if (cmd == null)
+            {
+                cmd = GetCmdBuffer();
+                cmd.SetViewport(ref view.Viewport);
+                cmd.SetScissor(view.ViewRect);
+            }
+
+            foreach (var batch in batches)
+            {
+                DrawBatch(cmd, batch, view.VSSet, view.PSSet, batch.offset);
+            }
+
+            cmd.End();
+        }
+
+        public void DrawBatchesMT(RenderView view, SourceBatch[] batches)
+        {
+            renderTasks.Clear();
+
+            int dpPerBatch = (int)Math.Ceiling(view.batches.Count / (float)WORK_COUNT);
+            if (dpPerBatch < 200)
+            {
+                dpPerBatch = 200;
+            }
+
+            int idx = 0;
+            for (int i = 0; i < batches.Length; i += dpPerBatch)
+            {
+                int from = i;
+                int to = Math.Min(i + dpPerBatch, batches.Length);
+                int cmdIndex = idx;
+                var t = Task.Run(() =>
+                {
+                    var cb = GetCmdBuffer(cmdIndex);
+                    cb.SetViewport(ref view.Viewport);
+                    cb.SetScissor(view.ViewRect);
+                    Draw(view, batches, cb, from, to);
+                    cb.End();
+                });
+                renderTasks.Add(t);
+                idx++;
+            }
+
+            Task.WaitAll(renderTasks.ToArray());
+        }
+
+        protected void Draw(RenderView view, SourceBatch[] sourceBatches, CommandBuffer commandBuffer, int from, int to)
+        {
+            for (int i = from; i < to; i++)
+            {
+                var batch = sourceBatches[i];
+                DrawBatch(commandBuffer, batch, view.VSSet, view.PSSet, batch.offset);
+            }
+
         }
 
         public void DrawFullScreenQuad(CommandBuffer cb, Material material)
