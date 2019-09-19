@@ -338,16 +338,15 @@ namespace SharpGame
             }
         }
 
-
         ShaderModule LoadShaderModel(ShaderStage shaderStage, string code, string[] defs)
         {
             var c = new ShaderCompiler();
 
-            CompileOptions o = new CompileOptions
+            CompileOptions o = new CompileOptions(IncludeHandler)
             {
                 Language = CompileOptions.InputLanguage.GLSL,
                 Target = CompileOptions.Environment.Vulkan,
-                IncludeCallback = new CompileOptions.IncludeHandler(IncludeHandler)
+                //IncludeCallback = IncludeHandler
             };
 
             ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;

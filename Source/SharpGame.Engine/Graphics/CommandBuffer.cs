@@ -836,6 +836,8 @@ namespace SharpGame
     [StructLayout(LayoutKind.Sequential)]
     public struct BufferMemoryBarrier
     {
+        public Buffer Buffer { set => native.buffer = value.buffer; }
+
         internal VkBufferMemoryBarrier native;
       
         public BufferMemoryBarrier(Buffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ulong offset = 0, ulong size = WholeSize)

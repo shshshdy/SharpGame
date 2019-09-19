@@ -46,6 +46,7 @@ namespace SharpGame.Samples
                     var animMdoel = node.AddComponent<AnimatedModel>();
                     animMdoel.SetModel(model);
                     animMdoel.SetMaterial(mat);
+                    //animMdoel.CastShadows = true;
 
                     AnimationState state = animMdoel.AddAnimationState(walkAnimation);
                     // The state would fail to create (return null) if the animation was not found

@@ -274,7 +274,7 @@ namespace SharpGame
             }
         }*/
 
-        public void AddSphere(ref BoundingSphere sphere, Color color, bool depthTest = true)
+        public void AddSphere(in BoundingSphere sphere, Color color, bool depthTest = true)
         {
             int uintColor = color.ToRgba();
 
@@ -295,14 +295,14 @@ namespace SharpGame
             }
         }
 
-        public void AddSphereSector(ref BoundingSphere sphere, ref quat rotation, float angle,
+        public void AddSphereSector(in BoundingSphere sphere, ref quat rotation, float angle,
             bool drawLines, Color color, bool depthTest = true)
         {
             if(angle <= 0.0f)
                 return;
             else if(angle >= 360.0f)
             {
-                AddSphere(ref sphere, color, depthTest);
+                AddSphere(in sphere, color, depthTest);
                 return;
             }
 

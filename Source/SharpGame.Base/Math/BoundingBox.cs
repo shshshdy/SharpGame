@@ -22,6 +22,7 @@
 // Greetings to SlimDX Group. Original code published with the following license:
 // -----------------------------------------------------------------------------
 
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -58,6 +59,9 @@ namespace SharpGame
         /// Return size.
         [IgnoreDataMember]
         public vec3 Size => Maximum - Minimum;
+
+        [IgnoreDataMember]
+        public float Volume { get { vec3 sz = Size; return sz.x * sz.y * sz.z; } }
 
         /// Return half-size.
         [IgnoreDataMember]

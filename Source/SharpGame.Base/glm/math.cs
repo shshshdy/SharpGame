@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MessagePack.Formatters;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -48,6 +49,26 @@ namespace SharpGame
         public static float sqrt(float v)
         {
             return (float)Math.Sqrt(v);
+        }
+
+        public static int max(int left, int right)
+        {
+            return left > right ? left : right;
+        }
+
+        public static int min(int left, int right)
+        {
+            return left < right ? left : right;
+        }
+
+        public static float max(float left, float right)
+        {
+            return left > right ? left : right;
+        }
+
+        public static float min(float left, float right)
+        {
+            return left < right ? left : right;
         }
 
         public static float clamp(int value, int min, int max)
