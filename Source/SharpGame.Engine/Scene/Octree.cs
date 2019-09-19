@@ -268,13 +268,7 @@ namespace SharpGame
             drawableUpdates_.Remove(drawable);
             drawable.updateQueued_ = false;
         }
-
-        public void DrawDebugGeometry(bool depthTest)
-        {
-            var debug = GetComponent<DebugRenderer>();
-            Root.DrawDebugGeometry(debug, depthTest);
-        }
-
+        
 
     }
 }

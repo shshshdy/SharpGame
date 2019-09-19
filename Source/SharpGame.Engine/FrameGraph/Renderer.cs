@@ -18,7 +18,7 @@ namespace SharpGame
         public static ref bool DebugDepthTest => ref debugDepthTest;
         static bool debugDepthTest;
 
-        public static ref bool DebugOctree => ref debugOctree;
+        public static ref bool DebugScene => ref debugOctree;
         static bool debugOctree;
 
         public static bool debugImage = false;
@@ -90,6 +90,12 @@ namespace SharpGame
                 if (debug == null || !debug.IsEnabledEffective())
                 {
                     continue;
+                }
+
+                var spacePartitioner = viewport.Scene.SpacePartitioner;
+                if(debugOctree && spacePartitioner != null)
+                {
+                    spacePartitioner.DrawDebugGeometry(debug, debugDepthTest);
                 }
 
                 foreach (var drawable in viewport.drawables)

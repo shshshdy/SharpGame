@@ -46,13 +46,6 @@ Shader "LitSolid"
         CullMode = Front
         FrontFace = CounterClockwise
 
-        PushConstant model
-        {
-            StageFlags = Vertex
-            Offset = 0
-            Size = 68
-        }
-
         @VertexShader
         {
             #define TEX_LOCATION 1

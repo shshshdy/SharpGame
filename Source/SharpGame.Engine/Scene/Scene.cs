@@ -35,7 +35,7 @@ namespace SharpGame
     [DataContract]
     public class Scene : Node
     {
-        protected ISpacePartitioner spacePartitioner;
+        public ISpacePartitioner SpacePartitioner { get; private set; }
 
         internal List<Drawable> drawables = new List<Drawable>();
 
@@ -106,8 +106,8 @@ namespace SharpGame
             {
                 if(component is ISpacePartitioner)
                 {
-                    spacePartitioner = component as ISpacePartitioner;
-                    OnAttachAccumutor(spacePartitioner);
+                    SpacePartitioner = component as ISpacePartitioner;
+                    OnAttachAccumutor(SpacePartitioner);
                 }
             }
         }
@@ -121,9 +121,9 @@ namespace SharpGame
 
             if(component.Node == this)
             {
-                if(component == spacePartitioner)
+                if(component == SpacePartitioner)
                 {
-                    spacePartitioner = null;
+                    SpacePartitioner = null;
                 }
             }
         }
@@ -142,9 +142,9 @@ namespace SharpGame
 
             drawables.Add(drawable);
 
-            if (spacePartitioner != null)
+            if (SpacePartitioner != null)
             {
-                spacePartitioner.InsertDrawable(drawable);
+                SpacePartitioner.InsertDrawable(drawable);
             }
 
             drawable.index = drawables.Count - 1;           
@@ -154,9 +154,9 @@ namespace SharpGame
         {
             Debug.Assert(drawable.index != -1);
 
-            if(spacePartitioner != null)
+            if(SpacePartitioner != null)
             {
-                spacePartitioner.RemoveDrawable(drawable);
+                SpacePartitioner.RemoveDrawable(drawable);
             }
 
             if (drawables.Count > 0 && drawable.index < drawables.Count - 1)
@@ -176,9 +176,9 @@ namespace SharpGame
         
         public void GetDrawables(OctreeQuery query, Action<Drawable> visitor)
         {
-            if(spacePartitioner != null)
+            if(SpacePartitioner != null)
             {
-                spacePartitioner.GetDrawables(query, visitor);
+                SpacePartitioner.GetDrawables(query, visitor);
                 return;
             }
 
@@ -190,9 +190,9 @@ namespace SharpGame
 
         public void Raycast(ref RayOctreeQuery query)
         {
-            if(spacePartitioner != null)
+            if(SpacePartitioner != null)
             {
-                spacePartitioner.Raycast(ref query);
+                SpacePartitioner.Raycast(ref query);
                 return;
             }
 
@@ -201,9 +201,9 @@ namespace SharpGame
 
         public void RaycastSingle(ref RayOctreeQuery query)
         {
-            if(spacePartitioner != null)
+            if(SpacePartitioner != null)
             {
-                spacePartitioner.RaycastSingle(ref query);
+                SpacePartitioner.RaycastSingle(ref query);
                 return;
             }
 
@@ -250,7 +250,7 @@ namespace SharpGame
         public void RenderUpdate(FrameInfo frameInfo)
         {
             Profiler.BeginSample("UpdateDrawable");
-            spacePartitioner?.Update(frameInfo);
+            SpacePartitioner?.Update(frameInfo);
             Profiler.EndSample();
 
         }

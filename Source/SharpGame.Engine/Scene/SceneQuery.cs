@@ -87,7 +87,7 @@ namespace SharpGame
         /// Return the closest drawable object by a ray query.
         void RaycastSingle(ref RayOctreeQuery query);
 
-        void DrawDebugGeometry(bool depthTest);
+        void DrawDebugGeometry(DebugRenderer debug, bool depthTest);
     }
 
     /// Graphics raycast detail level.

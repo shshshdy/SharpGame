@@ -5,6 +5,11 @@ using System.Text;
 
 namespace SharpGame
 {
+    public ref struct ConstBlock
+    {
+        public PushConstantRange range;
+        public IntPtr data;
+    }
 
     public class PipelineResourceSet : DisposeBase
     {

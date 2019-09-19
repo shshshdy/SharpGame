@@ -55,6 +55,8 @@ namespace SharpGame
         //public IntPtr instancingData;
 
         public uint offset;
+
+        public int frameNum;
         /// %Geometry type.
         public GeometryType geometryType;
     };

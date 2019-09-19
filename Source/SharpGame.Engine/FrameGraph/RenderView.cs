@@ -83,7 +83,7 @@ namespace SharpGame
         public Rect2D ViewRect => new Rect2D((int)Viewport.x, (int)Viewport.y, (int)Viewport.width, (int)Viewport.height);
 
         public uint ViewMask { get; set; } = 1;
-
+        public ref FrameInfo Frame => ref frameInfo;
         public ref LightParameter LightParam => ref lightParameter;
 
         internal FastList<Drawable> drawables = new FastList<Drawable>();
@@ -101,7 +101,7 @@ namespace SharpGame
 
         internal Buffer ubFrameInfo;
         public DoubleBuffer ubCameraVS;
-        public DynamicBuffer ubMatrics;
+        public static DynamicBuffer ubMatrics;
 
         internal Buffer ubCameraPS;
         internal Buffer ubLight;
@@ -165,9 +165,12 @@ namespace SharpGame
 
             ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
 
-            uint size = Graphics.Settings.Validation ? 64 * 1000u : 64 * 1000 * 100;
+            if(ubMatrics == null)
+            {
+                uint size = Graphics.Settings.Validation ? 64 * 1000u : 64 * 1000 * 100;
 
-            ubMatrics = new DynamicBuffer(size);
+                ubMatrics = new DynamicBuffer(size);
+            }
 
             ubCameraPS = Buffer.CreateUniformBuffer<CameraPS>();
             ubLight = Buffer.CreateUniformBuffer<LightParameter>();
@@ -205,7 +208,13 @@ namespace SharpGame
                 foreach (SourceBatch batch in drawable.Batches)
                 {
                     batches.Add(batch);
-                    batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+
+                    if (batch.frameNum != Frame.frameNumber)
+                    {
+                        batch.frameNum = Frame.frameNumber;
+                        batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+                    }
+
                 }
             }
         

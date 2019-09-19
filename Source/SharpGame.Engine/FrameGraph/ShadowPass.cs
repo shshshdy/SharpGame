@@ -114,8 +114,8 @@ namespace SharpGame
 
             depthShader = Resources.Instance.Load<Shader>("shaders/shadow.shader");
 
-            vsSet[0] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[0]);
-            vsSet[1] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[1]);
+            vsSet[0] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[0], RenderView.ubMatrics.Buffer[0]);
+            vsSet[1] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[1], RenderView.ubMatrics.Buffer[1]);
 
         }
 
@@ -136,7 +136,12 @@ namespace SharpGame
                     foreach (SourceBatch batch in drawable.Batches)
                     {
                         casters.Add(batch);
-                        //batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+
+                        if(batch.frameNum != view.Frame.frameNumber)
+                        {
+                            batch.frameNum = view.Frame.frameNumber;
+                            batch.offset = view.GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+                        }
                     }
                 }
             });
@@ -145,18 +150,18 @@ namespace SharpGame
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
                 Viewport viewport = new Viewport(0, 0, (float)SHADOWMAP_DIM, (float)SHADOWMAP_DIM, 0.0f, 1.0f);
-                Rect2D scissor = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
+                Rect2D renderArea = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
 
-                BeginRenderPass(cascades[i].frameBuffer, scissor, ClearDepthStencilValue);
+                BeginRenderPass(cascades[i].frameBuffer, renderArea, ClearDepthStencilValue);
                 
                 var cmd = GetCmdBuffer();
 
                 cmd.SetViewport(ref viewport);
-                cmd.SetScissor(scissor);
+                cmd.SetScissor(renderArea);
 
                 foreach (var batch in casters)
                 {
-                    DrawShadowBatch(cmd, batch, (uint)i, VSSet, null);
+                    DrawShadowBatch(cmd, batch, (uint)i, VSSet, null, batch.offset);
                 }
 
                 cmd.End();
@@ -166,14 +171,14 @@ namespace SharpGame
 
         }
 
-        public void DrawShadowBatch(CommandBuffer cb, SourceBatch batch, uint cascade, ResourceSet resourceSet, ResourceSet resourceSet1)
+        public void DrawShadowBatch(CommandBuffer cb, SourceBatch batch, uint cascade, ResourceSet resourceSet, ResourceSet resourceSet1, uint offset1)
         {
             var shader = batch.material.Shader;
             var pass = shader.GetPass(passID);
             var pipe = pass.GetGraphicsPipeline(renderPass, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet.Set, resourceSet);
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet.Set, resourceSet, offset1);
 
             if (resourceSet1 != null)
             {
@@ -182,8 +187,8 @@ namespace SharpGame
 
             batch.material.BindResourceSets(pass.passIndex, cb);
 
-            cb.PushConstants(pass.PipelineLayout, ShaderStage.Vertex, 0, 64, batch.worldTransform);
-            cb.PushConstants(pass.PipelineLayout, ShaderStage.Vertex, 64, ref cascade);
+            //cb.PushConstants(pass.PipelineLayout, ShaderStage.Vertex, 0, 64, batch.worldTransform);
+            cb.PushConstants(pass.PipelineLayout, ShaderStage.Vertex, 0, ref cascade);
 
             batch.geometry.Draw(cb);
         }
