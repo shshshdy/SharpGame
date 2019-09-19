@@ -59,14 +59,14 @@ namespace SharpGame
         {
             int workContext = Graphics.nextImage;
             var cb = cmdBufferPool[workContext].Get();
-            cb.renderPass = renderPass;
+            cb.renderPass = CurrentRenderPass.RenderPass;
 
             CurrentRenderPass.AddCommandBuffer(cb);
 
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
                 framebuffer = CurrentRenderPass.Framebuffer,
-                renderPass = renderPass
+                renderPass = CurrentRenderPass.RenderPass
             };
 
             cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
@@ -235,6 +235,8 @@ namespace SharpGame
         public int nextImage;
         public RenderPassBeginInfo rpBeginInfo;
         public Framebuffer Framebuffer => rpBeginInfo.framebuffer;
+        public RenderPass RenderPass => rpBeginInfo.renderPass;
+
         public FastList<CommandBuffer> commandList;
 
         public void AddCommandBuffer(CommandBuffer cb)

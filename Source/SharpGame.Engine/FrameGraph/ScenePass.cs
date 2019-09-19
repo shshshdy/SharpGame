@@ -10,10 +10,11 @@ namespace SharpGame
 {
     public class ScenePass : GraphicsPass
     {
-        private CommandBufferPool[][] cmdBufferPools = new CommandBufferPool[3][];
+        public const int WORK_COUNT = 16;
+        private CommandBufferPool[][] cmdBufferPools = new CommandBufferPool[WORK_COUNT][];
+
         FastList<Task> renderTasks = new FastList<Task>();
 
-        const int WORK_COUNT = 16;
         public static bool[] multiThreaded = { true, true, true };
 
         public static bool MultiThreaded = false;
@@ -22,10 +23,10 @@ namespace SharpGame
         {
             Name = name;
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < WORK_COUNT; i++)
             {
-                cmdBufferPools[i] = new CommandBufferPool[WORK_COUNT];
-                for (int j = 0; j < WORK_COUNT; j++)
+                cmdBufferPools[i] = new CommandBufferPool[3];
+                for (int j = 0; j < 3; j++)
                 {
                     cmdBufferPools[i][j] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
                     cmdBufferPools[i][j].Allocate(CommandBufferLevel.Secondary, 1);
@@ -37,17 +38,16 @@ namespace SharpGame
         protected CommandBuffer GetCmdBufferAt(int index)
         {
             int workContext = Graphics.Instance.nextImage;
-            var cb = cmdBufferPools[workContext][index][0];
-            cb.renderPass = renderPass;
-            cmdBufferPools[workContext][index].currentIndex = 1;
+            var cb = cmdBufferPools[index][workContext].Get();
+            cb.renderPass = CurrentRenderPass.RenderPass;
 
             CurrentRenderPass.AddCommandBuffer(cb);
             if (!cb.IsOpen)
             {
                 CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
                 {
-                    framebuffer = framebuffers[Graphics.Instance.nextImage],
-                    renderPass = renderPass
+                    framebuffer = CurrentRenderPass.Framebuffer,
+                    renderPass = CurrentRenderPass.RenderPass
                 };
 
                 cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
@@ -68,15 +68,15 @@ namespace SharpGame
 
         protected void DrawScene(RenderView view)
         {
-            int workContext = Graphics.Instance.nextImage;// Graphics.Instance.WorkContext;
+            int workContext = Graphics.nextImage;
             var batches = view.batches.Items;
             multiThreaded[workContext] = MultiThreaded;
 
             if (MultiThreaded)
             {
-                for (int i = 0; i < cmdBufferPools[workContext].Length; i++)
+                for (int i = 0; i < cmdBufferPools.Length; i++)
                 {
-                    var cmd = cmdBufferPools[workContext][i];
+                    var cmd = cmdBufferPools[i][workContext];
                     cmd.currentIndex = 0;
                 }
                 renderTasks.Clear();
