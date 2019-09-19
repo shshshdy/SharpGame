@@ -20,11 +20,6 @@ namespace SharpGame
             return ref Unsafe.AsRef<T>((void*)ptr);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IntPtr As<T>(ref T value)
-        {
-            return (IntPtr)Unsafe.AsPointer(ref value);
-        }
         /// <summary>
         /// Return the sizeof an array of struct. Equivalent to sizeof operator but works on generics too.
         /// </summary>
@@ -36,7 +31,8 @@ namespace SharpGame
             return array == null ? 0 : array.Length * Unsafe.SizeOf<T>();
         }
 
-        public static IntPtr AsPointer<T>(ref T source) where T : struct
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IntPtr AsPointer<T>(ref T source)
         {
             unsafe
             {

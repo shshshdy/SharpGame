@@ -8,9 +8,8 @@ namespace SharpGame
 {
     public struct FixedArray2<T> : IEnumerable<T>
     {
-        T item1;
 #pragma warning disable CS0649
-        T item2;
+        public T item1, item2;
 #pragma warning restore CS0649
         public T this[int index]
         {
@@ -23,6 +22,8 @@ namespace SharpGame
                 Unsafe.Add(ref item1, index) = value;
             }
         }
+
+        public IntPtr Data => Utilities.AsPointer(ref item1);
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -40,7 +41,7 @@ namespace SharpGame
     public struct FixedArray3<T> : IEnumerable<T>
     {
 #pragma warning disable CS0649
-        T item1, item2, item3;
+        public T item1, item2, item3;
 #pragma warning restore CS0649
         public T this[int index]
         {
@@ -53,6 +54,8 @@ namespace SharpGame
                 Unsafe.Add(ref item1, index) = value;
             }
         }
+
+        public IntPtr Data => Utilities.AsPointer(ref item1);
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -71,7 +74,7 @@ namespace SharpGame
     public struct FixedArray4<T> : IEnumerable<T>
     {
 #pragma warning disable CS0649
-        T item1, item2, item3, item4;
+        public T item1, item2, item3, item4;
 #pragma warning restore CS0649
         public T this[int index]
         {
@@ -84,6 +87,8 @@ namespace SharpGame
                 Unsafe.Add(ref item1, index) = value;
             }
         }
+
+        public IntPtr Data => Utilities.AsPointer(ref item1);
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -103,7 +108,7 @@ namespace SharpGame
     public struct FixedArray6<T> : IEnumerable<T>
     {
 #pragma warning disable CS0649
-        T item1, item2, item3, item4, item5, item6;
+        public T item1, item2, item3, item4, item5, item6;
 #pragma warning restore CS0649
         public T this[int index]
         {
@@ -116,6 +121,8 @@ namespace SharpGame
                 Unsafe.Add(ref item1, index) = value;
             }
         }
+
+        public IntPtr Data => Utilities.AsPointer(ref item1);
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -137,7 +144,7 @@ namespace SharpGame
     public struct FixedArray8<T> : IEnumerable<T>
     {
 #pragma warning disable CS0649
-        T item1, item2, item3, item4, item5, item6, item7, item8;
+        public T item1, item2, item3, item4, item5, item6, item7, item8;
 #pragma warning restore CS0649
 
         public T this[int index]
@@ -151,6 +158,8 @@ namespace SharpGame
                 Unsafe.Add(ref item1, index) = value;
             }
         }
+
+        public IntPtr Data => Utilities.AsPointer(ref item1);
 
         public IEnumerator<T> GetEnumerator()
         {

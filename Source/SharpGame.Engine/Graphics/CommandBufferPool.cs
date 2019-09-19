@@ -40,7 +40,7 @@ namespace SharpGame
 
         protected override void Destroy(bool disposing)
         {
-            //Free();
+            Free();
         }
 
         public unsafe CommandBuffer AllocateCommandBuffer(CommandBufferLevel commandBufferLevel)

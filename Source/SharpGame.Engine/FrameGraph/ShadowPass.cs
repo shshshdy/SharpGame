@@ -144,21 +144,12 @@ namespace SharpGame
             //todo:multi thread
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                int workContext = Graphics.Instance.nextImage;
-                var cmd = cmdBufferPool[workContext].Get();
-                cmd.renderPass = renderPass;
-
-                CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
-                {
-                    framebuffer = cascades[i].frameBuffer,
-                    renderPass = renderPass
-                };
-
-                cmd.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
-                    | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
-
                 Viewport viewport = new Viewport(0, 0, (float)SHADOWMAP_DIM, (float)SHADOWMAP_DIM, 0.0f, 1.0f);
                 Rect2D scissor = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
+
+                BeginRenderPass(cascades[i].frameBuffer, scissor, ClearDepthStencilValue);
+                
+                var cmd = GetCmdBuffer();
 
                 cmd.SetViewport(ref viewport);
                 cmd.SetScissor(scissor);
@@ -169,6 +160,9 @@ namespace SharpGame
                 }
 
                 cmd.End();
+
+
+                EndRenderPass(view);
             }
 
         }
@@ -193,38 +187,6 @@ namespace SharpGame
             cb.PushConstants(pass.PipelineLayout, ShaderStage.Vertex, 64, ref cascade);
 
             batch.geometry.Draw(cb);
-        }
-
-        public override void Submit(int imageIndex)
-        {
-            var g = Graphics.Instance;
-            CommandBuffer cb = g.RenderCmdBuffer;
-
-            Viewport viewport = new Viewport(0, 0, (float)SHADOWMAP_DIM, (float)SHADOWMAP_DIM, 0.0f, 1.0f);           
-            Rect2D scissor = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
-
-            cb.SetViewport(ref viewport);
-            cb.SetScissor(scissor);
-
-            var cmdPool = cmdBufferPool[imageIndex];
-
-            for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
-            {
-                var fb = cascades[i].frameBuffer;
-                var renderPassBeginInfo = new RenderPassBeginInfo
-                (
-                    fb.renderPass, fb,
-                    new Rect2D(0, 0, fb.Width, fb.Height),
-                    ClearDepthStencilValue
-                );
-
-                cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-               
-                cb.ExecuteCommand(cmdPool[i]);
-
-                cb.EndRenderPass();
-            }
-
         }
 
         /*

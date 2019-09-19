@@ -27,6 +27,7 @@ namespace SharpGame
         public Rect2D renderArea;
         public ClearValue[] clearValues;
         public int numClearValues;
+
         public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
         {
             this.renderPass = renderPass;

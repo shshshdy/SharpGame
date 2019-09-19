@@ -17,10 +17,14 @@ namespace SharpGame
             set
             {
                 vertexBuffers_ = value;
+                numVertexBuffer = (uint)vertexBuffers_.Length;
+                if (numVertexBuffer > 4)
+                {
+                    numVertexBuffer = 4;
+                    System.Diagnostics.Debug.Assert(false);
+                }
 
-                buffers_.Count = (uint)vertexBuffers_.Length;
-                offsets_.Count = (uint)vertexBuffers_.Length;
-                for (int i = 0; i < vertexBuffers_.Length; i++)
+                for (int i = 0; i < numVertexBuffer; i++)
                 {
                     buffers_[i] = vertexBuffers_[i].buffer;
                     offsets_[i] = 0;
@@ -38,8 +42,9 @@ namespace SharpGame
 
         public VertexLayout VertexLayout { get; set; }
 
-        NativeList<VkBuffer> buffers_ = new NativeList<VkBuffer>();
-        NativeList<ulong> offsets_ = new NativeList<ulong>();
+        uint numVertexBuffer;
+        FixedArray4<VkBuffer> buffers_ = new FixedArray4<VkBuffer>();
+        FixedArray4<ulong> offsets_ = new FixedArray4<ulong>();
 
         public Geometry()
         {
@@ -105,7 +110,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public void Draw(CommandBuffer cmdBuffer)
         {
-            cmdBuffer.BindVertexBuffers(0, buffers_.Count, buffers_.Data, ref offsets_[0]);
+            cmdBuffer.BindVertexBuffers(0, numVertexBuffer, buffers_.Data, ref offsets_.item1);
 
             if(IndexBuffer != null && IndexCount > 0)
             {

@@ -41,6 +41,7 @@ namespace SharpGame
             cb.renderPass = renderPass;
             cmdBufferPools[workContext][index].currentIndex = 1;
 
+            CurrentRenderPass.AddCommandBuffer(cb);
             if (!cb.IsOpen)
             {
                 CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
@@ -58,7 +59,11 @@ namespace SharpGame
 
         protected override void DrawImpl(RenderView view)
         {
+            BeginRenderPass(view);
+
             DrawScene(view);
+
+            EndRenderPass(view);
         }
 
         protected void DrawScene(RenderView view)
@@ -130,42 +135,5 @@ namespace SharpGame
 
         }
 
-        public override void Submit(int imageIndex)
-        {
-            var g = Graphics.Instance;
-            int renderContext = imageIndex;
-            bool mt = multiThreaded[renderContext];
-
-            if (mt)
-            {
-                CommandBuffer cb = g.RenderCmdBuffer;
-                var fbs = framebuffers ?? g.Framebuffers;
-                var fb = fbs[imageIndex];
-
-                var renderPassBeginInfo = new RenderPassBeginInfo
-                (
-                    fb.renderPass, fb,
-                    new Rect2D(0, 0, g.Width, g.Height),
-                    ClearColorValue, ClearDepthStencilValue
-                );
-
-                cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-
-                for (int i = 0; i < cmdBufferPools[renderContext].Length; i++)
-                {
-                    var cmd = cmdBufferPools[renderContext][i];
-                    if (cmd.currentIndex > 0)
-                        cb.ExecuteCommand(cmd.CommandBuffers[0]);
-                }
-
-                cb.EndRenderPass();
-
-            }
-            else
-            {
-                base.Submit(imageIndex);
-            }
-
-        }
     }
 }

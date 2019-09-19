@@ -26,6 +26,7 @@ namespace SharpGame
         protected CommandBuffer cmdBuffer;
         public CommandBuffer CmdBuffer => cmdBuffer;
 
+        public Graphics Graphics => Graphics.Instance;
 
         public FrameGraphPass()
         {

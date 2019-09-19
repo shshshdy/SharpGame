@@ -241,6 +241,16 @@ namespace SharpGame
             return ref items[index];
         }
 
+        public ref T Front()
+        {
+            return ref items[0];
+        }
+
+        public ref T Back()
+        {
+            return ref items[Count - 1];
+        }
+
         /// <summary>
         /// Clears this list with a fast-clear option.
         /// </summary>

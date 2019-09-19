@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define NEW_RENDERPASS
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -10,13 +11,6 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public struct RenderPassInfo
-    {
-        public int nextImage;
-        public Framebuffer framebuffer;
-        public FastList<CommandBuffer> commandList;
-    }
-
     public class GraphicsPass : FrameGraphPass, IEnumerable<Action<GraphicsPass, RenderView>>
     {
         [IgnoreDataMember]
@@ -28,7 +22,19 @@ namespace SharpGame
 
         protected CommandBufferPool[] cmdBufferPool;
 
-        protected RenderPassInfo[] debugInfo = new RenderPassInfo[3];
+        protected FastList<RenderPassInfo>[] renderPassInfo = new []
+        {
+            new FastList<RenderPassInfo>(),
+            new FastList<RenderPassInfo>(),
+            new FastList<RenderPassInfo>()
+        };
+
+        FastListPool<CommandBuffer>[] commdListPool = new []
+        {
+            new FastListPool<CommandBuffer>(),
+            new FastListPool<CommandBuffer>(),
+            new FastListPool<CommandBuffer>()
+        };
 
         public GraphicsPass(string name = "")
         {
@@ -39,7 +45,7 @@ namespace SharpGame
             for (int i = 0; i < 3; i++)
             {
                 cmdBufferPool[i] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
-                cmdBufferPool[i].Name = "GraphicsPass" + i;
+                cmdBufferPool[i].Name = $"GraphicsPass {Name} CmdPool {i}";
                 cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, 8);
             }
         }
@@ -51,41 +57,79 @@ namespace SharpGame
 
         protected CommandBuffer GetCmdBuffer()
         {
-            var g = Graphics.Instance;
-            int workContext = g.nextImage;
+            int workContext = Graphics.nextImage;
             var cb = cmdBufferPool[workContext].Get();
             cb.renderPass = renderPass;
 
+            CurrentRenderPass.AddCommandBuffer(cb);
+
             CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
             {
-                framebuffer = framebuffers[g.nextImage],
+                framebuffer = CurrentRenderPass.Framebuffer,
                 renderPass = renderPass
             };
 
             cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                 | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
 
-            ref RenderPassInfo info = ref debugInfo[g.nextImage];
-            info.nextImage = g.nextImage;
-            info.framebuffer = framebuffers[g.nextImage];
             return cb;
         }
 
         protected void Begin(RenderView view)
         {
-            var g = Graphics.Instance;
             if (renderPass == null)
             {
-                renderPass = g.RenderPass;
+                renderPass = Graphics.RenderPass;
             }
 
             if (framebuffers.IsNullOrEmpty())
             {
-                framebuffers = g.Framebuffers;
+                framebuffers = Graphics.Framebuffers;
             }
 
-            int workContext = g.nextImage;
+            int workContext = Graphics.nextImage;
+
             cmdBufferPool[workContext].currentIndex = 0;
+            renderPassInfo[workContext].Clear();
+        }
+
+
+        bool inRenderPass = false;
+        protected void BeginRenderPass(RenderView view)
+        {
+            BeginRenderPass(framebuffers[Graphics.nextImage], view.ViewRect, ClearColorValue, ClearDepthStencilValue);
+        }
+
+        protected void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
+        {
+            if(inRenderPass)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
+
+            inRenderPass = true;
+            var rpInfo = new RenderPassInfo
+            {
+                nextImage = Graphics.nextImage,
+                rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues),
+                commandList = commdListPool[Graphics.nextImage].Request()
+            };
+
+            renderPassInfo[Graphics.nextImage].Add(rpInfo);
+        }
+
+        protected ref RenderPassInfo CurrentRenderPass => ref renderPassInfo[Graphics.nextImage].Back();
+
+        protected void EndRenderPass(RenderView view)
+        {
+            if (!inRenderPass)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return;
+            }
+
+            inRenderPass = false;
         }
 
         public override void Draw(RenderView view)
@@ -103,6 +147,8 @@ namespace SharpGame
 
         protected virtual void DrawImpl(RenderView view)
         {
+            BeginRenderPass(view);
+
             cmdBuffer = GetCmdBuffer();
 
             cmdBuffer.SetViewport(ref view.Viewport);
@@ -121,6 +167,8 @@ namespace SharpGame
 
             cmdBuffer?.End();
             cmdBuffer = null;
+
+            EndRenderPass(view);
         }
 
         public void DrawFullScreenQuad(CommandBuffer cb, Material material)
@@ -162,30 +210,13 @@ namespace SharpGame
 
         public override void Submit(int imageIndex)
         {
-            var g = Graphics.Instance;
-            CommandBuffer cb = g.RenderCmdBuffer;
-            var fbs = framebuffers ?? g.Framebuffers;
-            int renderContext = imageIndex;// g.RenderContext;
-            var fb = fbs[imageIndex];
-
-            var renderPassBeginInfo = new RenderPassBeginInfo
-            (
-                fb.renderPass, fb,
-                new Rect2D(0, 0, g.Width, g.Height),
-                ClearColorValue, ClearDepthStencilValue
-            );
-
-            cb.BeginRenderPass(ref renderPassBeginInfo, SubpassContents.SecondaryCommandBuffers);
-            var cmdPool = cmdBufferPool[renderContext];
-            if(cmdPool.currentIndex > 0)
+            var rpInfo = renderPassInfo[imageIndex];
+            foreach (var rp in rpInfo)
             {
-                System.Diagnostics.Debug.Assert(imageIndex == debugInfo[imageIndex].nextImage);
-                //System.Diagnostics.Debug.Assert(fb == debugInfo[renderContext].framebuffer);
-            
-                cb.ExecuteCommand(cmdPool[0]);
+                rp.Submit(imageIndex);
+
+                commdListPool[imageIndex].Free(rp.commandList);
             }
-            
-            cb.EndRenderPass();
         }
 
         public IEnumerator<Action<GraphicsPass, RenderView>> GetEnumerator()
@@ -196,6 +227,39 @@ namespace SharpGame
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable<Action<GraphicsPass, RenderView>>)Subpasses).GetEnumerator();
+        }
+    }
+
+    public struct RenderPassInfo
+    {
+        public int nextImage;
+        public RenderPassBeginInfo rpBeginInfo;
+        public Framebuffer Framebuffer => rpBeginInfo.framebuffer;
+        public FastList<CommandBuffer> commandList;
+
+        public void AddCommandBuffer(CommandBuffer cb)
+        {
+            lock (commandList)
+            {
+                commandList.Add(cb);
+            }
+        }
+
+        public void Submit(int imageIndex)
+        {
+            CommandBuffer cb = Graphics.Instance.RenderCmdBuffer;
+
+            System.Diagnostics.Debug.Assert(imageIndex == nextImage);
+
+            cb.BeginRenderPass(ref rpBeginInfo, SubpassContents.SecondaryCommandBuffers);
+
+            foreach (var cmd in commandList)
+            {
+                cb.ExecuteCommand(cmd);
+            }
+
+            cb.EndRenderPass();
+
         }
     }
 
