@@ -185,7 +185,7 @@ namespace SharpGame
             EndRenderPass(view);
         }
 
-        public void DrawBatches(RenderView view, SourceBatch[] batches, CommandBuffer cb)
+        public void DrawBatches(RenderView view, FastList<SourceBatch> batches, CommandBuffer cb)
         {
             var cmd = cb;
 
@@ -204,7 +204,7 @@ namespace SharpGame
             cmd.End();
         }
 
-        public void DrawBatchesMT(RenderView view, SourceBatch[] batches)
+        public void DrawBatchesMT(RenderView view, FastList<SourceBatch> batches)
         {
             renderTasks.Clear();
 
@@ -215,10 +215,10 @@ namespace SharpGame
             }
 
             int idx = 0;
-            for (int i = 0; i < batches.Length; i += dpPerBatch)
+            for (int i = 0; i < batches.Count; i += dpPerBatch)
             {
                 int from = i;
-                int to = Math.Min(i + dpPerBatch, batches.Length);
+                int to = Math.Min(i + dpPerBatch, batches.Count);
                 int cmdIndex = idx;
                 var t = Task.Run(() =>
                 {
@@ -235,7 +235,7 @@ namespace SharpGame
             Task.WaitAll(renderTasks.ToArray());
         }
 
-        protected void Draw(RenderView view, SourceBatch[] sourceBatches, CommandBuffer commandBuffer, int from, int to)
+        protected void Draw(RenderView view, FastList<SourceBatch> sourceBatches, CommandBuffer commandBuffer, int from, int to)
         {
             for (int i = from; i < to; i++)
             {

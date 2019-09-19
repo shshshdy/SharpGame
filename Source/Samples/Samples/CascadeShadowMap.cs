@@ -35,9 +35,8 @@ namespace SharpGame.Samples
             camera.Node.LookAt(vec3.Zero);
 
             {
-                var model = /*Resources.Load<Model>("models/plane.obj");//*/ GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32, true);
+                var model = GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32, true);
                 var node = scene.CreateChild("Plane");
-                //node.Scaling = new vec3(5, 5, 5);
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);
                 var mat = Resources.Load<Material>("materials/Grass.material");

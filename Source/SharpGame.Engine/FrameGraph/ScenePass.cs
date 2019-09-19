@@ -25,7 +25,7 @@ namespace SharpGame
 
         protected void DrawScene(RenderView view)
         {
-            var batches = view.batches.Items;
+            var batches = view.batches;
 
             if (MultiThreaded)
             {
