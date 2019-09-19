@@ -48,7 +48,7 @@ namespace SharpGame
         /// Bounding box.
         [DataMember]
         public FastList<GeometryDesc> GeometryDesc { get => geometryDesc; set => geometryDesc = value; }
-        private FastList<GeometryDesc> geometryDesc;
+        private FastList<GeometryDesc> geometryDesc = new FastList<GeometryDesc>();
 
         /// Skeleton.
         [DataMember]
@@ -127,7 +127,18 @@ namespace SharpGame
             Model model = new Model();
             model.SetNumGeometry(geometries.Count);
 
+            if(model.vertexBuffers == null)
+            {
+                model.vertexBuffers = new List<Buffer>();
+            }
+
             model.vertexBuffers.Resize(geometries.Count);
+
+            if (model.indexBuffers == null)
+            {
+                model.indexBuffers = new List<Buffer>();
+            }
+
             model.indexBuffers.Resize(geometries.Count);
 
             BoundingBox bbox = new BoundingBox();

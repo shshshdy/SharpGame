@@ -32,7 +32,8 @@ namespace SharpGame
             }
             else if(list.Count < size)
             {
-                for(int i = 0; i < size - list.Count; i++)
+                int count = list.Count;
+                for (int i = 0; i < size - count; i++)
                 {
                     list.Add(default);
                 }

@@ -9,9 +9,7 @@ namespace SharpGame
     public class Renderer : System<Renderer>
     {
         public RenderView MainView { get; private set; }
-
         private List<RenderView> views = new List<RenderView>();
-
         public Graphics Graphics => Graphics.Instance;
 
         public static ref bool DrawDebug => ref drawDebug;
@@ -19,6 +17,9 @@ namespace SharpGame
 
         public static ref bool DebugDepthTest => ref debugDepthTest;
         static bool debugDepthTest;
+
+        public static ref bool DebugOctree => ref debugOctree;
+        static bool debugOctree;
 
         public static bool debugImage = false;
         protected float debugImageHeight = 200.0f;
