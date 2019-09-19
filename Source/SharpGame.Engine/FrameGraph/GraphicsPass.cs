@@ -10,10 +10,11 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public struct DebugInfo
+    public struct RenderPassInfo
     {
         public int nextImage;
         public Framebuffer framebuffer;
+        public FastList<CommandBuffer> commandList;
     }
 
     public class GraphicsPass : FrameGraphPass, IEnumerable<Action<GraphicsPass, RenderView>>
@@ -27,7 +28,7 @@ namespace SharpGame
 
         protected CommandBufferPool[] cmdBufferPool;
 
-        protected DebugInfo[] debugInfo = new DebugInfo[3];
+        protected RenderPassInfo[] debugInfo = new RenderPassInfo[3];
 
         public GraphicsPass(string name = "")
         {
@@ -64,7 +65,7 @@ namespace SharpGame
             cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
                 | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
 
-            ref DebugInfo info = ref debugInfo[g.nextImage];
+            ref RenderPassInfo info = ref debugInfo[g.nextImage];
             info.nextImage = g.nextImage;
             info.framebuffer = framebuffers[g.nextImage];
             return cb;

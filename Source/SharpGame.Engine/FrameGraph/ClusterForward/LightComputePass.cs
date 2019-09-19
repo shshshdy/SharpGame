@@ -95,11 +95,11 @@ namespace SharpGame
                 (uint)Utilities.SizeOf<UBO>(), sharingMode, queue_families);
 
 
-            light_pos_ranges = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible,
+            light_pos_ranges = new DoubleBuffer(BufferUsageFlags.StorageTexelBuffer, MemoryPropertyFlags.HostVisible,
                 MAX_NUM_LIGHTS * 4 * sizeof(float), sharingMode, queue_families);
             light_pos_ranges.CreateView(Format.R32g32b32a32Sfloat);
 
-            light_colors = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible,
+            light_colors = new DoubleBuffer(BufferUsageFlags.StorageTexelBuffer, MemoryPropertyFlags.HostVisible,
                 MAX_NUM_LIGHTS * sizeof(uint), sharingMode, queue_families);
             light_colors.CreateView(Format.R8g8b8a8Unorm);
 
@@ -153,6 +153,7 @@ namespace SharpGame
 
         unsafe void DoCompute(ComputePass renderPass, RenderView view)
         {
+            return;
             update_light_buffers_(view);
 
             var cmd_buf = renderPass.CmdBuffer;

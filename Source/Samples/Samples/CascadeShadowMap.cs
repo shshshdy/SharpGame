@@ -5,7 +5,7 @@ using System.Text;
 namespace SharpGame.Samples
 {
     [SampleDesc(sortOrder = 0)]
-    public class StaticScene : Sample
+    public class CascadeShadowMap : Sample
     {
         public override void Init()
         {
