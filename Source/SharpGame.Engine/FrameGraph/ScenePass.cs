@@ -10,7 +10,7 @@ namespace SharpGame
 {
     public class ScenePass : GraphicsPass
     {
-        public ScenePass(string name = "main") : base(name)
+        public ScenePass(string name = "main") : base(name, 16)
         {
         }
 

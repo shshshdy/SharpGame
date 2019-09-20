@@ -66,7 +66,9 @@ namespace SharpGame
 
             // Features should be checked by the examples before using them
             vkGetPhysicalDeviceFeatures(physicalDevice, out VkPhysicalDeviceFeatures features);
+
             Features = features;
+
             // Memory properties are used regularly for creating all kinds of buffers
             VkPhysicalDeviceMemoryProperties memoryProperties;
             vkGetPhysicalDeviceMemoryProperties(physicalDevice, out memoryProperties);
@@ -102,7 +104,7 @@ namespace SharpGame
                 }
             }
 
-            VulkanUtil.CheckResult(CreateLogicalDevice(enabledFeatures, enabledExtensions));
+            VulkanUtil.CheckResult(CreateLogicalDevice(/*enabledFeatures*/Features, enabledExtensions));
             queue = GetDeviceQueue(QFGraphics, 0);
             vkCmdPushDescriptorSetKHR();
             return device;

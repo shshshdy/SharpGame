@@ -86,7 +86,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            settings.Validation = false;
+            //settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -95,6 +95,10 @@ namespace SharpGame
 
             enabledFeatures.samplerAnisotropy = True;
             enabledFeatures.depthClamp = True;
+
+            enabledFeatures.shaderStorageImageExtendedFormats = True;
+
+
             device = Device.Create(settings, enabledFeatures, EnabledExtensions);
            
             // Get a graphics queue from the Device

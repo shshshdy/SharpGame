@@ -183,7 +183,7 @@ namespace SharpGame
             var cmd_buf = renderPass.CmdBuffer;
 
             cmd_buf.Begin();
-#if false
+#if true
             /*
           
                 update_light_buffers_(elapsed_time, data);

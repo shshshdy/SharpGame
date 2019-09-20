@@ -22,7 +22,7 @@ void main(void)
 {
     world_pos_out = Model * vec4(pos_in, 1.f);
 	
-#ifdef TEX_LOCATION
+#ifdef ALPHA_TEST
     outUV = inUV;
 #endif
 

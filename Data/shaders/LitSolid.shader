@@ -31,11 +31,13 @@ Shader "LitSolid"
 
 		@VertexShader
 		{
+#define ALPHA_TEST
 			#include "clustering.vert"
 		}
 
 		@PixelShader
-		{            
+		{
+#define ALPHA_TEST    
 			#include "clustering.frag"
 		}
 
@@ -48,13 +50,13 @@ Shader "LitSolid"
 
         @VertexShader
         {
-            #define TEX_LOCATION 1
+#define TEX_LOCATION 1
             #include "shadow.vert"
         }
 
         @PixelShader
         {
-            #define TEX_LOCATION 1            
+#define TEX_LOCATION 1            
             #include "shadow.frag"
         }
 
