@@ -14,32 +14,46 @@ namespace SharpGame
         RenderTarget p_rt_offscreen_depth_;
         Framebuffer frameBuffer;
 
+        Format depthFormat = Format.D16Unorm;
+
         public EarlyZPass() : base(Pass.EarlyZ)
         {
-            var depthFormat = Device.GetSupportedDepthFormat();
+        }
+
+
+        public override void Init()
+        {
+            base.Init();
+
 
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
-
-            p_rt_offscreen_depth_ = new RenderTarget(width, height, 1, depthFormat,
-                ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth, SampleCountFlags.Count1);
 
             AttachmentDescription[] attachments =
             {
                 new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)
             };
 
+            var depthStencilAttachment = new []
+            {
+                 new AttachmentReference(ATTACHMENT_REFERENCE_DEPTH, ImageLayout.DepthStencilAttachmentOptimal)
+            };
+
             SubpassDescription[] subpassDescription =
             {
+		        // depth prepass
                 new SubpassDescription
                 {
                     pipelineBindPoint = PipelineBindPoint.Graphics,
-
-                    pDepthStencilAttachment = new []
-                    {
-                        new AttachmentReference(0, ImageLayout.DepthStencilAttachmentOptimal)
-                    },
-                }
+                    pDepthStencilAttachment = depthStencilAttachment
+                },
+                
+		        // clustering subpass
+                new SubpassDescription
+                {
+                    pipelineBindPoint = PipelineBindPoint.Graphics,
+                    pDepthStencilAttachment = depthStencilAttachment
+                },
             };
 
             // Subpass dependencies for layout transitions
@@ -48,21 +62,32 @@ namespace SharpGame
                 new SubpassDependency
                 {
                     srcSubpass = VulkanNative.SubpassExternal,
-                    dstSubpass = 0,
-                    srcStageMask = PipelineStageFlags.FragmentShader,
-                    dstStageMask = PipelineStageFlags.EarlyFragmentTests,
-                    srcAccessMask = AccessFlags.ShaderRead,
-                    dstAccessMask = AccessFlags.DepthStencilAttachmentWrite,
+                    dstSubpass = SUBPASS_DEPTH,
+                    srcStageMask = PipelineStageFlags.BottomOfPipe,
+                    dstStageMask = PipelineStageFlags.VertexShader,
+                    srcAccessMask = AccessFlags.MemoryWrite,
+                    dstAccessMask = AccessFlags.UniformRead,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
 
                 new SubpassDependency
                 {
-                    srcSubpass = 0,
-                    dstSubpass = VulkanNative.SubpassExternal,
+                    srcSubpass = SUBPASS_DEPTH,
+                    dstSubpass = SUBPASS_CLUSTER_FLAG,
                     srcStageMask = PipelineStageFlags.LateFragmentTests,
-                    dstStageMask = PipelineStageFlags.FragmentShader,
+                    dstStageMask = PipelineStageFlags.EarlyFragmentTests,
                     srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,
+                    dstAccessMask = AccessFlags.DepthStencilAttachmentRead,
+                    dependencyFlags = DependencyFlags.ByRegion
+                },
+
+                new SubpassDependency
+                {
+                    srcSubpass = SUBPASS_CLUSTER_FLAG,
+                    dstSubpass = VulkanNative.SubpassExternal,
+                    srcStageMask = PipelineStageFlags.FragmentShader,
+                    dstStageMask = PipelineStageFlags.ComputeShader,
+                    srcAccessMask =  AccessFlags.ShaderWrite,
                     dstAccessMask = AccessFlags.ShaderRead,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
@@ -70,7 +95,17 @@ namespace SharpGame
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             renderPass = new RenderPass(ref renderPassInfo);
+
+            p_rt_offscreen_depth_ = new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth, SampleCountFlags.Count1);
+
             frameBuffer = Framebuffer.Create(renderPass, width, height, 1, new[] { p_rt_offscreen_depth_.view });
-          }
+        }
+
+        public override void Update(RenderView view)
+        {
+            base.Update(view);
+
+        }
+
     }
 }

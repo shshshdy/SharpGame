@@ -265,17 +265,8 @@ namespace SharpGame
             lights.Clear();
             batches.Clear();
 
-            this.SendGlobalEvent(new BeginView { view = this });
-
             UpdateDrawables();
 
-            this.SendGlobalEvent(new EndView { view = this });
-
-            Profiler.EndSample();
-        }
-
-        public void Render()
-        {
             frameUniform.DeltaTime = Time.Delta;
             frameUniform.ElapsedTime = Time.Elapsed;
 
@@ -290,6 +281,21 @@ namespace SharpGame
 
             UpdateGeometry();
 
+            FrameGraph.Update(this);
+
+            if (DrawDebug)
+            {
+                debugPass?.Update(this);
+            }
+
+            OverlayPass?.Update(this);
+
+            Profiler.EndSample();
+        }
+
+        public void Render()
+        {
+            
             FrameGraph.Draw(this);
 
             if (DrawDebug)

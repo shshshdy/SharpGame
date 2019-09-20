@@ -53,6 +53,8 @@ namespace SharpGame
                 frameNumber = Time.FrameNum
             };
 
+            this.SendGlobalEvent(new RenderUpdate());
+
             foreach (var viewport in views)
             {
                 viewport.Scene?.RenderUpdate(frameInfo);
@@ -64,6 +66,8 @@ namespace SharpGame
             {
                 DrawDebugGeometry();
             }
+
+            this.SendGlobalEvent(new PostRenderUpdate());
         }
 
         public void Render()

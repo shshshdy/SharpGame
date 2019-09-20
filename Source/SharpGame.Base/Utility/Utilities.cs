@@ -178,6 +178,7 @@ namespace SharpGame
             }
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public static void CopyBlock(IntPtr dest, IntPtr src, int sizeInBytesToCopy)
         {
             Unsafe.CopyBlock((void*)dest, (void*)src, (uint)sizeInBytesToCopy);

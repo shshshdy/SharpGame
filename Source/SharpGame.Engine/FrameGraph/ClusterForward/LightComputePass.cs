@@ -182,7 +182,7 @@ namespace SharpGame
                 grid_light_count_offsets, light_list, grid_light_counts_compare);
         }
 
-        void UpdateBuffers_(RenderView view)
+        public override void Update(RenderView view)
         {
             uint offset = 0;
             uint offset1 = 0;
@@ -212,8 +212,6 @@ namespace SharpGame
             tile_count_x = ((uint)view.ViewRect.width - 1) / TILE_WIDTH + 1;
             tile_count_y = ((uint)view.ViewRect.height - 1) / TILE_HEIGHT + 1;
 
-            UpdateBuffers_(view);
-            
             var cmd_buf = renderPass.CmdBuffer;
 
             cmd_buf.Begin();

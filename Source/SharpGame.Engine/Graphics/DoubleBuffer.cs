@@ -42,6 +42,7 @@ namespace SharpGame
             SetData(Utilities.AsPointer(ref data), offset, (uint)Unsafe.SizeOf<T>());
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void SetData(IntPtr data, ulong offset, ulong size)
         {
             Utilities.CopyBlock(Mapped + (int)offset, data, (int)size);

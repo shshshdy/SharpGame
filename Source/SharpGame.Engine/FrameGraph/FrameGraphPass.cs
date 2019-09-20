@@ -28,7 +28,46 @@ namespace SharpGame
 
         public Graphics Graphics => Graphics.Instance;
 
+        public Renderer Renderer => Renderer.Instance;
+
         public FrameGraphPass()
+        {
+        }
+
+        public virtual void Init()
+        {
+
+        }
+
+        public void Preappend(FrameGraphPass frameGraphPass)
+        {
+            int index = FrameGraph.IndexOf(this);
+            if(index != -1)
+            {
+                FrameGraph.InsertRenderPass(index, frameGraphPass);
+            }
+            else
+            {
+                Log.Assert("Not in FrameGraph");
+            }
+
+        }
+
+        public void Append(FrameGraphPass frameGraphPass)
+        {
+            int index = FrameGraph.IndexOf(this);
+            if (index != -1)
+            {
+                FrameGraph.InsertRenderPass(index + 1, frameGraphPass);
+            }
+            else
+            {
+                Log.Assert("Not in FrameGraph");
+            }
+
+        }
+
+        public virtual void Update(RenderView view)
         {
         }
 
@@ -37,6 +76,10 @@ namespace SharpGame
         }
 
         public virtual void Submit(int imageIndex)
+        {
+        }
+
+        public virtual void Shutdown()
         {
         }
     }

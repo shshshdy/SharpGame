@@ -21,7 +21,7 @@ namespace SharpGame
         protected List<Action<GraphicsPass, RenderView>> Subpasses { get; } = new List<Action<GraphicsPass, RenderView>>();
 
         protected int workCount = 16;
-        protected CommandBufferPool[][] cmdBufferPools;
+        protected FastList<CommandBufferPool[]> cmdBufferPools = new FastList<CommandBufferPool[]>();
 
         protected FastList<RenderPassInfo>[] renderPassInfo = new []
         {
@@ -47,17 +47,24 @@ namespace SharpGame
         {
             Name = name;
 
-            cmdBufferPools = new CommandBufferPool[workCount + 1][];
+            CreateCommandPool(4);
 
-            for (int i = 0; i < workCount + 1; i++)
+            for (int i = 0; i < workCount; i++)
             {
-                cmdBufferPools[i] = new CommandBufferPool[3];
-                for (int j = 0; j < 3; j++)
-                {
-                    cmdBufferPools[i][j] = new CommandBufferPool(Graphics.Instance.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
-                    cmdBufferPools[i][j].Allocate(CommandBufferLevel.Secondary, (uint)(i == 0 ? 4 : 1));
-                }
+                CreateCommandPool(1);
             }
+        }
+
+        protected void CreateCommandPool(uint numCmd = 1)
+        {
+            var cmdBufferPool = new CommandBufferPool[3];
+            for (int i= 0; i < 3; i++)
+            {
+                cmdBufferPool[i] = new CommandBufferPool(Graphics.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
+                cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, numCmd);
+            }
+
+            cmdBufferPools.Add(cmdBufferPool);
         }
 
         public void Add(Action<GraphicsPass, RenderView> subpass)
@@ -101,7 +108,7 @@ namespace SharpGame
 
             uint workContext = Graphics.WorkImage;
 
-            for (int i = 0; i < cmdBufferPools.Length; i++)
+            for (int i = 0; i < cmdBufferPools.Count; i++)
             {
                 var cmd = cmdBufferPools[i][workContext];
                 cmd.currentIndex = 0;

@@ -14,6 +14,8 @@ namespace SharpGame
 
         public List<FrameGraphPass> RenderPassList { get; set; } = new List<FrameGraphPass>();
 
+        bool initialized = false;
+
         public static FrameGraph Simple()
         {
             return new FrameGraph
@@ -26,7 +28,40 @@ namespace SharpGame
         public FrameGraph()
         {
         }
-        
+
+        public void Init()
+        {
+            foreach(var rp in RenderPassList)
+            {
+                rp.Init();
+            }
+
+            initialized = true;
+        }
+
+        public void Shutdown()
+        {
+            foreach (var rp in RenderPassList)
+            {
+                rp.Shutdown();
+            }
+
+            initialized = false;
+        }
+
+        public T Get<T>() where T : FrameGraphPass
+        {
+            foreach(var rp in RenderPassList)
+            {
+                if(rp is T)
+                {
+                    return rp as T;
+                }
+            }
+            return null;
+        }
+
+
         public void AddGraphicsPass(Action<GraphicsPass, RenderView> onDraw)
         {
             var renderPass = new GraphicsPass
@@ -54,24 +89,48 @@ namespace SharpGame
             var renderPass = new ComputePass
             {
                 OnDraw = onDraw,
-                FrameGraph = this
             };
 
-            RenderPassList.Add(renderPass);
+            AddRenderPass(renderPass);
         }
 
         public void InsertRenderPass(int index, FrameGraphPass renderPass)
         {
             renderPass.FrameGraph = this;
             RenderPassList.Insert(index, renderPass);
+
+            if (initialized)
+            {
+                renderPass.Init();
+            }
         }
 
         public void AddRenderPass(FrameGraphPass renderPass)
         {
             renderPass.FrameGraph = this;
             RenderPassList.Add(renderPass);
+
+            if(initialized)
+            {
+                renderPass.Init();
+            }
         }
-      
+
+        public int IndexOf(FrameGraphPass frameGraphPass)
+        {
+            return RenderPassList.IndexOf(frameGraphPass);
+        }
+
+        public void Update(RenderView view)
+        {
+            Profiler.BeginSample("FrameGraph.Update");
+            foreach (var renderPass in RenderPassList)
+            {
+                renderPass.Update(view);
+            }
+            Profiler.EndSample();
+        }
+
         public void Draw(RenderView view)
         {
             Profiler.BeginSample("FrameGraph.Draw");

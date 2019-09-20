@@ -22,12 +22,7 @@ namespace SharpGame
         public float timeTotal;
         public float timeDelta;
     }
-
-    public struct PostRenderUpdate
-    {
-
-    }
-
+    
     public struct EndFrame
     {
     }

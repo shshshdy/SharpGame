@@ -251,6 +251,7 @@ namespace SharpGame
         {
             Profiler.BeginSample("UpdateDrawable");
             SpacePartitioner?.Update(frameInfo);
+            //Parallel.ForEach(drawables, d => d.Update(frameInfo));
             Profiler.EndSample();
 
         }

@@ -8,6 +8,14 @@ namespace SharpGame
     {
     }
 
+    public struct RenderUpdate
+    {
+    }
+
+    public struct PostRenderUpdate
+    {
+    }
+
     public struct BeginRender
     {
     }
@@ -16,23 +24,4 @@ namespace SharpGame
     {
     }
 
-    public struct BeginView
-    {
-        public RenderView view;
-    }
-
-    public struct EndView
-    {
-        public RenderView view;
-    }
-
-    public struct BeginRenderPass
-    {
-        public FrameGraphPass renderPass;
-    }
-
-    public struct EndRenderPass
-    {
-        public FrameGraphPass renderPass;
-    }
 }

@@ -62,7 +62,12 @@ namespace SharpGame
 
         public static void Error(int line, string message)
         {
-            Log.Error("[line " + line + "]: " +  message);           
+            Log.Error("[line " + line + "]: " +  message);
+        }
+
+        public static void Assert(string message)
+        {
+            System.Diagnostics.Debug.Assert(false, message);
         }
     }
 }
