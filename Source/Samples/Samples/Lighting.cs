@@ -4,7 +4,7 @@ using System;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -2)]
+    [SampleDesc(sortOrder = 2)]
     public class Lighting : Sample
     {
         FrameGraph frameGraph;
@@ -33,9 +33,9 @@ namespace SharpGame.Samples
             staticModel.SetModel("models/sibenik/sibenik_bubble.fbx");// "models/voyager/voyager.dae");
 
 
-           BoundingBox aabb = staticModel.WorldBoundingBox;
-            int num_lights = 100;
+            BoundingBox aabb = staticModel.WorldBoundingBox;
 
+            int num_lights = 100;
 
             float light_vol = aabb.Volume / (float)(num_lights);
             float base_range = (float)Math.Pow(light_vol, 1.0f / 3.0f);
@@ -64,16 +64,15 @@ namespace SharpGame.Samples
 
             for (int i = 0; i < num_lights; ++i)
             {
-                float range = MathUtil.Rand.NextFloat(min_range, max_range);
-                hue_to_rgb(ref fcol, MathUtil.Rand.NextFloat(0.0f, 1.0f));
+                float range = MathUtil.Random(min_range, max_range);
+                hue_to_rgb(ref fcol, MathUtil.Random(0.0f, 1.0f));
 
                 fcol *= 1.3f;
                 fcol -= 0.15f;
 
-                vec3 pos = new vec3(
-                    MathUtil.Rand.NextFloat(-pos_radius, pos_radius),
-                    MathUtil.Rand.NextFloat(-pos_radius, pos_radius),
-                    MathUtil.Rand.NextFloat(-pos_radius, pos_radius));
+                vec3 pos = new vec3(MathUtil.Random(-pos_radius, pos_radius),
+                    MathUtil.Random(-pos_radius, pos_radius),
+                    MathUtil.Random(-pos_radius, pos_radius));
 
 
                 var lightNode = scene.CreateChild("light" + i, pos);

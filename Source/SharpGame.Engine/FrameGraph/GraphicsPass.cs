@@ -261,7 +261,8 @@ namespace SharpGame
             cb.Draw(3, 1, 0, 0);
         }
 
-        public void DrawBatch(CommandBuffer cb, SourceBatch batch, ResourceSet resourceSet, ResourceSet resourceSet1, uint? offset = null, uint? offset1 = null)
+        public void DrawBatch(CommandBuffer cb, SourceBatch batch, ResourceSet resourceSet,
+            ResourceSet resourceSet1, uint? offset = null, uint? offset1 = null)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
@@ -274,11 +275,11 @@ namespace SharpGame
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
 
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet.Set, resourceSet, offset);
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, offset);
 
             if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.PS) != 0)
             {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, resourceSet1.Set, resourceSet1, offset1);
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, offset1);
             }
 
             batch.material.Bind(pass.passIndex, cb);

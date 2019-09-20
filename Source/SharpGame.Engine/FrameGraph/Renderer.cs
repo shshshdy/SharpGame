@@ -25,6 +25,8 @@ namespace SharpGame
         protected float debugImageHeight = 200.0f;
         List<ImageView> debugImages = new List<ImageView>();
 
+        public static bool EarlyZ { get; set; }
+
         public Renderer()
         {
             (this).Subscribe((GUIEvent e) => OnDebugImage());

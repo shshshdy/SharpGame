@@ -7,15 +7,8 @@ Shader "Shadow"
 
 	Pass
 	{
-		CullMode = Back
-		FrontFace = Clockwise
-
-        PushConstant model
-        {
-            StageFlags = Vertex
-            Offset = 0
-            Size = 68
-        }
+		CullMode = Front
+		FrontFace = CounterClockwise
 
 		@VertexShader
         {
