@@ -67,7 +67,7 @@ namespace SharpGame
 
         protected CommandBuffer GetCmdBuffer(int index = -1)
         {
-            int workContext = Graphics.Instance.nextImage;
+            uint workContext = Graphics.WorkImage;
             var cb = cmdBufferPools[index + 1][workContext].Get();
             cb.renderPass = CurrentRenderPass.RenderPass;
 
@@ -99,7 +99,7 @@ namespace SharpGame
                 framebuffers = Graphics.Framebuffers;
             }
 
-            int workContext = Graphics.nextImage;
+            uint workContext = Graphics.WorkImage;
 
             for (int i = 0; i < cmdBufferPools.Length; i++)
             {
@@ -114,7 +114,7 @@ namespace SharpGame
         bool inRenderPass = false;
         protected void BeginRenderPass(RenderView view)
         {
-            BeginRenderPass(framebuffers[Graphics.nextImage], view.ViewRect, ClearColorValue, ClearDepthStencilValue);
+            BeginRenderPass(framebuffers[Graphics.WorkImage], view.ViewRect, ClearColorValue, ClearDepthStencilValue);
         }
 
         protected void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
@@ -128,15 +128,15 @@ namespace SharpGame
             inRenderPass = true;
             var rpInfo = new RenderPassInfo
             {
-                nextImage = Graphics.nextImage,
+                workImage = Graphics.WorkImage,
                 rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues),
-                commandList = commdListPool[Graphics.nextImage].Request()
+                commandList = commdListPool[Graphics.WorkImage].Request()
             };
 
-            renderPassInfo[Graphics.nextImage].Add(rpInfo);
+            renderPassInfo[Graphics.WorkImage].Add(rpInfo);
         }
 
-        protected ref RenderPassInfo CurrentRenderPass => ref renderPassInfo[Graphics.nextImage].Back();
+        protected ref RenderPassInfo CurrentRenderPass => ref renderPassInfo[Graphics.WorkImage].Back();
 
         protected void EndRenderPass(RenderView view)
         {
@@ -329,7 +329,7 @@ namespace SharpGame
 
     public struct RenderPassInfo
     {
-        public int nextImage;
+        public uint workImage;
         public RenderPassBeginInfo rpBeginInfo;
         public Framebuffer Framebuffer => rpBeginInfo.framebuffer;
         public RenderPass RenderPass => rpBeginInfo.renderPass;
@@ -348,7 +348,7 @@ namespace SharpGame
         {
             CommandBuffer cb = Graphics.Instance.RenderCmdBuffer;
 
-            System.Diagnostics.Debug.Assert(imageIndex == nextImage);
+            System.Diagnostics.Debug.Assert(imageIndex == workImage);
 
             cb.BeginRenderPass(ref rpBeginInfo, SubpassContents.SecondaryCommandBuffers);
 

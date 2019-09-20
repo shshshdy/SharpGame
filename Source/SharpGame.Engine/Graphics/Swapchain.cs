@@ -22,7 +22,7 @@ namespace SharpGame
         public Format ColorFormat { get; private set; }
         public VkColorSpaceKHR ColorSpace { get; private set; }
         public VkSwapchainKHR swapchain;
-        public int ImageCount { get; private set; }
+        public uint ImageCount { get; private set; }
         public NativeList<VkImage> Images { get; set; } = new NativeList<VkImage>();
         public SwapChainBuffer[] Buffers { get; set; }
         
@@ -317,7 +317,7 @@ namespace SharpGame
                 uint imageCount;
                 Device.GetSwapchainImagesKHR(swapchain, &imageCount, null);
 
-                ImageCount = (int)imageCount;
+                ImageCount = imageCount;
                 // Get the swap chain Images
                 Images.Resize(imageCount);
 

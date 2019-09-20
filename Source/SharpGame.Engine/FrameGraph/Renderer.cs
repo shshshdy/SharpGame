@@ -123,7 +123,7 @@ namespace SharpGame
 
             cmdBuffer.Begin();
 
-            int imageIndex = (int)Graphics.currentImage;
+            int imageIndex = (int)Graphics.RenderImage;
 
             foreach (var viewport in views)
             {

@@ -149,7 +149,7 @@ namespace SharpGame
             //todo:multi thread
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                Viewport viewport = new Viewport(0, 0, (float)SHADOWMAP_DIM, (float)SHADOWMAP_DIM, 0.0f, 1.0f);
+                Viewport viewport = new Viewport(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM, 0.0f, 1.0f);
                 Rect2D renderArea = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
 
                 BeginRenderPass(cascades[i].frameBuffer, renderArea, ClearDepthStencilValue);

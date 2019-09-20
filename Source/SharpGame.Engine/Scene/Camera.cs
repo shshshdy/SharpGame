@@ -153,7 +153,7 @@ namespace SharpGame
 
                 if(frustumDirty_)
                 {
-                    frustum_.mat4 = projection_ * View;
+                    frustum_.Matrix = projection_ * View;
                     //frustum_ = BoundingFrustum.FromCamera(Node.WorldPosition, Node.WorldDirection, Node.WorldUp, Fov, NearClip, FarClip, AspectRatio);
                     frustumDirty_ = false;
                 }

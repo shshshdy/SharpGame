@@ -42,7 +42,7 @@ namespace SharpGame
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        public int ImageCount => Swapchain.ImageCount;
+        public uint ImageCount => Swapchain.ImageCount;
 
         private Framebuffer[] framebuffers;
         public Framebuffer[] Framebuffers => framebuffers;
@@ -64,8 +64,13 @@ namespace SharpGame
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
 
-        public uint currentImage = (uint)0xffffffff;
-        public int nextImage = 0;
+        uint currentImage = (uint)0xffffffff;
+        uint nextImage = 0;
+
+        public uint RenderImage => currentImage;
+        public uint WorkImage => nextImage;
+
+
 
         public Semaphore PresentComplete { get; }
         public Semaphore RenderComplete { get; }
@@ -458,7 +463,7 @@ namespace SharpGame
 
             Profiler.BeginSample("MainSemWait");
             MainSemWait();
-            nextImage = ((int)currentImage + 1) % ImageCount;
+            nextImage = (currentImage + 1) % ImageCount;
 
             Profiler.EndSample();
 

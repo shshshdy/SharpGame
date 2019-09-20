@@ -405,9 +405,9 @@ namespace SharpGame
             vkCmdResetQueryPool(commandBuffer, queryPool.handle, firstQuery, queryCount);
         }
 
-        public void WriteTimestamp(PipelineStageFlags pipelineStage, VkQueryPool queryPool, uint query)
+        public void WriteTimestamp(PipelineStageFlags pipelineStage, QueryPool queryPool, uint query)
         {
-            vkCmdWriteTimestamp(commandBuffer, (VkPipelineStageFlags)pipelineStage, queryPool, (uint)query);
+            vkCmdWriteTimestamp(commandBuffer, (VkPipelineStageFlags)pipelineStage, queryPool.handle, (uint)query);
         }
 
         public void NextSubpass(SubpassContents contents)
