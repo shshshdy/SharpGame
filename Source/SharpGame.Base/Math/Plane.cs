@@ -34,21 +34,21 @@ namespace SharpGame
         /// <summary>
         /// The normal vector of the plane.
         /// </summary>
-        public vec3 Normal;
+        public vec3 normal;
 
         /// <summary>
         /// The distance of the plane along its normal from the origin.
         /// </summary>
-        public float D;
+        public float d;
 
-        public vec3 AbsNormal { get { return new vec3(Math.Abs(Normal.X), Math.Abs(Normal.Y), Math.Abs(Normal.Z)); } }
+        public vec3 AbsNormal { get { return new vec3(Math.Abs(normal.X), Math.Abs(normal.Y), Math.Abs(normal.Z)); } }
         /// <summary>
         /// Initializes a new instance of the <see cref="Plane"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
         public Plane(float value)
         {
-            Normal.x = Normal.y = Normal.z = D = value;
+            normal.x = normal.y = normal.z = d = value;
         }
 
         /// <summary>
@@ -60,10 +60,10 @@ namespace SharpGame
         /// <param name="d">The distance of the plane along its normal from the origin.</param>
         public Plane(float a, float b, float c, float d)
         {
-            Normal.x = a;
-            Normal.y = b;
-            Normal.z = c;
-            D = d;
+            normal.x = a;
+            normal.y = b;
+            normal.z = c;
+            this.d = d;
         }
 
         /// <summary>
@@ -73,8 +73,8 @@ namespace SharpGame
         /// <param name="normal">The normal vector to the plane.</param>
         public Plane(vec3 point, vec3 normal)
         {
-            this.Normal = normal;
-            this.D = -vec3.Dot(normal, point);
+            this.normal = normal;
+            this.d = -vec3.Dot(normal, point);
         }
 
         /// <summary>
@@ -84,8 +84,8 @@ namespace SharpGame
         /// <param name="d">The distance of the plane along its normal from the origin</param>
         public Plane(vec3 value, float d)
         {
-            Normal = value;
-            D = d;
+            normal = value;
+            this.d = d;
         }
 
         /// <summary>
@@ -107,10 +107,10 @@ namespace SharpGame
             float xy = (x1 * y2) - (y1 * x2);
             float invPyth = 1.0f / (float)(Math.Sqrt((yz * yz) + (xz * xz) + (xy * xy)));
 
-            Normal.x = yz * invPyth;
-            Normal.y = xz * invPyth;
-            Normal.z = xy * invPyth;
-            D = -((Normal.X * point1.X) + (Normal.Y * point1.Y) + (Normal.Z * point1.Z));
+            normal.x = yz * invPyth;
+            normal.y = xz * invPyth;
+            normal.z = xy * invPyth;
+            d = -((normal.X * point1.X) + (normal.Y * point1.Y) + (normal.Z * point1.Z));
         }
 
         public void Define(in vec3 point1, in vec3 point2, in vec3 point3)
@@ -126,10 +126,10 @@ namespace SharpGame
             float xy = (x1 * y2) - (y1 * x2);
             float invPyth = 1.0f / (float)(Math.Sqrt((yz * yz) + (xz * xz) + (xy * xy)));
 
-            Normal.X = yz * invPyth;
-            Normal.Y = xz * invPyth;
-            Normal.Z = xy * invPyth;
-            D = -((Normal.X * point1.X) + (Normal.Y * point1.Y) + (Normal.Z * point1.Z));
+            normal.X = yz * invPyth;
+            normal.Y = xz * invPyth;
+            normal.Z = xy * invPyth;
+            d = -((normal.X * point1.X) + (normal.Y * point1.Y) + (normal.Z * point1.Z));
         }
 
         /// <summary>
@@ -145,10 +145,10 @@ namespace SharpGame
             if(values.Length != 4)
                 throw new ArgumentOutOfRangeException("values", "There must be four and only four input values for Plane.");
 
-            Normal.x = values[0];
-            Normal.y = values[1];
-            Normal.z = values[2];
-            D = values[3];
+            normal.x = values[0];
+            normal.y = values[1];
+            normal.z = values[2];
+            d = values[3];
         }
 
         /// <summary>
@@ -164,10 +164,10 @@ namespace SharpGame
             {
                 switch(index)
                 {
-                    case 0: return Normal.X;
-                    case 1: return Normal.Y;
-                    case 2: return Normal.Z;
-                    case 3: return D;
+                    case 0: return normal.X;
+                    case 1: return normal.Y;
+                    case 2: return normal.Z;
+                    case 3: return d;
                 }
 
                 throw new ArgumentOutOfRangeException("index", "Indices for Plane run from 0 to 3, inclusive.");
@@ -177,10 +177,10 @@ namespace SharpGame
             {
                 switch(index)
                 {
-                    case 0: Normal.X = value; break;
-                    case 1: Normal.Y = value; break;
-                    case 2: Normal.Z = value; break;
-                    case 3: D = value; break;
+                    case 0: normal.X = value; break;
+                    case 1: normal.Y = value; break;
+                    case 2: normal.Z = value; break;
+                    case 3: d = value; break;
                     default: throw new ArgumentOutOfRangeException("index", "Indices for Plane run from 0 to 3, inclusive.");
                 }
             }
@@ -191,16 +191,16 @@ namespace SharpGame
         /// </summary>
         public void Normalize()
         {
-            float magnitude = 1.0f / (float)(Math.Sqrt((Normal.X * Normal.X) + (Normal.Y * Normal.Y) + (Normal.Z * Normal.Z)));
+            float magnitude = 1.0f / (float)(Math.Sqrt((normal.X * normal.X) + (normal.Y * normal.Y) + (normal.Z * normal.Z)));
 
-            Normal.X *= magnitude;
-            Normal.Y *= magnitude;
-            Normal.Z *= magnitude;
-            D *= magnitude;
+            normal.X *= magnitude;
+            normal.Y *= magnitude;
+            normal.Z *= magnitude;
+            d *= magnitude;
         }
 
         /// Return signed distance to a point.
-        public float Distance(in vec3 point) { return vec3.Dot(Normal, point) + D; }
+        public float Distance(in vec3 point) { return vec3.Dot(normal, point) + d; }
 
         /// <summary>
         /// Creates an array containing the elements of the plane.
@@ -208,7 +208,7 @@ namespace SharpGame
         /// <returns>A four-element array containing the components of the plane.</returns>
         public float[] ToArray()
         {
-            return new float[] { Normal.X, Normal.Y, Normal.Z, D };
+            return new float[] { normal.X, normal.Y, normal.Z, d };
         }
 
         /// <summary>
@@ -301,11 +301,11 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
+        /// Determines if there is an intersection between the current object and a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public PlaneIntersectionType Intersects(in BoundingSphere sphere)
+        public PlaneIntersectionType Intersects(in Sphere sphere)
         {
             return Collision.PlaneIntersectsSphere(in this, in sphere);
         }
@@ -318,10 +318,10 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the scaled plane.</param>
         public static void Multiply(in Plane value, float scale, out Plane result)
         {
-            result.Normal.x = value.Normal.X * scale;
-            result.Normal.y = value.Normal.Y * scale;
-            result.Normal.z = value.Normal.Z * scale;
-            result.D = value.D * scale;
+            result.normal.x = value.normal.X * scale;
+            result.normal.y = value.normal.Y * scale;
+            result.normal.z = value.normal.Z * scale;
+            result.d = value.d * scale;
         }
 
         /// <summary>
@@ -332,7 +332,7 @@ namespace SharpGame
         /// <returns>The scaled plane.</returns>
         public static Plane Multiply(Plane value, float scale)
         {
-            return new Plane(value.Normal.X * scale, value.Normal.Y * scale, value.Normal.Z * scale, value.D * scale);
+            return new Plane(value.normal.X * scale, value.normal.Y * scale, value.normal.Z * scale, value.d * scale);
         }
 
         /// <summary>
@@ -343,7 +343,7 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the dot product of the specified plane and vector.</param>
         public static void Dot(in Plane left, in vec4 right, out float result)
         {
-            result = (left.Normal.X * right.x) + (left.Normal.Y * right.y) + (left.Normal.Z * right.z) + (left.D * right.w);
+            result = (left.normal.X * right.x) + (left.normal.Y * right.y) + (left.normal.Z * right.z) + (left.d * right.w);
         }
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace SharpGame
         /// <returns>The dot product of the specified plane and vector.</returns>
         public static float Dot(Plane left, vec4 right)
         {
-            return (left.Normal.X * right.x) + (left.Normal.Y * right.y) + (left.Normal.Z * right.z) + (left.D * right.w);
+            return (left.normal.X * right.x) + (left.normal.Y * right.y) + (left.normal.Z * right.z) + (left.d * right.w);
         }
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the dot product of a specified vector and the normal of the Plane plus the distance value of the plane.</param>
         public static void DotCoordinate(in Plane left, in vec3 right, out float result)
         {
-            result = (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z) + left.D;
+            result = (left.normal.X * right.X) + (left.normal.Y * right.Y) + (left.normal.Z * right.Z) + left.d;
         }
 
         /// <summary>
@@ -376,7 +376,7 @@ namespace SharpGame
         /// <returns>The dot product of a specified vector and the normal of the Plane plus the distance value of the plane.</returns>
         public static float DotCoordinate(Plane left, vec3 right)
         {
-            return (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z) + left.D;
+            return (left.normal.X * right.X) + (left.normal.Y * right.Y) + (left.normal.Z * right.Z) + left.d;
         }
 
         /// <summary>
@@ -387,7 +387,7 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the dot product of the specified vector and the normal of the plane.</param>
         public static void DotNormal(in Plane left, in vec3 right, out float result)
         {
-            result = (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z);
+            result = (left.normal.X * right.X) + (left.normal.Y * right.Y) + (left.normal.Z * right.Z);
         }
 
         /// <summary>
@@ -398,7 +398,7 @@ namespace SharpGame
         /// <returns>The dot product of the specified vector and the normal of the plane.</returns>
         public static float DotNormal(Plane left, vec3 right)
         {
-            return (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z);
+            return (left.normal.X * right.X) + (left.normal.Y * right.Y) + (left.normal.Z * right.Z);
         }
 
         /// <summary>
@@ -408,12 +408,12 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the normalized plane.</param>
         public static void Normalize(in Plane plane, out Plane result)
         {
-            float magnitude = 1.0f / (float)(Math.Sqrt((plane.Normal.X * plane.Normal.X) + (plane.Normal.Y * plane.Normal.Y) + (plane.Normal.Z * plane.Normal.Z)));
+            float magnitude = 1.0f / (float)(Math.Sqrt((plane.normal.X * plane.normal.X) + (plane.normal.Y * plane.normal.Y) + (plane.normal.Z * plane.normal.Z)));
 
-            result.Normal.x = plane.Normal.X * magnitude;
-            result.Normal.y = plane.Normal.Y * magnitude;
-            result.Normal.z = plane.Normal.Z * magnitude;
-            result.D = plane.D * magnitude;
+            result.normal.x = plane.normal.X * magnitude;
+            result.normal.y = plane.normal.Y * magnitude;
+            result.normal.z = plane.normal.Z * magnitude;
+            result.d = plane.d * magnitude;
         }
 
         /// <summary>
@@ -423,8 +423,8 @@ namespace SharpGame
         /// <returns>The normalized plane.</returns>
         public static Plane Normalize(Plane plane)
         {
-            float magnitude = 1.0f / (float)(Math.Sqrt((plane.Normal.X * plane.Normal.X) + (plane.Normal.Y * plane.Normal.Y) + (plane.Normal.Z * plane.Normal.Z)));
-            return new Plane(plane.Normal.X * magnitude, plane.Normal.Y * magnitude, plane.Normal.Z * magnitude, plane.D * magnitude);
+            float magnitude = 1.0f / (float)(Math.Sqrt((plane.normal.X * plane.normal.X) + (plane.normal.Y * plane.normal.Y) + (plane.normal.Z * plane.normal.Z)));
+            return new Plane(plane.normal.X * magnitude, plane.normal.Y * magnitude, plane.normal.Z * magnitude, plane.d * magnitude);
         }
 
         /// <summary>
@@ -435,7 +435,7 @@ namespace SharpGame
         /// <returns>The scaled plane.</returns>
         public static Plane operator *(float scale, Plane plane)
         {
-            return new Plane(plane.Normal.X * scale, plane.Normal.Y * scale, plane.Normal.Z * scale, plane.D * scale);
+            return new Plane(plane.normal.X * scale, plane.normal.Y * scale, plane.normal.Z * scale, plane.d * scale);
         }
 
         /// <summary>
@@ -446,7 +446,7 @@ namespace SharpGame
         /// <returns>The scaled plane.</returns>
         public static Plane operator *(Plane plane, float scale)
         {
-            return new Plane(plane.Normal.X * scale, plane.Normal.Y * scale, plane.Normal.Z * scale, plane.D * scale);
+            return new Plane(plane.normal.X * scale, plane.normal.Y * scale, plane.normal.Z * scale, plane.d * scale);
         }
 
         /// <summary>
@@ -481,7 +481,7 @@ namespace SharpGame
         /// </returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.CurrentCulture, "A:{0} B:{1} C:{2} D:{3}", Normal.X, Normal.Y, Normal.Z, D);
+            return string.Format(CultureInfo.CurrentCulture, "A:{0} B:{1} C:{2} D:{3}", normal.X, normal.Y, normal.Z, d);
         }
 
         /// <summary>
@@ -493,8 +493,8 @@ namespace SharpGame
         /// </returns>
         public string ToString(string format)
         {
-            return string.Format(CultureInfo.CurrentCulture, "A:{0} B:{1} C:{2} D:{3}", Normal.X.ToString(format, CultureInfo.CurrentCulture),
-                Normal.Y.ToString(format, CultureInfo.CurrentCulture), Normal.Z.ToString(format, CultureInfo.CurrentCulture), D.ToString(format, CultureInfo.CurrentCulture));
+            return string.Format(CultureInfo.CurrentCulture, "A:{0} B:{1} C:{2} D:{3}", normal.X.ToString(format, CultureInfo.CurrentCulture),
+                normal.Y.ToString(format, CultureInfo.CurrentCulture), normal.Z.ToString(format, CultureInfo.CurrentCulture), d.ToString(format, CultureInfo.CurrentCulture));
         }
 
         /// <summary>
@@ -506,7 +506,7 @@ namespace SharpGame
         /// </returns>
         public string ToString(IFormatProvider formatProvider)
         {
-            return string.Format(formatProvider, "A:{0} B:{1} C:{2} D:{3}", Normal.X, Normal.Y, Normal.Z, D);
+            return string.Format(formatProvider, "A:{0} B:{1} C:{2} D:{3}", normal.X, normal.Y, normal.Z, d);
         }
 
         /// <summary>
@@ -519,8 +519,8 @@ namespace SharpGame
         /// </returns>
         public string ToString(string format, IFormatProvider formatProvider)
         {
-            return string.Format(formatProvider, "A:{0} B:{1} C:{2} D:{3}", Normal.X.ToString(format, formatProvider),
-                Normal.Y.ToString(format, formatProvider), Normal.Z.ToString(format, formatProvider), D.ToString(format, formatProvider));
+            return string.Format(formatProvider, "A:{0} B:{1} C:{2} D:{3}", normal.X.ToString(format, formatProvider),
+                normal.Y.ToString(format, formatProvider), normal.Z.ToString(format, formatProvider), d.ToString(format, formatProvider));
         }
 
         /// <summary>
@@ -533,7 +533,7 @@ namespace SharpGame
         {
             unchecked
             {
-                return (Normal.GetHashCode() * 397) ^ D.GetHashCode();
+                return (normal.GetHashCode() * 397) ^ d.GetHashCode();
             }
         }
 
@@ -547,7 +547,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(in Plane value)
         {
-            return Normal == value.Normal && D == value.D;
+            return normal == value.normal && d == value.d;
         }
 
         /// <summary>

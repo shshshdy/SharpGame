@@ -617,7 +617,7 @@ namespace SharpGame
                     }
                     else if((i.collisionMask_ & Bone.BONECOLLISION_SPHERE) != 0)
                     {
-                        var bs = new BoundingSphere(vec3.Transform(boneNode.WorldPosition, inverseNodeTransform), i.radius_ * 0.5f);
+                        var bs = new Sphere(vec3.Transform(boneNode.WorldPosition, inverseNodeTransform), i.radius_ * 0.5f);
                         boneBoundingBox_.Merge(bs);
                     }
                 }

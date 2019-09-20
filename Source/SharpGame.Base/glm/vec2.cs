@@ -52,54 +52,54 @@ namespace SharpGame
             this.y = y;
         }
 
-        public vec2(vec2 v)
+        public vec2(in vec2 v)
         {
             this.x = v.x;
             this.y = v.y;
         }
 
-        public vec2(vec3 v)
+        public vec2(in vec3 v)
         {
             this.x = v.x;
             this.y = v.y;
         }
 
-        public static vec2 operator +(vec2 lhs, vec2 rhs)
+        public static vec2 operator +(in vec2 lhs, in vec2 rhs)
         {
             return new vec2(lhs.x + rhs.x, lhs.y + rhs.y);
         }
 
-        public static vec2 operator +(vec2 lhs, float rhs)
+        public static vec2 operator +(in vec2 lhs, float rhs)
         {
             return new vec2(lhs.x + rhs, lhs.y + rhs);
         }
 
-        public static vec2 operator -(vec2 lhs, vec2 rhs)
+        public static vec2 operator -(in vec2 lhs, in vec2 rhs)
         {
             return new vec2(lhs.x - rhs.x, lhs.y - rhs.y);
         }
 
-        public static vec2 operator -(vec2 lhs, float rhs)
+        public static vec2 operator -(in vec2 lhs, float rhs)
         {
             return new vec2(lhs.x - rhs, lhs.y - rhs);
         }
 
-        public static vec2 operator *(vec2 self, float s)
+        public static vec2 operator *(in vec2 self, float s)
         {
             return new vec2(self.x * s, self.y * s);
         }
 
-        public static vec2 operator *(float lhs, vec2 rhs)
+        public static vec2 operator *(float lhs, in vec2 rhs)
         {
             return new vec2(rhs.x * lhs, rhs.y * lhs);
         }
 
-        public static vec2 operator *(vec2 lhs, vec2 rhs)
+        public static vec2 operator *(in vec2 lhs, in vec2 rhs)
         {
             return new vec2(rhs.x * lhs.x, rhs.y * lhs.y);
         }
 
-        public static vec2 operator /(vec2 lhs, float rhs)
+        public static vec2 operator /(in vec2 lhs, float rhs)
         {
             return new vec2(lhs.x / rhs, lhs.y / rhs);
         }
@@ -116,9 +116,9 @@ namespace SharpGame
         /// <param name="right">The second value to compare.</param>
         /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator ==(vec2 left, vec2 right)
+        public static bool operator ==(in vec2 left, in vec2 right)
         {
-            return left.Equals(ref right);
+            return left.Equals(in right);
         }
 
         /// <summary>
@@ -128,9 +128,9 @@ namespace SharpGame
         /// <param name="right">The second value to compare.</param>
         /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator !=(vec2 left, vec2 right)
+        public static bool operator !=(in vec2 left, in vec2 right)
         {
-            return !left.Equals(ref right);
+            return !left.Equals(right);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator vec3(vec2 value)
+        public static explicit operator vec3(in vec2 value)
         {
             return new vec3(value, 0.0f);
         }
@@ -148,7 +148,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator vec4(vec2 value)
+        public static explicit operator vec4(in vec2 value)
         {
             return new vec4(value.x, value.y, 0.0f, 0.0f);
         }
@@ -229,7 +229,7 @@ namespace SharpGame
         /// 	<c>true</c> if the specified <see cref="vec2"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(ref vec2 other)
+        public bool Equals(in vec2 other)
         {
             return MathUtil.NearEqual(other.x, x) && MathUtil.NearEqual(other.y, y);
         }
@@ -244,7 +244,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(vec2 other)
         {
-            return Equals(ref other);
+            return Equals(in other);
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace SharpGame
                 return false;
 
             var strongValue = (vec2)value;
-            return Equals(ref strongValue);
+            return Equals(in strongValue);
         }
 
     }

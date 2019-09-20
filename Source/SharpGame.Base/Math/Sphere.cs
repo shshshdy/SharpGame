@@ -29,44 +29,44 @@ namespace SharpGame
     /// Represents a bounding sphere in three dimensional space.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct BoundingSphere : IEquatable<BoundingSphere>, IFormattable
+    public struct Sphere : IEquatable<Sphere>, IFormattable
     {
         /// <summary>
         /// The center of the sphere in three dimensional space.
         /// </summary>
-        public vec3 Center;
+        public vec3 center;
 
         /// <summary>
         /// The radius of the sphere.
         /// </summary>
-        public float Radius;
+        public float radius;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BoundingSphere"/> struct.
+        /// Initializes a new instance of the <see cref="Sphere"/> struct.
         /// </summary>
         /// <param name="center">The center of the sphere in three dimensional space.</param>
         /// <param name="radius">The radius of the sphere.</param>
-        public BoundingSphere(vec3 center, float radius)
+        public Sphere(vec3 center, float radius)
         {
-            this.Center = center;
-            this.Radius = radius;
+            this.center = center;
+            this.radius = radius;
         }
         /// Return distance of a point to the surface, or 0 if inside.
-        public float Distance( vec3 point) { return Math.Max((point - Center).Length() - Radius, 0.0f); }
+        public float Distance( vec3 point) { return Math.Max((point - center).Length() - radius, 0.0f); }
         /// Return point on the sphere relative to sphere position.
         public vec3 GetLocalPoint(float theta, float phi)
         {
             return new vec3(
-                Radius * (float)Math.Sin(theta) * (float)Math.Sin(phi),
-                Radius * (float)Math.Cos(phi),
-                Radius * (float)Math.Cos(theta) * (float)Math.Sin(phi)
+                radius * (float)Math.Sin(theta) * (float)Math.Sin(phi),
+                radius * (float)Math.Cos(phi),
+                radius * (float)Math.Cos(theta) * (float)Math.Sin(phi)
             );
         }
 
         /// Return point on the sphere.
         public vec3 GetPoint(float theta, float phi)
         {
-            return Center + GetLocalPoint(theta, phi);
+            return center + GetLocalPoint(theta, phi);
         }
 
         /// <summary>
@@ -147,21 +147,21 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
+        /// Determines if there is an intersection between the current object and a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(in BoundingSphere sphere)
+        public bool Intersects(in Sphere sphere)
         {
             return Collision.SphereIntersectsSphere(in this, in sphere);
         }
 
         /// <summary>
-        /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
+        /// Determines if there is an intersection between the current object and a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(BoundingSphere sphere)
+        public bool Intersects(Sphere sphere)
         {
             return Intersects(in sphere);
         }
@@ -199,17 +199,17 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Determines whether the current objects contains a <see cref="BoundingSphere"/>.
+        /// Determines whether the current objects contains a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(in BoundingSphere sphere)
+        public Intersection Contains(in Sphere sphere)
         {
             return Collision.SphereContainsSphere(in this, in sphere);
         }
 
         /// <summary>
-        /// Constructs a <see cref="BoundingSphere" /> that fully contains the given points.
+        /// Constructs a <see cref="Sphere" /> that fully contains the given points.
         /// </summary>
         /// <param name="points">The points that will be contained by the sphere.</param>
         /// <param name="start">The start index from points array to start compute the bounding sphere.</param>
@@ -221,7 +221,7 @@ namespace SharpGame
         /// or
         /// count
         /// </exception>
-        public static void FromPoints(vec3[] points, int start, int count, out BoundingSphere result)
+        public static void FromPoints(vec3[] points, int start, int count, out Sphere result)
         {
             if (points == null)
             {
@@ -269,16 +269,16 @@ namespace SharpGame
             radius = (float)Math.Sqrt(radius);
 
             //Construct the sphere.
-            result.Center = center;
-            result.Radius = radius;
+            result.center = center;
+            result.radius = radius;
         }
 
         /// <summary>
-        /// Constructs a <see cref="BoundingSphere"/> that fully contains the given points.
+        /// Constructs a <see cref="Sphere"/> that fully contains the given points.
         /// </summary>
         /// <param name="points">The points that will be contained by the sphere.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding sphere.</param>
-        public static void FromPoints(vec3[] points, out BoundingSphere result)
+        public static void FromPoints(vec3[] points, out Sphere result)
         {
             if (points == null)
             {
@@ -289,59 +289,59 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Constructs a <see cref="BoundingSphere"/> that fully contains the given points.
+        /// Constructs a <see cref="Sphere"/> that fully contains the given points.
         /// </summary>
         /// <param name="points">The points that will be contained by the sphere.</param>
         /// <returns>The newly constructed bounding sphere.</returns>
-        public static BoundingSphere FromPoints(vec3[] points)
+        public static Sphere FromPoints(vec3[] points)
         {
-            BoundingSphere result;
+            Sphere result;
             FromPoints(points, out result);
             return result;
         }
 
         /// <summary>
-        /// Constructs a <see cref="BoundingSphere"/> from a given box.
+        /// Constructs a <see cref="Sphere"/> from a given box.
         /// </summary>
         /// <param name="box">The box that will designate the extents of the sphere.</param>
         /// <param name="result">When the method completes, the newly constructed bounding sphere.</param>
-        public static void FromBox(in BoundingBox box, out BoundingSphere result)
+        public static void FromBox(in BoundingBox box, out Sphere result)
         {
-            glm.lerp(in box.Minimum, in box.Maximum, 0.5f, out result.Center);
+            glm.lerp(in box.Minimum, in box.Maximum, 0.5f, out result.center);
 
             float x = box.Minimum.X - box.Maximum.X;
             float y = box.Minimum.Y - box.Maximum.Y;
             float z = box.Minimum.Z - box.Maximum.Z;
 
             float distance = (float)(Math.Sqrt((x * x) + (y * y) + (z * z)));
-            result.Radius = distance * 0.5f;
+            result.radius = distance * 0.5f;
         }
 
         /// <summary>
-        /// Constructs a <see cref="BoundingSphere"/> from a given box.
+        /// Constructs a <see cref="Sphere"/> from a given box.
         /// </summary>
         /// <param name="box">The box that will designate the extents of the sphere.</param>
         /// <returns>The newly constructed bounding sphere.</returns>
-        public static BoundingSphere FromBox(BoundingBox box)
+        public static Sphere FromBox(BoundingBox box)
         {
-            BoundingSphere result;
+            Sphere result;
             FromBox(in box, out result);
             return result;
         }
 
         /// <summary>
-        /// Constructs a <see cref="BoundingSphere"/> that is the as large as the total combined area of the two specified spheres.
+        /// Constructs a <see cref="Sphere"/> that is the as large as the total combined area of the two specified spheres.
         /// </summary>
         /// <param name="value1">The first sphere to merge.</param>
         /// <param name="value2">The second sphere to merge.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding sphere.</param>
-        public static void Merge(in BoundingSphere value1, in BoundingSphere value2, out BoundingSphere result)
+        public static void Merge(in Sphere value1, in Sphere value2, out Sphere result)
         {
-            vec3 difference = value2.Center - value1.Center;
+            vec3 difference = value2.center - value1.center;
 
             float length = difference.Length();
-            float radius = value1.Radius;
-            float radius2 = value2.Radius;
+            float radius = value1.radius;
+            float radius2 = value2.radius;
 
             if (radius + radius2 >= length)
             {
@@ -362,19 +362,19 @@ namespace SharpGame
             float min = Math.Min(-radius, length - radius2);
             float max = (Math.Max(radius, length + radius2) - min) * 0.5f;
 
-            result.Center = value1.Center + vector * (max + min);
-            result.Radius = max;
+            result.center = value1.center + vector * (max + min);
+            result.radius = max;
         }
 
         /// <summary>
-        /// Constructs a <see cref="BoundingSphere"/> that is the as large as the total combined area of the two specified spheres.
+        /// Constructs a <see cref="Sphere"/> that is the as large as the total combined area of the two specified spheres.
         /// </summary>
         /// <param name="value1">The first sphere to merge.</param>
         /// <param name="value2">The second sphere to merge.</param>
         /// <returns>The newly constructed bounding sphere.</returns>
-        public static BoundingSphere Merge(BoundingSphere value1, BoundingSphere value2)
+        public static Sphere Merge(Sphere value1, Sphere value2)
         {
-            BoundingSphere result;
+            Sphere result;
             Merge(in value1, in value2, out result);
             return result;
         }
@@ -386,7 +386,7 @@ namespace SharpGame
         /// <param name="right">The second value to compare.</param>
         /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator ==(BoundingSphere left, BoundingSphere right)
+        public static bool operator ==(Sphere left, Sphere right)
         {
             return left.Equals(in right);
         }
@@ -398,7 +398,7 @@ namespace SharpGame
         /// <param name="right">The second value to compare.</param>
         /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator !=(BoundingSphere left, BoundingSphere right)
+        public static bool operator !=(Sphere left, Sphere right)
         {
             return !left.Equals(in right);
         }
@@ -411,7 +411,7 @@ namespace SharpGame
         /// </returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.CurrentCulture, "Center:{0} Radius:{1}", Center.ToString(), Radius.ToString());
+            return string.Format(CultureInfo.CurrentCulture, "Center:{0} Radius:{1}", center.ToString(), radius.ToString());
         }
 
         /// <summary>
@@ -426,8 +426,8 @@ namespace SharpGame
             if (format == null)
                 return ToString();
 
-            return string.Format(CultureInfo.CurrentCulture, "Center:{0} Radius:{1}", Center.ToString(format, CultureInfo.CurrentCulture),
-                Radius.ToString(format, CultureInfo.CurrentCulture));
+            return string.Format(CultureInfo.CurrentCulture, "Center:{0} Radius:{1}", center.ToString(format, CultureInfo.CurrentCulture),
+                radius.ToString(format, CultureInfo.CurrentCulture));
         }
 
         /// <summary>
@@ -439,7 +439,7 @@ namespace SharpGame
         /// </returns>
         public string ToString(IFormatProvider formatProvider)
         {
-            return string.Format(formatProvider, "Center:{0} Radius:{1}", Center.ToString(), Radius.ToString());
+            return string.Format(formatProvider, "Center:{0} Radius:{1}", center.ToString(), radius.ToString());
         }
 
         /// <summary>
@@ -455,8 +455,8 @@ namespace SharpGame
             if (format == null)
                 return ToString(formatProvider);
 
-            return string.Format(formatProvider, "Center:{0} Radius:{1}", Center.ToString(format, formatProvider),
-                Radius.ToString(format, formatProvider));
+            return string.Format(formatProvider, "Center:{0} Radius:{1}", center.ToString(format, formatProvider),
+                radius.ToString(format, formatProvider));
         }
 
         /// <summary>
@@ -469,7 +469,7 @@ namespace SharpGame
         {
             unchecked
             {
-                return (Center.GetHashCode() * 397) ^ Radius.GetHashCode();
+                return (center.GetHashCode() * 397) ^ radius.GetHashCode();
             }
         }
 
@@ -481,9 +481,9 @@ namespace SharpGame
         /// <c>true</c> if the specified <see cref="Vector4"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(in BoundingSphere value)
+        public bool Equals(in Sphere value)
         {
-            return Center == value.Center && Radius == value.Radius;
+            return center == value.center && radius == value.radius;
         }
 
         /// <summary>
@@ -494,7 +494,7 @@ namespace SharpGame
         /// <c>true</c> if the specified <see cref="Vector4"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(BoundingSphere value)
+        public bool Equals(Sphere value)
         {
             return Equals(in value);
         }
@@ -508,10 +508,10 @@ namespace SharpGame
         /// </returns>
         public override bool Equals(object value)
         {
-            if (!(value is BoundingSphere))
+            if (!(value is Sphere))
                 return false;
 
-            var strongValue = (BoundingSphere)value;
+            var strongValue = (Sphere)value;
             return Equals(in strongValue);
         }
     }

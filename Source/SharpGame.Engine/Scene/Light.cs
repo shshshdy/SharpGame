@@ -63,7 +63,7 @@ namespace SharpGame
                                 for (int j = -1; j < 2; ++j)
                                 {
                                     vec3 offset = vec3.Up * (5.0f * i) + vec3.Right * (5.0f * j);
-                                    debug.AddSphere(new BoundingSphere(start + offset, 0.1f), color, depthTest);
+                                    debug.AddSphere(new Sphere(start + offset, 0.1f), color, depthTest);
                                     debug.AddLine(start + offset, end + offset, color, depthTest);
                                 }
                             }
@@ -75,7 +75,7 @@ namespace SharpGame
                         break;
 
                     case LightType.Point:
-                        debug.AddSphere(new BoundingSphere(node_.WorldPosition, Range), color, depthTest);
+                        debug.AddSphere(new Sphere(node_.WorldPosition, Range), color, depthTest);
                         break;
                 }
             }

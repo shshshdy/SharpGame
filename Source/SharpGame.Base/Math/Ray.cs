@@ -59,12 +59,12 @@ namespace SharpGame
         /// <summary>
         /// The position in three dimensional space where the ray starts.
         /// </summary>
-        public vec3 Position;
+        public vec3 origin;
 
         /// <summary>
         /// The normalized direction in which the ray points.
         /// </summary>
-        public vec3 Direction;
+        public vec3 direction;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Ray"/> struct.
@@ -73,8 +73,8 @@ namespace SharpGame
         /// <param name="direction">The normalized direction of the ray.</param>
         public Ray(vec3 position, vec3 direction)
         {
-            this.Position = position;
-            this.Direction = direction;
+            this.origin = position;
+            this.direction = direction;
         }
 
         /// <summary>
@@ -238,70 +238,70 @@ namespace SharpGame
                 return float.PositiveInfinity;
 
             // Check for ray origin being inside the box
-            if (box.Contains(in this.Position) == Intersection.InSide)
+            if (box.Contains(in this.origin) == Intersection.InSide)
                 return 0.0f;
 
             float dist = float.PositiveInfinity;
 
             // Check for intersecting in the X-direction
-            if (Position.x < box.Minimum.x && Direction.x > 0.0f)
+            if (origin.x < box.Minimum.x && direction.x > 0.0f)
             {
-                float x = (box.Minimum.x - Position.x) / Direction.x;
+                float x = (box.Minimum.x - origin.x) / direction.x;
                 if (x < dist)
                 {
-                    vec3 point = Position + x * Direction;
+                    vec3 point = origin + x * direction;
                     if (point.y >= box.Minimum.y && point.y <= box.Maximum.y && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
                         dist = x;
                 }
             }
-            if (Position.x > box.Maximum.x && Direction.x < 0.0f)
+            if (origin.x > box.Maximum.x && direction.x < 0.0f)
             {
-                float x = (box.Maximum.x - Position.x) / Direction.x;
+                float x = (box.Maximum.x - origin.x) / direction.x;
                 if (x < dist)
                 {
-                    vec3 point = Position + x * Direction;
+                    vec3 point = origin + x * direction;
                     if (point.y >= box.Minimum.y && point.y <= box.Maximum.y && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
                         dist = x;
                 }
             }
             // Check for intersecting in the Y-direction
-            if (Position.y < box.Minimum.y && Direction.y > 0.0f)
+            if (origin.y < box.Minimum.y && direction.y > 0.0f)
             {
-                float x = (box.Minimum.y - Position.y) / Direction.y;
+                float x = (box.Minimum.y - origin.y) / direction.y;
                 if (x < dist)
                 {
-                    vec3 point = Position + x * Direction;
+                    vec3 point = origin + x * direction;
                     if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
                         dist = x;
                 }
             }
-            if (Position.y > box.Maximum.y && Direction.y < 0.0f)
+            if (origin.y > box.Maximum.y && direction.y < 0.0f)
             {
-                float x = (box.Maximum.y - Position.y) / Direction.y;
+                float x = (box.Maximum.y - origin.y) / direction.y;
                 if (x < dist)
                 {
-                    vec3 point = Position + x * Direction;
+                    vec3 point = origin + x * direction;
                     if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
                         dist = x;
                 }
             }
             // Check for intersecting in the Z-direction
-            if (Position.z < box.Minimum.z && Direction.z > 0.0f)
+            if (origin.z < box.Minimum.z && direction.z > 0.0f)
             {
-                float x = (box.Minimum.z - Position.z) / Direction.z;
+                float x = (box.Minimum.z - origin.z) / direction.z;
                 if (x < dist)
                 {
-                    vec3 point = Position + x * Direction;
+                    vec3 point = origin + x * direction;
                     if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.y >= box.Minimum.y && point.y <= box.Maximum.y)
                         dist = x;
                 }
             }
-            if (Position.z > box.Maximum.z && Direction.z < 0.0f)
+            if (origin.z > box.Maximum.z && direction.z < 0.0f)
             {
-                float x = (box.Maximum.z - Position.z) / Direction.z;
+                float x = (box.Maximum.z - origin.z) / direction.z;
                 if (x < dist)
                 {
-                    vec3 point = Position + x * Direction;
+                    vec3 point = origin + x * direction;
                     if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.y >= box.Minimum.y && point.y <= box.Maximum.y)
                         dist = x;
                 }
@@ -310,46 +310,36 @@ namespace SharpGame
             return dist;
         }
         /// <summary>
-        /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
+        /// Determines if there is an intersection between the current object and a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(in BoundingSphere sphere)
+        public bool Intersects(in Sphere sphere)
         {
             float distance;
             return Collision.RayIntersectsSphere(in this, in sphere, out distance);
         }
 
         /// <summary>
-        /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
-        /// </summary>
-        /// <param name="sphere">The sphere to test.</param>
-        /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(BoundingSphere sphere)
-        {
-            return Intersects(in sphere);
-        }
-
-        /// <summary>
-        /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
+        /// Determines if there is an intersection between the current object and a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <param name="distance">When the method completes, contains the distance of the intersection,
         /// or 0 if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(in BoundingSphere sphere, out float distance)
+        public bool Intersects(in Sphere sphere, out float distance)
         {
             return Collision.RayIntersectsSphere(in this, in sphere, out distance);
         }
 
         /// <summary>
-        /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
+        /// Determines if there is an intersection between the current object and a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <param name="point">When the method completes, contains the point of intersection,
         /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(in BoundingSphere sphere, out vec3 point)
+        public bool Intersects(in Sphere sphere, out vec3 point)
         {
             return Collision.RayIntersectsSphere(in this, in sphere, out point);
         }
@@ -410,7 +400,7 @@ namespace SharpGame
         /// </returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.CurrentCulture, "Position:{0} Direction:{1}", Position.ToString(), Direction.ToString());
+            return string.Format(CultureInfo.CurrentCulture, "Position:{0} Direction:{1}", origin.ToString(), direction.ToString());
         }
 
         /// <summary>
@@ -422,8 +412,8 @@ namespace SharpGame
         /// </returns>
         public string ToString(string format)
         {
-            return string.Format(CultureInfo.CurrentCulture, "Position:{0} Direction:{1}", Position.ToString(format, CultureInfo.CurrentCulture),
-                Direction.ToString(format, CultureInfo.CurrentCulture));
+            return string.Format(CultureInfo.CurrentCulture, "Position:{0} Direction:{1}", origin.ToString(format, CultureInfo.CurrentCulture),
+                direction.ToString(format, CultureInfo.CurrentCulture));
         }
 
         /// <summary>
@@ -435,7 +425,7 @@ namespace SharpGame
         /// </returns>
         public string ToString(IFormatProvider formatProvider)
         {
-            return string.Format(formatProvider, "Position:{0} Direction:{1}", Position.ToString(), Direction.ToString());
+            return string.Format(formatProvider, "Position:{0} Direction:{1}", origin.ToString(), direction.ToString());
         }
 
         /// <summary>
@@ -448,8 +438,8 @@ namespace SharpGame
         /// </returns>
         public string ToString(string format, IFormatProvider formatProvider)
         {
-            return string.Format(formatProvider, "Position:{0} Direction:{1}", Position.ToString(format, formatProvider),
-                Direction.ToString(format, formatProvider));
+            return string.Format(formatProvider, "Position:{0} Direction:{1}", origin.ToString(format, formatProvider),
+                direction.ToString(format, formatProvider));
         }
 
         /// <summary>
@@ -462,7 +452,7 @@ namespace SharpGame
         {
             unchecked
             {
-                return (Position.GetHashCode() * 397) ^ Direction.GetHashCode();
+                return (origin.GetHashCode() * 397) ^ direction.GetHashCode();
             }
         }
 
@@ -476,7 +466,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(in Ray value)
         {
-            return Position == value.Position && Direction == value.Direction;
+            return origin == value.origin && direction == value.direction;
         }
 
         /// <summary>

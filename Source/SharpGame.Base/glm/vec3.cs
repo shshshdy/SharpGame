@@ -43,21 +43,21 @@ namespace SharpGame
             this.z = z;
         }
 
-        public vec3(vec3 v)
+        public vec3(in vec3 v)
         {
             this.x = v.x;
             this.y = v.y;
             this.z = v.z;
         }
 
-        public vec3(vec4 v)
+        public vec3(in vec4 v)
         {
             this.x = v.x;
             this.y = v.y;
             this.z = v.z;
         }
 
-        public vec3(vec2 xy, float z)
+        public vec3(in vec2 xy, float z)
         {
             this.x = xy.x;
             this.y = xy.y;
@@ -109,7 +109,7 @@ namespace SharpGame
             result = new vec3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
         }
 
-        public static vec3 Add(vec3 left, vec3 right)
+        public static vec3 Add(in vec3 left, in vec3 right)
         {
             return new vec3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
         }
@@ -119,7 +119,7 @@ namespace SharpGame
             result = new vec3(left.X - right, left.Y - right, left.Z - right);
         }
 
-        public static vec3 Subtract(vec3 left, float right)
+        public static vec3 Subtract(in vec3 left, float right)
         {
             return new vec3(left.X - right, left.Y - right, left.Z - right);
         }
@@ -129,7 +129,7 @@ namespace SharpGame
             result = new vec3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
         }
 
-        public static vec3 Subtract(vec3 left, vec3 right)
+        public static vec3 Subtract(in vec3 left, in vec3 right)
         {
             return new vec3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
         }
@@ -142,7 +142,7 @@ namespace SharpGame
                 (left.X * right.Y) - (left.Y * right.X));
         }
 
-        public static vec3 Cross(vec3 left, vec3 right)
+        public static vec3 Cross(in vec3 left, in vec3 right)
         {
             vec3 result;
             Cross(in left, in right, out result);
@@ -158,7 +158,7 @@ namespace SharpGame
             result = (float)Math.Sqrt((x * x) + (y * y) + (z * z));
         }
 
-        public static float Distance(vec3 value1, vec3 value2)
+        public static float Distance(in vec3 value1, in vec3 value2)
         {
             float x = value1.X - value2.X;
             float y = value1.Y - value2.Y;
@@ -176,7 +176,7 @@ namespace SharpGame
             result = (x * x) + (y * y) + (z * z);
         }
 
-        public static float DistanceSquared(vec3 value1, vec3 value2)
+        public static float DistanceSquared(in vec3 value1, in vec3 value2)
         {
             float x = value1.X - value2.X;
             float y = value1.Y - value2.Y;
@@ -212,7 +212,7 @@ namespace SharpGame
             result = transform* vector;
         }
 
-        public static vec3 Transform(vec3 vector, mat3 transform)
+        public static vec3 Transform(in vec3 vector, in mat3 transform)
         {
             vec3 result;
             Transform(in vector, in transform, out result);
@@ -234,8 +234,6 @@ namespace SharpGame
                 (vector.X * transform.M13) + (vector.Y * transform.M23) + (vector.Z * transform.M33) + transform.M43,
                 (vector.X * transform.M14) + (vector.Y * transform.M24) + (vector.Z * transform.M34) + transform.M44);
         }
-
-        public static vec3 Transform(vec3 vector, mat4 transform) => Transform(vector, transform);
 
         public static vec3 Transform(in vec3 vector, in mat4 transform)
         {
@@ -270,7 +268,7 @@ namespace SharpGame
             result = new vec3(vector.x * vector.w, vector.y * vector.w, vector.z * vector.w);
         }
 
-        public static vec3 TransformCoordinate(vec3 coordinate, mat4 transform)
+        public static vec3 TransformCoordinate(in vec3 coordinate, in mat4 transform)
         {
             vec3 result;
             TransformCoordinate(in coordinate, in transform, out result);
@@ -300,76 +298,76 @@ namespace SharpGame
                 (normal.X * transform.M13) + (normal.Y * transform.M23) + (normal.Z * transform.M33));
         }
 
-        public static vec3 TransformNormal(vec3 normal, mat4 transform)
+        public static vec3 TransformNormal(in vec3 normal, in mat4 transform)
         {
             vec3 result;
             TransformNormal(in normal, in transform, out result);
             return result;
         }
 
-        public static vec3 operator +(vec3 lhs, vec3 rhs)
+        public static vec3 operator +(in vec3 lhs, in vec3 rhs)
         {
             return new vec3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
         }
 
-        public static vec3 operator +(vec3 lhs, float rhs)
+        public static vec3 operator +(in vec3 lhs, float rhs)
         {
             return new vec3(lhs.x + rhs, lhs.y + rhs, lhs.z + rhs);
         }
 
-        public static vec3 operator -(vec3 lhs, vec3 rhs)
+        public static vec3 operator -(in vec3 lhs, in vec3 rhs)
         {
             return new vec3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
         }
 
-        public static vec3 operator -(vec3 lhs, float rhs)
+        public static vec3 operator -(in vec3 lhs, float rhs)
         {
             return new vec3(lhs.x - rhs, lhs.y - rhs, lhs.z - rhs);
         }
 
-        public static vec3 operator *(vec3 self, float s)
+        public static vec3 operator *(in vec3 self, float s)
         {
             return new vec3(self.x * s, self.y * s, self.z * s);
         }
 
-        public static vec3 operator *(float lhs, vec3 rhs)
+        public static vec3 operator *(float lhs, in vec3 rhs)
         {
             return new vec3(rhs.x * lhs, rhs.y * lhs, rhs.z * lhs);
         }
 
-        public static vec3 operator /(vec3 lhs, float rhs)
+        public static vec3 operator /(in vec3 lhs, float rhs)
         {
             return new vec3(lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
         }
 
-        public static vec3 operator *(vec3 lhs, vec3 rhs)
+        public static vec3 operator *(in vec3 lhs, in vec3 rhs)
         {
             return new vec3(rhs.x * lhs.x, rhs.y * lhs.y, rhs.z * lhs.z);
         }
 
-        public static vec3 operator +(vec3 lhs)
+        public static vec3 operator +(in vec3 lhs)
         {
             return new vec3(lhs.x, lhs.y, lhs.z);
         }
 
-        public static vec3 operator -(vec3 lhs)
+        public static vec3 operator -(in vec3 lhs)
         {
             return new vec3(-lhs.x, -lhs.y, -lhs.z);
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator ==(vec3 left, vec3 right)
+        public static bool operator ==(in vec3 left, in vec3 right)
         {
             return left.Equals(in right);
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator !=(vec3 left, vec3 right)
+        public static bool operator !=(in vec3 left, in vec3 right)
         {
             return !left.Equals(in right);
         }
 
-        public static explicit operator vec2(vec3 value)
+        public static explicit operator vec2(in vec3 value)
         {
             return new vec2(value.X, value.Y);
         }
@@ -421,7 +419,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(in vec3 other)
         {
-            return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z);
+            return other.x == x && other.y == y && other.z == z;
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining

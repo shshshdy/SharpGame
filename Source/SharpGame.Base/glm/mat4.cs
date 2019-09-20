@@ -12,7 +12,7 @@ namespace SharpGame
 
     [StructLayout(LayoutKind.Sequential, Size = 4)]
     [DebuggerDisplay("M11 = {M11} M12 = {M12} M13 = {M13} M14 = {M14}")]
-    public unsafe partial struct mat4
+    public unsafe partial struct mat4 : IEquatable<mat4>
     {
         fixed float value[16];
 
@@ -126,7 +126,7 @@ namespace SharpGame
         {
         }
 
-        public mat4(vec4 a, vec4 b, vec4 c, vec4 d)
+        public mat4(in vec4 a, in vec4 b, in vec4 c, in vec4 d)
         {
             value[0] = a.x; value[1] = a.y; value[2] = a.z; value[3] = a.w;
             value[4] = b.x; value[5] = b.y; value[6] = b.z; value[7] = b.w;
@@ -152,7 +152,7 @@ namespace SharpGame
 
         #endregion
 
-        public ref vec3 TranslationVector => ref Unsafe.As<vec4, vec3>(ref this[3]);
+        public ref vec3 TranslationVector => ref Unsafe.As<float, vec3>(ref value[12]);
 
         #region Index Access
 
@@ -189,7 +189,7 @@ namespace SharpGame
 
         #region Multiplication
 
-        public static vec4 operator *(mat4 lhs, vec4 rhs)
+        public static vec4 operator *(in mat4 lhs, in vec4 rhs)
         {
             return new vec4(
                 lhs.M11 * rhs[0] + lhs.M21 * rhs[1] + lhs.M31 * rhs[2] + lhs.M41 * rhs[3],
@@ -199,7 +199,7 @@ namespace SharpGame
             );
         }
 
-        public static vec3 operator *(mat4 lhs, vec3 rhs)
+        public static vec3 operator *(in mat4 lhs, in vec3 rhs)
         {
             return new vec3(
                 lhs.M11 * rhs[0] + lhs.M21 * rhs[1] + lhs.M31 * rhs[2] + lhs.M41,
@@ -214,20 +214,20 @@ namespace SharpGame
         /// <param name="lhs">The LHS matrix.</param>
         /// <param name="rhs">The RHS matrix.</param>
         /// <returns>The product of <paramref name="lhs"/> and <paramref name="rhs"/>.</returns>
-        public static mat4 operator *(mat4 lhs, mat4 rhs)
+        public static mat4 operator *(in mat4 lhs, in mat4 rhs)
         {
-            Multiply(ref lhs, ref rhs, out mat4 res);
+            Multiply(lhs, rhs, out mat4 res);
             return res;
         }
 
-        public static mat4 operator *(mat4 lhs, float s)
+        public static mat4 operator *(in mat4 lhs, float s)
         {
             return new mat4(lhs[0]*s, lhs[1]*s, lhs[2]*s, lhs[3]*s);
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Multiply(ref mat4 lhs, ref mat4 rhs, out mat4 result)
+        public static void Multiply(in mat4 lhs, in mat4 rhs, out mat4 result)
         {
             result = new mat4
             (
@@ -255,11 +255,11 @@ namespace SharpGame
 
         public void Transpose()
         {
-            Transpose(ref this, out this);
+            Transpose(in this, out this);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transpose(ref mat4 value, out mat4 result)
+        public static void Transpose(in mat4 value, out mat4 result)
         {
             mat4 temp = new mat4
             {
@@ -301,14 +301,7 @@ namespace SharpGame
         #endregion
 
         #region Comparision
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
-        /// The Difference is detected by the different values
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+
         public override bool Equals(object obj)
         {
             if (obj.GetType() == typeof(mat4))
@@ -320,42 +313,40 @@ namespace SharpGame
 
             return false;
         }
-        /// <summary>
-        /// Implements the operator ==.
-        /// </summary>
-        /// <param name="m1">The first Matrix.</param>
-        /// <param name="m2">The second Matrix.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator ==(mat4 m1, mat4 m2)
+        
+        public static bool operator ==(in mat4 m1, in mat4 m2)
         {
             return m1.Equals(m2);
         }
 
-        /// <summary>
-        /// Implements the operator !=.
-        /// </summary>
-        /// <param name="m1">The first Matrix.</param>
-        /// <param name="m2">The second Matrix.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator !=(mat4 m1, mat4 m2)
+        public static bool operator !=(in mat4 m1, in mat4 m2)
         {
             return !m1.Equals(m2);
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
         public override int GetHashCode()
         {
             return this[0].GetHashCode() ^ this[1].GetHashCode() ^ this[2].GetHashCode() ^ this[3].GetHashCode();
         }
+
+        public bool Equals(in mat4 other)
+        {
+            for(int i = 0; i < 16; i++)
+            {
+                if(value[i] != other.value[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool Equals(mat4 other)
+        {
+            return Equals(in other);
+        }
+
         #endregion
 
     }

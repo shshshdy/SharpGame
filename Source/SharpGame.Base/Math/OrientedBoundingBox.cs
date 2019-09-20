@@ -340,7 +340,7 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Determines whether a <see cref="OrientedBoundingBox"/> contains a <see cref="BoundingSphere"/>.
+        /// Determines whether a <see cref="OrientedBoundingBox"/> contains a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <param name="IgnoreScale">Optimize the check operation by assuming that <see cref="OrientedBoundingBox"/> has no scaling applied</param>
@@ -349,22 +349,22 @@ namespace SharpGame
         /// This method is not designed for <see cref="OrientedBoundingBox"/> which has a non-uniform scaling applied to its transformation matrix.
         /// But any type of scaling applied using Scale method will keep this method accurate.
         /// </remarks>
-        public Intersection Contains(BoundingSphere sphere, bool IgnoreScale = false)
+        public Intersection Contains(Sphere sphere, bool IgnoreScale = false)
         {
             mat4 invTrans;
             glm.inverse(in Transformation, out invTrans);
 
             // Transform sphere center into the obb coordinates
             vec3 locCenter;
-            vec3.TransformCoordinate(in sphere.Center, in invTrans, out locCenter);
+            vec3.TransformCoordinate(in sphere.center, in invTrans, out locCenter);
 
             float locRadius;
             if (IgnoreScale)
-                locRadius = sphere.Radius;
+                locRadius = sphere.radius;
             else
             {
                 // Transform sphere radius into the obb coordinates
-                vec3 vRadius = vec3.UnitX * sphere.Radius;
+                vec3 vRadius = vec3.UnitX * sphere.radius;
                 vec3.TransformNormal(in vRadius, in invTrans, out vRadius);
                 locRadius = vRadius.Length();
             }
@@ -615,8 +615,8 @@ namespace SharpGame
             glm.inverse(in Transformation, out invTrans);
 
             Ray bRay;
-            vec3.TransformNormal(in ray.Direction, in invTrans, out bRay.Direction);
-            vec3.TransformCoordinate(in ray.Position, in invTrans, out bRay.Position);
+            vec3.TransformNormal(in ray.direction, in invTrans, out bRay.direction);
+            vec3.TransformCoordinate(in ray.origin, in invTrans, out bRay.origin);
 
             //Perform a regular ray to BoundingBox check
             var bb = new BoundingBox(-Extents, Extents);

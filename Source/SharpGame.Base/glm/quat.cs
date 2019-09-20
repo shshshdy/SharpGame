@@ -10,7 +10,7 @@ namespace SharpGame
     using static glm;
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     [DataContract]
-    public struct quat
+    public struct quat : IEquatable<quat>
     {
         public float x;
         public float y;
@@ -52,7 +52,7 @@ namespace SharpGame
             this.w = w;
         }
 
-        public quat(float s, vec3 v)
+        public quat(float s, in vec3 v)
         {
             x = v.x;
             y = v.y;
@@ -60,7 +60,7 @@ namespace SharpGame
             w = s;
         }
 
-        public quat(vec3 u, vec3 v)
+        public quat(in vec3 u, in vec3 v)
         {
             float norm_u_norm_v = sqrt(dot(u, u) * dot(v, v));
             float real_part = norm_u_norm_v + dot(u, v);
@@ -83,7 +83,7 @@ namespace SharpGame
             this = normalize(quat(real_part, t.x, t.y, t.z));
         }
 
-        public quat(vec3 eulerAngle)
+        public quat(in vec3 eulerAngle)
         {
             vec3 c = cos(eulerAngle * 0.5f);
             vec3 s = sin(eulerAngle * 0.5f);
@@ -128,37 +128,37 @@ namespace SharpGame
             }
         }
 
-        public static quat operator +(quat lhs, quat rhs)
+        public static quat operator +(in quat lhs, in quat rhs)
         {
             return new quat(lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
         }
 
-        public static quat operator +(quat lhs, float rhs)
+        public static quat operator +(in quat lhs, float rhs)
         {
             return new quat(lhs.w + rhs, lhs.x + rhs, lhs.y + rhs, lhs.z + rhs);
         }
 
-        public static quat operator -(quat lhs, float rhs)
+        public static quat operator -(in quat lhs, float rhs)
         {
             return new quat(lhs.w - rhs, lhs.x - rhs, lhs.y - rhs, lhs.z - rhs);
         }
 
-        public static quat operator -(quat lhs, quat rhs)
+        public static quat operator -(in quat lhs, in quat rhs)
         {
             return new quat(lhs.w - rhs.w, lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
         }
 
-        public static quat operator *(quat self, float s)
+        public static quat operator *(in quat self, float s)
         {
             return new quat(self.w * s, self.x * s, self.y * s, self.z * s);
         }
 
-        public static quat operator *(float lhs, quat rhs)
+        public static quat operator *(float lhs, in quat rhs)
         {
             return new quat(rhs.w * lhs, rhs.x * lhs, rhs.y * lhs, rhs.z * lhs);
         }
 
-        public static quat operator *(quat p, quat q)
+        public static quat operator *(in quat p, in quat q)
         {
             return quat(p.w * q.w - p.x * q.x - p.y * q.y - p.z * q.z,
                         p.w * q.x + p.x * q.w + p.y * q.z - p.z * q.y,
@@ -166,22 +166,22 @@ namespace SharpGame
                         p.w * q.z + p.z * q.w + p.x * q.y - p.y * q.x);
         }
 
-        public static quat operator /(quat lhs, float rhs)
+        public static quat operator /(in quat lhs, float rhs)
         {
             return new quat(lhs.w / rhs, lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
         }
 
-        public static quat operator +(quat lhs)
+        public static quat operator +(in quat lhs)
         {
             return lhs;
         }
 
-        public static quat operator -(quat lhs)
+        public static quat operator -(in quat lhs)
         {
             return new quat(-lhs.w, -lhs.x, -lhs.y, -lhs.z);
         }
 
-        public static vec3 operator *(quat q, vec3 v)
+        public static vec3 operator *(in quat q, in vec3 v)
         {
             vec3 QuatVector = vec3(q.x, q.y, q.z);
             vec3 uv = cross(QuatVector, v);
@@ -189,7 +189,7 @@ namespace SharpGame
             return v + ((uv * q.w) + uuv) * (2);
         }
 
-        public static vec3 operator *(vec3 v, quat q)
+        public static vec3 operator *(in vec3 v, in quat q)
         {
             return inverse(q) * v;
         }
@@ -201,14 +201,6 @@ namespace SharpGame
 
         #region Comparision
 
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
-        /// The Difference is detected by the different values
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
         public override bool Equals(object obj)
         {
             if (obj.GetType() == typeof(quat))
@@ -220,41 +212,30 @@ namespace SharpGame
 
             return false;
         }
-        /// <summary>
-        /// Implements the operator ==.
-        /// </summary>
-        /// <param name="v1">The first Vector.</param>
-        /// <param name="v2">The second Vector.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator ==(quat v1, quat v2)
+
+        public static bool operator ==(in quat v1, in quat v2)
         {
             return v1.Equals(v2);
         }
 
-        /// <summary>
-        /// Implements the operator !=.
-        /// </summary>
-        /// <param name="v1">The first Vector.</param>
-        /// <param name="v2">The second Vector.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator !=(quat v1, quat v2)
+        public static bool operator !=(in quat v1, in quat v2)
         {
             return !v1.Equals(v2);
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
         public override int GetHashCode()
         {
             return x.GetHashCode() ^ y.GetHashCode() ^ z.GetHashCode() ^ w.GetHashCode();
+        }
+
+        public bool Equals(quat other)
+        {
+            return Equals(in other);
+        }
+
+        public bool Equals(in quat other)
+        {
+            return x == other.x && y == other.y && z == other.z && w == other.w;
         }
 
         #endregion
@@ -265,6 +246,7 @@ namespace SharpGame
         {
             return string.Format("[{0}, {1}, {2}, {3}]", x, y, z, w);
         }
+
 
         #endregion
     }

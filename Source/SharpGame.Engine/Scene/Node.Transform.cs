@@ -493,7 +493,7 @@ namespace SharpGame
             else
             {
 #if UNMANAGED_MATRIX
-                mat4.Multiply(ref parent_.WorldTransform, ref xform, out Unsafe.AsRef<mat4>((void*)worldTransform_));               
+                mat4.Multiply(parent_.WorldTransform, xform, out Unsafe.AsRef<mat4>((void*)worldTransform_));               
 #else
                 worldTransform_ =  parent_.WorldTransform * xform;
 #endif

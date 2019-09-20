@@ -225,45 +225,45 @@ namespace SharpGame
             //http://www.chadvernon.com/blog/resources/directx9/frustum-culling/
 
             // Left plane
-            left.Normal.x = matrix.M14 + matrix.M11;
-            left.Normal.y = matrix.M24 + matrix.M21;
-            left.Normal.z = matrix.M34 + matrix.M31;
-            left.D = matrix.M44 + matrix.M41;
+            left.normal.x = matrix.M14 + matrix.M11;
+            left.normal.y = matrix.M24 + matrix.M21;
+            left.normal.z = matrix.M34 + matrix.M31;
+            left.d = matrix.M44 + matrix.M41;
             left.Normalize();
 
             // Right plane
-            right.Normal.x = matrix.M14 - matrix.M11;
-            right.Normal.y = matrix.M24 - matrix.M21;
-            right.Normal.z = matrix.M34 - matrix.M31;
-            right.D = matrix.M44 - matrix.M41;
+            right.normal.x = matrix.M14 - matrix.M11;
+            right.normal.y = matrix.M24 - matrix.M21;
+            right.normal.z = matrix.M34 - matrix.M31;
+            right.d = matrix.M44 - matrix.M41;
             right.Normalize();
 
             // Top plane
-            top.Normal.x = matrix.M14 - matrix.M12;
-            top.Normal.y = matrix.M24 - matrix.M22;
-            top.Normal.z = matrix.M34 - matrix.M32;
-            top.D = matrix.M44 - matrix.M42;
+            top.normal.x = matrix.M14 - matrix.M12;
+            top.normal.y = matrix.M24 - matrix.M22;
+            top.normal.z = matrix.M34 - matrix.M32;
+            top.d = matrix.M44 - matrix.M42;
             top.Normalize();
 
             // Bottom plane
-            bottom.Normal.x = matrix.M14 + matrix.M12;
-            bottom.Normal.y = matrix.M24 + matrix.M22;
-            bottom.Normal.z = matrix.M34 + matrix.M32;
-            bottom.D = matrix.M44 + matrix.M42;
+            bottom.normal.x = matrix.M14 + matrix.M12;
+            bottom.normal.y = matrix.M24 + matrix.M22;
+            bottom.normal.z = matrix.M34 + matrix.M32;
+            bottom.d = matrix.M44 + matrix.M42;
             bottom.Normalize();
 
             // Near plane
-            near.Normal.x = matrix.M13;
-            near.Normal.y = matrix.M23;
-            near.Normal.z = matrix.M33;
-            near.D = matrix.M43;
+            near.normal.x = matrix.M13;
+            near.normal.y = matrix.M23;
+            near.normal.z = matrix.M33;
+            near.d = matrix.M43;
             near.Normalize();
 
             // Far plane
-            far.Normal.x = matrix.M14 - matrix.M13;
-            far.Normal.y = matrix.M24 - matrix.M23;
-            far.Normal.z = matrix.M34 - matrix.M33;
-            far.D = matrix.M44 - matrix.M43;
+            far.normal.x = matrix.M14 - matrix.M13;
+            far.normal.y = matrix.M24 - matrix.M23;
+            far.normal.z = matrix.M34 - matrix.M33;
+            far.d = matrix.M44 - matrix.M43;
             far.Normalize();
         }
 
@@ -271,9 +271,9 @@ namespace SharpGame
         {
             //P = -d1 * N2xN3 / N1.N2xN3 - d2 * N3xN1 / N2.N3xN1 - d3 * N1xN2 / N3.N1xN2 
             vec3 v =
-                -p1.D * vec3.Cross(p2.Normal, p3.Normal) / vec3.Dot(p1.Normal, vec3.Cross(p2.Normal, p3.Normal))
-                - p2.D * vec3.Cross(p3.Normal, p1.Normal) / vec3.Dot(p2.Normal, vec3.Cross(p3.Normal, p1.Normal))
-                - p3.D * vec3.Cross(p1.Normal, p2.Normal) / vec3.Dot(p3.Normal, vec3.Cross(p1.Normal, p2.Normal));
+                -p1.d * vec3.Cross(p2.normal, p3.normal) / vec3.Dot(p1.normal, vec3.Cross(p2.normal, p3.normal))
+                - p2.d * vec3.Cross(p3.normal, p1.normal) / vec3.Dot(p2.normal, vec3.Cross(p3.normal, p1.normal))
+                - p3.d * vec3.Cross(p1.normal, p2.normal) / vec3.Dot(p3.normal, vec3.Cross(p1.normal, p2.normal));
 
             return v;
         }
@@ -496,7 +496,7 @@ namespace SharpGame
             for (int i = 0; i < 6; i++)
             {
                 plane = GetPlane(i);
-                GetBoxToPlanePVertexNVertex(in box, in plane.Normal, out p, out n);
+                GetBoxToPlanePVertexNVertex(in box, in plane.normal, out p, out n);
                 if (Collision.PlaneIntersectsPoint(in plane, in p) == PlaneIntersectionType.Back)
                     return Intersection.OutSide;
 
@@ -531,7 +531,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <returns>Type of the containment</returns>
-        public Intersection Contains(in BoundingSphere sphere)
+        public Intersection Contains(in Sphere sphere)
         {
             var result = PlaneIntersectionType.Front;
             var planeResult = PlaneIntersectionType.Front;
@@ -567,7 +567,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <returns>Type of the containment</returns>
-        public Intersection Contains(BoundingSphere sphere)
+        public Intersection Contains(Sphere sphere)
         {
             return Contains(in sphere);
         }
@@ -577,7 +577,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <param name="result">Type of the containment.</param>
-        public void Contains(in BoundingSphere sphere, out Intersection result)
+        public void Contains(in Sphere sphere, out Intersection result)
         {
             result = Contains(in sphere);
         }
@@ -617,7 +617,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <returns>Type of the containment</returns>
-        public bool Intersects(in BoundingSphere sphere)
+        public bool Intersects(in Sphere sphere)
         {
             return Contains(in sphere) != Intersection.OutSide;
         }
@@ -626,7 +626,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <param name="result">Set to <c>true</c> if the current BoundingFrustum intersects a BoundingSphere.</param>
-        public void Intersects(in BoundingSphere sphere, out bool result)
+        public void Intersects(in Sphere sphere, out bool result)
         {
             result = Contains(in sphere) != Intersection.OutSide;
         }
@@ -684,7 +684,7 @@ namespace SharpGame
         /// <returns>With of the frustum at the specified depth</returns>
         public float GetWidthAtDepth(float depth)
         {
-            float hAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.Normal, pLeft.Normal))));
+            float hAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.normal, pLeft.normal))));
             return (float)(Math.Tan(hAngle) * depth * 2);
         }
 
@@ -695,19 +695,19 @@ namespace SharpGame
         /// <returns>Height of the frustum at the specified depth</returns>
         public float GetHeightAtDepth(float depth)
         {
-            float vAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.Normal, pTop.Normal))));
+            float vAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.normal, pTop.normal))));
             return (float)(Math.Tan(vAngle) * depth * 2);
         }
 
         private BoundingFrustum GetInsideOutClone()
         {
             var frustum = this;
-            frustum.pNear.Normal = -frustum.pNear.Normal;
-            frustum.pFar.Normal = -frustum.pFar.Normal;
-            frustum.pLeft.Normal = -frustum.pLeft.Normal;
-            frustum.pRight.Normal = -frustum.pRight.Normal;
-            frustum.pTop.Normal = -frustum.pTop.Normal;
-            frustum.pBottom.Normal = -frustum.pBottom.Normal;
+            frustum.pNear.normal = -frustum.pNear.normal;
+            frustum.pFar.normal = -frustum.pFar.normal;
+            frustum.pLeft.normal = -frustum.pLeft.normal;
+            frustum.pRight.normal = -frustum.pRight.normal;
+            frustum.pTop.normal = -frustum.pTop.normal;
+            frustum.pBottom.normal = -frustum.pBottom.normal;
             return frustum;
         }
 
@@ -730,7 +730,7 @@ namespace SharpGame
         /// <returns><c>true</c> if the current BoundingFrustum intersects the specified Ray.</returns>
         public bool Intersects(in Ray ray, out float? inDistance, out float? outDistance)
         {
-            if (Contains(ray.Position) != Intersection.OutSide)
+            if (Contains(ray.origin) != Intersection.OutSide)
             {
                 float nearstPlaneDistance = float.MaxValue;
                 for (int i = 0; i < 6; i++)
@@ -765,8 +765,8 @@ namespace SharpGame
                     }
                 }
 
-                vec3 minPoint = ray.Position + ray.Direction * minDist;
-                vec3 maxPoint = ray.Position + ray.Direction * maxDist;
+                vec3 minPoint = ray.origin + ray.direction * minDist;
+                vec3 maxPoint = ray.origin + ray.direction * maxDist;
                 vec3 center = (minPoint + maxPoint) / 2f;
                 if (Contains(in center) != Intersection.OutSide)
                 {
@@ -793,9 +793,9 @@ namespace SharpGame
         /// <returns>The zoom to fit distance</returns>
         public float GetZoomToExtentsShiftDistance(vec3[] points)
         {
-            float vAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.Normal, pTop.Normal))));
+            float vAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.normal, pTop.normal))));
             float vSin = (float)Math.Sin(vAngle);
-            float hAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.Normal, pLeft.Normal))));
+            float hAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.normal, pLeft.normal))));
             float hSin = (float)Math.Sin(hAngle);
             float horizontalToVerticalMapping = vSin / hSin;
 
@@ -835,7 +835,7 @@ namespace SharpGame
         /// <returns>The zoom to fit vector</returns>
         public vec3 GetZoomToExtentsShiftVector(vec3[] points)
         {
-            return GetZoomToExtentsShiftDistance(points) * pNear.Normal;
+            return GetZoomToExtentsShiftDistance(points) * pNear.normal;
         }
         /// <summary>
         /// Get the vector shift which when added to camera position will do the effect of zoom to extents (zoom to fit) operation,
@@ -845,7 +845,7 @@ namespace SharpGame
         /// <returns>The zoom to fit vector</returns>
         public vec3 GetZoomToExtentsShiftVector(in BoundingBox boundingBox)
         {
-            return GetZoomToExtentsShiftDistance(boundingBox.GetCorners()) * pNear.Normal;
+            return GetZoomToExtentsShiftDistance(boundingBox.GetCorners()) * pNear.normal;
         }
 
         /// <summary>
@@ -858,7 +858,7 @@ namespace SharpGame
         {
             get
             {
-                return (pLeft.Normal == -pRight.Normal) && (pTop.Normal == -pBottom.Normal);
+                return (pLeft.normal == -pRight.normal) && (pTop.normal == -pBottom.normal);
             }
         }
     }

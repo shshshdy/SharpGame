@@ -231,21 +231,21 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
+        /// Determines if there is an intersection between the current object and a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(in BoundingSphere sphere)
+        public bool Intersects(in Sphere sphere)
         {
             return Collision.BoxIntersectsSphere(in this, in sphere);
         }
 
         /// <summary>
-        /// Determines if there is an intersection between the current object and a <see cref="BoundingSphere"/>.
+        /// Determines if there is an intersection between the current object and a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(BoundingSphere sphere)
+        public bool Intersects(Sphere sphere)
         {
             return Intersects(in sphere);
         }
@@ -281,21 +281,21 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Determines whether the current objects contains a <see cref="BoundingSphere"/>.
+        /// Determines whether the current objects contains a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(in BoundingSphere sphere)
+        public Intersection Contains(in Sphere sphere)
         {
             return Collision.BoxContainsSphere(in this, in sphere);
         }
 
         /// <summary>
-        /// Determines whether the current objects contains a <see cref="BoundingSphere"/>.
+        /// Determines whether the current objects contains a <see cref="Sphere"/>.
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(BoundingSphere sphere)
+        public Intersection Contains(Sphere sphere)
         {
             return Contains(in sphere);
         }
@@ -347,11 +347,11 @@ namespace SharpGame
         }
 
         /// Merge another bounding box.
-        public void Merge(BoundingSphere sphere) => Merge(in sphere);
-        public void Merge(in BoundingSphere sphere)
+        public void Merge(Sphere sphere) => Merge(in sphere);
+        public void Merge(in Sphere sphere)
         {
-            vec3 center = sphere.Center;
-            float radius = sphere.Radius;
+            vec3 center = sphere.center;
+            float radius = sphere.radius;
 
             Merge(center + new vec3(radius, radius, radius));
             Merge(center + new vec3(-radius, -radius, -radius));
@@ -408,10 +408,10 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere that will designate the extents of the box.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding box.</param>
-        public static void FromSphere(in BoundingSphere sphere, out BoundingBox result)
+        public static void FromSphere(in Sphere sphere, out BoundingBox result)
         {
-            result.Minimum = new vec3(sphere.Center.X - sphere.Radius, sphere.Center.Y - sphere.Radius, sphere.Center.Z - sphere.Radius);
-            result.Maximum = new vec3(sphere.Center.X + sphere.Radius, sphere.Center.Y + sphere.Radius, sphere.Center.Z + sphere.Radius);
+            result.Minimum = new vec3(sphere.center.X - sphere.radius, sphere.center.Y - sphere.radius, sphere.center.Z - sphere.radius);
+            result.Maximum = new vec3(sphere.center.X + sphere.radius, sphere.center.Y + sphere.radius, sphere.center.Z + sphere.radius);
         }
 
         /// <summary>
@@ -419,11 +419,11 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere that will designate the extents of the box.</param>
         /// <returns>The newly constructed bounding box.</returns>
-        public static BoundingBox FromSphere(BoundingSphere sphere)
+        public static BoundingBox FromSphere(Sphere sphere)
         {
             BoundingBox box;
-            box.Minimum = new vec3(sphere.Center.X - sphere.Radius, sphere.Center.Y - sphere.Radius, sphere.Center.Z - sphere.Radius);
-            box.Maximum = new vec3(sphere.Center.X + sphere.Radius, sphere.Center.Y + sphere.Radius, sphere.Center.Z + sphere.Radius);
+            box.Minimum = new vec3(sphere.center.X - sphere.radius, sphere.center.Y - sphere.radius, sphere.center.Z - sphere.radius);
+            box.Maximum = new vec3(sphere.center.X + sphere.radius, sphere.center.Y + sphere.radius, sphere.center.Z + sphere.radius);
             return box;
         }
 

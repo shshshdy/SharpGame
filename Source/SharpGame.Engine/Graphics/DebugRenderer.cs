@@ -274,7 +274,7 @@ namespace SharpGame
             }
         }*/
 
-        public void AddSphere(in BoundingSphere sphere, Color color, bool depthTest = true)
+        public void AddSphere(in Sphere sphere, Color color, bool depthTest = true)
         {
             int uintColor = color.ToRgba();
 
@@ -295,7 +295,7 @@ namespace SharpGame
             }
         }
 
-        public void AddSphereSector(in BoundingSphere sphere, ref quat rotation, float angle,
+        public void AddSphereSector(in Sphere sphere, ref quat rotation, float angle,
             bool drawLines, Color color, bool depthTest = true)
         {
             if(angle <= 0.0f)
@@ -318,8 +318,8 @@ namespace SharpGame
             for(int j = 0; j < numCircleSegments; ++j)
             {
                 AddLine(
-                    sphere.Center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
-                    sphere.Center + vec3.Transform(sphere.GetLocalPoint((j + 1) * 360.0f / numCircleSegments, halfAngle), rotation),
+                    sphere.center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
+                    sphere.center + vec3.Transform(sphere.GetLocalPoint((j + 1) * 360.0f / numCircleSegments, halfAngle), rotation),
                     uintColor);
             }
 
@@ -331,8 +331,8 @@ namespace SharpGame
                 {
                     float nextPhi = i + 1 == numArcSegments - 1 ? halfAngle : (i + 1) * arcStep;
                     AddLine(
-                        sphere.Center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, i * arcStep), rotation),
-                        sphere.Center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, nextPhi), rotation),
+                        sphere.center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, i * arcStep), rotation),
+                        sphere.center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, nextPhi), rotation),
                         uintColor);
                 }
             }
@@ -342,8 +342,8 @@ namespace SharpGame
             {
                 for(int j = 0; j < numCircleSegments; j += step)
                 {
-                    AddLine(sphere.Center,
-                        sphere.Center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
+                    AddLine(sphere.center,
+                        sphere.center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
                         uintColor);
                 }
             }
@@ -351,7 +351,7 @@ namespace SharpGame
 
         public void AddCylinder(vec3 position, float radius, float height, Color color, bool depthTest)
         {
-            BoundingSphere sphere = new BoundingSphere(position, radius);
+            Sphere sphere = new Sphere(position, radius);
             vec3 heightVec = new vec3(0, height, 0);
             vec3 offsetXVec = new vec3(radius, 0, 0);
             vec3 offsetZVec = new vec3(0, 0, radius);

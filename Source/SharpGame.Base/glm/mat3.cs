@@ -7,7 +7,7 @@ namespace SharpGame
     /// <summary>
     /// Represents a 3x3 matrix.
     /// </summary>
-    public unsafe struct mat3
+    public unsafe struct mat3 : IEquatable<mat3>
     {
         private fixed float value[9];
         public ref float M11
@@ -78,7 +78,7 @@ namespace SharpGame
         {  
         }
 
-        public mat3(vec3 a, vec3 b, vec3 c)
+        public mat3(in vec3 a, in vec3 b, in vec3 c)
         {
             value[0] = a.x; value[1] = a.y; value[2] = a.z;
             value[3] = b.x; value[4] = b.y; value[5] = b.z;
@@ -129,7 +129,7 @@ namespace SharpGame
         /// <param name="lhs">The LHS matrix.</param>
         /// <param name="rhs">The RHS vector.</param>
         /// <returns>The product of <paramref name="lhs"/> and <paramref name="rhs"/>.</returns>
-        public static vec3 operator *(mat3 lhs, vec3 rhs)
+        public static vec3 operator *(in mat3 lhs, in vec3 rhs)
         {
             return new vec3(
                 lhs[0, 0] * rhs[0] + lhs[1, 0] * rhs[1] + lhs[2, 0] * rhs[2],
@@ -178,14 +178,7 @@ namespace SharpGame
         #endregion
 
         #region comparision
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
-        /// The Difference is detected by the different values
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        
         public override bool Equals(object obj)
         {
             if (obj.GetType() == typeof(mat3))
@@ -197,42 +190,40 @@ namespace SharpGame
 
             return false;
         }
-        /// <summary>
-        /// Implements the operator ==.
-        /// </summary>
-        /// <param name="m1">The first Matrix.</param>
-        /// <param name="m2">The second Matrix.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator ==(mat3 m1, mat3 m2)
+        
+        public static bool operator ==(in mat3 m1, in mat3 m2)
         {
             return m1.Equals(m2);
         }
 
-        /// <summary>
-        /// Implements the operator !=.
-        /// </summary>
-        /// <param name="m1">The first Matrix.</param>
-        /// <param name="m2">The second Matrix.</param>
-        /// <returns>
-        /// The result of the operator.
-        /// </returns>
-        public static bool operator !=(mat3 m1, mat3 m2)
+        public static bool operator !=(in mat3 m1, in mat3 m2)
         {
             return !m1.Equals(m2);
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
-        /// </returns>
         public override int GetHashCode()
         {
             return this[0].GetHashCode() ^ this[1].GetHashCode() ^ this[2].GetHashCode();
         }
+
+        public bool Equals(mat3 other)
+        {
+            return Equals(in other);
+        }
+
+        public bool Equals(in mat3 other)
+        {
+            for(int i = 0; i < 9; i++)
+            {
+                if (value[i] != other.value[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         #endregion
 
     }
