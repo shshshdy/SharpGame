@@ -114,13 +114,14 @@ namespace SharpShaderCompiler
         /// <summary>
         /// Specify the call back <see cref="IncludeHandler"/>
         /// </summary>
-        public IncludeHandler IncludeCallback;
+        IncludeHandler IncludeCallback;
 
         /// <summary>
         /// Create new compile options
         /// </summary>
-        public CompileOptions()
+        public CompileOptions(IncludeHandler includeCallback = null)
         {
+            IncludeCallback = includeCallback;
             _handle = ShadercNative.shaderc_compile_options_initialize();
             ShadercNative.shaderc_compile_options_set_include_callbacks(_handle, DelegateWrapper, ReleaseInclude, IntPtr.Zero);
         }

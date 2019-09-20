@@ -842,26 +842,6 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="vec3"/> to <see cref="Color4"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
-        public static explicit operator Color4(ColorBGRA value)
-        {
-            return new Color4(value.R, value.G, value.B, value.A);
-        }
-
-        /// <summary>
-        /// Performs an explicit conversion from <see cref="vec4"/> to <see cref="Color4"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the conversion.</returns>
-        public static explicit operator ColorBGRA(Color4 value)
-        {
-            return new ColorBGRA(value.Red, value.Green, value.Blue, value.Alpha);
-        }
-
-        /// <summary>
         /// Performs an explicit conversion from <see cref="Color4"/> to <see cref="System.Int32"/>.
         /// </summary>
         /// <param name="value">The value.</param>
