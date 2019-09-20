@@ -308,7 +308,6 @@ namespace SharpGame
             vec3 oldEdge = Size * 0.5f;
             vec3 newEdge;
             newEdge = RotateExtents(in oldEdge, in transform);
-            //vec3.TransformNormal(in oldEdge, in transform, out newEdge);
             return new BoundingBox(newCenter - newEdge, newCenter + newEdge);
         }
 
@@ -316,7 +315,7 @@ namespace SharpGame
         {
             vec3 newExtents = new vec3();
             for (int i = 0; i < 3; i++)
-                newExtents[i] = Math.Abs(rotation.Get(i, 0) * extents.x) + Math.Abs(rotation.Get(i, 1) * extents.y) + Math.Abs(rotation.Get(i, 2) * extents.z);
+                newExtents[i] = Math.Abs(rotation[0, i] * extents.x) + Math.Abs(rotation[1, i] * extents.y) + Math.Abs(rotation[2, i] * extents.z);
             return newExtents;
         }
 

@@ -36,17 +36,17 @@ namespace SharpGame
             vec3 temp = (1.0f - c) * axis;
 
             mat4 result = mat4(1.0f);
-            result[0, 0] = c + temp[0] * axis[0];
-            result[0, 1] = 0 + temp[0] * axis[1] + s * axis[2];
-            result[0, 2] = 0 + temp[0] * axis[2] - s * axis[1];
+            result.M11 = c + temp[0] * axis[0];
+            result.M12 = 0 + temp[0] * axis[1] + s * axis[2];
+            result.M13 = 0 + temp[0] * axis[2] - s * axis[1];
 
-            result[1, 0] = 0 + temp[1] * axis[0] - s * axis[2];
-            result[1, 1] = c + temp[1] * axis[1];
-            result[1, 2] = 0 + temp[1] * axis[2] + s * axis[0];
+            result.M21 = 0 + temp[1] * axis[0] - s * axis[2];
+            result.M22 = c + temp[1] * axis[1];
+            result.M23 = 0 + temp[1] * axis[2] + s * axis[0];
 
-            result[2, 0] = 0 + temp[2] * axis[0] + s * axis[1];
-            result[2, 1] = 0 + temp[2] * axis[1] - s * axis[0];
-            result[2, 2] = c + temp[2] * axis[2];
+            result.M31 = 0 + temp[2] * axis[0] + s * axis[1];
+            result.M32 = 0 + temp[2] * axis[1] - s * axis[0];
+            result.M33 = c + temp[2] * axis[2];
             return result;
         }
 
@@ -59,17 +59,17 @@ namespace SharpGame
             vec3 temp = (1.0f - c) * axis;
 
             mat4 rotate = mat4(1.0f);
-            rotate[0, 0] = c + temp[0] * axis[0];
-            rotate[0, 1] = 0 + temp[0] * axis[1] + s * axis[2];
-            rotate[0, 2] = 0 + temp[0] * axis[2] - s * axis[1];
+            rotate.M11 = c + temp[0] * axis[0];
+            rotate.M12 = 0 + temp[0] * axis[1] + s * axis[2];
+            rotate.M13 = 0 + temp[0] * axis[2] - s * axis[1];
 
-            rotate[1, 0] = 0 + temp[1] * axis[0] - s * axis[2];
-            rotate[1, 1] = c + temp[1] * axis[1];
-            rotate[1, 2] = 0 + temp[1] * axis[2] + s * axis[0];
+            rotate.M21 = 0 + temp[1] * axis[0] - s * axis[2];
+            rotate.M22 = c + temp[1] * axis[1];
+            rotate.M23 = 0 + temp[1] * axis[2] + s * axis[0];
 
-            rotate[2, 0] = 0 + temp[2] * axis[0] + s * axis[1];
-            rotate[2, 1] = 0 + temp[2] * axis[1] - s * axis[0];
-            rotate[2, 2] = c + temp[2] * axis[2];
+            rotate.M31 = 0 + temp[2] * axis[0] + s * axis[1];
+            rotate.M32 = 0 + temp[2] * axis[1] - s * axis[0];
+            rotate.M33 = c + temp[2] * axis[2];
 
             mat4 result = mat4(1.0f);
             result[0] = m[0] * rotate.M11 + m[1] * rotate.M12 + m[2] * rotate.M13;
@@ -297,11 +297,11 @@ namespace SharpGame
         public static mat4 ortho(float left, float right, float bottom, float top)
         {
             var result = mat4(1.0f);
-            result[0, 0] = 2f / (right - left);
-            result[1, 1] = 2f / (top - bottom);
-            result[2, 2] = -1f;
-            result[3, 0] = -(right + left) / (right - left);
-            result[3, 1] = -(top + bottom) / (top - bottom);
+            result.M11 = 2f / (right - left);
+            result.M22 = 2f / (top - bottom);
+            result.M33 = -1f;
+            result.M41 = -(right + left) / (right - left);
+            result.M42 = -(top + bottom) / (top - bottom);
             return result;
         }
 

@@ -11,7 +11,7 @@ namespace SharpGame
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     [DataContract]
-    public partial struct vec4 : IEquatable<vec4>, IFormattable
+    public unsafe partial struct vec4 : IEquatable<vec4>, IFormattable
     {
         public float x;
         public float y;
@@ -21,19 +21,14 @@ namespace SharpGame
         public static readonly vec4 Zero = new vec4(0, 0, 0, 0);
         public static readonly vec4 One = new vec4(1, 1, 1, 1);
 
-        public float this[int index]
+        public ref float this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 System.Diagnostics.Debug.Assert(index >= 0 && index < 4);
-                return Unsafe.Add(ref x, index);
-            }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set
-            {
-                System.Diagnostics.Debug.Assert(index >= 0 && index < 4);
-                Unsafe.Add(ref x, index) = value;
+                fixed (float* value = &x)
+                return ref value[index];
             }
         }
 

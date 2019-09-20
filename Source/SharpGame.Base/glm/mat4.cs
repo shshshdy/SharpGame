@@ -14,107 +14,14 @@ namespace SharpGame
     [DebuggerDisplay("M11 = {M11} M12 = {M12} M13 = {M13} M14 = {M14}")]
     public unsafe partial struct mat4 : IEquatable<mat4>
     {
-        fixed float value[16];
+        public float M11, M12, M13, M14;
+        public float M21, M22, M23, M24;
+        public float M31, M32, M33, M34;
+        public float M41, M42, M43, M44;
 
         public static readonly mat4 Identity = new mat4(1);
 
-        public ref float M11
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[0];
-        }
-
-        public ref float M12
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[1];
-        }
-
-        public ref float M13
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[2];
-        }
-
-        public ref float M14
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[3];
-        }
-
-        public ref float M21
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[4];
-        }
-
-        public ref float M22
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[5];
-        }
-
-        public ref float M23
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[6];
-        }
-
-        public ref float M24
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[7];
-        }
-
-        public ref float M31
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[8];
-        }
-
-        public ref float M32
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[9];
-        }
-
-        public ref float M33
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[10];
-        }
-
-        public ref float M34
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[11];
-        }
-
-        public ref float M41
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[12];
-        }
-
-        public ref float M42
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[13];
-        }
-
-        public ref float M43
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[14];
-        }
-
-        public ref float M44
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[15];
-        }
-
-        public IntPtr Data => (IntPtr)Unsafe.AsPointer(ref value[0]);
+        public IntPtr Data => (IntPtr)Unsafe.AsPointer(ref M11);
 
         #region Construction
 
@@ -127,11 +34,11 @@ namespace SharpGame
         }
 
         public mat4(in vec4 a, in vec4 b, in vec4 c, in vec4 d)
+           : this(a.x, a.y, a.z, a.w,
+                 b.x, b.y, b.z, b.w,
+                 c.x, c.y, c.z, c.w,
+                 d.x, d.y, d.z, d.w)
         {
-            value[0] = a.x; value[1] = a.y; value[2] = a.z; value[3] = a.w;
-            value[4] = b.x; value[5] = b.y; value[6] = b.z; value[7] = b.w;
-            value[8] = c.x; value[9] = c.y; value[10] = c.z; value[11] = c.w;
-            value[12] = d.x; value[13] = d.y; value[14] = d.z; value[15] = d.w;
         }
 
         public mat4(float m00, float m01, float m02, float m03,
@@ -139,10 +46,10 @@ namespace SharpGame
             float m20, float m21, float m22, float m23,
             float m30, float m31, float m32, float m33)
         {
-            value[0] = m00; value[1] = m01; value[2] = m02; value[3] = m03;
-            value[4] = m10; value[5] = m11; value[6] = m12; value[7] = m13;
-            value[8] = m20; value[9] = m21; value[10] = m22; value[11] = m23;
-            value[12] = m30; value[13] = m31; value[14] = m32; value[15] = m33;
+            M11 = m00; M12 = m01; M13 = m02; M14 = m03;
+            M21 = m10; M22 = m11; M23 = m12; M24 = m13;
+            M31 = m20; M32 = m21; M33 = m22; M34 = m23;
+            M41 = m30; M42 = m31; M43 = m32; M44 = m33;
         }
 
         public mat4(in mat3 scale)
@@ -152,13 +59,24 @@ namespace SharpGame
 
         #endregion
 
-        public ref vec3 TranslationVector => ref Unsafe.As<float, vec3>(ref value[12]);
+        public ref vec3 TranslationVector
+        {
+            get
+            {
+                fixed (float* value = &M11)
+                return ref Unsafe.As<float, vec3>(ref value[12]);
+            }
+        }
 
         #region Index Access
 
         public ref vec4 this[int column]
         {
-            get { return ref Unsafe.As<float, vec4>(ref value[column << 2]); }
+            get
+            {
+                fixed (float* value = &M11)
+                return ref Unsafe.As<float, vec4>(ref value[column << 2]);
+            }
         }
 
         public float this[int column, int row]
@@ -166,8 +84,6 @@ namespace SharpGame
             get { return this[column][row]; }
             set { this[column][row] = value; }
         }
-
-        public ref float Get(int row, int column) { return ref value[row + (column * 4)]; }
 
         #endregion
 
@@ -307,8 +223,7 @@ namespace SharpGame
             if (obj.GetType() == typeof(mat4))
             {
                 var mat = (mat4)obj;
-                if (mat[0] == this[0] && mat[1] == this[1] && mat[2] == this[2] && mat[3] == this[3])
-                    return true;
+                return Equals(in mat);
             }
 
             return false;
@@ -329,11 +244,13 @@ namespace SharpGame
             return this[0].GetHashCode() ^ this[1].GetHashCode() ^ this[2].GetHashCode() ^ this[3].GetHashCode();
         }
 
-        public bool Equals(in mat4 other)
+        public unsafe bool Equals(in mat4 other)
         {
-            for(int i = 0; i < 16; i++)
+            fixed(float* value = &M11)
+            fixed (float* value1 = &other.M11)
+            for (int i = 0; i < 16; i++)
             {
-                if(value[i] != other.value[i])
+                if(value[i] != value1[i])
                 {
                     return false;
                 }
