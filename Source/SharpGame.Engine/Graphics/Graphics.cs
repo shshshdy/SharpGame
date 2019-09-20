@@ -59,7 +59,7 @@ namespace SharpGame
         public CommandBuffer WorkComputeBuffer => computeCmdPool.CommandBuffers[WorkContext];
         public CommandBuffer RenderComputeBuffer => computeCmdPool.CommandBuffers[RenderContext];
 
-        public CommandBuffer submitComputeCmdBuffer;
+        public List<CommandBuffer> submitComputeCmdBuffers = new List<CommandBuffer>();
 
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
@@ -86,7 +86,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            //settings.Validation = true;
+            settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -406,6 +406,11 @@ namespace SharpGame
             commandBuffer.Reset(true);
         }
 
+        public void submitComputeCmdBuffer(CommandBuffer cmd)
+        {
+            submitComputeCmdBuffers.Add(cmd);
+        }
+
         public TransientBuffer AllocVertexBuffer(uint count)
         {
             return transientVertexBuffer.Alloc(count);
@@ -466,12 +471,16 @@ namespace SharpGame
         {
             Profiler.BeginSample("Submit");
 
-            if(submitComputeCmdBuffer)
+            if(submitComputeCmdBuffers.Count > 0)
             {
-                ComputeQueue.Submit(null, PipelineStageFlags.None, submitComputeCmdBuffer, null, computeFence);
+                foreach (var cmd in submitComputeCmdBuffers)
+                {
+                    ComputeQueue.Submit(null, PipelineStageFlags.None, cmd, null, computeFence);
+                }
+
                 computeFence.Wait();
                 computeFence.Reset();
-                submitComputeCmdBuffer = null;
+                submitComputeCmdBuffers.Clear();
             }
 
             GraphicsQueue.Submit(PresentComplete, PipelineStageFlags.ColorAttachmentOutput, primaryCmdPool[RenderContext], RenderComplete);

@@ -22,8 +22,11 @@ namespace SharpGame
         
         public override void Submit(int imageIndex)
         {
-            Graphics.submitComputeCmdBuffer = commandBuffers[Graphics.RenderContext];
-            commandBuffers[Graphics.RenderContext] = null;
+            if (commandBuffers[Graphics.RenderContext] != null)
+            {
+                Graphics.submitComputeCmdBuffer(commandBuffers[Graphics.RenderContext]);
+                commandBuffers[Graphics.RenderContext] = null;
+            }
         }
     }
 }

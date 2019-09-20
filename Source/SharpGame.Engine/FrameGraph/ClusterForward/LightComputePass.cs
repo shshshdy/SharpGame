@@ -34,6 +34,31 @@ namespace SharpGame
         uint tile_count_y = 0;
         uint TILE_COUNT_Z = 256;
 
+        enum Queries : uint
+        {
+            DEPTH_PASS = 0,
+            CLUSTERING = 1,
+            CALC_LIGHT_GRIDS = 2,
+            CALC_GRID_OFFSETS = 3,
+            CALC_LIGHT_LIST = 4,
+            ONSCREEN = 5,
+            TRANSFER = 6,
+            HSIZE = 7
+        };
+
+        unsafe struct Query_data
+        {
+            fixed uint depth_pass[2];
+            fixed uint clustering[2];
+            fixed uint calc_light_grids[2];
+            fixed uint calc_grid_offsets[2];
+            fixed uint calc_light_list[2];
+            fixed uint onscreen[2];
+            fixed uint transfer[2];
+        }
+
+        uint query_count_;
+
         private DoubleBuffer ubo;
         private DoubleBuffer light_pos_ranges;
         private DoubleBuffer light_colors;
@@ -52,10 +77,17 @@ namespace SharpGame
         private ResourceSet[] resourceSet0 = new ResourceSet[2];
         private ResourceSet resourceSet1;
 
+        QueryPool[] query_pool = new QueryPool[3];
         public LightComputePass()
         {
             OnDraw = DoCompute;
 
+            query_count_ = (uint)Queries.HSIZE * 2;
+            for (int i = 0; i < 3; i++)
+            {
+                var queryPoolCreateInfo = new QueryPoolCreateInfo(QueryType.Timestamp, query_count_);
+                query_pool[i] = new QueryPool(ref queryPoolCreateInfo);
+            }
 
             clusterLight = Resources.Instance.Load<Shader>("Shaders/ClusterLight.shader");
 
@@ -148,7 +180,7 @@ namespace SharpGame
                 grid_light_count_offsets, light_list, grid_light_counts_compare);
         }
 
-        void update_light_buffers_(RenderView view)
+        void UpdateBuffers_(RenderView view)
         {
             uint offset = 0;
             uint offset1 = 0;
@@ -178,7 +210,7 @@ namespace SharpGame
             tile_count_x = ((uint)view.ViewRect.width - 1) / TILE_WIDTH + 1;
             tile_count_y = ((uint)view.ViewRect.height - 1) / TILE_HEIGHT + 1;
 
-            update_light_buffers_(view);
+            UpdateBuffers_(view);
             
             var cmd_buf = renderPass.CmdBuffer;
 

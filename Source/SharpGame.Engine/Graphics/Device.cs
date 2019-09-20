@@ -485,6 +485,22 @@ namespace SharpGame
             vkDestroyFence(device, fence, null);
         }
 
+        public static VkQueryPool CreateQueryPool(ref VkQueryPoolCreateInfo pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateQueryPool(device, ref pCreateInfo, null, out VkQueryPool pQueryPool));
+            return pQueryPool;
+        }
+
+        public static void GetQueryPoolResults(VkQueryPool queryPool, uint firstQuery, uint queryCount, UIntPtr dataSize, void* pData, ulong stride, VkQueryResultFlags flags)
+        {
+            VulkanUtil.CheckResult(vkGetQueryPoolResults( device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags));
+        }
+
+        public static void DestroyQueryPool(ref VkQueryPool queryPool)
+        {
+            vkDestroyQueryPool(device, queryPool, null);
+        }
+
         public static VkImage CreateImage(ref VkImageCreateInfo pCreateInfo)
         {
             VulkanUtil.CheckResult(vkCreateImage(device, ref pCreateInfo, null, out VkImage pImage));
