@@ -24,7 +24,7 @@ namespace SharpGame
         {
             if (commandBuffers[Graphics.RenderContext] != null)
             {
-                Graphics.submitComputeCmdBuffer(commandBuffers[Graphics.RenderContext]);
+                Graphics.SubmitComputeCmdBuffer(commandBuffers[Graphics.RenderContext]);
                 commandBuffers[Graphics.RenderContext] = null;
             }
         }

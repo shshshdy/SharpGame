@@ -91,7 +91,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            //settings.Validation = true;
+            settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -411,7 +411,7 @@ namespace SharpGame
             commandBuffer.Reset(true);
         }
 
-        public void submitComputeCmdBuffer(CommandBuffer cmd)
+        public void SubmitComputeCmdBuffer(CommandBuffer cmd)
         {
             submitComputeCmdBuffers.Add(cmd);
         }

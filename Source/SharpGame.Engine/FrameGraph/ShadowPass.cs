@@ -159,11 +159,11 @@ namespace SharpGame
                 cmd.SetViewport(ref viewport);
                 cmd.SetScissor(renderArea);
 
-                uint cascade = (uint)i;
-                cmd.PushConstants(depthShader.Main.PipelineLayout, ShaderStage.Vertex, 0, ref cascade);
-
                 foreach (var batch in casters)
                 {
+                    uint cascade = (uint)i;
+                    cmd.PushConstants(depthShader.Main.PipelineLayout, ShaderStage.Vertex, 0, ref cascade);
+
                     DrawBatch(cmd, batch, VSSet, null, batch.offset);
                 }
 
