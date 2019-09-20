@@ -131,12 +131,12 @@ namespace SharpGame
             return (float)Math.Cos(angle);
         }
 
-        public static vec2 cos(vec2 angle)
+        public static vec2 cos(in vec2 angle)
         {
             return new vec2((float)Math.Cos(angle.x), (float)Math.Cos(angle.y));
         }
 
-        public static vec3 cos(vec3 angle)
+        public static vec3 cos(in vec3 angle)
         {
             return new vec3((float)Math.Cos(angle.x), (float)Math.Cos(angle.y), (float)Math.Cos(angle.z));
         }
@@ -151,12 +151,12 @@ namespace SharpGame
             return radians * (57.295779513082320876798154814105f);
         }
 
-        public static vec2 degrees(vec2 radians)
+        public static vec2 degrees(in vec2 radians)
         {
             return new vec2(degrees(radians.x), degrees(radians.y));
         }
 
-        public static vec3 degrees(vec3 radians)
+        public static vec3 degrees(in vec3 radians)
         {
             return new vec3(degrees(radians.x), degrees(radians.y), degrees(radians.z));
         }
@@ -171,12 +171,12 @@ namespace SharpGame
             return degrees * (0.01745329251994329576923690768489f);
         }
 
-        public static vec2 radians(vec2 degrees)
+        public static vec2 radians(in vec2 degrees)
         {
             return new vec2(radians(degrees.x), radians(degrees.y));
         }
 
-        public static vec3 radians(vec3 degrees)
+        public static vec3 radians(in vec3 degrees)
         {
             return new vec3(radians(degrees.x), radians(degrees.y), radians(degrees.z));
         }
@@ -191,12 +191,12 @@ namespace SharpGame
             return (float)Math.Sin(angle);
         }
 
-        public static vec2 sin(vec2 angle)
+        public static vec2 sin(in vec2 angle)
         {
             return new vec2(sin(angle.x), sin(angle.y));
         }
 
-        public static vec3 sin(vec3 angle)
+        public static vec3 sin(in vec3 angle)
         {
             return new vec3(sin(angle.x), sin(angle.y), sin(angle.z));
         }
@@ -211,12 +211,12 @@ namespace SharpGame
             return (float)Math.Tan(angle);
         }
 
-        public static vec2 tan(vec2 angle)
+        public static vec2 tan(in vec2 angle)
         {
             return new vec2(tan(angle.x), tan(angle.y));
         }
 
-        public static vec3 tan(vec3 angle)
+        public static vec3 tan(in vec3 angle)
         {
             return new vec3(tan(angle.x), tan(angle.y), tan(angle.z));
         }

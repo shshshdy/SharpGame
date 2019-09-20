@@ -148,7 +148,7 @@ namespace SharpGame
                         continue;
 
                     // Skip if still fits the current octant
-                    if (/*drawable->IsOccludee() &&*/ octant.CullingBox.Contains(ref box) == Intersection.InSide && octant.CheckDrawableFit(in box))
+                    if (/*drawable->IsOccludee() &&*/ octant.CullingBox.Contains(box) == Intersection.InSide && octant.CheckDrawableFit(in box))
                         continue;
 
                     InsertDrawable(drawable);

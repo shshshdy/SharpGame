@@ -153,7 +153,7 @@ namespace SharpGame
                 ref mat4 worldTransform = ref node_.WorldTransform;
                 for (int i = 0; i < batches.Length; ++i)
                 {
-                    vec3.Transform(ref geometryData_[i].center_, ref worldTransform, out vec3 worldCenter);
+                    vec3.Transform(geometryData_[i].center_, worldTransform, out vec3 worldCenter);
                     batches[i].distance = frame.camera.GetDistance(worldCenter);
                 }
             }

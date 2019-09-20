@@ -274,7 +274,7 @@ namespace SharpGame
             return Result;
         }
 
-        public static void transformation2D(ref vec2 translation, float rotation, ref vec2 scaling, out mat3 result)
+        public static void transformation2D(in vec2 translation, float rotation, in vec2 scaling, out mat3 result)
         {
             result = mat3(1);
             result = scale(in result, scaling);
@@ -282,10 +282,10 @@ namespace SharpGame
             result = translate(in result, translation);
         }
 
-        public static mat3 transformation2D(ref vec2 translation, float rotation, ref vec2 scaling)
+        public static mat3 transformation2D(in vec2 translation, float rotation, in vec2 scaling)
         {
             mat3 result;
-            transformation2D(ref translation, rotation, ref scaling, out result);
+            transformation2D(in translation, rotation, in scaling, out result);
             return result;
         }
 

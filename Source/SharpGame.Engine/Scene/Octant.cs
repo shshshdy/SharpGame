@@ -136,7 +136,7 @@ namespace SharpGame
             // Also if drawable is outside the root octant bounds, insert to root
             bool insertHere;
             if (this == root_.Root)
-                insertHere = /*!drawable->IsOccludee() ||*/ cullingBox_.Contains(ref box) != Intersection.InSide || CheckDrawableFit(box);
+                insertHere = /*!drawable->IsOccludee() ||*/ cullingBox_.Contains(box) != Intersection.InSide || CheckDrawableFit(box);
             else
                 insertHere = CheckDrawableFit(box);
 
@@ -260,7 +260,7 @@ namespace SharpGame
         {
             if (this != root_.Root)
             {
-                Intersection res = query.TestOctant(ref cullingBox_, inside);
+                Intersection res = query.TestOctant(cullingBox_, inside);
                 if (res == Intersection.InSide)
                     inside = true;
                 else if (res == Intersection.OutSide)
@@ -283,7 +283,7 @@ namespace SharpGame
 
         internal void GetDrawablesInternal(RayOctreeQuery query)
         {
-            if (!query.ray_.Intersects(ref cullingBox_, out float octantDist))
+            if (!query.ray_.Intersects(cullingBox_, out float octantDist))
             {
                 return;
             }
@@ -305,7 +305,7 @@ namespace SharpGame
 
         internal void GetDrawablesOnlyInternal(RayOctreeQuery query, FastList<Drawable> drawables)
         {
-            if (!query.ray_.Intersects(ref cullingBox_, out float octantDist))
+            if (!query.ray_.Intersects(cullingBox_, out float octantDist))
             {
                 return;
             }

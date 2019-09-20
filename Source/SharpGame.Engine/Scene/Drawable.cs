@@ -289,7 +289,7 @@ namespace SharpGame
 
         protected virtual void OnWorldBoundingBoxUpdate()
         {
-            worldBoundingBox_ = boundingBox_.Transformed(ref node_.WorldTransform);
+            worldBoundingBox_ = boundingBox_.Transformed(node_.WorldTransform);
             worldCenter_ = worldBoundingBox_.Center;
         }
 

@@ -82,7 +82,7 @@ namespace SharpGame
                 model.Geometries.Add(new [] { geometry });
                 model.GeometryCenters.Add(meshBoundingBox.Center);
 
-                boundingBox.Merge(ref meshBoundingBox);
+                boundingBox.Merge(meshBoundingBox);
 
             }
 
@@ -200,7 +200,7 @@ namespace SharpGame
 
                 vertexBuffer.Add(vertex);
 
-                meshBoundingBox.Merge(ref vertex.position);
+                meshBoundingBox.Merge(vertex.position);
             }
 
             for (int f = 0; f < mesh.FaceCount; f++)
@@ -250,7 +250,7 @@ namespace SharpGame
                 }
 
                 vertexBuffer.Add(vertex);
-                meshBoundingBox.Merge(ref vertex.position);
+                meshBoundingBox.Merge(vertex.position);
             }
 
             for (int f = 0; f < mesh.FaceCount; f++)

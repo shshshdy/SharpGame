@@ -272,7 +272,7 @@ namespace SharpGame
 
     public static partial class glm
     {
-        public static quat quat(vec3 euler)
+        public static quat quat(in vec3 euler)
         {
             return new quat(euler);
         }
@@ -287,17 +287,17 @@ namespace SharpGame
             return quat((1), (0), (0), (0));
         }
 
-        public static float length(quat q)
+        public static float length(in quat q)
         {
             return sqrt(dot(q, q));
         }
 
-        public static float length2(quat q)
+        public static float length2(in quat q)
         {
             return q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
         }
 
-        public static quat normalize(quat q)
+        public static quat normalize(in quat q)
         {
             float len = length(q);
             if (len <= (0)) // Problem
@@ -306,23 +306,23 @@ namespace SharpGame
             return quat(q.w * oneOverLen, q.x * oneOverLen, q.y * oneOverLen, q.z * oneOverLen);
         }
 
-        public static float dot(quat a, quat b)
+        public static float dot(in quat a, in quat b)
         {
             vec4 tmp = vec4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
             return (tmp.x + tmp.y) + (tmp.z + tmp.w);
         }
 
-        public static quat conjugate(quat q)
+        public static quat conjugate(in quat q)
         {
             return quat(q.w, -q.x, -q.y, -q.z);
         }
 
-        public static quat inverse(quat q)
+        public static quat inverse(in quat q)
         {
             return conjugate(q) / dot(q, q);
         }
 
-        public static quat cross(quat q1, quat q2)
+        public static quat cross(in quat q1, in quat q2)
         {
             return quat(
                 q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z,
@@ -332,7 +332,7 @@ namespace SharpGame
         }
 
 
-        public static quat mix(quat x, quat y, float a)
+        public static quat mix(in quat x, in quat y, float a)
         {
             float cosTheta = dot(x, y);
 
@@ -355,7 +355,7 @@ namespace SharpGame
         }
 
 
-        public static quat lerp(quat x, quat y, float a)
+        public static quat lerp(in quat x, in quat y, float a)
         {
             // Lerp is only defined in [0, 1]
             System.Diagnostics.Debug.Assert(a >= (0));
@@ -364,7 +364,7 @@ namespace SharpGame
             return x * ((1) - a) + (y * a);
         }
 
-        public static quat slerp(quat x, quat y, float a)
+        public static quat slerp(in quat x, quat y, float a)
         {
             quat z = y;
 
@@ -397,7 +397,7 @@ namespace SharpGame
         }
 
 
-        public static quat rotate(quat q, float angle, vec3 v)
+        public static quat rotate(in quat q, float angle, in vec3 v)
         {
             vec3 Tmp = v;
 
@@ -418,7 +418,7 @@ namespace SharpGame
             //return gtc::quaternion::cross(q, quat(cos(AngleRad * float(0.5)), Tmp.x * fSin, Tmp.y * fSin, Tmp.z * fSin));
         }
 
-        public static mat3 mat3_cast(quat q)
+        public static mat3 mat3_cast(in quat q)
         {
             mat3 Result = mat3(1);
             float qxx = (q.x * q.x);
@@ -445,7 +445,7 @@ namespace SharpGame
             return Result;
         }
 
-        public static mat4 mat4_cast(quat q)
+        public static mat4 mat4_cast(in quat q)
         {
             mat4 Result = mat4(1);
             float qxx = (q.x * q.x);
@@ -472,7 +472,7 @@ namespace SharpGame
             return Result;
         }
 
-        public static quat quat_cast(mat3 m)
+        public static quat quat_cast(in mat3 m)
         {
             float fourXSquaredMinus1 = m[0][0] - m[1][1] - m[2][2];
             float fourYSquaredMinus1 = m[1][1] - m[0][0] - m[2][2];
@@ -516,12 +516,12 @@ namespace SharpGame
             }
         }
 
-        public static float angle(quat x)
+        public static float angle(in quat x)
         {
             return acos(x.w) * (2);
         }
 
-        public static vec3 axis(quat x)
+        public static vec3 axis(in quat x)
         {
             float tmp1 = (1) - x.w * x.w;
             if (tmp1 <= (0))
@@ -530,7 +530,7 @@ namespace SharpGame
             return vec3(x.x * tmp2, x.y * tmp2, x.z * tmp2);
         }
 
-        public static quat angleAxis(float angle, vec3 v)
+        public static quat angleAxis(float angle, in vec3 v)
         {
             quat Result;
             float a = (angle);
@@ -543,7 +543,7 @@ namespace SharpGame
             return Result;
         }
 
-        public static quat rotation(vec3 orig, vec3 dest)
+        public static quat rotation(in vec3 orig, in vec3 dest)
         {
             float cosTheta = dot(orig, dest);
             vec3 rotationAxis;

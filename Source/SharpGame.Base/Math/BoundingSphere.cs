@@ -74,10 +74,10 @@ namespace SharpGame
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray)
+        public bool Intersects(in Ray ray)
         {
             float distance;
-            return Collision.RayIntersectsSphere(ref ray, ref this, out distance);
+            return Collision.RayIntersectsSphere(in ray, in this, out distance);
         }
 
         /// <summary>
@@ -87,9 +87,9 @@ namespace SharpGame
         /// <param name="distance">When the method completes, contains the distance of the intersection,
         /// or 0 if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out float distance)
+        public bool Intersects(in Ray ray, out float distance)
         {
-            return Collision.RayIntersectsSphere(ref ray, ref this, out distance);
+            return Collision.RayIntersectsSphere(in ray, in this, out distance);
         }
 
         /// <summary>
@@ -99,9 +99,9 @@ namespace SharpGame
         /// <param name="point">When the method completes, contains the point of intersection,
         /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out vec3 point)
+        public bool Intersects(in Ray ray, out vec3 point)
         {
-            return Collision.RayIntersectsSphere(ref ray, ref this, out point);
+            return Collision.RayIntersectsSphere(in ray, in this, out point);
         }
 
         /// <summary>
@@ -109,9 +109,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="plane">The plane to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public PlaneIntersectionType Intersects(ref Plane plane)
+        public PlaneIntersectionType Intersects(in Plane plane)
         {
-            return Collision.PlaneIntersectsSphere(ref plane, ref this);
+            return Collision.PlaneIntersectsSphere(in plane, in this);
         }
 
         /// <summary>
@@ -121,9 +121,9 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
+        public bool Intersects(in vec3 vertex1, in vec3 vertex2, in vec3 vertex3)
         {
-            return Collision.SphereIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
+            return Collision.SphereIntersectsTriangle(in this, in vertex1, in vertex2, in vertex3);
         }
 
         /// <summary>
@@ -131,9 +131,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref BoundingBox box)
+        public bool Intersects(in BoundingBox box)
         {
-            return Collision.BoxIntersectsSphere(ref box, ref this);
+            return Collision.BoxIntersectsSphere(in box, in this);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace SharpGame
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(BoundingBox box)
         {
-            return Intersects(ref box);
+            return Intersects(in box);
         }
 
         /// <summary>
@@ -151,9 +151,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref BoundingSphere sphere)
+        public bool Intersects(in BoundingSphere sphere)
         {
-            return Collision.SphereIntersectsSphere(ref this, ref sphere);
+            return Collision.SphereIntersectsSphere(in this, in sphere);
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace SharpGame
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(BoundingSphere sphere)
         {
-            return Intersects(ref sphere);
+            return Intersects(in sphere);
         }
 
         /// <summary>
@@ -171,9 +171,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(ref vec3 point)
+        public Intersection Contains(in vec3 point)
         {
-            return Collision.SphereContainsPoint(ref this, ref point);
+            return Collision.SphereContainsPoint(in this, in point);
         }
 
         /// <summary>
@@ -183,9 +183,9 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
+        public Intersection Contains(in vec3 vertex1, in vec3 vertex2, in vec3 vertex3)
         {
-            return Collision.SphereContainsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
+            return Collision.SphereContainsTriangle(in this, in vertex1, in vertex2, in vertex3);
         }
 
         /// <summary>
@@ -193,9 +193,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(ref BoundingBox box)
+        public Intersection Contains(in BoundingBox box)
         {
-            return Collision.SphereContainsBox(ref this, ref box);
+            return Collision.SphereContainsBox(in this, in box);
         }
 
         /// <summary>
@@ -203,9 +203,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(ref BoundingSphere sphere)
+        public Intersection Contains(in BoundingSphere sphere)
         {
-            return Collision.SphereContainsSphere(ref this, ref sphere);
+            return Collision.SphereContainsSphere(in this, in sphere);
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace SharpGame
             vec3 center = vec3.Zero;
             for (int i = start; i < upperEnd; ++i)
             {
-                vec3.Add(ref points[i], ref center, out center);
+                vec3.Add(in points[i], in center, out center);
             }
 
             //This is the center of our sphere.
@@ -259,7 +259,7 @@ namespace SharpGame
                 //We are doing a relative distance comparison to find the maximum distance
                 //from the center of our sphere.
                 float distance;
-                vec3.DistanceSquared(ref center, ref points[i], out distance);
+                vec3.DistanceSquared(in center, in points[i], out distance);
 
                 if (distance > radius)
                     radius = distance;
@@ -305,9 +305,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="box">The box that will designate the extents of the sphere.</param>
         /// <param name="result">When the method completes, the newly constructed bounding sphere.</param>
-        public static void FromBox(ref BoundingBox box, out BoundingSphere result)
+        public static void FromBox(in BoundingBox box, out BoundingSphere result)
         {
-            glm.lerp(ref box.Minimum, ref box.Maximum, 0.5f, out result.Center);
+            glm.lerp(in box.Minimum, in box.Maximum, 0.5f, out result.Center);
 
             float x = box.Minimum.X - box.Maximum.X;
             float y = box.Minimum.Y - box.Maximum.Y;
@@ -325,7 +325,7 @@ namespace SharpGame
         public static BoundingSphere FromBox(BoundingBox box)
         {
             BoundingSphere result;
-            FromBox(ref box, out result);
+            FromBox(in box, out result);
             return result;
         }
 
@@ -335,7 +335,7 @@ namespace SharpGame
         /// <param name="value1">The first sphere to merge.</param>
         /// <param name="value2">The second sphere to merge.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding sphere.</param>
-        public static void Merge(ref BoundingSphere value1, ref BoundingSphere value2, out BoundingSphere result)
+        public static void Merge(in BoundingSphere value1, in BoundingSphere value2, out BoundingSphere result)
         {
             vec3 difference = value2.Center - value1.Center;
 
@@ -375,7 +375,7 @@ namespace SharpGame
         public static BoundingSphere Merge(BoundingSphere value1, BoundingSphere value2)
         {
             BoundingSphere result;
-            Merge(ref value1, ref value2, out result);
+            Merge(in value1, in value2, out result);
             return result;
         }
 
@@ -388,7 +388,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator ==(BoundingSphere left, BoundingSphere right)
         {
-            return left.Equals(ref right);
+            return left.Equals(in right);
         }
 
         /// <summary>
@@ -400,7 +400,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator !=(BoundingSphere left, BoundingSphere right)
         {
-            return !left.Equals(ref right);
+            return !left.Equals(in right);
         }
 
         /// <summary>
@@ -481,7 +481,7 @@ namespace SharpGame
         /// <c>true</c> if the specified <see cref="Vector4"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(ref BoundingSphere value)
+        public bool Equals(in BoundingSphere value)
         {
             return Center == value.Center && Radius == value.Radius;
         }
@@ -496,7 +496,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(BoundingSphere value)
         {
-            return Equals(ref value);
+            return Equals(in value);
         }
 
         /// <summary>
@@ -512,7 +512,7 @@ namespace SharpGame
                 return false;
 
             var strongValue = (BoundingSphere)value;
-            return Equals(ref strongValue);
+            return Equals(in strongValue);
         }
     }
 }

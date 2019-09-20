@@ -221,31 +221,31 @@ namespace SharpGame
             return quat_cast(Result);
         }
 
-        public static void transformation(ref vec3 translation, ref quat rotation, out mat4 result)
+        public static void transformation(in vec3 translation, in quat rotation, out mat4 result)
         {
             //result = translate(translation) * rotate(rotation);
             result = rotate(rotation);
             result.TranslationVector = translation;
         }
 
-        public static mat4 transformation(ref vec3 translation, ref quat rotation)
+        public static mat4 transformation(in vec3 translation, in quat rotation)
         {
             mat4 result;
-            transformation(ref translation, ref rotation, out result);
+            transformation(in translation, in rotation, out result);
             return result;
         }
 
-        public static void transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling, out mat4 result)
+        public static void transformation(in vec3 translation, in quat rotation, in vec3 scaling, out mat4 result)
         {
             //result = translate(translation) * rotate(rotation) * scale(scaling);
             result = scale(rotate(rotation), scaling);
             result.TranslationVector = translation;
         }
 
-        public static mat4 transformation(ref vec3 translation, ref quat rotation, ref vec3 scaling)
+        public static mat4 transformation(in vec3 translation, in quat rotation, in vec3 scaling)
         {
             mat4 result;
-            transformation(ref translation, ref rotation, ref scaling, out result);
+            transformation(in translation, in rotation, in scaling, out result);
             return result;
         }
 
@@ -517,7 +517,7 @@ namespace SharpGame
             return tweakedInfinitePerspective(fovy, aspect, zNear, float.Epsilon);
         }
 
-        public static vec3 project(ref vec3 obj, ref mat4 model, ref mat4 proj, ref vec4 viewport)
+        public static vec3 project(in vec3 obj, in mat4 model, in mat4 proj, in vec4 viewport)
         {
             vec4 tmp = vec4(obj, 1);
             tmp = model * tmp;
@@ -537,7 +537,7 @@ namespace SharpGame
             return vec3(tmp.x, tmp.y, tmp.z);
         }
 
-        public static vec3 unProject(ref vec3 win, ref mat4 model, ref mat4 proj, ref vec4 viewport)
+        public static vec3 unProject(in vec3 win, in mat4 model, in mat4 proj, in vec4 viewport)
         {
             mat4 Inverse = inverse(proj * model);
 
@@ -557,7 +557,7 @@ namespace SharpGame
             return vec3(obj);
         }
 
-        public static mat4 pickMatrix(ref vec2 center, ref vec2 delta, ref vec4 viewport)
+        public static mat4 pickMatrix(in vec2 center, in vec2 delta, in vec4 viewport)
         {
             //assert(delta.x > (0) && delta.y > (0));
             mat4 Result = mat4(1);
@@ -643,7 +643,7 @@ namespace SharpGame
         // http://www.opensource.apple.com/source/WebCore/WebCore-514/platform/graphics/transforms/TransformationMatrix.cpp
         // Decomposes the mode matrix to translations,rotation scale components
 
-        public static bool decompose(ref mat4 ModelMatrix, ref vec3 Scale, ref quat Orientation, ref vec3 Translation, ref vec3 Skew, ref vec4 Perspective)
+        public static bool decompose(in mat4 ModelMatrix, ref vec3 Scale, ref quat Orientation, ref vec3 Translation, ref vec3 Skew, ref vec4 Perspective)
         {
             mat4 LocalMatrix = ModelMatrix;
 

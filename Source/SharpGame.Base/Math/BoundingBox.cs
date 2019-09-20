@@ -90,16 +90,16 @@ namespace SharpGame
             Maximum = new vec3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
         }
 
-        public void Define(BoundingBox box)=> Define(ref box);
+        public void Define(BoundingBox box)=> Define(in box);
 
         /// Define from another bounding box.
-        public void Define(ref BoundingBox box)
+        public void Define(in BoundingBox box)
         {
-            Define(ref box.Minimum, ref box.Maximum);
+            Define(in box.Minimum, in box.Maximum);
         }
 
         /// Define from minimum and maximum vectors.
-        public void Define(ref vec3 min, ref vec3 max)
+        public void Define(in vec3 min, in vec3 max)
         {
             Minimum = min;
             Maximum = max;
@@ -113,7 +113,7 @@ namespace SharpGame
         }
 
         /// Define from a point.
-        public void Define(ref vec3 point)
+        public void Define(in vec3 point)
         {
             Minimum = Maximum = point;
         }
@@ -156,10 +156,10 @@ namespace SharpGame
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray)
+        public bool Intersects(in Ray ray)
         {
             float distance;
-            return Collision.RayIntersectsBox(ref ray, ref this, out distance);
+            return Collision.RayIntersectsBox(in ray, in this, out distance);
         }
 
         /// <summary>
@@ -169,9 +169,9 @@ namespace SharpGame
         /// <param name="distance">When the method completes, contains the distance of the intersection,
         /// or 0 if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out float distance)
+        public bool Intersects(in Ray ray, out float distance)
         {
-            return Collision.RayIntersectsBox(ref ray, ref this, out distance);
+            return Collision.RayIntersectsBox(in ray, in this, out distance);
         }
 
         /// <summary>
@@ -181,9 +181,9 @@ namespace SharpGame
         /// <param name="point">When the method completes, contains the point of intersection,
         /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out vec3 point)
+        public bool Intersects(in Ray ray, out vec3 point)
         {
-            return Collision.RayIntersectsBox(ref ray, ref this, out point);
+            return Collision.RayIntersectsBox(in ray, in this, out point);
         }
 
         /// <summary>
@@ -191,9 +191,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="plane">The plane to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public PlaneIntersectionType Intersects(ref Plane plane)
+        public PlaneIntersectionType Intersects(in Plane plane)
         {
-            return Collision.PlaneIntersectsBox(ref plane, ref this);
+            return Collision.PlaneIntersectsBox(in plane, in this);
         }
 
         /* This implementation is wrong
@@ -204,9 +204,9 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
+        public bool Intersects(in vec3 vertex1, in vec3 vertex2, in vec3 vertex3)
         {
-            return Collision.BoxIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
+            return Collision.BoxIntersectsTriangle(in this, in vertex1, in vertex2, in vertex3);
         }
         */
 
@@ -215,9 +215,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref BoundingBox box)
+        public bool Intersects(in BoundingBox box)
         {
-            return Collision.BoxIntersectsBox(ref this, ref box);
+            return Collision.BoxIntersectsBox(in this, in box);
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace SharpGame
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(BoundingBox box)
         {
-            return Intersects(ref box);
+            return Intersects(in box);
         }
 
         /// <summary>
@@ -235,9 +235,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref BoundingSphere sphere)
+        public bool Intersects(in BoundingSphere sphere)
         {
-            return Collision.BoxIntersectsSphere(ref this, ref sphere);
+            return Collision.BoxIntersectsSphere(in this, in sphere);
         }
 
         /// <summary>
@@ -247,17 +247,17 @@ namespace SharpGame
         /// <returns>Whether the two objects intersected.</returns>
         public bool Intersects(BoundingSphere sphere)
         {
-            return Intersects(ref sphere);
+            return Intersects(in sphere);
         }
 
-        public Intersection Contains(ref vec3 point)
+        public Intersection Contains(in vec3 point)
         {
-            return Collision.BoxContainsPoint(ref this, ref point);
+            return Collision.BoxContainsPoint(in this, in point);
         }
 
         public Intersection Contains(vec3 point)
         {
-            return Contains(ref point);
+            return Contains(in point);
         }
 
         /// <summary>
@@ -265,9 +265,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(ref BoundingBox box)
+        public Intersection Contains(in BoundingBox box)
         {
-            return Collision.BoxContainsBox(ref this, ref box);
+            return Collision.BoxContainsBox(in this, in box);
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace SharpGame
         /// <returns>The type of containment the two objects have.</returns>
         public Intersection Contains(BoundingBox box)
         {
-            return Contains(ref box);
+            return Contains(in box);
         }
 
         /// <summary>
@@ -285,9 +285,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public Intersection Contains(ref BoundingSphere sphere)
+        public Intersection Contains(in BoundingSphere sphere)
         {
-            return Collision.BoxContainsSphere(ref this, ref sphere);
+            return Collision.BoxContainsSphere(in this, in sphere);
         }
 
         /// <summary>
@@ -297,18 +297,18 @@ namespace SharpGame
         /// <returns>The type of containment the two objects have.</returns>
         public Intersection Contains(BoundingSphere sphere)
         {
-            return Contains(ref sphere);
+            return Contains(in sphere);
         }
 
         /// Return transformed by a 4x4 matrix.
-        public BoundingBox Transformed(ref mat4 transform)
+        public BoundingBox Transformed(in mat4 transform)
         {
             vec3 center = Center;
-            vec3.Transform(ref center, ref transform, out vec3 newCenter);
+            vec3.Transform(in center, in transform, out vec3 newCenter);
             vec3 oldEdge = Size * 0.5f;
             vec3 newEdge;
             newEdge = RotateExtents(in oldEdge, in transform);
-            //vec3.TransformNormal(ref oldEdge, ref transform, out newEdge);
+            //vec3.TransformNormal(in oldEdge, in transform, out newEdge);
             return new BoundingBox(newCenter - newEdge, newCenter + newEdge);
         }
 
@@ -321,8 +321,8 @@ namespace SharpGame
         }
 
         /// Merge a point.
-        public void Merge(vec3 point) => Merge(ref point);
-        public void Merge(ref vec3 point)
+        public void Merge(vec3 point) => Merge(in point);
+        public void Merge(in vec3 point)
         {
             if (point.X < Minimum.X)
                 Minimum.X = point.X;
@@ -339,18 +339,18 @@ namespace SharpGame
         }
 
         /// Merge another bounding box.
-        public void Merge(BoundingBox box) => Merge(ref box);
-        public void Merge(ref BoundingBox box)
+        public void Merge(BoundingBox box) => Merge(in box);
+        public void Merge(in BoundingBox box)
         {
-            glm.min(ref Minimum, ref box.Minimum, out Minimum);
-            glm.max(ref Maximum, ref box.Maximum, out Maximum);
+            glm.min(in Minimum, in box.Minimum, out Minimum);
+            glm.max(in Maximum, in box.Maximum, out Maximum);
         }
 
         /// Merge another bounding box.
-        public void Merge(BoundingSphere sphere) => Merge(ref sphere);
-        public void Merge(ref BoundingSphere sphere)
+        public void Merge(BoundingSphere sphere) => Merge(in sphere);
+        public void Merge(in BoundingSphere sphere)
         {
-            ref vec3 center = ref sphere.Center;
+            vec3 center = sphere.Center;
             float radius = sphere.Radius;
 
             Merge(center + new vec3(radius, radius, radius));
@@ -373,8 +373,8 @@ namespace SharpGame
 
             for (int i = 0; i < points.Length; ++i)
             {
-                glm.min(ref min, ref points[i], out min);
-                glm.max(ref max, ref points[i], out max);
+                glm.min(in min, in points[i], out min);
+                glm.max(in max, in points[i], out max);
             }
 
             result = new BoundingBox(min, max);
@@ -396,8 +396,8 @@ namespace SharpGame
 
             for (int i = 0; i < points.Length; ++i)
             {
-                glm.min(ref min, ref points[i], out min);
-                glm.max(ref max, ref points[i], out max);
+                glm.min(in min, in points[i], out min);
+                glm.max(in max, in points[i], out max);
             }
 
             return new BoundingBox(min, max);
@@ -408,7 +408,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere that will designate the extents of the box.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding box.</param>
-        public static void FromSphere(ref BoundingSphere sphere, out BoundingBox result)
+        public static void FromSphere(in BoundingSphere sphere, out BoundingBox result)
         {
             result.Minimum = new vec3(sphere.Center.X - sphere.Radius, sphere.Center.Y - sphere.Radius, sphere.Center.Z - sphere.Radius);
             result.Maximum = new vec3(sphere.Center.X + sphere.Radius, sphere.Center.Y + sphere.Radius, sphere.Center.Z + sphere.Radius);
@@ -433,10 +433,10 @@ namespace SharpGame
         /// <param name="value1">The first box to merge.</param>
         /// <param name="value2">The second box to merge.</param>
         /// <param name="result">When the method completes, contains the newly constructed bounding box.</param>
-        public static void Merge(ref BoundingBox value1, ref BoundingBox value2, out BoundingBox result)
+        public static void Merge(in BoundingBox value1, in BoundingBox value2, out BoundingBox result)
         {
-            glm.min(ref value1.Minimum, ref value2.Minimum, out result.Minimum);
-            glm.max(ref value1.Maximum, ref value2.Maximum, out result.Maximum);
+            glm.min(in value1.Minimum, in value2.Minimum, out result.Minimum);
+            glm.max(in value1.Maximum, in value2.Maximum, out result.Maximum);
         }
 
         /// <summary>
@@ -448,8 +448,8 @@ namespace SharpGame
         public static BoundingBox Merge(BoundingBox value1, BoundingBox value2)
         {
             BoundingBox box;
-            glm.min(ref value1.Minimum, ref value2.Minimum, out box.Minimum);
-            glm.max(ref value1.Maximum, ref value2.Maximum, out box.Maximum);
+            glm.min(in value1.Minimum, in value2.Minimum, out box.Minimum);
+            glm.max(in value1.Maximum, in value2.Maximum, out box.Maximum);
             return box;
         }
 
@@ -462,7 +462,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator ==(BoundingBox left, BoundingBox right)
         {
-            return left.Equals(ref right);
+            return left.Equals(in right);
         }
 
         /// <summary>
@@ -474,7 +474,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator !=(BoundingBox left, BoundingBox right)
         {
-            return !left.Equals(ref right);
+            return !left.Equals(in right);
         }
 
         /// <summary>
@@ -555,7 +555,7 @@ namespace SharpGame
         /// <c>true</c> if the specified <see cref="Vector4"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(ref BoundingBox value)
+        public bool Equals(in BoundingBox value)
         {
             return Minimum == value.Minimum && Maximum == value.Maximum;
         }
@@ -570,7 +570,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(BoundingBox value)
         {
-            return Equals(ref value);
+            return Equals(in value);
         }
 
         /// <summary>
@@ -586,7 +586,7 @@ namespace SharpGame
                 return false;
 
             var strongValue = (BoundingBox)value;
-            return Equals(ref strongValue);
+            return Equals(in strongValue);
         }
 
     }

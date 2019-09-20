@@ -10,7 +10,7 @@ namespace SharpGame
         public uint drawableFlags;
 
         public abstract void TestDrawables(Span<Drawable> start, bool inside, Action<Drawable> visitor);
-        public abstract Intersection TestOctant(ref BoundingBox box, bool inside);     
+        public abstract Intersection TestOctant(in BoundingBox box, bool inside);     
 
     }
 
@@ -41,18 +41,18 @@ namespace SharpGame
             {
                 if ((drawable.DrawableFlags & drawableFlags) != 0 && (drawable.ViewMask & viewMask) != 0)
                 {
-                    if (inside || camera.Frustum.Intersects(ref drawable.WorldBoundingBox))
+                    if (inside || camera.Frustum.Intersects(drawable.WorldBoundingBox))
                         visitor(drawable);
                 }
             }
         }
 
-        public override Intersection TestOctant(ref BoundingBox box, bool inside)
+        public override Intersection TestOctant(in BoundingBox box, bool inside)
         {
             if (inside)
                 return Intersection.InSide;
             else
-                return camera.Frustum.Contains(ref box);
+                return camera.Frustum.Contains(in box);
         }
     }
 
@@ -65,7 +65,7 @@ namespace SharpGame
             {
                 if ((drawable.DrawableFlags & drawableFlags) != 0 && (drawable.ViewMask & viewMask) != 0)
                 {
-                    if (inside || camera.Frustum.Intersects(ref drawable.WorldBoundingBox))
+                    if (inside || camera.Frustum.Intersects(drawable.WorldBoundingBox))
                         visitor(drawable);
                 }
             }

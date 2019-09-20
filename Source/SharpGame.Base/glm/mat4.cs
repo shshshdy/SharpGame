@@ -145,7 +145,7 @@ namespace SharpGame
             value[12] = m30; value[13] = m31; value[14] = m32; value[15] = m33;
         }
 
-        public mat4(mat3 scale)
+        public mat4(in mat3 scale)
             : this(scale[0], scale[1], scale[2], new vec4(0.0f, 0.0f, 0.0f, 1))
         {
         }
@@ -367,7 +367,7 @@ namespace SharpGame
             return new mat4(scale);
         }
 
-        public static mat4 mat4(mat3 m)
+        public static mat4 mat4(in mat3 m)
         {
             return new mat4(m);
         }

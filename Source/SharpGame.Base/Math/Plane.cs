@@ -113,7 +113,7 @@ namespace SharpGame
             D = -((Normal.X * point1.X) + (Normal.Y * point1.Y) + (Normal.Z * point1.Z));
         }
 
-        public void Define(ref vec3 point1, ref vec3 point2, ref vec3 point3)
+        public void Define(in vec3 point1, in vec3 point2, in vec3 point3)
         {
             float x1 = point2.X - point1.X;
             float y1 = point2.Y - point1.Y;
@@ -200,7 +200,7 @@ namespace SharpGame
         }
 
         /// Return signed distance to a point.
-        public float Distance(ref vec3 point) { return vec3.Dot(Normal, point) + D; }
+        public float Distance(in vec3 point) { return vec3.Dot(Normal, point) + D; }
 
         /// <summary>
         /// Creates an array containing the elements of the plane.
@@ -216,9 +216,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public PlaneIntersectionType Intersects(ref vec3 point)
+        public PlaneIntersectionType Intersects(in vec3 point)
         {
-            return Collision.PlaneIntersectsPoint(ref this, ref point);
+            return Collision.PlaneIntersectsPoint(in this, in point);
         }
 
         /// <summary>
@@ -226,10 +226,10 @@ namespace SharpGame
         /// </summary>
         /// <param name="ray">The ray to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray)
+        public bool Intersects(in Ray ray)
         {
             float distance;
-            return Collision.RayIntersectsPlane(ref ray, ref this, out distance);
+            return Collision.RayIntersectsPlane(in ray, in this, out distance);
         }
 
         /// <summary>
@@ -239,9 +239,9 @@ namespace SharpGame
         /// <param name="distance">When the method completes, contains the distance of the intersection,
         /// or 0 if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out float distance)
+        public bool Intersects(in Ray ray, out float distance)
         {
-            return Collision.RayIntersectsPlane(ref ray, ref this, out distance);
+            return Collision.RayIntersectsPlane(in ray, in this, out distance);
         }
 
         /// <summary>
@@ -251,9 +251,9 @@ namespace SharpGame
         /// <param name="point">When the method completes, contains the point of intersection,
         /// or <see cref="vec3.Zero"/> if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Ray ray, out vec3 point)
+        public bool Intersects(in Ray ray, out vec3 point)
         {
-            return Collision.RayIntersectsPlane(ref ray, ref this, out point);
+            return Collision.RayIntersectsPlane(in ray, in this, out point);
         }
 
         /// <summary>
@@ -261,9 +261,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="plane">The plane to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Plane plane)
+        public bool Intersects(in Plane plane)
         {
-            return Collision.PlaneIntersectsPlane(ref this, ref plane);
+            return Collision.PlaneIntersectsPlane(in this, in plane);
         }
 
         /// <summary>
@@ -273,9 +273,9 @@ namespace SharpGame
         /// <param name="line">When the method completes, contains the line of intersection
         /// as a <see cref="Ray"/>, or a zero ray if there was no intersection.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public bool Intersects(ref Plane plane, out Ray line)
+        public bool Intersects(in Plane plane, out Ray line)
         {
-            return Collision.PlaneIntersectsPlane(ref this, ref plane, out line);
+            return Collision.PlaneIntersectsPlane(in this, in plane, out line);
         }
 
         /// <summary>
@@ -285,9 +285,9 @@ namespace SharpGame
         /// <param name="vertex2">The second vertex of the triangle to test.</param>
         /// <param name="vertex3">The third vertex of the triangle to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public PlaneIntersectionType Intersects(ref vec3 vertex1, ref vec3 vertex2, ref vec3 vertex3)
+        public PlaneIntersectionType Intersects(in vec3 vertex1, in vec3 vertex2, in vec3 vertex3)
         {
-            return Collision.PlaneIntersectsTriangle(ref this, ref vertex1, ref vertex2, ref vertex3);
+            return Collision.PlaneIntersectsTriangle(in this, in vertex1, in vertex2, in vertex3);
         }
 
         /// <summary>
@@ -295,9 +295,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="box">The box to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public PlaneIntersectionType Intersects(ref BoundingBox box)
+        public PlaneIntersectionType Intersects(in BoundingBox box)
         {
-            return Collision.PlaneIntersectsBox(ref this, ref box);
+            return Collision.PlaneIntersectsBox(in this, in box);
         }
 
         /// <summary>
@@ -305,9 +305,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere to test.</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public PlaneIntersectionType Intersects(ref BoundingSphere sphere)
+        public PlaneIntersectionType Intersects(in BoundingSphere sphere)
         {
-            return Collision.PlaneIntersectsSphere(ref this, ref sphere);
+            return Collision.PlaneIntersectsSphere(in this, in sphere);
         }
 
         /// <summary>
@@ -316,7 +316,7 @@ namespace SharpGame
         /// <param name="value">The plane to scale.</param>
         /// <param name="scale">The amount by which to scale the plane.</param>
         /// <param name="result">When the method completes, contains the scaled plane.</param>
-        public static void Multiply(ref Plane value, float scale, out Plane result)
+        public static void Multiply(in Plane value, float scale, out Plane result)
         {
             result.Normal.x = value.Normal.X * scale;
             result.Normal.y = value.Normal.Y * scale;
@@ -341,7 +341,7 @@ namespace SharpGame
         /// <param name="left">The source plane.</param>
         /// <param name="right">The source vector.</param>
         /// <param name="result">When the method completes, contains the dot product of the specified plane and vector.</param>
-        public static void Dot(ref Plane left, ref vec4 right, out float result)
+        public static void Dot(in Plane left, in vec4 right, out float result)
         {
             result = (left.Normal.X * right.x) + (left.Normal.Y * right.y) + (left.Normal.Z * right.z) + (left.D * right.w);
         }
@@ -363,7 +363,7 @@ namespace SharpGame
         /// <param name="left">The source plane.</param>
         /// <param name="right">The source vector.</param>
         /// <param name="result">When the method completes, contains the dot product of a specified vector and the normal of the Plane plus the distance value of the plane.</param>
-        public static void DotCoordinate(ref Plane left, ref vec3 right, out float result)
+        public static void DotCoordinate(in Plane left, in vec3 right, out float result)
         {
             result = (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z) + left.D;
         }
@@ -385,7 +385,7 @@ namespace SharpGame
         /// <param name="left">The source plane.</param>
         /// <param name="right">The source vector.</param>
         /// <param name="result">When the method completes, contains the dot product of the specified vector and the normal of the plane.</param>
-        public static void DotNormal(ref Plane left, ref vec3 right, out float result)
+        public static void DotNormal(in Plane left, in vec3 right, out float result)
         {
             result = (left.Normal.X * right.X) + (left.Normal.Y * right.Y) + (left.Normal.Z * right.Z);
         }
@@ -406,7 +406,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="plane">The source plane.</param>
         /// <param name="result">When the method completes, contains the normalized plane.</param>
-        public static void Normalize(ref Plane plane, out Plane result)
+        public static void Normalize(in Plane plane, out Plane result)
         {
             float magnitude = 1.0f / (float)(Math.Sqrt((plane.Normal.X * plane.Normal.X) + (plane.Normal.Y * plane.Normal.Y) + (plane.Normal.Z * plane.Normal.Z)));
 
@@ -458,7 +458,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator ==(Plane left, Plane right)
         {
-            return left.Equals(ref right);
+            return left.Equals(in right);
         }
 
         /// <summary>
@@ -470,7 +470,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator !=(Plane left, Plane right)
         {
-            return !left.Equals(ref right);
+            return !left.Equals(in right);
         }
 
         /// <summary>
@@ -545,7 +545,7 @@ namespace SharpGame
         /// <c>true</c> if the specified <see cref="vec4"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(ref Plane value)
+        public bool Equals(in Plane value)
         {
             return Normal == value.Normal && D == value.D;
         }
@@ -560,7 +560,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(Plane value)
         {
-            return Equals(ref value);
+            return Equals(in value);
         }
 
         /// <summary>
@@ -576,7 +576,7 @@ namespace SharpGame
                 return false;
 
             var strongValue = (Plane)value;
-            return Equals(ref strongValue);
+            return Equals(in strongValue);
         }
     }
 }

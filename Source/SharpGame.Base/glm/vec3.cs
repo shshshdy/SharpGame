@@ -104,7 +104,7 @@ namespace SharpGame
             }
         }
 
-        public static void Add(ref vec3 left, ref vec3 right, out vec3 result)
+        public static void Add(in vec3 left, in vec3 right, out vec3 result)
         {
             result = new vec3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
         }
@@ -114,7 +114,7 @@ namespace SharpGame
             return new vec3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
         }
 
-        public static void Subtract(ref vec3 left, ref float right, out vec3 result)
+        public static void Subtract(in vec3 left, in float right, out vec3 result)
         {
             result = new vec3(left.X - right, left.Y - right, left.Z - right);
         }
@@ -124,7 +124,7 @@ namespace SharpGame
             return new vec3(left.X - right, left.Y - right, left.Z - right);
         }
 
-        public static void Subtract(ref vec3 left, ref vec3 right, out vec3 result)
+        public static void Subtract(in vec3 left, in vec3 right, out vec3 result)
         {
             result = new vec3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
         }
@@ -134,7 +134,7 @@ namespace SharpGame
             return new vec3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
         }
 
-        public static void Cross(ref vec3 left, ref vec3 right, out vec3 result)
+        public static void Cross(in vec3 left, in vec3 right, out vec3 result)
         {
             result = new vec3(
                 (left.Y * right.Z) - (left.Z * right.Y),
@@ -145,11 +145,11 @@ namespace SharpGame
         public static vec3 Cross(vec3 left, vec3 right)
         {
             vec3 result;
-            Cross(ref left, ref right, out result);
+            Cross(in left, in right, out result);
             return result;
         }
 
-        public static void Distance(ref vec3 value1, ref vec3 value2, out float result)
+        public static void Distance(in vec3 value1, in vec3 value2, out float result)
         {
             float x = value1.X - value2.X;
             float y = value1.Y - value2.Y;
@@ -167,7 +167,7 @@ namespace SharpGame
             return (float)Math.Sqrt((x * x) + (y * y) + (z * z));
         }
 
-        public static void DistanceSquared(ref vec3 value1, ref vec3 value2, out float result)
+        public static void DistanceSquared(in vec3 value1, in vec3 value2, out float result)
         {
             float x = value1.X - value2.X;
             float y = value1.Y - value2.Y;
@@ -185,29 +185,29 @@ namespace SharpGame
             return (x * x) + (y * y) + (z * z);
         }
 
-        public static void Dot(ref vec3 left, ref vec3 right, out float result)
+        public static void Dot(in vec3 left, in vec3 right, out float result)
         {
             result = (left.X * right.X) + (left.Y * right.Y) + (left.Z * right.Z);
         }
 
-        public static float Dot(vec3 left, vec3 right)
+        public static float Dot(in vec3 left, in vec3 right)
         {
             return (left.X * right.X) + (left.Y * right.Y) + (left.Z * right.Z);
         }
 
-        public static void Transform(ref vec3 vector, ref quat rotation, out vec3 result)
+        public static void Transform(in vec3 vector, in quat rotation, out vec3 result)
         {
             result = rotation * vector;
         }
 
-        public static vec3 Transform(vec3 vector, quat rotation)
+        public static vec3 Transform(in vec3 vector, in quat rotation)
         {
             vec3 result;
-            Transform(ref vector, ref rotation, out result);
+            Transform(vector, rotation, out result);
             return result;
         }
 
-        public static void Transform(ref vec3 vector, ref mat3 transform, out vec3 result)
+        public static void Transform(in vec3 vector, in mat3 transform, out vec3 result)
         {
             result = transform* vector;
         }
@@ -215,18 +215,18 @@ namespace SharpGame
         public static vec3 Transform(vec3 vector, mat3 transform)
         {
             vec3 result;
-            Transform(ref vector, ref transform, out result);
+            Transform(in vector, in transform, out result);
             return result;
         }
 
-        public static void Transform(ref vec3 vector, ref mat4 transform, out vec3 result)
+        public static void Transform(in vec3 vector, in mat4 transform, out vec3 result)
         {
             vec4 intermediate;
-            Transform(ref vector, ref transform, out intermediate);
+            Transform(in vector, in transform, out intermediate);
             result = (vec3)intermediate;
         }
 
-        public static void Transform(ref vec3 vector, ref mat4 transform, out vec4 result)
+        public static void Transform(in vec3 vector, in mat4 transform, out vec4 result)
         {
             result = new vec4(
                 (vector.X * transform.M11) + (vector.Y * transform.M21) + (vector.Z * transform.M31) + transform.M41,
@@ -237,14 +237,14 @@ namespace SharpGame
 
         public static vec3 Transform(vec3 vector, mat4 transform) => Transform(vector, transform);
 
-        public static vec3 Transform(ref vec3 vector, ref mat4 transform)
+        public static vec3 Transform(in vec3 vector, in mat4 transform)
         {
             vec3 result;
-            Transform(ref vector, ref transform, out result);
+            Transform(in vector, in transform, out result);
             return result;
         }
 
-        public static void Transform(vec3[] source, ref mat4 transform, vec3[] destination)
+        public static void Transform(vec3[] source, in mat4 transform, vec3[] destination)
         {
             if (source == null)
                 throw new ArgumentNullException("source");
@@ -255,11 +255,11 @@ namespace SharpGame
 
             for (int i = 0; i < source.Length; ++i)
             {
-                Transform(ref source[i], ref transform, out destination[i]);
+                Transform(in source[i], in transform, out destination[i]);
             }
         }
 
-        public static void TransformCoordinate(ref vec3 coordinate, ref mat4 transform, out vec3 result)
+        public static void TransformCoordinate(in vec3 coordinate, in mat4 transform, out vec3 result)
         {
             vec4 vector = new vec4();
             vector.x = (coordinate.X * transform.M11) + (coordinate.Y * transform.M21) + (coordinate.Z * transform.M31) + transform.M41;
@@ -273,11 +273,11 @@ namespace SharpGame
         public static vec3 TransformCoordinate(vec3 coordinate, mat4 transform)
         {
             vec3 result;
-            TransformCoordinate(ref coordinate, ref transform, out result);
+            TransformCoordinate(in coordinate, in transform, out result);
             return result;
         }
 
-        public static void TransformCoordinate(vec3[] source, ref mat4 transform, vec3[] destination)
+        public static void TransformCoordinate(vec3[] source, in mat4 transform, vec3[] destination)
         {
             if (source == null)
                 throw new ArgumentNullException("source");
@@ -288,11 +288,11 @@ namespace SharpGame
 
             for (int i = 0; i < source.Length; ++i)
             {
-                TransformCoordinate(ref source[i], ref transform, out destination[i]);
+                TransformCoordinate(in source[i], in transform, out destination[i]);
             }
         }
 
-        public static void TransformNormal(ref vec3 normal, ref mat4 transform, out vec3 result)
+        public static void TransformNormal(in vec3 normal, in mat4 transform, out vec3 result)
         {
             result = new vec3(
                 (normal.X * transform.M11) + (normal.Y * transform.M21) + (normal.Z * transform.M31),
@@ -303,7 +303,7 @@ namespace SharpGame
         public static vec3 TransformNormal(vec3 normal, mat4 transform)
         {
             vec3 result;
-            TransformNormal(ref normal, ref transform, out result);
+            TransformNormal(in normal, in transform, out result);
             return result;
         }
 
@@ -360,13 +360,13 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator ==(vec3 left, vec3 right)
         {
-            return left.Equals(ref right);
+            return left.Equals(in right);
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator !=(vec3 left, vec3 right)
         {
-            return !left.Equals(ref right);
+            return !left.Equals(in right);
         }
 
         public static explicit operator vec2(vec3 value)
@@ -419,7 +419,7 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(ref vec3 other)
+        public bool Equals(in vec3 other)
         {
             return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z);
         }
@@ -427,7 +427,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(vec3 other)
         {
-            return Equals(ref other);
+            return Equals(in other);
         }
 
         public override bool Equals(object value)
@@ -436,7 +436,7 @@ namespace SharpGame
                 return false;
 
             var strongValue = (vec3)value;
-            return Equals(ref strongValue);
+            return Equals(in strongValue);
         }
 
     }
@@ -453,22 +453,22 @@ namespace SharpGame
             return new vec3(x, y, z);
         }
 
-        public static vec3 vec3(vec4 v)
+        public static vec3 vec3(in vec4 v)
         {
             return new vec3(v.x, v.y, v.z);
         }
 
-        public static float length(vec3 v)
+        public static float length(in vec3 v)
         {
             return (float)Math.Sqrt(dot(v, v));
         }
 
-        public static float length2(vec3 v)
+        public static float length2(in vec3 v)
         {
             return v.x * v.x + v.y * v.y + v.z * v.z;
         }
 
-        public static vec3 cross(vec3 lhs, vec3 rhs)
+        public static vec3 cross(in vec3 lhs, in vec3 rhs)
         {
             return new vec3(
                 lhs.y * rhs.z - rhs.y * lhs.z,
@@ -476,19 +476,19 @@ namespace SharpGame
                 lhs.x * rhs.y - rhs.x * lhs.y);
         }
 
-        public static float dot(vec3 a, vec3 b)
+        public static float dot(in vec3 a, in vec3 b)
         {
             vec3 tmp = new vec3(a * b);
             return tmp.x + tmp.y + tmp.z;
         }
 
-        public static vec3 normalize(vec3 v)
+        public static vec3 normalize(in vec3 v)
         {
             float sqr = v.x * v.x + v.y * v.y + v.z * v.z;
             return v * (1.0f / (float)Math.Sqrt(sqr));
         }
 
-        public static void clamp(ref vec3 value, ref vec3 min, ref vec3 max, out vec3 result)
+        public static void clamp(in vec3 value, in vec3 min, in vec3 max, out vec3 result)
         {
             float x = value.X;
             x = (x > max.X) ? max.X : x;
@@ -505,41 +505,41 @@ namespace SharpGame
             result = new vec3(x, y, z);
         }
 
-        public static vec3 clamp(vec3 value, vec3 min, vec3 max)
+        public static vec3 clamp(in vec3 value, in vec3 min, in vec3 max)
         {
             vec3 result;
-            clamp(ref value, ref min, ref max, out result);
+            clamp(value, min, max, out result);
             return result;
         }
 
-        public static void lerp(ref vec3 start, ref vec3 end, float amount, out vec3 result)
+        public static void lerp(in vec3 start, in vec3 end, float amount, out vec3 result)
         {
             result.x = MathUtil.Lerp(start.X, end.X, amount);
             result.y = MathUtil.Lerp(start.Y, end.Y, amount);
             result.z = MathUtil.Lerp(start.Z, end.Z, amount);
         }
 
-        public static vec3 lerp(vec3 start, vec3 end, float amount)
+        public static vec3 lerp(in vec3 start, in vec3 end, float amount)
         {
             vec3 result;
-            lerp(ref start, ref end, amount, out result);
+            lerp(start, end, amount, out result);
             return result;
         }
 
-        public static void smoothStep(ref vec3 start, ref vec3 end, float amount, out vec3 result)
+        public static void smoothStep(in vec3 start, in vec3 end, float amount, out vec3 result)
         {
             amount = MathUtil.SmoothStep(amount);
-            lerp(ref start, ref end, amount, out result);
+            lerp(start, end, amount, out result);
         }
 
-        public static vec3 smoothStep(vec3 start, vec3 end, float amount)
+        public static vec3 smoothStep(in vec3 start, in vec3 end, float amount)
         {
             vec3 result;
-            smoothStep(ref start, ref end, amount, out result);
+            smoothStep(start, end, amount, out result);
             return result;
         }
 
-        public static void hermite(ref vec3 value1, ref vec3 tangent1, ref vec3 value2, ref vec3 tangent2, float amount, out vec3 result)
+        public static void hermite(in vec3 value1, in vec3 tangent1, in vec3 value2, in vec3 tangent2, float amount, out vec3 result)
         {
             float squared = amount * amount;
             float cubed = amount * squared;
@@ -553,14 +553,14 @@ namespace SharpGame
             result.z = (((value1.Z * part1) + (value2.Z * part2)) + (tangent1.Z * part3)) + (tangent2.Z * part4);
         }
 
-        public static vec3 hermite(vec3 value1, vec3 tangent1, vec3 value2, vec3 tangent2, float amount)
+        public static vec3 hermite(in vec3 value1, in vec3 tangent1, in vec3 value2, in vec3 tangent2, float amount)
         {
             vec3 result;
-            hermite(ref value1, ref tangent1, ref value2, ref tangent2, amount, out result);
+            hermite(value1, tangent1, value2, tangent2, amount, out result);
             return result;
         }
 
-        public static void catmullRom(ref vec3 value1, ref vec3 value2, ref vec3 value3, ref vec3 value4, float amount, out vec3 result)
+        public static void catmullRom(in vec3 value1, in vec3 value2, in vec3 value3, in vec3 value4, float amount, out vec3 result)
         {
             float squared = amount * amount;
             float cubed = amount * squared;
@@ -578,38 +578,38 @@ namespace SharpGame
                 ((((-value1.Z + (3.0f * value2.Z)) - (3.0f * value3.Z)) + value4.Z) * cubed));
         }
 
-        public static vec3 catmullRom(vec3 value1, vec3 value2, vec3 value3, vec3 value4, float amount)
+        public static vec3 catmullRom(in vec3 value1, in vec3 value2, in vec3 value3, in vec3 value4, float amount)
         {
             vec3 result;
-            catmullRom(ref value1, ref value2, ref value3, ref value4, amount, out result);
+            catmullRom(value1, value2, value3, value4, amount, out result);
             return result;
         }
 
-        public static void max(ref vec3 left, ref vec3 right, out vec3 result)
+        public static void max(in vec3 left, in  vec3 right, out vec3 result)
         {
             result.x = (left.X > right.X) ? left.X : right.X;
             result.y = (left.Y > right.Y) ? left.Y : right.Y;
             result.z = (left.Z > right.Z) ? left.Z : right.Z;
         }
 
-        public static vec3 max(vec3 left, vec3 right)
+        public static vec3 max(in vec3 left, in vec3 right)
         {
             vec3 result;
-            max(ref left, ref right, out result);
+            max(left, right, out result);
             return result;
         }
 
-        public static void min(ref vec3 left, ref vec3 right, out vec3 result)
+        public static void min(in vec3 left, in vec3 right, out vec3 result)
         {
             result.x = (left.X < right.X) ? left.X : right.X;
             result.y = (left.Y < right.Y) ? left.Y : right.Y;
             result.z = (left.Z < right.Z) ? left.Z : right.Z;
         }
 
-        public static vec3 min(vec3 left, vec3 right)
+        public static vec3 min(in vec3 left, in vec3 right)
         {
             vec3 result;
-            min(ref left, ref right, out result);
+            min(left, right, out result);
             return result;
         }
     }

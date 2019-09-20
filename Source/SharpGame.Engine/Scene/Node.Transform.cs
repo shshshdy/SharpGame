@@ -94,7 +94,7 @@ namespace SharpGame
         {
             get
             {
-                return glm.transformation(ref position_, ref rotation_, ref scaling_);
+                return glm.transformation(position_, rotation_, scaling_);
             }
         }
 
@@ -235,7 +235,7 @@ namespace SharpGame
         {
             vec3 v1 = vec3.Zero;
             vec4 v2 = vec4.Zero;
-            glm.decompose(ref matrix, ref scaling_, ref rotation_, ref position_, ref v1, ref v2);
+            glm.decompose(matrix, ref scaling_, ref rotation_, ref position_, ref v1, ref v2);
             MarkDirty();
         }
 

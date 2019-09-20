@@ -634,7 +634,7 @@ namespace SharpGame
 
         public bool IsInside(ref BoundingBox box)
         {
-            return frustum_.Contains(ref box) == Intersection.InSide;
+            return frustum_.Contains(box) == Intersection.InSide;
         }
 
         bool HasContent()

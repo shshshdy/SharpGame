@@ -272,18 +272,18 @@ namespace SharpGame
             return new vec2(x, y);
         }
 
-        public static float length(vec2 v)
+        public static float length(in vec2 v)
         {
             return (float)Math.Sqrt(dot(v, v));
         }
 
-        public static vec2 normalize(vec2 v)
+        public static vec2 normalize(in vec2 v)
         {
             float sqr = v.x * v.x + v.y * v.y;
             return v * (1.0f / (float)Math.Sqrt(sqr));
         }
 
-        public static float dot(vec2 a, vec2 b)
+        public static float dot(in vec2 a, in vec2 b)
         {
             vec2 tmp = new vec2(a * b);
             return tmp.x + tmp.y;

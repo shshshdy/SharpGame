@@ -125,7 +125,7 @@ namespace SharpGame
                     {
                         // Note: view matrix is unaffected by node or parent scale
                         vec3 worldPosition = node_.WorldPosition;
-                        view_ = glm.transformation(ref worldPosition, ref node_.WorldRotation);
+                        view_ = glm.transformation(worldPosition, node_.WorldRotation);
                         view_ = glm.inverse(view_);
                         
                     }

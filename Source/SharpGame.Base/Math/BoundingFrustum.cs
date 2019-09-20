@@ -51,7 +51,7 @@ namespace SharpGame
             set
             {
                 pMatrix = value;
-                GetPlanesFromMatrix(ref pMatrix, out pNear, out pFar, out pLeft, out pRight, out pTop, out pBottom);
+                GetPlanesFromMatrix(in pMatrix, out pNear, out pFar, out pLeft, out pRight, out pTop, out pBottom);
             }
         }
         /// <summary>
@@ -122,7 +122,7 @@ namespace SharpGame
         public BoundingFrustum(mat4 matrix)
         {
             pMatrix = matrix;
-            GetPlanesFromMatrix(ref pMatrix, out pNear, out pFar, out pLeft, out pRight, out pTop, out pBottom);
+            GetPlanesFromMatrix(in pMatrix, out pNear, out pFar, out pLeft, out pRight, out pTop, out pBottom);
         }
 
         public override int GetHashCode()
@@ -138,7 +138,7 @@ namespace SharpGame
         ///   <c>true</c> if the specified <see cref="BoundingFrustum"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(ref BoundingFrustum other)
+        public bool Equals(in BoundingFrustum other)
         {
             return this.pMatrix == other.pMatrix;
         }
@@ -153,7 +153,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(BoundingFrustum other)
         {
-            return Equals(ref other);
+            return Equals(in other);
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace SharpGame
                 return false;
 
             var strongValue = (BoundingFrustum)obj;
-            return Equals(ref strongValue);
+            return Equals(in strongValue);
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator ==(BoundingFrustum left, BoundingFrustum right)
         {
-            return left.Equals(ref right);
+            return left.Equals(in right);
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public static bool operator !=(BoundingFrustum left, BoundingFrustum right)
         {
-            return !left.Equals(ref right);
+            return !left.Equals(in right);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace SharpGame
             }
         }
 
-        private static void GetPlanesFromMatrix(ref mat4 matrix, out Plane near, out Plane far, out Plane left, out Plane right, out Plane top, out Plane bottom)
+        private static void GetPlanesFromMatrix(in mat4 matrix, out Plane near, out Plane far, out Plane left, out Plane right, out Plane top, out Plane bottom)
         {
             //http://www.chadvernon.com/blog/resources/directx9/frustum-culling/
 
@@ -267,7 +267,7 @@ namespace SharpGame
             far.Normalize();
         }
 
-        private static vec3 Get3PlanesInterPoint(ref Plane p1, ref Plane p2, ref Plane p3)
+        private static vec3 Get3PlanesInterPoint(in Plane p1, in Plane p2, in Plane p3)
         {
             //P = -d1 * N2xN3 / N1.N2xN3 - d2 * N3xN1 / N2.N3xN1 - d3 * N1xN2 / N3.N1xN2 
             vec3 v =
@@ -364,14 +364,14 @@ namespace SharpGame
         /// <returns>The 8 corners of the frustum</returns>
         public void GetCorners(vec3[] corners)
         {
-            corners[0] = Get3PlanesInterPoint(ref pNear, ref  pBottom, ref  pRight);    //Near1
-            corners[1] = Get3PlanesInterPoint(ref pNear, ref  pTop, ref  pRight);       //Near2
-            corners[2] = Get3PlanesInterPoint(ref pNear, ref  pTop, ref  pLeft);        //Near3
-            corners[3] = Get3PlanesInterPoint(ref pNear, ref  pBottom, ref  pLeft);     //Near3
-            corners[4] = Get3PlanesInterPoint(ref pFar, ref  pBottom, ref  pRight);    //Far1
-            corners[5] = Get3PlanesInterPoint(ref pFar, ref  pTop, ref  pRight);       //Far2
-            corners[6] = Get3PlanesInterPoint(ref pFar, ref  pTop, ref  pLeft);        //Far3
-            corners[7] = Get3PlanesInterPoint(ref pFar, ref  pBottom, ref  pLeft);     //Far3
+            corners[0] = Get3PlanesInterPoint(in pNear, in  pBottom, in  pRight);    //Near1
+            corners[1] = Get3PlanesInterPoint(in pNear, in  pTop, in  pRight);       //Near2
+            corners[2] = Get3PlanesInterPoint(in pNear, in  pTop, in  pLeft);        //Near3
+            corners[3] = Get3PlanesInterPoint(in pNear, in  pBottom, in  pLeft);     //Near3
+            corners[4] = Get3PlanesInterPoint(in pFar, in  pBottom, in  pRight);    //Far1
+            corners[5] = Get3PlanesInterPoint(in pFar, in  pTop, in  pRight);       //Far2
+            corners[6] = Get3PlanesInterPoint(in pFar, in  pTop, in  pLeft);        //Far3
+            corners[7] = Get3PlanesInterPoint(in pFar, in  pBottom, in  pLeft);     //Far3
         }
 
         /// <summary>
@@ -379,7 +379,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="point">The point.</param>
         /// <returns>Type of the containment</returns>
-        public Intersection Contains(ref vec3 point)
+        public Intersection Contains(in vec3 point)
         {
             var result = PlaneIntersectionType.Front;
             var planeResult = PlaneIntersectionType.Front;
@@ -387,12 +387,12 @@ namespace SharpGame
             {
                 switch (i)
                 {
-                    case 0: planeResult = pNear.Intersects(ref point); break;
-                    case 1: planeResult = pFar.Intersects(ref point); break;
-                    case 2: planeResult = pLeft.Intersects(ref point); break;
-                    case 3: planeResult = pRight.Intersects(ref point); break;
-                    case 4: planeResult = pTop.Intersects(ref point); break;
-                    case 5: planeResult = pBottom.Intersects(ref point); break;
+                    case 0: planeResult = pNear.Intersects(in point); break;
+                    case 1: planeResult = pFar.Intersects(in point); break;
+                    case 2: planeResult = pLeft.Intersects(in point); break;
+                    case 3: planeResult = pRight.Intersects(in point); break;
+                    case 4: planeResult = pTop.Intersects(in point); break;
+                    case 5: planeResult = pBottom.Intersects(in point); break;
                 }
                 switch (planeResult)
                 {
@@ -417,7 +417,7 @@ namespace SharpGame
         /// <returns>Type of the containment</returns>
         public Intersection Contains(vec3 point)
         {
-            return Contains(ref point);
+            return Contains(in point);
         }
 
         /// <summary>
@@ -433,7 +433,7 @@ namespace SharpGame
             var containsAll = true;
             for (int i = 0; i < points.Length; i++)
             {
-                switch (Contains(ref points[i]))
+                switch (Contains(in points[i]))
                 {
                     case ContainmentType.Contains:
                     case ContainmentType.Intersects:
@@ -464,7 +464,7 @@ namespace SharpGame
             result = Contains(points);
         }
 
-        private void GetBoxToPlanePVertexNVertex(ref BoundingBox box, ref vec3 planeNormal, out vec3 p, out vec3 n)
+        private void GetBoxToPlanePVertexNVertex(in BoundingBox box, in vec3 planeNormal, out vec3 p, out vec3 n)
         {
             p = box.Minimum;
             if (planeNormal.X >= 0)
@@ -488,7 +488,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="box">The box.</param>
         /// <returns>Type of the containment</returns>
-        public Intersection Contains(ref BoundingBox box)
+        public Intersection Contains(in BoundingBox box)
         {
             vec3 p, n;
             Plane plane;
@@ -496,11 +496,11 @@ namespace SharpGame
             for (int i = 0; i < 6; i++)
             {
                 plane = GetPlane(i);
-                GetBoxToPlanePVertexNVertex(ref box, ref plane.Normal, out p, out n);
-                if (Collision.PlaneIntersectsPoint(ref plane, ref p) == PlaneIntersectionType.Back)
+                GetBoxToPlanePVertexNVertex(in box, in plane.Normal, out p, out n);
+                if (Collision.PlaneIntersectsPoint(in plane, in p) == PlaneIntersectionType.Back)
                     return Intersection.OutSide;
 
-                if (Collision.PlaneIntersectsPoint(ref plane, ref n) == PlaneIntersectionType.Back)
+                if (Collision.PlaneIntersectsPoint(in plane, in n) == PlaneIntersectionType.Back)
                     result = Intersection.Intersects;
             }
             return result;
@@ -513,7 +513,7 @@ namespace SharpGame
         /// <returns>Type of the containment</returns>
         public Intersection Contains(BoundingBox box)
         {
-            return Contains(ref box);
+            return Contains(in box);
         }
 
         /// <summary>
@@ -521,9 +521,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="box">The box.</param>
         /// <param name="result">Type of the containment.</param>
-        public void Contains(ref BoundingBox box, out Intersection result)
+        public void Contains(in BoundingBox box, out Intersection result)
         {
-            result = Contains(ref box);
+            result = Contains(in box);
         }
 
         /// <summary>
@@ -531,7 +531,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <returns>Type of the containment</returns>
-        public Intersection Contains(ref BoundingSphere sphere)
+        public Intersection Contains(in BoundingSphere sphere)
         {
             var result = PlaneIntersectionType.Front;
             var planeResult = PlaneIntersectionType.Front;
@@ -539,12 +539,12 @@ namespace SharpGame
             {
                 switch (i)
                 {
-                    case 0: planeResult = pNear.Intersects(ref sphere); break;
-                    case 1: planeResult = pFar.Intersects(ref sphere); break;
-                    case 2: planeResult = pLeft.Intersects(ref sphere); break;
-                    case 3: planeResult = pRight.Intersects(ref sphere); break;
-                    case 4: planeResult = pTop.Intersects(ref sphere); break;
-                    case 5: planeResult = pBottom.Intersects(ref sphere); break;
+                    case 0: planeResult = pNear.Intersects(in sphere); break;
+                    case 1: planeResult = pFar.Intersects(in sphere); break;
+                    case 2: planeResult = pLeft.Intersects(in sphere); break;
+                    case 3: planeResult = pRight.Intersects(in sphere); break;
+                    case 4: planeResult = pTop.Intersects(in sphere); break;
+                    case 5: planeResult = pBottom.Intersects(in sphere); break;
                 }
                 switch (planeResult)
                 {
@@ -569,7 +569,7 @@ namespace SharpGame
         /// <returns>Type of the containment</returns>
         public Intersection Contains(BoundingSphere sphere)
         {
-            return Contains(ref sphere);
+            return Contains(in sphere);
         }
 
         /// <summary>
@@ -577,9 +577,9 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <param name="result">Type of the containment.</param>
-        public void Contains(ref BoundingSphere sphere, out Intersection result)
+        public void Contains(in BoundingSphere sphere, out Intersection result)
         {
-            result = Contains(ref sphere);
+            result = Contains(in sphere);
         }
 
         /// <summary>
@@ -587,7 +587,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="frustum">The frustum.</param>
         /// <returns>Type of the containment</returns>
-        public bool Contains(ref BoundingFrustum frustum)
+        public bool Contains(in BoundingFrustum frustum)
         {
             return Contains(frustum.GetCorners()) != Intersection.OutSide;
         }
@@ -599,7 +599,7 @@ namespace SharpGame
         /// <returns>Type of the containment</returns>
         public bool Contains(BoundingFrustum frustum)
         {
-            return Contains(ref frustum);
+            return Contains(in frustum);
         }
 
         /// <summary>
@@ -607,7 +607,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="frustum">The frustum.</param>
         /// <param name="result">Type of the containment.</param>
-        public void Contains(ref BoundingFrustum frustum, out bool result)
+        public void Contains(in BoundingFrustum frustum, out bool result)
         {
             result = Contains(frustum.GetCorners()) != Intersection.OutSide;
         }
@@ -617,43 +617,43 @@ namespace SharpGame
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <returns>Type of the containment</returns>
-        public bool Intersects(ref BoundingSphere sphere)
+        public bool Intersects(in BoundingSphere sphere)
         {
-            return Contains(ref sphere) != Intersection.OutSide;
+            return Contains(in sphere) != Intersection.OutSide;
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects a BoundingSphere.
         /// </summary>
         /// <param name="sphere">The sphere.</param>
         /// <param name="result">Set to <c>true</c> if the current BoundingFrustum intersects a BoundingSphere.</param>
-        public void Intersects(ref BoundingSphere sphere, out bool result)
+        public void Intersects(in BoundingSphere sphere, out bool result)
         {
-            result = Contains(ref sphere) != Intersection.OutSide;
+            result = Contains(in sphere) != Intersection.OutSide;
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects a BoundingBox.
         /// </summary>
         /// <param name="box">The box.</param>
         /// <returns><c>true</c> if the current BoundingFrustum intersects a BoundingSphere.</returns>
-        public bool Intersects(ref BoundingBox box)
+        public bool Intersects(in BoundingBox box)
         {
-            return Contains(ref box) != Intersection.OutSide;
+            return Contains(in box) != Intersection.OutSide;
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects a BoundingBox.
         /// </summary>
         /// <param name="box">The box.</param>
         /// <param name="result"><c>true</c> if the current BoundingFrustum intersects a BoundingSphere.</param>
-        public void Intersects(ref BoundingBox box, out bool result)
+        public void Intersects(in BoundingBox box, out bool result)
         {
-            result = Contains(ref box) != Intersection.OutSide;
+            result = Contains(in box) != Intersection.OutSide;
         }
 
-        private PlaneIntersectionType PlaneIntersectsPoints(ref Plane plane, vec3[] points)
+        private PlaneIntersectionType PlaneIntersectsPoints(in Plane plane, vec3[] points)
         {
-            var result = Collision.PlaneIntersectsPoint(ref plane, ref points[0]);
+            var result = Collision.PlaneIntersectsPoint(in plane, in points[0]);
             for (int i = 1; i < points.Length; i++)
-                if (Collision.PlaneIntersectsPoint(ref plane, ref points[i]) != result)
+                if (Collision.PlaneIntersectsPoint(in plane, in points[i]) != result)
                     return PlaneIntersectionType.Intersecting;
             return result;
         }
@@ -663,18 +663,18 @@ namespace SharpGame
         /// </summary>
         /// <param name="plane">The plane.</param>
         /// <returns>Plane intersection type.</returns>
-        public PlaneIntersectionType Intersects(ref Plane plane)
+        public PlaneIntersectionType Intersects(in Plane plane)
         {
-            return PlaneIntersectsPoints(ref plane, GetCorners());
+            return PlaneIntersectsPoints(in plane, GetCorners());
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects the specified Plane.
         /// </summary>
         /// <param name="plane">The plane.</param>
         /// <param name="result">Plane intersection type.</param>
-        public void Intersects(ref Plane plane, out PlaneIntersectionType result)
+        public void Intersects(in Plane plane, out PlaneIntersectionType result)
         {
-            result = PlaneIntersectsPoints(ref plane, GetCorners());
+            result = PlaneIntersectsPoints(in plane, GetCorners());
         }
 
         /// <summary>
@@ -716,10 +716,10 @@ namespace SharpGame
         /// </summary>
         /// <param name="ray">The ray.</param>
         /// <returns><c>true</c> if the current BoundingFrustum intersects the specified Ray.</returns>
-        public bool Intersects(ref Ray ray)
+        public bool Intersects(in Ray ray)
         {
             float? inDist, outDist;
-            return Intersects(ref ray, out inDist, out outDist);
+            return Intersects(in ray, out inDist, out outDist);
         }
         /// <summary>
         /// Checks whether the current BoundingFrustum intersects the specified Ray.
@@ -728,7 +728,7 @@ namespace SharpGame
         /// <param name="inDistance">The distance at which the ray enters the frustum if there is an intersection and the ray starts outside the frustum.</param>
         /// <param name="outDistance">The distance at which the ray exits the frustum if there is an intersection.</param>
         /// <returns><c>true</c> if the current BoundingFrustum intersects the specified Ray.</returns>
-        public bool Intersects(ref Ray ray, out float? inDistance, out float? outDistance)
+        public bool Intersects(in Ray ray, out float? inDistance, out float? outDistance)
         {
             if (Contains(ray.Position) != Intersection.OutSide)
             {
@@ -737,7 +737,7 @@ namespace SharpGame
                 {
                     var plane = GetPlane(i);
                     float distance;
-                    if (Collision.RayIntersectsPlane(ref ray, ref plane, out distance) && distance < nearstPlaneDistance)
+                    if (Collision.RayIntersectsPlane(in ray, in plane, out distance) && distance < nearstPlaneDistance)
                     {
                         nearstPlaneDistance = distance;
                     }
@@ -758,7 +758,7 @@ namespace SharpGame
                 {
                     var plane = GetPlane(i);
                     float distance;
-                    if (Collision.RayIntersectsPlane(ref ray, ref plane, out distance))
+                    if (Collision.RayIntersectsPlane(in ray, in plane, out distance))
                     {
                         minDist = Math.Min(minDist, distance);
                         maxDist = Math.Max(maxDist, distance);
@@ -768,7 +768,7 @@ namespace SharpGame
                 vec3 minPoint = ray.Position + ray.Direction * minDist;
                 vec3 maxPoint = ray.Position + ray.Direction * maxDist;
                 vec3 center = (minPoint + maxPoint) / 2f;
-                if (Contains(ref center) != Intersection.OutSide)
+                if (Contains(in center) != Intersection.OutSide)
                 {
                     inDistance = minDist;
                     outDistance = maxDist;
@@ -804,10 +804,10 @@ namespace SharpGame
             float maxPointDist = float.MinValue;
             for (int i = 0; i < points.Length; i++)
             {
-                float pointDist = Collision.DistancePlanePoint(ref ioFrustrum.pTop, ref points[i]);
-                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(ref ioFrustrum.pBottom, ref points[i]));
-                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(ref ioFrustrum.pLeft, ref points[i]) * horizontalToVerticalMapping);
-                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(ref ioFrustrum.pRight, ref points[i]) * horizontalToVerticalMapping);
+                float pointDist = Collision.DistancePlanePoint(in ioFrustrum.pTop, in points[i]);
+                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(in ioFrustrum.pBottom, in points[i]));
+                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(in ioFrustrum.pLeft, in points[i]) * horizontalToVerticalMapping);
+                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(in ioFrustrum.pRight, in points[i]) * horizontalToVerticalMapping);
 
                 maxPointDist = Math.Max(maxPointDist, pointDist);
             }
@@ -822,7 +822,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="boundingBox">The bounding box.</param>
         /// <returns>The zoom to fit distance</returns>
-        public float GetZoomToExtentsShiftDistance(ref BoundingBox boundingBox)
+        public float GetZoomToExtentsShiftDistance(in BoundingBox boundingBox)
         {
             return GetZoomToExtentsShiftDistance(boundingBox.GetCorners());
         }
@@ -843,7 +843,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="boundingBox">The bounding box.</param>
         /// <returns>The zoom to fit vector</returns>
-        public vec3 GetZoomToExtentsShiftVector(ref BoundingBox boundingBox)
+        public vec3 GetZoomToExtentsShiftVector(in BoundingBox boundingBox)
         {
             return GetZoomToExtentsShiftDistance(boundingBox.GetCorners()) * pNear.Normal;
         }

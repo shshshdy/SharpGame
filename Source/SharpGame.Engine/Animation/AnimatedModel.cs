@@ -148,14 +148,14 @@ namespace SharpGame
             {
                 for(int i = 0; i < batches.Length; ++i)
                 {
-                    vec3.Transform(ref geometryData_[i].center_, ref worldTransform, out vec3 worldCenter);
+                    vec3.Transform(geometryData_[i].center_, worldTransform, out vec3 worldCenter);
                     batches[i].distance = frame.camera.GetDistance(worldCenter);
                 }
             }
 
             // Use a transformed version of the model's bounding box instead of world bounding box for LOD scale
             // determination so that animation does not change the scale
-            BoundingBox transformedBoundingBox = boundingBox_.Transformed(ref worldTransform);
+            BoundingBox transformedBoundingBox = boundingBox_.Transformed(worldTransform);
             float scale = vec3.Dot(transformedBoundingBox.Size, (vec3)MathUtil.DotScale);
             float newLodDistance = frame.camera.GetLodDistance(distance_, scale, lodBias_);
 
@@ -613,12 +613,12 @@ namespace SharpGame
                     if((i.collisionMask_ & Bone.BONECOLLISION_BOX) != 0)
                     {
                         var m = boneNode.WorldTransform * inverseNodeTransform;
-                        boneBoundingBox_.Merge(i.boundingBox_.Transformed(ref m));
+                        boneBoundingBox_.Merge(i.boundingBox_.Transformed(m));
                     }
                     else if((i.collisionMask_ & Bone.BONECOLLISION_SPHERE) != 0)
                     {
                         var bs = new BoundingSphere(vec3.Transform(boneNode.WorldPosition, inverseNodeTransform), i.radius_ * 0.5f);
-                        boneBoundingBox_.Merge(ref bs);
+                        boneBoundingBox_.Merge(bs);
                     }
                 }
             }
@@ -657,7 +657,7 @@ namespace SharpGame
             if(isMaster_)
             {
                 // Note: do not update bone bounding box here, instead do it in either of the threaded updates
-                worldBoundingBox_ = boneBoundingBox_.Transformed(ref node_.WorldTransform);
+                worldBoundingBox_ = boneBoundingBox_.Transformed(node_.WorldTransform);
                 //worldBoundingBox_ = boundingBox_.Transformed(ref node_.WorldTransform);
             }
             else
