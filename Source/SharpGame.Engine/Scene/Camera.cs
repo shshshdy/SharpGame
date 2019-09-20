@@ -49,7 +49,7 @@ namespace SharpGame
         /// Cached vulkan projection matrix.
         mat4 vkProjection_;
         /// Cached world space frustum.
-        BoundingFrustum frustum_;
+        Frustum frustum_;
 
         /// View matrix dirty flag.
         bool viewDirty_ = true;
@@ -142,7 +142,7 @@ namespace SharpGame
         }
 
         [IgnoreDataMember]
-        public ref BoundingFrustum Frustum
+        public ref Frustum Frustum
         {
             get
             {

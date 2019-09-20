@@ -50,8 +50,8 @@ namespace SharpGame
         /// </remarks>
         public OrientedBoundingBox(BoundingBox bb)
         {
-            var Center = bb.Minimum + (bb.Maximum - bb.Minimum) / 2f;
-            Extents = bb.Maximum - Center;
+            var Center = bb.min + (bb.max - bb.min) / 2f;
+            Extents = bb.max - Center;
             Transformation = glm.translate(Center);
         }
 
@@ -536,8 +536,8 @@ namespace SharpGame
             if (cornersCheck != Intersection.OutSide)
                 return cornersCheck;
 
-            var boxCenter = box.Minimum + (box.Maximum - box.Minimum) / 2f;
-            var boxExtents = box.Maximum - boxCenter;
+            var boxCenter = box.min + (box.max - box.min) / 2f;
+            var boxExtents = box.max - boxCenter;
 
             var SizeA = Extents;
             var SizeB = boxExtents;

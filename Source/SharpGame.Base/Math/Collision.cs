@@ -223,8 +223,8 @@ namespace SharpGame
             //Reference: Page 130
 
             vec3 temp;
-            glm.max(in point, in box.Minimum, out temp);
-            glm.min(in temp, in box.Maximum, out result);
+            glm.max(in point, in box.min, out temp);
+            glm.min(in temp, in box.max, out result);
         }
 
         /// <summary>
@@ -309,20 +309,20 @@ namespace SharpGame
 
             float distance = 0f;
 
-            if (point.X < box.Minimum.X)
-                distance += (box.Minimum.X - point.X) * (box.Minimum.X - point.X);
-            if (point.X > box.Maximum.X)
-                distance += (point.X - box.Maximum.X) * (point.X - box.Maximum.X);
+            if (point.X < box.min.X)
+                distance += (box.min.X - point.X) * (box.min.X - point.X);
+            if (point.X > box.max.X)
+                distance += (point.X - box.max.X) * (point.X - box.max.X);
 
-            if (point.Y < box.Minimum.Y)
-                distance += (box.Minimum.Y - point.Y) * (box.Minimum.Y - point.Y);
-            if (point.Y > box.Maximum.Y)
-                distance += (point.Y - box.Maximum.Y) * (point.Y - box.Maximum.Y);
+            if (point.Y < box.min.Y)
+                distance += (box.min.Y - point.Y) * (box.min.Y - point.Y);
+            if (point.Y > box.max.Y)
+                distance += (point.Y - box.max.Y) * (point.Y - box.max.Y);
 
-            if (point.Z < box.Minimum.Z)
-                distance += (box.Minimum.Z - point.Z) * (box.Minimum.Z - point.Z);
-            if (point.Z > box.Maximum.Z)
-                distance += (point.Z - box.Maximum.Z) * (point.Z - box.Maximum.Z);
+            if (point.Z < box.min.Z)
+                distance += (box.min.Z - point.Z) * (box.min.Z - point.Z);
+            if (point.Z > box.max.Z)
+                distance += (point.Z - box.max.Z) * (point.Z - box.max.Z);
 
             return (float)Math.Sqrt(distance);
         }
@@ -341,38 +341,38 @@ namespace SharpGame
             float distance = 0f;
 
             //Distance for X.
-            if (box1.Minimum.X > box2.Maximum.X)
+            if (box1.min.X > box2.max.X)
             {
-                float delta = box2.Maximum.X - box1.Minimum.X;
+                float delta = box2.max.X - box1.min.X;
                 distance += delta * delta;
             }
-            else if (box2.Minimum.X > box1.Maximum.X)
+            else if (box2.min.X > box1.max.X)
             {
-                float delta = box1.Maximum.X - box2.Minimum.X;
+                float delta = box1.max.X - box2.min.X;
                 distance += delta * delta;
             }
 
             //Distance for Y.
-            if (box1.Minimum.Y > box2.Maximum.Y)
+            if (box1.min.Y > box2.max.Y)
             {
-                float delta = box2.Maximum.Y - box1.Minimum.Y;
+                float delta = box2.max.Y - box1.min.Y;
                 distance += delta * delta;
             }
-            else if (box2.Minimum.Y > box1.Maximum.Y)
+            else if (box2.min.Y > box1.max.Y)
             {
-                float delta = box1.Maximum.Y - box2.Minimum.Y;
+                float delta = box1.max.Y - box2.min.Y;
                 distance += delta * delta;
             }
 
             //Distance for Z.
-            if (box1.Minimum.Z > box2.Maximum.Z)
+            if (box1.min.Z > box2.max.Z)
             {
-                float delta = box2.Maximum.Z - box1.Minimum.Z;
+                float delta = box2.max.Z - box1.min.Z;
                 distance += delta * delta;
             }
-            else if (box2.Minimum.Z > box1.Maximum.Z)
+            else if (box2.min.Z > box1.max.Z)
             {
-                float delta = box1.Maximum.Z - box2.Minimum.Z;
+                float delta = box1.max.Z - box2.min.Z;
                 distance += delta * delta;
             }
 
@@ -750,7 +750,7 @@ namespace SharpGame
 
             if (MathUtil.IsZero(ray.direction.X))
             {
-                if (ray.origin.X < box.Minimum.X || ray.origin.X > box.Maximum.X)
+                if (ray.origin.X < box.min.X || ray.origin.X > box.max.X)
                 {
                     distance = 0f;
                     return false;
@@ -759,8 +759,8 @@ namespace SharpGame
             else
             {
                 float inverse = 1.0f / ray.direction.X;
-                float t1 = (box.Minimum.X - ray.origin.X) * inverse;
-                float t2 = (box.Maximum.X - ray.origin.X) * inverse;
+                float t1 = (box.min.X - ray.origin.X) * inverse;
+                float t2 = (box.max.X - ray.origin.X) * inverse;
 
                 if (t1 > t2)
                 {
@@ -781,7 +781,7 @@ namespace SharpGame
 
             if (MathUtil.IsZero(ray.direction.Y))
             {
-                if (ray.origin.Y < box.Minimum.Y || ray.origin.Y > box.Maximum.Y)
+                if (ray.origin.Y < box.min.Y || ray.origin.Y > box.max.Y)
                 {
                     distance = 0f;
                     return false;
@@ -790,8 +790,8 @@ namespace SharpGame
             else
             {
                 float inverse = 1.0f / ray.direction.Y;
-                float t1 = (box.Minimum.Y - ray.origin.Y) * inverse;
-                float t2 = (box.Maximum.Y - ray.origin.Y) * inverse;
+                float t1 = (box.min.Y - ray.origin.Y) * inverse;
+                float t2 = (box.max.Y - ray.origin.Y) * inverse;
 
                 if (t1 > t2)
                 {
@@ -812,7 +812,7 @@ namespace SharpGame
 
             if (MathUtil.IsZero(ray.direction.Z))
             {
-                if (ray.origin.Z < box.Minimum.Z || ray.origin.Z > box.Maximum.Z)
+                if (ray.origin.Z < box.min.Z || ray.origin.Z > box.max.Z)
                 {
                     distance = 0f;
                     return false;
@@ -821,8 +821,8 @@ namespace SharpGame
             else
             {
                 float inverse = 1.0f / ray.direction.Z;
-                float t1 = (box.Minimum.Z - ray.origin.Z) * inverse;
-                float t2 = (box.Maximum.Z - ray.origin.Z) * inverse;
+                float t1 = (box.min.Z - ray.origin.Z) * inverse;
+                float t2 = (box.max.Z - ray.origin.Z) * inverse;
 
                 if (t1 > t2)
                 {
@@ -1056,12 +1056,12 @@ namespace SharpGame
             vec3 min;
             vec3 max;
 
-            max.x = (plane.normal.X >= 0.0f) ? box.Minimum.X : box.Maximum.X;
-            max.y = (plane.normal.Y >= 0.0f) ? box.Minimum.Y : box.Maximum.Y;
-            max.z = (plane.normal.Z >= 0.0f) ? box.Minimum.Z : box.Maximum.Z;
-            min.x = (plane.normal.X >= 0.0f) ? box.Maximum.X : box.Minimum.X;
-            min.y = (plane.normal.Y >= 0.0f) ? box.Maximum.Y : box.Minimum.Y;
-            min.z = (plane.normal.Z >= 0.0f) ? box.Maximum.Z : box.Minimum.Z;
+            max.x = (plane.normal.X >= 0.0f) ? box.min.X : box.max.X;
+            max.y = (plane.normal.Y >= 0.0f) ? box.min.Y : box.max.Y;
+            max.z = (plane.normal.Z >= 0.0f) ? box.min.Z : box.max.Z;
+            min.x = (plane.normal.X >= 0.0f) ? box.max.X : box.min.X;
+            min.y = (plane.normal.Y >= 0.0f) ? box.max.Y : box.min.Y;
+            min.z = (plane.normal.Z >= 0.0f) ? box.max.Z : box.min.Z;
 
             float distance;
             vec3.Dot(in plane.normal, in max, out distance);
@@ -1133,13 +1133,13 @@ namespace SharpGame
         /// <returns>Whether the two objects intersected.</returns>
         public static bool BoxIntersectsBox(in BoundingBox box1, in BoundingBox box2)
         {
-            if (box1.Minimum.X > box2.Maximum.X || box2.Minimum.X > box1.Maximum.X)
+            if (box1.min.X > box2.max.X || box2.min.X > box1.max.X)
                 return false;
 
-            if (box1.Minimum.Y > box2.Maximum.Y || box2.Minimum.Y > box1.Maximum.Y)
+            if (box1.min.Y > box2.max.Y || box2.min.Y > box1.max.Y)
                 return false;
 
-            if (box1.Minimum.Z > box2.Maximum.Z || box2.Minimum.Z > box1.Maximum.Z)
+            if (box1.min.Z > box2.max.Z || box2.min.Z > box1.max.Z)
                 return false;
 
             return true;
@@ -1157,7 +1157,7 @@ namespace SharpGame
             //Reference: Page 166
 
             vec3 vector;
-            glm.clamp(in sphere.center, in box.Minimum, in box.Maximum, out vector);
+            glm.clamp(in sphere.center, in box.min, in box.max, out vector);
             float distance = vec3.DistanceSquared(sphere.center, vector);
 
             return distance <= sphere.radius * sphere.radius;
@@ -1206,9 +1206,9 @@ namespace SharpGame
         /// <returns>The type of containment the two objects have.</returns>
         public static Intersection BoxContainsPoint(in BoundingBox box, in vec3 point)
         {
-            if (box.Minimum.X <= point.X && box.Maximum.X >= point.X &&
-                box.Minimum.Y <= point.Y && box.Maximum.Y >= point.Y &&
-                box.Minimum.Z <= point.Z && box.Maximum.Z >= point.Z)
+            if (box.min.X <= point.X && box.max.X >= point.X &&
+                box.min.Y <= point.Y && box.max.Y >= point.Y &&
+                box.min.Z <= point.Z && box.max.Z >= point.Z)
             {
                 return Intersection.InSide;
             }
@@ -1249,18 +1249,18 @@ namespace SharpGame
         /// <returns>The type of containment the two objects have.</returns>
         public static Intersection BoxContainsBox(in BoundingBox box1, in BoundingBox box2)
         {
-            if (box1.Maximum.X < box2.Minimum.X || box1.Minimum.X > box2.Maximum.X)
+            if (box1.max.X < box2.min.X || box1.min.X > box2.max.X)
                 return Intersection.OutSide;
 
-            if (box1.Maximum.Y < box2.Minimum.Y || box1.Minimum.Y > box2.Maximum.Y)
+            if (box1.max.Y < box2.min.Y || box1.min.Y > box2.max.Y)
                 return Intersection.OutSide;
 
-            if (box1.Maximum.Z < box2.Minimum.Z || box1.Minimum.Z > box2.Maximum.Z)
+            if (box1.max.Z < box2.min.Z || box1.min.Z > box2.max.Z)
                 return Intersection.OutSide;
 
-            if (box1.Minimum.X <= box2.Minimum.X && (box2.Maximum.X <= box1.Maximum.X &&
-                box1.Minimum.Y <= box2.Minimum.Y && box2.Maximum.Y <= box1.Maximum.Y) &&
-                box1.Minimum.Z <= box2.Minimum.Z && box2.Maximum.Z <= box1.Maximum.Z)
+            if (box1.min.X <= box2.min.X && (box2.max.X <= box1.max.X &&
+                box1.min.Y <= box2.min.Y && box2.max.Y <= box1.max.Y) &&
+                box1.min.Z <= box2.min.Z && box2.max.Z <= box1.max.Z)
             {
                 return Intersection.InSide;
             }
@@ -1277,15 +1277,15 @@ namespace SharpGame
         public static Intersection BoxContainsSphere(in BoundingBox box, in Sphere sphere)
         {
             vec3 vector;
-            glm.clamp(in sphere.center, in box.Minimum, in box.Maximum, out vector);
+            glm.clamp(in sphere.center, in box.min, in box.max, out vector);
             float distance = vec3.DistanceSquared(sphere.center, vector);
 
             if (distance > sphere.radius * sphere.radius)
                 return Intersection.OutSide;
 
-            if ((((box.Minimum.X + sphere.radius <= sphere.center.X) && (sphere.center.X <= box.Maximum.X - sphere.radius)) && ((box.Maximum.X - box.Minimum.X > sphere.radius) &&
-                (box.Minimum.Y + sphere.radius <= sphere.center.Y))) && (((sphere.center.Y <= box.Maximum.Y - sphere.radius) && (box.Maximum.Y - box.Minimum.Y > sphere.radius)) &&
-                (((box.Minimum.Z + sphere.radius <= sphere.center.Z) && (sphere.center.Z <= box.Maximum.Z - sphere.radius)) && (box.Maximum.Z - box.Minimum.Z > sphere.radius))))
+            if ((((box.min.X + sphere.radius <= sphere.center.X) && (sphere.center.X <= box.max.X - sphere.radius)) && ((box.max.X - box.min.X > sphere.radius) &&
+                (box.min.Y + sphere.radius <= sphere.center.Y))) && (((sphere.center.Y <= box.max.Y - sphere.radius) && (box.max.Y - box.min.Y > sphere.radius)) &&
+                (((box.min.Z + sphere.radius <= sphere.center.Z) && (sphere.center.Z <= box.max.Z - sphere.radius)) && (box.max.Z - box.min.Z > sphere.radius))))
             {
                 return Intersection.InSide;
             }
@@ -1347,58 +1347,58 @@ namespace SharpGame
                 return Intersection.OutSide;
 
             float radiussquared = sphere.radius * sphere.radius;
-            vector.x = sphere.center.X - box.Minimum.X;
-            vector.y = sphere.center.Y - box.Maximum.Y;
-            vector.z = sphere.center.Z - box.Maximum.Z;
+            vector.x = sphere.center.X - box.min.X;
+            vector.y = sphere.center.Y - box.max.Y;
+            vector.z = sphere.center.Z - box.max.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;
 
-            vector.x = sphere.center.X - box.Maximum.X;
-            vector.y = sphere.center.Y - box.Maximum.Y;
-            vector.z = sphere.center.Z - box.Maximum.Z;
+            vector.x = sphere.center.X - box.max.X;
+            vector.y = sphere.center.Y - box.max.Y;
+            vector.z = sphere.center.Z - box.max.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;
 
-            vector.X = sphere.center.X - box.Maximum.X;
-            vector.Y = sphere.center.Y - box.Minimum.Y;
-            vector.Z = sphere.center.Z - box.Maximum.Z;
+            vector.X = sphere.center.X - box.max.X;
+            vector.Y = sphere.center.Y - box.min.Y;
+            vector.Z = sphere.center.Z - box.max.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;
 
-            vector.X = sphere.center.X - box.Minimum.X;
-            vector.Y = sphere.center.Y - box.Minimum.Y;
-            vector.Z = sphere.center.Z - box.Maximum.Z;
+            vector.X = sphere.center.X - box.min.X;
+            vector.Y = sphere.center.Y - box.min.Y;
+            vector.Z = sphere.center.Z - box.max.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;
 
-            vector.X = sphere.center.X - box.Minimum.X;
-            vector.Y = sphere.center.Y - box.Maximum.Y;
-            vector.Z = sphere.center.Z - box.Minimum.Z;
+            vector.X = sphere.center.X - box.min.X;
+            vector.Y = sphere.center.Y - box.max.Y;
+            vector.Z = sphere.center.Z - box.min.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;
 
-            vector.X = sphere.center.X - box.Maximum.X;
-            vector.Y = sphere.center.Y - box.Maximum.Y;
-            vector.Z = sphere.center.Z - box.Minimum.Z;
+            vector.X = sphere.center.X - box.max.X;
+            vector.Y = sphere.center.Y - box.max.Y;
+            vector.Z = sphere.center.Z - box.min.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;
 
-            vector.X = sphere.center.X - box.Maximum.X;
-            vector.Y = sphere.center.Y - box.Minimum.Y;
-            vector.Z = sphere.center.Z - box.Minimum.Z;
+            vector.X = sphere.center.X - box.max.X;
+            vector.Y = sphere.center.Y - box.min.Y;
+            vector.Z = sphere.center.Z - box.min.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;
 
-            vector.X = sphere.center.X - box.Minimum.X;
-            vector.Y = sphere.center.Y - box.Minimum.Y;
-            vector.Z = sphere.center.Z - box.Minimum.Z;
+            vector.X = sphere.center.X - box.min.X;
+            vector.Y = sphere.center.Y - box.min.Y;
+            vector.Z = sphere.center.Z - box.min.Z;
 
             if (vector.LengthSquared() > radiussquared)
                 return Intersection.Intersects;

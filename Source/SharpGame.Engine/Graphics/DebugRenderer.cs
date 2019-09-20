@@ -64,7 +64,7 @@ namespace SharpGame
         /// Projection transform in API-specific format.
         mat4 vkProjection_;
         /// View frustum.
-        BoundingFrustum frustum_;
+        Frustum frustum_;
         /// Line antialiasing flag.
         bool lineAntiAlias_;
 
@@ -160,8 +160,8 @@ namespace SharpGame
 
         public void AddBoundingBox(ref BoundingBox box, Color color, bool depthTest = true, bool solid = false)
         {
-            vec3 min = box.Minimum;
-            vec3 max = box.Maximum;
+            vec3 min = box.min;
+            vec3 max = box.max;
 
             vec3 v1 = new vec3(max.X, min.Y, min.Z);
             vec3 v2 = new vec3(max.X, max.Y, min.Z);
@@ -200,8 +200,8 @@ namespace SharpGame
 
         public void AddBoundingBox(ref BoundingBox box, ref mat4 transform, Color color, bool depthTest, bool solid)
         {
-            vec3 min = box.Minimum;
-            vec3 max = box.Maximum;
+            vec3 min = box.min;
+            vec3 max = box.max;
 
             vec3 v0 = vec3.Transform(min, transform);
             vec3 v1 = vec3.Transform(new vec3(max.X, min.Y, min.Z), transform);

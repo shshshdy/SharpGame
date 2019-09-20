@@ -29,89 +29,29 @@ namespace SharpGame
     /// (matrix, frustum, camera) interchange, and many kind of intersection testing.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct BoundingFrustum : IEquatable<BoundingFrustum>
+    public struct Frustum : IEquatable<Frustum>
     {
-        private mat4 pMatrix;
-        private Plane  pNear;
-        private Plane  pFar;
-        private Plane  pLeft;
-        private Plane  pRight;
-        private Plane  pTop;
-        private Plane  pBottom;
+        private mat4 matrix;
+        private Plane  near;
+        private Plane  far;
+        private Plane  left;
+        private Plane  right;
+        private Plane  top;
+        private Plane  bottom;
 
         /// <summary>
         /// Gets or sets the mat4 that describes this bounding frustum.
         /// </summary>
-        public mat4 mat4
+        public mat4 Matrix
         {
             get
             {
-                return pMatrix;
+                return matrix;
             }
             set
             {
-                pMatrix = value;
-                GetPlanesFromMatrix(in pMatrix, out pNear, out pFar, out pLeft, out pRight, out pTop, out pBottom);
-            }
-        }
-        /// <summary>
-        /// Gets the near plane of the BoundingFrustum.
-        /// </summary>
-        public Plane Near
-        {
-            get
-            {
-                return pNear;
-            }
-        }
-        /// <summary>
-        /// Gets the far plane of the BoundingFrustum.
-        /// </summary>
-        public Plane Far
-        {
-            get
-            {
-                return pFar;
-            }
-        }
-        /// <summary>
-        /// Gets the left plane of the BoundingFrustum.
-        /// </summary>
-        public Plane Left
-        {
-            get
-            {
-                return pLeft;
-            }
-        }
-        /// <summary>
-        /// Gets the right plane of the BoundingFrustum.
-        /// </summary>
-        public Plane Right
-        {
-            get
-            {
-                return pRight;
-            }
-        }
-        /// <summary>
-        /// Gets the top plane of the BoundingFrustum.
-        /// </summary>
-        public Plane Top
-        {
-            get
-            {
-                return pTop;
-            }
-        }
-        /// <summary>
-        /// Gets the bottom plane of the BoundingFrustum.
-        /// </summary>
-        public Plane Bottom
-        {
-            get
-            {
-                return pBottom;
+                matrix = value;
+                GetPlanesFromMatrix(in matrix, out near, out far, out left, out right, out top, out bottom);
             }
         }
 
@@ -119,39 +59,39 @@ namespace SharpGame
         /// Creates a new instance of BoundingFrustum.
         /// </summary>
         /// <param name="matrix">Combined matrix that usually takes view × projection matrix.</param>
-        public BoundingFrustum(mat4 matrix)
+        public Frustum(mat4 matrix)
         {
-            pMatrix = matrix;
-            GetPlanesFromMatrix(in pMatrix, out pNear, out pFar, out pLeft, out pRight, out pTop, out pBottom);
+            this.matrix = matrix;
+            GetPlanesFromMatrix(in this.matrix, out near, out far, out left, out right, out top, out bottom);
         }
 
         public override int GetHashCode()
         {
-            return pMatrix.GetHashCode();
+            return matrix.GetHashCode();
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="BoundingFrustum"/> is equal to this instance.
+        /// Determines whether the specified <see cref="Frustum"/> is equal to this instance.
         /// </summary>
-        /// <param name="other">The <see cref="BoundingFrustum"/> to compare with this instance.</param>
+        /// <param name="other">The <see cref="Frustum"/> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="BoundingFrustum"/> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="Frustum"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(in BoundingFrustum other)
+        public bool Equals(in Frustum other)
         {
-            return this.pMatrix == other.pMatrix;
+            return this.matrix == other.matrix;
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="BoundingFrustum"/> is equal to this instance.
+        /// Determines whether the specified <see cref="Frustum"/> is equal to this instance.
         /// </summary>
-        /// <param name="other">The <see cref="BoundingFrustum"/> to compare with this instance.</param>
+        /// <param name="other">The <see cref="Frustum"/> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="BoundingFrustum"/> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="Frustum"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(BoundingFrustum other)
+        public bool Equals(Frustum other)
         {
             return Equals(in other);
         }
@@ -165,10 +105,10 @@ namespace SharpGame
         /// </returns>
         public override bool Equals(object obj)
         {
-            if(!(obj is BoundingFrustum))
+            if(!(obj is Frustum))
                 return false;
 
-            var strongValue = (BoundingFrustum)obj;
+            var strongValue = (Frustum)obj;
             return Equals(in strongValue);
         }
 
@@ -181,7 +121,7 @@ namespace SharpGame
         /// The result of the operator.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator ==(BoundingFrustum left, BoundingFrustum right)
+        public static bool operator ==(Frustum left, Frustum right)
         {
             return left.Equals(in right);
         }
@@ -195,7 +135,7 @@ namespace SharpGame
         /// The result of the operator.
         /// </returns>
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator !=(BoundingFrustum left, BoundingFrustum right)
+        public static bool operator !=(Frustum left, Frustum right)
         {
             return !left.Equals(in right);
         }
@@ -209,12 +149,12 @@ namespace SharpGame
         {
             switch (index)
             {
-                case 0: return pLeft;
-                case 1: return pRight;
-                case 2: return pTop;
-                case 3: return pBottom;
-                case 4: return pNear;
-                case 5: return pFar;
+                case 0: return left;
+                case 1: return right;
+                case 2: return top;
+                case 3: return bottom;
+                case 4: return near;
+                case 5: return far;
                 default:
                     return new Plane();
             }
@@ -289,7 +229,7 @@ namespace SharpGame
         /// <param name="zfar">The zfar.</param>
         /// <param name="aspect">The aspect.</param>
         /// <returns>The bounding frustum calculated from perspective camera</returns>
-        public static BoundingFrustum FromCamera(vec3 cameraPos, vec3 lookDir, vec3 upDir, float fov, float znear, float zfar, float aspect)
+        public static Frustum FromCamera(vec3 cameraPos, vec3 lookDir, vec3 upDir, float fov, float znear, float zfar, float aspect)
         {
             //http://knol.google.com/k/view-frustum
 
@@ -313,22 +253,22 @@ namespace SharpGame
             vec3 Far3 = farCenter + farHalfHeight * upDir - farHalfWidth * rightDir;
             vec3 Far4 = farCenter - farHalfHeight * upDir - farHalfWidth * rightDir;
 
-            var result = new BoundingFrustum();
-            result.pNear = new Plane(Near1, Near2, Near3);
-            result.pFar = new Plane(Far3, Far2, Far1);
-            result.pLeft = new Plane(Near4, Near3, Far3);
-            result.pRight = new Plane(Far1, Far2, Near2);
-            result.pTop = new Plane(Near2, Far2, Far3);
-            result.pBottom = new Plane(Far4, Far1, Near1);
+            var result = new Frustum();
+            result.near = new Plane(Near1, Near2, Near3);
+            result.far = new Plane(Far3, Far2, Far1);
+            result.left = new Plane(Near4, Near3, Far3);
+            result.right = new Plane(Far1, Far2, Near2);
+            result.top = new Plane(Near2, Far2, Far3);
+            result.bottom = new Plane(Far4, Far1, Near1);
 
-            result.pNear.Normalize();
-            result.pFar.Normalize();
-            result.pLeft.Normalize();
-            result.pRight.Normalize();
-            result.pTop.Normalize();
-            result.pBottom.Normalize();
+            result.near.Normalize();
+            result.far.Normalize();
+            result.left.Normalize();
+            result.right.Normalize();
+            result.top.Normalize();
+            result.bottom.Normalize();
 
-            result.pMatrix =glm.perspective(fov, aspect, znear, zfar) * glm.lookAt(cameraPos, cameraPos + lookDir * 10, upDir);
+            result.matrix =glm.perspective(fov, aspect, znear, zfar) * glm.lookAt(cameraPos, cameraPos + lookDir * 10, upDir);
 
             return result;
         }
@@ -364,14 +304,14 @@ namespace SharpGame
         /// <returns>The 8 corners of the frustum</returns>
         public void GetCorners(vec3[] corners)
         {
-            corners[0] = Get3PlanesInterPoint(in pNear, in  pBottom, in  pRight);    //Near1
-            corners[1] = Get3PlanesInterPoint(in pNear, in  pTop, in  pRight);       //Near2
-            corners[2] = Get3PlanesInterPoint(in pNear, in  pTop, in  pLeft);        //Near3
-            corners[3] = Get3PlanesInterPoint(in pNear, in  pBottom, in  pLeft);     //Near3
-            corners[4] = Get3PlanesInterPoint(in pFar, in  pBottom, in  pRight);    //Far1
-            corners[5] = Get3PlanesInterPoint(in pFar, in  pTop, in  pRight);       //Far2
-            corners[6] = Get3PlanesInterPoint(in pFar, in  pTop, in  pLeft);        //Far3
-            corners[7] = Get3PlanesInterPoint(in pFar, in  pBottom, in  pLeft);     //Far3
+            corners[0] = Get3PlanesInterPoint(in near, in  bottom, in  right);    //Near1
+            corners[1] = Get3PlanesInterPoint(in near, in  top, in  right);       //Near2
+            corners[2] = Get3PlanesInterPoint(in near, in  top, in  left);        //Near3
+            corners[3] = Get3PlanesInterPoint(in near, in  bottom, in  left);     //Near3
+            corners[4] = Get3PlanesInterPoint(in far, in  bottom, in  right);    //Far1
+            corners[5] = Get3PlanesInterPoint(in far, in  top, in  right);       //Far2
+            corners[6] = Get3PlanesInterPoint(in far, in  top, in  left);        //Far3
+            corners[7] = Get3PlanesInterPoint(in far, in  bottom, in  left);     //Far3
         }
 
         /// <summary>
@@ -387,12 +327,12 @@ namespace SharpGame
             {
                 switch (i)
                 {
-                    case 0: planeResult = pNear.Intersects(in point); break;
-                    case 1: planeResult = pFar.Intersects(in point); break;
-                    case 2: planeResult = pLeft.Intersects(in point); break;
-                    case 3: planeResult = pRight.Intersects(in point); break;
-                    case 4: planeResult = pTop.Intersects(in point); break;
-                    case 5: planeResult = pBottom.Intersects(in point); break;
+                    case 0: planeResult = near.Intersects(in point); break;
+                    case 1: planeResult = far.Intersects(in point); break;
+                    case 2: planeResult = left.Intersects(in point); break;
+                    case 3: planeResult = right.Intersects(in point); break;
+                    case 4: planeResult = top.Intersects(in point); break;
+                    case 5: planeResult = bottom.Intersects(in point); break;
                 }
                 switch (planeResult)
                 {
@@ -466,21 +406,21 @@ namespace SharpGame
 
         private void GetBoxToPlanePVertexNVertex(in BoundingBox box, in vec3 planeNormal, out vec3 p, out vec3 n)
         {
-            p = box.Minimum;
+            p = box.min;
             if (planeNormal.X >= 0)
-                p.X = box.Maximum.X;
+                p.X = box.max.X;
             if (planeNormal.Y >= 0)
-                p.Y = box.Maximum.Y;
+                p.Y = box.max.Y;
             if (planeNormal.Z >= 0)
-                p.Z = box.Maximum.Z;
+                p.Z = box.max.Z;
 
-            n = box.Maximum;
+            n = box.max;
             if (planeNormal.X >= 0)
-                n.X = box.Minimum.X;
+                n.X = box.min.X;
             if (planeNormal.Y >= 0)
-                n.Y = box.Minimum.Y;
+                n.Y = box.min.Y;
             if (planeNormal.Z >= 0)
-                n.Z = box.Minimum.Z;
+                n.Z = box.min.Z;
         }
 
         /// <summary>
@@ -539,12 +479,12 @@ namespace SharpGame
             {
                 switch (i)
                 {
-                    case 0: planeResult = pNear.Intersects(in sphere); break;
-                    case 1: planeResult = pFar.Intersects(in sphere); break;
-                    case 2: planeResult = pLeft.Intersects(in sphere); break;
-                    case 3: planeResult = pRight.Intersects(in sphere); break;
-                    case 4: planeResult = pTop.Intersects(in sphere); break;
-                    case 5: planeResult = pBottom.Intersects(in sphere); break;
+                    case 0: planeResult = near.Intersects(in sphere); break;
+                    case 1: planeResult = far.Intersects(in sphere); break;
+                    case 2: planeResult = left.Intersects(in sphere); break;
+                    case 3: planeResult = right.Intersects(in sphere); break;
+                    case 4: planeResult = top.Intersects(in sphere); break;
+                    case 5: planeResult = bottom.Intersects(in sphere); break;
                 }
                 switch (planeResult)
                 {
@@ -587,7 +527,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="frustum">The frustum.</param>
         /// <returns>Type of the containment</returns>
-        public bool Contains(in BoundingFrustum frustum)
+        public bool Contains(in Frustum frustum)
         {
             return Contains(frustum.GetCorners()) != Intersection.OutSide;
         }
@@ -597,7 +537,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="frustum">The frustum.</param>
         /// <returns>Type of the containment</returns>
-        public bool Contains(BoundingFrustum frustum)
+        public bool Contains(Frustum frustum)
         {
             return Contains(in frustum);
         }
@@ -607,7 +547,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="frustum">The frustum.</param>
         /// <param name="result">Type of the containment.</param>
-        public void Contains(in BoundingFrustum frustum, out bool result)
+        public void Contains(in Frustum frustum, out bool result)
         {
             result = Contains(frustum.GetCorners()) != Intersection.OutSide;
         }
@@ -684,7 +624,7 @@ namespace SharpGame
         /// <returns>With of the frustum at the specified depth</returns>
         public float GetWidthAtDepth(float depth)
         {
-            float hAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.normal, pLeft.normal))));
+            float hAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(near.normal, left.normal))));
             return (float)(Math.Tan(hAngle) * depth * 2);
         }
 
@@ -695,19 +635,19 @@ namespace SharpGame
         /// <returns>Height of the frustum at the specified depth</returns>
         public float GetHeightAtDepth(float depth)
         {
-            float vAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.normal, pTop.normal))));
+            float vAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(near.normal, top.normal))));
             return (float)(Math.Tan(vAngle) * depth * 2);
         }
 
-        private BoundingFrustum GetInsideOutClone()
+        private Frustum GetInsideOutClone()
         {
             var frustum = this;
-            frustum.pNear.normal = -frustum.pNear.normal;
-            frustum.pFar.normal = -frustum.pFar.normal;
-            frustum.pLeft.normal = -frustum.pLeft.normal;
-            frustum.pRight.normal = -frustum.pRight.normal;
-            frustum.pTop.normal = -frustum.pTop.normal;
-            frustum.pBottom.normal = -frustum.pBottom.normal;
+            frustum.near.normal = -frustum.near.normal;
+            frustum.far.normal = -frustum.far.normal;
+            frustum.left.normal = -frustum.left.normal;
+            frustum.right.normal = -frustum.right.normal;
+            frustum.top.normal = -frustum.top.normal;
+            frustum.bottom.normal = -frustum.bottom.normal;
             return frustum;
         }
 
@@ -793,9 +733,9 @@ namespace SharpGame
         /// <returns>The zoom to fit distance</returns>
         public float GetZoomToExtentsShiftDistance(vec3[] points)
         {
-            float vAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.normal, pTop.normal))));
+            float vAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(near.normal, top.normal))));
             float vSin = (float)Math.Sin(vAngle);
-            float hAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(pNear.normal, pLeft.normal))));
+            float hAngle = (float)((Math.PI / 2.0 - Math.Acos(vec3.Dot(near.normal, left.normal))));
             float hSin = (float)Math.Sin(hAngle);
             float horizontalToVerticalMapping = vSin / hSin;
 
@@ -804,10 +744,10 @@ namespace SharpGame
             float maxPointDist = float.MinValue;
             for (int i = 0; i < points.Length; i++)
             {
-                float pointDist = Collision.DistancePlanePoint(in ioFrustrum.pTop, in points[i]);
-                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(in ioFrustrum.pBottom, in points[i]));
-                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(in ioFrustrum.pLeft, in points[i]) * horizontalToVerticalMapping);
-                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(in ioFrustrum.pRight, in points[i]) * horizontalToVerticalMapping);
+                float pointDist = Collision.DistancePlanePoint(in ioFrustrum.top, in points[i]);
+                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(in ioFrustrum.bottom, in points[i]));
+                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(in ioFrustrum.left, in points[i]) * horizontalToVerticalMapping);
+                pointDist = Math.Max(pointDist, Collision.DistancePlanePoint(in ioFrustrum.right, in points[i]) * horizontalToVerticalMapping);
 
                 maxPointDist = Math.Max(maxPointDist, pointDist);
             }
@@ -835,7 +775,7 @@ namespace SharpGame
         /// <returns>The zoom to fit vector</returns>
         public vec3 GetZoomToExtentsShiftVector(vec3[] points)
         {
-            return GetZoomToExtentsShiftDistance(points) * pNear.normal;
+            return GetZoomToExtentsShiftDistance(points) * near.normal;
         }
         /// <summary>
         /// Get the vector shift which when added to camera position will do the effect of zoom to extents (zoom to fit) operation,
@@ -845,7 +785,7 @@ namespace SharpGame
         /// <returns>The zoom to fit vector</returns>
         public vec3 GetZoomToExtentsShiftVector(in BoundingBox boundingBox)
         {
-            return GetZoomToExtentsShiftDistance(boundingBox.GetCorners()) * pNear.normal;
+            return GetZoomToExtentsShiftDistance(boundingBox.GetCorners()) * near.normal;
         }
 
         /// <summary>
@@ -858,7 +798,7 @@ namespace SharpGame
         {
             get
             {
-                return (pLeft.normal == -pRight.normal) && (pTop.normal == -pBottom.normal);
+                return (left.normal == -right.normal) && (top.normal == -bottom.normal);
             }
         }
     }

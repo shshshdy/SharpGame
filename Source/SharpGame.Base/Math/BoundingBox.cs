@@ -44,28 +44,28 @@ namespace SharpGame
         /// The minimum point of the box.
         /// </summary>
         [DataMember(Order = 0)]
-        public vec3 Minimum;
+        public vec3 min;
 
         /// <summary>
         /// The maximum point of the box.
         /// </summary>
         [DataMember(Order = 1)]
-        public vec3 Maximum;
+        public vec3 max;
 
         /// Return center.
         [IgnoreDataMember]
-        public vec3 Center => (Maximum + Minimum) * 0.5f;
+        public vec3 Center => (max + min) * 0.5f;
 
         /// Return size.
         [IgnoreDataMember]
-        public vec3 Size => Maximum - Minimum;
+        public vec3 Size => max - min;
 
         [IgnoreDataMember]
         public float Volume { get { vec3 sz = Size; return sz.x * sz.y * sz.z; } }
 
         /// Return half-size.
         [IgnoreDataMember]
-        public vec3 HalfSize => (Maximum - Minimum) * 0.5f;
+        public vec3 HalfSize => (max - min) * 0.5f;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BoundingBox"/> struct.
@@ -74,20 +74,20 @@ namespace SharpGame
         /// <param name="maximum">The maximum vertex of the bounding box.</param>
         public BoundingBox(vec3 minimum, vec3 maximum)
         {
-            this.Minimum = minimum;
-            this.Maximum = maximum;
+            this.min = minimum;
+            this.max = maximum;
         }
 
         public BoundingBox(float min, float max)
         {
-            Minimum = new vec3(min, min, min);
-            Maximum = new vec3(max, max, max);
+            this.min = new vec3(min, min, min);
+            this.max = new vec3(max, max, max);
         }
 
         public void Clear()
         {
-            Minimum = new vec3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
-            Maximum = new vec3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+            min = new vec3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+            max = new vec3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
         }
 
         public void Define(BoundingBox box)=> Define(in box);
@@ -95,33 +95,33 @@ namespace SharpGame
         /// Define from another bounding box.
         public void Define(in BoundingBox box)
         {
-            Define(in box.Minimum, in box.Maximum);
+            Define(in box.min, in box.max);
         }
 
         /// Define from minimum and maximum vectors.
         public void Define(in vec3 min, in vec3 max)
         {
-            Minimum = min;
-            Maximum = max;
+            this.min = min;
+            this.max = max;
         }
 
         /// Define from minimum and maximum floats (all dimensions same.)
         public void Define(float min, float max)
         {
-            Minimum = new vec3(min, min, min);
-            Maximum = new vec3(max, max, max);
+            this.min = new vec3(min, min, min);
+            this.max = new vec3(max, max, max);
         }
 
         /// Define from a point.
         public void Define(in vec3 point)
         {
-            Minimum = Maximum = point;
+            min = max = point;
         }
 
         /// Return true if this bounding box is defined via a previous call to Define() or Merge().
         public bool Defined()
         {
-            return Minimum.X != float.PositiveInfinity;
+            return min.X != float.PositiveInfinity;
         }
 
         /// <summary>
@@ -141,14 +141,14 @@ namespace SharpGame
         /// <returns>An array of points representing the eight corners of the bounding box.</returns>
         public void GetCorners(vec3[] corners)
         {
-            corners[0] = new vec3(Minimum.X, Maximum.Y, Maximum.Z);
-            corners[1] = new vec3(Maximum.X, Maximum.Y, Maximum.Z);
-            corners[2] = new vec3(Maximum.X, Minimum.Y, Maximum.Z);
-            corners[3] = new vec3(Minimum.X, Minimum.Y, Maximum.Z);
-            corners[4] = new vec3(Minimum.X, Maximum.Y, Minimum.Z);
-            corners[5] = new vec3(Maximum.X, Maximum.Y, Minimum.Z);
-            corners[6] = new vec3(Maximum.X, Minimum.Y, Minimum.Z);
-            corners[7] = new vec3(Minimum.X, Minimum.Y, Minimum.Z);
+            corners[0] = new vec3(min.X, max.Y, max.Z);
+            corners[1] = new vec3(max.X, max.Y, max.Z);
+            corners[2] = new vec3(max.X, min.Y, max.Z);
+            corners[3] = new vec3(min.X, min.Y, max.Z);
+            corners[4] = new vec3(min.X, max.Y, min.Z);
+            corners[5] = new vec3(max.X, max.Y, min.Z);
+            corners[6] = new vec3(max.X, min.Y, min.Z);
+            corners[7] = new vec3(min.X, min.Y, min.Z);
         }
 
         /// <summary>
@@ -323,26 +323,26 @@ namespace SharpGame
         public void Merge(vec3 point) => Merge(in point);
         public void Merge(in vec3 point)
         {
-            if (point.X < Minimum.X)
-                Minimum.X = point.X;
-            if (point.Y < Minimum.Y)
-                Minimum.Y = point.Y;
-            if (point.Z < Minimum.Z)
-                Minimum.Z = point.Z;
-            if (point.X > Maximum.X)
-                Maximum.X = point.X;
-            if (point.Y > Maximum.Y)
-                Maximum.Y = point.Y;
-            if (point.Z > Maximum.Z)
-                Maximum.Z = point.Z;
+            if (point.X < min.X)
+                min.X = point.X;
+            if (point.Y < min.Y)
+                min.Y = point.Y;
+            if (point.Z < min.Z)
+                min.Z = point.Z;
+            if (point.X > max.X)
+                max.X = point.X;
+            if (point.Y > max.Y)
+                max.Y = point.Y;
+            if (point.Z > max.Z)
+                max.Z = point.Z;
         }
 
         /// Merge another bounding box.
         public void Merge(BoundingBox box) => Merge(in box);
         public void Merge(in BoundingBox box)
         {
-            glm.min(in Minimum, in box.Minimum, out Minimum);
-            glm.max(in Maximum, in box.Maximum, out Maximum);
+            glm.min(in min, in box.min, out min);
+            glm.max(in max, in box.max, out max);
         }
 
         /// Merge another bounding box.
@@ -409,8 +409,8 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the newly constructed bounding box.</param>
         public static void FromSphere(in Sphere sphere, out BoundingBox result)
         {
-            result.Minimum = new vec3(sphere.center.X - sphere.radius, sphere.center.Y - sphere.radius, sphere.center.Z - sphere.radius);
-            result.Maximum = new vec3(sphere.center.X + sphere.radius, sphere.center.Y + sphere.radius, sphere.center.Z + sphere.radius);
+            result.min = new vec3(sphere.center.X - sphere.radius, sphere.center.Y - sphere.radius, sphere.center.Z - sphere.radius);
+            result.max = new vec3(sphere.center.X + sphere.radius, sphere.center.Y + sphere.radius, sphere.center.Z + sphere.radius);
         }
 
         /// <summary>
@@ -421,8 +421,8 @@ namespace SharpGame
         public static BoundingBox FromSphere(Sphere sphere)
         {
             BoundingBox box;
-            box.Minimum = new vec3(sphere.center.X - sphere.radius, sphere.center.Y - sphere.radius, sphere.center.Z - sphere.radius);
-            box.Maximum = new vec3(sphere.center.X + sphere.radius, sphere.center.Y + sphere.radius, sphere.center.Z + sphere.radius);
+            box.min = new vec3(sphere.center.X - sphere.radius, sphere.center.Y - sphere.radius, sphere.center.Z - sphere.radius);
+            box.max = new vec3(sphere.center.X + sphere.radius, sphere.center.Y + sphere.radius, sphere.center.Z + sphere.radius);
             return box;
         }
 
@@ -434,8 +434,8 @@ namespace SharpGame
         /// <param name="result">When the method completes, contains the newly constructed bounding box.</param>
         public static void Merge(in BoundingBox value1, in BoundingBox value2, out BoundingBox result)
         {
-            glm.min(in value1.Minimum, in value2.Minimum, out result.Minimum);
-            glm.max(in value1.Maximum, in value2.Maximum, out result.Maximum);
+            glm.min(in value1.min, in value2.min, out result.min);
+            glm.max(in value1.max, in value2.max, out result.max);
         }
 
         /// <summary>
@@ -447,8 +447,8 @@ namespace SharpGame
         public static BoundingBox Merge(BoundingBox value1, BoundingBox value2)
         {
             BoundingBox box;
-            glm.min(in value1.Minimum, in value2.Minimum, out box.Minimum);
-            glm.max(in value1.Maximum, in value2.Maximum, out box.Maximum);
+            glm.min(in value1.min, in value2.min, out box.min);
+            glm.max(in value1.max, in value2.max, out box.max);
             return box;
         }
 
@@ -484,7 +484,7 @@ namespace SharpGame
         /// </returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.CurrentCulture, "Minimum:{0} Maximum:{1}", Minimum.ToString(), Maximum.ToString());
+            return string.Format(CultureInfo.CurrentCulture, "Minimum:{0} Maximum:{1}", min.ToString(), max.ToString());
         }
 
         /// <summary>
@@ -499,8 +499,8 @@ namespace SharpGame
             if (format == null)
                 return ToString();
 
-            return string.Format(CultureInfo.CurrentCulture, "Minimum:{0} Maximum:{1}", Minimum.ToString(format, CultureInfo.CurrentCulture),
-                Maximum.ToString(format, CultureInfo.CurrentCulture));
+            return string.Format(CultureInfo.CurrentCulture, "Minimum:{0} Maximum:{1}", min.ToString(format, CultureInfo.CurrentCulture),
+                max.ToString(format, CultureInfo.CurrentCulture));
         }
 
         /// <summary>
@@ -512,7 +512,7 @@ namespace SharpGame
         /// </returns>
         public string ToString(IFormatProvider formatProvider)
         {
-            return string.Format(formatProvider, "Minimum:{0} Maximum:{1}", Minimum.ToString(), Maximum.ToString());
+            return string.Format(formatProvider, "Minimum:{0} Maximum:{1}", min.ToString(), max.ToString());
         }
 
         /// <summary>
@@ -528,8 +528,8 @@ namespace SharpGame
             if (format == null)
                 return ToString(formatProvider);
 
-            return string.Format(formatProvider, "Minimum:{0} Maximum:{1}", Minimum.ToString(format, formatProvider),
-                Maximum.ToString(format, formatProvider));
+            return string.Format(formatProvider, "Minimum:{0} Maximum:{1}", min.ToString(format, formatProvider),
+                max.ToString(format, formatProvider));
         }
 
         /// <summary>
@@ -542,7 +542,7 @@ namespace SharpGame
         {
             unchecked
             {
-                return (Minimum.GetHashCode() * 397) ^ Maximum.GetHashCode();
+                return (min.GetHashCode() * 397) ^ max.GetHashCode();
             }
         }
 
@@ -556,7 +556,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
         public bool Equals(in BoundingBox value)
         {
-            return Minimum == value.Minimum && Maximum == value.Maximum;
+            return min == value.min && max == value.max;
         }
 
         /// <summary>

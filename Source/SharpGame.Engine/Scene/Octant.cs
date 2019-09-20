@@ -90,7 +90,7 @@ namespace SharpGame
             worldBoundingBox_ = box;
             center_ = box.Center;
             halfSize_ = 0.5f * box.Size;
-            cullingBox_ = new BoundingBox(worldBoundingBox_.Minimum - halfSize_, worldBoundingBox_.Maximum + halfSize_);
+            cullingBox_ = new BoundingBox(worldBoundingBox_.min - halfSize_, worldBoundingBox_.max + halfSize_);
         }
 
         public Octant GetOrCreateChild(int index)
@@ -98,8 +98,8 @@ namespace SharpGame
             if (children_[index] != null)
                 return children_[index];
 
-            vec3 newMin = worldBoundingBox_.Minimum;
-            vec3 newMax = worldBoundingBox_.Maximum;
+            vec3 newMin = worldBoundingBox_.min;
+            vec3 newMax = worldBoundingBox_.max;
             vec3 oldCenter = worldBoundingBox_.Center;
 
             if ((index & 1u) != 0)
@@ -173,12 +173,12 @@ namespace SharpGame
             // Also check if the box can not fit a child octant's culling box, in that case size OK (must insert here)
             else
             {
-                if (box.Minimum.x <= worldBoundingBox_.Minimum.x - 0.5f * halfSize_.x ||
-                    box.Maximum.x >= worldBoundingBox_.Maximum.x + 0.5f * halfSize_.x ||
-                    box.Minimum.y <= worldBoundingBox_.Minimum.y - 0.5f * halfSize_.y ||
-                    box.Maximum.y >= worldBoundingBox_.Maximum.y + 0.5f * halfSize_.y ||
-                    box.Minimum.z <= worldBoundingBox_.Minimum.z - 0.5f * halfSize_.z ||
-                    box.Maximum.z >= worldBoundingBox_.Maximum.z + 0.5f * halfSize_.z)
+                if (box.min.x <= worldBoundingBox_.min.x - 0.5f * halfSize_.x ||
+                    box.max.x >= worldBoundingBox_.max.x + 0.5f * halfSize_.x ||
+                    box.min.y <= worldBoundingBox_.min.y - 0.5f * halfSize_.y ||
+                    box.max.y >= worldBoundingBox_.max.y + 0.5f * halfSize_.y ||
+                    box.min.z <= worldBoundingBox_.min.z - 0.5f * halfSize_.z ||
+                    box.max.z >= worldBoundingBox_.max.z + 0.5f * halfSize_.z)
                     return true;
             }
 

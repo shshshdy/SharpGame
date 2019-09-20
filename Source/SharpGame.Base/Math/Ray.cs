@@ -244,65 +244,65 @@ namespace SharpGame
             float dist = float.PositiveInfinity;
 
             // Check for intersecting in the X-direction
-            if (origin.x < box.Minimum.x && direction.x > 0.0f)
+            if (origin.x < box.min.x && direction.x > 0.0f)
             {
-                float x = (box.Minimum.x - origin.x) / direction.x;
+                float x = (box.min.x - origin.x) / direction.x;
                 if (x < dist)
                 {
                     vec3 point = origin + x * direction;
-                    if (point.y >= box.Minimum.y && point.y <= box.Maximum.y && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
+                    if (point.y >= box.min.y && point.y <= box.max.y && point.z >= box.min.z && point.z <= box.max.z)
                         dist = x;
                 }
             }
-            if (origin.x > box.Maximum.x && direction.x < 0.0f)
+            if (origin.x > box.max.x && direction.x < 0.0f)
             {
-                float x = (box.Maximum.x - origin.x) / direction.x;
+                float x = (box.max.x - origin.x) / direction.x;
                 if (x < dist)
                 {
                     vec3 point = origin + x * direction;
-                    if (point.y >= box.Minimum.y && point.y <= box.Maximum.y && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
+                    if (point.y >= box.min.y && point.y <= box.max.y && point.z >= box.min.z && point.z <= box.max.z)
                         dist = x;
                 }
             }
             // Check for intersecting in the Y-direction
-            if (origin.y < box.Minimum.y && direction.y > 0.0f)
+            if (origin.y < box.min.y && direction.y > 0.0f)
             {
-                float x = (box.Minimum.y - origin.y) / direction.y;
+                float x = (box.min.y - origin.y) / direction.y;
                 if (x < dist)
                 {
                     vec3 point = origin + x * direction;
-                    if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
+                    if (point.x >= box.min.x && point.x <= box.max.x && point.z >= box.min.z && point.z <= box.max.z)
                         dist = x;
                 }
             }
-            if (origin.y > box.Maximum.y && direction.y < 0.0f)
+            if (origin.y > box.max.y && direction.y < 0.0f)
             {
-                float x = (box.Maximum.y - origin.y) / direction.y;
+                float x = (box.max.y - origin.y) / direction.y;
                 if (x < dist)
                 {
                     vec3 point = origin + x * direction;
-                    if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.z >= box.Minimum.z && point.z <= box.Maximum.z)
+                    if (point.x >= box.min.x && point.x <= box.max.x && point.z >= box.min.z && point.z <= box.max.z)
                         dist = x;
                 }
             }
             // Check for intersecting in the Z-direction
-            if (origin.z < box.Minimum.z && direction.z > 0.0f)
+            if (origin.z < box.min.z && direction.z > 0.0f)
             {
-                float x = (box.Minimum.z - origin.z) / direction.z;
+                float x = (box.min.z - origin.z) / direction.z;
                 if (x < dist)
                 {
                     vec3 point = origin + x * direction;
-                    if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.y >= box.Minimum.y && point.y <= box.Maximum.y)
+                    if (point.x >= box.min.x && point.x <= box.max.x && point.y >= box.min.y && point.y <= box.max.y)
                         dist = x;
                 }
             }
-            if (origin.z > box.Maximum.z && direction.z < 0.0f)
+            if (origin.z > box.max.z && direction.z < 0.0f)
             {
-                float x = (box.Maximum.z - origin.z) / direction.z;
+                float x = (box.max.z - origin.z) / direction.z;
                 if (x < dist)
                 {
                     vec3 point = origin + x * direction;
-                    if (point.x >= box.Minimum.x && point.x <= box.Maximum.x && point.y >= box.Minimum.y && point.y <= box.Maximum.y)
+                    if (point.x >= box.min.x && point.x <= box.max.x && point.y >= box.min.y && point.y <= box.max.y)
                         dist = x;
                 }
             }

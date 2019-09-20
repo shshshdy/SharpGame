@@ -307,11 +307,11 @@ namespace SharpGame
         /// <param name="result">When the method completes, the newly constructed bounding sphere.</param>
         public static void FromBox(in BoundingBox box, out Sphere result)
         {
-            glm.lerp(in box.Minimum, in box.Maximum, 0.5f, out result.center);
+            glm.lerp(in box.min, in box.max, 0.5f, out result.center);
 
-            float x = box.Minimum.X - box.Maximum.X;
-            float y = box.Minimum.Y - box.Maximum.Y;
-            float z = box.Minimum.Z - box.Maximum.Z;
+            float x = box.min.X - box.max.X;
+            float y = box.min.Y - box.max.Y;
+            float z = box.min.Z - box.max.Z;
 
             float distance = (float)(Math.Sqrt((x * x) + (y * y) + (z * z)));
             result.radius = distance * 0.5f;

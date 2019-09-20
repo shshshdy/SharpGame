@@ -71,6 +71,6 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             renderPass = new RenderPass(ref renderPassInfo);
             frameBuffer = Framebuffer.Create(renderPass, width, height, 1, new[] { p_rt_offscreen_depth_.view });
-        }
+          }
     }
 }
