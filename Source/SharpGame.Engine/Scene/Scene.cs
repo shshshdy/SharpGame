@@ -47,7 +47,7 @@ namespace SharpGame
         {
             NodeAdded(this);
 
-            this.Subscribe<Update>(e => Update(e.timeDelta));
+            this.Subscribe((in Update e) => Update(e.timeDelta));
         }
         
         public void NodeAdded(Node node)

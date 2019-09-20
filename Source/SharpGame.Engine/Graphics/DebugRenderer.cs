@@ -642,7 +642,7 @@ namespace SharpGame
             return !(lines_.Count == 0 && noDepthLines_.Count == 0 && triangles_.Count == 0 && noDepthTriangles_.Count == 0);
         }
 
-        void HandleEndFrame(EndFrame eventData)
+        void HandleEndFrame(in EndFrame eventData)
         {
             // When the amount of debug geometry is reduced, release memory
             int linesSize = lines_.Count;

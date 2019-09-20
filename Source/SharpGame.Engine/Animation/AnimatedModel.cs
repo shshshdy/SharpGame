@@ -563,7 +563,7 @@ namespace SharpGame
                     Node = node_
                 };
 
-                node_.SendEvent(ref eventData);
+                node_.SendEvent(in eventData);
 
             }
             else

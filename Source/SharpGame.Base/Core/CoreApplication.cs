@@ -46,7 +46,11 @@ namespace SharpGame
 
     public class System<T> : Object
     {
-        public static T Instance => InstanceHoler<T>.inst;
+        public static T Instance
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => InstanceHoler<T>.inst;
+        }
     }
 
 }

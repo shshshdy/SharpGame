@@ -596,7 +596,7 @@ namespace SharpGame
             return -1;
         }
 
-        void HandleScenePostUpdate(ScenePostUpdate e)
+        void HandleScenePostUpdate(in ScenePostUpdate e)
         {
             Update(e.timeStep);
         }

@@ -72,7 +72,7 @@ namespace SharpGame.Samples
             }
         }
 
-        private void HandleUpdate(Update e)
+        private void HandleUpdate(in Update e)
         {
             if (current)
             {
@@ -97,7 +97,7 @@ namespace SharpGame.Samples
         bool showStats = false;
         const float DISTANCE = 10.0f;
         
-        private void HandleGUI(GUIEvent e)
+        private void HandleGUI(in GUIEvent e)
         {
             var io = ImGui.GetIO();
             corner = 1;

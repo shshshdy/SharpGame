@@ -322,7 +322,7 @@ namespace SharpGame
                 };
 
                 // Note: this may cause arbitrary deletion of animation states, including the one we are currently processing
-                senderNode.SendEvent(ref eventData);
+                senderNode.SendEvent(in eventData);
                 //if (senderNode.Expired() || self.Expired())
                 //    return;
             }
@@ -374,7 +374,7 @@ namespace SharpGame
                         };
 
                         // Note: this may cause arbitrary deletion of animation states, including the one we are currently processing
-                        senderNode.SendEvent(ref eventData);
+                        senderNode.SendEvent(in eventData);
                         //if (senderNode.Expired() || self.Expired())
                         //    return;
                     }

@@ -38,7 +38,7 @@ namespace SharpGame
 
         }
         
-        public void SendEvent<T>(ref T e)
+        public void SendEvent<T>(in T e)
         {
             if(eventHandlers == null)
             {
@@ -50,24 +50,7 @@ namespace SharpGame
                 for (int i = 0; i < handlers.Count; i++)
                 {
                     var handler = handlers[i];
-                    ((RefEventHandler<T>)handler).Invoke(ref e);
-                }
-            }
-        }
-
-        public void SendEvent<T>(T e)
-        {
-            if(eventHandlers == null)
-            {
-                return;
-            }
-
-            if (eventHandlers.TryGetValue(typeof(T), out List<IEventHandler> handlers))
-            {
-                for(int i = 0; i < handlers.Count; i++)
-                {
-                    var handler = handlers[i];
-                    ((TEventHandler<T>)handler).Invoke(e);
+                    ((EventHandler<T>)handler).Invoke(in e);
                 }
             }
         }

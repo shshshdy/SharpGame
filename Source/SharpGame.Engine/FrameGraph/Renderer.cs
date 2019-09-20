@@ -29,7 +29,7 @@ namespace SharpGame
 
         public Renderer()
         {
-            (this).Subscribe((GUIEvent e) => OnDebugImage());
+            (this).Subscribe((in GUIEvent e) => OnDebugImage());
         }
 
         public void Initialize()

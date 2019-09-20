@@ -77,7 +77,7 @@ namespace SharpGame
 
             ImGui.NewFrame();
 
-            this.Subscribe<BeginFrame>((e) => Update());
+            this.Subscribe((in BeginFrame e) => Update());
 
             guiPass = new GraphicsPass
             {
