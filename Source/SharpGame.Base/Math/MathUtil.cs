@@ -30,7 +30,6 @@ namespace SharpGame
         /// </summary>
         public const float Epsilon = 1e-6f; // Value a 8x higher than 1.19209290E-07F
 
-        public const float MinNearClip = 0.01f;
         /// <summary>
         /// A value specifying the approximation of π which is 180 degrees.
         /// </summary>
@@ -141,30 +140,6 @@ namespace SharpGame
         }
 
         /// <summary>
-        /// Clamps the specified value.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <param name="min">The min.</param>
-        /// <param name="max">The max.</param>
-        /// <returns>The result of clamping a value between min and max</returns>
-        public static float Clamp(float value, float min, float max)
-        {
-            return value < min ? min : value > max ? max : value;
-        }
-
-        /// <summary>
-        /// Clamps the specified value.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <param name="min">The min.</param>
-        /// <param name="max">The max.</param>
-        /// <returns>The result of clamping a value between min and max</returns>
-        public static int Clamp(int value, int min, int max)
-        {
-            return value < min ? min : value > max ? max : value;
-        }
-
-        /// <summary>
         /// Swap two values.
         /// </summary>
         /// <param name="first">The first value.</param>
@@ -250,32 +225,6 @@ namespace SharpGame
             return (amount <= 0) ? 0
                 : (amount >= 1) ? 1
                 : amount * amount * amount * (amount * ((amount * 6) - 15) + 10);
-        }
-
-        /// <summary>
-        /// Calculates the modulo of the specified value.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <param name="modulo">The modulo.</param>
-        /// <returns>The result of the modulo applied to value</returns>
-        public static float Mod(float value, float modulo)
-        {
-            if (modulo == 0.0f)
-            {
-                return value;
-            }
-
-            return value % modulo;
-        }
-
-        /// <summary>
-        /// Calculates the modulo 2*PI of the specified value.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The result of the modulo applied to value</returns>
-        public static float Mod2PI(float value)
-        {
-            return Mod(value, TwoPi);
         }
 
         /// <summary>

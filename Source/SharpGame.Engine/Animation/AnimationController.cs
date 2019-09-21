@@ -230,7 +230,7 @@ namespace SharpGame
             if (index == -1 || !state)
                 return false;
 
-            animations_[index].targetWeight_ = MathUtil.Clamp(targetWeight, 0.0f, 1.0f);
+            animations_[index].targetWeight_ = glm.clamp(targetWeight, 0.0f, 1.0f);
             animations_[index].fadeTime_ = fadeTime;
             return true;
         }
@@ -251,7 +251,7 @@ namespace SharpGame
                     AnimationState otherState = GetAnimationState(control.hash_);
                     if (otherState && otherState.Layer == layer)
                     {
-                        control.targetWeight_ = MathUtil.Clamp(targetWeight, 0.0f, 1.0f);
+                        control.targetWeight_ = glm.clamp(targetWeight, 0.0f, 1.0f);
                         control.fadeTime_ = fadeTime;
                     }
                 }
@@ -293,7 +293,7 @@ namespace SharpGame
             if (index == -1 || !state)
                 return false;
 
-            time = MathUtil.Clamp(time, 0.0f, state.Length);
+            time = glm.clamp(time, 0.0f, state.Length);
             state.SetTime(time);
             // Prepare "set time" command for network replication
             animations_[index].setTime_ = (ushort)(time / state.Length * 65535.0f);
@@ -320,7 +320,7 @@ namespace SharpGame
                 return false;
 
 
-            weight = MathUtil.Clamp(weight, 0.0f, 1.0f);
+            weight = glm.clamp(weight, 0.0f, 1.0f);
             state.SetWeight(weight);
             // Prepare "set weight" command for network replication
             animations_[index].setWeight_ = (byte)(weight * 255.0f);

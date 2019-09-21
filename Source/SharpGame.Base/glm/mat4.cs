@@ -12,7 +12,7 @@ namespace SharpGame
 
     [StructLayout(LayoutKind.Sequential, Size = 4)]
     [DebuggerDisplay("M11 = {M11} M12 = {M12} M13 = {M13} M14 = {M14}")]
-    public unsafe partial struct mat4 : IEquatable<mat4>
+    public partial struct mat4 : IEquatable<mat4>
     {
         public float M11, M12, M13, M14;
         public float M21, M22, M23, M24;
@@ -20,8 +20,6 @@ namespace SharpGame
         public float M41, M42, M43, M44;
 
         public static readonly mat4 Identity = new mat4(1);
-
-        public IntPtr Data => (IntPtr)Unsafe.AsPointer(ref M11);
 
         #region Construction
 
@@ -59,7 +57,7 @@ namespace SharpGame
 
         #endregion
 
-        public ref vec3 TranslationVector
+        public unsafe ref vec3 TranslationVector
         {
             get
             {
@@ -70,7 +68,7 @@ namespace SharpGame
 
         #region Index Access
 
-        public ref vec4 this[int column]
+        public unsafe ref vec4 this[int column]
         {
             get
             {

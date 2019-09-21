@@ -193,7 +193,7 @@ namespace SharpGame
             // Weight can only be set in model mode. In node animation it is hardcoded to full
             if(model_)
             {
-                weight = MathUtil.Clamp(weight, 0.0f, 1.0f);
+                weight = glm.clamp(weight, 0.0f, 1.0f);
                 if(weight != weight_)
                 {
                     weight_ = weight;
@@ -219,7 +219,7 @@ namespace SharpGame
             if(!animation_)
                 return;
 
-            time = MathUtil.Clamp(time, 0.0f, animation_.Length);
+            time = glm.clamp(time, 0.0f, animation_.Length);
             if(time != time_)
             {
                 time_ = time;
@@ -233,7 +233,7 @@ namespace SharpGame
             if(index >= stateTracks_.Count)
                 return;
 
-            weight = MathUtil.Clamp(weight, 0.0f, 1.0f);
+            weight = glm.clamp(weight, 0.0f, 1.0f);
 
             if(weight != stateTracks_[index].weight_)
             {

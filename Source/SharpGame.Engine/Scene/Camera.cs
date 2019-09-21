@@ -193,7 +193,7 @@ namespace SharpGame
 
         public void SetFov(float fov)
         {
-            fov_ = MathUtil.Clamp(fov, 0.0f, M_MAX_FOV);
+            fov_ = glm.clamp(fov, 0.0f, M_MAX_FOV);
             frustumDirty_ = true;
             projectionDirty_ = true;
         }

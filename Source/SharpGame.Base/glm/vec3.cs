@@ -74,20 +74,21 @@ namespace SharpGame
         public float Z { get => z; set => z = value; }
 
         [IgnoreDataMember]
-        public float this[int index]
+        public ref float this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 System.Diagnostics.Debug.Assert(index >= 0 && index < 3);
-                return Unsafe.Add(ref x, index);
+                unsafe
+                {
+                    fixed (float* value = &x)
+                    {
+                        return ref Unsafe.AsRef<float>(value + index);
+                    }
+                }
             }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set
-            {
-                System.Diagnostics.Debug.Assert(index >= 0 && index < 3);
-                Unsafe.Add(ref x, index) = value;
-            }
+            
         }
 
         public float Length() => length(this);

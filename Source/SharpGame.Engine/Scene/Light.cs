@@ -71,7 +71,7 @@ namespace SharpGame
                         break;
 
                     case LightType.Spot:
-                        //debug->AddFrustum(GetFrustum(), color, depthTest);
+                        //debug.AddFrustum(GetFrustum(), color, depthTest);
                         break;
 
                     case LightType.Point:

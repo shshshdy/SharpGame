@@ -201,23 +201,19 @@ namespace SharpGame
 
         public static quat quatLookDirectionRH(in vec3 direction, in vec3 up)
         {
-            mat3 Result;
-
+            mat3 Result = new mat3();
             Result[2] = -normalize(direction);
             Result[0] = normalize(cross(up, Result[2]));
             Result[1] = cross(Result[2], Result[0]);
-
             return quat_cast(Result);
         }
 
         public static quat quatLookDirectionLH(in vec3 direction, in vec3 up)
         {
-            mat3 Result;
-
+            mat3 Result = new mat3();
             Result[2] = normalize(direction);
             Result[0] = normalize(cross(up, Result[2]));
             Result[1] = cross(Result[2], Result[0]);
-
             return quat_cast(Result);
         }
 

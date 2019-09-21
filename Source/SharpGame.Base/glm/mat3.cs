@@ -7,63 +7,21 @@ namespace SharpGame
     /// <summary>
     /// Represents a 3x3 matrix.
     /// </summary>
-    public unsafe struct mat3 : IEquatable<mat3>
+    public struct mat3 : IEquatable<mat3>
     {
-        private fixed float value[9];
-        public ref float M11
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[0];
-        }
-        public ref float M12
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[1];
-        }
-        public ref float M13
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[2];
-        }
-        public ref float M21
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[3];
-        }
-        public ref float M22
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[4];
-        }
-        public ref float M23
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[5];
-        }
-        public ref float M31
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[6];
-        }
-        public ref float M32
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[7];
-        }
-        public ref float M33
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref value[8];
-        }
+        public float M11, M12, M13;
+        public float M21, M22, M23;
+        public float M31, M32, M33;
+
 
         #region Construction
         public mat3(float m00, float m01, float m02,
             float m10, float m11, float m12,
             float m20, float m21, float m22)
         {
-            value[0] = m00; value[1] = m01; value[2] = m02;
-            value[3] = m10; value[4] = m11; value[5] = m12;
-            value[6] = m20; value[7] = m21; value[8] = m22;
+            M11 = m00; M12 = m01; M13 = m02;
+            M21 = m10; M22 = m11; M23 = m12;
+            M31 = m20; M32 = m21; M33 = m22;
         }
 
         /// <summary>
@@ -80,9 +38,9 @@ namespace SharpGame
 
         public mat3(in vec3 a, in vec3 b, in vec3 c)
         {
-            value[0] = a.x; value[1] = a.y; value[2] = a.z;
-            value[3] = b.x; value[4] = b.y; value[5] = b.z;
-            value[6] = c.x; value[7] = c.y; value[8] = c.z;
+            M11 = a.x; M12 = a.y; M13 = a.z;
+            M21 = b.x; M22 = b.y; M23 = b.z;
+            M31 = c.x; M32 = c.y; M33 = c.z;
         }
 
         #endregion
@@ -99,7 +57,16 @@ namespace SharpGame
         /// <returns>The column at index <paramref name="column"/>.</returns>
         public ref vec3 this[int column]
         {
-            get { return ref Unsafe.As<float,vec3>(ref value[column*3]) ; }
+            get
+            {
+                unsafe
+                {
+                    fixed (float* value = &M11)
+                    {
+                        return ref Unsafe.As<float, vec3>(ref value[column * 3]);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -113,10 +80,10 @@ namespace SharpGame
         /// <returns>
         /// The element at <paramref name="column"/> and <paramref name="row"/>.
         /// </returns>
-        public float this[int column, int row]
+        public ref float this[int column, int row]
         {
-            get { return this[column][row]; }
-            set { this[column][row] = value; }
+            get { return ref this[column][row]; }
+            //set { this[column][row] = value; }
         }
 
         #endregion
@@ -211,11 +178,13 @@ namespace SharpGame
             return Equals(in other);
         }
 
-        public bool Equals(in mat3 other)
+        public unsafe bool Equals(in mat3 other)
         {
-            for(int i = 0; i < 9; i++)
+            fixed(float* value = &M11)
+            fixed (float* value1 = &other.M11)
+            for (int i = 0; i < 9; i++)
             {
-                if (value[i] != other.value[i])
+                if (value[i] != value1[i])
                 {
                     return false;
                 }
@@ -248,21 +217,18 @@ namespace SharpGame
             float c = cos(a);
             float s = sin(a);
 
-            mat3 Result;
-            Result[0] = m[0] * c + m[1] * s;
-            Result[1] = m[0] * -s + m[1] * c;
-            Result[2] = m[2];
-            return Result;
+            return new mat3
+            (
+                m[0] * c + m[1] * s,
+                m[0] * -s + m[1] * c,
+                m[2]
+            );
         }
 
 
         public static mat3 scale(in mat3 m, vec2 v)
         {
-            mat3 Result;
-            Result[0] = m[0] * v[0];
-            Result[1] = m[1] * v[1];
-            Result[2] = m[2];
-            return Result;
+            return new mat3(m[0] * v[0], m[1] * v[1], m[2]);            
         }
 
         public static void transformation2D(in vec2 translation, float rotation, in vec2 scaling, out mat3 result)
@@ -304,19 +270,7 @@ namespace SharpGame
 
         public static mat3 transpose(in mat3 m)
 		{
-			mat3 Result;
-            Result[0][0] = m[0][0];
-			Result[0][1] = m[1][0];
-			Result[0][2] = m[2][0];
-
-			Result[1][0] = m[0][1];
-			Result[1][1] = m[1][1];
-			Result[1][2] = m[2][1];
-
-			Result[2][0] = m[0][2];
-			Result[2][1] = m[1][2];
-			Result[2][2] = m[2][2];
-			return Result;
+            return new mat3(m.M11, m.M21, m.M31, m.M12, m.M22, m.M32, m.M13, m.M23, m.M33);
 		}
 
         public static float determinant(in mat3 m)

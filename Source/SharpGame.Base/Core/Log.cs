@@ -65,9 +65,16 @@ namespace SharpGame
             Log.Error("[line " + line + "]: " +  message);
         }
 
+        [Conditional("DEBUG")]
         public static void Assert(string message)
         {
             System.Diagnostics.Debug.Assert(false, message);
+        }
+
+        [Conditional("DEBUG")]
+        public static void Assert(bool condition)
+        {
+            System.Diagnostics.Debug.Assert(condition);
         }
     }
 }

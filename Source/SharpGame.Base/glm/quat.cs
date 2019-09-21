@@ -4,6 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
+    using System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
     using global::System.Runtime.Serialization;
     using System.Xml;
@@ -19,23 +20,14 @@ namespace SharpGame
 
         public readonly static quat Identity = new quat(1, 0, 0, 0);
 
-        public float this[int index]
+        public unsafe ref float this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (index == 0) return x;
-                else if (index == 1) return y;
-                else if (index == 2) return z;
-                else if (index == 3) return w;
-                else throw new Exception("Out of range.");
-            }
-            set
-            {
-                if (index == 0) x = value;
-                else if (index == 1) y = value;
-                else if (index == 2) z = value;
-                else if (index == 3) w = value;
-                else throw new Exception("Out of range.");
+                System.Diagnostics.Debug.Assert(index >= 0 && index < 4);
+                fixed (float* value = &x)
+                    return ref value[index];
             }
         }
 
