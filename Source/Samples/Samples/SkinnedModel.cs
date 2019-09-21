@@ -12,7 +12,8 @@ namespace SharpGame.Samples
         {
             scene = new Scene
             {
-                new Octree { },
+                new Octree(),
+                new DebugRenderer()
             };
 
             var cameraNode = scene.CreateChild("Camera", new vec3(0, 20, -30), glm.radians(30, 0, 0));

@@ -45,10 +45,6 @@ namespace SharpGame
             }
         }
 
-        uint Align(uint size, uint uboAlignment)
-        {
-            return ((size / uboAlignment) * uboAlignment + ((size % uboAlignment) > 0 ? uboAlignment : 0));
-        }
 
         public TransientBuffer Alloc(uint size)
         {
@@ -65,7 +61,7 @@ namespace SharpGame
                 {
                     tb.offset = tbc.size;
                     tb.buffer = tbc.buffer;
-                    tbc.size += Align(size, 256);
+                    tbc.size += MathUtil.Align(size, (uint)Device.Properties.limits.nonCoherentAtomSize);
                     return tb;
                 }
             }
@@ -73,7 +69,7 @@ namespace SharpGame
             ref TransientBufferDesc desc = ref CreateNewBuffer();
             tb.offset = desc.size;
             tb.buffer = desc.buffer;
-            desc.size += Align(size, 256);
+            desc.size += MathUtil.Align(size, (uint)Device.Properties.limits.nonCoherentAtomSize);
             return tb;
         }
 

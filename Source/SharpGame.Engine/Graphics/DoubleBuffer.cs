@@ -80,7 +80,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public uint Alloc(uint size, IntPtr data)
         {
-            uint uboAlignment = (uint)256;// Device.Properties.limits.minUniformBufferOffsetAlignment;
+            uint uboAlignment = (uint)Device.Properties.limits.minUniformBufferOffsetAlignment;
             uint dynamicAlignment = ((size / uboAlignment) * uboAlignment + ((size % uboAlignment) > 0 ? uboAlignment : 0));
 #if DEBUG
             if(offset + dynamicAlignment > Size)
@@ -102,12 +102,7 @@ namespace SharpGame
 
         public void Flush()
         {
-            Buffer.Flush(offset, 0);
-        }
-
-        public void Flush(int index)
-        {
-            Buffer[index].Flush(offset, 0);
+            Buffer.Flush(MathUtil.Align(offset, (uint)Device.Properties.limits.nonCoherentAtomSize), 0);
         }
 
         protected override void Destroy(bool disposing)

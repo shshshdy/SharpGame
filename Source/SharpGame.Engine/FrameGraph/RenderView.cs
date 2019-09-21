@@ -167,7 +167,7 @@ namespace SharpGame
 
             if(ubMatrics == null)
             {
-                uint size = Graphics.Settings.Validation ? 64 * 1000u : 64 * 1000 * 100;
+                uint size = /*Graphics.Settings.Validation ? 64 * 1000u :*/ 64 * 1000 * 100;
 
                 ubMatrics = new DynamicBuffer(size);
             }

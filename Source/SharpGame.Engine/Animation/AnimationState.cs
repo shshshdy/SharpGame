@@ -323,12 +323,12 @@ namespace SharpGame
 
                 // Note: this may cause arbitrary deletion of animation states, including the one we are currently processing
                 senderNode.SendEvent(in eventData);
-                //if (senderNode.Expired() || self.Expired())
-                //    return;
+                if (senderNode.IsDisposed || this.IsDisposed)
+                    return;
             }
 
             // Process animation triggers
-            if(animation_.Triggers.Count > 0)
+            if (animation_.Triggers.Count > 0)
             {
                 bool wrap = false;
 
@@ -375,8 +375,8 @@ namespace SharpGame
 
                         // Note: this may cause arbitrary deletion of animation states, including the one we are currently processing
                         senderNode.SendEvent(in eventData);
-                        //if (senderNode.Expired() || self.Expired())
-                        //    return;
+                        if (senderNode.IsDisposed || this.IsDisposed)
+                            return;
                     }
                 }
             }

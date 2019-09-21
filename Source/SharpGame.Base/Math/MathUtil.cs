@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace SharpGame
 {
@@ -360,6 +361,13 @@ namespace SharpGame
             var componentY = (cy * cy) / (2 * sigmaY * sigmaY);
 
             return amplitude * Math.Exp(-(componentX + componentY));
+        }
+
+
+        [MethodImpl((MethodImplOptions)0x100)]
+        public static uint Align(uint size, uint uboAlignment)
+        {
+            return ((size / uboAlignment) * uboAlignment + ((size % uboAlignment) > 0 ? uboAlignment : 0));
         }
     }
 }

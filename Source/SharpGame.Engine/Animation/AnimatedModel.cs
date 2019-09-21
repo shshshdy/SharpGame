@@ -657,7 +657,7 @@ namespace SharpGame
             if(isMaster_)
             {
                 // Note: do not update bone bounding box here, instead do it in either of the threaded updates
-                worldBoundingBox_ = boneBoundingBox_.Transformed(node_.WorldTransform);
+                worldBoundingBox_ = boundingBox_.Transformed(node_.WorldTransform);
                 //worldBoundingBox_ = boundingBox_.Transformed(ref node_.WorldTransform);
             }
             else

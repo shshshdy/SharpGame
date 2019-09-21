@@ -304,10 +304,12 @@ namespace SharpGame
         public BoundingBox Transformed(in mat4 transform)
         {
             vec3 center = Center;
-            vec3.Transform(in center, in transform, out vec3 newCenter);
+            vec3 newCenter = transform * center;
+            //vec3.Transform(in center, in transform, out vec3 newCenter);
             vec3 oldEdge = Size * 0.5f;
             vec3 newEdge;
-            newEdge = RotateExtents(in oldEdge, in transform);
+            //newEdge = RotateExtents(in oldEdge, in transform);
+            vec3.TransformNormal(oldEdge, transform, out newEdge);
             return new BoundingBox(newCenter - newEdge, newCenter + newEdge);
         }
 
