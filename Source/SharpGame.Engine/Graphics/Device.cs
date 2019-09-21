@@ -298,7 +298,7 @@ namespace SharpGame
                 VkDebugReportFlagsEXT.DebugEXT,
                 (args) =>
                 {
-                    Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}] {args.Message}");
+                    Log.Info($"[{args.Flags}][{args.LayerPrefix}] {args.Message}");
                     return args.Flags.HasFlag(DebugReportFlagsExt.Error);
                 }, IntPtr.Zero
             );

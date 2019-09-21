@@ -325,7 +325,7 @@ namespace SharpGame
         {
             if (dataPtr != null)
             {
-                Debug.WriteLine($"A NativeList<{typeof(T).Name}> was not properly disposed.");
+                Log.Warn($"A NativeList<{typeof(T).Name}> was not properly disposed.");
                 Dispose();
             }
         }

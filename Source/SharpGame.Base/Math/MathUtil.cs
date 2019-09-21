@@ -20,6 +20,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace SharpGame
 {
@@ -317,6 +318,31 @@ namespace SharpGame
         public static uint Align(uint size, uint uboAlignment)
         {
             return ((size / uboAlignment) * uboAlignment + ((size % uboAlignment) > 0 ? uboAlignment : 0));
+        }
+
+        public static float InvSqrt(float v) => 1 / glm.sqrt(v);
+
+        [StructLayout(LayoutKind.Explicit, Size = 4)]
+        struct FloatIntUnion
+        {
+            [FieldOffset(0)]
+            public float f;
+            [FieldOffset(0)]
+            public Int32 i;
+        };
+
+        public static float FastestInvSqrt(float f)
+        {
+            FloatIntUnion u = new FloatIntUnion();
+            float fhalf = 0.5f * f;
+            u.f = f;
+            int i = u.i;
+            i = 0x5f3759df - (i >> 1);
+            u.i = i;
+            f = u.f;
+            f = f * (1.5f - fhalf * f * f);
+            // f = f*(1.5f - fhalf*f*f); // uncommenting this would be two iterations
+            return f;
         }
     }
 }

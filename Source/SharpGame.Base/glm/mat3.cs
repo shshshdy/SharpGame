@@ -36,25 +36,24 @@ namespace SharpGame
         {  
         }
 
-        public mat3(in vec3 a, in vec3 b, in vec3 c)
+        public mat3(in vec3 t, in vec3 b, in vec3 n)
         {
-            M11 = a.x; M12 = a.y; M13 = a.z;
+            M11 = t.x; M12 = t.y; M13 = t.z;
             M21 = b.x; M22 = b.y; M23 = b.z;
-            M31 = c.x; M32 = c.y; M33 = c.z;
+            M31 = n.x; M32 = n.y; M33 = n.z;
+        }
+
+        public void Set(in vec3 t, in vec3 b, in vec3 n)
+        {
+            M11 = t.x; M12 = t.y; M13 = t.z;
+            M21 = b.x; M22 = b.y; M23 = b.z;
+            M31 = n.x; M32 = n.y; M33 = n.z;
         }
 
         #endregion
 
         #region Index Access
 
-        /// <summary>
-        /// Gets or sets the <see cref="vec3"/> column at the specified index.
-        /// </summary>
-        /// <value>
-        /// The <see cref="vec3"/> column.
-        /// </value>
-        /// <param name="column">The column index.</param>
-        /// <returns>The column at index <paramref name="column"/>.</returns>
         public ref vec3 this[int column]
         {
             get
@@ -69,21 +68,10 @@ namespace SharpGame
             }
         }
 
-        /// <summary>
-        /// Gets or sets the element at <paramref name="column"/> and <paramref name="row"/>.
-        /// </summary>
-        /// <value>
-        /// The element at <paramref name="column"/> and <paramref name="row"/>.
-        /// </value>
-        /// <param name="column">The column index.</param>
-        /// <param name="row">The row index.</param>
-        /// <returns>
-        /// The element at <paramref name="column"/> and <paramref name="row"/>.
         /// </returns>
         public ref float this[int column, int row]
         {
             get { return ref this[column][row]; }
-            //set { this[column][row] = value; }
         }
 
         #endregion

@@ -48,7 +48,7 @@ namespace SharpGame
             }
             else
             {
-                Log.Assert("Not in FrameGraph");
+                Debug.Assert(false, "Not in FrameGraph");
             }
 
         }
@@ -62,7 +62,7 @@ namespace SharpGame
             }
             else
             {
-                Log.Assert("Not in FrameGraph");
+                Debug.Assert(false, "Not in FrameGraph");
             }
 
         }

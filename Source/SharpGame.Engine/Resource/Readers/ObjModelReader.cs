@@ -1,5 +1,7 @@
-﻿using System;
+﻿#define FPFIXES
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using static SharpGame.ObjFile;
 
@@ -36,7 +38,7 @@ namespace SharpGame
             foreach (MeshGroup group in objFile.MeshGroups)
             {
                 int indexCount = group.Faces.Length * 3;
-                if(indexCount == 0)
+                if (indexCount == 0)
                 {
                     continue;
                 }
@@ -81,7 +83,7 @@ namespace SharpGame
                     ibs.Add(Buffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
 
                     triangles = new uint[indices.Length];
-                    for(int i = 0; i < indices.Length; i++)
+                    for (int i = 0; i < indices.Length; i++)
                     {
                         triangles[i] = indices[i];
                     }
@@ -100,7 +102,7 @@ namespace SharpGame
             {
                 VertexBuffers = new List<Buffer> { vb },
                 IndexBuffers = ibs,
-                BoundingBox = BoundingBox.FromPoints(objFile.Positions)                
+                BoundingBox = BoundingBox.FromPoints(objFile.Positions)
             };
 
             model.Geometries = new List<Geometry[]>();
@@ -142,7 +144,7 @@ namespace SharpGame
 
             return model;
         }
-  
+
         public static void CalculateMeshTangents(FastList<VertexPosTexNorm> vertices,
             FastList<VertexPosTexNormTangent> tangentVertices, List<uint[]> trianglesList)
         {
@@ -203,7 +205,7 @@ namespace SharpGame
             {
                 vec3 n = vertices[a].normal;
                 vec3 t = tan1[a];
-                if(t == vec3.Zero)
+                if (t == vec3.Zero)
                 {
                     continue;
                 }
@@ -221,15 +223,173 @@ namespace SharpGame
             }
 
         }
+        /*
+                void CreateTangentSpaceTangents(vec3[] pPositions, vec3[] tex, vec3[] normals, Matrix3x3f* avgOrthonormalBases, int vertexCount, uint[] indices, int faceCount)
+        {
+
+
+
+            vec3 v0, v1, v2, tanu, tanv;
+
+                vec3 p0, p1, p2;
+
+                vec3 d1, d2;
+
+                float uv[3][2],det,u,v,l1,l2;
+
+            int i, j, k;
+                vector<vec3> sVector, tVector;
+                vector<vec3> avgS, avgT;
+
+                avgS.resize(vertexCount);
+            avgT.resize(vertexCount);
+
+            sVector.reserve(faceCount* 3);
+            tVector.reserve(faceCount* 3);
+
+            for(i=0;i<vertexCount;i++ )
+
+            {
+
+                sVector[i]=vec3(0.0, 0.0, 0.0);
+
+                tVector[i]=vec3(0.0, 0.0, 0.0);
+
+            }
+
+            k=0;
+            for(i=0;i<faceCount;i++,k+=3 )
+
+            {
+
+                v0=* ((vec3*)&pPositions[indices[k]]);
+
+                v1=* ((vec3*)&pPositions[indices[k + 1]])-v0;
+
+                v2=* ((vec3*)&pPositions[indices[k + 2]])-v0;
+
+                uv[0][0]=tex[indices[k]].x;
+
+                uv[0][1]=tex[indices[k]].y;
+
+                uv[1][0]=tex[indices[k + 1]].x-uv[0][0];
+
+                uv[1][1]=tex[indices[k + 1]].y-uv[0][1];
+
+                uv[2][0]=tex[indices[k + 2]].x-uv[0][0];
+
+                uv[2][1]=tex[indices[k + 2]].y-uv[0][1];
+
+                det=(uv[1][0]* uv[2][1])-(uv[2][0]* uv[1][1]);
+
+
+
+                if (Math.Abs(det)<0.000001f){ 
+                    continue;
+                }
+
+        u=0; v=0;
+
+                u-=uv[0][0]; v-=uv[0][1];
+
+                p0=v0+v1* ((u* uv[2][1]-uv[2][0]* v)/det)+v2* ((uv[1][0]* v-u* uv[1][1])/det);
+
+
+
+                u=1; v=0;
+
+                u-=uv[0][0]; v-=uv[0][1];
+
+                p1=v0+v1* ((u* uv[2][1]-uv[2][0]* v)/det)+v2* ((uv[1][0]* v-u* uv[1][1])/det);
+
+
+
+                u=0; v=1;
+
+                u-=uv[0][0]; v-=uv[0][1];
+
+                p2=v0+v1* ((u* uv[2][1]-uv[2][0]* v)/det)+v2* ((uv[1][0]* v-u* uv[1][1])/det);
+
+
+
+                d1=p2-p0;
+
+                d2=p1-p0;
+
+                l1=Magnitude(d1);
+
+        l2=Magnitude(d2);
+
+        d1*=1.0f/l1;
+
+                d2*=1.0f/l2;
+
+
+
+                j=indices[k];
+
+                sVector[j] += d1;
+
+                tVector[j].x+=d2.x;	tVector[j].y+=d2.y;	tVector[j].z+=d2.z;
+
+
+
+                j=indices[k + 1];
+
+                sVector[j].x+=d1.x;	sVector[j].y+=d1.y;	sVector[j].z+=d1.z;
+
+                tVector[j].x+=d2.x;	tVector[j].y+=d2.y;	tVector[j].z+=d2.z;
+
+
+
+                j=indices[k + 2];
+
+                sVector[j].x+=d1.x;	sVector[j].y+=d1.y;	sVector[j].z+=d1.z;
+
+                tVector[j].x+=d2.x;	tVector[j].y+=d2.y;	tVector[j].z+=d2.z;
+
+            }
+
+
+
+            for(i=0;i<vertexCount;i++ )
+
+            {
+                v0 = vec3(sVector[i].x, sVector[i].y, sVector[i].z);
+        v0 = NormalizeRobust(v0);
+
+        v1 = vec3(tVector[i].x, tVector[i].y, tVector[i].z);
+
+        vec3 n(normals[i].x, normals[i].y, normals[i].z);
+
+                if (SqrMagnitude(v1)<0.0001f)
+                {
+                    v1 = Cross(v0, n);
+                }	
+                v1 = NormalizeRobust(v1);
+
+
+        sVector[i]=v0;
+
+                tVector[i].x=v1.x;
+
+                tVector[i].y=v1.y;
+
+                tVector[i].z=v1.z;
+
+                avgOrthonormalBases[i].SetOrthoNormalBasis(tVector[i], sVector[i], n);
+            }
+
+        }*/
 
         Material ConvertMaterial(string path, MaterialDefinition materialDef, Shader shader)
         {
             Material material = new Material(shader);
-            
+
             if (!string.IsNullOrEmpty(materialDef.DiffuseTexture))
             {
                 Texture tex = Resources.Instance.Load<Texture>(path + materialDef.DiffuseTexture);
-                material.SetTexture("DiffMap", tex.ResourceRef);                
+                material.SetTexture("DiffMap", tex.ResourceRef);
             }
             else
             {
@@ -257,6 +417,141 @@ namespace SharpGame
             }
             return material;
         }
+
+        static vec3 NormalizeRobust(in vec3 a, out float l, out float div)
+        {
+            float a0, a1, a2, aa0, aa1, aa2;
+            a0 = a[0];
+            a1 = a[1];
+            a2 = a[2];
+
+#if FPFIXES
+            if (MathUtil.WithinEpsilon(a0, 0.0F, 0.00001F))
+                a0 = aa0 = 0;
+            else
+#endif
+            {
+                aa0 = Math.Abs(a0);
+            }
+
+#if FPFIXES
+            if (MathUtil.WithinEpsilon(a1, 0.0F, 0.00001F))
+                a1 = aa1 = 0;
+            else
+#endif
+            {
+                aa1 = Math.Abs(a1);
+            }
+
+#if FPFIXES
+            if (MathUtil.WithinEpsilon(a2, 0.0F, 0.00001F))
+                a2 = aa2 = 0;
+            else
+#endif
+            {
+                aa2 = Math.Abs(a2);
+            }
+
+            if (aa1 > aa0)
+            {
+                if (aa2 > aa1)
+                {
+                    a0 /= aa2;
+                    a1 /= aa2;
+                    l = MathUtil.InvSqrt(a0 * a0 + a1 * a1 + 1.0F);
+                    div = aa2;
+                    return glm.vec3(a0 * l, a1 * l, CopySignf(l, a2));
+                }
+                else
+                {
+                    // aa1 is largest
+                    a0 /= aa1;
+                    a2 /= aa1;
+                    l = MathUtil.InvSqrt(a0 * a0 + a2 * a2 + 1.0F);
+                    div = aa1;
+                    return glm.vec3(a0 * l, CopySignf(l, a1), a2 * l);
+                }
+            }
+            else
+            {
+                if (aa2 > aa0)
+                {
+                    // aa2 is largest
+                    a0 /= aa2;
+                    a1 /= aa2;
+                    l = MathUtil.InvSqrt(a0 * a0 + a1 * a1 + 1.0F);
+                    div = aa2;
+                    return glm.vec3(a0 * l, a1 * l, CopySignf(l, a2));
+                }
+                else
+                {
+                    // aa0 is largest
+                    if (aa0 <= 0)
+                    {
+                        l = 0;
+                        div = 1;
+                        return glm.vec3(0.0F, 1.0F, 0.0F);
+                    }
+
+                    a1 /= aa0;
+                    a2 /= aa0;
+                    l = MathUtil.InvSqrt(a1 * a1 + a2 * a2 + 1.0F);
+                    div = aa0;
+                    return glm.vec3(CopySignf(l, a0), a1 * l, a2 * l);
+                }
+            }
+        }
+
+
+        [StructLayout(LayoutKind.Explicit, Size = 4)]
+        struct FloatUIntUnion
+        {
+            [FieldOffset(0)]
+            public float f;
+            [FieldOffset(0)]
+            public UInt32 i;
+        };
+
+        static float CopySignf(float x, float y)
+        {
+            FloatUIntUnion u = new FloatUIntUnion(), u0 = new FloatUIntUnion(), u1 = new FloatUIntUnion();
+            u0.f = x; u1.f = y;
+
+            UInt32 a = u0.i;
+            UInt32 b = u1.i;
+            int mask = 1 << 31;
+            UInt32 sign = (uint)(b & mask);
+            a &= (uint)~mask;
+            a |= sign;
+
+            u.i = a;
+            return u.f;
+        }
+
+        vec3 NormalizeRobust(in vec3 a)
+        {
+            float l, div;
+            return NormalizeRobust(a, out l, out div);
+        }
+
+        vec3 NormalizeRobust(in vec3 a, out float invOriginalLength)
+        {
+            float l, div;
+            vec3 n = NormalizeRobust(a, out l, out div);
+            invOriginalLength = l / div;
+            // guard for NaNs
+            Debug.Assert(n == n);
+            Debug.Assert(invOriginalLength == invOriginalLength);
+            Debug.Assert(IsNormalized(n));
+            return n;
+        }
+        bool IsNormalized(in vec3 vec, float epsilon = MathUtil.Epsilon)
+        {
+            return MathUtil.WithinEpsilon(glm.length2(vec), 1.0F, epsilon);
+        }
+
+
+
     }
 
 
