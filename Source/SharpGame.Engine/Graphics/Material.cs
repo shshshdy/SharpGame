@@ -16,6 +16,13 @@ namespace SharpGame
         Custom
     }
 
+    public enum BlendType : int
+    {
+        None,
+        AlphaTest,
+        AlphaBlend
+    }
+
 
     public class Material : Resource
     {
@@ -25,8 +32,7 @@ namespace SharpGame
         public FastList<TextureParameter> TextureParameters { get; set; }
         public FastList<BufferParameter> BufferParameters { get; set; }
 
-        public bool AlphaBlend { get; set; }
-        public bool AlphaTest { get; set; }
+        public BlendType BlendType { get; set; }
 
         [IgnoreDataMember]
         public Shader Shader { get; set; }

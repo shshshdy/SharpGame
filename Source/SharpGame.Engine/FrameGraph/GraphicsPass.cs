@@ -208,7 +208,7 @@ namespace SharpGame
 
             foreach (var batch in batches)
             {
-                DrawBatch(cmd, batch, view.VSSet, view.PSSet, batch.offset);
+                DrawBatch(cmd, batch, default, view.VSSet, view.PSSet, batch.offset);
             }
 
             cmd.End();
@@ -218,7 +218,7 @@ namespace SharpGame
         {
             renderTasks.Clear();
 
-            int dpPerBatch = (int)Math.Ceiling(view.batches.Count / (float)workCount);
+            int dpPerBatch = (int)Math.Ceiling(view.opaqueBatches.Count / (float)workCount);
             if (dpPerBatch < 200)
             {
                 dpPerBatch = 200;
@@ -250,7 +250,7 @@ namespace SharpGame
             for (int i = from; i < to; i++)
             {
                 var batch = sourceBatches[i];
-                DrawBatch(commandBuffer, batch, view.VSSet, view.PSSet, batch.offset);
+                DrawBatch(commandBuffer, batch, default, view.VSSet, view.PSSet, batch.offset);
             }
 
         }
@@ -268,7 +268,7 @@ namespace SharpGame
             cb.Draw(3, 1, 0, 0);
         }
 
-        public void DrawBatch(CommandBuffer cb, SourceBatch batch, ResourceSet resourceSet,
+        public void DrawBatch(CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts, ResourceSet resourceSet, 
             ResourceSet resourceSet1, uint? offset = null, uint? offset1 = null)
         {
             var shader = batch.material.Shader;
@@ -287,6 +287,11 @@ namespace SharpGame
             if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.PS) != 0)
             {
                 cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, offset1);
+            }
+
+            foreach(ConstBlock constBlock in pushConsts)
+            {
+                cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
             }
 
             batch.material.Bind(pass.passIndex, cb);

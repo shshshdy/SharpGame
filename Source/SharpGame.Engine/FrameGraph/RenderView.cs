@@ -88,7 +88,15 @@ namespace SharpGame
 
         internal FastList<Drawable> drawables = new FastList<Drawable>();
         internal FastList<Light> lights = new FastList<Light>();
-        internal FastList<SourceBatch> batches = new FastList<SourceBatch>();
+
+        internal FastList<SourceBatch>[] batches = new FastList<SourceBatch>[]
+        {
+            new FastList<SourceBatch>(), new FastList<SourceBatch>(), new FastList<SourceBatch>()
+        };
+
+        internal FastList<SourceBatch> opaqueBatches => batches[(int)BlendType.None];
+        internal FastList<SourceBatch> alphaTestBatches => batches[(int)BlendType.AlphaTest];
+        internal FastList<SourceBatch> translucentBatches => batches[(int)BlendType.AlphaBlend];
 
         FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery();
 
@@ -195,6 +203,7 @@ namespace SharpGame
             psResourceSet[1] = new ResourceSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
         public void AddDrawable(Drawable drawable)
         {
             if(drawable.DrawableFlags == Drawable.DRAWABLE_LIGHT)
@@ -207,7 +216,7 @@ namespace SharpGame
 
                 foreach (SourceBatch batch in drawable.Batches)
                 {
-                    batches.Add(batch);
+                    batches[(int)batch.material.BlendType].Add(batch);
 
                     if (batch.frameNum != Frame.frameNumber)
                     {
@@ -263,7 +272,7 @@ namespace SharpGame
 
             drawables.Clear();
             lights.Clear();
-            batches.Clear();
+            opaqueBatches.Clear();
 
             UpdateDrawables();
 
@@ -319,6 +328,8 @@ namespace SharpGame
 
             frustumOctreeQuery.Init(camera, Drawable.DRAWABLE_ANY, ViewMask);
             Scene.GetDrawables(frustumOctreeQuery, AddDrawable);
+
+            //translucentBatches.Sort()
 
             Profiler.EndSample();
 

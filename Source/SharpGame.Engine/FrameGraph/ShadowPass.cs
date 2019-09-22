@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Vulkan;
 
@@ -48,7 +49,10 @@ namespace SharpGame
 
         ResourceSet[] vsSet = new ResourceSet[2];
 
-        FastList<SourceBatch> casters = new FastList<SourceBatch>();
+        FastList<SourceBatch>[] casters = new FastList<SourceBatch>[]
+        {
+            new FastList<SourceBatch>(), new FastList<SourceBatch>(), new FastList<SourceBatch>()
+        };
         FrustumOctreeQuery shadowCasterQuery = new FrustumOctreeQuery();
 
         ResourceSet VSSet => vsSet[Graphics.WorkContext];
@@ -125,7 +129,9 @@ namespace SharpGame
             UpdateCascades(view);
             UpdateUniformBuffers(view);
 
-            casters.Clear();
+            casters[0].Clear();
+            casters[1].Clear();
+            casters[2].Clear();
 
             shadowCasterQuery.Init(view.Camera, Drawable.DRAWABLE_ANY, view.ViewMask);
 
@@ -135,7 +141,7 @@ namespace SharpGame
                 {
                     foreach (SourceBatch batch in drawable.Batches)
                     {
-                        casters.Add(batch);
+                        casters[(int)batch.material.BlendType].Add(batch);
 
                         if(batch.frameNum != view.Frame.frameNumber)
                         {
@@ -159,12 +165,16 @@ namespace SharpGame
                 cmd.SetViewport(ref viewport);
                 cmd.SetScissor(renderArea);
 
-                foreach (var batch in casters)
+                uint cascade = (uint)i;
+                //cmd.PushConstants(depthShader.Main.PipelineLayout, ShaderStage.Vertex, 0, ref cascade);
+                Span<ConstBlock> consts = stackalloc ConstBlock[]
                 {
-                    uint cascade = (uint)i;
-                    cmd.PushConstants(depthShader.Main.PipelineLayout, ShaderStage.Vertex, 0, ref cascade);
+                    new ConstBlock(ShaderStage.Vertex, 0, 4, Utilities.AsPointer(ref cascade))
+                };
 
-                    DrawBatch(cmd, batch, VSSet, null, batch.offset);
+                foreach (var batch in casters[0])
+                {
+                    DrawBatch(cmd, batch, consts, VSSet, null, batch.offset);
                 }
 
                 cmd.End();

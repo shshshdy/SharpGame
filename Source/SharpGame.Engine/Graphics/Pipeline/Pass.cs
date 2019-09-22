@@ -372,9 +372,9 @@ namespace SharpGame
             return false;
         }
 
-        public unsafe uint GetShaderStageCreateInfos(VkPipelineShaderStageCreateInfo* shaderStageCreateInfo)
+        public unsafe uint GetShaderStageCreateInfos(Span<VkPipelineShaderStageCreateInfo> shaderStageCreateInfo)
         {
-            uint count = 0;
+            int count = 0;
             foreach (var sm in ShaderModels)
             {
                 if (sm != null)
@@ -393,7 +393,7 @@ namespace SharpGame
                 }
             }
 
-            return count;
+            return (uint)count;
         }
 
         private unsafe VkPipelineShaderStageCreateInfo GetComputeStageCreateInfo()
@@ -444,10 +444,10 @@ namespace SharpGame
 
             pipelineCreateInfo.pVertexInputState = &vertexInputState;
 
-            VkPipelineShaderStageCreateInfo* shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];
+            Span<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];
             uint count = GetShaderStageCreateInfos(shaderStageCreateInfos);
             pipelineCreateInfo.stageCount = count;
-            pipelineCreateInfo.pStages = shaderStageCreateInfos;
+            pipelineCreateInfo.pStages = (VkPipelineShaderStageCreateInfo*)Unsafe.AsPointer(ref shaderStageCreateInfos[0]);
 
             var pipelineInputAssemblyStateCreateInfo = VkPipelineInputAssemblyStateCreateInfo.New();
             pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)primitiveTopology;

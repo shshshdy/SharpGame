@@ -68,9 +68,7 @@ namespace SharpGame
             {
                 onDraw
             };
-
-            renderPass.Add(onDraw);
-
+            
             AddRenderPass(renderPass);
         }
 

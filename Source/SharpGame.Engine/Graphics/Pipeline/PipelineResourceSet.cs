@@ -5,10 +5,16 @@ using System.Text;
 
 namespace SharpGame
 {
-    public ref struct ConstBlock
+    public struct ConstBlock
     {
         public PushConstantRange range;
         public IntPtr data;
+
+        public ConstBlock(ShaderStage shaderStage, int offset, int size, IntPtr data)
+        {
+            range = new PushConstantRange(shaderStage, offset, size);
+            this.data = data;
+        }
     }
 
     public class PipelineResourceSet : DisposeBase
