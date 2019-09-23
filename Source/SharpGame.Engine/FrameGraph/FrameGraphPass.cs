@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace SharpGame
@@ -21,7 +22,17 @@ namespace SharpGame
         public RenderPass renderPass { get; set; }
 
         [IgnoreDataMember]
-        public FrameGraph FrameGraph { get; set; }
+        public FrameGraph FrameGraph
+        {
+            get => frameGraph;
+            set
+            {
+                frameGraph = value;
+                OnSetFrameGraph(frameGraph);
+            }
+        }
+
+        FrameGraph frameGraph;
 
         protected CommandBuffer cmdBuffer;
         public CommandBuffer CmdBuffer => cmdBuffer;
@@ -36,7 +47,30 @@ namespace SharpGame
 
         public virtual void Init()
         {
+        }
 
+        protected virtual void OnSetFrameGraph(FrameGraph frameGraph)
+        {
+        }
+
+        public void PreappendGraphicsPass(string name, int workCount, Action<GraphicsPass, RenderView> onDraw)
+        {
+            var renderPass = new GraphicsPass(name, workCount)
+            {
+                onDraw
+            };
+
+            Preappend(renderPass);
+        }
+
+        public void PreappendComputePass(Action<ComputePass, RenderView> onDraw)
+        {
+            var renderPass = new ComputePass
+            {
+                OnDraw = onDraw
+            };
+
+            Preappend(renderPass);
         }
 
         public void Preappend(FrameGraphPass frameGraphPass)
@@ -51,6 +85,16 @@ namespace SharpGame
                 Debug.Assert(false, "Not in FrameGraph");
             }
 
+        }
+
+        public void AppendGraphicsPass(string name, int workCount, Action<GraphicsPass, RenderView> onDraw)
+        {
+            var renderPass = new GraphicsPass(name, workCount)
+            {
+                onDraw
+            };
+
+            Append(renderPass);
         }
 
         public void Append(FrameGraphPass frameGraphPass)

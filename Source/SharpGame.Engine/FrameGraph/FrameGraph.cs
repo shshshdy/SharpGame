@@ -31,6 +31,11 @@ namespace SharpGame
 
         public void Init()
         {
+            if (initialized)
+            {
+                return;
+            }
+
             foreach(var rp in RenderPassList)
             {
                 rp.Init();
@@ -96,8 +101,8 @@ namespace SharpGame
 
         public void InsertRenderPass(int index, FrameGraphPass renderPass)
         {
-            renderPass.FrameGraph = this;
             RenderPassList.Insert(index, renderPass);
+            renderPass.FrameGraph = this;
 
             if (initialized)
             {
@@ -107,8 +112,8 @@ namespace SharpGame
 
         public void AddRenderPass(FrameGraphPass renderPass)
         {
-            renderPass.FrameGraph = this;
             RenderPassList.Add(renderPass);
+            renderPass.FrameGraph = this;
 
             if(initialized)
             {
@@ -152,8 +157,8 @@ namespace SharpGame
 
         public void Add(FrameGraphPass renderPass)
         {
-            renderPass.FrameGraph = this;
             RenderPassList.Add(renderPass);
+            renderPass.FrameGraph = this;
         }
 
         public IEnumerator<FrameGraphPass> GetEnumerator()

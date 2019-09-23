@@ -5,7 +5,19 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class EarlyZPass : ScenePass
+    public struct ClusterUBO
+    {
+        public mat4 view;
+        public mat4 projection_clip;
+        public vec2 tile_size;
+        public Int2 grid_dim;
+        public vec3 cam_pos;
+        public float cam_far;
+        public vec2 resolution;
+        public uint num_lights;
+    };
+
+    public partial class ClusterLighting : ScenePass
     {
         const uint ATTACHMENT_REFERENCE_DEPTH = 0;
         const uint SUBPASS_DEPTH = 0;
@@ -16,16 +28,8 @@ namespace SharpGame
 
         Format depthFormat = Format.D16Unorm;
 
-        public EarlyZPass() : base(Pass.EarlyZ)
+        private void InitEarlyZ()
         {
-        }
-
-
-        public override void Init()
-        {
-            base.Init();
-
-
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
 
@@ -101,11 +105,9 @@ namespace SharpGame
             frameBuffer = Framebuffer.Create(renderPass, width, height, 1, new[] { p_rt_offscreen_depth_.view });
         }
 
-        public override void Update(RenderView view)
+        void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
         {
-            base.Update(view);
-
+            //renderPass.DrawBatchesMT(view, view.batches);
         }
-
     }
 }

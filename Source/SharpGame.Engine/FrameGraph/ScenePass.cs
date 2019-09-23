@@ -10,6 +10,8 @@ namespace SharpGame
 {
     public class ScenePass : GraphicsPass
     {
+        public static bool MultiThreaded = false;
+
         public ScenePass(string name = "main") : base(name, 16)
         {
         }

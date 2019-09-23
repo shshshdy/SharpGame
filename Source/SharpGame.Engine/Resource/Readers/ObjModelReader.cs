@@ -361,6 +361,16 @@ namespace SharpGame
             {
                 material.SetTexture("SpecMap", Texture.White);
             }
+
+            if (!string.IsNullOrEmpty(materialDef.AlphaMap))
+            {
+                Texture tex = Resources.Instance.Load<Texture>(path + materialDef.AlphaMap);
+                material.SetTexture("AlphaMap", tex.ResourceRef);
+            }
+            else
+            {
+                material.SetTexture("AlphaMap", Texture.White);
+            }
             return material;
         }
 
