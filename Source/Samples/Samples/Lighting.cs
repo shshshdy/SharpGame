@@ -4,7 +4,7 @@ using System;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -2)]
+    [SampleDesc(sortOrder = 2)]
     public class Lighting : Sample
     {
         FrameGraph frameGraph;
