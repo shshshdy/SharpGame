@@ -43,6 +43,11 @@ namespace SharpGame
                 for (int i = 0; i < pipelineLayout.PushConstantNames.Count; i++)
                 {
                     var constName = pipelineLayout.PushConstantNames[i];
+                    if(constName.StartsWith("g_"))
+                    {
+                        continue;
+                    }
+
                     var pushConst = pipelineLayout.PushConstant[i];
                     if (pushConst.offset + pushConst.size > Device.MaxPushConstantsSize)
                     {

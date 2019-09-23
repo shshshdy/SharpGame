@@ -23,6 +23,11 @@ namespace SharpGame
             this.action = action;
         }
 
+        public EventHandler(Action<T> action)
+        {
+            this.action = (in T e) => action(e);
+        }
+
         public Type Type => typeof(T);
 
         public void Invoke(in T e)
@@ -56,8 +61,45 @@ namespace SharpGame
             observable.SubscribeEvent(handler);
             subscribedEvents.Add((observable, handler));
         }
-        
+
+        internal void SubscribeEvent<T>(IObserver oberver, Object observable, Action<T> action)
+        {
+            EventHandler<T> handler = new EventHandler<T>(action);
+
+            if (this.subscribedEvents.TryGetValue(oberver, out EventSet subscribedEvents))
+            {
+                if (subscribedEvents.Contains((observable, handler)))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                subscribedEvents = new EventSet();
+                this.subscribedEvents[oberver] = subscribedEvents;
+            }
+
+            observable.SubscribeEvent(handler);
+            subscribedEvents.Add((observable, handler));
+        }
+
         internal void UnsubscribeEvent<T>(IObserver oberver, Object observable, EventAction<T> action)
+        {
+            if (this.subscribedEvents.TryGetValue(oberver, out EventSet subscribedEvents))
+            {
+                EventHandler<T> handler = new EventHandler<T>(action);
+                if (!subscribedEvents.Contains((observable, handler)))
+                {
+                    return;
+                }
+
+                subscribedEvents.Remove((observable, handler));
+                observable.UnsubscribeEvent(handler);
+            }
+
+        }
+
+        internal void UnsubscribeEvent<T>(IObserver oberver, Object observable, Action<T> action)
         {
             if (this.subscribedEvents.TryGetValue(oberver, out EventSet subscribedEvents))
             {
