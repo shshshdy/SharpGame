@@ -57,12 +57,6 @@ namespace SharpGame
         FastList<DebugTriangle> triangles_ = new FastList<DebugTriangle>();
         /// Triangles rendered without depth test.
         FastList<DebugTriangle> noDepthTriangles_ = new FastList<DebugTriangle>();
-        /// View transform.
-        mat4 view_;
-        /// Projection transform.
-        mat4 projection_;
-        /// Projection transform in API-specific format.
-        mat4 vkProjection_;
         /// View frustum.
         Frustum frustum_;
         /// Line antialiasing flag.
@@ -95,9 +89,6 @@ namespace SharpGame
             if(!camera)
                 return;
 
-            view_ = camera.View;
-            projection_ = camera.Projection;
-            vkProjection_ = camera.VkProjection;
             frustum_ = camera.Frustum;
         }
 
@@ -239,11 +230,12 @@ namespace SharpGame
                 AddPolygon(v0, v1, v5, v4, uintColor, depthTest);
             }
         }
-        /*
-        void AddFrustum(const Frustum& frustum, Color color, bool depthTest)
+        
+        public void AddFrustum(in Frustum frustum, Color color, bool depthTest)
         {
-            const vec3* vertices = frustum.vertices_;
-            int uintColor = color.ToUInt();
+            Span<vec3> vertices = stackalloc vec3[8];
+            frustum.GetCorners(vertices);
+            int uintColor = color.ToRgba();
 
             AddLine(vertices[0], vertices[1], uintColor, depthTest);
             AddLine(vertices[1], vertices[2], uintColor, depthTest);
@@ -259,6 +251,7 @@ namespace SharpGame
             AddLine(vertices[3], vertices[7], uintColor, depthTest);
         }
 
+        /*
         void AddPolyhedron(const Polyhedron& poly, Color color, bool depthTest)
         {
             int uintColor = color.ToUInt();
@@ -446,7 +439,8 @@ namespace SharpGame
             }
         }
     }*/
-        /*
+
+            /*
             void AddCircle(vec3 center, vec3 normal, float radius, Color color, int steps, bool depthTest)
             {
                 quat orientation = quat.FromRotationTo(vec3.Up, normal.Normalized());
@@ -637,7 +631,7 @@ namespace SharpGame
             return frustum_.Contains(box) == Intersection.InSide;
         }
 
-        bool HasContent()
+        public bool HasContent()
         {
             return !(lines_.Count == 0 && noDepthLines_.Count == 0 && triangles_.Count == 0 && noDepthTriangles_.Count == 0);
         }

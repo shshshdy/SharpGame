@@ -73,50 +73,12 @@ namespace Vulkan
         private static vkCreateDebugReportCallbackEXTDelegate vkCreateDebugReportCallbackEXT(VkInstance instance) => instance.GetProc<vkCreateDebugReportCallbackEXTDelegate>(nameof(vkCreateDebugReportCallbackEXT));
     }
 
-    /// <summary>
-    /// Structure specifying parameters of a newly created debug report callback.
-    /// <para>
-    /// For each <see cref="DebugReportCallbackCreateInfoExt"/> that is created the flags determine
-    /// when that function is called.
-    /// </para>
-    /// <para>
-    /// A callback will be made for issues that match any bit set in its flags. The callback will
-    /// come directly from the component that detected the event, unless some other layer intercepts
-    /// the calls for its own purposes (filter them in different way, log to system error log, etc.)
-    /// An application may receive multiple callbacks if multiple <see
-    /// cref="DebugReportCallbackCreateInfoExt"/> objects were created.
-    /// </para>
-    /// <para>A callback will always be executed in the same thread as the originating Vulkan call.</para>
-    /// <para>
-    /// A callback may be called from multiple threads simultaneously (if the application is making
-    /// Vulkan calls from multiple threads).
-    /// </para>
-    /// </summary>
     public struct DebugReportCallbackCreateInfoExt
     {
-        /// <summary>
-        /// A bitmask specifying which event(s) will cause this callback to be called. Flags are
-        /// interpreted as bitmasks and multiple can be set.
-        /// </summary>
         public VkDebugReportFlagsEXT Flags;
-        /// <summary>
-        /// The application callback function to call.
-        /// </summary>
         public Func<DebugReportCallbackInfo, bool> Callback;
-        /// <summary>
-        /// User data to be passed to the callback.
-        /// </summary>
         public IntPtr UserData;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DebugReportCallbackCreateInfoExt"/> structure.
-        /// </summary>
-        /// <param name="flags">
-        /// A bitmask specifying which event(s) will cause this callback to be called. Flags are
-        /// interpreted as bitmasks and multiple can be set.
-        /// </param>
-        /// <param name="callback">The application callback function to call.</param>
-        /// <param name="userData">User data to be passed to the callback.</param>
         public DebugReportCallbackCreateInfoExt(
             VkDebugReportFlagsEXT flags,
             Func<DebugReportCallbackInfo, bool> callback,
@@ -135,45 +97,15 @@ namespace Vulkan
         }
     }
 
-    /// <summary>
-    /// Structure specifying arguments for a debug report callback function.
-    /// </summary>
     public struct DebugReportCallbackInfo
     {
-        /// <summary>
-        /// The <see cref="DebugReportFlagsExt"/> that triggered this callback.
-        /// </summary>
         public DebugReportFlagsExt Flags;
-        /// <summary>
-        /// The <see cref="DebugReportObjectTypeExt"/> specifying the type of object being used or
-        /// created at the time the event was triggered.
-        /// </summary>
         public DebugReportObjectTypeExt ObjectType;
-        /// <summary>
-        /// The object where the issue was detected. <see cref="Object"/> may be 0 if there is no
-        /// object associated with the event.
-        /// </summary>
         public long Object;
-        /// <summary>
-        /// The component (layer, driver, loader) defined value that indicates the location of the
-        /// trigger. This is an optional value.
-        /// </summary>
         public IntPtr Location;
-        /// <summary>
-        /// The layer-defined value indicating what test triggered this callback.
-        /// </summary>
         public int MessageCode;
-        /// <summary>
-        /// The abbreviation of the component making the callback.
-        /// </summary>
         public string LayerPrefix;
-        /// <summary>
-        /// The string detailing the trigger conditions.
-        /// </summary>
         public string Message;
-        /// <summary>
-        /// The user data given when the <see cref="DebugReportCallbackCreateInfoExt"/> was created.
-        /// </summary>
         public IntPtr UserData;
     }
 
