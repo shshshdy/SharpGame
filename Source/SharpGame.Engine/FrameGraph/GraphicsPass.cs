@@ -39,6 +39,9 @@ namespace SharpGame
 
         FastList<Task> renderTasks = new FastList<Task>();
 
+        protected ResourceSet[] resourceSets = new ResourceSet[2];
+        protected int[] offsets = new int[2];
+
         public GraphicsPass(string name = "", int workCount = 0)
         {
             Name = name;
@@ -68,6 +71,12 @@ namespace SharpGame
             Subpasses.Add(subpass);
         }
 
+        public void SetGlobalResourceSet(int index, ResourceSet rs, int offset)
+        {
+            resourceSets[index] = rs;
+            offsets[index] = offset;
+        }
+
         public CommandBuffer GetCmdBuffer(int index = -1)
         {
             uint workContext = Graphics.WorkImage;
@@ -92,9 +101,9 @@ namespace SharpGame
 
         protected void Begin(RenderView view)
         {
-            if (renderPass == null)
+            if (RenderPass == null)
             {
-                renderPass = Graphics.RenderPass;
+                RenderPass = Graphics.RenderPass;
             }
 
             if (framebuffers.IsNullOrEmpty())
@@ -102,6 +111,11 @@ namespace SharpGame
                 framebuffers = Graphics.Framebuffers;
             }
 
+            Reset();
+        }
+
+        protected virtual void Reset()
+        {
             uint workContext = Graphics.WorkImage;
 
             for (int i = 0; i < cmdBufferPools.Count; i++)
@@ -112,7 +126,6 @@ namespace SharpGame
 
             renderPassInfo[workContext].Clear();
         }
-
 
         bool inRenderPass = false;
         public void BeginRenderPass(RenderView view)
@@ -255,7 +268,7 @@ namespace SharpGame
         {
             var shader = material.Shader;
             var pass = shader.GetPass(passID);
-            var pipe = pass.GetGraphicsPipeline(renderPass, null);
+            var pipe = pass.GetGraphicsPipeline(RenderPass, null);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
 
@@ -265,7 +278,7 @@ namespace SharpGame
         }
 
         public void DrawBatch(CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts, ResourceSet resourceSet, 
-            ResourceSet resourceSet1, uint? offset = null, uint? offset1 = null)
+            ResourceSet resourceSet1, int offset = -1, int offset1 = -1)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
@@ -274,10 +287,9 @@ namespace SharpGame
             }
             
             var pass = shader.GetPass(passID);
-            var pipe = pass.GetGraphicsPipeline(renderPass, batch.geometry);
+            var pipe = pass.GetGraphicsPipeline(RenderPass, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
-
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, offset);
 
             if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.PS) != 0)

@@ -207,15 +207,15 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindGraphicsResourceSet(PipelineLayout pipelineLayout, int firstSet, ResourceSet resourceSet, uint? dynamicOffset = null)
+        public unsafe void BindGraphicsResourceSet(PipelineLayout pipelineLayout, int firstSet, ResourceSet resourceSet, int dynamicOffset = -1)
         {
             uint dynamicOffsetCount = 0;
             uint val;
             uint* pDynamicOffsets = null;
-            if (dynamicOffset != null)
+            if (dynamicOffset >= 0)
             {
                 dynamicOffsetCount = 1;
-                val = dynamicOffset.Value;
+                val = (uint)dynamicOffset;
                 pDynamicOffsets = (uint*)Unsafe.AsPointer(ref val);
             }
 
@@ -223,15 +223,15 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindComputeResourceSet(PipelineLayout pipelineLayout, int firstSet, ResourceSet resourceSet, uint? dynamicOffset = null)
+        public unsafe void BindComputeResourceSet(PipelineLayout pipelineLayout, int firstSet, ResourceSet resourceSet, int dynamicOffset = -1)
         {
             uint dynamicOffsetCount = 0;
             uint val;
             uint* pDynamicOffsets = null;
-            if (dynamicOffset != null)
+            if (dynamicOffset >= 0)
             {
                 dynamicOffsetCount = 1;
-                val = dynamicOffset.Value;
+                val = (uint)dynamicOffset;
                 pDynamicOffsets = (uint*)Unsafe.AsPointer(ref val);
             }
 

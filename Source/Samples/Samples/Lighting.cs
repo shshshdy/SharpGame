@@ -88,6 +88,7 @@ namespace SharpGame.Samples
             {
                 new ShadowPass(),
 
+                //new ScenePass()
                 new ClusterLighting()
 
             };

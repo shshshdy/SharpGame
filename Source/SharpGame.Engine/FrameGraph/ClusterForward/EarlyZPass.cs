@@ -5,18 +5,6 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public struct ClusterUBO
-    {
-        public mat4 view;
-        public mat4 projection_clip;
-        public vec2 tile_size;
-        public Int2 grid_dim;
-        public vec3 cam_pos;
-        public float cam_far;
-        public vec2 resolution;
-        public uint num_lights;
-    };
-
     public partial class ClusterLighting : ScenePass
     {
         const uint ATTACHMENT_REFERENCE_DEPTH = 0;
@@ -24,6 +12,7 @@ namespace SharpGame
         const uint SUBPASS_CLUSTER_FLAG = 1;
        
         RenderTarget p_rt_offscreen_depth_;
+        RenderPass rpEarlyZ;
         Framebuffer frameBuffer;
 
         Format depthFormat = Format.D16Unorm;
@@ -98,11 +87,11 @@ namespace SharpGame
             };
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            renderPass = new RenderPass(ref renderPassInfo);
+            rpEarlyZ = new RenderPass(ref renderPassInfo);
 
             p_rt_offscreen_depth_ = new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth, SampleCountFlags.Count1);
 
-            frameBuffer = Framebuffer.Create(renderPass, width, height, 1, new[] { p_rt_offscreen_depth_.view });
+            frameBuffer = Framebuffer.Create(rpEarlyZ, width, height, 1, new[] { p_rt_offscreen_depth_.view });
         }
 
         void DrawEarlyZ(GraphicsPass renderPass, RenderView view)

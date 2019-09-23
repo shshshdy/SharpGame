@@ -6,10 +6,6 @@ namespace SharpGame
 {
     public partial class ClusterLighting : ScenePass
     {
-        public ClusterLighting() : base("main")
-        {
-        }
-
         private void UpdateLight(RenderView view)
         {
             uint offset = 0;

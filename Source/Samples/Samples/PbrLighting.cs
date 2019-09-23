@@ -205,7 +205,7 @@ namespace SharpGame.Samples
                     spSet.UpdateSets();
 
                     commandBuffer.BindComputePipeline(pass);
-                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, spSet, null);
+                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, spSet);
 
                     float deltaRoughness = 1.0f / Math.Max((float)numMipTailLevels, 1.0f);
                     for (uint level = 1, size = kEnvMapSize / 2; level < kEnvMapLevels; ++level, size /= 2)
@@ -237,7 +237,7 @@ namespace SharpGame.Samples
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
 
                     commandBuffer.BindComputePipeline(pass);
-                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, irSet, null);
+                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, irSet);
                     commandBuffer.Dispatch(kIrradianceMapSize / 32, kIrradianceMapSize / 32, 6);
 
                     Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(irMap.image, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
@@ -259,7 +259,7 @@ namespace SharpGame.Samples
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
 
                     commandBuffer.BindComputePipeline(pass);
-                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, brdfLUTSet, null);
+                    commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, brdfLUTSet);
                     commandBuffer.Dispatch(kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
 
                     Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(brdfLUT.image, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };

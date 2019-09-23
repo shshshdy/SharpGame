@@ -18,6 +18,7 @@ Shader "LitSolid"
 		@PixelShader
 		{
             #define SHADOW
+#define ALPHA_TEST
             #include "general.frag"
 		}
 		

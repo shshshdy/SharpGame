@@ -74,19 +74,23 @@ namespace SharpGame
 
         public GraphicsPass OverlayPass { get; set; }
 
-        public bool DrawDebug { get => Renderer.DrawDebug && drawDebug; set => drawDebug = value; }
-        bool drawDebug = true;
-        GraphicsPass debugPass;
-
         private Viewport viewport;
         public ref Viewport Viewport => ref viewport;
         public Rect2D ViewRect => new Rect2D((int)Viewport.x, (int)Viewport.y, (int)Viewport.width, (int)Viewport.height);
+
+        public float Width => viewport.width;
+        public float Height => viewport.height;
+
+        public bool DrawDebug { get => Renderer.DrawDebug && drawDebug; set => drawDebug = value; }
+        bool drawDebug = true;
+        GraphicsPass debugPass;
 
         public uint ViewMask { get; set; } = 1;
         public ref FrameInfo Frame => ref frameInfo;
         public ref LightParameter LightParam => ref lightParameter;
 
         internal FastList<Drawable> drawables = new FastList<Drawable>();
+
         internal FastList<Light> lights = new FastList<Light>();
 
         internal FastList<SourceBatch>[] batches = new FastList<SourceBatch>[]
@@ -135,7 +139,7 @@ namespace SharpGame
 
             debugPass = new GraphicsPass
             {
-                renderPass = renderPass,
+                RenderPass = renderPass,
                 framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
             };
 
@@ -151,7 +155,6 @@ namespace SharpGame
                 {
                     return;
                 }
-
 
                 var cmdBuffer = pass.CmdBuffer;
                 debug.Render(view, cmdBuffer);
@@ -176,7 +179,7 @@ namespace SharpGame
 
             if(ubMatrics == null)
             {
-                uint size = /*Graphics.Settings.Validation ? 64 * 1000u :*/ 64 * 1000 * 100;
+                uint size = 64 * 1000 * 100;
 
                 ubMatrics = new DynamicBuffer(size);
             }
@@ -231,10 +234,10 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe uint GetTransform(IntPtr pos, uint count)
+        public unsafe int GetTransform(IntPtr pos, uint count)
         {
             uint sz = count << 6;// (uint)Utilities.SizeOf<mat4>() * count;
-            return ubMatrics.Alloc(sz, pos);
+            return (int)ubMatrics.Alloc(sz, pos);
         }
 
         public void Update(ref FrameInfo frame)
@@ -258,14 +261,7 @@ namespace SharpGame
             mat4 m = mat4.Identity;
             GetTransform(Utilities.AsPointer(ref m), 1);
 
-            if (NegativeViewport)
-            {
-                Viewport.Define(0, g.Height, g.Width, -g.Height);
-            }
-            else
-            {
-                Viewport.Define(0, 0, g.Width, g.Height);
-            }
+            Viewport.Define(0, 0, g.Width, g.Height);
 
             if (camera && camera.AutoAspectRatio)
             {

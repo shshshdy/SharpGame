@@ -82,7 +82,7 @@ namespace SharpGame
             guiPass = new GraphicsPass
             {
                 framebuffers = framebuffers,
-                renderPass = renderPass,
+                RenderPass = renderPass,
             };
 
             guiPass.Add((pass, view) =>

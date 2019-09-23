@@ -105,12 +105,12 @@ namespace SharpGame
             };
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            renderPass = new RenderPass(ref renderPassInfo);
+            RenderPass = new RenderPass(ref renderPassInfo);
 
             for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
                 cascades[i].view = ImageView.Create(DepthRT.image, ImageViewType.Image2D, depthFormat, ImageAspectFlags.Depth, 0, 1, i, 1);
-                cascades[i].frameBuffer = Framebuffer.Create(renderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
+                cascades[i].frameBuffer = Framebuffer.Create(RenderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
                 Renderer.Instance.AddDebugImage(cascades[i].view);
             }
 
@@ -166,7 +166,7 @@ namespace SharpGame
                 cmd.SetScissor(renderArea);
 
                 uint cascade = (uint)i;
-                //cmd.PushConstants(depthShader.Main.PipelineLayout, ShaderStage.Vertex, 0, ref cascade);
+
                 Span<ConstBlock> consts = stackalloc ConstBlock[]
                 {
                     new ConstBlock(ShaderStage.Vertex, 0, 4, Utilities.AsPointer(ref cascade))

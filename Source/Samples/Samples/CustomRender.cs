@@ -93,7 +93,7 @@ namespace SharpGame.Samples
             {
                 mat4 worldTransform = glm.translate(gridSize * (i / 10), 0, gridSize * (i % 10));
 
-                batches[i].offset = ub.Alloc(64, Utilities.AsPointer(ref worldTransform));
+                batches[i].offset = (int)ub.Alloc(64, Utilities.AsPointer(ref worldTransform));
             }
 
             ub.Flush();            

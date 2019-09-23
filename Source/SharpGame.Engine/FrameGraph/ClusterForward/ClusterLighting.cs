@@ -4,6 +4,18 @@ using System.Text;
 
 namespace SharpGame
 {
+    public struct ClusterUniforms
+    {
+        public mat4 view;
+        public mat4 projection_clip;
+        public vec2 tile_size;
+        public FixedArray2<uint> grid_dim;
+        public vec3 cam_pos;
+        public float cam_far;
+        public vec2 resolution;
+        public uint num_lights;
+    };
+
     public partial class ClusterLighting : ScenePass
     {
         uint MAX_WIDTH = 1920;
@@ -44,7 +56,9 @@ namespace SharpGame
 
         uint query_count_;
 
-        private DoubleBuffer ubo;
+        ClusterUniforms clusterUniforms = new ClusterUniforms();
+
+        private DoubleBuffer uboCluster;
         private DoubleBuffer light_pos_ranges;
         private DoubleBuffer light_colors;
 
@@ -66,6 +80,10 @@ namespace SharpGame
 
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
+        public ClusterLighting() : base("main")
+        {
+        }
+
         public override void Init()
         {
             base.Init();
@@ -73,7 +91,6 @@ namespace SharpGame
             CreateResources();
 
             InitEarlyZ();
-
         }
 
         protected override void OnSetFrameGraph(FrameGraph frameGraph)
@@ -81,7 +98,6 @@ namespace SharpGame
             PreappendGraphicsPass(Pass.EarlyZ, 8, DrawEarlyZ);
             PreappendComputePass(ComputeLight);
         }
-
 
         private void CreateResources()
         {
@@ -94,14 +110,14 @@ namespace SharpGame
 
             clusterLight = Resources.Instance.Load<Shader>("Shaders/ClusterLight.shader");
 
-            resourceLayout0 = new ResourceLayout(0)
+            resourceLayout0 = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Compute),
                 new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
                 new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
             };
 
-            resourceLayout1 = new ResourceLayout(1)
+            resourceLayout1 = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
                 new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
@@ -110,7 +126,6 @@ namespace SharpGame
                 new ResourceLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
                 new ResourceLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
                 new ResourceLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-
             };
 
             uint[] queue_families = null;
@@ -128,9 +143,8 @@ namespace SharpGame
                 size = (uint)queue_families.Length;
             }
 
-            ubo = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible,
-                (uint)Utilities.SizeOf<ClusterUBO>(), sharingMode, queue_families);
-
+            uboCluster = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible,
+                (uint)Utilities.SizeOf<ClusterUniforms>(), sharingMode, queue_families);
 
             light_pos_ranges = new DoubleBuffer(BufferUsageFlags.StorageTexelBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
                 MAX_NUM_LIGHTS * 4 * sizeof(float), SharingMode.Exclusive, queue_families);
@@ -140,8 +154,8 @@ namespace SharpGame
                 MAX_NUM_LIGHTS * sizeof(uint), sharingMode, queue_families);
             light_colors.CreateView(Format.R8g8b8a8Unorm);
 
-            resourceSet0[0] = new ResourceSet(resourceLayout0, ubo[0], light_pos_ranges[0], light_colors[0]);
-            resourceSet0[1] = new ResourceSet(resourceLayout0, ubo[1], light_pos_ranges[1], light_colors[1]);
+            resourceSet0[0] = new ResourceSet(resourceLayout0, uboCluster[0], light_pos_ranges[0], light_colors[0]);
+            resourceSet0[1] = new ResourceSet(resourceLayout0, uboCluster[1], light_pos_ranges[1], light_colors[1]);
 
             uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
             grid_flags = Buffer.CreateTexelBuffer(
@@ -187,6 +201,24 @@ namespace SharpGame
         public override void Update(RenderView view)
         {
             UpdateLight(view);
+
+            Camera camera = view.Camera;
+            clusterUniforms.view = camera.View;
+            clusterUniforms.projection_clip = camera.VkProjection;
+
+            clusterUniforms.tile_size[0] = (float)(TILE_WIDTH);
+            clusterUniforms.tile_size[1] = (float)(TILE_HEIGHT);
+            clusterUniforms.grid_dim[0] = tile_count_x;
+            clusterUniforms.grid_dim[1] = tile_count_y;
+
+            clusterUniforms.cam_pos = camera.Node.WorldPosition;
+            clusterUniforms.cam_far = camera.FarClip;
+
+            clusterUniforms.resolution[0] = (float)(view.Width);
+            clusterUniforms.resolution[1] = (float)(view.Height);
+            clusterUniforms.num_lights = num_lights;
+            uboCluster.SetData(ref clusterUniforms);
+            uboCluster.Flush();
         }
     }
 }

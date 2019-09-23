@@ -19,7 +19,7 @@ namespace SharpGame
 
         protected ulong passID = 1;
 
-        public RenderPass renderPass { get; set; }
+        public RenderPass RenderPass { get; set; }
 
         [IgnoreDataMember]
         public FrameGraph FrameGraph
@@ -53,7 +53,7 @@ namespace SharpGame
         {
         }
 
-        public void PreappendGraphicsPass(string name, int workCount, Action<GraphicsPass, RenderView> onDraw)
+        public GraphicsPass PreappendGraphicsPass(string name, int workCount, Action<GraphicsPass, RenderView> onDraw)
         {
             var renderPass = new GraphicsPass(name, workCount)
             {
@@ -61,9 +61,10 @@ namespace SharpGame
             };
 
             Preappend(renderPass);
+            return renderPass;
         }
 
-        public void PreappendComputePass(Action<ComputePass, RenderView> onDraw)
+        public ComputePass PreappendComputePass(Action<ComputePass, RenderView> onDraw)
         {
             var renderPass = new ComputePass
             {
@@ -71,6 +72,7 @@ namespace SharpGame
             };
 
             Preappend(renderPass);
+            return renderPass;
         }
 
         public void Preappend(FrameGraphPass frameGraphPass)
