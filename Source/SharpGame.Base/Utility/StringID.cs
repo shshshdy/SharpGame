@@ -21,7 +21,15 @@ namespace SharpGame
         public StringID(string str)
         {
             Str = str;
-            Hash = str.GetHashCode();
+
+            if(str != null)
+            {
+                Hash = str.GetHashCode();
+            }
+            else
+            {
+                Hash = 0;
+            }
         }
 
         [IgnoreDataMember]

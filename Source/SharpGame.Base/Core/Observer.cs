@@ -17,7 +17,17 @@ namespace SharpGame
             EventSystem.Instance.SubscribeEvent(self, observable, action);
         }
 
+        public static void Subscribe<T>(this IObserver self, Object observable, Action<T> action)
+        {
+            EventSystem.Instance.SubscribeEvent(self, observable, action);
+        }
+
         public static void Unsubscribe<T>(this IObserver self, Object observable, EventAction<T> action)
+        {
+            EventSystem.Instance.UnsubscribeEvent(self, observable, action);
+        }
+
+        public static void Unsubscribe<T>(this IObserver self, Object observable, Action<T> action)
         {
             EventSystem.Instance.UnsubscribeEvent(self, observable, action);
         }
@@ -27,7 +37,17 @@ namespace SharpGame
             EventSystem.Instance.SubscribeEvent(self, EventSystem.Instance, action);
         }
 
+        public static void Subscribe<T>(this IObserver self, Action<T> action)
+        {
+            EventSystem.Instance.SubscribeEvent(self, EventSystem.Instance, action);
+        }
+
         public static void Unsubscribe<T>(this IObserver self, EventAction<T> action)
+        {
+            EventSystem.Instance.UnsubscribeEvent(self, EventSystem.Instance, action);
+        }
+
+        public static void Unsubscribe<T>(this IObserver self, Action<T> action)
         {
             EventSystem.Instance.UnsubscribeEvent(self, EventSystem.Instance, action);
         }

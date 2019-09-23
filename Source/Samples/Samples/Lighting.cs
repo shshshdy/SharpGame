@@ -87,8 +87,8 @@ namespace SharpGame.Samples
             frameGraph = new FrameGraph
             {
                 new ShadowPass(),
-                new LightComputePass(),
-                new ScenePass()
+
+                new ClusterLighting()
 
             };
 

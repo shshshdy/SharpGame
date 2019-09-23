@@ -72,6 +72,7 @@ Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
 map_Kd vase_plant.jpg
 map_Ka vase_plant.jpg
+map_d vase_plant_mask.jpg
 Ni 1.50
 Ks 0.00 0.00 0.00
 map_Ks vase_plant_spec.jpg
@@ -282,6 +283,7 @@ Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
 map_Kd sponza_thorn_diff.jpg
 map_Ka sponza_thorn_diff.jpg
+map_d sponza_thorn_mask.jpg
 bump sponza_thorn_ddn.jpg -bm 0
 Ni 1.50
 Ks 0.00 0.00 0.00

@@ -134,6 +134,10 @@ namespace SharpGame
                         ExpectExactly(pieces, 1, "map_d");
                         _currentDefinition.AlphaMap = pieces[1];
                         break;
+                    case "map_ks":
+                        ExpectExactly(pieces, 1, "map_ks");
+                        _currentDefinition.SpecularColorTexture = pieces[1];
+                        break;
                     case "map_ns":
                         ExpectExactly(pieces, 1, "map_ns");
                         _currentDefinition.SpecularColorTexture = pieces[1];

@@ -37,11 +37,7 @@ namespace SharpGame
             new FastListPool<CommandBuffer>()
         };
 
-
         FastList<Task> renderTasks = new FastList<Task>();
-
-
-        public static bool MultiThreaded = false;
 
         public GraphicsPass(string name = "", int workCount = 0)
         {
@@ -72,7 +68,7 @@ namespace SharpGame
             Subpasses.Add(subpass);
         }
 
-        protected CommandBuffer GetCmdBuffer(int index = -1)
+        public CommandBuffer GetCmdBuffer(int index = -1)
         {
             uint workContext = Graphics.WorkImage;
             var cb = cmdBufferPools[index + 1][workContext].Get();
@@ -119,12 +115,12 @@ namespace SharpGame
 
 
         bool inRenderPass = false;
-        protected void BeginRenderPass(RenderView view)
+        public void BeginRenderPass(RenderView view)
         {
             BeginRenderPass(framebuffers[Graphics.WorkImage], view.ViewRect, ClearColorValue, ClearDepthStencilValue);
         }
 
-        protected void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
+        public void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
         {
             if(inRenderPass)
             {
@@ -143,9 +139,9 @@ namespace SharpGame
             renderPassInfo[Graphics.WorkImage].Add(rpInfo);
         }
 
-        protected ref RenderPassInfo CurrentRenderPass => ref renderPassInfo[Graphics.WorkImage].Back();
+        public ref RenderPassInfo CurrentRenderPass => ref renderPassInfo[Graphics.WorkImage].Back();
 
-        protected void EndRenderPass(RenderView view)
+        public void EndRenderPass(RenderView view)
         {
             if (!inRenderPass)
             {

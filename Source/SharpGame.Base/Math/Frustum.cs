@@ -302,7 +302,7 @@ namespace SharpGame
         /// , element7 is Far4 (far left down corner)
         /// </summary>
         /// <returns>The 8 corners of the frustum</returns>
-        public void GetCorners(vec3[] corners)
+        public unsafe void GetCorners(Span<vec3> corners)
         {
             corners[0] = Get3PlanesInterPoint(in near, in  bottom, in  right);    //Near1
             corners[1] = Get3PlanesInterPoint(in near, in  top, in  right);       //Near2

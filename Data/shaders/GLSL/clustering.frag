@@ -34,7 +34,7 @@ uvec3 view_pos_to_grid_coord(vec2 frag_pos, float view_z)
 {
     vec3 c;
     c.xy = (frag_pos-0.5f) / ubo_in.tile_size;
-    c.z = min(float(GRID_DIM_Z - 1), max(0.f, float(GRID_DIM_Z) * log((-view_z - CAM_NEAR) / (ubo_in.cam_far - CAM_NEAR) + 1.f)));
+    c.z = min(float(GRID_DIM_Z - 1), max(0.f, float(GRID_DIM_Z) * log((view_z - CAM_NEAR) / (ubo_in.cam_far - CAM_NEAR) + 1.f)));
     return uvec3(c);
 }
 

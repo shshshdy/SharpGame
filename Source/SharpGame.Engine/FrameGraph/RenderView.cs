@@ -165,6 +165,7 @@ namespace SharpGame
             this.camera = camera;
                         
             FrameGraph = frameGraph;
+            FrameGraph?.Init();
         }
 
         protected void CreateBuffers()
@@ -249,6 +250,7 @@ namespace SharpGame
             if (FrameGraph == null)
             {
                 FrameGraph =  FrameGraph.Simple();
+                FrameGraph.Init();
             }
 
             ubMatrics.Clear();

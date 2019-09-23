@@ -2,8 +2,8 @@
 #include "UniformsVS.glsl"
 
 layout(location = 0) in vec3 inPos;
-#ifdef TEX_LOCATION
-layout(location = TEX_LOCATION) in vec2 inUV;
+#ifdef ALPHA_TEST
+layout(location = 1) in vec2 inUV;
 #endif
 // todo: pass via specialization constant
 #define SHADOW_MAP_CASCADE_COUNT 4
@@ -24,7 +24,7 @@ out gl_PerVertex{
 
 void main()
 {
-#ifdef TEX_LOCATION
+#ifdef ALPHA_TEST
     outUV = inUV;
 #endif
     vec4 pos = Model * vec4(inPos, 1);

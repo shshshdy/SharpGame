@@ -25,7 +25,7 @@ namespace SharpGame
         public int ID { get; set; }
 
         [DataMember(Order = 1)]
-        public StringID Name { get; set; }
+        public string Name { get; set; }
 
         [DataMember(Order = 2)]
         public bool Enabled { get; set; } = true;

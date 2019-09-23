@@ -1,4 +1,4 @@
-Shader "LitSolid"
+Shader "LitAlphaTest"
 {
 	Properties
 	{
@@ -18,6 +18,8 @@ Shader "LitSolid"
 		@PixelShader
 		{
             #define SHADOW
+#define ALPHA_TEST
+            #define ALPHA_MAP
             #include "general.frag"
 		}
 		
@@ -31,11 +33,13 @@ Shader "LitSolid"
 
 		@VertexShader
 		{
+#define ALPHA_TEST
 			#include "clustering.vert"
 		}
 
 		@PixelShader
-		{  
+		{
+#define ALPHA_TEST    
 			#include "clustering.frag"
 		}
 
@@ -56,12 +60,14 @@ Shader "LitSolid"
         @VertexShader
         {
 #define ALPHA_TEST
+#define ALPHA_MAP
             #include "shadow.vert"
         }
 
         @PixelShader
         {
-#define ALPHA_TEST            
+#define ALPHA_TEST   
+#define ALPHA_MAP         
             #include "shadow.frag"
         }
 
