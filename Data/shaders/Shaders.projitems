@@ -35,6 +35,7 @@
     <None Include="$(MSBuildThisFileDirectory)GLSL\general.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\shadow.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\shadow.vert" />
+    <None Include="$(MSBuildThisFileDirectory)LitAlphaTest.shader" />
     <None Include="$(MSBuildThisFileDirectory)Shadow.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\irmap.comp" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\pbr.frag" />

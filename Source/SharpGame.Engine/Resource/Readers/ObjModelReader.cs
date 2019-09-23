@@ -121,8 +121,6 @@ namespace SharpGame
                 model.GeometryCenters.Add(vec3.Zero);
             }
 
-            var shader = Resources.Instance.Load<Shader>("Shaders/LitSolid.shader");
-
             if (!string.IsNullOrEmpty(objFile.MaterialLibName))
             {
                 string path = FileUtil.GetPath(name);
@@ -137,7 +135,7 @@ namespace SharpGame
                         continue;
                     }
 
-                    Material mat = ConvertMaterial(path, materialDefinition, shader);
+                    Material mat = ConvertMaterial(path, materialDefinition);
                     model.Materials.Add(mat);
                 }
             }
@@ -328,8 +326,23 @@ namespace SharpGame
 
         }
 
-        Material ConvertMaterial(string path, MaterialDefinition materialDef, Shader shader)
+        Material ConvertMaterial(string path, MaterialDefinition materialDef)
         {
+            Shader shader = null;// Resources.Instance.Load<Shader>("Shaders/LitSolid.shader");
+
+            if (!string.IsNullOrEmpty(materialDef.AlphaMap))
+            {
+                shader = Resources.Instance.Load<Shader>("Shaders/LitAlphaTest.shader");
+            }
+            else if(string.IsNullOrEmpty(materialDef.DiffuseTexture) && materialDef.Opacity < 1)
+            {
+                shader = Resources.Instance.Load<Shader>("Shaders/LitParticle.shader");
+            }
+            else
+            {
+                shader = Resources.Instance.Load<Shader>("Shaders/LitSolid.shader");
+            }
+
             Material material = new Material(shader);
 
             if (!string.IsNullOrEmpty(materialDef.DiffuseTexture))
@@ -339,7 +352,9 @@ namespace SharpGame
             }
             else
             {
-                material.SetTexture("DiffMap", Texture.White);
+                var color = materialDef.DiffuseReflectivity;
+                material.SetTexture("DiffMap", Texture.CreateByColor(
+                    new Color(color.X, color.Y, color.Z, materialDef.Opacity)));
             }
 
             if (!string.IsNullOrEmpty(materialDef.BumpMap))
@@ -359,7 +374,7 @@ namespace SharpGame
             }
             else
             {
-                material.SetTexture("SpecMap", Texture.White);
+                material.SetTexture("SpecMap", Texture.Black);
             }
 
             if (!string.IsNullOrEmpty(materialDef.AlphaMap))

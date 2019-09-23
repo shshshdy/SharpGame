@@ -116,6 +116,8 @@ namespace SharpShaderCompiler
         /// </summary>
         IncludeHandler IncludeCallback;
 
+        ShadercNative.IncludeFunction includeFunction;
+        ShadercNative.ReleaseInclude releaseInclude;
         /// <summary>
         /// Create new compile options
         /// </summary>
@@ -123,7 +125,11 @@ namespace SharpShaderCompiler
         {
             IncludeCallback = includeCallback;
             _handle = ShadercNative.shaderc_compile_options_initialize();
-            ShadercNative.shaderc_compile_options_set_include_callbacks(_handle, DelegateWrapper, ReleaseInclude, IntPtr.Zero);
+
+            includeFunction = new ShadercNative.IncludeFunction(DelegateWrapper);
+            releaseInclude = new ShadercNative.ReleaseInclude(ReleaseInclude);
+            ShadercNative.shaderc_compile_options_set_include_callbacks(_handle, includeFunction,
+                releaseInclude, IntPtr.Zero);
         }
 
         private CompileOptions(IntPtr handle)

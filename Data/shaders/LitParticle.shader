@@ -10,6 +10,8 @@ Shader "LitParticle"
         CullMode = None
 		BlendMode = Alpha
 
+        DepthWrite = false
+
         @VertexShader
         {
             #include "general.vert"
