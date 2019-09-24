@@ -32,7 +32,6 @@ namespace SharpGame.Samples
         ResourceSet[] resourceSet = new ResourceSet[2];
 
         DoubleBuffer ubCameraVS;
-        DynamicBuffer ubObjectVS;
 
         Geometry cube;
         vec3 cameraPos;
@@ -65,38 +64,19 @@ namespace SharpGame.Samples
 
             ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint) Utilities.SizeOf<CameraVS>());
 
-            ubObjectVS = new DynamicBuffer(COUNT * 4 * 64);
-
-            //ubObjectVS = Renderer.MainView.ubMatrics;
-
-            resourceSet[0] = new ResourceSet(resourceLayout, ubCameraVS[0], ubObjectVS.Buffer[0]);
-            resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], ubObjectVS.Buffer[1]);
+            resourceSet[0] = new ResourceSet(resourceLayout, ubCameraVS[0], Renderer.TransformBuffer[0]);
+            resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], Renderer.TransformBuffer[1]);
 
             frameGraph.AddGraphicsPass(CustomDraw);
 
             cameraPos = new vec3(0, 5, -50);
-            //pitch = MathUtil.Radians(15);
-           
+            
             Renderer.MainView.Attach(null, null, frameGraph);
 
         }
 
         public override void Update()
         {
-            var ub = ubObjectVS;
-            
-            ub.Clear();
-
-            float gridSize = 15;
-
-            for (int i = 0; i < COUNT; i++)
-            {
-                mat4 worldTransform = glm.translate(gridSize * (i / 10), 0, gridSize * (i % 10));
-
-                batches[i].offset = (int)ub.Alloc(64, Utilities.AsPointer(ref worldTransform));
-            }
-
-            ub.Flush();            
 
             UpdateInput();
         }
@@ -172,6 +152,15 @@ namespace SharpGame.Samples
             cameraVS.ViewProj = proj * cameraVS.View ;
             ub.SetData(ref cameraVS);
             ub.Flush();
+
+            float gridSize = 15;
+
+            for (int i = 0; i < COUNT; i++)
+            {
+                mat4 worldTransform = glm.translate(gridSize * (i / 10), 0, gridSize * (i % 10));
+
+                batches[i].offset = (int)Renderer.Instance.GetTransform(Utilities.AsPointer(ref worldTransform), 1);
+            }
 
             for (int i = 0; i < COUNT; i++)
             {

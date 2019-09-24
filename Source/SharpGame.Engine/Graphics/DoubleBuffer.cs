@@ -70,12 +70,14 @@ namespace SharpGame
 
         uint offset;
 
-        public DynamicBuffer(uint size)
+        public DynamicBuffer(BufferUsageFlags bufferUsage, uint size)
         {
             this.Size = size;
-            Buffer = new DoubleBuffer(BufferUsageFlags.UniformBuffer, size);
+            Buffer = new DoubleBuffer(bufferUsage, size);
             
         }
+
+        public Buffer this[int index] => Buffer[index];
 
         [MethodImpl((MethodImplOptions)0x100)]
         public uint Alloc(uint size, IntPtr data)

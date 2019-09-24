@@ -113,7 +113,7 @@ namespace SharpGame
 
         internal Buffer ubFrameInfo;
         public DoubleBuffer ubCameraVS;
-        public static DynamicBuffer ubMatrics;
+
 
         internal Buffer ubCameraPS;
         internal Buffer ubLight;
@@ -177,13 +177,6 @@ namespace SharpGame
 
             ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
 
-            if(ubMatrics == null)
-            {
-                uint size = 64 * 1000 * 100;
-
-                ubMatrics = new DynamicBuffer(size);
-            }
-
             ubCameraPS = Buffer.CreateUniformBuffer<CameraPS>();
             ubLight = Buffer.CreateUniformBuffer<LightParameter>();
 
@@ -193,8 +186,8 @@ namespace SharpGame
                 new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
             };
 
-            vsResourceSet[0] = new ResourceSet(vsResLayout, ubCameraVS[0], ubMatrics.Buffer[0]);
-            vsResourceSet[1] = new ResourceSet(vsResLayout, ubCameraVS[1], ubMatrics.Buffer[1]);
+            vsResourceSet[0] = new ResourceSet(vsResLayout, ubCameraVS[0], Renderer.TransformBuffer[0]);
+            vsResourceSet[1] = new ResourceSet(vsResLayout, ubCameraVS[1], Renderer.TransformBuffer[1]);
 
             psResLayout = new ResourceLayout
             {
@@ -225,19 +218,12 @@ namespace SharpGame
                     if (batch.frameNum != Frame.frameNumber)
                     {
                         batch.frameNum = Frame.frameNumber;
-                        batch.offset = GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+                        batch.offset = Renderer.GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
                     }
 
                 }
             }
         
-        }
-
-        [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe int GetTransform(IntPtr pos, uint count)
-        {
-            uint sz = count << 6;// (uint)Utilities.SizeOf<mat4>() * count;
-            return (int)ubMatrics.Alloc(sz, pos);
         }
 
         public void Update(ref FrameInfo frame)
@@ -255,11 +241,6 @@ namespace SharpGame
                 FrameGraph =  FrameGraph.Simple();
                 FrameGraph.Init();
             }
-
-            ubMatrics.Clear();
-
-            mat4 m = mat4.Identity;
-            GetTransform(Utilities.AsPointer(ref m), 1);
 
             Viewport.Define(0, 0, g.Width, g.Height);
 
@@ -311,7 +292,6 @@ namespace SharpGame
 
             OverlayPass?.Draw(this);
 
-            ubMatrics.Flush();
         }
 
         private void UpdateDrawables()

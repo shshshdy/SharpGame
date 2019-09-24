@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SharpGame
@@ -25,11 +26,19 @@ namespace SharpGame
         protected float debugImageHeight = 200.0f;
         List<ImageView> debugImages = new List<ImageView>();
 
+        public DynamicBuffer TransformBuffer { get; }        
+        public DynamicBuffer InstanceBuffer { get; }
+        public DynamicBuffer MaterialBuffer { get; }
+
         public static bool EarlyZ { get; set; }
 
         public Renderer()
         {
-            (this).Subscribe((in GUIEvent e) => OnDebugImage());
+            this.Subscribe<GUIEvent>(e => OnDebugImage());
+
+            uint size = 64 * 1000 * 100;
+
+            TransformBuffer = new DynamicBuffer(BufferUsageFlags.UniformBuffer, size);
         }
 
         public void Initialize()
@@ -45,6 +54,13 @@ namespace SharpGame
             return view;
         }
 
+        [MethodImpl((MethodImplOptions)0x100)]
+        public unsafe int GetTransform(IntPtr pos, uint count)
+        {
+            uint sz = count << 6;// (uint)Utilities.SizeOf<mat4>() * count;
+            return (int)TransformBuffer.Alloc(sz, pos);
+        }
+
         public void Update()
         {
             var frameInfo = new FrameInfo
@@ -52,6 +68,11 @@ namespace SharpGame
                 timeStep = Time.Delta,
                 frameNumber = Time.FrameNum
             };
+
+            TransformBuffer.Clear();
+
+            mat4 m = mat4.Identity;
+            GetTransform(Utilities.AsPointer(ref m), 1);
 
             this.SendGlobalEvent(new RenderUpdate());
 
@@ -80,6 +101,8 @@ namespace SharpGame
             }
 
             this.SendGlobalEvent(new EndRender());
+
+            TransformBuffer.Flush();
         }
 
         private void DrawDebugGeometry()

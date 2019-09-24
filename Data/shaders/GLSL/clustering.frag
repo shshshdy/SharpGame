@@ -1,15 +1,7 @@
 #version 450 core
-#define CAM_NEAR 0.1f
-#define GRID_DIM_Z 256
 
-layout(early_fragment_tests) in;
-layout(location = 0) in vec4 world_pos_in;
 
-#ifdef ALPHA_TEST
-layout(location = 1) in vec2 inUV;
-#endif
-
-layout(set = 0, binding = 0) uniform UBO
+layout(set = 1, binding = 0) uniform UBO
 {
     mat4 view;
     mat4 projection_clip;
@@ -24,11 +16,22 @@ layout(set = 0, binding = 0) uniform UBO
     uint num_lights;
 } ubo_in;
 
-layout(set = 0, binding = 1, r8ui) uniform uimageBuffer grid_flags;
+layout(set = 1, binding = 1, r8ui) uniform uimageBuffer grid_flags;
 
 #ifdef ALPHA_TEST
-layout(set = 1, binding = 0) uniform sampler2D DiffMap;
+layout(set = 2, binding = 0) uniform sampler2D DiffMap;
 #endif
+
+
+layout(early_fragment_tests) in;
+layout(location = 0) in vec4 world_pos_in;
+
+#ifdef ALPHA_TEST
+layout(location = 1) in vec2 inUV;
+#endif
+
+#define CAM_NEAR 0.1f
+#define GRID_DIM_Z 256
 
 uvec3 view_pos_to_grid_coord(vec2 frag_pos, float view_z)
 {

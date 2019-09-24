@@ -16,6 +16,8 @@ namespace SharpGame
         Framebuffer fbEarlyZ;
 
         Format depthFormat = Format.D16Unorm;
+        ResourceLayout clusteringSet1;
+        ResourceSet[] set1 = new ResourceSet[2];
 
         private void InitEarlyZ()
         {
@@ -95,14 +97,24 @@ namespace SharpGame
             fbEarlyZ = Framebuffer.Create(rpEarlyZ, width, height, 1, new[] { rtDepth.view });
 
             earlyZPass.RenderPass = rpEarlyZ;
-            earlyZPass.Framebuffers = new Framebuffer[] { fbEarlyZ, fbEarlyZ, fbEarlyZ };
+            earlyZPass.Framebuffer= fbEarlyZ;
 
             Renderer.AddDebugImage(rtDepth.view);
+
+
+            clusteringSet1 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+            };
+
+            set1[0] = new ResourceSet(clusteringSet1, uboCluster[0], grid_flags);
+            set1[1] = new ResourceSet(clusteringSet1, uboCluster[1], grid_flags);
         }
 
         void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
         {
-            renderPass.DrawBatchesMT(view, view.batches[0], view.Set0, view.Set1);
+            renderPass.DrawBatchesMT(view, view.batches[0], view.Set0, set1[Graphics.WorkContext]);
         }
     }
 }
