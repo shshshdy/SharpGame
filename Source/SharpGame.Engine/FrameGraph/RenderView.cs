@@ -121,11 +121,11 @@ namespace SharpGame
 
         private ResourceLayout vsResLayout;
 
-        public ResourceSet VSSet => vsResourceSet[Graphics.Instance.WorkContext];
+        public ResourceSet Set0 => vsResourceSet[Graphics.Instance.WorkContext];
         ResourceSet[] vsResourceSet = new ResourceSet[2];
 
         private ResourceLayout psResLayout;
-        public ResourceSet PSSet => psResourceSet[Graphics.Instance.WorkContext];
+        public ResourceSet Set1 => psResourceSet[Graphics.Instance.WorkContext];
         ResourceSet[] psResourceSet = new ResourceSet[2];
 
         Graphics Graphics => Graphics.Instance;
@@ -187,7 +187,7 @@ namespace SharpGame
             ubCameraPS = Buffer.CreateUniformBuffer<CameraPS>();
             ubLight = Buffer.CreateUniformBuffer<LightParameter>();
 
-            vsResLayout = new ResourceLayout(0)
+            vsResLayout = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
                 new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
@@ -196,7 +196,7 @@ namespace SharpGame
             vsResourceSet[0] = new ResourceSet(vsResLayout, ubCameraVS[0], ubMatrics.Buffer[0]);
             vsResourceSet[1] = new ResourceSet(vsResLayout, ubCameraVS[1], ubMatrics.Buffer[1]);
 
-            psResLayout = new ResourceLayout(1)
+            psResLayout = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
                 new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Fragment),

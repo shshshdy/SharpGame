@@ -11,7 +11,7 @@ namespace SharpGame
     public class ScenePass : GraphicsPass
     {
         public static bool MultiThreaded = true;
-        RenderTarget colorRT;
+        //RenderTarget colorRT;
         public ScenePass(string name = "main") : base(name, 16)
         {
             /*
@@ -42,11 +42,11 @@ namespace SharpGame
 
             if (MultiThreaded)
             {
-                DrawBatchesMT(view, batches);
+                DrawBatchesMT(view, batches, view.Set0, view.Set1);
             }
             else
             {
-                DrawBatches(view, batches, CmdBuffer);
+                DrawBatches(view, batches, CmdBuffer, view.Set0, view.Set1);
             }
 
         }

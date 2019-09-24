@@ -14,7 +14,9 @@ namespace SharpGame
     public class GraphicsPass : FrameGraphPass, IEnumerable<Action<GraphicsPass, RenderView>>
     {
         [IgnoreDataMember]
-        public Framebuffer[] Framebuffers;
+        public Framebuffer[] Framebuffers { get; set; }
+        [IgnoreDataMember]
+        public Framebuffer Framebuffer { set => Framebuffers = new[] { value, value, value }; }
 
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
@@ -40,7 +42,6 @@ namespace SharpGame
         FastList<Task> renderTasks = new FastList<Task>();
 
         protected ResourceSet[] resourceSets = new ResourceSet[2];
-        protected int[] offsets = new int[2];
 
         public GraphicsPass(string name = "", int workCount = 0)
         {
@@ -70,11 +71,10 @@ namespace SharpGame
         {
             Subpasses.Add(subpass);
         }
-
-        public void SetGlobalResourceSet(int index, ResourceSet rs, int offset)
+        
+        public void SetGlobalResourceSet(int index, ResourceSet rs)
         {
             resourceSets[index] = rs;
-            offsets[index] = offset;
         }
 
         public CommandBuffer GetCmdBuffer(int index = -1)
@@ -204,7 +204,7 @@ namespace SharpGame
             EndRenderPass(view);
         }
 
-        public void DrawBatches(RenderView view, FastList<SourceBatch> batches, CommandBuffer cb)
+        public void DrawBatches(RenderView view, FastList<SourceBatch> batches, CommandBuffer cb, ResourceSet set0, ResourceSet set1 = null)
         {
             var cmd = cb;
 
@@ -217,13 +217,13 @@ namespace SharpGame
 
             foreach (var batch in batches)
             {
-                DrawBatch(cmd, batch, default, view.VSSet, view.PSSet, batch.offset);
+                DrawBatch(cmd, batch, default, set0, set1);
             }
 
             cmd.End();
         }
 
-        public void DrawBatchesMT(RenderView view, FastList<SourceBatch> batches)
+        public void DrawBatchesMT(RenderView view, FastList<SourceBatch> batches, ResourceSet set0, ResourceSet set1 = null)
         {
             renderTasks.Clear();
 
@@ -244,7 +244,7 @@ namespace SharpGame
                     var cb = GetCmdBuffer(cmdIndex);
                     cb.SetViewport(ref view.Viewport);
                     cb.SetScissor(view.ViewRect);
-                    Draw(view, batches, cb, from, to);
+                    Draw(view, batches.AsSpan(from, to - from), cb, set0, set1);
                     cb.End();
                 });
                 renderTasks.Add(t);
@@ -254,12 +254,11 @@ namespace SharpGame
             Task.WaitAll(renderTasks.ToArray());
         }
 
-        protected void Draw(RenderView view, FastList<SourceBatch> sourceBatches, CommandBuffer commandBuffer, int from, int to)
+        protected void Draw(RenderView view, Span<SourceBatch> sourceBatches, CommandBuffer commandBuffer, ResourceSet set0, ResourceSet set1)
         {
-            for (int i = from; i < to; i++)
+            foreach (var batch in sourceBatches)
             {
-                var batch = sourceBatches[i];
-                DrawBatch(commandBuffer, batch, default, view.VSSet, view.PSSet, batch.offset);
+                DrawBatch(commandBuffer, batch, default, set0, set1);
             }
 
         }
@@ -277,8 +276,7 @@ namespace SharpGame
             cb.Draw(3, 1, 0, 0);
         }
 
-        public void DrawBatch(CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts, ResourceSet resourceSet, 
-            ResourceSet resourceSet1, int offset = -1, int offset1 = -1)
+        public void DrawBatch(CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts, ResourceSet resourceSet, ResourceSet resourceSet1)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
@@ -290,11 +288,12 @@ namespace SharpGame
             var pipe = pass.GetGraphicsPipeline(RenderPass, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, offset);
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
 
             if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.Set1) != 0)
             {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, offset1);
+                //todo: dynamic material set
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, -1);
             }
 
             foreach(ConstBlock constBlock in pushConsts)

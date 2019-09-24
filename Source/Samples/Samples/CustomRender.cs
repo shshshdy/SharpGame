@@ -176,7 +176,7 @@ namespace SharpGame.Samples
             for (int i = 0; i < COUNT; i++)
             {
                 var batch = batches[i];
-                pass.DrawBatch(pass.CmdBuffer, batch, default, rs, null, batch.offset);
+                pass.DrawBatch(pass.CmdBuffer, batch, default, rs, null);
             }
         }
     }

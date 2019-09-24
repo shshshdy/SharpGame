@@ -102,7 +102,7 @@ namespace SharpGame
 
         void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
         {
-            renderPass.DrawBatchesMT(view, view.batches[0]);
+            renderPass.DrawBatchesMT(view, view.batches[0], view.Set0, view.Set1);
         }
     }
 }
