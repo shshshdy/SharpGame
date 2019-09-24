@@ -110,8 +110,8 @@ namespace SharpGame
             for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
                 cascades[i].view = ImageView.Create(DepthRT.image, ImageViewType.Image2D, depthFormat, ImageAspectFlags.Depth, 0, 1, i, 1);
-                cascades[i].frameBuffer = Framebuffer.Create(RenderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
-                Renderer.Instance.AddDebugImage(cascades[i].view);
+                cascades[i].frameBuffer = SharpGame.Framebuffer.Create(RenderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
+                //Renderer.Instance.AddDebugImage(cascades[i].view);
             }
 
             ubShadow = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));

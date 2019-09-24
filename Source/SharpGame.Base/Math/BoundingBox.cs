@@ -72,7 +72,7 @@ namespace SharpGame
         /// </summary>
         /// <param name="minimum">The minimum vertex of the bounding box.</param>
         /// <param name="maximum">The maximum vertex of the bounding box.</param>
-        public BoundingBox(vec3 minimum, vec3 maximum)
+        public BoundingBox(in vec3 minimum, in vec3 maximum)
         {
             this.min = minimum;
             this.max = maximum;

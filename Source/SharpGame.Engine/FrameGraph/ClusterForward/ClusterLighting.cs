@@ -41,8 +41,6 @@ namespace SharpGame
         const uint QUERY_ONSCREEN = 5;
         const uint QUERY_TRANSFER = 6;
         const uint QUERY_HSIZE = 7;
-
-
         unsafe struct Query_data
         {
             fixed uint depth_pass[2];
@@ -80,8 +78,17 @@ namespace SharpGame
 
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
+        GraphicsPass earlyZPass;
+        ComputePass lightPass;
+
         public ClusterLighting() : base("main")
         {
+        }
+
+        protected override void OnSetFrameGraph(FrameGraph frameGraph)
+        {
+            earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawEarlyZ);
+            lightPass = PreappendComputePass(ComputeLight);
         }
 
         public override void Init()
@@ -91,12 +98,6 @@ namespace SharpGame
             CreateResources();
 
             InitEarlyZ();
-        }
-
-        protected override void OnSetFrameGraph(FrameGraph frameGraph)
-        {
-            PreappendGraphicsPass(Pass.EarlyZ, 8, DrawEarlyZ);
-            PreappendComputePass(ComputeLight);
         }
 
         private void CreateResources()

@@ -42,7 +42,7 @@ vec3 view_pos_to_grid_coord(vec2 frag_pos, float view_z)
 {
     vec3 c;
     c.xy = frag_pos / ubo_in.tile_size;
-    c.z = min(float(GRID_DIM_Z - 1), max(0.f, float(GRID_DIM_Z) * log((-view_z - CAM_NEAR) / (ubo_in.cam_far - CAM_NEAR) + 1.f)));
+    c.z = min(float(GRID_DIM_Z - 1), max(0.f, float(GRID_DIM_Z) * log((view_z - CAM_NEAR) / (ubo_in.cam_far - CAM_NEAR) + 1.f)));
     return c;
 }
 
@@ -52,7 +52,8 @@ int grid_coord_to_grid_idx(uint i, uint j, uint k)
 }
 
 // to mark skipped situations for cal_light_list compute pass
-void mark_skip_light(uint light_idx, vec3 light_pos) {
+void mark_skip_light(uint light_idx, vec3 light_pos)
+{
     imageStore(light_pos_ranges, int(light_idx), vec4(light_pos, 0.f));
 }
 

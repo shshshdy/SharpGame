@@ -14,7 +14,7 @@ namespace SharpGame
     public class GraphicsPass : FrameGraphPass, IEnumerable<Action<GraphicsPass, RenderView>>
     {
         [IgnoreDataMember]
-        public Framebuffer[] framebuffers;
+        public Framebuffer[] Framebuffers;
 
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
@@ -106,9 +106,9 @@ namespace SharpGame
                 RenderPass = Graphics.RenderPass;
             }
 
-            if (framebuffers.IsNullOrEmpty())
+            if (Framebuffers == null)
             {
-                framebuffers = Graphics.Framebuffers;
+                Framebuffers = Graphics.Framebuffers;
             }
 
             Reset();
@@ -130,7 +130,7 @@ namespace SharpGame
         bool inRenderPass = false;
         public void BeginRenderPass(RenderView view)
         {
-            BeginRenderPass(framebuffers[Graphics.WorkImage], view.ViewRect, ClearColorValue, ClearDepthStencilValue);
+            BeginRenderPass(Framebuffers[Graphics.WorkImage], view.ViewRect, ClearColorValue, ClearDepthStencilValue);
         }
 
         public void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
@@ -292,7 +292,7 @@ namespace SharpGame
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, offset);
 
-            if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.PS) != 0)
+            if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.Set1) != 0)
             {
                 cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, offset1);
             }

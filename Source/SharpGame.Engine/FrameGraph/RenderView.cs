@@ -140,7 +140,7 @@ namespace SharpGame
             debugPass = new GraphicsPass
             {
                 RenderPass = renderPass,
-                framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
+                Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
             };
 
             debugPass.Add((pass, view) =>
@@ -248,7 +248,7 @@ namespace SharpGame
 
             this.frameInfo = frame;
             this.frameInfo.camera = camera;
-            this.frameInfo.viewSize = new Int2(g.Width, g.Height);
+            this.frameInfo.viewSize = new Int2((int)g.Width, (int)g.Height);
 
             if (FrameGraph == null)
             {
@@ -302,7 +302,6 @@ namespace SharpGame
 
         public void Render()
         {
-            
             FrameGraph.Draw(this);
 
             if (DrawDebug)

@@ -39,8 +39,8 @@ namespace SharpGame
         public Format DepthFormat { get; protected set; }
         public Swapchain Swapchain { get; private set; }
 
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public uint Width { get; private set; }
+        public uint Height { get; private set; }
 
         public uint ImageCount => Swapchain.ImageCount;
 
@@ -78,7 +78,9 @@ namespace SharpGame
         Fence computeFence;
 
         private RenderTarget depthStencil;
-        
+        public RenderTarget RTDepth => depthStencil;
+
+
         TransientBufferManager transientVertexBuffer = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
         TransientBufferManager transientIndexBuffer = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
 
@@ -153,8 +155,8 @@ namespace SharpGame
 
         public void Resize(int w, int h)
         {
-            Width = w;
-            Height = h;
+            Width = (uint)w;
+            Height = (uint)h;
 
             // Ensure all operations on the device have been finished before destroying resources
             WaitIdle();
@@ -189,8 +191,8 @@ namespace SharpGame
             uint width, height;
             Swapchain.Create(&width, &height, Settings.VSync);
 
-            Width = (int)width;
-            Height = (int)height;
+            Width = width;
+            Height = height;
         }
 
         public void CreateDefaultRenderPass()

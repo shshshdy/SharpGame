@@ -52,8 +52,8 @@ namespace SharpGame
     public enum DefaultResourcSet : int
     {
         None = 0,
-        VS = 1,
-        PS = 2,
+        Set0 = 1,
+        Set1 = 2,
         PBR = 4,
     }
 
@@ -127,12 +127,12 @@ namespace SharpGame
 
             if (GetBinding("CameraVS") != null)
             {
-                DefaultResourcSet |= DefaultResourcSet.VS;
+                DefaultResourcSet |= DefaultResourcSet.Set0;
             }
 
             if (GetBinding("CameraPS") != null)
             {
-                DefaultResourcSet |= DefaultResourcSet.PS;
+                DefaultResourcSet |= DefaultResourcSet.Set1;
             }
 
             return this;

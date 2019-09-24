@@ -81,7 +81,7 @@ namespace SharpGame
 
             guiPass = new GraphicsPass
             {
-                framebuffers = framebuffers,
+                Framebuffers = framebuffers,
                 RenderPass = renderPass,
             };
 

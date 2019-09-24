@@ -11,9 +11,9 @@ namespace SharpGame
         const uint SUBPASS_DEPTH = 0;
         const uint SUBPASS_CLUSTER_FLAG = 1;
        
-        RenderTarget p_rt_offscreen_depth_;
+        RenderTarget rtDepth;
         RenderPass rpEarlyZ;
-        Framebuffer frameBuffer;
+        Framebuffer fbEarlyZ;
 
         Format depthFormat = Format.D16Unorm;
 
@@ -87,16 +87,22 @@ namespace SharpGame
             };
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
+
             rpEarlyZ = new RenderPass(ref renderPassInfo);
 
-            p_rt_offscreen_depth_ = new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth, SampleCountFlags.Count1);
+            rtDepth = new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth, SampleCountFlags.Count1);
 
-            frameBuffer = Framebuffer.Create(rpEarlyZ, width, height, 1, new[] { p_rt_offscreen_depth_.view });
+            fbEarlyZ = Framebuffer.Create(rpEarlyZ, width, height, 1, new[] { rtDepth.view });
+
+            earlyZPass.RenderPass = rpEarlyZ;
+            earlyZPass.Framebuffers = new Framebuffer[] { fbEarlyZ, fbEarlyZ, fbEarlyZ };
+
+            Renderer.AddDebugImage(rtDepth.view);
         }
 
         void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
         {
-            //renderPass.DrawBatchesMT(view, view.batches);
+            renderPass.DrawBatchesMT(view, view.batches[0]);
         }
     }
 }

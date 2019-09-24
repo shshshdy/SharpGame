@@ -3,7 +3,8 @@
 #define GRID_DIM_Z 256
 #define AMBIENT_GLOBAL 0.2f
 
-layout(set = 0, binding = 0) uniform readonly Material_properties {
+layout(set = 0, binding = 0) uniform readonly Material_properties
+{
     vec3 ambient;
     float padding;
 
@@ -23,8 +24,6 @@ layout(set = 1, binding = 3) uniform sampler2D mtl_normal_map;
 
 layout(set = 2, binding = 0) uniform readonly UBO {
     mat4 view;
-    mat4 normal;
-    mat4 model;
     mat4 projection_clip;
 
     vec2 tile_size; // xy
@@ -46,21 +45,24 @@ layout(set = 3, binding = 4, r32ui) uniform readonly uimageBuffer grid_light_cou
 layout(set = 3, binding = 5, r32ui) uniform readonly uimageBuffer light_list;
 
 layout (location= 0) in vec4 world_pos_in;
-layout (location= 1) in vec3 world_normal_in;
-layout (location= 2) in vec3 world_tangent_in;
-layout (location= 3) in vec3 world_bitangent_in;
-layout (location= 4) in vec2 uv_in;
+layout (location= 1) in vec2 uv_in;
+layout (location= 2) in vec3 world_normal_in;
+layout (location= 3) in vec3 world_tangent_in;
+layout (location= 4) in vec3 world_bitangent_in;
+
 
 layout (location = 0) out vec4 frag_color;
 
-uvec3 view_pos_to_grid_coord(vec2 frag_pos, float view_z) {
+uvec3 view_pos_to_grid_coord(vec2 frag_pos, float view_z)
+{
     vec3 c;
     c.xy = (frag_pos - 0.5f)/ ubo_in.tile_size;
-    c.z = min(float(GRID_DIM_Z - 1), max(0.f, float(GRID_DIM_Z) * log((-view_z - CAM_NEAR) / (ubo_in.cam_far - CAM_NEAR) + 1.f)));
+    c.z = min(float(GRID_DIM_Z - 1), max(0.f, float(GRID_DIM_Z) * log((view_z - CAM_NEAR) / (ubo_in.cam_far - CAM_NEAR) + 1.f)));
     return uvec3(c);
 }
 
-int grid_coord_to_grid_idx(uvec3 c) {
+int grid_coord_to_grid_idx(uvec3 c)
+{
     return int(ubo_in.grid_dim.x * ubo_in.grid_dim.y * c.z + ubo_in.grid_dim.x * c.y + c.x);
 }
 
@@ -90,11 +92,13 @@ void main()
     int grid_idx = grid_coord_to_grid_idx(grid_coord);
 
     vec3 lighting = vec3(0.f);
-    if (imageLoad(grid_flags, grid_idx).r == 1) {
+    if (imageLoad(grid_flags, grid_idx).r == 1)
+    {
 	uint offset = imageLoad(grid_light_count_offsets, grid_idx).r;
 	uint light_count = imageLoad(grid_light_counts, grid_idx).r;
-	for (uint i = 0; i < light_count; i ++) {
 
+	for (uint i = 0; i < light_count; i ++)
+    {
 	    int light_idx = int(imageLoad(light_list, int(offset + i)).r);
 	    vec4 light_pos_range = imageLoad(light_pos_ranges, light_idx);
 	    float dist = distance(light_pos_range.xyz, world_pos_in.xyz);

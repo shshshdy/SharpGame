@@ -48,7 +48,7 @@ namespace SharpGame
         /// <remarks>
         /// Initially, the OBB is axis-aligned box, but it can be rotated and transformed later.
         /// </remarks>
-        public OrientedBoundingBox(BoundingBox bb)
+        public OrientedBoundingBox(in BoundingBox bb)
         {
             var Center = bb.min + (bb.max - bb.min) / 2f;
             Extents = bb.max - Center;
@@ -63,7 +63,7 @@ namespace SharpGame
         /// <remarks>
         /// Initially, the OrientedBoundingBox is axis-aligned box, but it can be rotated and transformed later.
         /// </remarks>
-        public OrientedBoundingBox(vec3 minimum, vec3 maximum)
+        public OrientedBoundingBox(in vec3 minimum, in vec3 maximum)
         {
             var Center = minimum + (maximum - minimum) / 2f;
             Extents = maximum - Center;
