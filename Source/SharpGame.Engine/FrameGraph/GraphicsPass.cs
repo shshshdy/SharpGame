@@ -290,7 +290,7 @@ namespace SharpGame
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
 
-            if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.Set1) != 0)
+            //if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.Set1) != 0)
             {
                 //todo: dynamic material set
                 cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, -1);

@@ -333,6 +333,28 @@ namespace SharpGame
                 material.SetTexture("NormalMap", Texture.Blue);
             }
 
+            if (aiMaterial.HasTextureSpecular)
+            {
+                string texPath = FileUtil.CombinePath(path, aiMaterial.TextureSpecular.FilePath);
+                Texture tex = Resources.Instance.Load<Texture>(texPath);
+                if (tex != null)
+                {
+                    material.SetTexture("SpecMap", tex.ResourceRef);
+                }
+                else
+                {
+                    tex = Resources.Instance.Load<Texture>(texPath.Replace(".ktx", "_bc3_unorm.ktx"));
+                    if (tex != null)
+                    {
+                        material.SetTexture("SpecMap", tex.ResourceRef);
+                    }
+                }
+            }
+            else
+            {
+                material.SetTexture("SpecMap", Texture.Black);
+            }
+
 
             return material;
         }

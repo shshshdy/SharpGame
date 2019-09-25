@@ -88,7 +88,7 @@ namespace SharpGame
         protected override void OnSetFrameGraph(FrameGraph frameGraph)
         {
             earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawEarlyZ);
-            lightPass = PreappendComputePass(ComputeLight);
+            //lightPass = PreappendComputePass(ComputeLight);
         }
 
         public override void Init()
@@ -144,7 +144,7 @@ namespace SharpGame
                 size = (uint)queue_families.Length;
             }
 
-            uboCluster = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible,
+            uboCluster = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible|MemoryPropertyFlags.HostCoherent,
                 (uint)Utilities.SizeOf<ClusterUniforms>(), sharingMode, queue_families);
 
             light_pos_ranges = new DoubleBuffer(BufferUsageFlags.StorageTexelBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,

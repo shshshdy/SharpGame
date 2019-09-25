@@ -54,10 +54,14 @@ namespace SharpGame.Samples
                 var mat = new Material("Shaders/LitSolid.shader");
                 var tex = texReader.Load("textures/oak_bark.ktx");
                 mat.SetTexture("DiffMap", tex);
+                mat.SetTexture("NormalMap", Texture.Blue);
+                mat.SetTexture("SpecMap", Texture.Black);
 
                 var mat1 = new Material("Shaders/LitSolid.shader");
                 var tex1 = texReader.Load("textures/oak_leafs.ktx");
                 mat1.SetTexture("DiffMap", tex1);
+                mat1.SetTexture("NormalMap", Texture.Blue);
+                mat1.SetTexture("SpecMap", Texture.Black);
 
                 List<Geometry> geoList = new List<Geometry>();
                 List<BoundingBox> bboxList = new List<BoundingBox>();

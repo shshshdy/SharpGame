@@ -104,8 +104,8 @@ namespace SharpGame
 
             clusteringSet1 = new ResourceLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
             };
 
             set1[0] = new ResourceSet(clusteringSet1, uboCluster[0], grid_flags);
@@ -114,7 +114,14 @@ namespace SharpGame
 
         void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
         {
-            renderPass.DrawBatchesMT(view, view.batches[0], view.Set0, set1[Graphics.WorkContext]);
+            var cmd = renderPass.CmdBuffer;
+            var batches = view.batches[0];
+            foreach (var batch in batches)
+            {
+                renderPass.DrawBatch(cmd, batch, default, view.Set0, set1[Graphics.WorkContext]);
+            }
+
+            //renderPass.DrawBatches(view, view.batches[0], renderPass.CmdBuffer, view.Set0, set1[Graphics.WorkContext]);
         }
     }
 }
