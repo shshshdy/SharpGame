@@ -36,7 +36,7 @@ namespace SharpGame
         {
             this.Subscribe<GUIEvent>(e => OnDebugImage());
 
-            uint size = 64 * 1000 * 100;
+            uint size = 64 * 1000;// * 100;
 
             TransformBuffer = new DynamicBuffer(BufferUsageFlags.UniformBuffer, size);
         }
@@ -89,6 +89,8 @@ namespace SharpGame
             }
 
             this.SendGlobalEvent(new PostRenderUpdate());
+
+            TransformBuffer.Flush();
         }
 
         public void Render()
@@ -102,7 +104,6 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndRender());
 
-            TransformBuffer.Flush();
         }
 
         private void DrawDebugGeometry()
@@ -175,6 +176,7 @@ namespace SharpGame
         {
             foreach (var tex in textures)
             {
+                ImGUI.Instance.GetOrCreateImGuiBinding(tex);
                 debugImages.Add(tex.imageView);
             }
         }
@@ -183,6 +185,7 @@ namespace SharpGame
         {
             foreach (var tex in imageViews)
             {
+                ImGUI.Instance.GetOrCreateImGuiBinding(tex);
                 debugImages.Add(tex);
             }
         }

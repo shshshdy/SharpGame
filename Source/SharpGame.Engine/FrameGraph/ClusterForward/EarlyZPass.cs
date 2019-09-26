@@ -35,13 +35,13 @@ namespace SharpGame
             };
 
             SubpassDescription[] subpassDescription =
-            {
+            {/*
 		        // depth prepass
                 new SubpassDescription
                 {
                     pipelineBindPoint = PipelineBindPoint.Graphics,
                     pDepthStencilAttachment = depthStencilAttachment
-                },
+                },*/
                 
 		        // clustering subpass
                 new SubpassDescription
@@ -64,7 +64,7 @@ namespace SharpGame
                     dstAccessMask = AccessFlags.UniformRead,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
-
+                /*
                 new SubpassDependency
                 {
                     srcSubpass = SUBPASS_DEPTH,
@@ -74,11 +74,11 @@ namespace SharpGame
                     srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,
                     dstAccessMask = AccessFlags.DepthStencilAttachmentRead,
                     dependencyFlags = DependencyFlags.ByRegion
-                },
+                },*/
 
                 new SubpassDependency
                 {
-                    srcSubpass = SUBPASS_CLUSTER_FLAG,
+                    srcSubpass = 0,// SUBPASS_CLUSTER_FLAG,
                     dstSubpass = VulkanNative.SubpassExternal,
                     srcStageMask = PipelineStageFlags.FragmentShader,
                     dstStageMask = PipelineStageFlags.ComputeShader,
@@ -92,7 +92,7 @@ namespace SharpGame
 
             rpEarlyZ = new RenderPass(ref renderPassInfo);
 
-            rtDepth = new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth, SampleCountFlags.Count1);
+            rtDepth = new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
 
             fbEarlyZ = Framebuffer.Create(rpEarlyZ, width, height, 1, new[] { rtDepth.view });
 
