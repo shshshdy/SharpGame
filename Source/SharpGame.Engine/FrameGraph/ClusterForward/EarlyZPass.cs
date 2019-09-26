@@ -16,8 +16,10 @@ namespace SharpGame
         Framebuffer fbEarlyZ;
 
         Format depthFormat = Format.D16Unorm;
-        ResourceLayout clusteringSet1;
-        ResourceSet[] set1 = new ResourceSet[2];
+
+        
+        ResourceLayout clusteringLayout1;
+        ResourceSet[] clusteringSet1 = new ResourceSet[2];
 
         private void InitEarlyZ()
         {
@@ -35,13 +37,13 @@ namespace SharpGame
             };
 
             SubpassDescription[] subpassDescription =
-            {/*
+            {
 		        // depth prepass
                 new SubpassDescription
                 {
                     pipelineBindPoint = PipelineBindPoint.Graphics,
                     pDepthStencilAttachment = depthStencilAttachment
-                },*/
+                },
                 
 		        // clustering subpass
                 new SubpassDescription
@@ -64,7 +66,7 @@ namespace SharpGame
                     dstAccessMask = AccessFlags.UniformRead,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
-                /*
+                
                 new SubpassDependency
                 {
                     srcSubpass = SUBPASS_DEPTH,
@@ -74,11 +76,11 @@ namespace SharpGame
                     srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,
                     dstAccessMask = AccessFlags.DepthStencilAttachmentRead,
                     dependencyFlags = DependencyFlags.ByRegion
-                },*/
+                },
 
                 new SubpassDependency
                 {
-                    srcSubpass = 0,// SUBPASS_CLUSTER_FLAG,
+                    srcSubpass = SUBPASS_CLUSTER_FLAG,
                     dstSubpass = VulkanNative.SubpassExternal,
                     srcStageMask = PipelineStageFlags.FragmentShader,
                     dstStageMask = PipelineStageFlags.ComputeShader,
@@ -102,25 +104,41 @@ namespace SharpGame
             Renderer.AddDebugImage(rtDepth.view);
 
 
-            clusteringSet1 = new ResourceLayout
+            clusteringLayout1 = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
                 new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
             };
 
-            set1[0] = new ResourceSet(clusteringSet1, uboCluster[0], grid_flags);
-            set1[1] = new ResourceSet(clusteringSet1, uboCluster[1], grid_flags);
+            clusteringSet1[0] = new ResourceSet(clusteringLayout1, uboCluster[0], grid_flags);
+            clusteringSet1[1] = new ResourceSet(clusteringLayout1, uboCluster[1], grid_flags);
         }
 
         void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
         {
             var cmd = renderPass.CmdBuffer;
             var batches = view.batches[0];
+
+            var pass_id = Pass.GetID(Pass.EarlyZ);
+
             foreach (var batch in batches)
             {
-                renderPass.DrawBatch(cmd, batch, default, view.Set0, set1[Graphics.WorkContext]);
+                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, null/*clusteringSet1[Graphics.WorkContext]*/);
             }
+            
+            //renderPass.DrawBatches(view, view.batches[0], renderPass.CmdBuffer, view.Set0, set1[Graphics.WorkContext]);
+        }
 
+        void DrawClustering(GraphicsPass renderPass, RenderView view)
+        {
+            var cmd = renderPass.CmdBuffer;
+            var batches = view.batches[0];
+
+            var pass_id = Pass.GetID("clustering");
+            foreach (var batch in batches)
+            {
+                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusteringSet1[Graphics.WorkContext]);
+            }
             //renderPass.DrawBatches(view, view.batches[0], renderPass.CmdBuffer, view.Set0, set1[Graphics.WorkContext]);
         }
     }

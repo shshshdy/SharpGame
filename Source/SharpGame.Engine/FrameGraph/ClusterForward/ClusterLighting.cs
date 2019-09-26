@@ -88,6 +88,7 @@ namespace SharpGame
         protected override void OnSetFrameGraph(FrameGraph frameGraph)
         {
             earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawEarlyZ);
+            earlyZPass.Add(DrawClustering);
             //lightPass = PreappendComputePass(ComputeLight);
         }
 

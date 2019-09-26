@@ -174,7 +174,7 @@ namespace SharpGame
 
                 foreach (var batch in casters[0])
                 {
-                    DrawBatch(cmd, batch, consts, VSSet, null);
+                    DrawBatch(passID, cmd, batch, consts, VSSet, null);
                 }
 
                 cmd.End();

@@ -146,13 +146,18 @@ namespace SharpGame
             {
                 workImage = Graphics.WorkImage,
                 rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues),
-                commandList = commdListPool[Graphics.WorkImage].Request()
+                commandList = new List<FastList<CommandBuffer>> { commdListPool[Graphics.WorkImage].Request() }
             };
 
             renderPassInfo[Graphics.WorkImage].Add(rpInfo);
         }
 
         public ref RenderPassInfo CurrentRenderPass => ref renderPassInfo[Graphics.WorkImage].Back();
+
+        public void NextSubpass()
+        {
+            CurrentRenderPass.NextSubpass(commdListPool[Graphics.WorkImage]);
+        }
 
         public void EndRenderPass(RenderView view)
         {
@@ -182,24 +187,25 @@ namespace SharpGame
         {
             BeginRenderPass(view);
 
-            cmdBuffer = GetCmdBuffer();
-
-            cmdBuffer.SetViewport(ref view.Viewport);
-            cmdBuffer.SetScissor(view.ViewRect);
 
             for (int i = 0; i < Subpasses.Count; i++)
             {
+                cmdBuffer = GetCmdBuffer();
+
+                cmdBuffer.SetViewport(ref view.Viewport);
+                cmdBuffer.SetScissor(view.ViewRect);
                 var action = Subpasses[i];
                 action.Invoke(this, view);
-                
-                if(i != Subpasses.Count - 1)
-                {
-                    cmdBuffer.NextSubpass(SubpassContents.Inline);
-                }
-            }
 
-            cmdBuffer?.End();
-            cmdBuffer = null;
+                if (i != Subpasses.Count - 1)
+                {
+                    NextSubpass();
+                }
+
+                cmdBuffer?.End();
+                cmdBuffer = null;
+
+            }
 
             EndRenderPass(view);
         }
@@ -217,7 +223,7 @@ namespace SharpGame
 
             foreach (var batch in batches)
             {
-                DrawBatch(cmd, batch, default, set0, set1);
+                DrawBatch(passID, cmd, batch, default, set0, set1);
             }
 
             cmd.End();
@@ -258,7 +264,7 @@ namespace SharpGame
         {
             foreach (var batch in sourceBatches)
             {
-                DrawBatch(commandBuffer, batch, default, set0, set1);
+                DrawBatch(passID, commandBuffer, batch, default, set0, set1);
             }
 
         }
@@ -276,7 +282,7 @@ namespace SharpGame
             cb.Draw(3, 1, 0, 0);
         }
 
-        public void DrawBatch(CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts, ResourceSet resourceSet, ResourceSet resourceSet1)
+        public void DrawBatch(ulong passID, CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts, ResourceSet resourceSet, ResourceSet resourceSet1)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
@@ -290,7 +296,7 @@ namespace SharpGame
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
 
-            //if (resourceSet1 != null && (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.Set1) != 0)
+            if (resourceSet1 != null /*&& (pass.PipelineLayout.DefaultResourcSet & DefaultResourcSet.Set1) != 0*/)
             {
                 //todo: dynamic material set
                 cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, -1);
@@ -313,8 +319,7 @@ namespace SharpGame
                 foreach (var rp in rpInfo)
                 {
                     rp.Submit(imageIndex);
-
-                    commdListPool[imageIndex].Free(rp.commandList);
+                    rp.Free(commdListPool[imageIndex]);
                 }
             }
             else
@@ -353,14 +358,21 @@ namespace SharpGame
         public Framebuffer Framebuffer => rpBeginInfo.framebuffer;
         public RenderPass RenderPass => rpBeginInfo.renderPass;
 
-        public FastList<CommandBuffer> commandList;
+        public int currentSubpass;
+        public List<FastList<CommandBuffer>> commandList;
 
         public void AddCommandBuffer(CommandBuffer cb)
         {
             lock (commandList)
             {
-                commandList.Add(cb);
+                commandList[currentSubpass].Add(cb);
             }
+        }
+
+        public void NextSubpass(FastListPool<CommandBuffer> pool)
+        {
+            commandList.Add(pool.Request());
+            currentSubpass++;
         }
 
         public void Submit(int imageIndex)
@@ -371,13 +383,31 @@ namespace SharpGame
 
             cb.BeginRenderPass(ref rpBeginInfo, SubpassContents.SecondaryCommandBuffers);
 
-            foreach (var cmd in commandList)
+            int i = 0;
+            foreach (var subpass in commandList)
             {
-                cb.ExecuteCommand(cmd);
+                foreach (var cmd in subpass)
+                {
+                    cb.ExecuteCommand(cmd);
+                }
+
+                if (i != commandList.Count - 1)
+                {
+                    cb.NextSubpass(SubpassContents.SecondaryCommandBuffers);
+                }
+                i++;
             }
 
             cb.EndRenderPass();
 
+        }
+
+        public void Free(FastListPool<CommandBuffer> pool)
+        {
+            foreach (var subpass in commandList)
+            {
+                pool.Free(subpass);
+            }
         }
     }
 

@@ -36,7 +36,7 @@ namespace SharpGame
         {
             this.Subscribe<GUIEvent>(e => OnDebugImage());
 
-            uint size = 64 * 1000;// * 100;
+            uint size = Graphics.Settings.Validation ? 64 * 1000u : 64 * 1000 * 100u;
 
             TransformBuffer = new DynamicBuffer(BufferUsageFlags.UniformBuffer, size);
         }

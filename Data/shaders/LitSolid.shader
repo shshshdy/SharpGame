@@ -35,9 +35,23 @@ Shader "LitSolid"
 			#include "clustering.vert"
 		}
 
+	}
+
+	Pass "clustering"
+	{
+		CullMode = Back
+
+		FrontFace = CounterClockwise
+		DepthWrite = false
+
+		@VertexShader
+		{
+#include "clustering.vert"
+		}
+
 		@PixelShader
-		{  
-			#include "clustering.frag"
+		{
+#include "clustering.frag"
 		}
 
 	}
