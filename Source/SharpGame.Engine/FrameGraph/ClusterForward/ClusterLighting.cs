@@ -89,7 +89,7 @@ namespace SharpGame
         {
             earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawEarlyZ);
             earlyZPass.Add(DrawClustering);
-            //lightPass = PreappendComputePass(ComputeLight);
+            lightPass = PreappendComputePass(ComputeLight);
         }
 
         public override void Init()
@@ -99,6 +99,7 @@ namespace SharpGame
             CreateResources();
 
             InitEarlyZ();
+            InitLightCompute();
         }
 
         private void CreateResources()

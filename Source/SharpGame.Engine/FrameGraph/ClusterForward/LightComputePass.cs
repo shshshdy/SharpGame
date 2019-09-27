@@ -6,6 +6,38 @@ namespace SharpGame
 {
     public partial class ClusterLighting : ScenePass
     {
+        private ResourceLayout computeLayout0;
+        private ResourceLayout computeLayout1;
+
+        private ResourceSet[] computeSet0 = new ResourceSet[2];
+        private ResourceSet computeSet1;
+
+        private void InitLightCompute()
+        {
+
+            computeLayout0 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+            };
+
+            computeLayout1 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+            };
+
+
+            computeSet0[0] = new ResourceSet(computeLayout0, uboCluster[0], light_pos_ranges[0]);
+            computeSet0[1] = new ResourceSet(computeLayout0, uboCluster[1], light_pos_ranges[1]);
+
+        }
+
         private void UpdateLight(RenderView view)
         {
             uint offset = 0;
@@ -56,7 +88,7 @@ namespace SharpGame
             {
                 var pass = clusterLight.Pass[0];
                 cmd_buf.BindComputePipeline(pass);
-                cmd_buf.BindComputeResourceSet(pass.PipelineLayout, 0, resourceSet0[Graphics.Instance.WorkContext]);
+                cmd_buf.BindComputeResourceSet(pass.PipelineLayout, 0, computeSet0[Graphics.Instance.WorkContext]);
                 cmd_buf.BindComputeResourceSet(pass.PipelineLayout, 1, resourceSet1);
                 cmd_buf.Dispatch((num_lights - 1) / 32 + 1, 1, 1);
 

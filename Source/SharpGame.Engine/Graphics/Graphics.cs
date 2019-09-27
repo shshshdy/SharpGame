@@ -93,7 +93,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            //settings.Validation = true;
+            settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -188,8 +188,8 @@ namespace SharpGame
 
         private void CreateSwapChain()
         {
-            uint width, height;
-            Swapchain.Create(&width, &height, Settings.VSync);
+            uint width = Width, height = Height;
+            Swapchain.Create(ref width, ref height, Settings.VSync);
 
             Width = width;
             Height = height;

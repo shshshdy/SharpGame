@@ -190,7 +190,7 @@ namespace SharpGame
         * @param height Pointer to the height of the swapchain (may be adjusted to fit the requirements of the swapchain)
         * @param vsync (Optional) Can be used to force vsync'd rendering (by using VK_PRESENT_MODE_FIFO_KHR as presentation mode)
         */
-        public void Create(uint* width, uint* height, bool vsync = false)
+        public void Create(ref uint width, ref uint height, bool vsync = false)
         {
             VkResult err;
             VkSwapchainKHR oldSwapchain = swapchain;
@@ -218,15 +218,15 @@ namespace SharpGame
                 {
                     // If the Surface size is undefined, the size is set to
                     // the size of the Images requested.
-                    swapchainExtent.width = *width;
-                    swapchainExtent.height = *height;
+                    swapchainExtent.width = width;
+                    swapchainExtent.height = height;
                 }
                 else
                 {
                     // If the Surface size is defined, the swap chain size must match
                     swapchainExtent = surfCaps.currentExtent;
-                    *width = surfCaps.currentExtent.width;
-                    *height = surfCaps.currentExtent.height;
+                    width = surfCaps.currentExtent.width;
+                    height = surfCaps.currentExtent.height;
                 }
 
 
