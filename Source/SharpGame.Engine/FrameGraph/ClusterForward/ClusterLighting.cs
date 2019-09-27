@@ -81,7 +81,7 @@ namespace SharpGame
         GraphicsPass earlyZPass;
         ComputePass lightPass;
 
-        public ClusterLighting() : base("main")
+        public ClusterLighting() : /*base("cluster_forward")//*/ base("main")
         {
         }
 

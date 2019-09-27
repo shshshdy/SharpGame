@@ -35,7 +35,8 @@ namespace SharpGame
         public BlendType BlendType { get; set; }
 
         [IgnoreDataMember]
-        public Shader Shader { get; set; }
+        public Shader Shader { get => shader; set => SetShader(value); }
+        private Shader shader;
 
 
         [IgnoreDataMember]
@@ -55,9 +56,7 @@ namespace SharpGame
 
         public Material(Shader shader)
         {
-            Shader = shader;
-
-            OnBuild();
+            SetShader(shader);
         }
 
         protected override bool OnBuild()
@@ -67,21 +66,35 @@ namespace SharpGame
                 Shader = Resources.Instance.Load<Shader>(ShaderResource);
             }
 
-            if(Shader == null)
+
+            return true;
+        }
+
+        public void SetShader(Shader shader)
+        {
+            if (shader == null)
             {
-                return false;
+                return;
             }
 
-            if(Shader.Pass.Count <= 0)
+            if (shader.Pass.Count <= 0)
             {
-                return false;
+                return;
             }
 
-            pipelineResourceSet = new PipelineResourceSet[Shader.Pass.Count];
+            this.shader = shader;
 
-            for(int i = 0; i < Shader.Pass.Count; i++)
+            if(!pipelineResourceSet.IsNullOrEmpty())
             {
-                var pass = Shader.Pass[i];
+                foreach(var prs in pipelineResourceSet)
+                    prs?.Dispose();
+            }
+
+            pipelineResourceSet = new PipelineResourceSet[shader.Pass.Count];
+
+            for (int i = 0; i < shader.Pass.Count; i++)
+            {
+                var pass = shader.Pass[i];
                 pipelineResourceSet[i] = new PipelineResourceSet();
                 pipelineResourceSet[i].Init(pass.PipelineLayout);
             }
@@ -92,10 +105,10 @@ namespace SharpGame
                 {
                     ref ShaderParameter shaderParam = ref ShaderParameters.At(j);
 
-                    foreach(var prs in pipelineResourceSet )
+                    foreach (var prs in pipelineResourceSet)
                     {
                         var addr = prs.GetPushConst(shaderParam.name);
-                        if(addr != IntPtr.Zero)
+                        if (addr != IntPtr.Zero)
                         {
                             shaderParam.Bind(addr);
                             break;
@@ -115,8 +128,6 @@ namespace SharpGame
                     UpdateResourceSet(texParam.name, res as Texture);
                 }
             }
-
-            return true;
         }
 
         public ref ShaderParameter GetShaderParameter(StringID name)

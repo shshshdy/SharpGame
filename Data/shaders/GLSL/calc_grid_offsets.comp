@@ -1,34 +1,10 @@
 #version 450 core
 
-#define GRID_DIM_Z 256
+#include "Clustering.glsl"
+
 #define LIGHT_LIST_MAX_LENGTH 1048576
 
 layout(local_size_x = 16, local_size_y = 16) in;
-layout(set = 0, binding = 0) uniform UBO
-{
-    mat4 view;
-    //mat4 normal;
-    //mat4 model;
-    mat4 projection_clip;
-    vec2 tile_size; // xy
-    uvec2 grid_dim; // xy
-
-    vec3 cam_pos;
-    float cam_far;
-
-    vec2 resolution;
-    uint num_lights;
-} ubo_in;
-
-layout (set = 1, binding = 0, r8ui) uniform uimageBuffer grid_flags;
-layout (set = 1, binding = 2, r32ui) uniform uimageBuffer grid_light_counts;
-layout (set = 1, binding = 3, r32ui) uniform uimageBuffer grid_light_count_total;
-layout (set = 1, binding = 4, r32ui) uniform uimageBuffer grid_light_count_offsets;
-
-uint grid_coord_to_grid_idx(uint i, uint j, uint k)
-{
-    return ubo_in.grid_dim.x * ubo_in.grid_dim.y * k + ubo_in.grid_dim.x * j + i;
-}
 
 void main()
 {

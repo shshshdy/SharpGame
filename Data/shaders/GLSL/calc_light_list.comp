@@ -1,34 +1,8 @@
 #version 450 core
 
+#include "Clustering.glsl"
+
 layout(local_size_x = 32) in;
-layout(set = 0, binding = 0) uniform UBO
-{
-    mat4 view;
-    //mat4 normal;
-    //mat4 model;
-    mat4 projection_clip;
-
-    vec2 tile_size; // xy
-    uvec2 grid_dim; // xy
-
-    vec3 cam_pos;
-    float cam_far;
-
-    vec2 resolution;
-    uint num_lights;
-} ubo_in;
-layout (set = 0, binding = 1, rgba32f) uniform imageBuffer light_pos_ranges;
-
-layout(set = 1, binding = 0, r8ui) uniform uimageBuffer grid_flags;
-layout(set = 1, binding = 1, r32ui) uniform uimageBuffer light_bounds;
-layout(set = 1, binding = 4, r32ui) uniform uimageBuffer  grid_light_count_offsets;
-layout(set = 1, binding = 5, r32ui) uniform uimageBuffer light_list;
-layout(set = 1, binding = 6, r32ui) uniform uimageBuffer grid_light_counts_compare;
-
-int grid_coord_to_grid_idx(uint i, uint j, uint k)
-{
-    return int(ubo_in.grid_dim.x * ubo_in.grid_dim.y * k + ubo_in.grid_dim.x * j + i);
-}
 
 void main()
 {

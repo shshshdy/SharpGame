@@ -34,6 +34,18 @@ namespace SharpGame
 
         internal VkPipelineLayout handle;
 
+        public PipelineLayout()
+        {
+        }
+
+        public PipelineLayout(params ResourceLayout[] resourceLayouts)
+        {
+            ResourceLayout = resourceLayouts;
+
+            Build();
+        }
+
+
         public ResourceLayoutBinding GetBinding(string name)
         {
             foreach(var layout in ResourceLayout)
