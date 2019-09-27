@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define CLUSTER_FORWARD
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -81,7 +82,12 @@ namespace SharpGame
         GraphicsPass earlyZPass;
         ComputePass lightPass;
 
-        public ClusterLighting() : /*base("cluster_forward")//*/ base("main")
+        public ClusterLighting() :
+#if CLUSTER_FORWARD
+            base("cluster_forward")
+#else
+            base("main")
+#endif
         {
         }
 
@@ -223,5 +229,28 @@ namespace SharpGame
             uboCluster.SetData(ref clusterUniforms);
             uboCluster.Flush();
         }
+
+        protected override void DrawImpl(RenderView view)
+        {
+#if CLUSTER_FORWARD
+            BeginRenderPass(view);
+
+            var batches = view.opaqueBatches;
+
+            if (MultiThreaded)
+            {
+                DrawBatchesMT(view, batches, view.Set0, resourceSet0[Graphics.RenderContext]);
+            }
+            else
+            {
+                DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.RenderContext]);
+            }
+
+            EndRenderPass(view);
+#else
+            base.DrawImpl(view);
+#endif
+        }
+
     }
 }
