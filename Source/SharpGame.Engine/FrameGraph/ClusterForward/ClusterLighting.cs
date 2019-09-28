@@ -121,20 +121,20 @@ namespace SharpGame
 
             resourceLayout0 = new ResourceLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
             };
 
             resourceLayout1 = new ResourceLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new ResourceLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
             };
 
             uint[] queue_families = null;
@@ -211,6 +211,9 @@ namespace SharpGame
         {
             UpdateLight(view);
 
+            tile_count_x = ((uint)view.Width - 1) / TILE_WIDTH + 1;
+            tile_count_y = ((uint)view.Height - 1) / TILE_HEIGHT + 1;
+
             Camera camera = view.Camera;
             clusterUniforms.view = camera.View;
             clusterUniforms.projection_clip = camera.VkProjection;
@@ -239,11 +242,11 @@ namespace SharpGame
 
             if (MultiThreaded)
             {
-                DrawBatchesMT(view, batches, view.Set0, resourceSet0[Graphics.RenderContext]);
+                DrawBatchesMT(view, batches, view.Set0, resourceSet0[Graphics.RenderContext], resourceSet1);
             }
             else
             {
-                DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.RenderContext]);
+                DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.RenderContext], resourceSet1);
             }
 
             EndRenderPass(view);

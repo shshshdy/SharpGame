@@ -38,6 +38,9 @@ namespace SharpGame
 
             pipelineLayout = new PipelineLayout(computeLayout0, computeLayout1);
 
+            computeSet1 = new ResourceSet(computeLayout1,
+                grid_flags, light_bounds, grid_light_counts, grid_light_count_total,
+                grid_light_count_offsets, light_list, grid_light_counts_compare);
         }
 
         private void UpdateLight(RenderView view)
@@ -54,7 +57,7 @@ namespace SharpGame
 
                 vec4 pos = new vec4(light.Node.WorldPosition, light.Range);
                 light_pos_ranges.SetData(ref pos, offset);
-                Color4 color = light.EffectiveColor;
+                int color = light.EffectiveColor.ToRgba();
                 light_colors.SetData(ref color, offset1);
                 offset += 16;
                 offset1 += 4;
@@ -91,7 +94,7 @@ namespace SharpGame
                 var pass = clusterLight.Pass[0];
                 cmd_buf.BindComputePipeline(pass);
                 cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0[Graphics.Instance.WorkContext]);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 1, resourceSet1);
+                cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
                 cmd_buf.Dispatch((num_lights - 1) / 32 + 1, 1, 1);
 
                 cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2 + 1);
@@ -116,7 +119,7 @@ namespace SharpGame
                 var pass = clusterLight.Pass[1];
                 cmd_buf.BindComputePipeline(pass);
                 cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0[Graphics.Instance.WorkContext]);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 1, resourceSet1);
+                cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
 
                 cmd_buf.Dispatch((tile_count_x - 1) / 16 + 1, (tile_count_y - 1) / 16 + 1, TILE_COUNT_Z);
 
@@ -141,7 +144,7 @@ namespace SharpGame
 
                 cmd_buf.BindComputePipeline(pass);
                 cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0[Graphics.Instance.WorkContext]);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 1, resourceSet1);
+                cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
                 cmd_buf.Dispatch((num_lights - 1) / 32 + 1, 1, 1);
 
                 cmd_buf.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CALC_LIGHT_LIST * 2 + 1);

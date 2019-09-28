@@ -136,11 +136,25 @@ namespace SharpGame
 
                     if (Match(READONLY))
                     {
+                        ;
                     }
 
                     Layout layout = new Layout();
                     if (Match(UNIFORM))
                     {
+                        if (Match(RESTRICT))
+                        {
+                        }
+
+                        if (Match(WRITEONLY))
+                        {
+                        }
+
+                        if (Match(READONLY))
+                        {
+                            ;
+                        }
+
                         var t = Consume(IDENTIFIER, "");
 
                         switch (t.Lexeme)
