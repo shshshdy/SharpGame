@@ -125,8 +125,7 @@ namespace SharpGame
             {
                 renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, null/*clusteringSet1[Graphics.WorkContext]*/);
             }
-            
-            //renderPass.DrawBatches(view, view.batches[0], renderPass.CmdBuffer, view.Set0, set1[Graphics.WorkContext]);
+
         }
 
         void DrawClustering(GraphicsPass renderPass, RenderView view)
@@ -139,7 +138,7 @@ namespace SharpGame
             {
                 renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusteringSet1[Graphics.WorkContext]);
             }
-            //renderPass.DrawBatches(view, view.batches[0], renderPass.CmdBuffer, view.Set0, set1[Graphics.WorkContext]);
+
         }
     }
 }

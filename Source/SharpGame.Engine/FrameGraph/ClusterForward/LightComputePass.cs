@@ -123,7 +123,7 @@ namespace SharpGame
 
                 cmd_buf.Dispatch((tile_count_x - 1) / 16 + 1, (tile_count_y - 1) / 16 + 1, TILE_COUNT_Z);
 
-                //cmd_buf.writeTimestamp(PipelineStageFlags.ComputeShader, data.query_pool, QUERY_CALC_GRID_OFFSETS * 2 + 1);
+                cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_GRID_OFFSETS * 2 + 1);
 
                 barriers[0].Buffer = grid_light_count_total;
                 barriers[1].Buffer = grid_light_count_offsets;
