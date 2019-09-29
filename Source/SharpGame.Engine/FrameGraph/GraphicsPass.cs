@@ -357,6 +357,7 @@ namespace SharpGame
 
     public struct RenderPassInfo
     {
+        public PassQueue passQueue;
         public uint workImage;
         public RenderPassBeginInfo rpBeginInfo;
         public Framebuffer Framebuffer => rpBeginInfo.framebuffer;

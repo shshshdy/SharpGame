@@ -4,6 +4,13 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
+    public enum PassQueue
+    {
+        EarlyGraphics,
+        Compute,
+        Graphics,
+    }
+
     public class FrameGraphPass : Object
     {
         private StringID name;
@@ -18,6 +25,8 @@ namespace SharpGame
         }
 
         protected ulong passID = 1;
+
+        public PassQueue PassQueue { get; set; }
 
         public RenderPass RenderPass { get; set; }
 

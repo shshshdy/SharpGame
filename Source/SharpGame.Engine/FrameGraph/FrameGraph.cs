@@ -144,11 +144,25 @@ namespace SharpGame
             Profiler.EndSample();
         }
 
+        public void EarlySubmit(int imageIndex)
+        {
+            foreach (var renderPass in RenderPassList)
+            {
+                if(renderPass.PassQueue == PassQueue.EarlyGraphics)
+                {
+                    renderPass.Submit(imageIndex);
+                }
+            }
+        }
+
         public void Submit(int imageIndex)
         {
             foreach (var renderPass in RenderPassList)
             {
-                renderPass.Submit(imageIndex);
+                if(renderPass.PassQueue != PassQueue.EarlyGraphics)
+                {
+                    renderPass.Submit(imageIndex);
+                }
             }
 
         }

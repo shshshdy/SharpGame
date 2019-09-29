@@ -145,13 +145,18 @@ namespace SharpGame
         {
             Profiler.BeginSample("Submit");
 
+            int imageIndex = (int)Graphics.RenderImage;
+
             Graphics.BeginRender();
 
             CommandBuffer cmdBuffer = Graphics.RenderCmdBuffer;
 
             cmdBuffer.Begin();
 
-            int imageIndex = (int)Graphics.RenderImage;
+            foreach (var viewport in views)
+            {
+                viewport.EarlySubmit(imageIndex);
+            }
 
             foreach (var viewport in views)
             {
