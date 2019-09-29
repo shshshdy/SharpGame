@@ -26,51 +26,7 @@ namespace SharpGame
 {
     public static class MathUtil
     {
-        /// <summary>
-        /// The value for which all absolute numbers smaller than are considered equal to zero.
-        /// </summary>
-        public const float Epsilon = 1e-6f; // Value a 8x higher than 1.19209290E-07F
-
-        /// <summary>
-        /// A value specifying the approximation of π which is 180 degrees.
-        /// </summary>
-        public const float Pi = (float)Math.PI;
-
-        /// <summary>
-        /// A value specifying the approximation of 2π which is 360 degrees.
-        /// </summary>
-        public const float TwoPi = (float)(2 * Math.PI);
-
-        /// <summary>
-        /// A value specifying the approximation of π/2 which is 90 degrees.
-        /// </summary>
-        public const float PiOverTwo = (float)(Math.PI / 2);
-
-        /// <summary>
-        /// A value specifying the approximation of π/4 which is 45 degrees.
-        /// </summary>
-        public const float PiOverFour = (float)(Math.PI / 4);
-
         public static readonly vec3 DotScale = new vec3(1 / 3.0f, 1 / 3.0f, 1 / 3.0f);
-
-        static readonly Random rand_ = new Random();
-
-        public static Random Rand => rand_;
-
-        /// Return a random float between 0.0 (inclusive) and 1.0 (exclusive.)
-        public static float Random() { return (float)rand_.NextDouble(); }
-
-        /// Return a random float between 0.0 and range, inclusive from both ends.
-        public static float Random(float range) { return rand_.NextFloat(0, range); }
-
-        /// Return a random float between min and max, inclusive from both ends.
-        public static float Random(float min, float max) { return rand_.NextFloat(min, max); }
-
-        /// Return a random integer between 0 and range - 1.
-        public static int Random(int range) { return (int)rand_.NextLong(0, range); }
-
-        /// Return a random integer between min and max - 1.
-        public static int Random(int min, int max) { return (int)rand_.NextLong(min, max); }
 
         /// <summary>
         /// Checks if a and b are almost equals, taking into account the magnitude of floating point numbers (unlike <see cref="WithinEpsilon"/> method). See Remarks.
@@ -114,7 +70,7 @@ namespace SharpGame
         /// <returns><c>true</c> if the specified value is close to zero (0.0f); otherwise, <c>false</c>.</returns>
         public static bool IsZero(float a)
         {
-            return Math.Abs(a) < Epsilon;
+            return Math.Abs(a) < glm.epsilon;
         }
 
         /// <summary>
@@ -150,54 +106,6 @@ namespace SharpGame
             ref T temp = ref first;
             first = second;
             second = temp;
-        }
-
-        /// <summary>
-        /// Interpolates between two values using a linear function by a given amount.
-        /// </summary>
-        /// <remarks>
-        /// See http://www.encyclopediaofmath.org/index.php/Linear_interpolation and
-        /// http://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
-        /// </remarks>
-        /// <param name="from">Value to interpolate from.</param>
-        /// <param name="to">Value to interpolate to.</param>
-        /// <param name="amount">Interpolation amount.</param>
-        /// <returns>The result of linear interpolation of values based on the amount.</returns>
-        public static double Lerp(double from, double to, double amount)
-        {
-            return (1 - amount) * from + amount * to;
-        }
-
-        /// <summary>
-        /// Interpolates between two values using a linear function by a given amount.
-        /// </summary>
-        /// <remarks>
-        /// See http://www.encyclopediaofmath.org/index.php/Linear_interpolation and
-        /// http://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
-        /// </remarks>
-        /// <param name="from">Value to interpolate from.</param>
-        /// <param name="to">Value to interpolate to.</param>
-        /// <param name="amount">Interpolation amount.</param>
-        /// <returns>The result of linear interpolation of values based on the amount.</returns>
-        public static float Lerp(float from, float to, float amount)
-        {
-            return (1 - amount) * from + amount * to;
-        }
-
-        /// <summary>
-        /// Interpolates between two values using a linear function by a given amount.
-        /// </summary>
-        /// <remarks>
-        /// See http://www.encyclopediaofmath.org/index.php/Linear_interpolation and
-        /// http://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
-        /// </remarks>
-        /// <param name="from">Value to interpolate from.</param>
-        /// <param name="to">Value to interpolate to.</param>
-        /// <param name="amount">Interpolation amount.</param>
-        /// <returns>The result of linear interpolation of values based on the amount.</returns>
-        public static byte Lerp(byte from, byte to, float amount)
-        {
-            return (byte)Lerp((float)from, (float)to, amount);
         }
 
         /// <summary>
@@ -319,8 +227,6 @@ namespace SharpGame
         {
             return ((size / uboAlignment) * uboAlignment + ((size % uboAlignment) > 0 ? uboAlignment : 0));
         }
-
-        public static float InvSqrt(float v) => 1 / glm.sqrt(v);
 
         [StructLayout(LayoutKind.Explicit, Size = 4)]
         struct FloatIntUnion

@@ -36,7 +36,7 @@ namespace SharpGame
         /// <returns>Random <c>float</c> number.</returns>
         public static float NextFloat(this Random random, float min, float max)
         {
-            return MathUtil.Lerp(min, max, (float)random.NextDouble());
+            return glm.lerp(min, max, (float)random.NextDouble());
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace SharpGame
         /// <returns>Random <c>double</c> number.</returns>
         public static double NextDouble(this Random random, double min, double max)
         {
-            return MathUtil.Lerp(min, max, random.NextDouble());
+            return glm.lerp(min, max, random.NextDouble());
         }
 
         /// <summary>

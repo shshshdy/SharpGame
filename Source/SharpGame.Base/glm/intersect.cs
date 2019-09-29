@@ -10,7 +10,7 @@ namespace SharpGame
         public static bool intersectRayPlane(in vec3 orig, in vec3 dir, in vec3 planeOrig, in vec3 planeNormal, out float intersectionDistance)
         {
             float d = dot(dir, planeNormal);
-            float Epsilon = epsilon();
+            float Epsilon = glm.epsilon;
 
             if (d < -Epsilon)
             {
@@ -37,7 +37,7 @@ namespace SharpGame
 
             vec3 qvec;
 
-            if (det > epsilon())
+            if (det > glm.epsilon)
             {
                 // calculate distance from vert0 to ray origin
                 vec3 tvec = orig - vert0;
@@ -56,7 +56,7 @@ namespace SharpGame
                 if ((baryPosition.y < (0)) || ((baryPosition.x + baryPosition.y) > det))
                     return false;
             }
-            else if (det < -epsilon())
+            else if (det < -glm.epsilon)
             {
                 // calculate distance from vert0 to ray origin
                 vec3 tvec = orig - vert0;
@@ -96,7 +96,7 @@ namespace SharpGame
             ref vec3 position
         )
         {
-            var Epsilon = epsilon();
+            var Epsilon = glm.epsilon;
 
             vec3 edge1 = vert1 - vert0;
             vec3 edge2 = vert2 - vert0;
@@ -134,7 +134,7 @@ namespace SharpGame
             out float intersectionDistance
         )
         {
-            float Epsilon = epsilon();
+            float Epsilon = glm.epsilon;
             vec3 diff = sphereCenter - rayStarting;
             float t0 = dot(diff, rayNormalizedDirection);
             float dSquared = dot(diff, diff) - t0 * t0;
@@ -175,7 +175,7 @@ namespace SharpGame
             ref vec3 intersectionPoint2, ref vec3 intersectionNormal2
         )
         {
-            float Epsilon = epsilon();
+            float Epsilon = glm.epsilon;
             vec3 dir = normalize(point1 - point0);
             vec3 diff = sphereCenter - point0;
             float t0 = dot(diff, dir);

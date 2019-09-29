@@ -93,16 +93,13 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
 
             rpEarlyZ = new RenderPass(ref renderPassInfo);
-
             rtDepth = new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
-
             fbEarlyZ = Framebuffer.Create(rpEarlyZ, width, height, 1, new[] { rtDepth.view });
 
             earlyZPass.RenderPass = rpEarlyZ;
             earlyZPass.Framebuffer= fbEarlyZ;
 
-            Renderer.AddDebugImage(rtDepth.view);
-
+            //Renderer.AddDebugImage(rtDepth.view);
 
             clusteringLayout1 = new ResourceLayout
             {

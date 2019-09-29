@@ -93,7 +93,7 @@ namespace SharpGame
 
         public static Buffer CreateTexelBuffer(BufferUsageFlags flags, ulong size, Format format, SharingMode sharingMode, uint[] queueFamilyIndices)
         {
-            var buffer = new Buffer(flags, MemoryPropertyFlags.DeviceLocal, size, 1, sharingMode, queueFamilyIndices);
+            var buffer = new Buffer(BufferUsageFlags.StorageTexelBuffer | flags, MemoryPropertyFlags.DeviceLocal, size, 1, sharingMode, queueFamilyIndices);
             buffer.CreateView(format, 0, WholeSize);
             return buffer;
         }

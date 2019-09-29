@@ -513,9 +513,9 @@ namespace SharpGame
 
         public static void lerp(in vec3 start, in vec3 end, float amount, out vec3 result)
         {
-            result.x = MathUtil.Lerp(start.X, end.X, amount);
-            result.y = MathUtil.Lerp(start.Y, end.Y, amount);
-            result.z = MathUtil.Lerp(start.Z, end.Z, amount);
+            result.x = glm.lerp(start.X, end.X, amount);
+            result.y = glm.lerp(start.Y, end.Y, amount);
+            result.z = glm.lerp(start.Z, end.Z, amount);
         }
 
         public static vec3 lerp(in vec3 start, in vec3 end, float amount)

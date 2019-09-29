@@ -144,15 +144,11 @@ namespace SharpGame
             if (Device.QFGraphics != Device.QFCompute)
             {
                 sharingMode = SharingMode.Concurrent;
-                queue_families = new[]
-                {
-                    Device.QFGraphics, Device.QFCompute
-                };
-
+                queue_families = new[] { Device.QFGraphics, Device.QFCompute };
                 size = (uint)queue_families.Length;
             }
 
-            uboCluster = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible|MemoryPropertyFlags.HostCoherent,
+            uboCluster = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
                 (uint)Utilities.SizeOf<ClusterUniforms>(), sharingMode, queue_families);
 
             light_pos_ranges = new DoubleBuffer(BufferUsageFlags.StorageTexelBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
@@ -167,39 +163,26 @@ namespace SharpGame
             resourceSet0[1] = new ResourceSet(resourceLayout0, uboCluster[1], light_pos_ranges[1], light_colors[1]);
 
             uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
-            grid_flags = Buffer.CreateTexelBuffer(
-                BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
+            grid_flags = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
                 max_grid_count, Format.R8Uint, sharingMode, queue_families);
 
-            light_bounds = Buffer.CreateTexelBuffer(
-                BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
-                     MAX_NUM_LIGHTS * 6 * sizeof(uint), Format.R32Uint,
-                     sharingMode, queue_families); // max tile count 1d (z 256)
+            light_bounds = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
+                MAX_NUM_LIGHTS * 6 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // max tile count 1d (z 256)
 
-            grid_light_counts = Buffer.CreateTexelBuffer(
-                BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
-                                  max_grid_count * sizeof(uint), Format.R32Uint,
-                                  sharingMode, queue_families); // light count / grid
+            grid_light_counts = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
+                max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
 
-            grid_light_count_total = Buffer.CreateTexelBuffer(
-                BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
-                                   1 * sizeof(uint), Format.R32Uint,
-                                   sharingMode, queue_families); // light count total * max grid count
+            grid_light_count_total = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
+                sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count total * max grid count
 
-            grid_light_count_offsets = Buffer.CreateTexelBuffer(
-                BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
-                                     max_grid_count * sizeof(uint), Format.R32Uint,
-                                     sharingMode, queue_families); // same as above
+            grid_light_count_offsets = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
+                max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // same as above
 
-            light_list = Buffer.CreateTexelBuffer(
-                BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
-                               1024 * 1024 * sizeof(uint), Format.R32Uint,
-                               sharingMode, queue_families); // light idx
+            light_list = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
+                1024 * 1024 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light idx
 
-            grid_light_counts_compare = Buffer.CreateTexelBuffer(
-                BufferUsageFlags.StorageTexelBuffer | BufferUsageFlags.TransferDst,
-                                      max_grid_count * sizeof(uint), Format.R32Uint,
-                                      sharingMode, queue_families); // light count / grid
+            grid_light_counts_compare = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
+                max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
 
             resourceSet1 = new ResourceSet(resourceLayout1,
                 grid_flags, light_bounds, grid_light_counts, grid_light_count_total,
@@ -229,6 +212,7 @@ namespace SharpGame
             clusterUniforms.resolution[0] = (float)(view.Width);
             clusterUniforms.resolution[1] = (float)(view.Height);
             clusterUniforms.num_lights = num_lights;
+
             uboCluster.SetData(ref clusterUniforms);
             uboCluster.Flush();
         }

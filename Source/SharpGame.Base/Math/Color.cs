@@ -746,10 +746,10 @@ namespace SharpGame
         /// </remarks>
         public static void Lerp(ref Color start, ref Color end, float amount, out Color result)
         {
-            result.R = MathUtil.Lerp(start.R, end.R, amount);
-            result.G = MathUtil.Lerp(start.G, end.G, amount);
-            result.B = MathUtil.Lerp(start.B, end.B, amount);
-            result.A = MathUtil.Lerp(start.A, end.A, amount);
+            result.R = glm.lerp(start.R, end.R, amount);
+            result.G = glm.lerp(start.G, end.G, amount);
+            result.B = glm.lerp(start.B, end.B, amount);
+            result.A = glm.lerp(start.A, end.A, amount);
         }
 
         /// <summary>

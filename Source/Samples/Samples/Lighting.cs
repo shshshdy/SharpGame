@@ -64,15 +64,15 @@ namespace SharpGame.Samples
 
             for (int i = 0; i < num_lights; ++i)
             {
-                float range = MathUtil.Random(min_range, max_range);
-                hue_to_rgb(ref fcol, MathUtil.Random(0.0f, 1.0f));
+                float range = glm.random(min_range, max_range);
+                hue_to_rgb(ref fcol, glm.random(0.0f, 1.0f));
 
                 fcol *= 1.3f;
                 fcol -= 0.15f;
 
-                vec3 pos = new vec3(MathUtil.Random(-pos_radius, pos_radius),
-                    MathUtil.Random(-pos_radius, pos_radius),
-                    MathUtil.Random(-pos_radius, pos_radius));
+                vec3 pos = new vec3(glm.random(-pos_radius, pos_radius),
+                    glm.random(-pos_radius, pos_radius),
+                    glm.random(-pos_radius, pos_radius));
 
 
                 var lightNode = scene.CreateChild("light" + i, pos);

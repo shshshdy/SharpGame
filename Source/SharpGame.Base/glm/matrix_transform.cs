@@ -644,7 +644,7 @@ namespace SharpGame
             mat4 LocalMatrix = ModelMatrix;
 
             // Normalize the matrix.
-            if (epsilonEqual(LocalMatrix.M44, 0, epsilon()))
+            if (epsilonEqual(LocalMatrix.M44, 0, glm.epsilon))
             {
                 return false;
             }
@@ -663,14 +663,14 @@ namespace SharpGame
             PerspectiveMatrix.M44 = 1;
 
             /// TODO: Fixme!
-            if (epsilonEqual(determinant(in PerspectiveMatrix), 0, epsilon()))
+            if (epsilonEqual(determinant(in PerspectiveMatrix), 0, glm.epsilon))
                 return false;
 
             // First, isolate perspective.  This is the messiest.
             if (
-                epsilonNotEqual(LocalMatrix.M14, 0, epsilon()) ||
-                epsilonNotEqual(LocalMatrix.M24, 0, epsilon()) ||
-                epsilonNotEqual(LocalMatrix.M34, 0, epsilon()))
+                epsilonNotEqual(LocalMatrix.M14, 0, glm.epsilon) ||
+                epsilonNotEqual(LocalMatrix.M24, 0, glm.epsilon) ||
+                epsilonNotEqual(LocalMatrix.M34, 0, glm.epsilon))
             {
                 // rightHandSide is the right hand side of the equation.
                 vec4 RightHandSide = new vec4();

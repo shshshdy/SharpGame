@@ -12,11 +12,11 @@ namespace SharpGame
     {
         const float M_LARGE_EPSILON = 0.00005f;
         const float M_MIN_NEARCLIP = 0.01f;
-        const float M_MAX_FOV = 160.0f* (MathUtil.Pi / 180.0f);
+        const float M_MAX_FOV = 160.0f* (glm.pi / 180.0f);
 
         const float DEFAULT_NEARCLIP = 0.1f;
         const float DEFAULT_FARCLIP = 1000.0f;
-        const float DEFAULT_CAMERA_FOV = 45.0f * (MathUtil.Pi / 180.0f);
+        const float DEFAULT_CAMERA_FOV = 45.0f * (glm.pi / 180.0f);
         const float DEFAULT_ORTHOSIZE = 20.0f;
 
         const uint DEFAULT_VIEWMASK = uint.MaxValue;
@@ -233,7 +233,7 @@ namespace SharpGame
 
         public void SetZoom(float zoom)
         {
-            zoom_ = Math.Max(zoom, MathUtil.Epsilon);
+            zoom_ = Math.Max(zoom, glm.epsilon);
             frustumDirty_ = true;
             projectionDirty_ = true;
         }
@@ -350,7 +350,7 @@ namespace SharpGame
 
         public float GetLodDistance(float distance, float scale, float bias)
         {
-            float d = Math.Max(lodBias_ * bias * scale * zoom_, MathUtil.Epsilon);
+            float d = Math.Max(lodBias_ * bias * scale * zoom_, glm.epsilon);
             if(!orthographic_)
                 return distance / d;
             else

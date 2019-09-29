@@ -7,29 +7,46 @@ namespace SharpGame
 {
     public static partial class glm
     {
+        /// <summary>
+        /// The value for which all absolute numbers smaller than are considered equal to zero.
+        /// </summary>
+        public const float epsilon = 1e-6f; // Value a 8x higher than 1.19209290E-07F
+
+        /// <summary>
+        /// A value specifying the approximation of π which is 180 degrees.
+        /// </summary>
+        public const float pi = (float)Math.PI;
+
+        /// <summary>
+        /// A value specifying the approximation of 2π which is 360 degrees.
+        /// </summary>
+        public const float twoPi = (float)(2 * Math.PI);
+
+        /// <summary>
+        /// A value specifying the approximation of π/2 which is 90 degrees.
+        /// </summary>
+        public const float half_pi = (float)(Math.PI / 2);
+
         const float FLT_EPSILON = 1.192092896e-07F;
 
-        public static float epsilon() => FLT_EPSILON;
+        static readonly Random rand_ = new Random();
 
-        public static float pi()
-        {
-            return (float)(3.14159265358979323846264338327950288);
-        }
+        public static Random rand() => rand_;
 
-        public static float two_pi()
-        {
-            return (float)(6.28318530717958647692528676655900576);
-        }
+        /// Return a random float between 0.0 (inclusive) and 1.0 (exclusive.)
+        public static float random() { return (float)rand_.NextDouble(); }
 
-        public static float root_pi()
-        {
-            return (float)(1.772453850905516027);
-        }
+        /// Return a random float between 0.0 and range, inclusive from both ends.
+        public static float random(float range) { return rand_.NextFloat(0, range); }
 
-        public static float half_pi()
-        {
-            return (float)(1.57079632679489661923132169163975144);
-        }
+        /// Return a random float between min and max, inclusive from both ends.
+        public static float random(float min, float max) { return rand_.NextFloat(min, max); }
+
+        /// Return a random integer between 0 and range - 1.
+        public static int random(int range) { return (int)rand_.NextLong(0, range); }
+
+        /// Return a random integer between min and max - 1.
+        public static int random(int min, int max) { return (int)rand_.NextLong(min, max); }
 
         public static float abs(float v)
         {
@@ -50,6 +67,8 @@ namespace SharpGame
         {
             return (float)Math.Sqrt(v);
         }
+
+        public static float invSqrt(float v) => 1 / glm.sqrt(v);
 
         public static int max(int left, int right)
         {
@@ -81,150 +100,25 @@ namespace SharpGame
             return value < min ? min : value > max ? max : value;
         }
 
+        public static double lerp(double from, double to, double amount)
+        {
+            return (1 - amount) * from + amount * to;
+        }
+
+        public static float lerp(float from, float to, float amount)
+        {
+            return (1 - amount) * from + amount * to;
+        }
+
+        public static byte lerp(byte from, byte to, float amount)
+        {
+            return (byte)lerp((float)from, (float)to, amount);
+        }
+
         public static float mix(float x, float y, float a)
 		{
 			return ((x) + a* (y - x));
 		}
-
-        public static float acos(float x)
-        {
-            return (float)Math.Acos(x);
-        }
-
-        public static float acosh(float x)
-        {
-
-            if (x < (1f))
-                return (0f);
-            return (float)Math.Log(x + Math.Sqrt(x * x - (1f)));
-        }
-
-        public static float asin(float x)
-        {
-            return (float)Math.Asin(x);
-        }
-
-        public static float asinh(float x)
-        {
-            return (float)(x < 0f ? -1f : (x > 0f ? 1f : 0f)) * (float)Math.Log(Math.Abs(x) + Math.Sqrt(1f + x * x));
-        }
-
-        public static float atan(float y, float x)
-        {
-            return (float)Math.Atan2(y, x);
-        }
-
-        public static float atan(float y_over_x)
-        {
-            return (float)Math.Atan(y_over_x);
-        }
-
-        public static float atanh(float x)
-        {
-            if (Math.Abs(x) >= 1f)
-                return 0;
-            return (0.5f) * (float)Math.Log((1f + x) / (1f - x));
-        }
-
-        public static float cos(float angle)
-        {
-            return (float)Math.Cos(angle);
-        }
-
-        public static vec2 cos(in vec2 angle)
-        {
-            return new vec2((float)Math.Cos(angle.x), (float)Math.Cos(angle.y));
-        }
-
-        public static vec3 cos(in vec3 angle)
-        {
-            return new vec3((float)Math.Cos(angle.x), (float)Math.Cos(angle.y), (float)Math.Cos(angle.z));
-        }
-
-        public static float cosh(float angle)
-        {
-            return (float)Math.Cosh(angle);
-        }
-
-        public static float degrees(float radians)
-        {
-            return radians * (57.295779513082320876798154814105f);
-        }
-
-        public static vec2 degrees(in vec2 radians)
-        {
-            return new vec2(degrees(radians.x), degrees(radians.y));
-        }
-
-        public static vec3 degrees(in vec3 radians)
-        {
-            return new vec3(degrees(radians.x), degrees(radians.y), degrees(radians.z));
-        }
-
-        public static vec3 degrees(float x, float y, float z)
-        {
-            return new vec3(degrees(x), degrees(y), degrees(z));
-        }
-
-        public static float radians(float degrees)
-        {
-            return degrees * (0.01745329251994329576923690768489f);
-        }
-
-        public static vec2 radians(in vec2 degrees)
-        {
-            return new vec2(radians(degrees.x), radians(degrees.y));
-        }
-
-        public static vec3 radians(in vec3 degrees)
-        {
-            return new vec3(radians(degrees.x), radians(degrees.y), radians(degrees.z));
-        }
-
-        public static vec3 radians(float x, float y, float z)
-        {
-            return new vec3(radians(x), radians(y), radians(z));
-        }
-
-        public static float sin(float angle)
-        {
-            return (float)Math.Sin(angle);
-        }
-
-        public static vec2 sin(in vec2 angle)
-        {
-            return new vec2(sin(angle.x), sin(angle.y));
-        }
-
-        public static vec3 sin(in vec3 angle)
-        {
-            return new vec3(sin(angle.x), sin(angle.y), sin(angle.z));
-        }
-
-        public static float sinh(float angle)
-        {
-            return (float)Math.Sinh(angle);
-        }
-
-        public static float tan(float angle)
-        {
-            return (float)Math.Tan(angle);
-        }
-
-        public static vec2 tan(in vec2 angle)
-        {
-            return new vec2(tan(angle.x), tan(angle.y));
-        }
-
-        public static vec3 tan(in vec3 angle)
-        {
-            return new vec3(tan(angle.x), tan(angle.y), tan(angle.z));
-        }
-
-        public static float tanh(float angle)
-        {
-            return (float)Math.Tanh(angle);
-        }
 
         public static void hash_combine(ref uint seed, ref uint hash)
         {

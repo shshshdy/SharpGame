@@ -72,9 +72,9 @@ namespace SharpGame.Samples
                 for(int i = 0; i < 400; i++)
                 {
                     var node = scene.CreateChild("Model");
-                    node.Position = new vec3(MathUtil.Random(-40, 40), 0, MathUtil.Random(-40, 40));
-                    node.Rotation = new quat(new vec3(0, glm.radians(MathUtil.Random(0, 360)), 0));
-                    node.Scaling = new vec3(MathUtil.Random(2.0f, 4.0f));
+                    node.Position = new vec3(glm.random(-40, 40), 0, glm.random(-40, 40));
+                    node.Rotation = new quat(new vec3(0, glm.radians(glm.random(0, 360)), 0));
+                    node.Scaling = new vec3(glm.random(2.0f, 4.0f));
                     var staticModel = node.AddComponent<StaticModel>();
                     staticModel.CastShadows = true;
                     staticModel.SetModel(model);

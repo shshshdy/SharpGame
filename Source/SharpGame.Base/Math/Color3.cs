@@ -411,9 +411,9 @@ namespace SharpGame
         /// </remarks>
         public static void Lerp(ref Color3 start, ref Color3 end, float amount, out Color3 result)
         {
-            result.Red = MathUtil.Lerp(start.Red, end.Red, amount);
-            result.Green = MathUtil.Lerp(start.Green, end.Green, amount);
-            result.Blue = MathUtil.Lerp(start.Blue, end.Blue, amount);
+            result.Red = glm.lerp(start.Red, end.Red, amount);
+            result.Green = glm.lerp(start.Green, end.Green, amount);
+            result.Blue = glm.lerp(start.Blue, end.Blue, amount);
         }
 
         /// <summary>

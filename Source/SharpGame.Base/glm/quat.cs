@@ -540,7 +540,7 @@ namespace SharpGame
                     rotationAxis = cross(vec3(1, 0, 0), orig);
 
                 rotationAxis = normalize(rotationAxis);
-                return angleAxis(pi(), rotationAxis);
+                return angleAxis(-glm.pi, rotationAxis);
             }
 
             // Implementation from Stan Melax's Game Programming Gems 1 article

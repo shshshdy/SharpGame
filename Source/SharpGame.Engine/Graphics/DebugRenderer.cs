@@ -372,7 +372,7 @@ namespace SharpGame
             for(int i = 0; i < bones.Length; ++i)
             {
                 // Skip if bone contains no skinned geometry
-                if(bones[i].radius_ < MathUtil.Epsilon && bones[i].boundingBox_.Size.LengthSquared() < MathUtil.Epsilon)
+                if(bones[i].radius_ < glm.epsilon && bones[i].boundingBox_.Size.LengthSquared() < glm.epsilon)
                     continue;
 
                 Node boneNode = bones[i].node_;
@@ -386,7 +386,7 @@ namespace SharpGame
                 Node parentNode = boneNode.Parent;
 
                 // If bone has a parent defined, and it also skins geometry, draw a line to it. Else draw the bone as a point
-                if(parentNode && (bones[j].radius_ >= MathUtil.Epsilon || bones[j].boundingBox_.Size.LengthSquared() >= MathUtil.Epsilon))
+                if(parentNode && (bones[j].radius_ >= glm.epsilon || bones[j].boundingBox_.Size.LengthSquared() >= glm.epsilon))
                     end = parentNode.WorldPosition;
                 else
                     end = start;

@@ -767,9 +767,9 @@ namespace SharpGame
                 for(int i = 0; i < bones.Length; i++)
                 {
                     ref Bone bone = ref bones[i];
-                    if((bone.collisionMask_ & Bone.BONECOLLISION_BOX) != 0 && bone.boundingBox_.Size.Length() < MathUtil.Epsilon)
+                    if((bone.collisionMask_ & Bone.BONECOLLISION_BOX) != 0 && bone.boundingBox_.Size.Length() < glm.epsilon)
                         bone.collisionMask_ &= (byte)~Bone.BONECOLLISION_BOX;
-                    if((bone.collisionMask_ & Bone.BONECOLLISION_SPHERE) != 0 && bone.radius_ < MathUtil.Epsilon)
+                    if((bone.collisionMask_ & Bone.BONECOLLISION_SPHERE) != 0 && bone.radius_ < glm.epsilon)
                         bone.collisionMask_ &= (byte)~Bone.BONECOLLISION_SPHERE;
                 }
             }

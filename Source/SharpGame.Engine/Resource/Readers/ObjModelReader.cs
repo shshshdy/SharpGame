@@ -429,7 +429,7 @@ namespace SharpGame
                 {
                     a0 /= aa2;
                     a1 /= aa2;
-                    l = MathUtil.InvSqrt(a0 * a0 + a1 * a1 + 1.0F);
+                    l = glm.invSqrt(a0 * a0 + a1 * a1 + 1.0F);
                     div = aa2;
                     return glm.vec3(a0 * l, a1 * l, CopySignf(l, a2));
                 }
@@ -438,7 +438,7 @@ namespace SharpGame
                     // aa1 is largest
                     a0 /= aa1;
                     a2 /= aa1;
-                    l = MathUtil.InvSqrt(a0 * a0 + a2 * a2 + 1.0F);
+                    l = glm.invSqrt(a0 * a0 + a2 * a2 + 1.0F);
                     div = aa1;
                     return glm.vec3(a0 * l, CopySignf(l, a1), a2 * l);
                 }
@@ -450,7 +450,7 @@ namespace SharpGame
                     // aa2 is largest
                     a0 /= aa2;
                     a1 /= aa2;
-                    l = MathUtil.InvSqrt(a0 * a0 + a1 * a1 + 1.0F);
+                    l = glm.invSqrt(a0 * a0 + a1 * a1 + 1.0F);
                     div = aa2;
                     return glm.vec3(a0 * l, a1 * l, CopySignf(l, a2));
                 }
@@ -466,7 +466,7 @@ namespace SharpGame
 
                     a1 /= aa0;
                     a2 /= aa0;
-                    l = MathUtil.InvSqrt(a1 * a1 + a2 * a2 + 1.0F);
+                    l = glm.invSqrt(a1 * a1 + a2 * a2 + 1.0F);
                     div = aa0;
                     return glm.vec3(CopySignf(l, a0), a1 * l, a2 * l);
                 }
@@ -516,7 +516,7 @@ namespace SharpGame
             return n;
         }
 
-        bool IsNormalized(in vec3 vec, float epsilon = MathUtil.Epsilon)
+        bool IsNormalized(in vec3 vec, float epsilon = glm.epsilon)
         {
             return MathUtil.WithinEpsilon(glm.length2(vec), 1.0F, epsilon);
         }

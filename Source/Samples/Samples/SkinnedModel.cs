@@ -41,8 +41,8 @@ namespace SharpGame.Samples
 
                 for (int i = 0; i < 100; i++)
                 {
-                    var node = scene.CreateChild("Model", new vec3(MathUtil.Random(-20, 20), 0, MathUtil.Random(-20, 20)));
-                    node.Rotation = new quat(0, glm.radians(MathUtil.Random(0, 90)), 0);
+                    var node = scene.CreateChild("Model", new vec3(glm.random(-20, 20), 0, glm.random(-20, 20)));
+                    node.Rotation = new quat(0, glm.radians(glm.random(0, 90)), 0);
 
                     var animMdoel = node.AddComponent<AnimatedModel>();
                     animMdoel.SetModel(model);
@@ -56,7 +56,7 @@ namespace SharpGame.Samples
                         // Enable full blending weight and looping
                         state.SetWeight(1.0f);
                         state.SetLooped(true);
-                        state.SetTime(MathUtil.Random(walkAnimation.Length));
+                        state.SetTime(glm.random(walkAnimation.Length));
                     }
 
                     animators_.Add(animMdoel);

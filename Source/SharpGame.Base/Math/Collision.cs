@@ -432,7 +432,7 @@ namespace SharpGame
             //Same thing as RayIntersectsSphere except that the radius of the sphere (point)
             //is the epsilon for zero.
             float b = vec3.Dot(m, ray.direction);
-            float c = vec3.Dot(m, m) - MathUtil.Epsilon;
+            float c = vec3.Dot(m, m) - glm.epsilon;
 
             if (c > 0f && b > 0f)
                 return false;

@@ -32,6 +32,14 @@ namespace SharpGame
 
         public static bool EarlyZ { get; set; }
 
+        struct Command_buffer_block
+        {
+            CommandBuffer cmd_buffer;
+            Fence submit_fence;
+        };
+
+        Command_buffer_block offscreen_cmd_buf_blk, compute_cmd_buf_blk, onscreen_cmd_buf_blk;
+
         public Renderer()
         {
             this.Subscribe<GUIEvent>(e => OnDebugImage());
@@ -145,14 +153,14 @@ namespace SharpGame
         {
             Profiler.BeginSample("Submit");
 
-            int imageIndex = (int)Graphics.RenderImage;
-
             Graphics.BeginRender();
+
+            int imageIndex = (int)Graphics.RenderImage;
 
             CommandBuffer cmdBuffer = Graphics.RenderCmdBuffer;
 
             cmdBuffer.Begin();
-
+           
             foreach (var viewport in views)
             {
                 viewport.EarlySubmit(imageIndex);
