@@ -71,7 +71,6 @@ namespace SharpGame
         public uint WorkImage => nextImage;
 
 
-
         public Semaphore PresentComplete { get; }
         public Semaphore RenderComplete { get; }
 
@@ -474,11 +473,11 @@ namespace SharpGame
             transientIndexBuffer.Flush();
         }
 
-        public void EndRender()
+        public void Submit()
         {
             Profiler.BeginSample("Submit");
 
-            if(submitComputeCmdBuffers.Count > 0)
+            if (submitComputeCmdBuffers.Count > 0)
             {
                 foreach (var cmd in submitComputeCmdBuffers)
                 {
@@ -494,6 +493,10 @@ namespace SharpGame
 
             Profiler.EndSample();
 
+        }
+
+        public void EndRender()
+        {            
             Profiler.BeginSample("Present");
 
             Swapchain.QueuePresent(GraphicsQueue, currentImage, RenderComplete);

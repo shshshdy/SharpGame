@@ -20,7 +20,7 @@ namespace SharpGame
             OnDraw?.Invoke(this, view);            
         }
         
-        public override void Submit(int imageIndex)
+        public override void Submit(CommandBuffer cb, int imageIndex)
         {
             if (commandBuffers[Graphics.RenderContext] != null)
             {

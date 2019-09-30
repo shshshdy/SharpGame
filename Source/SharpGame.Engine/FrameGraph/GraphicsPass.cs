@@ -315,21 +315,21 @@ namespace SharpGame
             batch.geometry.Draw(cb);
         }
 
-        public override void Submit(int imageIndex)
+        public override void Submit(CommandBuffer cb, int imageIndex)
         {
             var rpInfo = renderPassInfo[imageIndex];
             if(rpInfo.Count > 0)
             {
                 foreach (var rp in rpInfo)
                 {
-                    rp.Submit(imageIndex);
+                    rp.Submit(cb, imageIndex);
                     rp.Free(commdListPool[imageIndex]);
                 }
             }
             else
             {
                 // clear pass
-                CommandBuffer cb = Graphics.Instance.RenderCmdBuffer;
+                //CommandBuffer cb = Graphics.Instance.RenderCmdBuffer;
 
                 var fb = Graphics.Framebuffers[imageIndex];
 
@@ -357,7 +357,6 @@ namespace SharpGame
 
     public struct RenderPassInfo
     {
-        public PassQueue passQueue;
         public uint workImage;
         public RenderPassBeginInfo rpBeginInfo;
         public Framebuffer Framebuffer => rpBeginInfo.framebuffer;
@@ -380,9 +379,9 @@ namespace SharpGame
             currentSubpass++;
         }
 
-        public void Submit(int imageIndex)
+        public void Submit(CommandBuffer cb, int imageIndex)
         {
-            CommandBuffer cb = Graphics.Instance.RenderCmdBuffer;
+            //CommandBuffer cb = Graphics.Instance.RenderCmdBuffer;
 
             System.Diagnostics.Debug.Assert(imageIndex == workImage);
 

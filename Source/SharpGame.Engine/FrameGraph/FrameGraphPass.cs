@@ -6,6 +6,7 @@ namespace SharpGame
 {
     public enum PassQueue
     {
+        None,
         EarlyGraphics,
         Compute,
         Graphics,
@@ -130,7 +131,7 @@ namespace SharpGame
         {
         }
 
-        public virtual void Submit(int imageIndex)
+        public virtual void Submit(CommandBuffer cb, int imageIndex)
         {
         }
 
