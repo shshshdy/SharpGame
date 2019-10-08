@@ -80,6 +80,21 @@ namespace SharpGame
         private TransientBufferManager transientVertexBuffer = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
         private TransientBufferManager transientIndexBuffer = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
 
+        class BackBuffer
+        {
+            public uint imageIndex;
+
+            public Semaphore acquireSemaphore;
+            public Semaphore pre_compute_render_semaphore;
+            public Semaphore compute_semaphore;
+
+            public Semaphore renderSemaphore;
+            public Fence presentFence;
+        }
+
+        Queue<BackBuffer> backBuffers = new Queue<BackBuffer>();
+        BackBuffer currentBuffer;
+
         public Graphics(Settings settings)
         {
 #if DEBUG
@@ -87,14 +102,11 @@ namespace SharpGame
 #else
             settings.Validation = false;
 #endif
-
             Settings = settings;
 
             enabledFeatures.samplerAnisotropy = True;
             enabledFeatures.depthClamp = True;
-
             enabledFeatures.shaderStorageImageExtendedFormats = True;
-
 
             device = Device.Create(settings, enabledFeatures, EnabledExtensions);
            
@@ -106,30 +118,39 @@ namespace SharpGame
             // Create synchronization objects
             PresentComplete = new Semaphore();
             RenderComplete = new Semaphore();
+
             computeFence = new Fence(FenceCreateFlags.None);
 
             commandPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
 
+            DescriptorPoolManager = new DescriptorPoolManager();
+
             Texture.Init();
+
             Sampler.Init();
 
         }
-
 
         public void Init(IntPtr wnd)
         {
             Swapchain = new Swapchain(wnd);
 
-            DescriptorPoolManager = new DescriptorPoolManager();
-
             CreateSwapChain();
             CreateDepthStencil();
             CreateDefaultRenderPass();
             CreateFrameBuffer();
-
             CreateCommandPool();
             CreateCommandBuffers();
 
+            for (int i = 0; i < Swapchain.ImageCount; i++)
+            {
+                backBuffers.Enqueue(new BackBuffer
+                {
+                    acquireSemaphore = new Semaphore(),
+                    renderSemaphore = new Semaphore(),
+                    presentFence = new Fence(FenceCreateFlags.None)
+                });
+            }
         }
 
         protected override void Destroy()
@@ -425,9 +446,16 @@ namespace SharpGame
 
             uint curImage = currentImage;
 
+            var frame = backBuffers.Peek();
+
             Swapchain.AcquireNextImage(PresentComplete, ref currentImage);
-            
-            System.Diagnostics.Debug.Assert(currentImage == (curImage + 1) % ImageCount);
+
+            Debug.Assert(currentImage == (curImage + 1) % ImageCount);
+
+            currentBuffer = frame;
+            currentBuffer.imageIndex = currentImage;
+
+            backBuffers.Dequeue();
 
             Profiler.EndSample();
             
@@ -459,7 +487,8 @@ namespace SharpGame
                 submitComputeCmdBuffers.Clear();
             }
 
-            GraphicsQueue.Submit(PresentComplete, PipelineStageFlags.ColorAttachmentOutput, primaryCmdPool[RenderContext], RenderComplete);
+            GraphicsQueue.Submit(PresentComplete, PipelineStageFlags.ColorAttachmentOutput,
+                primaryCmdPool[RenderContext], RenderComplete);
 
             Profiler.EndSample();
 
