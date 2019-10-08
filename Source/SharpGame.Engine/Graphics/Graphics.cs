@@ -1,6 +1,4 @@
-﻿//#define EVENT_SYNC
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -64,8 +62,8 @@ namespace SharpGame
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
 
-        uint currentImage = (uint)0xffffffff;
-        uint nextImage = 0;
+        private uint currentImage = (uint)0xffffffff;
+        private uint nextImage = 0;
 
         public uint RenderImage => currentImage;
         public uint WorkImage => nextImage;
@@ -74,20 +72,13 @@ namespace SharpGame
         public Semaphore PresentComplete { get; }
         public Semaphore RenderComplete { get; }
 
-        Fence computeFence;
+        private Fence computeFence;
 
         private RenderTarget depthStencil;
         public RenderTarget RTDepth => depthStencil;
 
-
-        TransientBufferManager transientVertexBuffer = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
-        TransientBufferManager transientIndexBuffer = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
-
-#if EVENT_SYNC
-        private ManualResetEvent _renderActive;
-        private ManualResetEvent _renderComandsReady;
-        private ManualResetEvent _renderCompleted;
-#endif  
+        private TransientBufferManager transientVertexBuffer = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
+        private TransientBufferManager transientIndexBuffer = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
 
         public Graphics(Settings settings)
         {
@@ -121,11 +112,7 @@ namespace SharpGame
 
             Texture.Init();
             Sampler.Init();
-#if EVENT_SYNC
-            _renderComandsReady = new ManualResetEvent(false);
-            _renderActive = new ManualResetEvent(false);
-            _renderCompleted = new ManualResetEvent(true);
-#endif
+
         }
 
 
@@ -435,40 +422,23 @@ namespace SharpGame
         public void BeginRender()
         {
             Profiler.BeginSample("Acquire");
-            // Acquire the next image from the swap chaing
-            uint cur = currentImage;
+
+            uint curImage = currentImage;
+
             Swapchain.AcquireNextImage(PresentComplete, ref currentImage);
             
-            System.Diagnostics.Debug.Assert(currentImage == (cur + 1) % ImageCount);
+            System.Diagnostics.Debug.Assert(currentImage == (curImage + 1) % ImageCount);
 
-            //nextImage = ((int)currentImage + 1)%ImageCount;
             Profiler.EndSample();
-
-#if EVENT_SYNC
-            if (!SingleLoop)
-            {
-                Profiler.BeginSample("RenderWait");
-                _renderActive.Reset();
-                _renderCompleted.Set();
-                _renderComandsReady.WaitOne();
-
-                _renderCompleted.Reset();
-                _renderComandsReady.Reset();
-                //SwapBuffers();
-                //SwapContext();
-                _renderActive.Set();
-                Profiler.EndSample();
-            }
-
-#else
-
+            
             Profiler.BeginSample("MainSemWait");
+
             MainSemWait();
+
             nextImage = (currentImage + 1) % ImageCount;
 
             Profiler.EndSample();
 
-#endif
             transientVertexBuffer.Flush();
             transientIndexBuffer.Flush();
         }
@@ -505,14 +475,11 @@ namespace SharpGame
 
             Profiler.EndSample();
 
-
-#if EVENT_SYNC
-
-#else
             Profiler.BeginSample("RenderSemPost");
+
             RenderSemPost();
+
             Profiler.EndSample();
-#endif
         }
 
 #region MULTITHREADED   
@@ -533,7 +500,9 @@ namespace SharpGame
 
         private int currentFrame;
         public int CurrentFrame => currentFrame;
-        
+
+        public uint NextImage { get => nextImage; set => nextImage = value; }
+
         private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
         private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);
 
@@ -580,13 +549,8 @@ namespace SharpGame
         public void WakeRender()
         {
             SwapContext();
-#if EVENT_SYNC
-            _renderComandsReady.Set();
-            _renderActive.WaitOne();
-#else
             // release render thread
             MainSemPost();
-#endif
         }
 
         public void MainSemPost()
@@ -628,23 +592,15 @@ namespace SharpGame
             if (!SingleLoop)
             {
                 long curTime = Stopwatch.GetTimestamp();
-#if EVENT_SYNC
-                _renderCompleted.WaitOne();
-#else
                 bool ok = renderSem.WaitOne();
-#endif
                 stats.RenderWait = Stopwatch.GetTimestamp() - curTime;
             }
         }
 
         public void Close()
         {
-#if EVENT_SYNC
-            _renderCompleted.Set();
-#else
             MainSemWait();
             RenderSemPost();
-#endif
         }
 
 #endregion
