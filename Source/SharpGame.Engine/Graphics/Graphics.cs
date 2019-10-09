@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define NEW_BACK_BUFF
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -77,8 +78,8 @@ namespace SharpGame
         private RenderTarget depthStencil;
         public RenderTarget RTDepth => depthStencil;
 
-        private TransientBufferManager transientVertexBuffer = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
-        private TransientBufferManager transientIndexBuffer = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
+        private TransientBufferManager transientVB = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
+        private TransientBufferManager transientIB = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
 
         class BackBuffer
         {
@@ -148,7 +149,7 @@ namespace SharpGame
                 {
                     acquireSemaphore = new Semaphore(),
                     renderSemaphore = new Semaphore(),
-                    presentFence = new Fence(FenceCreateFlags.None)
+                    //presentFence = new Fence(FenceCreateFlags.None)
                 });
             }
         }
@@ -427,12 +428,12 @@ namespace SharpGame
 
         public TransientBuffer AllocVertexBuffer(uint count)
         {
-            return transientVertexBuffer.Alloc(count);
+            return transientVB.Alloc(count);
         }
 
         public TransientBuffer AllocIndexBuffer(uint count)
         {
-            return transientIndexBuffer.Alloc(count);
+            return transientIB.Alloc(count);
         }
         
         public void WaitIdle()
@@ -444,18 +445,42 @@ namespace SharpGame
         {
             Profiler.BeginSample("Acquire");
 
+#if NEW_BACK_BUFF
+            var frame = backBuffers.Peek();
+            if(frame.presentFence == null)
+            {
+                frame.presentFence = new Fence(FenceCreateFlags.None);
+            }
+            else
+            {
+                VkResult fenceStatus = frame.presentFence.GetStatus();
+                if (VkResult.NotReady == fenceStatus)
+                {
+                    frame.presentFence.Wait();
+                }
+
+                // reset the fence
+                if (VkResult.Success == frame.presentFence.GetStatus())
+                {
+                    frame.presentFence.Reset();
+                }
+            }
+
+#endif
+
             uint curImage = currentImage;
 
-            var frame = backBuffers.Peek();
-
-            Swapchain.AcquireNextImage(PresentComplete, ref currentImage);
+#if NEW_BACK_BUFF
+            Swapchain.AcquireNextImage(frame.acquireSemaphore, ref currentImage);
+            currentBuffer = frame;
+            currentBuffer.imageIndex = currentImage;
+            backBuffers.Dequeue();
+#else
+            Swapchain.AcquireNextImage(PresentComplete, ref currentImage);            
+#endif
 
             Debug.Assert(currentImage == (curImage + 1) % ImageCount);
 
-            currentBuffer = frame;
-            currentBuffer.imageIndex = currentImage;
-
-            backBuffers.Dequeue();
 
             Profiler.EndSample();
             
@@ -467,8 +492,8 @@ namespace SharpGame
 
             Profiler.EndSample();
 
-            transientVertexBuffer.Flush();
-            transientIndexBuffer.Flush();
+            transientVB.Flush();
+            transientIB.Flush();
         }
 
         public void Submit()
@@ -487,9 +512,13 @@ namespace SharpGame
                 submitComputeCmdBuffers.Clear();
             }
 
+#if NEW_BACK_BUFF
+            GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.ColorAttachmentOutput,
+                primaryCmdPool[RenderContext], currentBuffer.renderSemaphore);
+#else
             GraphicsQueue.Submit(PresentComplete, PipelineStageFlags.ColorAttachmentOutput,
                 primaryCmdPool[RenderContext], RenderComplete);
-
+#endif
             Profiler.EndSample();
 
         }
@@ -498,9 +527,17 @@ namespace SharpGame
         {            
             Profiler.BeginSample("Present");
 
+#if NEW_BACK_BUFF
+            Swapchain.QueuePresent(GraphicsQueue, currentImage, currentBuffer.renderSemaphore);
+            GraphicsQueue.Submit(null, currentBuffer.presentFence);
+#else
             Swapchain.QueuePresent(GraphicsQueue, currentImage, RenderComplete);
-            
+#endif
             GraphicsQueue.WaitIdle();
+
+#if NEW_BACK_BUFF
+            backBuffers.Enqueue(currentBuffer);
+#endif
 
             Profiler.EndSample();
 
@@ -548,8 +585,8 @@ namespace SharpGame
             WaitRender();
             WakeRender();
 
-            transientVertexBuffer.Reset();
-            transientIndexBuffer.Reset();
+            transientVB.Reset();
+            transientIB.Reset();
 
             Profiler.EndSample();
         }

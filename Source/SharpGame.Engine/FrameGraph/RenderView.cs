@@ -166,9 +166,15 @@ namespace SharpGame
         {
             this.scene = scene;
             this.camera = camera;
-                        
+
             FrameGraph = frameGraph;
-            FrameGraph?.Init();
+
+            if (FrameGraph == null)
+            {
+                FrameGraph = FrameGraph.Simple();
+            }
+
+            FrameGraph.Init();
         }
 
         protected void CreateBuffers()
@@ -235,12 +241,6 @@ namespace SharpGame
             this.frameInfo = frame;
             this.frameInfo.camera = camera;
             this.frameInfo.viewSize = new Int2((int)g.Width, (int)g.Height);
-
-            if (FrameGraph == null)
-            {
-                FrameGraph =  FrameGraph.Simple();
-                FrameGraph.Init();
-            }
 
             Viewport.Define(0, 0, g.Width, g.Height);
 

@@ -33,30 +33,18 @@ namespace SharpGame
         /// Gets the queue index.
         /// </summary>
         public uint Index { get; }
-/*
-        /// <summary>
-        /// Submits a sequence of semaphores or command buffers to a queue.
-        /// </summary>
-        /// <param name="submits">Structures, each specifying a command buffer submission batch.</param>
-        /// <param name="fence">
-        /// An optional handle to a fence to be signaled. If fence is not <c>null</c>, it defines a
-        /// fence signal operation.
-        /// </param>
-        /// <exception cref="VulkanException">Vulkan returns an error code.</exception>
+
         public void Submit(SubmitInfo[] submits, Fence fence = null)
         {
             int count = submits?.Length ?? 0;
-            var nativeSubmits = stackalloc SubmitInfo.Native[count];
+            var nativeSubmits = stackalloc VkSubmitInfo[count];
             for (int i = 0; i < count; i++)
                 submits[i].ToNative(out nativeSubmits[i]);
 
-            Result result = vkQueueSubmit(this, count, nativeSubmits, fence);
-            for (int i = 0; i < count; i++)
-                nativeSubmits[i].Free();
+            VulkanUtil.CheckResult(vkQueueSubmit(native, (uint)count, nativeSubmits,
+                fence?.native ?? VkFence.Null));           
+        }
 
-            VulkanException.ThrowForInvalidResult(result);
-        }*/
-/*
         /// <summary>
         /// Submits a sequence of semaphores or command buffers to a queue.
         /// </summary>
@@ -68,11 +56,10 @@ namespace SharpGame
         /// <exception cref="VulkanException">Vulkan returns an error code.</exception>
         public void Submit(SubmitInfo submit, Fence fence = null)
         {
-            submit.ToNative(out SubmitInfo.Native nativeSubmit);
-            Result result = vkQueueSubmit(this, 1, &nativeSubmit, fence);
-            nativeSubmit.Free();
-            VulkanException.ThrowForInvalidResult(result);
-        }*/
+            submit.ToNative(out var nativeSubmit);
+            VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &nativeSubmit,
+                fence?.native ?? VkFence.Null));
+        }
 
         /// <summary>
         /// Submits semaphores or a command buffer to a queue.
@@ -194,20 +181,20 @@ namespace SharpGame
         /// Semaphores upon which to wait before the command buffers for this batch begin execution.
         /// If semaphores to wait on are provided, they define a semaphore wait operation.
         /// </summary>
-        public long[] WaitSemaphores;
+        public long[] waitSemaphores;
         /// <summary>
         /// Pipeline stages at which each corresponding semaphore wait will occur.
         /// </summary>
-        public PipelineStageFlags[] WaitDstStageMask;
+        public PipelineStageFlags[] waitDstStageMask;
         /// <summary>
         /// Command buffers to execute in the batch.
         /// </summary>
-        public IntPtr[] CommandBuffers;
+        public IntPtr[] commandBuffers;
         /// <summary>
         /// Semaphores which will be signaled when the command buffers for this batch have completed
         /// execution. If semaphores to be signaled are provided, they define a semaphore signal operation.
         /// </summary>
-        public long[] SignalSemaphores;
+        public long[] signalSemaphores;
         /*
         /// <summary>
         /// Initializes a new instance of the <see cref="SubmitInfo"/> structure.
@@ -237,19 +224,17 @@ namespace SharpGame
             SignalSemaphores = signalSemaphores?.ToHandleArray();
         }*/
         
-        /*
-        internal void ToNative(out Native native)
+        internal void ToNative(out VkSubmitInfo native)
         {
-            native.Type = StructureType.SubmitInfo;
-            native.Next = IntPtr.Zero;
-            native.WaitSemaphoreCount = WaitSemaphores?.Length ?? 0;
-            native.WaitSemaphores = Interop.Struct.AllocToPointer(WaitSemaphores);
-            native.WaitDstStageMask = Interop.Struct.AllocToPointer(WaitDstStageMask);
-            native.CommandBufferCount = CommandBuffers?.Length ?? 0;
-            native.CommandBuffers = Interop.Struct.AllocToPointer(CommandBuffers);
-            native.SignalSemaphoreCount = SignalSemaphores?.Length ?? 0;
-            native.SignalSemaphores = Interop.Struct.AllocToPointer(SignalSemaphores);
-        }*/
+            native = VkSubmitInfo.New();
+            native.waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0);
+            //native.pWaitSemaphores = Interop.Struct.AllocToPointer(WaitSemaphores);
+            //native.pWaitDstStageMask = Interop.Struct.AllocToPointer(WaitDstStageMask);
+            native.commandBufferCount = (uint)(commandBuffers?.Length ?? 0);
+            //native.pCommandBuffers = Interop.Struct.AllocToPointer(CommandBuffers);
+            native.signalSemaphoreCount = (uint)(signalSemaphores?.Length ?? 0);
+            //native.pSignalSemaphores = Interop.Struct.AllocToPointer(SignalSemaphores);
+        }
     }
 
     /// <summary>
