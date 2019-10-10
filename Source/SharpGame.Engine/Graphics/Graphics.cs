@@ -1,4 +1,4 @@
-﻿//#define NEW_BACK_BUFF
+﻿#define NEW_BACK_BUFF
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
