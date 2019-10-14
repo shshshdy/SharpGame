@@ -14,7 +14,7 @@ using System.Threading;
 
 namespace SharpGame
 {
-    public unsafe partial class Application : CoreApplication
+    public class Application : CoreApplication
     {
         protected static Application instance;
         private string m_title= "SharpGame";
@@ -82,17 +82,17 @@ namespace SharpGame
             fileSystem = CreateSubsystem<FileSystem>(workSpace);
             cache = CreateSubsystem<Resources>();
 
-            cache.RegisterAssertReader(new ShaderReader());
+            cache.RegisterAssetReader(new ShaderReader());
 
-            cache.RegisterAssertReader(new MdlModelReader());
-            cache.RegisterAssertReader(new ObjModelReader());
-            cache.RegisterAssertReader(new AssimpModelReader());
+            cache.RegisterAssetReader(new MdlModelReader());
+            cache.RegisterAssetReader(new ObjModelReader());
+            cache.RegisterAssetReader(new AssimpModelReader());
 
-            cache.RegisterAssertReader(new DDSTextureReader());
-            cache.RegisterAssertReader(new SharpTextureReader());
-            cache.RegisterAssertReader(new KtxTextureReader());
+            cache.RegisterAssetReader(new DDSTextureReader());
+            cache.RegisterAssetReader(new SharpTextureReader());
+            cache.RegisterAssetReader(new KtxTextureReader());
 
-            cache.RegisterAssertReader(new AnimationReader());
+            cache.RegisterAssetReader(new AnimationReader());
 
             CreateWindow();
 

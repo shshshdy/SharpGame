@@ -94,7 +94,7 @@ namespace SharpGame
                     }
                     else if (Match('*'))
                     {
-                        ParseMulitLineComment();
+                        ParseMultiLineComment();
                     }
                     else
 					{
@@ -195,7 +195,7 @@ namespace SharpGame
 			}
 			AddToken(resolvedType);
 		}
-        private void ParseMulitLineComment()
+        private void ParseMultiLineComment()
         {
             int depth = 1;
             int startingLine = _line;

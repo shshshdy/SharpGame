@@ -29,7 +29,7 @@ namespace SharpGame
         {
         }
 
-        public void RegisterAssertReader(IResourceReader reader)
+        public void RegisterAssetReader(IResourceReader reader)
         {
             if(!resourceReaders.TryGetValue(reader.ResourceType, out List<IResourceReader> readers))
             {

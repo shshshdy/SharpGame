@@ -16,7 +16,7 @@ namespace SharpGame
             _pools.Add(CreateNewPool());
         }
 
-        public unsafe VkDescriptorPool Allocate(ResourceLayout resLayout)
+        public VkDescriptorPool Allocate(ResourceLayout resLayout)
         {
             VkDescriptorPool pool = GetPool(ref resLayout.descriptorResourceCounts);
             return pool;
