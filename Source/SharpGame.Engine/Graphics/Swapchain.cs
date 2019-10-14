@@ -15,7 +15,7 @@ namespace SharpGame
         public ImageView View;
     }
 
-    public unsafe class Swapchain
+    public class Swapchain
     {
         public VkSurfaceKHR Surface { get; private set; }
         public uint QueueNodeIndex { get; private set; } = uint.MaxValue;
@@ -190,7 +190,7 @@ namespace SharpGame
         * @param height Pointer to the height of the swapchain (may be adjusted to fit the requirements of the swapchain)
         * @param vsync (Optional) Can be used to force vsync'd rendering (by using VK_PRESENT_MODE_FIFO_KHR as presentation mode)
         */
-        public void Create(ref uint width, ref uint height, bool vsync = false)
+        public unsafe void Create(ref uint width, ref uint height, bool vsync = false)
         {
             VkResult err;
             VkSwapchainKHR oldSwapchain = swapchain;
@@ -342,7 +342,7 @@ namespace SharpGame
             Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref imageIndex);
         }
 
-        public void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = null)
+        public unsafe void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = null)
         {
             VkPresentInfoKHR presentInfo = VkPresentInfoKHR.New();
             presentInfo.pNext = null;

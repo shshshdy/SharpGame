@@ -133,7 +133,7 @@ namespace SharpGame
         (
             new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
             new VertexInputAttribute(0, 1, Format.R8g8b8a8Unorm, 12)
-         );
+        );
     }
 
     [StructLayout(LayoutKind.Sequential)]
