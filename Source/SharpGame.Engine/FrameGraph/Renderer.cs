@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿//#define SIMPLE_RENDER
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -152,7 +153,25 @@ namespace SharpGame
             Graphics.BeginRender();
 
             int imageIndex = (int)Graphics.RenderImage;
+
+#if SIMPLE_RENDER
+
+            CommandBuffer cmdBuffer = Graphics.RenderCmdBuffer;
+
+            cmdBuffer.Begin();
+
+            foreach (var viewport in views)
+            {
+                viewport.Submit(cmdBuffer, PassQueue.All, imageIndex);
+            }
+
+            cmdBuffer.End();
+
+            Graphics.Submit();
+
+#else
             var currentBuffer = Graphics.currentBuffer;
+
             {
                 var fence = preRenderCmdBlk[imageIndex].submit_fence;
                 fence.Wait();
@@ -212,7 +231,7 @@ namespace SharpGame
 
                 foreach (var viewport in views)
                 {
-                    viewport.Submit(cmdBuffer, imageIndex);
+                    viewport.Submit(cmdBuffer, PassQueue.Graphics, imageIndex);
                 }
 
                 cmdBuffer.End();
@@ -220,9 +239,7 @@ namespace SharpGame
                 Graphics.GraphicsQueue.Submit(currentBuffer.computeSemaphore, PipelineStageFlags.ColorAttachmentOutput,
                     cmdBuffer, currentBuffer.renderSemaphore, fence);
             }
-
-            //Graphics.Submit();
-
+#endif
             Graphics.EndRender();
 
             Profiler.EndSample();

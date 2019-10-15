@@ -1,4 +1,4 @@
-﻿//#define CLUSTER_FORWARD
+﻿#define CLUSTER_FORWARD
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -148,7 +148,7 @@ namespace SharpGame
         {
             foreach (var renderPass in RenderPassList)
             {
-                if(renderPass.PassQueue == passQueue)
+                if((renderPass.PassQueue & passQueue) == renderPass.PassQueue)
                 {
                     renderPass.Submit(cb, imageIndex);
                 }

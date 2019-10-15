@@ -7,9 +7,10 @@ namespace SharpGame
     public enum PassQueue
     {
         None,
-        EarlyGraphics,
-        Compute,
-        Graphics,
+        EarlyGraphics = 1,
+        Compute = 2,
+        Graphics = 4,
+        All = 7
     }
 
     public class FrameGraphPass : Object

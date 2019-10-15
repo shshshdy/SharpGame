@@ -387,11 +387,11 @@ namespace SharpGame
             ubLight.SetData(ref lightParameter);
         }
 
-        public void Submit(CommandBuffer cb, int imageIndex)
+        public void Submit(CommandBuffer cb, PassQueue passQueue, int imageIndex)
         {
             Profiler.BeginSample("Submit");
 
-            FrameGraph.Submit(cb, PassQueue.Graphics, imageIndex);
+            FrameGraph.Submit(cb, passQueue, imageIndex);
 
             if (DrawDebug)
             {
