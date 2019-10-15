@@ -49,16 +49,12 @@ namespace SharpGame
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
         private CommandBufferPool computeCmdPool;
-        private CommandBufferPool renderCmdPool;
 
         private CommandBufferPool workCmdPool;
 
         private static CommandBufferPool commandPool;
 
-        public CommandBuffer WorkComputeCmdBuffer => computeCmdPool.CommandBuffers[WorkContext];
-
-        public CommandBuffer RenderCmdBuffer => renderCmdPool.CommandBuffers[RenderContext];
-        public CommandBuffer ComputeCmdBuffer => computeCmdPool.CommandBuffers[RenderContext];
+        public CommandBuffer WorkComputeCmdBuffer => computeCmdPool.CommandBuffers[WorkImage];
 
         public List<CommandBuffer> submitComputeCmdBuffers = new List<CommandBuffer>();
 
@@ -367,14 +363,12 @@ namespace SharpGame
         
         private void CreateCommandPool()
         {
-            renderCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
             workCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
             computeCmdPool = new CommandBufferPool(ComputeQueue.FamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer);
         }
 
         protected void CreateCommandBuffers()
         {
-            renderCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
             workCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
             computeCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
         }
@@ -499,7 +493,7 @@ namespace SharpGame
             transientVB.Flush();
             transientIB.Flush();
         }
-
+        /*
         public void Submit()
         {
             Profiler.BeginSample("Submit");
@@ -525,7 +519,7 @@ namespace SharpGame
 #endif
             Profiler.EndSample();
 
-        }
+        }*/
 
         public void EndRender()
         {            

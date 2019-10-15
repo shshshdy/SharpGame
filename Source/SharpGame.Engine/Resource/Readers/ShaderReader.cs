@@ -320,12 +320,20 @@ namespace SharpGame
             return layout;
         }
 
+        static Dictionary<string, IncludeResult> includes = new Dictionary<string, IncludeResult>();
         IncludeResult IncludeHandler(string requestedSource, string requestingSource, CompileOptions.IncludeType type)
         {
+            if(includes.TryGetValue(requestedSource, out var res))
+            {
+                return res;
+            }
+
             using (var file = FileSystem.Instance.GetFile(requestedSource))
             {
                 var content = file.ReadAllText();
-                return new IncludeResult(requestedSource, content);
+                res = new IncludeResult(requestedSource, content);
+                includes[requestedSource] = res;
+                return res;
             }
 
         }
@@ -346,7 +354,6 @@ namespace SharpGame
             {
                 Language = CompileOptions.InputLanguage.GLSL,
                 Target = CompileOptions.Environment.Vulkan,
-                //IncludeCallback = IncludeHandler
             };
 
             ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;

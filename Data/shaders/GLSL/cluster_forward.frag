@@ -91,7 +91,6 @@ void main()
     float fresnel = max(0.f, r0 + (1.f - r0) * pow(1.f - max(dot(v, world_normal), 0.f), 5.f));
     vec3 mtl_c_specular = texture(SpecMap, uv_in).rgb;// * mtl_in.specular;
     vec3 fresnel_specular = mtl_c_specular * (1.f - mtl_c_specular) * fresnel;
-	
 
     vec3 view_pos = (ubo_in.view * vec4(world_pos_in.xyz, 1.f)).xyz;
     uvec3 grid_coord = view_pos_to_grid_coord(gl_FragCoord.xy, view_pos.z);
