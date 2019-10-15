@@ -87,7 +87,7 @@ namespace SharpGame
 #if DEBUG
             if(offset + dynamicAlignment > Size)
             {
-                Debug.Assert(false);
+                //Debug.Assert(false);
                 return 0;
             }
 #endif

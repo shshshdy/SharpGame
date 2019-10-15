@@ -11,11 +11,12 @@ namespace SharpGame
         CommandBuffer[] commandBuffers = new CommandBuffer[3];
         public ComputePass()
         {
+            PassQueue = PassQueue.Compute;
         }
 
         public override void Draw(RenderView view)
         {
-            cmdBuffer = Graphics.WorkComputeBuffer;
+            cmdBuffer = Graphics.WorkComputeCmdBuffer;
             commandBuffers[Graphics.WorkContext] = cmdBuffer;
             OnDraw?.Invoke(this, view);            
         }

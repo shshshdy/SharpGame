@@ -48,15 +48,17 @@ namespace SharpGame
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
-        private CommandBufferPool primaryCmdPool;
-        private CommandBufferPool workCmdPool;
         private CommandBufferPool computeCmdPool;
+        private CommandBufferPool renderCmdPool;
+
+        private CommandBufferPool workCmdPool;
 
         private static CommandBufferPool commandPool;
 
-        public CommandBuffer RenderCmdBuffer => primaryCmdPool.CommandBuffers[RenderContext];
-        public CommandBuffer WorkComputeBuffer => computeCmdPool.CommandBuffers[WorkContext];
-        public CommandBuffer RenderComputeBuffer => computeCmdPool.CommandBuffers[RenderContext];
+        public CommandBuffer WorkComputeCmdBuffer => computeCmdPool.CommandBuffers[WorkContext];
+
+        public CommandBuffer RenderCmdBuffer => renderCmdPool.CommandBuffers[RenderContext];
+        public CommandBuffer ComputeCmdBuffer => computeCmdPool.CommandBuffers[RenderContext];
 
         public List<CommandBuffer> submitComputeCmdBuffers = new List<CommandBuffer>();
 
@@ -81,20 +83,20 @@ namespace SharpGame
         private TransientBufferManager transientVB = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
         private TransientBufferManager transientIB = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
 
-        class BackBuffer
+        public class BackBuffer
         {
             public uint imageIndex;
 
             public Semaphore acquireSemaphore;
-            public Semaphore pre_compute_render_semaphore;
-            public Semaphore compute_semaphore;
+            public Semaphore preRenderSemaphore;
+            public Semaphore computeSemaphore;
 
             public Semaphore renderSemaphore;
             public Fence presentFence;
         }
 
         Queue<BackBuffer> backBuffers = new Queue<BackBuffer>();
-        BackBuffer currentBuffer;
+        public BackBuffer currentBuffer;
 
         public Graphics(Settings settings)
         {
@@ -148,6 +150,8 @@ namespace SharpGame
                 backBuffers.Enqueue(new BackBuffer
                 {
                     acquireSemaphore = new Semaphore(),
+                    preRenderSemaphore = new Semaphore(),
+                    computeSemaphore = new Semaphore(),
                     renderSemaphore = new Semaphore(),
                     //presentFence = new Fence(FenceCreateFlags.None)
                 });
@@ -363,14 +367,14 @@ namespace SharpGame
         
         private void CreateCommandPool()
         {
-            primaryCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
+            renderCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
             workCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
             computeCmdPool = new CommandBufferPool(ComputeQueue.FamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer);
         }
 
         protected void CreateCommandBuffers()
         {
-            primaryCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
+            renderCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
             workCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
             computeCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
         }
@@ -514,7 +518,7 @@ namespace SharpGame
 
 #if NEW_BACK_BUFF
             GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.ColorAttachmentOutput,
-                primaryCmdPool[RenderContext], currentBuffer.renderSemaphore);
+                renderCmdPool[RenderContext], currentBuffer.renderSemaphore);
 #else
             GraphicsQueue.Submit(PresentComplete, PipelineStageFlags.ColorAttachmentOutput,
                 primaryCmdPool[RenderContext], RenderComplete);

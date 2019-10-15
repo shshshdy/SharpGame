@@ -58,6 +58,7 @@ namespace SharpGame
         ResourceSet VSSet => vsSet[Graphics.WorkContext];
         public ShadowPass() : base(Pass.Shadow)
         {
+            PassQueue = PassQueue.EarlyGraphics;
             var depthFormat = Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =

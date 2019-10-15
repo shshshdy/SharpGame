@@ -67,21 +67,21 @@ namespace SharpGame
             for(int i = 0; i < 3; i++)
             {
                 offscreen_cmd_buf_blk[i].cmd_buffer = preComputeCmdPool.CommandBuffers[i];
-                offscreen_cmd_buf_blk[i].submit_fence = new Fence(FenceCreateFlags.None);
+                offscreen_cmd_buf_blk[i].submit_fence = new Fence(FenceCreateFlags.Signaled);
             }            
 
             computeCmdPool.Allocate(CommandBufferLevel.Primary, 3);
             for (int i = 0; i < 3; i++)
             {
                 compute_cmd_buf_blk[i].cmd_buffer = computeCmdPool.CommandBuffers[i];
-                compute_cmd_buf_blk[i].submit_fence = new Fence(FenceCreateFlags.None);
+                compute_cmd_buf_blk[i].submit_fence = new Fence(FenceCreateFlags.Signaled);
             }
 
             graphicsCmdPool.Allocate(CommandBufferLevel.Primary, 3);
             for (int i = 0; i < 3; i++)
             {
                 onscreen_cmd_buf_blk[i].cmd_buffer = graphicsCmdPool.CommandBuffers[i];
-                onscreen_cmd_buf_blk[i].submit_fence = new Fence(FenceCreateFlags.None);
+                onscreen_cmd_buf_blk[i].submit_fence = new Fence(FenceCreateFlags.Signaled);
             }
         }
 
@@ -152,11 +152,11 @@ namespace SharpGame
             Graphics.BeginRender();
 
             int imageIndex = (int)Graphics.RenderImage;
-
+            var currentBuffer = Graphics.currentBuffer;
             {
                 var fence = offscreen_cmd_buf_blk[imageIndex].submit_fence;
-                //fence.Wait();
-                //fence.Reset();
+                fence.Wait();
+                fence.Reset();
 
                 CommandBuffer cmdBuffer = offscreen_cmd_buf_blk[imageIndex].cmd_buffer;
 
@@ -164,23 +164,43 @@ namespace SharpGame
 
                 foreach (var viewport in views)
                 {
-                    viewport.EarlySubmit(cmdBuffer, imageIndex);
+                    viewport.FrameGraph.Submit(cmdBuffer, PassQueue.EarlyGraphics, imageIndex);
                 }
 
                 cmdBuffer.End();
+
+                Graphics.GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.FragmentShader,
+                    cmdBuffer, currentBuffer.preRenderSemaphore, fence);
             }
 
             {
                 var fence = compute_cmd_buf_blk[imageIndex].submit_fence;
-                //fence.Wait();
-                //fence.Reset();
 
+                foreach (var viewport in views)
+                {
+                    viewport.FrameGraph.Submit(null, PassQueue.Compute, imageIndex);
+                }
+
+                fence.Wait();
+                fence.Reset();
+
+                if (Graphics.submitComputeCmdBuffers.Count > 0)
+                {
+                    var cmdBuffer = Graphics.submitComputeCmdBuffers[0];
+                    Graphics.ComputeQueue.Submit(currentBuffer.preRenderSemaphore, PipelineStageFlags.ComputeShader,
+                    cmdBuffer, currentBuffer.computeSemaphore, fence);
+                }
+                else
+                {
+                    Graphics.ComputeQueue.Submit(currentBuffer.preRenderSemaphore, PipelineStageFlags.ComputeShader,
+                    null, currentBuffer.computeSemaphore, fence);
+                }
             }
 
             {
                 var fence = onscreen_cmd_buf_blk[imageIndex].submit_fence;
-                //fence.Wait();
-                //fence.Reset();
+                fence.Wait();
+                fence.Reset();
 
                 CommandBuffer cmdBuffer = Graphics.RenderCmdBuffer;
 
@@ -193,9 +213,11 @@ namespace SharpGame
 
                 cmdBuffer.End();
 
+                Graphics.GraphicsQueue.Submit(currentBuffer.computeSemaphore, PipelineStageFlags.ColorAttachmentOutput,
+                    cmdBuffer, currentBuffer.renderSemaphore, fence);
             }
 
-            Graphics.Submit();
+            //Graphics.Submit();
 
             Graphics.EndRender();
 

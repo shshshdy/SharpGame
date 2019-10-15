@@ -44,6 +44,7 @@ namespace SharpGame
 
         public GraphicsPass(string name = "", int workCount = 0)
         {
+            PassQueue = PassQueue.Graphics;
             Name = name;
 
             CreateCommandPool(4);
