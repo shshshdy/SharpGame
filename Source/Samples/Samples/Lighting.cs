@@ -32,11 +32,21 @@ namespace SharpGame.Samples
             var staticModel = node.AddComponent<StaticModel>();
             staticModel.SetModel("models/sibenik/sibenik_bubble.fbx");// "models/voyager/voyager.dae");
 
-
             BoundingBox aabb = staticModel.WorldBoundingBox;
+            SetupLights(scene, aabb, 100);
 
-            int num_lights = 100;
+            frameGraph = new FrameGraph
+            {
+                new ShadowPass(),
+                //new ScenePass()
+                new ClusterLighting()
+            };
 
+            Renderer.MainView.Attach(camera, scene, frameGraph);
+        }
+
+        public static void SetupLights(Scene scene, BoundingBox aabb, int num_lights)
+        {
             float light_vol = aabb.Volume / (float)(num_lights);
             float base_range = (float)Math.Pow(light_vol, 1.0f / 3.0f);
             float max_range = base_range * 3.0f;
@@ -44,7 +54,6 @@ namespace SharpGame.Samples
             vec3 half_size = aabb.HalfSize;
             float pos_radius = glm.max(half_size.x, glm.max(half_size.y, half_size.z));
             vec3 fcol = new vec3();
-
 
             void hue_to_rgb(ref vec3 ret, float hue)
             {
@@ -74,28 +83,13 @@ namespace SharpGame.Samples
                     glm.random(-pos_radius, pos_radius),
                     glm.random(-pos_radius, pos_radius));
 
-
                 var lightNode = scene.CreateChild("light" + i, pos);
                 var light = lightNode.AddComponent<Light>();
                 light.LightType = LightType.Point;
                 light.Range = range;
-                light.Color = (Color4) fcol;
-
+                light.Color = (Color4)fcol;
             }
-   
 
-            frameGraph = new FrameGraph
-            {
-                new ShadowPass(),
-
-                //new ScenePass()
-                new ClusterLighting()
-
-            };
-
-            Renderer.MainView.Attach(camera, scene, frameGraph);
         }
-
-
     }
 }
