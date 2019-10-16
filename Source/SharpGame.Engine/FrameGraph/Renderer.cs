@@ -14,16 +14,12 @@ namespace SharpGame
         private List<RenderView> views = new List<RenderView>();
         public Graphics Graphics => Graphics.Instance;
 
-        public static ref bool DrawDebug => ref drawDebug;
-        static bool drawDebug;
-
-        public static ref bool DebugDepthTest => ref debugDepthTest;
-        static bool debugDepthTest;
-
-        public static ref bool DebugScene => ref debugOctree;
-        static bool debugOctree;
-
+        public static bool simpleRender = false;
+        public static bool drawDebug;
+        public static bool debugDepthTest;
+        public static bool debugOctree;
         public static bool debugImage = false;
+
         protected float debugImageHeight = 200.0f;
         List<ImageView> debugImages = new List<ImageView>();
 
@@ -144,6 +140,7 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndRender());
 
+            //Log.Info("Render frame " + Graphics.CurrentFrame);
         }
 
         public void Submit()
@@ -156,6 +153,8 @@ namespace SharpGame
 
 #if SIMPLE_RENDER
 
+            //Log.Info("Summit frame " + Graphics.CurrentFrame);
+            /*
             CommandBuffer cmdBuffer = Graphics.RenderCmdBuffer;
 
             cmdBuffer.Begin();
@@ -167,9 +166,18 @@ namespace SharpGame
 
             cmdBuffer.End();
 
-            Graphics.Submit();
+            Graphics.Submit();*/
 
 #else
+           
+            if(simpleRender)
+            {
+                SimpleSubmit();
+                Graphics.EndRender();
+                Profiler.EndSample();
+                return;
+            }
+
             var currentBuffer = Graphics.currentBuffer;
 
             {
@@ -198,13 +206,10 @@ namespace SharpGame
                 fence.Wait();
                 fence.Reset();
 
-                //CommandBuffer cmdBuffer = preRenderCmdBlk[imageIndex].cmd_buffer;
-
                 foreach (var viewport in views)
                 {
                     viewport.FrameGraph.Submit(null, PassQueue.Compute, imageIndex);
                 }
-
 
                 if (Graphics.submitComputeCmdBuffers.Count > 0)
                 {
@@ -243,6 +248,30 @@ namespace SharpGame
             Graphics.EndRender();
 
             Profiler.EndSample();
+
+        }
+
+        void SimpleSubmit()
+        {
+            int imageIndex = (int)Graphics.RenderImage;
+            var currentBuffer = Graphics.currentBuffer;
+            var fence = renderCmdBlk[imageIndex].submit_fence;
+            fence.Wait();
+            fence.Reset();
+
+            CommandBuffer cmdBuffer = renderCmdBlk[imageIndex].cmd_buffer;
+
+            cmdBuffer.Begin();
+
+            foreach (var viewport in views)
+            {
+                viewport.Submit(cmdBuffer, PassQueue.All, imageIndex);
+            }
+
+            cmdBuffer.End();
+
+            Graphics.GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.ColorAttachmentOutput,
+                cmdBuffer, currentBuffer.renderSemaphore, fence);
 
         }
 
