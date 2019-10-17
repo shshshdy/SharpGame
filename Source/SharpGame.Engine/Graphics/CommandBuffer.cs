@@ -400,6 +400,11 @@ namespace SharpGame
             vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, ref Unsafe.As<BufferImageCopy, VkBufferImageCopy>(ref pRegions[0]));
         }
 
+        public void FillBuffer(Buffer dstBuffer, ulong dstOffset, ulong size, uint data)
+        {
+            vkCmdFillBuffer(commandBuffer, dstBuffer.buffer, dstOffset, size, data);
+        }
+
         public void ResetQueryPool(QueryPool queryPool, uint firstQuery, uint queryCount)
         {
             vkCmdResetQueryPool(commandBuffer, queryPool.handle, firstQuery, queryCount);

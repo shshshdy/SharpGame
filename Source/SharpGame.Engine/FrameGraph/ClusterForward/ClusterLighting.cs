@@ -93,9 +93,9 @@ namespace SharpGame
 
         protected override void OnSetFrameGraph(FrameGraph frameGraph)
         {
-            earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawEarlyZ);
-            earlyZPass.PassQueue = PassQueue.EarlyGraphics;
-            earlyZPass.Add(DrawClustering);
+            //earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawEarlyZ);
+            //earlyZPass.PassQueue = PassQueue.EarlyGraphics;
+            //earlyZPass.Add(DrawClustering);
             lightPass = PreappendComputePass(ComputeLight);
         }
 
@@ -105,7 +105,7 @@ namespace SharpGame
 
             CreateResources();
 
-            InitEarlyZ();
+            //InitEarlyZ();
             InitLightCompute();
         }
 
@@ -240,5 +240,83 @@ namespace SharpGame
 #endif
         }
 
+        public override void Submit(CommandBuffer cmd_buf, int imageIndex)
+        {
+            base.Submit(cmd_buf, imageIndex);
+
+            // clean up buffers
+            unsafe
+            {
+                BufferMemoryBarrier* transfer_barriers = stackalloc BufferMemoryBarrier[]
+                {
+                    new BufferMemoryBarrier(grid_flags, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
+                    new BufferMemoryBarrier(grid_light_counts, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
+                    new BufferMemoryBarrier(grid_light_count_offsets, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
+                    new BufferMemoryBarrier(light_list, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite)
+                };
+
+                //cmd_buf.writeTimestamp(vk::PipelineStageFlagBits::eTopOfPipe, data.query_pool, QUERY_TRANSFER * 2);
+
+                cmd_buf.PipelineBarrier(PipelineStageFlags.FragmentShader,
+                            PipelineStageFlags.Transfer,
+                            DependencyFlags.ByRegion,
+                            0, null,
+                            4,
+                            transfer_barriers,
+                            0, null);
+                
+                cmd_buf.FillBuffer(grid_flags,
+                           0, Vulkan.VulkanNative.WholeSize,
+                           0);
+                cmd_buf.FillBuffer(light_bounds,
+                           0, Vulkan.VulkanNative.WholeSize,
+                           0);
+                cmd_buf.FillBuffer(grid_light_counts,
+                           0, Vulkan.VulkanNative.WholeSize,
+                           0);
+                cmd_buf.FillBuffer(grid_light_count_offsets,
+                           0, Vulkan.VulkanNative.WholeSize,
+                           0);
+                cmd_buf.FillBuffer(grid_light_count_total,
+                           0, Vulkan.VulkanNative.WholeSize,
+                           0);
+                cmd_buf.FillBuffer(light_list,
+                           0, Vulkan.VulkanNative.WholeSize,
+                           0);
+                cmd_buf.FillBuffer(grid_light_counts_compare,
+                           0, Vulkan.VulkanNative.WholeSize,
+                           0);
+
+                BufferMemoryBarrier* transfer_barriers1 = stackalloc BufferMemoryBarrier[]
+                {
+                    new BufferMemoryBarrier(grid_flags, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
+                    new BufferMemoryBarrier(grid_light_counts, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
+                    new BufferMemoryBarrier(grid_light_count_offsets, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
+                    new BufferMemoryBarrier(light_list, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite)
+                };
+                /*
+                                transfer_barriers.clear();
+                                transfer_barriers.resize(4,
+                                             vk::BufferMemoryBarrier(vk::AccessFlagBits::eTransferWrite,
+                                                         vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite,
+                                                         VK_QUEUE_FAMILY_IGNORED,
+                                                         VK_QUEUE_FAMILY_IGNORED,
+                                                         p_grid_flags_->p_buf->buf,
+                                                         0, VK_WHOLE_SIZE));
+                                transfer_barriers[1].buffer = p_grid_light_counts_->p_buf->buf;
+                                transfer_barriers[2].buffer = p_grid_light_count_offsets_->p_buf->buf;
+                                transfer_barriers[3].buffer = p_light_list_->p_buf->buf;
+                                */
+                cmd_buf.PipelineBarrier(PipelineStageFlags.Transfer,
+                                            PipelineStageFlags.FragmentShader,
+                                            DependencyFlags.ByRegion,
+                                            0, null,
+                                            4,
+                                            transfer_barriers1,
+                                            0, null);
+                                            
+                //cmd_buf.writeTimestamp(vk::PipelineStageFlagBits::eTransfer, data.query_pool, QUERY_TRANSFER * 2 + 1);
+            }
+        }
     }
 }
