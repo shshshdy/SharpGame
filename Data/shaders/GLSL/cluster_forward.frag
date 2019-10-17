@@ -106,11 +106,11 @@ void main()
 	uint offset = imageLoad(grid_light_count_offsets, grid_idx).r;
 	uint light_count = imageLoad(grid_light_counts, grid_idx).r;
 
-	//frag_color = vec4(offset, light_count, 1, 1); return;
+	//frag_color = vec4(offset, /*light_count*/0, 1, 1); return;
 
-	for (uint i = 0; i < 100/*light_count*/; i ++)
+	for (uint i = 0; i < light_count; i ++)
     {
-	    int light_idx =int(i);// int(imageLoad(light_list, int(offset + i)).r);
+	    int light_idx =/*int(i);//*/ int(imageLoad(light_list, int(offset + i)).r);
 	    vec4 light_pos_range = imageLoad(light_pos_ranges, light_idx);
 	    float dist = distance(light_pos_range.xyz, world_pos_in.xyz);
 	    if (dist < light_pos_range.w) {

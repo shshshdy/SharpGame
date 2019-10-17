@@ -26,12 +26,12 @@ void main()
 	vp_max.yz = vp.yz - pos_range_in.w;
 
 	// restrict view_z
-	if ((vp_max.z >= -CAM_NEAR) || (vp_min.z <= -ubo_in.cam_far)) {
+	if ((vp_max.z < CAM_NEAR) || (vp_min.z > ubo_in.cam_far)) {
 	    mark_skip_light(light_idx, pos_range_in.xyz);
 	    return;
 	}
-	vp_min.z = min(-CAM_NEAR, vp_min.z);
-	vp_max.z = max(-ubo_in.cam_far, vp_max.z);
+	vp_min.z = min(CAM_NEAR, vp_min.z);
+	vp_max.z = max(ubo_in.cam_far, vp_max.z);
 
 	// frag pos
 	vec2 fp_a = view_pos_to_frag_pos(vec3(vp_min.xy, vp_min.z));
@@ -72,9 +72,9 @@ void main()
 	    for (uint j = bound_min.y; j <= bound_max.y; j++) {
 		for (uint k = bound_min.z; k <= bound_max.z; k++) {
 		    int grid_idx = grid_coord_to_grid_idx(i,j,k);
-		    if (imageLoad(grid_flags, grid_idx).r == 1) {
+		    //if (imageLoad(grid_flags, grid_idx).r == 1) {
 			imageAtomicAdd(grid_light_counts, grid_idx, 1);
-		    }
+		    //}
 		}
 	    }
 	} // grid loop

@@ -1,4 +1,4 @@
-﻿//#define CLUSTER_FORWARD
+﻿#define CLUSTER_FORWARD
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -94,6 +94,7 @@ namespace SharpGame
         protected override void OnSetFrameGraph(FrameGraph frameGraph)
         {
             earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawEarlyZ);
+            earlyZPass.PassQueue = PassQueue.EarlyGraphics;
             earlyZPass.Add(DrawClustering);
             lightPass = PreappendComputePass(ComputeLight);
         }
