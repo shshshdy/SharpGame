@@ -42,7 +42,7 @@ Shader "LitSolid"
 		CullMode = Back
 
 		FrontFace = CounterClockwise
-		DepthWrite = false
+		//DepthWrite = false
 
 		@VertexShader
 		{
