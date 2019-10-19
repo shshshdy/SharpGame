@@ -72,9 +72,9 @@ void main()
 	    for (uint j = bound_min.y; j <= bound_max.y; j++) {
 		for (uint k = bound_min.z; k <= bound_max.z; k++) {
 		    int grid_idx = grid_coord_to_grid_idx(i,j,k);
-		    //if (imageLoad(grid_flags, grid_idx).r == 1) {
+		    if (imageLoad(grid_flags, grid_idx).r == 1) {
 			imageAtomicAdd(grid_light_counts, grid_idx, 1);
-		    //}
+		    }
 		}
 	    }
 	} // grid loop

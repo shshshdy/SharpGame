@@ -24,11 +24,11 @@ void main()
 	    for (uint j = j_min; j <= j_max; j++){
 		for (uint k = k_min; k <= k_max; k++){
 		    int grid_idx = grid_coord_to_grid_idx(i,j,k);
-		    //if (imageLoad(grid_flags, grid_idx).r == 1) {
+		    if (imageLoad(grid_flags, grid_idx).r == 1) {
 			uint offset = imageLoad(grid_light_count_offsets, grid_idx).r;
 			uint grid_light_idx = imageAtomicAdd(grid_light_counts_compare, grid_idx, 1);
 			imageStore(light_list, int( offset + grid_light_idx), uvec4(light_idx, 0, 0, 0));
-		    //}
+		    }
 		}
 	    }
 	} // grid loop
