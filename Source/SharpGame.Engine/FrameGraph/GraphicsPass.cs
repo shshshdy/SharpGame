@@ -150,6 +150,7 @@ namespace SharpGame
             };
 
             renderPassInfo[Graphics.WorkImage].Add(rpInfo);
+            Subpass = 0;
         }
 
         public ref RenderPassInfo CurrentRenderPass => ref renderPassInfo[Graphics.WorkImage].Back();
@@ -273,7 +274,7 @@ namespace SharpGame
         {
             var shader = material.Shader;
             var pass = shader.GetPass(passID);
-            var pipe = pass.GetGraphicsPipeline(RenderPass, null);
+            var pipe = pass.GetGraphicsPipeline(RenderPass, Subpass, null);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
 
@@ -292,7 +293,7 @@ namespace SharpGame
             }
             
             var pass = shader.GetPass(passID);
-            var pipe = pass.GetGraphicsPipeline(RenderPass, batch.geometry);
+            var pipe = pass.GetGraphicsPipeline(RenderPass, Subpass, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
@@ -398,7 +399,7 @@ namespace SharpGame
 
                 if (i != commandList.Count - 1)
                 {
-                    cb.NextSubpass(SubpassContents.SecondaryCommandBuffers);
+                   cb.NextSubpass(SubpassContents.SecondaryCommandBuffers);
                 }
                 i++;
             }

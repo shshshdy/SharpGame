@@ -11,6 +11,7 @@ namespace SharpGame
     
     public class Buffer : RefCounted, IBindableResource
     {
+        public const ulong WholeSize = ulong.MaxValue;
         public ulong Stride { get; set; }
         public ulong Count { get; set; }
         public ulong Size { get; set; }

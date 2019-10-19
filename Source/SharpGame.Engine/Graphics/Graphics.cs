@@ -98,7 +98,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            //settings.Validation = true;
+            settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -571,7 +571,7 @@ namespace SharpGame
         public uint NextImage { get => nextImage; set => nextImage = value; }
 
         private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
-        private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);
+        private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(1, 1);
 
         List<System.Action> actions = new List<Action>();
 

@@ -75,11 +75,11 @@ namespace SharpGame
         {
             debugShader = Resources.Instance.Load<Shader>("shaders/Debug.shader");
 
-            pipelineDepthLines = debugShader.Pass[0].CreateGraphicsPipeline(Graphics.Instance.RenderPass, VertexPosColor.Layout, PrimitiveTopology.LineList);
-            pipelineNoDepthLines = debugShader.Pass[1].CreateGraphicsPipeline(Graphics.Instance.RenderPass, VertexPosColor.Layout, PrimitiveTopology.LineList);
+            pipelineDepthLines = debugShader.Pass[0].CreateGraphicsPipeline(Graphics.Instance.RenderPass, 0, VertexPosColor.Layout, PrimitiveTopology.LineList);
+            pipelineNoDepthLines = debugShader.Pass[1].CreateGraphicsPipeline(Graphics.Instance.RenderPass, 0, VertexPosColor.Layout, PrimitiveTopology.LineList);
 
-            pipelineDepth = debugShader.Pass[0].CreateGraphicsPipeline(Graphics.Instance.RenderPass, VertexPosColor.Layout, PrimitiveTopology.TriangleList);
-            pipelineNoDepth = debugShader.Pass[1].CreateGraphicsPipeline(Graphics.Instance.RenderPass, VertexPosColor.Layout, PrimitiveTopology.TriangleList);
+            pipelineDepth = debugShader.Pass[0].CreateGraphicsPipeline(Graphics.Instance.RenderPass, 0, VertexPosColor.Layout, PrimitiveTopology.TriangleList);
+            pipelineNoDepth = debugShader.Pass[1].CreateGraphicsPipeline(Graphics.Instance.RenderPass, 0, VertexPosColor.Layout, PrimitiveTopology.TriangleList);
 
             this.Subscribe<EndFrame>(HandleEndFrame);
         }

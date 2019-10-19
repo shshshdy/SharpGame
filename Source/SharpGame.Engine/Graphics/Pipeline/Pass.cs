@@ -410,7 +410,7 @@ namespace SharpGame
             return default;
         }
 
-        public Pipeline GetGraphicsPipeline(RenderPass renderPass, Geometry geometry)
+        public Pipeline GetGraphicsPipeline(RenderPass renderPass, uint subPass, Geometry geometry)
         {
             var vertexInput = geometry != null ? geometry.VertexLayout : VertexLayout;
             var primitiveTopology = (geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
@@ -420,14 +420,15 @@ namespace SharpGame
                 return pipe;
             }
 
-            return CreateGraphicsPipeline(renderPass, vertexInput, primitiveTopology);            
+            return CreateGraphicsPipeline(renderPass, subPass, vertexInput, primitiveTopology);            
         }
 
-        public unsafe Pipeline CreateGraphicsPipeline(RenderPass renderPass, VertexLayout vertexInput, PrimitiveTopology primitiveTopology)
+        public unsafe Pipeline CreateGraphicsPipeline(RenderPass renderPass, uint subPass, VertexLayout vertexInput, PrimitiveTopology primitiveTopology)
         {
             VkGraphicsPipelineCreateInfo pipelineCreateInfo = VkGraphicsPipelineCreateInfo.New();
             pipelineCreateInfo.layout = PipelineLayout.handle;
             pipelineCreateInfo.renderPass = renderPass.handle;
+            pipelineCreateInfo.subpass = subPass;
             pipelineCreateInfo.flags = 0;
             pipelineCreateInfo.basePipelineIndex = -1;
             pipelineCreateInfo.basePipelineHandle = new VkPipeline();

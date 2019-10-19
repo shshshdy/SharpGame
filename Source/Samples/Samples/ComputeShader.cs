@@ -146,7 +146,7 @@ namespace SharpGame.Samples
             var cb = renderPass.CmdBuffer;
             var shader = material.Shader;
 
-            cb.DrawGeometry(geometry, shader.Main, material);
+            cb.DrawGeometry(geometry, shader.Main, 0, material);
         }
 
         private void Docompute(ComputePass renderPass, RenderView view)

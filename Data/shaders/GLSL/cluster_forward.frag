@@ -101,7 +101,7 @@ void main()
 	//frag_color = vec4(light_color, 1); return;
 
     vec3 lighting = vec3(0.f);
-    //if (imageLoad(grid_flags, grid_idx).r == 1)
+    if (imageLoad(grid_flags, grid_idx).r == 1)
     {
 	uint offset = imageLoad(grid_light_count_offsets, grid_idx).r;
 	uint light_count = imageLoad(grid_light_counts, grid_idx).r;

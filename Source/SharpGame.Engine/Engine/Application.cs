@@ -1,11 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-using Vulkan;
-using static Vulkan.VulkanNative;
-using System.Numerics;
 using System.IO;
 using SharpGame.Sdl2;
 using System.Collections.Generic;
@@ -217,7 +211,7 @@ namespace SharpGame
             Start();
             started = true;
 
-            graphics.WakeRender();           
+            //graphics.WakeRender();           
 
             while (!shouldQuit)
             {

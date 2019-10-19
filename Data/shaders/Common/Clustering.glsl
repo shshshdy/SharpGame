@@ -5,8 +5,6 @@
 layout(set = 0, binding = 0) uniform UBO
 {
     mat4 view;
-    //mat4 normal;
-    //mat4 model;
     mat4 projection_clip;
 
     vec2 tile_size; // xy

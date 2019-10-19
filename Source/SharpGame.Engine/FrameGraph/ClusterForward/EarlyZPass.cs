@@ -15,7 +15,7 @@ namespace SharpGame
         RenderPass rpEarlyZ;
         Framebuffer fbEarlyZ;
 
-        Format depthFormat = Format.D16Unorm;
+        Format depthFormat = Device.GetSupportedDepthFormat();// Format.D16Unorm;
 
         
         ResourceLayout clusteringLayout1;
@@ -37,14 +37,14 @@ namespace SharpGame
             };
 
             SubpassDescription[] subpassDescription =
-            {
+            {/*
 		        // depth prepass
                 new SubpassDescription
                 {
                     pipelineBindPoint = PipelineBindPoint.Graphics,
                     pDepthStencilAttachment = depthStencilAttachment
                 },
-                
+                */
 		        // clustering subpass
                 new SubpassDescription
                 {
@@ -66,7 +66,7 @@ namespace SharpGame
                     dstAccessMask = AccessFlags.UniformRead,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
-                
+                /*
                 new SubpassDependency
                 {
                     srcSubpass = SUBPASS_DEPTH,
@@ -76,11 +76,11 @@ namespace SharpGame
                     srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,
                     dstAccessMask = AccessFlags.DepthStencilAttachmentRead,
                     dependencyFlags = DependencyFlags.ByRegion
-                },
+                },*/
 
                 new SubpassDependency
                 {
-                    srcSubpass = SUBPASS_CLUSTER_FLAG,
+                    srcSubpass = 0,// SUBPASS_CLUSTER_FLAG,
                     dstSubpass = VulkanNative.SubpassExternal,
                     srcStageMask = PipelineStageFlags.FragmentShader,
                     dstStageMask = PipelineStageFlags.ComputeShader,
@@ -111,12 +111,22 @@ namespace SharpGame
             clusteringSet1[1] = new ResourceSet(clusteringLayout1, uboCluster[1], grid_flags);
         }
 
-        void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
+        unsafe void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
         {
             var cmd = renderPass.CmdBuffer;
             var batches = view.batches[0];
-
             var pass_id = Pass.GetID(Pass.EarlyZ);
+            /*
+            BufferMemoryBarrier* barriers = stackalloc BufferMemoryBarrier[2];
+            barriers[0] =new BufferMemoryBarrier(
+                uboCluster[Graphics.Instance.WorkContext],
+                AccessFlags.HostWrite,
+		        AccessFlags.ShaderRead);
+
+            cmd.PipelineBarrier(PipelineStageFlags.Host,
+                        PipelineStageFlags.VertexShader,
+                        DependencyFlags.ByRegion,
+                        0, null, 1, barriers, 0, null);*/
 
             foreach (var batch in batches)
             {

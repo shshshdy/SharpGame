@@ -23,7 +23,7 @@ layout(set = 2, binding = 0) uniform sampler2D DiffMap;
 #endif
 
 
-layout(early_fragment_tests) in;
+//layout(early_fragment_tests) in;
 layout(location = 0) in vec4 world_pos_in;
 
 #ifdef ALPHA_TEST
@@ -47,14 +47,14 @@ uint grid_coord_to_grid_idx(uvec3 c)
 }
 
 void main ()
-{
+{/*
 #ifdef ALPHA_TEST
     float alpha = texture(DiffMap, inUV).a;
     if (alpha < 0.5) {
         discard;
     }
 #endif
-
+*/
     vec4 view_pos = ubo_in.view * world_pos_in;
     uint grid_idx = grid_coord_to_grid_idx(view_pos_to_grid_coord(gl_FragCoord.xy, view_pos.z));
     imageStore(grid_flags, int(grid_idx), uvec4(1, 0, 0, 0));

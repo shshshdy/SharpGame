@@ -134,7 +134,7 @@ namespace SharpGame
 
             renderPass = graphics.CreateRenderPass();
             framebuffers = graphics.CreateSwapChainFramebuffers(renderPass);
-            pipeline = pass.CreateGraphicsPipeline(renderPass, VertexPos2dTexColor.Layout, PrimitiveTopology.TriangleList);
+            pipeline = pass.CreateGraphicsPipeline(renderPass, 0, VertexPos2dTexColor.Layout, PrimitiveTopology.TriangleList);
         }
 
         private unsafe void RecreateFontDeviceTexture()

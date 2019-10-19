@@ -27,10 +27,9 @@ namespace SharpGame
         }
 
         protected ulong passID = 1;
-
         public PassQueue PassQueue { get; set; }
-
         public RenderPass RenderPass { get; set; }
+        public uint Subpass { get; set; }
 
         [IgnoreDataMember]
         public FrameGraph FrameGraph
