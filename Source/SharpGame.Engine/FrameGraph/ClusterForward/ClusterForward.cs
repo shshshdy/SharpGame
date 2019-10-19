@@ -1,5 +1,4 @@
-﻿#define CLUSTER_FORWARD
-#define EARLY_Z
+﻿
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -20,7 +19,7 @@ namespace SharpGame
         public uint num_lights;
     };
 
-    public partial class ClusterLighting : ScenePass
+    public partial class ClusterForward : ScenePass
     {
         uint MAX_WIDTH = 1920;
         uint MAX_HEIGHT = 1080;
@@ -85,22 +84,16 @@ namespace SharpGame
         GraphicsPass earlyZPass;
         ComputePass lightPass;
 
-        public ClusterLighting() :
-#if CLUSTER_FORWARD
+        public ClusterForward() :
             base("cluster_forward")
-#else
-            base("main")
-#endif
         {
         }
 
         protected override void OnSetFrameGraph(FrameGraph frameGraph)
         {
-#if EARLY_Z
-            earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawClustering/*DrawEarlyZ*/);
+            earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawClustering);
             earlyZPass.PassQueue = PassQueue.EarlyGraphics;
-            //earlyZPass.Add(DrawClustering);
-#endif
+
             lightPass = PreappendComputePass(ComputeLight);
         }
 
@@ -110,9 +103,8 @@ namespace SharpGame
 
             CreateResources();
 
-#if EARLY_Z
             InitEarlyZ();
-#endif
+
             InitLightCompute();
         }
 
@@ -231,7 +223,6 @@ namespace SharpGame
 
         protected override void DrawImpl(RenderView view)
         {
-#if CLUSTER_FORWARD
             BeginRenderPass(view);
 
             var batches = view.opaqueBatches;
@@ -246,9 +237,6 @@ namespace SharpGame
             }
 
             EndRenderPass(view);
-#else
-            base.DrawImpl(view);
-#endif
         }
 
         public override void Submit(CommandBuffer cmd_buf, int imageIndex)

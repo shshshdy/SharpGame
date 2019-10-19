@@ -5,7 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public partial class ClusterLighting : ScenePass
+    public partial class ClusterForward : ScenePass
     {
         const uint ATTACHMENT_REFERENCE_DEPTH = 0;
         const uint SUBPASS_DEPTH = 0;
@@ -116,17 +116,6 @@ namespace SharpGame
             var cmd = renderPass.CmdBuffer;
             var batches = view.batches[0];
             var pass_id = Pass.GetID(Pass.EarlyZ);
-            /*
-            BufferMemoryBarrier* barriers = stackalloc BufferMemoryBarrier[2];
-            barriers[0] =new BufferMemoryBarrier(
-                uboCluster[Graphics.Instance.WorkContext],
-                AccessFlags.HostWrite,
-		        AccessFlags.ShaderRead);
-
-            cmd.PipelineBarrier(PipelineStageFlags.Host,
-                        PipelineStageFlags.VertexShader,
-                        DependencyFlags.ByRegion,
-                        0, null, 1, barriers, 0, null);*/
 
             foreach (var batch in batches)
             {
