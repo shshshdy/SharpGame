@@ -4,7 +4,7 @@ using System;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 2)]
+    [SampleDesc(sortOrder = -2)]
     public class Lighting : Sample
     {
         FrameGraph frameGraph;
@@ -39,7 +39,7 @@ namespace SharpGame.Samples
             {
                 new ShadowPass(),
                 //new ScenePass()
-                new ClusterLighting()
+                new ClusterForward()
             };
 
             Renderer.MainView.Attach(camera, scene, frameGraph);
@@ -90,6 +90,41 @@ namespace SharpGame.Samples
                 light.Color = (Color4)fcol;
             }
 
+        }
+    }
+
+    public class Spherical : Component
+    {
+        vec3 el;
+        Spherical(){}
+
+        void set_from_vec(vec3 v)
+        {
+            el.x = glm.length(v); // r
+            if (v.x == 0.0f)
+            {
+                el.y = 0.0f;
+                el.z = 0.0f;
+            }
+            else
+            {
+                el.y = glm.acos(glm.clamp(-v.y / el.x, -1.0f, 1.0f)); // phi
+                el.z = MathF.Atan2(-v.z, v.x); // theta
+            }
+        }
+
+        void restrict()
+        {
+            // restrict phi to the range of EPS ~ PI - EPS
+            el.y = glm.max(glm.epsilon, glm.min(glm.pi - glm.epsilon, el.y));
+        }
+
+        vec3 get_vec()
+        {
+            float x = el.x * glm.sin(el.y) * glm.cos(el.z);
+            float y = -el.x * glm.cos(el.y);
+            float z = -el.x * glm.sin(el.y) * glm.sin(el.z);
+            return glm.vec3(x, y, z);
         }
     }
 }

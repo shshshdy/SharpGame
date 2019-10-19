@@ -1,4 +1,5 @@
-﻿
+﻿#define NO_DEPTHWRITE
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -44,15 +45,16 @@ namespace SharpGame
         const uint QUERY_ONSCREEN = 5;
         const uint QUERY_TRANSFER = 6;
         const uint QUERY_HSIZE = 7;
+
         unsafe struct Query_data
         {
-            fixed uint depth_pass[2];
-            fixed uint clustering[2];
-            fixed uint calc_light_grids[2];
-            fixed uint calc_grid_offsets[2];
-            fixed uint calc_light_list[2];
-            fixed uint onscreen[2];
-            fixed uint transfer[2];
+            public fixed uint depth_pass[2];
+            public fixed uint clustering[2];
+            public fixed uint calc_light_grids[2];
+            public fixed uint calc_grid_offsets[2];
+            public fixed uint calc_light_list[2];
+            public fixed uint onscreen[2];
+            public fixed uint transfer[2];
         }
 
         uint query_count_;
@@ -84,8 +86,7 @@ namespace SharpGame
         GraphicsPass earlyZPass;
         ComputePass lightPass;
 
-        public ClusterForward() :
-            base("cluster_forward")
+        public ClusterForward() : base("cluster_forward")
         {
         }
 
@@ -101,6 +102,9 @@ namespace SharpGame
         {
             base.Init();
 
+#if NO_DEPTHWRITE
+            RenderPass = Graphics.CreateRenderPass(true, false);
+#endif
             CreateResources();
 
             InitEarlyZ();
@@ -225,6 +229,8 @@ namespace SharpGame
         {
             BeginRenderPass(view);
 
+            //BeginRenderPass(Framebuffers[Graphics.WorkImage], view.ViewRect, ClearColorValue);
+
             var batches = view.opaqueBatches;
 
             if (MultiThreaded)
@@ -241,6 +247,8 @@ namespace SharpGame
 
         public override void Submit(CommandBuffer cmd_buf, int imageIndex)
         {
+            cmd_buf.ResetQueryPool(QueryPool, 12, 2);
+
             base.Submit(cmd_buf, imageIndex);
 
             // clean up buffers
@@ -254,7 +262,7 @@ namespace SharpGame
                     new BufferMemoryBarrier(light_list, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite)
                 };
 
-                //cmd_buf.writeTimestamp(vk::PipelineStageFlagBits::eTopOfPipe, data.query_pool, QUERY_TRANSFER * 2);
+                cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_TRANSFER * 2);
 
                 cmd_buf.PipelineBarrier(PipelineStageFlags.FragmentShader,
                             PipelineStageFlags.Transfer,
@@ -288,7 +296,7 @@ namespace SharpGame
                                             transfer_barriers1,
                                             0, null);
                                             
-                //cmd_buf.writeTimestamp(vk::PipelineStageFlagBits::eTransfer, data.query_pool, QUERY_TRANSFER * 2 + 1);
+                cmd_buf.WriteTimestamp(PipelineStageFlags.Transfer, QueryPool, QUERY_TRANSFER * 2 + 1);
             }
         }
     }

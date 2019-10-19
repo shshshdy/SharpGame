@@ -208,8 +208,16 @@ namespace SharpGame
         {
             AttachmentDescription[] attachments =
             {
-                new AttachmentDescription(Swapchain.ColorFormat/*Format.R16g16b16a16Sfloat*/, finalLayout : ImageLayout.PresentSrcKHR),
-                new AttachmentDescription(DepthFormat, finalLayout : ImageLayout.DepthStencilAttachmentOptimal)
+                new AttachmentDescription
+                (
+                    ColorFormat, 
+                    finalLayout : ImageLayout.PresentSrcKHR
+                ),
+                new AttachmentDescription
+                (
+                    DepthFormat,
+                    finalLayout : ImageLayout.DepthStencilAttachmentOptimal
+                )
             };
 
             SubpassDescription[] subpassDescription =

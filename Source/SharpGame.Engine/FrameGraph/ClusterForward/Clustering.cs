@@ -37,14 +37,7 @@ namespace SharpGame
             };
 
             SubpassDescription[] subpassDescription =
-            {/*
-		        // depth prepass
-                new SubpassDescription
-                {
-                    pipelineBindPoint = PipelineBindPoint.Graphics,
-                    pDepthStencilAttachment = depthStencilAttachment
-                },
-                */
+            {
 		        // clustering subpass
                 new SubpassDescription
                 {
@@ -66,21 +59,10 @@ namespace SharpGame
                     dstAccessMask = AccessFlags.UniformRead,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
-                /*
-                new SubpassDependency
-                {
-                    srcSubpass = SUBPASS_DEPTH,
-                    dstSubpass = SUBPASS_CLUSTER_FLAG,
-                    srcStageMask = PipelineStageFlags.LateFragmentTests,
-                    dstStageMask = PipelineStageFlags.EarlyFragmentTests,
-                    srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,
-                    dstAccessMask = AccessFlags.DepthStencilAttachmentRead,
-                    dependencyFlags = DependencyFlags.ByRegion
-                },*/
 
                 new SubpassDependency
                 {
-                    srcSubpass = 0,// SUBPASS_CLUSTER_FLAG,
+                    srcSubpass = 0,
                     dstSubpass = VulkanNative.SubpassExternal,
                     srcStageMask = PipelineStageFlags.FragmentShader,
                     dstStageMask = PipelineStageFlags.ComputeShader,
@@ -93,7 +75,7 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
 
             rpEarlyZ = new RenderPass(ref renderPassInfo);
-            rtDepth = new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
+            rtDepth = Graphics.RTDepth;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
             fbEarlyZ = Framebuffer.Create(rpEarlyZ, width, height, 1, new[] { rtDepth.view });
 
             earlyZPass.RenderPass = rpEarlyZ;
@@ -117,6 +99,8 @@ namespace SharpGame
             var batches = view.batches[0];
             var pass_id = Pass.GetID(Pass.EarlyZ);
 
+            cmd.ResetQueryPool(QueryPool, 0, 2);
+
             foreach (var batch in batches)
             {
                 renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, null/*clusteringSet1[Graphics.WorkContext]*/);
@@ -128,6 +112,8 @@ namespace SharpGame
         {
             var cmd = renderPass.CmdBuffer;
             var batches = view.batches[0];
+
+            cmd.ResetQueryPool(QueryPool, 2, 2);
 
             var pass_id = Pass.GetID("clustering");
             foreach (var batch in batches)
