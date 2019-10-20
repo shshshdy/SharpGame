@@ -115,11 +115,15 @@ namespace SharpGame
 
             cmd.ResetQueryPool(QueryPool, 2, 2);
 
+            cmd.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CLUSTERING * 2);
+
             var pass_id = Pass.GetID("clustering");
             foreach (var batch in batches)
             {
                 renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusteringSet1[Graphics.WorkContext]);
             }
+
+            cmd.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CLUSTERING * 2 + 1);
 
         }
     }

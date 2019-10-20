@@ -147,7 +147,6 @@ namespace SharpGame.Samples
 
                 ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
                 ImGui.Checkbox("Show Stats", ref showStats);
-                ImGui.Checkbox("Simple Render", ref Renderer.simpleRender);
                 ImGui.Checkbox("DebugRenderer", ref Renderer.drawDebug);
                 ImGui.Checkbox("Debug Scene", ref Renderer.debugOctree);
                 ImGui.Checkbox("Show DebugImage", ref Renderer.debugImage);

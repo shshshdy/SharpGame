@@ -6,7 +6,7 @@ using Vulkan;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 9)]
+    [SampleDesc(sortOrder = 1)]
     public class PbrLighting : Sample
     {
         const int kEnvMapSize = 1024;

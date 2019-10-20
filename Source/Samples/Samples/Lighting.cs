@@ -1,13 +1,19 @@
 ﻿
+using ImGuiNET;
 using SharpGame;
 using System;
+using System.Collections.Generic;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -2)]
+    [SampleDesc(sortOrder = 0)]
     public class Lighting : Sample
     {
         FrameGraph frameGraph;
+        List<Light> lights = new List<Light>();
+        FastList<Spherical> sphericals = new FastList<Spherical>();
+        ClusterForward clusterRenderer;
+
         public override void Init()
         {
             base.Init();
@@ -33,16 +39,54 @@ namespace SharpGame.Samples
             staticModel.SetModel("models/sibenik/sibenik_bubble.fbx");// "models/voyager/voyager.dae");
 
             BoundingBox aabb = staticModel.WorldBoundingBox;
-            SetupLights(scene, aabb, 100);
+            SetupLights(scene, aabb, 1024);
 
+            scene.GetComponents(lights, true);
+          
+            clusterRenderer = new ClusterForward();
             frameGraph = new FrameGraph
             {
                 new ShadowPass(),
-                //new ScenePass()
-                new ClusterForward()
+                clusterRenderer
             };
 
             Renderer.MainView.Attach(camera, scene, frameGraph);
+        }
+
+        vec3 center = vec3.Zero;
+        public override void Update()
+        {
+            base.Update();
+
+            Spherical s = new Spherical();
+            foreach (var l in lights)
+            {
+                s.set_from_vec(l.Node.Position - center);
+                s.el.z += 0.001f;
+                s.restrict();
+                var v = s.get_vec();
+                l.Node.Position = center + v;
+            }
+        }
+
+        public override void OnGUI()
+        {
+            base.OnGUI();
+
+            if (ImGui.Begin("HUD"))
+            {
+                ref var queryData = ref clusterRenderer.QueryData;
+
+                ImGui.Text("query data (in ms)");
+                ImGui.Text("subpass clustering :" + queryData.Clustering / 1000000.0f);
+                ImGui.Text("calc light grids :" + queryData.CalcLightGrids / 1000000.0f);
+                ImGui.Text("calc grid offsets :" + queryData.CalcGridOffsets / 1000000.0f);
+                ImGui.Text("calc light list :" + queryData.CalcLightList / 1000000.0f);
+                ImGui.Text("subpass scene :" + queryData.SceneRender / 1000000.0f);
+                ImGui.Text("clear :" + queryData.ClearBuffer / 1000000.0f);
+
+
+            }
         }
 
         public static void SetupLights(Scene scene, BoundingBox aabb, int num_lights)
@@ -93,12 +137,11 @@ namespace SharpGame.Samples
         }
     }
 
-    public class Spherical : Component
+    public struct Spherical
     {
-        vec3 el;
-        Spherical(){}
+        public vec3 el;
 
-        void set_from_vec(vec3 v)
+        public void set_from_vec(vec3 v)
         {
             el.x = glm.length(v); // r
             if (v.x == 0.0f)
@@ -109,17 +152,17 @@ namespace SharpGame.Samples
             else
             {
                 el.y = glm.acos(glm.clamp(-v.y / el.x, -1.0f, 1.0f)); // phi
-                el.z = MathF.Atan2(-v.z, v.x); // theta
+                el.z = glm.atan(-v.z, v.x); // theta
             }
         }
 
-        void restrict()
+        public void restrict()
         {
             // restrict phi to the range of EPS ~ PI - EPS
             el.y = glm.max(glm.epsilon, glm.min(glm.pi - glm.epsilon, el.y));
         }
 
-        vec3 get_vec()
+        public vec3 get_vec()
         {
             float x = el.x * glm.sin(el.y) * glm.cos(el.z);
             float y = -el.x * glm.cos(el.y);

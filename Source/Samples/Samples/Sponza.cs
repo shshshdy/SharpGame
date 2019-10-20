@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 4)]
+    [SampleDesc(sortOrder = 2)]
     public class Sponza : Sample
     {
         public override void Init()

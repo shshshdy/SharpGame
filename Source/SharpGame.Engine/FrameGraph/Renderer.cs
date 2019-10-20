@@ -14,7 +14,6 @@ namespace SharpGame
         private List<RenderView> views = new List<RenderView>();
         public Graphics Graphics => Graphics.Instance;
 
-        public static bool simpleRender = false;
         public static bool drawDebug;
         public static bool debugDepthTest;
         public static bool debugOctree;
@@ -42,6 +41,10 @@ namespace SharpGame
         CmdBufferBlock[] preRenderCmdBlk = new CmdBufferBlock[3];
         CmdBufferBlock[] computeCmdBlk = new CmdBufferBlock[3];
         CmdBufferBlock[] renderCmdBlk = new CmdBufferBlock[3];
+
+        public event Action<int> OnBeginSubmit;
+        public event Action<int, PassQueue> OnSubmit;
+        public event Action<int> OnEndSubmit;
 
         public Renderer()
         {
@@ -151,32 +154,8 @@ namespace SharpGame
 
             int imageIndex = (int)Graphics.RenderImage;
 
-#if SIMPLE_RENDER
+            OnBeginSubmit?.Invoke(imageIndex);
 
-            //Log.Info("Summit frame " + Graphics.CurrentFrame);
-            /*
-            CommandBuffer cmdBuffer = Graphics.RenderCmdBuffer;
-
-            cmdBuffer.Begin();
-
-            foreach (var viewport in views)
-            {
-                viewport.Submit(cmdBuffer, PassQueue.All, imageIndex);
-            }
-
-            cmdBuffer.End();
-
-            Graphics.Submit();*/
-
-#else
-           
-            if(simpleRender)
-            {
-                SimpleSubmit();
-                Graphics.EndRender();
-                Profiler.EndSample();
-                return;
-            }
 
             var currentBuffer = Graphics.currentBuffer;
 
@@ -198,6 +177,8 @@ namespace SharpGame
 
                 Graphics.GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.FragmentShader,
                     cmdBuffer, currentBuffer.preRenderSemaphore, fence);
+
+                OnSubmit?.Invoke(imageIndex, PassQueue.EarlyGraphics);
             }
 
             {
@@ -223,6 +204,8 @@ namespace SharpGame
                     Graphics.ComputeQueue.Submit(currentBuffer.preRenderSemaphore, PipelineStageFlags.ComputeShader,
                     null, currentBuffer.computeSemaphore, fence);
                 }
+
+                OnSubmit?.Invoke(imageIndex, PassQueue.Compute);
             }
 
             {
@@ -243,8 +226,12 @@ namespace SharpGame
 
                 Graphics.GraphicsQueue.Submit(currentBuffer.computeSemaphore, PipelineStageFlags.ColorAttachmentOutput,
                     cmdBuffer, currentBuffer.renderSemaphore, fence);
+
+                OnSubmit?.Invoke(imageIndex, PassQueue.Graphics);
             }
-#endif
+
+            OnEndSubmit?.Invoke(imageIndex);
+
             Graphics.EndRender();
 
             Profiler.EndSample();

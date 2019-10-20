@@ -4,9 +4,9 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class ClusterDeferred : ScenePass
+    public class HybridRenderer : ScenePass
     {
-        public ClusterDeferred() : base("gbuffer")
+        public HybridRenderer() : base("gbuffer")
         {
         }
     }

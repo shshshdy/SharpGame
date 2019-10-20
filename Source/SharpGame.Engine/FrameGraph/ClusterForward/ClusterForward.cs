@@ -20,6 +20,24 @@ namespace SharpGame
         public uint num_lights;
     };
 
+    public struct QueryData
+    {
+        public FixedArray2<uint> depth_pass;
+        public FixedArray2<uint> clustering;
+        public FixedArray2<uint> calc_light_grids;
+        public FixedArray2<uint> calc_grid_offsets;
+        public FixedArray2<uint> calc_light_list;
+        public FixedArray2<uint> onscreen;
+        public FixedArray2<uint> transfer;
+
+        public uint Clustering => clustering[1] - clustering[0];
+        public uint CalcLightGrids => calc_light_grids[1] - calc_light_grids[0];
+        public uint CalcGridOffsets => calc_grid_offsets[1] - calc_grid_offsets[0];
+        public uint CalcLightList => calc_light_list[1] - calc_light_list[0];
+        public uint SceneRender => onscreen[1] - onscreen[0];
+        public uint ClearBuffer => transfer[1] - transfer[0];
+    }
+
     public partial class ClusterForward : ScenePass
     {
         uint MAX_WIDTH = 1920;
@@ -46,16 +64,6 @@ namespace SharpGame
         const uint QUERY_TRANSFER = 6;
         const uint QUERY_HSIZE = 7;
 
-        unsafe struct Query_data
-        {
-            public fixed uint depth_pass[2];
-            public fixed uint clustering[2];
-            public fixed uint calc_light_grids[2];
-            public fixed uint calc_grid_offsets[2];
-            public fixed uint calc_light_list[2];
-            public fixed uint onscreen[2];
-            public fixed uint transfer[2];
-        }
 
         uint query_count_;
 
@@ -81,6 +89,10 @@ namespace SharpGame
 
         QueryPool[] query_pool = new QueryPool[3];
 
+        QueryData[] queryData = new QueryData[3];
+
+        public ref QueryData QueryData => ref queryData[Graphics.WorkImage];
+
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
         GraphicsPass earlyZPass;
@@ -88,6 +100,14 @@ namespace SharpGame
 
         public ClusterForward() : base("cluster_forward")
         {
+            Renderer.OnSubmit += Renderer_OnSubmit;
+        }
+
+        protected override void Destroy()
+        {
+            base.Destroy();
+
+            Renderer.OnSubmit -= Renderer_OnSubmit;
         }
 
         protected override void OnSetFrameGraph(FrameGraph frameGraph)
@@ -167,26 +187,13 @@ namespace SharpGame
             resourceSet0[1] = new ResourceSet(resourceLayout0, uboCluster[1], light_pos_ranges[1], light_colors[1]);
 
             uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
-            grid_flags = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
-                max_grid_count, Format.R8Uint, sharingMode, queue_families);
-
-            light_bounds = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
-                MAX_NUM_LIGHTS * 6 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // max tile count 1d (z 256)
-
-            grid_light_counts = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
-                max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
-
-            grid_light_count_total = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
-                sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count total * max grid count
-
-            grid_light_count_offsets = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
-                max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // same as above
-
-            light_list = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
-                1024 * 1024 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light idx
-
-            grid_light_counts_compare = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst,
-                max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
+            grid_flags = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count, Format.R8Uint, sharingMode, queue_families);
+            light_bounds = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, MAX_NUM_LIGHTS * 6 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // max tile count 1d (z 256)
+            grid_light_counts = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
+            grid_light_count_total = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count total * max grid count
+            grid_light_count_offsets = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // same as above
+            light_list = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light idx
+            grid_light_counts_compare = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
 
             resourceSet1 = new ResourceSet(resourceLayout1,
                 grid_flags, light_bounds, grid_light_counts, grid_light_count_total,
@@ -247,9 +254,13 @@ namespace SharpGame
 
         public override void Submit(CommandBuffer cmd_buf, int imageIndex)
         {
-            cmd_buf.ResetQueryPool(QueryPool, 12, 2);
+            cmd_buf.ResetQueryPool(QueryPool, 10, 4);
+
+            cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_ONSCREEN * 2);
 
             base.Submit(cmd_buf, imageIndex);
+
+            cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_ONSCREEN * 2 + 1);
 
             // clean up buffers
             unsafe
@@ -299,5 +310,24 @@ namespace SharpGame
                 cmd_buf.WriteTimestamp(PipelineStageFlags.Transfer, QueryPool, QUERY_TRANSFER * 2 + 1);
             }
         }
+
+
+        private void Renderer_OnSubmit(int imageIndex, PassQueue passQueue)
+        {
+            if (passQueue == PassQueue.EarlyGraphics)
+            {
+                QueryPool.GetResults(2, 2, 2 * sizeof(uint), queryData[imageIndex].clustering.Data, sizeof(uint), QueryResults.QueryWait);
+            }
+            else if (passQueue == PassQueue.Compute)
+            {
+                QueryPool.GetResults(4, 6, 6 * sizeof(uint), queryData[imageIndex].calc_light_grids.Data, sizeof(uint), QueryResults.QueryWait);
+            }
+            else if (passQueue == PassQueue.Graphics)
+            {
+                QueryPool.GetResults(10, 4, 4 * sizeof(uint), queryData[imageIndex].onscreen.Data, sizeof(uint), QueryResults.QueryWait);
+            }
+           
+        }
+
     }
 }
