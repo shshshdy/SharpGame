@@ -328,6 +328,7 @@ namespace SharpGame
                     rp.Free(commdListPool[imageIndex]);
                 }
             }
+            /*
             else
             {
                 // clear pass
@@ -343,7 +344,7 @@ namespace SharpGame
                 cb.BeginRenderPass(ref rpBeginInfo, SubpassContents.SecondaryCommandBuffers);
                 cb.EndRenderPass();
             }
-        
+            */
         }
 
         public IEnumerator<Action<GraphicsPass, RenderView>> GetEnumerator()
