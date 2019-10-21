@@ -25,13 +25,20 @@ namespace SharpGame.Samples
                     SunlightDir = glm.normalize(new vec3(-1.0f, -1.0f, 0.0f))
                 },
 
-                new DebugRenderer()
+                new DebugRenderer(),
+
+                new Node("Camera", new vec3(-8.0f, -5.0f, 0), glm.radians(0, 90, 0))
+                {
+                    new Camera
+                    {
+                        Fov = glm.radians(60)
+                    },
+                },
             };
 
-            var cameraNode = scene.CreateChild("Camera", new vec3(-8.0f, -5.0f, 0));
-            cameraNode.EulerAngles = glm.radians(0, 90, 0);
-
-            camera = cameraNode.CreateComponent<Camera>();
+            camera = scene.GetComponent<Camera>(true);
+            //yaw = glm.half_pi;
+            //pitch = 0;
 
             var node = scene.CreateChild("Mesh");
 
@@ -84,8 +91,6 @@ namespace SharpGame.Samples
                 ImGui.Text("calc light list :" + queryData.CalcLightList / 1000000.0f);
                 ImGui.Text("subpass scene :" + queryData.SceneRender / 1000000.0f);
                 ImGui.Text("clear :" + queryData.ClearBuffer / 1000000.0f);
-
-
             }
         }
 

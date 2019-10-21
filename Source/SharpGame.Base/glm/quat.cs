@@ -562,5 +562,10 @@ namespace SharpGame
             return quat_cast(res);
         }
 
+        public static quat quatYawPitchRoll(in vec3 v)
+        {
+            yawPitchRoll(v.y, v.x, v.z, out mat3 res);
+            return quat_cast(res);
+        }
     }
 }

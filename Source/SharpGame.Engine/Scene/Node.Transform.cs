@@ -52,7 +52,7 @@ namespace SharpGame
         protected quat rotation_ = quat.Identity;
 
         [IgnoreDataMember]
-        public vec3 EulerAngles { get => rotation_.EulerAngles; set => rotation_ = glm.quat(value); }
+        public vec3 EulerAngles { get => rotation_.EulerAngles; set => rotation_ = glm.quatYawPitchRoll(value); }
 
         public void SetDirection(in vec3 direction)
         {

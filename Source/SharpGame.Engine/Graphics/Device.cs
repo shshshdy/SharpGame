@@ -415,9 +415,9 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkGetSwapchainImagesKHR(device, swapchain, pSwapchainImageCount, pSwapchainImages));
         }
 
-        public static void AcquireNextImageKHR(VkSwapchainKHR swapchain, ulong timeout, VkSemaphore semaphore, VkFence fence, ref uint pImageIndex)
+        public static VkResult AcquireNextImageKHR(VkSwapchainKHR swapchain, ulong timeout, VkSemaphore semaphore, VkFence fence, ref uint pImageIndex)
         {
-            VulkanUtil.CheckResult(vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, ref pImageIndex));
+            return vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, ref pImageIndex);
         }
 
         public static VkSemaphore CreateSemaphore(uint flags = 0)

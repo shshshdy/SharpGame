@@ -16,10 +16,18 @@ namespace SharpGame.Samples
 
         public override void Init()
         {
-            scene = new Scene();
+            scene = new Scene
+            {
+                new Node("Camera", new vec3(0, 5, -10), glm.radians(30, 0, 0))
+                {
+                    new Camera
+                    {
+                        Fov = glm.radians(60)
+                    },
+                },
+            };
 
-            var cameraNode = scene.CreateChild("Camera", new vec3(0, 5, -10), glm.radians(30, 0, 0));
-            camera = cameraNode.CreateComponent<Camera>();
+            camera = scene.GetComponent<Camera>(true);
           
             var cubeMap = Resources.Load<Texture>("textures/cubemap_yokohama_bc3_unorm.ktx");
             {

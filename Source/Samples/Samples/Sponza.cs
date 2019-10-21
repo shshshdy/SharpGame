@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-
-namespace SharpGame.Samples
+﻿namespace SharpGame.Samples
 {
     [SampleDesc(sortOrder = 2)]
     public class Sponza : Sample
@@ -15,22 +10,27 @@ namespace SharpGame.Samples
                 new Environment
                 {
                     SunlightDir = glm.normalize(new vec3(-1.0f, -1.0f, 0.0f))
-                }
+                },
+
+                new Node("Camera", new vec3(1200, 35, -75), glm.radians(0, 270, 0) )
+                {
+                    new Camera
+                    {
+                        FarClip = 3000.0f,
+                    },
+
+                },
             };
 
-            camera = scene.CreateChild("Camera").
-                WithPosition(new vec3(1200, 35, -75))
-                .WithRotation(glm.radians(0, 270, 0))
-                .CreateComponent<Camera>();
-            camera.FarClip = 3000.0f;
-
             {
-                var model = Resources.Load<Model>(/*"Models/sponza/sponza.dae");//*/ "Models/crysponza_bubbles/sponza.obj");
+                var model = Resources.Load<Model>("Models/crysponza_bubbles/sponza.obj");
                 var node = scene.CreateChild("sponza");
                 var staticModel = node.AddComponent<StaticModel>();
                 //staticModel.CastShadows = true;
                 staticModel.SetModel(model);
             }
+
+            camera = scene.GetComponent<Camera>(true);
             
             Renderer.MainView.Attach(camera, scene);
 

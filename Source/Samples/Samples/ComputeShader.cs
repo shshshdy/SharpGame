@@ -1,7 +1,4 @@
-﻿using ImGuiNET;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace SharpGame.Samples
 {
@@ -53,8 +50,7 @@ namespace SharpGame.Samples
             Particle[] particles = new Particle[PARTICLE_COUNT];
             for (int i = 0; i < PARTICLE_COUNT; i++)
             {
-                ref Particle particle = ref particles[i];
-
+                ref Particle particle = ref particles[i];            
                 particle.pos = rand.NextVector2(new vec2(-1, -1), new vec2(1, 1));
                 particle.vel = new vec2(0.0f);
                 particle.gradientPos = new vec4(particle.pos.X / 2.0f, 0, 0, 0);
@@ -100,8 +96,7 @@ namespace SharpGame.Samples
             frameGraph.AddGraphicsPass(DrawQuad);
             frameGraph.AddComputePass(Docompute);
 
-
-            Renderer.Instance.MainView.Attach(null, null, frameGraph);
+            Renderer.MainView.Attach(null, null, frameGraph);
 
         }
 

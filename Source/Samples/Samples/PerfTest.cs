@@ -9,12 +9,16 @@ namespace SharpGame.Samples
     {
         public override void Init()
         {
-            scene = new Scene();
-
-            var cameraNode = scene.CreateChild("Camera", new vec3(0, 1500, -1500), glm.radians(50, 0, 0));
-            
-            camera = cameraNode.CreateComponent<Camera>();
-            camera.FarClip = 3000.0f;
+            scene = new Scene
+            {
+                new Node("Camera", new vec3(0.0f, 1500, -1500), glm.radians(50, 0, 0))
+                {
+                    new Camera
+                    {
+                        FarClip = 3000.0f
+                    },
+                },
+            };
 
             {
                 var mat = new Material("Shaders/Basic.shader");
@@ -37,6 +41,7 @@ namespace SharpGame.Samples
                 }
             }
 
+            camera = scene.GetComponent<Camera>(true);
             Renderer.MainView.Attach(camera, scene);
             
         }

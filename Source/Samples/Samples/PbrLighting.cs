@@ -45,13 +45,23 @@ namespace SharpGame.Samples
         {
             base.Init();
 
-            scene = new Scene();
+            scene = new Scene
+            {
+                new Node("Camera", new vec3(120.0f, 0.0f, -50))
+                {
+                    new Camera
+                    {
+                        Fov = glm.radians(60)
+                    },
+                },
+            };
 
-            var cameraNode = scene.CreateChild("Camera", new vec3(120.0f, 0.0f, -50));//, glm.radians(0, -90, 0));
-            camera = cameraNode.CreateComponent<Camera>();
-            camera.Fov = glm.radians(60);
+            camera = scene.GetComponent<Camera>(true);
+            camera.Node.LookAt(new vec3(0.0f, 5.0f, -50), TransformSpace.WORLD);
 
-            cameraNode.LookAt(new vec3(0.0f, 5.0f, -50), TransformSpace.WORLD);
+            yaw = camera.Node.EulerAngles.y;
+            pitch = camera.Node.EulerAngles.x;
+            roll = camera.Node.EulerAngles.z;
 
             envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0, ImageUsageFlags.Storage);
             irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);

@@ -127,6 +127,11 @@ namespace SharpGame
 
         protected override void DrawImpl(RenderView view)
         {
+            if(view.Camera == null)
+            {
+                return;
+            }
+
             UpdateCascades(view);
             UpdateUniformBuffers(view);
 
@@ -191,9 +196,11 @@ namespace SharpGame
         */
         void UpdateCascades(RenderView view)
         {
+            var camera = view.Camera;
+
             vec3 lightDir = view.LightParam.SunlightDir;
             Span<float> cascadeSplits = stackalloc float[SHADOW_MAP_CASCADE_COUNT];
-            var camera = view.Camera;
+            
             float nearClip = camera.NearClip;
             float farClip = camera.FarClip;
             float clipRange = farClip - nearClip;

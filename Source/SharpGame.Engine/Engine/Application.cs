@@ -61,7 +61,7 @@ namespace SharpGame
         private int timeStepSmoothing = 2;
         private uint minFps = 10;
         private uint maxFps = 3000;
-
+        private bool resized = false;
         public Application(string dataPath)
         {
             instance = this;
@@ -223,6 +223,14 @@ namespace SharpGame
 
                 input.snapshot = window.PumpEvents();
 
+                if(resized)
+                {
+                    resized = false;
+                    graphics.Frame();
+                    Profiler.End();
+                    continue;
+                }
+
                 UpdateFrame();
 
                 ApplyFrameLimit();
@@ -372,12 +380,13 @@ namespace SharpGame
             // Recreate swap chain
             Width = window.Width;
             Height = window.Width;
+            //resized = true;
 
-            graphics.Execute(() =>
-            {
-                graphics.Resize(Width, Height);
-
-            });
+//             graphics.Execute(() =>
+//             {
+//                 graphics.Resize(Width, Height);
+// 
+//             });
 
         }
 

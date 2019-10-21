@@ -24,6 +24,7 @@ namespace SharpGame.Samples
         protected bool firstMode = true;
         protected float yaw;
         protected float pitch;
+        protected float roll;
         protected float rotSpeed = 0.5f;
         protected float wheelSpeed = 10.0f;
         protected float moveSpeed = 10.0f;
@@ -66,7 +67,7 @@ namespace SharpGame.Samples
                 {
                     vec2 delta = (input.MousePosition - mousePos) * (Time.Delta * rotSpeed * new vec2(camera.AspectRatio, 1.0f));
 
-                    if (pitch == 0)
+                    if (yaw == 0 )
                     {
                         var rot = camera.Node.Rotation.EulerAngles;
                         yaw = rot.Y;
@@ -75,7 +76,7 @@ namespace SharpGame.Samples
 
                     yaw += delta.X;
                     pitch += delta.Y;
-
+                    pitch = glm.clamp(pitch, -glm.half_pi, glm.half_pi);
                     camera.Node.Rotation = glm.quatYawPitchRoll(yaw, pitch, 0);
 
                     if (input.IsKeyPressed(Key.W))

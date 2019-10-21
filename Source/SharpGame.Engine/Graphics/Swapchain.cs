@@ -339,7 +339,25 @@ namespace SharpGame
         {
             // By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
             // With that we don't have to handle VK_NOT_READY
-            Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref imageIndex);
+
+            VkResult res = VkResult.Timeout;
+
+            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref imageIndex);
+            if (res == VkResult.ErrorOutOfDateKHR)
+            {
+                uint w = 0, h = 0;
+                w = 0;
+                //Create(ref w, ref h, false);
+            }
+            else if (res == VkResult.SuboptimalKHR)
+            {
+                int i = 1;
+            }
+            else if(res != VkResult.Success)
+            {
+                int i = 1;
+            }
+
         }
 
         public unsafe void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = null)
