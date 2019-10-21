@@ -77,7 +77,6 @@ namespace SharpGame.Samples
 
         public override void Update()
         {
-
             UpdateInput();
         }
 

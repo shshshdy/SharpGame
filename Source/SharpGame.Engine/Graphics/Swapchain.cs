@@ -345,17 +345,18 @@ namespace SharpGame
             res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref imageIndex);
             if (res == VkResult.ErrorOutOfDateKHR)
             {
+                Log.Info(res.ToString());
                 uint w = 0, h = 0;
                 w = 0;
                 //Create(ref w, ref h, false);
             }
             else if (res == VkResult.SuboptimalKHR)
             {
-                int i = 1;
+                Log.Info(res.ToString());
             }
             else if(res != VkResult.Success)
             {
-                int i = 1;
+                Log.Info(res.ToString());
             }
 
         }

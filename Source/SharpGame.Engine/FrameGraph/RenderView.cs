@@ -141,24 +141,24 @@ namespace SharpGame
             {
                 RenderPass = renderPass,
                 Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
+                OnDraw = (pass, view) =>
+                {
+                    if (view.Scene == null)
+                    {
+                        return;
+                    }
+
+                    var debug = view.Scene.GetComponent<DebugRenderer>();
+                    if (debug == null)
+                    {
+                        return;
+                    }
+
+                    var cmdBuffer = pass.CmdBuffer;
+                    debug.Render(view, cmdBuffer);
+                }
             };
 
-            debugPass.Add((pass, view) =>
-            {
-                if (view.Scene == null)
-                {
-                    return;
-                }
-
-                var debug = view.Scene.GetComponent<DebugRenderer>();
-                if (debug == null)
-                {
-                    return;
-                }
-
-                var cmdBuffer = pass.CmdBuffer;
-                debug.Render(view, cmdBuffer);
-            });
 
         }
 

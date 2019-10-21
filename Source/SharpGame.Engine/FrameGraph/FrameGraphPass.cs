@@ -67,7 +67,7 @@ namespace SharpGame
         {
             var renderPass = new GraphicsPass(name, workCount)
             {
-                onDraw
+                OnDraw = onDraw
             };
 
             Preappend(renderPass);
@@ -103,7 +103,7 @@ namespace SharpGame
         {
             var renderPass = new GraphicsPass(name, workCount)
             {
-                onDraw
+                OnDraw = onDraw
             };
 
             Append(renderPass);

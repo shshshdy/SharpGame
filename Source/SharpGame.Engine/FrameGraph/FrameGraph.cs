@@ -71,7 +71,7 @@ namespace SharpGame
         {
             var renderPass = new GraphicsPass
             {
-                onDraw
+                OnDraw = onDraw
             };
             
             AddRenderPass(renderPass);
@@ -81,7 +81,7 @@ namespace SharpGame
         {
             var renderPass = new GraphicsPass
             {
-                onDraw
+                OnDraw = onDraw
             };
 
             InsertRenderPass(index, renderPass);

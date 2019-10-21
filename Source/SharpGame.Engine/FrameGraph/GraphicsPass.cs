@@ -10,7 +10,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class GraphicsPass : FrameGraphPass, IEnumerable<Action<GraphicsPass, RenderView>>
+    public class GraphicsPass : FrameGraphPass
     {
         [IgnoreDataMember]
         public Framebuffer[] Framebuffers { get; set; }
@@ -19,7 +19,7 @@ namespace SharpGame
 
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
-        protected List<Action<GraphicsPass, RenderView>> Subpasses { get; } = new List<Action<GraphicsPass, RenderView>>();
+        public Action<GraphicsPass, RenderView> OnDraw { get; set; }
 
         protected int workCount = 16;
         protected FastList<CommandBufferPool[]> cmdBufferPools = new FastList<CommandBufferPool[]>();
@@ -67,11 +67,6 @@ namespace SharpGame
             cmdBufferPools.Add(cmdBufferPool);
         }
 
-        public void Add(Action<GraphicsPass, RenderView> subpass)
-        {
-            Subpasses.Add(subpass);
-        }
-        
         public void SetGlobalResourceSet(int index, ResourceSet rs)
         {
             resourceSets[index] = rs;
@@ -146,7 +141,7 @@ namespace SharpGame
             {
                 workImage = Graphics.WorkImage,
                 rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues),
-                commandList = new List<FastList<CommandBuffer>> { commdListPool[Graphics.WorkImage].Request() }
+                commandList = new FastList<CommandBuffer>()
             };
 
             renderPassInfo[Graphics.WorkImage].Add(rpInfo);
@@ -154,11 +149,6 @@ namespace SharpGame
         }
 
         public ref RenderPassInfo CurrentRenderPass => ref renderPassInfo[Graphics.WorkImage].Back();
-
-        public void NextSubpass()
-        {
-            CurrentRenderPass.NextSubpass(commdListPool[Graphics.WorkImage]);
-        }
 
         public void EndRenderPass(RenderView view)
         {
@@ -188,25 +178,16 @@ namespace SharpGame
         {
             BeginRenderPass(view);
 
+            cmdBuffer = GetCmdBuffer();
 
-            for (int i = 0; i < Subpasses.Count; i++)
-            {
-                cmdBuffer = GetCmdBuffer();
+            cmdBuffer.SetViewport(ref view.Viewport);
+            cmdBuffer.SetScissor(view.ViewRect);
 
-                cmdBuffer.SetViewport(ref view.Viewport);
-                cmdBuffer.SetScissor(view.ViewRect);
-                var action = Subpasses[i];
-                action.Invoke(this, view);
+            OnDraw?.Invoke(this, view);
 
-                if (i != Subpasses.Count - 1)
-                {
-                    NextSubpass();
-                }
+            cmdBuffer?.End();
+            cmdBuffer = null;
 
-                cmdBuffer?.End();
-                cmdBuffer = null;
-
-            }
 
             EndRenderPass(view);
         }
@@ -267,7 +248,6 @@ namespace SharpGame
             {
                 DrawBatch(passID, commandBuffer, batch, default, set0, set1, set2);
             }
-
         }
 
         public void DrawFullScreenQuad(CommandBuffer cb, Material material)
@@ -328,34 +308,9 @@ namespace SharpGame
                     rp.Free(commdListPool[imageIndex]);
                 }
             }
-            /*
-            else
-            {
-                // clear pass
-                //CommandBuffer cb = Graphics.Instance.RenderCmdBuffer;
-
-                var fb = Graphics.Framebuffers[imageIndex];
-
-                RenderPassBeginInfo rpBeginInfo = new RenderPassBeginInfo
-                (
-                    fb.renderPass, fb,
-                    new Rect2D(0, 0, Graphics.Width, Graphics.Height), ClearColorValue, ClearDepthStencilValue
-                );
-                cb.BeginRenderPass(ref rpBeginInfo, SubpassContents.SecondaryCommandBuffers);
-                cb.EndRenderPass();
-            }
-            */
+            
         }
 
-        public IEnumerator<Action<GraphicsPass, RenderView>> GetEnumerator()
-        {
-            return ((IEnumerable<Action<GraphicsPass, RenderView>>)Subpasses).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable<Action<GraphicsPass, RenderView>>)Subpasses).GetEnumerator();
-        }
     }
 
     public struct RenderPassInfo
@@ -366,20 +321,14 @@ namespace SharpGame
         public RenderPass RenderPass => rpBeginInfo.renderPass;
 
         public int currentSubpass;
-        public List<FastList<CommandBuffer>> commandList;
+        public FastList<CommandBuffer> commandList;
 
         public void AddCommandBuffer(CommandBuffer cb)
         {
             lock (commandList)
             {
-                commandList[currentSubpass].Add(cb);
+                commandList.Add(cb);
             }
-        }
-
-        public void NextSubpass(FastListPool<CommandBuffer> pool)
-        {
-            commandList.Add(pool.Request());
-            currentSubpass++;
         }
 
         public void Submit(CommandBuffer cb, int imageIndex)
@@ -390,19 +339,9 @@ namespace SharpGame
 
             cb.BeginRenderPass(ref rpBeginInfo, SubpassContents.SecondaryCommandBuffers);
 
-            int i = 0;
-            foreach (var subpass in commandList)
+            foreach (var cmd in commandList)
             {
-                foreach (var cmd in subpass)
-                {
-                    cb.ExecuteCommand(cmd);
-                }
-
-                if (i != commandList.Count - 1)
-                {
-                   cb.NextSubpass(SubpassContents.SecondaryCommandBuffers);
-                }
-                i++;
+                cb.ExecuteCommand(cmd);
             }
 
             cb.EndRenderPass();
@@ -411,10 +350,7 @@ namespace SharpGame
 
         public void Free(FastListPool<CommandBuffer> pool)
         {
-            foreach (var subpass in commandList)
-            {
-                pool.Free(subpass);
-            }
+            pool.Free(commandList);
         }
     }
 

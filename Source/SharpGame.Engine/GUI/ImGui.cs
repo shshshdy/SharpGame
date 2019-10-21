@@ -83,13 +83,13 @@ namespace SharpGame
             {
                 Framebuffers = framebuffers,
                 RenderPass = renderPass,
+               
+                OnDraw = (pass, view) =>
+                {
+                    var cmdBuffer = pass.CmdBuffer;
+                    RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
+                }
             };
-
-            guiPass.Add((pass, view) =>
-            {
-                var cmdBuffer = pass.CmdBuffer;
-                RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
-            });
 
             Renderer.Instance.MainView.OverlayPass = guiPass;
 
