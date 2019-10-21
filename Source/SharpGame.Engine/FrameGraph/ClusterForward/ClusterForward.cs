@@ -254,13 +254,14 @@ namespace SharpGame
 
         public override void Submit(CommandBuffer cmd_buf, int imageIndex)
         {
-            cmd_buf.ResetQueryPool(QueryPool, 10, 4);
+            var queryPool = query_pool[imageIndex];
+            cmd_buf.ResetQueryPool(queryPool, 10, 4);
 
-            cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_ONSCREEN * 2);
+            cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
 
             base.Submit(cmd_buf, imageIndex);
 
-            cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_ONSCREEN * 2 + 1);
+            cmd_buf.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
 
             // clean up buffers
             unsafe
@@ -273,7 +274,7 @@ namespace SharpGame
                     new BufferMemoryBarrier(light_list, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite)
                 };
 
-                cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_TRANSFER * 2);
+                cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_TRANSFER * 2);
 
                 cmd_buf.PipelineBarrier(PipelineStageFlags.FragmentShader,
                             PipelineStageFlags.Transfer,
@@ -307,24 +308,25 @@ namespace SharpGame
                                             transfer_barriers1,
                                             0, null);
                                             
-                cmd_buf.WriteTimestamp(PipelineStageFlags.Transfer, QueryPool, QUERY_TRANSFER * 2 + 1);
+                cmd_buf.WriteTimestamp(PipelineStageFlags.Transfer, queryPool, QUERY_TRANSFER * 2 + 1);
             }
         }
 
 
         private void Renderer_OnSubmit(int imageIndex, PassQueue passQueue)
         {
+            var queryPool = query_pool[imageIndex];
             if (passQueue == PassQueue.EarlyGraphics)
             {
-                QueryPool.GetResults(2, 2, 2 * sizeof(uint), queryData[imageIndex].clustering.Data, sizeof(uint), QueryResults.QueryWait);
+                queryPool.GetResults(2, 2, 2 * sizeof(uint), queryData[imageIndex].clustering.Data, sizeof(uint), QueryResults.QueryWait);
             }
             else if (passQueue == PassQueue.Compute)
             {
-                QueryPool.GetResults(4, 6, 6 * sizeof(uint), queryData[imageIndex].calc_light_grids.Data, sizeof(uint), QueryResults.QueryWait);
+                queryPool.GetResults(4, 6, 6 * sizeof(uint), queryData[imageIndex].calc_light_grids.Data, sizeof(uint), QueryResults.QueryWait);
             }
             else if (passQueue == PassQueue.Graphics)
             {
-                QueryPool.GetResults(10, 4, 4 * sizeof(uint), queryData[imageIndex].onscreen.Data, sizeof(uint), QueryResults.QueryWait);
+                queryPool.GetResults(10, 4, 4 * sizeof(uint), queryData[imageIndex].onscreen.Data, sizeof(uint), QueryResults.QueryWait);
             }
            
         }

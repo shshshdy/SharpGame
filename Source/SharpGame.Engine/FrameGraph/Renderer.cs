@@ -143,7 +143,7 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndRender());
 
-            //Log.Info("Render frame " + Graphics.CurrentFrame);
+            //Log.Info("Render frame " + Graphics.WorkImage);
         }
 
         public void Submit()
@@ -153,9 +153,9 @@ namespace SharpGame
             Graphics.BeginRender();
 
             int imageIndex = (int)Graphics.RenderImage;
+            //Log.Info("Submit frame " + imageIndex);
 
             OnBeginSubmit?.Invoke(imageIndex);
-
 
             var currentBuffer = Graphics.currentBuffer;
 
@@ -235,30 +235,6 @@ namespace SharpGame
             Graphics.EndRender();
 
             Profiler.EndSample();
-
-        }
-
-        void SimpleSubmit()
-        {
-            int imageIndex = (int)Graphics.RenderImage;
-            var currentBuffer = Graphics.currentBuffer;
-            var fence = renderCmdBlk[imageIndex].submit_fence;
-            fence.Wait();
-            fence.Reset();
-
-            CommandBuffer cmdBuffer = renderCmdBlk[imageIndex].cmd_buffer;
-
-            cmdBuffer.Begin();
-
-            foreach (var viewport in views)
-            {
-                viewport.Submit(cmdBuffer, PassQueue.All, imageIndex);
-            }
-
-            cmdBuffer.End();
-
-            Graphics.GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.ColorAttachmentOutput,
-                cmdBuffer, currentBuffer.renderSemaphore, fence);
 
         }
 

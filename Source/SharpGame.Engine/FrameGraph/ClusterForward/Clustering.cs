@@ -113,9 +113,9 @@ namespace SharpGame
             var cmd = renderPass.CmdBuffer;
             var batches = view.batches[0];
 
-            cmd.ResetQueryPool(QueryPool, 2, 2);
+            //cmd.ResetQueryPool(QueryPool, 2, 2);
 
-            cmd.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CLUSTERING * 2);
+            cmd.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CLUSTERING * 2);
 
             var pass_id = Pass.GetID("clustering");
             foreach (var batch in batches)
