@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 5)]
+    [SampleDesc(sortOrder = -5)]
     public class CascadeShadowMap : Sample
     {
         public override void Init()
@@ -32,8 +32,7 @@ namespace SharpGame.Samples
             };
 
             camera = scene.GetComponent<Camera>(true);
-            camera.Node.LookAt(vec3.Zero);
-
+            
             {
                 var model = GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32, true);
                 var node = scene.CreateChild("Plane");

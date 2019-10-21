@@ -37,11 +37,8 @@ namespace SharpGame.Samples
             };
 
             camera = scene.GetComponent<Camera>(true);
-            //yaw = glm.half_pi;
-            //pitch = 0;
-
+       
             var node = scene.CreateChild("Mesh");
-
             var staticModel = node.AddComponent<StaticModel>();
             staticModel.SetModel("models/sibenik/sibenik_bubble.fbx");// "models/voyager/voyager.dae");
 
@@ -68,10 +65,10 @@ namespace SharpGame.Samples
             Spherical s = new Spherical();
             foreach (var l in lights)
             {
-                s.set_from_vec(l.Node.Position - center);
+                s.Set(l.Node.Position - center);
                 s.el.z += 0.001f;
-                s.restrict();
-                var v = s.get_vec();
+                s.Restrict();
+                var v = s.GetVec();
                 l.Node.Position = center + v;
             }
         }
@@ -104,7 +101,7 @@ namespace SharpGame.Samples
             float pos_radius = glm.max(half_size.x, glm.max(half_size.y, half_size.z));
             vec3 fcol = new vec3();
 
-            void hue_to_rgb(ref vec3 ret, float hue)
+            void Hue2Rgb(ref vec3 ret, float hue)
             {
                 float s = hue * 6.0f;
                 float r0 = glm.clamp(s - 4.0f, 0.0f, 1.0f);
@@ -123,7 +120,7 @@ namespace SharpGame.Samples
             for (int i = 0; i < num_lights; ++i)
             {
                 float range = glm.random(min_range, max_range);
-                hue_to_rgb(ref fcol, glm.random(0.0f, 1.0f));
+                Hue2Rgb(ref fcol, glm.random(0.0f, 1.0f));
 
                 fcol *= 1.3f;
                 fcol -= 0.15f;
@@ -146,7 +143,7 @@ namespace SharpGame.Samples
     {
         public vec3 el;
 
-        public void set_from_vec(vec3 v)
+        public void Set(vec3 v)
         {
             el.x = glm.length(v); // r
             if (v.x == 0.0f)
@@ -161,13 +158,13 @@ namespace SharpGame.Samples
             }
         }
 
-        public void restrict()
+        public void Restrict()
         {
             // restrict phi to the range of EPS ~ PI - EPS
             el.y = glm.max(glm.epsilon, glm.min(glm.pi - glm.epsilon, el.y));
         }
 
-        public vec3 get_vec()
+        public vec3 GetVec()
         {
             float x = el.x * glm.sin(el.y) * glm.cos(el.z);
             float y = -el.x * glm.cos(el.y);
