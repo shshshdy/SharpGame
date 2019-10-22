@@ -252,6 +252,8 @@ namespace SharpGame
             drawables.Clear();
             lights.Clear();
             opaqueBatches.Clear();
+            alphaTestBatches.Clear();
+            translucentBatches.Clear();
 
             UpdateDrawables();
 

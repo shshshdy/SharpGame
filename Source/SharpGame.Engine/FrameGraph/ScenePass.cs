@@ -38,6 +38,16 @@ namespace SharpGame
                 DrawBatches(view, batches, CmdBuffer, view.Set0, view.Set1);
             }
 
+            if (view.alphaTestBatches.Count > 0)
+            {
+                DrawBatches(view, view.alphaTestBatches, CmdBuffer, view.Set0, view.Set1);
+            }
+
+            if(view.translucentBatches.Count > 0)
+            {
+                DrawBatches(view, view.translucentBatches, CmdBuffer, view.Set0, view.Set1);
+            }
+
         }
 
 

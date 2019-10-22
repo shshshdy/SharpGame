@@ -118,7 +118,18 @@ namespace SharpGame
             cmd.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CLUSTERING * 2);
 
             var pass_id = Pass.GetID("clustering");
+
             foreach (var batch in batches)
+            {
+                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusteringSet1[Graphics.WorkContext]);
+            }
+
+            foreach (var batch in view.batches[1])
+            {
+                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusteringSet1[Graphics.WorkContext]);
+            }
+
+            foreach (var batch in view.batches[2])
             {
                 renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusteringSet1[Graphics.WorkContext]);
             }

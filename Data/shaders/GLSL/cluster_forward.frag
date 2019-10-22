@@ -71,9 +71,9 @@ int grid_coord_to_grid_idx(uvec3 c)
 
 void main()
 {
-    vec3 mtl_c_diffuse = texture(DiffMap, uv_in).rgb;// * mtl_in.diffuse;
+    vec4 mtl_c_diffuse = texture(DiffMap, uv_in);// * mtl_in.diffuse;
 
-	//frag_color = vec4(mtl_c_diffuse, 1); return;
+	//frag_color = mtl_c_diffuse; return;
     vec3 ambient = vec3(AMBIENT_GLOBAL);
 
     mat3 invBTN = inNormal;// inverse(transpose(mat3(normalize(world_tangent_in), normalize(world_bitangent_in), normalize(world_normal_in))));
@@ -130,10 +130,10 @@ void main()
 
 		vec3 light_color = imageLoad(light_colors, light_idx).rgb;
 		//frag_color = vec4(light_color, 1); return;
-		lighting += light_color * lambertien * atten * (mtl_c_diffuse + specular);
+		lighting += light_color * lambertien * atten * (mtl_c_diffuse.rgb + specular);
 	    }
 	}
     }
 
-    frag_color = vec4(lighting + ambient,1 /*mtl_in.alpha + (1.f - mtl_in.alpha) * fresnel*/);
+    frag_color = vec4(lighting + ambient, mtl_c_diffuse.a /*mtl_in.alpha + (1.f - mtl_in.alpha) * fresnel*/);
 }

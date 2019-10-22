@@ -324,7 +324,8 @@ namespace SharpGame
             {
                 if(aiMaterial.HasColorDiffuse)
                 {
-                    Color c = new Color(aiMaterial.ColorDiffuse[0], aiMaterial.ColorDiffuse[1], aiMaterial.ColorDiffuse[2], aiMaterial.ColorDiffuse[3]);
+                    Color c = new Color(aiMaterial.ColorDiffuse[0], aiMaterial.ColorDiffuse[1],
+                        aiMaterial.ColorDiffuse[2], aiMaterial.ColorDiffuse[3]* aiMaterial.Opacity);
                     material.SetTexture("DiffMap", Texture.CreateByColor(c));
                 }
                 else

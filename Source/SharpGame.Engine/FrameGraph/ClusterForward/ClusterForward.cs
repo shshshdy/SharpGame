@@ -242,11 +242,21 @@ namespace SharpGame
 
             if (MultiThreaded)
             {
-                DrawBatchesMT(view, batches, view.Set0, resourceSet0[Graphics.RenderContext], resourceSet1);
+                DrawBatchesMT(view, batches, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
             }
             else
             {
-                DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.RenderContext], resourceSet1);
+                DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
+            }
+
+            if (view.alphaTestBatches.Count > 0)
+            {
+                DrawBatches(view, view.alphaTestBatches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
+            }
+
+            if (view.translucentBatches.Count > 0)
+            {
+                DrawBatches(view, view.translucentBatches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
             }
 
             EndRenderPass(view);
