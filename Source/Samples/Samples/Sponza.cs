@@ -16,6 +16,7 @@
                 {
                     new Camera
                     {
+                        NearClip = 1.0f,
                         FarClip = 3000.0f,
                     },
 

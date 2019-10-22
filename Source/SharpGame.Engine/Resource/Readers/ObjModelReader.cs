@@ -329,13 +329,15 @@ namespace SharpGame
         Material ConvertMaterial(string path, MaterialDefinition materialDef)
         {
             Shader shader = null;// Resources.Instance.Load<Shader>("Shaders/LitSolid.shader");
-
+            BlendType blendType = BlendType.None;
             if (!string.IsNullOrEmpty(materialDef.AlphaMap))
             {
+                blendType = BlendType.AlphaTest;
                 shader = Resources.Instance.Load<Shader>("Shaders/LitAlphaTest.shader");
             }
             else if(string.IsNullOrEmpty(materialDef.DiffuseTexture) && materialDef.Opacity < 1)
             {
+                blendType = BlendType.AlphaBlend;
                 shader = Resources.Instance.Load<Shader>("Shaders/LitParticle.shader");
             }
             else
@@ -344,7 +346,7 @@ namespace SharpGame
             }
 
             Material material = new Material(shader);
-
+            material.BlendType = blendType;
             if (!string.IsNullOrEmpty(materialDef.DiffuseTexture))
             {
                 Texture tex = Resources.Instance.Load<Texture>(path + materialDef.DiffuseTexture);

@@ -46,8 +46,6 @@ namespace SharpGame
             float scale = 1.0f;
 
             BoundingBox boundingBox = new BoundingBox();
-            var shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");
-            var shader1 = Resources.Instance.Load<Shader>("Shaders/Litsolid.shader");
 
             string path = FileUtil.GetPath(loadingFile);
 
@@ -62,7 +60,7 @@ namespace SharpGame
                 if (mesh.MaterialIndex >= 0 && mesh.MaterialIndex < scene.MaterialCount)
                 {
                     hasNormalMap = scene.Materials[mesh.MaterialIndex].HasTextureNormal;
-                    Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], mesh.HasTangentBasis ? shader1 : shader);
+                    Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], mesh.HasTangentBasis);
                     if(mat == null)
                     {
                         continue;
@@ -270,10 +268,35 @@ namespace SharpGame
             indexBuffer.Dispose();
         }
 
-        Material ConvertMaterial(string path, Assimp.Material aiMaterial, Shader shader)
+        Material ConvertMaterial(string path, Assimp.Material aiMaterial, bool hasTangent)
         {
-            Material material = new Material(shader);
+            Shader shader = null;
+            BlendType blendType = BlendType.None;
+            if (hasTangent)
+            {
+                if (aiMaterial.HasTextureOpacity)
+                {
+                    blendType = BlendType.AlphaTest;
+                    shader = Resources.Instance.Load<Shader>("Shaders/LitAlphaTest.shader");
+                }
+                else if (aiMaterial.Opacity < 1)
+                {
+                    blendType = BlendType.AlphaBlend;
+                    shader = Resources.Instance.Load<Shader>("Shaders/LitParticle.shader");
+                }
+                else
+                {
+                    shader = Resources.Instance.Load<Shader>("Shaders/LitSolid.shader");
+                }
 
+            }
+            else
+            {
+                shader = Resources.Instance.Load<Shader>("Shaders/Basic.shader");
+            }
+
+            Material material = new Material(shader);
+            material.BlendType = blendType;
             if (aiMaterial.HasTextureDiffuse)
             {
                 string texPath = FileUtil.CombinePath(path, aiMaterial.TextureDiffuse.FilePath);
