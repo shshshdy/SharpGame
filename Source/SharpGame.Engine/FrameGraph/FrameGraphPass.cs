@@ -59,6 +59,10 @@ namespace SharpGame
         {
         }
 
+        public virtual void Reset()
+        {
+        }
+
         protected virtual void OnSetFrameGraph(FrameGraph frameGraph)
         {
         }

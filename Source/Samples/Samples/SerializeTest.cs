@@ -21,6 +21,7 @@ namespace SharpGame.Samples
                     System.IO.File.WriteAllText("test.material", text);
                 }
 
+                /*
                 var mat1 = Resources.Load<Material>("materials/Stone.material");
 
                 {
@@ -28,7 +29,7 @@ namespace SharpGame.Samples
 
                     System.IO.File.WriteAllText("test1.material", MessagePack.MessagePackSerializer.ToJson(bytes));
                     System.IO.File.WriteAllBytes("test2.material", bytes);
-                }
+                }*/
 
                 using (File file = FileSystem.Instance.GetFile("Shaders/Common/UniformsVS.glsl"))
                 {

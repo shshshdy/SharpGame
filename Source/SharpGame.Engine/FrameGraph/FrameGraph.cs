@@ -44,6 +44,14 @@ namespace SharpGame
             initialized = true;
         }
 
+        public void Reset()
+        {
+            foreach (var rp in RenderPassList)
+            {
+                rp.Reset();
+            }
+        }
+
         public void Shutdown()
         {
             foreach (var rp in RenderPassList)

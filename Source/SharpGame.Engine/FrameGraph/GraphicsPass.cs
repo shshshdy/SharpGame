@@ -100,16 +100,16 @@ namespace SharpGame
             {
                 RenderPass = Graphics.RenderPass;
             }
-
+/*
             if (Framebuffers == null)
             {
                 Framebuffers = Graphics.Framebuffers;
-            }
+            }*/
 
-            Reset();
+            Clear();
         }
 
-        protected virtual void Reset()
+        protected virtual void Clear()
         {
             uint workContext = Graphics.WorkImage;
 
@@ -125,7 +125,17 @@ namespace SharpGame
         bool inRenderPass = false;
         public void BeginRenderPass(RenderView view)
         {
-            BeginRenderPass(Framebuffers[Graphics.WorkImage], view.ViewRect, ClearColorValue, ClearDepthStencilValue);
+            Framebuffer framebuffer = null;
+            if (Framebuffers == null)
+            {
+                framebuffer = Graphics.Framebuffers[Graphics.WorkImage];
+            }
+            else
+            {
+                framebuffer = Framebuffers[Graphics.WorkImage];
+            }
+
+            BeginRenderPass(framebuffer, view.ViewRect, ClearColorValue, ClearDepthStencilValue);
         }
 
         public void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)

@@ -162,6 +162,13 @@ namespace SharpGame
 
         }
 
+        public void Reset()
+        {
+            FrameGraph?.Reset();
+            debugPass?.Reset();
+            OverlayPass?.Reset();
+        }
+
         public void Attach(Camera camera, Scene scene, FrameGraph frameGraph = null)
         {
             this.scene = scene;
@@ -238,9 +245,9 @@ namespace SharpGame
 
             var g = Graphics.Instance;
 
-            this.frameInfo = frame;
-            this.frameInfo.camera = camera;
-            this.frameInfo.viewSize = new Int2((int)g.Width, (int)g.Height);
+            frameInfo = frame;
+            frameInfo.camera = camera;
+            frameInfo.viewSize = new Int2((int)g.Width, (int)g.Height);
 
             Viewport.Define(0, 0, g.Width, g.Height);
 
