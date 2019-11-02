@@ -18,10 +18,11 @@
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0006" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
-    <PackageReference Include="Vk" Version="1.0.21" />
+    <PackageReference Include="Vk" Version="1.0.22" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Tools\SharpShaderCompiler\src\SharpShaderCompiler\SharpShaderCompiler.csproj" />
+    <ProjectReference Include="..\SharpGame.Graphics\SharpGame.Graphics.csproj" />
     <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />
     <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
   </ItemGroup>

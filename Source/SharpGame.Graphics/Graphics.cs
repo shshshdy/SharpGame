@@ -25,7 +25,7 @@ namespace SharpGame
     {
         public Settings Settings { get; } = new Settings();
 
-        internal Stats stats = new Stats();
+        public Stats stats = new Stats();
 
         public VkPhysicalDeviceFeatures enabledFeatures;
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
@@ -98,7 +98,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            settings.Validation = true;
+            //settings.Validation = true;
 #else
             settings.Validation = false;
 #endif

@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using Vulkan;
 using static Vulkan.VulkanNative;
 using static SharpGame.Sdl2.Sdl2Native;
-using System.Collections.Generic;
 
 namespace SharpGame
 {

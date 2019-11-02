@@ -25,7 +25,7 @@ namespace SharpGame
     public class Fence : DisposeBase
     {
         internal VkFence native;
-        internal Fence(FenceCreateFlags flags)
+        public Fence(FenceCreateFlags flags)
         {
             VkFenceCreateInfo createInfo = VkFenceCreateInfo.New();
             createInfo.flags = (VkFenceCreateFlags)flags;

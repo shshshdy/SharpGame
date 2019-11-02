@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -50,36 +49,6 @@ namespace SharpGame
             }
 
             return false;
-        }
-
-        public void Draw(int depth)
-        {
-            bool collapse = ImGuiNET.ImGui.TreeNodeEx(label, ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.FramePadding);
-            if(!IsRoot)   
-            {
-                ImGuiNET.ImGui.SameLine(400);
-                ImGuiNET.ImGui.Text(string.Format("{0:D}", count)); ImGuiNET.ImGui.SameLine(500);
-                ImGuiNET.ImGui.Text(string.Format("{0:F4}", averageMS)); ImGuiNET.ImGui.SameLine(600);
-                ImGuiNET.ImGui.Text(string.Format("{0:P1}%%", percent)); ImGuiNET.ImGui.SameLine(800);
-                ImGuiNET.ImGui.Text(string.Format("{0:P1}%%", totalPercent));
-            }
-
-            if(depth < 3 && !collapse)
-            {
-                ImGuiNET.ImGui.TreePush();
-            }            
-
-            if (collapse || depth < 3)
-            {
-                foreach (var c in children)
-                {
-                    c.Draw(depth + 1);
-                }
-
-                ImGuiNET.ImGui.TreePop();
-            }
-
-           
         }
 
         public void Free()

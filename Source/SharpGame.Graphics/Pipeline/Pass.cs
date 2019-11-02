@@ -149,7 +149,7 @@ namespace SharpGame
         public ulong passID;
 
         [IgnoreDataMember]
-        internal int passIndex;
+        public int passIndex;
 
         readonly ShaderModule[] shaderModels = new ShaderModule[6];
         [DataMember]

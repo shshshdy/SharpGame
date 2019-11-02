@@ -22,9 +22,9 @@
     <PackageReference Include="ImGui.NET" Version="1.70.0" />
     <PackageReference Include="System.Memory" Version="4.5.3" />
     <PackageReference Include="Utf8Json" Version="1.3.7" />
-    <PackageReference Include="Vk" Version="1.0.21" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SharpGame.Graphics\SharpGame.Graphics.csproj" />
     <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />
     <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
     <ProjectReference Include="..\SharpGame.Engine\SharpGame.Engine.csproj" />

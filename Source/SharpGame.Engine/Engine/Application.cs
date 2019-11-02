@@ -70,6 +70,7 @@ namespace SharpGame
 
         protected virtual void Setup()
         {
+            Resource.RegisterAllResType(typeof(Graphics));
             Resource.RegisterAllResType(typeof(Application));
 
             timer = CreateSubsystem<Timer>();

@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -10,11 +9,11 @@ namespace SharpGame
     public class PerfTree : Object
     {
         Dictionary<string, PerfNode> m_pathItemMap = new Dictionary<string, PerfNode>();
-        PerfNode root = new PerfNode();
+        public PerfNode root = new PerfNode();
         public FreeList<PerfNode> blockPool = new FreeList<PerfNode>();
 
-        const float sampleTime = 2;
-        float timer = sampleTime;
+        public const float sampleTime = 2;
+        public float timer = sampleTime;
 
         public PerfTree()
         {
@@ -30,37 +29,7 @@ namespace SharpGame
         }
 
 
-        public void Draw()
-        {
-            ImGuiNET.ImGui.SameLine(400);
-            ImGuiNET.ImGui.Text("Count"); ImGuiNET.ImGui.SameLine(500);
-            ImGuiNET.ImGui.Text("Time(ms)"); ImGuiNET.ImGui.SameLine(600);
-            ImGuiNET.ImGui.Text("Percent"); ImGuiNET.ImGui.SameLine(800);
-            ImGuiNET.ImGui.Text("Total Percent");
-
-            ImGuiNET.ImGui.Separator();
-            timer += Time.Delta;
-
-            bool sample = false;
-            if(timer >= sampleTime)
-            {
-                sample = true;
-                timer = 0;
-            }
-
-            var it = Profiler.Profilers.GetEnumerator();
-            while(it.MoveNext())
-            {
-                var profiler = it.Current.Value;
-                Build(profiler, sample);
-            }
-
-            root.Draw(0);
-
-            root.Free();
-        }
-
-        void Build(ThreadedProfiler profiler, bool sample)
+        public void Build(ThreadedProfiler profiler, bool sample)
         {
             StringBuilder path = new StringBuilder();
             path.Append(profiler.threadID);

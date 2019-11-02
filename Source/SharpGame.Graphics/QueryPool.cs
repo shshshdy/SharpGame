@@ -14,7 +14,7 @@ namespace SharpGame
     public unsafe class QueryPool : DisposeBase
     {
         internal VkQueryPool handle;
-        internal QueryPool(ref QueryPoolCreateInfo createInfo)
+        public QueryPool(ref QueryPoolCreateInfo createInfo)
         {
             handle = Device.CreateQueryPool(ref createInfo.native);            
         }

@@ -175,7 +175,7 @@ namespace SharpGame
 
             rootBoneIndex_ = uint.MaxValue;
         }
-
+        
         public void Reset()
         {
             foreach(var i in bones_)
