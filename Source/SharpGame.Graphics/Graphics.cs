@@ -488,7 +488,7 @@ namespace SharpGame
             Swapchain.AcquireNextImage(PresentComplete, ref currentImage);            
 #endif
 
-            Debug.Assert(currentImage == (curImage + 1) % ImageCount);
+            //Debug.Assert(currentImage == (curImage + 1) % ImageCount);
 
 
             Profiler.EndSample();

@@ -16,7 +16,6 @@ namespace SharpGame
         public Framebuffer[] Framebuffers { get; set; }
         [IgnoreDataMember]
         public Framebuffer Framebuffer { set => Framebuffers = new[] { value, value, value }; }
-
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
         public Action<GraphicsPass, RenderView> OnDraw { get; set; }
@@ -100,11 +99,6 @@ namespace SharpGame
             {
                 RenderPass = Graphics.RenderPass;
             }
-/*
-            if (Framebuffers == null)
-            {
-                Framebuffers = Graphics.Framebuffers;
-            }*/
 
             Clear();
         }
@@ -123,6 +117,8 @@ namespace SharpGame
         }
 
         bool inRenderPass = false;
+        Viewport viewport;
+        Rect2D renderArea;
         public void BeginRenderPass(RenderView view)
         {
             Framebuffer framebuffer = null;
@@ -135,7 +131,18 @@ namespace SharpGame
                 framebuffer = Framebuffers[Graphics.WorkImage];
             }
 
-            BeginRenderPass(framebuffer, view.ViewRect, ClearColorValue, ClearDepthStencilValue);
+            if (view != null)
+            {
+                viewport = view.Viewport;
+                renderArea = view.ViewRect;
+            }
+            else
+            {
+                viewport = new Viewport(0, 0, Graphics.Width, Graphics.Height);
+                renderArea = new Rect2D(0, 0, Graphics.Width, Graphics.Height);
+            }
+
+            BeginRenderPass(framebuffer, renderArea, ClearColorValue, ClearDepthStencilValue);
         }
 
         public void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
@@ -190,8 +197,8 @@ namespace SharpGame
 
             cmdBuffer = GetCmdBuffer();
 
-            cmdBuffer.SetViewport(ref view.Viewport);
-            cmdBuffer.SetScissor(view.ViewRect);
+            cmdBuffer.SetViewport(in viewport);
+            cmdBuffer.SetScissor(in renderArea);
 
             OnDraw?.Invoke(this, view);
 
@@ -209,7 +216,7 @@ namespace SharpGame
             if (cmd == null)
             {
                 cmd = GetCmdBuffer();
-                cmd.SetViewport(ref view.Viewport);
+                cmd.SetViewport(view.Viewport);
                 cmd.SetScissor(view.ViewRect);
             }
 
@@ -240,7 +247,7 @@ namespace SharpGame
                 var t = Task.Run(() =>
                 {
                     var cb = GetCmdBuffer(cmdIndex);
-                    cb.SetViewport(ref view.Viewport);
+                    cb.SetViewport(view.Viewport);
                     cb.SetScissor(view.ViewRect);
                     Draw(view, batches.AsSpan(from, to - from), cb, set0, set1, set2);
                     cb.End();

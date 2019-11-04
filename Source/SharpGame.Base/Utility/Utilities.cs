@@ -40,6 +40,14 @@ namespace SharpGame
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IntPtr AsIntPtr<T>(in T source)
+        {
+            unsafe
+            {
+                return (IntPtr)Unsafe.AsPointer( ref Unsafe.AsRef(in source));
+            }
+        }
         /// <summary>
         /// Pins the specified source and call an action with the pinned pointer.
         /// </summary>

@@ -270,6 +270,10 @@ namespace SharpGame
 
         }
 
+        private void Render()
+        {
+        }
+
         private unsafe void RenderImDrawData(CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
         {
             var io = ImGui.GetIO();
@@ -352,7 +356,7 @@ namespace SharpGame
 
                         Rect2D scissor = new Rect2D((int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y,
                             (int)(pcmd.ClipRect.Z - pcmd.ClipRect.X), (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y));
-                        cmdBuffer.SetScissor(ref scissor);
+                        cmdBuffer.SetScissor(scissor);
 
                         cmdBuffer.DrawIndexed(pcmd.ElemCount, 1, (uint)idx_offset, vtx_offset, 0);
 

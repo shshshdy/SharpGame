@@ -176,27 +176,15 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void SetScissor(Rect2D scissor)
+        public void SetScissor(in Rect2D pScissors)
         {
-            SetScissor(ref scissor);
+            vkCmdSetScissor(commandBuffer, 0, 1, Utilities.AsIntPtr(in pScissors));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void SetScissor(ref Rect2D pScissors)
+        public void SetViewport(in Viewport pViewports)
         {
-            vkCmdSetScissor(commandBuffer, 0, 1, Utilities.AsPointer(ref pScissors));
-        }
-
-        [MethodImpl((MethodImplOptions)0x100)]
-        public void SetViewport(Viewport viewport)
-        {
-            SetViewport(ref viewport);
-        }
-
-        [MethodImpl((MethodImplOptions)0x100)]
-        public void SetViewport(ref Viewport pViewports)
-        {
-            vkCmdSetViewport(commandBuffer, 0, 1, Utilities.AsPointer(ref pViewports));
+            vkCmdSetViewport(commandBuffer, 0, 1, Utilities.AsIntPtr(in pViewports));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

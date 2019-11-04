@@ -168,7 +168,7 @@ namespace SharpGame
                 
                 var cmd = GetCmdBuffer();
 
-                cmd.SetViewport(ref viewport);
+                cmd.SetViewport(viewport);
                 cmd.SetScissor(renderArea);
 
                 uint cascade = (uint)i;
