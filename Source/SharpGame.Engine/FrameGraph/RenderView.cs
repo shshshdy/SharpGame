@@ -72,8 +72,6 @@ namespace SharpGame
 
         public FrameGraph FrameGraph { get; set; }
 
-        public GraphicsPass OverlayPass { get; set; }
-
         private Viewport viewport;
         public ref Viewport Viewport => ref viewport;
         public Rect2D ViewRect => new Rect2D((int)Viewport.x, (int)Viewport.y, (int)Viewport.width, (int)Viewport.height);
@@ -113,7 +111,6 @@ namespace SharpGame
 
         internal Buffer ubFrameInfo;
         public DoubleBuffer ubCameraVS;
-
 
         internal Buffer ubCameraPS;
         internal Buffer ubLight;
@@ -166,7 +163,6 @@ namespace SharpGame
         {
             FrameGraph?.Reset();
             debugPass?.Reset();
-            OverlayPass?.Reset();
         }
 
         public void Attach(Camera camera, Scene scene, FrameGraph frameGraph = null)
@@ -285,8 +281,6 @@ namespace SharpGame
                 debugPass?.Update(this);
             }
 
-            OverlayPass?.Update(this);
-
             Profiler.EndSample();
         }
 
@@ -299,7 +293,6 @@ namespace SharpGame
                 debugPass?.Draw(this);
             }
 
-            OverlayPass?.Draw(this);
 
         }
 
@@ -406,8 +399,6 @@ namespace SharpGame
             {
                 debugPass?.Submit(cb, imageIndex);
             }
-
-            OverlayPass?.Submit(cb, imageIndex);
 
             Profiler.EndSample();
         }

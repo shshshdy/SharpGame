@@ -71,7 +71,7 @@ namespace SharpGame.Samples
 
             cameraPos = new vec3(0, 5, -50);
             
-            Renderer.MainView.Attach(null, null, frameGraph);
+            MainView.Attach(null, null, frameGraph);
 
         }
 

@@ -54,7 +54,7 @@ namespace SharpGame.Samples
                 clusterRenderer
             };
 
-            Renderer.MainView.Attach(camera, scene, frameGraph);
+            MainView.Attach(camera, scene, frameGraph);
         }
 
         vec3 center = vec3.Zero;

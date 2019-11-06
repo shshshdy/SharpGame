@@ -123,7 +123,7 @@ namespace SharpGame.Samples
             Renderer.AddDebugImage(irMap);
             Renderer.AddDebugImage(brdfLUT);
 
-            Renderer.MainView.Attach(camera, scene);
+            MainView.Attach(camera, scene);
 
         }
 

@@ -10,7 +10,8 @@ namespace SharpGame
 {
     public class Application : CoreApplication
     {
-        protected static Application instance;
+        public static Application Instance { get; private set; }
+
         private string m_title= "SharpGame";
         public string Title
         {
@@ -62,9 +63,13 @@ namespace SharpGame
         private uint minFps = 10;
         private uint maxFps = 3000;
         private bool resized = false;
+        protected RenderView mainView;
+
+        public RenderView MainView => mainView;
+
         public Application(string dataPath)
         {
-            instance = this;
+            Instance = this;
             workSpace = Path.Combine(AppContext.BaseDirectory, dataPath);
         }
 
@@ -99,11 +104,13 @@ namespace SharpGame
             renderer = CreateSubsystem<Renderer>();
             input = CreateSubsystem<Input>();
             renderer.Initialize();
+
+            CreateSubsystem<ImGUI>();
         }
 
         protected virtual void Init()
         {
-            CreateSubsystem<ImGUI>();
+            mainView = renderer.CreateRenderView();
         }
 
         protected virtual void CreateWindow()
@@ -128,7 +135,7 @@ namespace SharpGame
 
         public static void Quit()
         {
-            instance.shouldQuit = true;
+            Instance.shouldQuit = true;
         }
 
         public void Run()
@@ -387,12 +394,15 @@ namespace SharpGame
             {
                 graphics.Resize(Width, Height);
             }
+            else
+            {
+                graphics.Execute(() =>
+                           {
+                               graphics.Resize(Width, Height);
 
-//             graphics.Execute(() =>
-//             {
-//                 graphics.Resize(Width, Height);
-// 
-//             });
+                           });
+            }
+           
 
         }
 

@@ -91,7 +91,7 @@ namespace SharpGame
                 }
             };
 
-            Renderer.Instance.MainView.OverlayPass = guiPass;
+            Renderer.Instance.OverlayPass = guiPass;
 
         }
 

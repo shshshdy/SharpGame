@@ -34,6 +34,7 @@ namespace SharpGame.Samples
         public Resources Resources => Resources.Instance;
         public Graphics Graphics => Graphics.Instance;
         public Renderer Renderer => Renderer.Instance;
+        public RenderView MainView => Application.Instance.MainView;
 
         public Sample()
         {

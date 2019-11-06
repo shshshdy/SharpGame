@@ -96,7 +96,7 @@ namespace SharpGame.Samples
             frameGraph.AddGraphicsPass(DrawQuad);
             frameGraph.AddComputePass(Docompute);
 
-            Renderer.MainView.Attach(null, null, frameGraph);
+            MainView.Attach(null, null, frameGraph);
 
         }
 

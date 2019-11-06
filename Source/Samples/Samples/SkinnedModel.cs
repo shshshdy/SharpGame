@@ -69,7 +69,7 @@ namespace SharpGame.Samples
                 }
             }
 
-            Renderer.MainView.Attach(camera, scene);
+            MainView.Attach(camera, scene);
         }
 
         public override void Update()

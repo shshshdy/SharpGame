@@ -10,14 +10,8 @@ namespace SharpGame
 {
     public class Renderer : System<Renderer>
     {
-        public RenderView MainView { get; private set; }
         private List<RenderView> views = new List<RenderView>();
         public Graphics Graphics => Graphics.Instance;
-
-        public static bool drawDebug;
-        public static bool debugDepthTest;
-        public static bool debugOctree;
-        public static bool debugImage = false;
 
         protected float debugImageHeight = 200.0f;
         List<ImageView> debugImages = new List<ImageView>();
@@ -25,6 +19,8 @@ namespace SharpGame
         public DynamicBuffer TransformBuffer { get; }        
         public DynamicBuffer InstanceBuffer { get; }
         public DynamicBuffer MaterialBuffer { get; }
+
+        public GraphicsPass OverlayPass { get; set; }
 
         public static bool EarlyZ { get; set; }
 
@@ -49,6 +45,11 @@ namespace SharpGame
         public event Action<int, PassQueue> OnSubmit;
         public event Action<int> OnEndSubmit;
 
+        public static bool drawDebug;
+        public static bool debugDepthTest;
+        public static bool debugOctree;
+        public static bool debugImage = false;
+
         public Renderer()
         {
             this.Subscribe<GUIEvent>(e => OnDebugImage());
@@ -64,8 +65,6 @@ namespace SharpGame
 
         public void Initialize()
         {
-            MainView = CreateRenderView();
-
             preRenderCmdPool.Allocate(CommandBufferLevel.Primary, 3);
             for(int i = 0; i < 3; i++)
             {
@@ -130,6 +129,8 @@ namespace SharpGame
                 DrawDebugGeometry();
             }
 
+            OverlayPass?.Update(null);
+
             this.SendGlobalEvent(new PostRenderUpdate());
 
             TransformBuffer.Flush();
@@ -143,6 +144,8 @@ namespace SharpGame
             {
                 viewport.Render();
             }
+
+            OverlayPass?.Draw(null);
 
             this.SendGlobalEvent(new EndRender());
 
@@ -224,6 +227,8 @@ namespace SharpGame
                 {
                     viewport.Submit(cmdBuffer, PassQueue.Graphics, imageIndex);
                 }
+
+                OverlayPass?.Submit(cmdBuffer, imageIndex);
 
                 cmdBuffer.End();
 
