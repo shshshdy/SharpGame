@@ -101,13 +101,18 @@ namespace SharpGame
         public ClusterRenderer(string name = "cluster_forward") : base(name)
         {
             Renderer.OnSubmit += Renderer_OnSubmit;
-        }
 
+            this.OnSubmitBegin += ClusterRenderer_OnSubmitBegin;
+            this.OnSubmitEnd += ClusterRenderer_OnSubmitEnd;
+        }
+        
         protected override void Destroy()
         {
             base.Destroy();
 
             Renderer.OnSubmit -= Renderer_OnSubmit;
+            this.OnSubmitBegin -= ClusterRenderer_OnSubmitBegin;
+            this.OnSubmitEnd -= ClusterRenderer_OnSubmitEnd;
         }
 
         protected override void OnSetFrameGraph(FrameGraph frameGraph)
@@ -116,6 +121,8 @@ namespace SharpGame
             clusterPass.PassQueue = PassQueue.EarlyGraphics;
 
             lightPass = PreappendComputePass(ComputeLight);
+
+            this.OnDraw = DrawScene;
         }
 
         public override void Init()
@@ -232,7 +239,7 @@ namespace SharpGame
             uboCluster.Flush();
         }
 
-        protected override void DrawImpl(RenderView view)
+        protected void DrawScene(GraphicsPass renderPass, RenderView view)
         {
             BeginRenderPass(view);
 
@@ -242,35 +249,36 @@ namespace SharpGame
 
             if (MultiThreaded)
             {
-                DrawBatchesMT(view, batches, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
+                renderPass.DrawBatchesMT(view, batches, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
             }
             else
             {
-                DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
+                renderPass.DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
             }
 
             if (view.alphaTestBatches.Count > 0)
             {
-                DrawBatches(view, view.alphaTestBatches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
+                renderPass.DrawBatches(view, view.alphaTestBatches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
             }
 
             if (view.translucentBatches.Count > 0)
             {
-                DrawBatches(view, view.translucentBatches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
+                renderPass.DrawBatches(view, view.translucentBatches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
             }
 
             EndRenderPass(view);
         }
 
-        public override void Submit(CommandBuffer cmd_buf, int imageIndex)
+        private void ClusterRenderer_OnSubmitBegin(CommandBuffer cmd_buf, int imageIndex)
         {
             var queryPool = query_pool[imageIndex];
             cmd_buf.ResetQueryPool(queryPool, 10, 4);
-
             cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
+        }
 
-            base.Submit(cmd_buf, imageIndex);
-
+        private void ClusterRenderer_OnSubmitEnd(CommandBuffer cmd_buf, int imageIndex)
+        {
+            var queryPool = query_pool[imageIndex];
             cmd_buf.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
 
             // clean up buffers
@@ -293,7 +301,7 @@ namespace SharpGame
                             4,
                             transfer_barriers,
                             0, null);
-                
+
                 cmd_buf.FillBuffer(grid_flags, 0, Buffer.WholeSize, 0);
                 cmd_buf.FillBuffer(light_bounds, 0, Buffer.WholeSize, 0);
                 cmd_buf.FillBuffer(grid_light_counts, 0, Buffer.WholeSize, 0);
@@ -309,7 +317,7 @@ namespace SharpGame
                     new BufferMemoryBarrier(grid_light_count_offsets, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
                     new BufferMemoryBarrier(light_list, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite)
                 };
-                
+
                 cmd_buf.PipelineBarrier(PipelineStageFlags.Transfer,
                                             PipelineStageFlags.FragmentShader,
                                             DependencyFlags.ByRegion,
@@ -317,11 +325,10 @@ namespace SharpGame
                                             4,
                                             transfer_barriers1,
                                             0, null);
-                                            
+
                 cmd_buf.WriteTimestamp(PipelineStageFlags.Transfer, queryPool, QUERY_TRANSFER * 2 + 1);
             }
         }
-
 
         private void Renderer_OnSubmit(int imageIndex, PassQueue passQueue)
         {

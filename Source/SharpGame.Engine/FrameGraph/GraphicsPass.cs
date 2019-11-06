@@ -18,7 +18,10 @@ namespace SharpGame
         public Framebuffer Framebuffer { set => Framebuffers = new[] { value, value, value }; }
         public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
+
         public Action<GraphicsPass, RenderView> OnDraw { get; set; }
+        public event Action<CommandBuffer, int> OnSubmitBegin;
+        public event Action<CommandBuffer, int> OnSubmitEnd;
 
         protected int workCount = 16;
         protected FastList<CommandBufferPool[]> cmdBufferPools = new FastList<CommandBufferPool[]>();
@@ -304,6 +307,8 @@ namespace SharpGame
 
         public override void Submit(CommandBuffer cb, int imageIndex)
         {
+            OnSubmitBegin?.Invoke(cb, imageIndex);
+
             var rpInfo = renderPassInfo[imageIndex];
             if(rpInfo.Count > 0)
             {
@@ -313,7 +318,8 @@ namespace SharpGame
                     rp.Free(commdListPool[imageIndex]);
                 }
             }
-            
+
+            OnSubmitEnd?.Invoke(cb, imageIndex);
         }
 
     }

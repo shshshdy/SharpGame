@@ -18,15 +18,21 @@ namespace SharpGame
 
         protected override void DrawImpl(RenderView view)
         {
-            BeginRenderPass(view);
+            if(OnDraw != null)
+            {
+                OnDraw.Invoke(this, view);
+            }
+            else
+            {
+                DrawScene(view);
+            }
 
-            DrawScene(view);
-
-            EndRenderPass(view);
         }
 
         protected void DrawScene(RenderView view)
         {
+            BeginRenderPass(view);
+
             var batches = view.opaqueBatches;
 
             if (MultiThreaded)
@@ -47,6 +53,8 @@ namespace SharpGame
             {
                 DrawBatches(view, view.translucentBatches, CmdBuffer, view.Set0, view.Set1);
             }
+
+            EndRenderPass(view);
 
         }
 

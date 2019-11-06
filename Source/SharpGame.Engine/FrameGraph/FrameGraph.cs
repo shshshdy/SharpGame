@@ -16,25 +16,32 @@ namespace SharpGame
 
         bool initialized = false;
 
-        public static FrameGraph Simple()
-        {
-            return new FrameGraph
-            {
-                new ShadowPass(),
-                new ScenePass()
-            };
-        }
-
+        Type rendererType;
+        RenderPipeline renderPipeline;
+        
         public FrameGraph()
         {
         }
 
-        public void Init()
+        public void Init(RenderView renderView)
         {
             if (initialized)
             {
                 return;
             }
+            /*
+            if(renderPipeline == null)
+            {
+                if (rendererType != null)
+                {
+                    
+                }
+                else
+                {
+                    renderPipeline = new DefaultRenderer(renderView);
+                    renderPipeline.Init();
+                }
+            }*/
 
             foreach(var rp in RenderPassList)
             {

@@ -172,12 +172,9 @@ namespace SharpGame
 
             FrameGraph = frameGraph;
 
-            if (FrameGraph == null)
-            {
-                FrameGraph = FrameGraph.Simple();
-            }
+            FrameGraph?.Init(this);
 
-            FrameGraph.Init();
+
         }
 
         protected void CreateBuffers()
@@ -274,7 +271,17 @@ namespace SharpGame
 
             UpdateGeometry();
 
-            FrameGraph.Update(this);
+            if (FrameGraph == null)
+            {
+                FrameGraph = new FrameGraph
+                {
+                    new ShadowPass(),
+                    new ScenePass()
+                };
+                FrameGraph.Init(this);
+            }
+
+            FrameGraph?.Update(this);
 
             if (DrawDebug)
             {
@@ -286,7 +293,7 @@ namespace SharpGame
 
         public void Render()
         {
-            FrameGraph.Draw(this);
+            FrameGraph?.Draw(this);
 
             if (DrawDebug)
             {
@@ -393,7 +400,7 @@ namespace SharpGame
         {
             Profiler.BeginSample("Submit");
 
-            FrameGraph.Submit(cb, passQueue, imageIndex);
+            FrameGraph?.Submit(cb, passQueue, imageIndex);
 
             if (DrawDebug)
             {
