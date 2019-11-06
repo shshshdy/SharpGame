@@ -4,7 +4,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public partial class ClusterForward : ScenePass
+    public partial class ClusterRenderer : ScenePass
     {
         private ResourceLayout computeLayout0;
         private ResourceLayout computeLayout1;
@@ -12,6 +12,7 @@ namespace SharpGame
         private ResourceSet[] computeSet0 = new ResourceSet[2];
         private ResourceSet computeSet1;
         PipelineLayout pipelineLayout;
+
         private void InitLightCompute()
         {
 

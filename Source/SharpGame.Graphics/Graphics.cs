@@ -48,16 +48,9 @@ namespace SharpGame
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
-        private CommandBufferPool computeCmdPool;
-        private CommandBufferPool renderCmdPool;
         private CommandBufferPool workCmdPool;
 
         private static CommandBufferPool commandPool;
-
-        public CommandBuffer WorkComputeCmdBuffer => computeCmdPool.CommandBuffers[WorkImage];
-        public CommandBuffer RenderCmdBuffer => renderCmdPool.CommandBuffers[RenderImage];
-
-        public List<CommandBuffer> submitComputeCmdBuffers = new List<CommandBuffer>();
 
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
@@ -373,15 +366,11 @@ namespace SharpGame
         private void CreateCommandPool()
         {
             workCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
-            computeCmdPool = new CommandBufferPool(ComputeQueue.FamilyIndex, CommandPoolCreateFlags.ResetCommandBuffer);
-            renderCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
         }
 
         protected void CreateCommandBuffers()
         {
             workCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
-            computeCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
-            renderCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
         }
 
         public static CommandBuffer CreateCommandBuffer(CommandBufferLevel level, bool begin = false)
@@ -428,11 +417,6 @@ namespace SharpGame
             GraphicsQueue.WaitIdle();
 
             commandBuffer.Reset(true);
-        }
-
-        public void SubmitComputeCmdBuffer(CommandBuffer cmd)
-        {
-            submitComputeCmdBuffers.Add(cmd);
         }
 
         public TransientBuffer AllocVertexBuffer(uint count)
@@ -505,33 +489,6 @@ namespace SharpGame
             transientIB.Flush();
         }
       
-        public void Submit()
-        {
-            Profiler.BeginSample("Submit");
-
-            if (submitComputeCmdBuffers.Count > 0)
-            {
-                foreach (var cmd in submitComputeCmdBuffers)
-                {
-                    ComputeQueue.Submit(null, PipelineStageFlags.None, cmd, null, computeFence);
-                }
-
-                computeFence.Wait();
-                computeFence.Reset();
-                submitComputeCmdBuffers.Clear();
-            }
-#if NEW_BACK_BUFF
-            GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.ColorAttachmentOutput,
-                renderCmdPool[RenderContext], currentBuffer.renderSemaphore);
-#else
-            GraphicsQueue.Submit(PresentComplete, PipelineStageFlags.ColorAttachmentOutput,
-                renderCmdPool[RenderContext], RenderComplete);
-#endif
-
-            Profiler.EndSample();
-
-        }
-
         public void EndRender()
         {            
             Profiler.BeginSample("Present");

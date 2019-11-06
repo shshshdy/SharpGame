@@ -5,7 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public partial class ClusterForward : ScenePass
+    public partial class ClusterRenderer : ScenePass
     {
         const uint ATTACHMENT_REFERENCE_DEPTH = 0;
         const uint SUBPASS_DEPTH = 0;

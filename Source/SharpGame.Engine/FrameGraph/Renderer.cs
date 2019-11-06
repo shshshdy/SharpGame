@@ -42,6 +42,9 @@ namespace SharpGame
         CmdBufferBlock[] computeCmdBlk = new CmdBufferBlock[3];
         CmdBufferBlock[] renderCmdBlk = new CmdBufferBlock[3];
 
+        public CommandBuffer WorkComputeCmdBuffer => computeCmdBlk[Graphics.WorkImage].cmd_buffer;
+        public CommandBuffer RenderCmdBuffer => renderCmdBlk[Graphics.RenderImage].cmd_buffer;
+
         public event Action<int> OnBeginSubmit;
         public event Action<int, PassQueue> OnSubmit;
         public event Action<int> OnEndSubmit;
@@ -187,17 +190,17 @@ namespace SharpGame
                 fence.Wait();
                 fence.Reset();
 
+                CommandBuffer cmdBuffer = computeCmdBlk[imageIndex].cmd_buffer;
+
                 foreach (var viewport in views)
                 {
                     viewport.FrameGraph.Submit(null, PassQueue.Compute, imageIndex);
                 }
 
-                if (Graphics.submitComputeCmdBuffers.Count > 0)
+                if (cmdBuffer.NeedSubmit)
                 {
-                    var cmdBuffer = Graphics.submitComputeCmdBuffers[0];
                     Graphics.ComputeQueue.Submit(currentBuffer.preRenderSemaphore, PipelineStageFlags.ComputeShader,
-                    cmdBuffer, currentBuffer.computeSemaphore, fence);
-                    Graphics.submitComputeCmdBuffers.Clear();
+                    cmdBuffer, currentBuffer.computeSemaphore, fence);                    
                 }
                 else
                 {

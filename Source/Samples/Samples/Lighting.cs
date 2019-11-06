@@ -12,7 +12,7 @@ namespace SharpGame.Samples
         FrameGraph frameGraph;
         List<Light> lights = new List<Light>();
         FastList<Spherical> sphericals = new FastList<Spherical>();
-        ClusterForward clusterRenderer;
+        ClusterRenderer clusterRenderer;
 
         public override void Init()
         {
@@ -47,7 +47,7 @@ namespace SharpGame.Samples
 
             scene.GetComponents(lights, true);
           
-            clusterRenderer = new ClusterForward();
+            clusterRenderer = new ClusterRenderer();
             frameGraph = new FrameGraph
             {
                 new ShadowPass(),

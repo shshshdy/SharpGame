@@ -125,6 +125,7 @@ namespace SharpGame
         public RenderPass renderPass;
         bool opened = false;
         public bool IsOpen => opened;
+        public bool NeedSubmit { get; set; }
 
         internal CommandBuffer(VkCommandBuffer cmdBuffer)
         {
@@ -138,6 +139,7 @@ namespace SharpGame
             cmdBufInfo.flags = (VkCommandBufferUsageFlags)flags;
             VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
             opened = true;
+            NeedSubmit = true;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -152,6 +154,7 @@ namespace SharpGame
                 VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufBeginInfo));
             }
             opened = true;
+            NeedSubmit = true;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -340,12 +343,8 @@ namespace SharpGame
         public void ExecuteCommand(CommandBuffer cmdBuffer)
         {
             vkCmdExecuteCommands(commandBuffer, 1, ref cmdBuffer.commandBuffer);
-        }
 
-        [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void ExecuteCommand(CommandBufferPool cmdBuffer)
-        {
-            vkCmdExecuteCommands(commandBuffer, (uint)cmdBuffer.currentIndex, (VkCommandBuffer*)cmdBuffer.GetAddress(0));
+            cmdBuffer.NeedSubmit = false;
         }
 
         public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, ref BufferCopy region)

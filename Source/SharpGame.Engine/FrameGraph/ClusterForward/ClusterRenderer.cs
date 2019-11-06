@@ -38,21 +38,21 @@ namespace SharpGame
         public uint ClearBuffer => transfer[1] - transfer[0];
     }
 
-    public partial class ClusterForward : ScenePass
+    public partial class ClusterRenderer : ScenePass
     {
-        uint MAX_WIDTH = 1920;
-        uint MAX_HEIGHT = 1080;
+        protected uint MAX_WIDTH = 1920;
+        protected uint MAX_HEIGHT = 1080;
 
-        uint MIN_NUM_LIGHTS = 1024;
-        uint MAX_NUM_LIGHTS = 600000;
-        uint num_lights = 0;
+        protected uint MIN_NUM_LIGHTS = 1024;
+        protected uint MAX_NUM_LIGHTS = 600000;
+        protected uint num_lights = 0;
 
-        uint TILE_WIDTH = 64;
-        uint TILE_HEIGHT = 64;
+        protected uint TILE_WIDTH = 64;
+        protected uint TILE_HEIGHT = 64;
 
-        uint tile_count_x = 0;
-        uint tile_count_y = 0;
-        uint TILE_COUNT_Z = 256;
+        protected uint tile_count_x = 0;
+        protected uint tile_count_y = 0;
+        protected uint TILE_COUNT_Z = 256;
 
 
         const uint QUERY_DEPTH_PASS = 0;
@@ -67,11 +67,11 @@ namespace SharpGame
 
         uint query_count_;
 
-        ClusterUniforms clusterUniforms = new ClusterUniforms();
+        protected ClusterUniforms clusterUniforms = new ClusterUniforms();
 
-        private DoubleBuffer uboCluster;
-        private DoubleBuffer light_pos_ranges;
-        private DoubleBuffer light_colors;
+        protected DoubleBuffer uboCluster;
+        protected DoubleBuffer light_pos_ranges;
+        protected DoubleBuffer light_colors;
 
         private Buffer grid_flags;
         private Buffer light_bounds;
@@ -81,11 +81,11 @@ namespace SharpGame
         private Buffer light_list;
         private Buffer grid_light_counts_compare;
 
-        private Shader clusterLight;
-        private ResourceLayout resourceLayout0;
-        private ResourceLayout resourceLayout1;
-        private ResourceSet[] resourceSet0 = new ResourceSet[2];
-        private ResourceSet resourceSet1;
+        protected Shader clusterLight;
+        protected ResourceLayout resourceLayout0;
+        protected ResourceLayout resourceLayout1;
+        protected ResourceSet[] resourceSet0 = new ResourceSet[2];
+        protected ResourceSet resourceSet1;
 
         QueryPool[] query_pool = new QueryPool[3];
 
@@ -95,10 +95,10 @@ namespace SharpGame
 
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
-        GraphicsPass earlyZPass;
-        ComputePass lightPass;
+        protected GraphicsPass earlyZPass;
+        protected ComputePass lightPass;
 
-        public ClusterForward() : base("cluster_forward")
+        public ClusterRenderer(string name = "cluster_forward") : base(name)
         {
             Renderer.OnSubmit += Renderer_OnSubmit;
         }

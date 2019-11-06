@@ -109,7 +109,11 @@ namespace SharpGame
             }
             
             VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &nativeSubmit, fence != null ? fence.native : VkFence.Null));
-            
+
+            if (commandBuffer)
+            {
+                commandBuffer.NeedSubmit = false;
+            }
         }
 
         /// <summary>
