@@ -95,7 +95,7 @@ namespace SharpGame
 
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
-        protected GraphicsPass earlyZPass;
+        protected GraphicsPass clusterPass;
         protected ComputePass lightPass;
 
         public ClusterRenderer(string name = "cluster_forward") : base(name)
@@ -112,8 +112,8 @@ namespace SharpGame
 
         protected override void OnSetFrameGraph(FrameGraph frameGraph)
         {
-            earlyZPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawClustering);
-            earlyZPass.PassQueue = PassQueue.EarlyGraphics;
+            clusterPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawClustering);
+            clusterPass.PassQueue = PassQueue.EarlyGraphics;
 
             lightPass = PreappendComputePass(ComputeLight);
         }
@@ -127,7 +127,7 @@ namespace SharpGame
 #endif
             CreateResources();
 
-            InitEarlyZ();
+            InitCluster();
 
             InitLightCompute();
         }

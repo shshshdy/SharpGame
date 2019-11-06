@@ -11,17 +11,17 @@ namespace SharpGame
         const uint SUBPASS_DEPTH = 0;
         const uint SUBPASS_CLUSTER_FLAG = 1;
        
-        RenderTarget rtDepth;
-        RenderPass rpEarlyZ;
-        Framebuffer fbEarlyZ;
+        RenderTarget depthRT;
+        RenderPass clusterRP;
+        Framebuffer clusterFB;
 
         Format depthFormat = Device.GetSupportedDepthFormat();// Format.D16Unorm;
 
         
-        ResourceLayout clusteringLayout1;
-        ResourceSet[] clusteringSet1 = new ResourceSet[2];
+        ResourceLayout clusterLayout1;
+        ResourceSet[] clusterSet1 = new ResourceSet[2];
 
-        private void InitEarlyZ()
+        private void InitCluster()
         {
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
@@ -74,23 +74,24 @@ namespace SharpGame
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
 
-            rpEarlyZ = new RenderPass(ref renderPassInfo);
-            rtDepth = Graphics.RTDepth;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
-            fbEarlyZ = Framebuffer.Create(rpEarlyZ, width, height, 1, new[] { rtDepth.view });
+            clusterRP = new RenderPass(ref renderPassInfo);
 
-            earlyZPass.RenderPass = rpEarlyZ;
-            earlyZPass.Framebuffer= fbEarlyZ;
+            depthRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
+            clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
+
+            clusterPass.RenderPass = clusterRP;
+            clusterPass.Framebuffer= clusterFB;
 
             //Renderer.AddDebugImage(rtDepth.view);
 
-            clusteringLayout1 = new ResourceLayout
+            clusterLayout1 = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
                 new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
             };
 
-            clusteringSet1[0] = new ResourceSet(clusteringLayout1, uboCluster[0], grid_flags);
-            clusteringSet1[1] = new ResourceSet(clusteringLayout1, uboCluster[1], grid_flags);
+            clusterSet1[0] = new ResourceSet(clusterLayout1, uboCluster[0], grid_flags);
+            clusterSet1[1] = new ResourceSet(clusterLayout1, uboCluster[1], grid_flags);
         }
 
         unsafe void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
@@ -121,17 +122,17 @@ namespace SharpGame
 
             foreach (var batch in batches)
             {
-                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusteringSet1[Graphics.WorkContext]);
+                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusterSet1[Graphics.WorkContext]);
             }
 
             foreach (var batch in view.batches[1])
             {
-                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusteringSet1[Graphics.WorkContext]);
+                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusterSet1[Graphics.WorkContext]);
             }
 
             foreach (var batch in view.batches[2])
             {
-                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusteringSet1[Graphics.WorkContext]);
+                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusterSet1[Graphics.WorkContext]);
             }
 
             cmd.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CLUSTERING * 2 + 1);

@@ -68,7 +68,7 @@ namespace SharpGame
         private Fence computeFence;
 
         private RenderTarget depthStencil;
-        public RenderTarget RTDepth => depthStencil;
+        public RenderTarget DepthRT => depthStencil;
 
         private TransientBufferManager transientVB = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
         private TransientBufferManager transientIB = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
