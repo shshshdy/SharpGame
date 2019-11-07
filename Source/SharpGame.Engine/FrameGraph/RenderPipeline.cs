@@ -8,7 +8,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class RenderPipeline : Object, IEnumerable<FrameGraphPass>
+    public class RenderPipeline : Object
     {
         public RenderTarget[] RenderTargets { get; set; }
 
@@ -125,7 +125,7 @@ namespace SharpGame
         public void InsertRenderPass(int index, FrameGraphPass renderPass)
         {
             RenderPassList.Insert(index, renderPass);
-            renderPass.FrameGraph = this;
+            renderPass.RenderPipeline = this;
 
             if (initialized)
             {
@@ -136,7 +136,7 @@ namespace SharpGame
         public void AddRenderPass(FrameGraphPass renderPass)
         {
             RenderPassList.Add(renderPass);
-            renderPass.FrameGraph = this;
+            renderPass.RenderPipeline = this;
 
             if(initialized)
             {
@@ -184,20 +184,11 @@ namespace SharpGame
             }
         }
 
-        public void Add(FrameGraphPass renderPass)
+        public RenderPipeline Add(FrameGraphPass renderPass)
         {
             RenderPassList.Add(renderPass);
-            renderPass.FrameGraph = this;
-        }
-
-        public IEnumerator<FrameGraphPass> GetEnumerator()
-        {
-            return RenderPassList.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable)RenderPassList).GetEnumerator();
+            renderPass.RenderPipeline = this;
+            return this;
         }
 
         protected virtual void OnInit()
@@ -221,8 +212,8 @@ namespace SharpGame
     {
         public ForwardRenderer()
         {
-            Add(new ShadowPass());
-            Add(new ScenePass());
+            Add(new ShadowPass())
+            .Add(new ScenePass());
         }
 
     }

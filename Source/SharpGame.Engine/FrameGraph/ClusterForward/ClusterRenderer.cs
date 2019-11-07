@@ -99,10 +99,9 @@ namespace SharpGame
         protected ComputePass lightPass;
         protected ScenePass mainPass;
 
-        public ClusterRenderer(string name = "cluster_forward")// : base(name)
+        public ClusterRenderer()
         {
             Renderer.OnSubmit += Renderer_OnSubmit;
-
         }
         
         protected override void Destroy()
@@ -113,37 +112,35 @@ namespace SharpGame
             mainPass.OnSubmitBegin -= ClusterRenderer_OnSubmitBegin;
             mainPass.OnSubmitEnd -= ClusterRenderer_OnSubmitEnd;
         }
-        /*
-        protected override void OnSetFrameGraph(RenderPipeline frameGraph)
-        {
-            clusterPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawClustering);
-            clusterPass.PassQueue = PassQueue.EarlyGraphics;
-
-            lightPass = PreappendComputePass(ComputeLight);
-
-            this.OnDraw = DrawScene;
-        }*/
-
+        
         protected override void OnInit()
         {
-            AddPass<ShadowPass>(null);
+            clusterPass = new GraphicsPass(Pass.EarlyZ, 8)
+            {
+                OnDraw = DrawClustering,
+                PassQueue = PassQueue.EarlyGraphics
+            };
 
-            clusterPass = AddPass<GraphicsPass>(/*Pass.EarlyZ, 8,*/ DrawClustering);
-            clusterPass.PassQueue = PassQueue.EarlyGraphics;
+            lightPass = new ComputePass(ComputeLight);
 
-            lightPass = AddComputePass(ComputeLight);
+            mainPass = new ScenePass("cluster_forward")
+            {
+                OnDraw = DrawScene,
+#if NO_DEPTHWRITE
+                RenderPass = Graphics.CreateRenderPass(true, false)
+#endif
+            };
 
-            mainPass = AddPass<ScenePass>(DrawScene);
-            mainPass.Name = "cluster_forward";
             mainPass.OnSubmitBegin += ClusterRenderer_OnSubmitBegin;
             mainPass.OnSubmitEnd += ClusterRenderer_OnSubmitEnd;
-#if NO_DEPTHWRITE
-            mainPass.RenderPass = Graphics.CreateRenderPass(true, false);
-#endif
+
+            Add(new ShadowPass())
+            .Add(clusterPass)
+            .Add(lightPass)
+            .Add(mainPass);
+
             CreateResources();
-
             InitCluster();
-
             InitLightCompute();
         }
 

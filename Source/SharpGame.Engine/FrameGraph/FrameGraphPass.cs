@@ -32,17 +32,7 @@ namespace SharpGame
         public uint Subpass { get; set; }
 
         [IgnoreDataMember]
-        public RenderPipeline FrameGraph
-        {
-            get => frameGraph;
-            set
-            {
-                frameGraph = value;
-                OnSetFrameGraph(frameGraph);
-            }
-        }
-
-        RenderPipeline frameGraph;
+        public RenderPipeline RenderPipeline { get; set; }
 
         protected CommandBuffer cmdBuffer;
         public CommandBuffer CmdBuffer => cmdBuffer;
@@ -55,76 +45,17 @@ namespace SharpGame
         {
         }
 
+        public FrameGraphPass(RenderPipeline renderPipeline)
+        {
+            renderPipeline.Add(this);
+        }
+
         public virtual void Init()
         {
         }
 
         public virtual void Reset()
         {
-        }
-
-        protected virtual void OnSetFrameGraph(RenderPipeline frameGraph)
-        {
-        }
-
-        public GraphicsPass PreappendGraphicsPass(string name, int workCount, Action<GraphicsPass, RenderView> onDraw)
-        {
-            var renderPass = new GraphicsPass(name, workCount)
-            {
-                OnDraw = onDraw
-            };
-
-            Preappend(renderPass);
-            return renderPass;
-        }
-
-        public ComputePass PreappendComputePass(Action<ComputePass, RenderView> onDraw)
-        {
-            var renderPass = new ComputePass
-            {
-                OnDraw = onDraw
-            };
-
-            Preappend(renderPass);
-            return renderPass;
-        }
-
-        public void Preappend(FrameGraphPass frameGraphPass)
-        {
-            int index = FrameGraph.IndexOf(this);
-            if(index != -1)
-            {
-                FrameGraph.InsertRenderPass(index, frameGraphPass);
-            }
-            else
-            {
-                Debug.Assert(false, "Not in FrameGraph");
-            }
-
-        }
-
-        public void AppendGraphicsPass(string name, int workCount, Action<GraphicsPass, RenderView> onDraw)
-        {
-            var renderPass = new GraphicsPass(name, workCount)
-            {
-                OnDraw = onDraw
-            };
-
-            Append(renderPass);
-        }
-
-        public void Append(FrameGraphPass frameGraphPass)
-        {
-            int index = FrameGraph.IndexOf(this);
-            if (index != -1)
-            {
-                FrameGraph.InsertRenderPass(index + 1, frameGraphPass);
-            }
-            else
-            {
-                Debug.Assert(false, "Not in FrameGraph");
-            }
-
         }
 
         public virtual void Update(RenderView view)
