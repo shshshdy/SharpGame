@@ -47,3 +47,11 @@ int grid_coord_to_grid_idx(uint i, uint j, uint k)
     return int(ubo_in.grid_dim.x * ubo_in.grid_dim.y * k + ubo_in.grid_dim.x * j + i);
 }
 
+
+int ViewPosToGridIdx(vec2 frag_pos, float view_z)
+{
+    vec3 c;
+    c.xy = frag_pos / ubo_in.tile_size;
+    c.z = min(float(GRID_DIM_Z - 1), max(0.f, float(GRID_DIM_Z) * log((view_z - CAM_NEAR) / (ubo_in.cam_far - CAM_NEAR) + 1.f)));
+    return int(ubo_in.grid_dim.x * ubo_in.grid_dim.y * uint(c.z) + ubo_in.grid_dim.x * uint(c.y) + uint(c.x));
+}

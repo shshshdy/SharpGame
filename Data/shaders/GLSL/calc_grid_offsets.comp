@@ -8,16 +8,21 @@ layout(local_size_x = 16, local_size_y = 16) in;
 
 void main()
 {
-    if (gl_GlobalInvocationID.z < GRID_DIM_Z && gl_GlobalInvocationID.x < ubo_in.grid_dim.x && gl_GlobalInvocationID.y < ubo_in.grid_dim.y ) {
-	int grid_idx = int(gl_GlobalInvocationID.z * ubo_in.grid_dim.x * ubo_in.grid_dim.y + gl_GlobalInvocationID.y * ubo_in.grid_dim.x + gl_GlobalInvocationID.x);
-	uint light_count = imageLoad(grid_light_counts, grid_idx).r;
-	if (light_count > 0) {
-	    uint offset = imageAtomicAdd(grid_light_count_total, 0, light_count);
-	    if (offset < LIGHT_LIST_MAX_LENGTH) {
-		imageStore(grid_light_count_offsets, grid_idx, uvec4(offset, 0, 0, 0));
-	    } else {
-		imageStore(grid_flags, grid_idx, uvec4(0));
-	    }
-	}
+    if (gl_GlobalInvocationID.z < GRID_DIM_Z && gl_GlobalInvocationID.x < ubo_in.grid_dim.x && gl_GlobalInvocationID.y < ubo_in.grid_dim.y )
+	{
+		int grid_idx = int(gl_GlobalInvocationID.z * ubo_in.grid_dim.x * ubo_in.grid_dim.y + gl_GlobalInvocationID.y * ubo_in.grid_dim.x + gl_GlobalInvocationID.x);
+		uint light_count = imageLoad(grid_light_counts, grid_idx).r;
+		if (light_count > 0)
+		{
+			uint offset = imageAtomicAdd(grid_light_count_total, 0, light_count);
+			if (offset < LIGHT_LIST_MAX_LENGTH)
+			{
+				imageStore(grid_light_count_offsets, grid_idx, uvec4(offset, 0, 0, 0));
+			} 
+			else 
+			{
+				imageStore(grid_flags, grid_idx, uvec4(0));
+			}
+		}
     }
 }

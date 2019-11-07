@@ -29,6 +29,7 @@
     <None Include="$(MSBuildThisFileDirectory)GLSL\clustering.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_forward.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_forward.vert" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_gbuffer.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\debug.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\debug.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\depth.frag" />

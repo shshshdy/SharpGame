@@ -43,7 +43,7 @@ Shader "LitSolid"
 
         @VertexShader
         {
-#include "clustering.vert"
+#include "cluster_gbuffer.vert"
         }
 
         @PixelShader
