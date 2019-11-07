@@ -55,14 +55,14 @@ namespace SharpGame
         protected uint TILE_COUNT_Z = 256;
 
 
-        const uint QUERY_DEPTH_PASS = 0;
-        const uint QUERY_CLUSTERING = 1;
-        const uint QUERY_CALC_LIGHT_GRIDS = 2;
-        const uint QUERY_CALC_GRID_OFFSETS = 3;
-        const uint QUERY_CALC_LIGHT_LIST = 4;
-        const uint QUERY_ONSCREEN = 5;
-        const uint QUERY_TRANSFER = 6;
-        const uint QUERY_HSIZE = 7;
+        protected const uint QUERY_DEPTH_PASS = 0;
+        protected const uint QUERY_CLUSTERING = 1;
+        protected const uint QUERY_CALC_LIGHT_GRIDS = 2;
+        protected const uint QUERY_CALC_GRID_OFFSETS = 3;
+        protected const uint QUERY_CALC_LIGHT_LIST = 4;
+        protected const uint QUERY_ONSCREEN = 5;
+        protected const uint QUERY_TRANSFER = 6;
+        protected const uint QUERY_HSIZE = 7;
 
 
         uint query_count_;
@@ -83,11 +83,14 @@ namespace SharpGame
 
         protected ResourceLayout resourceLayout0;
         protected ResourceLayout resourceLayout1;
+        protected ResourceLayout clusterLayout1;
+
         protected ResourceSet[] resourceSet0 = new ResourceSet[2];
         protected ResourceSet[] resourceSet1 = new ResourceSet[2];
+        protected ResourceSet[] clusterSet1 = new ResourceSet[2];
 
-        QueryPool[] query_pool = new QueryPool[3];
-        QueryData[] queryData = new QueryData[3];
+        protected QueryPool[] query_pool = new QueryPool[3];
+        protected QueryData[] queryData = new QueryData[3];
 
         public ref QueryData QueryData => ref queryData[Graphics.WorkImage];
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
@@ -111,13 +114,16 @@ namespace SharpGame
         protected override void OnInit()
         {
             CreateResources();
-            InitCluster();
+
             InitLightCompute();
 
             var it = CreateRenderPass();
             while (it.MoveNext())
             {
-                Add(it.Current);
+                if(it.Current != null)
+                {
+                    Add(it.Current);
+                }
             }
 
         }
@@ -187,35 +193,20 @@ namespace SharpGame
                 grid_flags, light_bounds, grid_light_counts, grid_light_count_total,
                 grid_light_count_offsets, light_list, grid_light_counts_compare);
 
+
+            clusterLayout1 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+            };
+
+            clusterSet1[0] = new ResourceSet(clusterLayout1, uboCluster[0], grid_flags);
+            clusterSet1[1] = new ResourceSet(clusterLayout1, uboCluster[1], grid_flags);
         }
 
         protected virtual IEnumerator<FrameGraphPass> CreateRenderPass()
         {
-            yield return new ShadowPass();
-
-            clusterPass = new ScenePass("clustering")
-            {
-                PassQueue = PassQueue.EarlyGraphics,
-                RenderPass = clusterRP,
-                Framebuffer = clusterFB,
-                Set1 = clusterSet1
-            };
-
-            yield return clusterPass;
-
-            lightPass = new ComputePass(ComputeLight);
-            yield return lightPass;
-
-            mainPass = new ScenePass("cluster_forward")
-            {
-#if NO_DEPTHWRITE
-                RenderPass = Graphics.CreateRenderPass(true, false),
-#endif
-                Set1 = resourceSet0,
-                Set2 = resourceSet1,             
-            };
-
-            yield return mainPass;
+            return null;
         }
 
         protected override void OnUpdate()
@@ -250,7 +241,7 @@ namespace SharpGame
             uboCluster.Flush();
         }
 
-        private void ClearBuffers(CommandBuffer cmd_buf, int imageIndex)
+        protected void ClearBuffers(CommandBuffer cmd_buf, int imageIndex)
         {
             var queryPool = query_pool[imageIndex];
 
@@ -300,40 +291,6 @@ namespace SharpGame
                                             0, null);
 
                 cmd_buf.WriteTimestamp(PipelineStageFlags.Transfer, queryPool, QUERY_TRANSFER * 2 + 1);
-            }
-        }
-
-        protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
-        {
-            if (renderPass == clusterPass)
-            {
-                var queryPool = query_pool[imageIndex];
-                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
-
-            }
-            else if (renderPass == mainPass)
-            {
-                var queryPool = query_pool[imageIndex];
-                cb.ResetQueryPool(queryPool, 10, 4);
-                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
-
-            }
-        }
-
-        protected override void OnEndSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
-        {
-            if(renderPass == clusterPass)
-            {
-                var queryPool = query_pool[imageIndex];
-                cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);
-            }
-            else if (renderPass == mainPass)
-            {
-                var queryPool = query_pool[imageIndex];
-
-                cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
-
-                ClearBuffers(cb, imageIndex);
             }
         }
 

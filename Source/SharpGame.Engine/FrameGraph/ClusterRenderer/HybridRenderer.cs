@@ -6,6 +6,10 @@ namespace SharpGame
 {
     public class HybridRenderer : ClusterRenderer
     {
+        protected RenderTarget depthRT;
+        protected RenderPass clusterRP;
+        protected Framebuffer clusterFB;
+
         public HybridRenderer()
         {
         }

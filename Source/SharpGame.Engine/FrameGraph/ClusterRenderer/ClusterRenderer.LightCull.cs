@@ -18,7 +18,6 @@ namespace SharpGame
         {
             clusterLight = Resources.Instance.Load<Shader>("Shaders/ClusterLight.shader");
 
-
             computeLayout0 = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Compute),

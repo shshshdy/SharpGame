@@ -5,17 +5,21 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public partial class ClusterRenderer : RenderPipeline
-    {      
+    public class ClusterForwardRenderer : ClusterRenderer
+    {
         protected RenderTarget depthRT;
         protected RenderPass clusterRP;
         protected Framebuffer clusterFB;
         protected Format depthFormat = Device.GetSupportedDepthFormat();
-        protected ResourceLayout clusterLayout1;
-        protected ResourceSet[] clusterSet1 = new ResourceSet[2];
 
-        private void InitCluster()
+        public ClusterForwardRenderer()
         {
+        }
+
+        protected override void CreateResources()
+        {
+            base.CreateResources();
+
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
 
@@ -24,7 +28,7 @@ namespace SharpGame
                 new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)
             };
 
-            var depthStencilAttachment = new []
+            var depthStencilAttachment = new[]
             {
                  new AttachmentReference(0, ImageLayout.DepthStencilAttachmentOptimal)
             };
@@ -73,14 +77,69 @@ namespace SharpGame
 
             //Renderer.AddDebugImage(rtDepth.view);
 
-            clusterLayout1 = new ResourceLayout
+        }
+
+        protected override IEnumerator<FrameGraphPass> CreateRenderPass()
+        {
+            yield return new ShadowPass();
+
+            clusterPass = new ScenePass("clustering")
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                PassQueue = PassQueue.EarlyGraphics,
+                RenderPass = clusterRP,
+                Framebuffer = clusterFB,
+                Set1 = clusterSet1
             };
 
-            clusterSet1[0] = new ResourceSet(clusterLayout1, uboCluster[0], grid_flags);
-            clusterSet1[1] = new ResourceSet(clusterLayout1, uboCluster[1], grid_flags);
+            yield return clusterPass;
+
+            lightPass = new ComputePass(ComputeLight);
+            yield return lightPass;
+
+            mainPass = new ScenePass("cluster_forward")
+            {
+#if NO_DEPTHWRITE
+                RenderPass = Graphics.CreateRenderPass(true, false),
+#endif
+                Set1 = resourceSet0,
+                Set2 = resourceSet1,
+            };
+
+            yield return mainPass;
+        }
+
+        protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
+        {
+            if (renderPass == clusterPass)
+            {
+                var queryPool = query_pool[imageIndex];
+                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
+
+            }
+            else if (renderPass == mainPass)
+            {
+                var queryPool = query_pool[imageIndex];
+                cb.ResetQueryPool(queryPool, 10, 4);
+                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
+
+            }
+        }
+
+        protected override void OnEndSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
+        {
+            if (renderPass == clusterPass)
+            {
+                var queryPool = query_pool[imageIndex];
+                cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);
+            }
+            else if (renderPass == mainPass)
+            {
+                var queryPool = query_pool[imageIndex];
+
+                cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
+
+                ClearBuffers(cb, imageIndex);
+            }
         }
 
     }

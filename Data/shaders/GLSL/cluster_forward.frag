@@ -1,22 +1,8 @@
 #version 450 core
-#define CAM_NEAR 0.1f
-#define GRID_DIM_Z 256
+
+#include "GridCoord.glsl"
+
 #define AMBIENT_GLOBAL 0.2f
-
-layout(set = 1, binding = 0) uniform UBO 
-{
-    mat4 view;
-    mat4 projection_clip;
-
-    vec2 tile_size; // xy
-    uvec2 grid_dim; // xy
-
-    vec3 cam_pos;
-    float cam_far;
-
-    vec2 resolution;
-    uint num_lights;
-} ubo_in;
 
 layout(set = 1, binding = 1, rgba32f) uniform readonly imageBuffer light_pos_ranges;
 layout(set = 1, binding = 2, rgba8) uniform readonly imageBuffer light_colors;
@@ -56,18 +42,6 @@ layout (location= 4) in vec3 world_bitangent_in;*/
 
 layout (location = 0) out vec4 frag_color;
 
-uvec3 view_pos_to_grid_coord(vec2 frag_pos, float view_z)
-{
-    vec3 c;
-    c.xy = (frag_pos - 0.5f)/ ubo_in.tile_size;
-    c.z = min(float(GRID_DIM_Z - 1), max(0.f, float(GRID_DIM_Z) * log((view_z - CAM_NEAR) / (ubo_in.cam_far - CAM_NEAR) + 1.f)));
-    return uvec3(c);
-}
-
-int grid_coord_to_grid_idx(uvec3 c)
-{
-    return int(ubo_in.grid_dim.x * ubo_in.grid_dim.y * c.z + ubo_in.grid_dim.x * c.y + c.x);
-}
 
 void main()
 {
@@ -94,7 +68,7 @@ void main()
 
     vec3 view_pos = (ubo_in.view * vec4(world_pos_in.xyz, 1.f)).xyz;
     uvec3 grid_coord = view_pos_to_grid_coord(gl_FragCoord.xy, view_pos.z);
-    int grid_idx = grid_coord_to_grid_idx(grid_coord);
+    int grid_idx = grid_coord_to_grid_idx(grid_coord.x, grid_coord.y, grid_coord.z);
 	
 	//frag_color = vec4(grid_coord/10.0f, 1); return;
 

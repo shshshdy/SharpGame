@@ -54,8 +54,8 @@ void main()
 	fp_max.xy = min(ubo_in.resolution - 1.f, fp_max);
 
 	// grid coord
-	vec3 grid_coord_min = view_pos_to_grid_coord(fp_min, vp_min.z);
-	vec3 grid_coord_max = view_pos_to_grid_coord(fp_max, vp_max.z);
+	uvec3 grid_coord_min = view_pos_to_grid_coord(fp_min, vp_min.z);
+	uvec3 grid_coord_max = view_pos_to_grid_coord(fp_max, vp_max.z);
 	uvec3 bound_min = uvec3(grid_coord_min);// - 3;
 	uvec3 bound_max = uvec3(grid_coord_max);// + 3;
 

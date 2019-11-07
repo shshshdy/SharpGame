@@ -37,6 +37,21 @@ Shader "LitSolid"
 
 	}
 
+    Pass "gbuffer"
+    {
+        CullMode = Back
+
+        @VertexShader
+        {
+#include "clustering.vert"
+        }
+
+        @PixelShader
+        {
+#include "cluster_gbuffer.frag"
+        }
+    }
+
 	Pass "clustering"
 	{
 		CullMode = Back
