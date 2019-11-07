@@ -24,7 +24,7 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = 6)]
     public class CustomRender : Sample
     {
-        FrameGraph frameGraph = new FrameGraph();
+        RenderPipeline frameGraph = new RenderPipeline();
         List<SourceBatch> batches = new List<SourceBatch>();
 
         CameraVS cameraVS = new CameraVS();
@@ -158,7 +158,7 @@ namespace SharpGame.Samples
             {
                 mat4 worldTransform = glm.translate(gridSize * (i / 10), 0, gridSize * (i % 10));
 
-                batches[i].offset = (int)Renderer.Instance.GetTransform(Utilities.AsPointer(ref worldTransform), 1);
+                batches[i].offset = (int)RenderSystem.Instance.GetTransform(Utilities.AsPointer(ref worldTransform), 1);
             }
 
             for (int i = 0; i < COUNT; i++)

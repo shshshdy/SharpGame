@@ -14,7 +14,7 @@ namespace SharpGame.Samples
     {
         const int PARTICLE_COUNT = 256 * 1024;
 
-        private FrameGraph frameGraph = new FrameGraph();
+        private RenderPipeline frameGraph = new RenderPipeline();
         private Buffer storageBuffer;
         private Buffer uniformBuffer;
 

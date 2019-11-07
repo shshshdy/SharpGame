@@ -7,59 +7,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct FrameUniform
-    {
-        public float DeltaTime;
-        public float ElapsedTime;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CameraVS
-    {
-        public mat4 View;
-        public mat4 ViewInv;
-        public mat4 ViewProj;
-        public vec3 CameraPos;
-        public float NearClip;
-        public vec3 FrustumSize;
-        public float FarClip;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CameraPS
-    {
-        public mat4 ViewInv;
-        public vec3 CameraPos;
-        float pading1;
-        public vec4 DepthReconstruct;
-        public vec2 GBufferInvSize;
-        public float NearClip;
-        public float FarClip;
-    }
-
-
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct LightParameter
-    {
-        public Color4 AmbientColor;
-        public Color4 SunlightColor;
-        public vec3 SunlightDir;
-        public float LightPS_pading1;
-
-        public vec4 cascadeSplits;
-        public FixedArray4<mat4> lightMatrices;
-
-        public FixedArray8<Color4> lightColor;
-        public FixedArray8<vec4> lightVec;
-        
-        public void SetLightMatrices(int index, ref mat4 mat)
-        {
-            lightMatrices[index] = mat;
-        }
-
-    }
-
+ 
     public class RenderView : Object
     {
         public static bool NegativeViewport { get; set; } = false;
@@ -70,7 +18,7 @@ namespace SharpGame
         private Camera camera;
         public Camera Camera => camera;
 
-        public FrameGraph FrameGraph { get; set; }
+        public RenderPipeline RenderPipeline { get; set; }
 
         private Viewport viewport;
         public ref Viewport Viewport => ref viewport;
@@ -79,7 +27,7 @@ namespace SharpGame
         public float Width => viewport.width;
         public float Height => viewport.height;
 
-        public bool DrawDebug { get => Renderer.drawDebug && drawDebug; set => drawDebug = value; }
+        public bool DrawDebug { get => RenderSystem.drawDebug && drawDebug; set => drawDebug = value; }
         bool drawDebug = true;
         GraphicsPass debugPass;
 
@@ -126,7 +74,7 @@ namespace SharpGame
         ResourceSet[] psResourceSet = new ResourceSet[2];
 
         Graphics Graphics => Graphics.Instance;
-        Renderer Renderer => Renderer.Instance;
+        RenderSystem Renderer => RenderSystem.Instance;
 
         public RenderView()
         {
@@ -161,18 +109,18 @@ namespace SharpGame
 
         public void Reset()
         {
-            FrameGraph?.Reset();
+            RenderPipeline?.Reset();
             debugPass?.Reset();
         }
 
-        public void Attach(Camera camera, Scene scene, FrameGraph frameGraph = null)
+        public void Attach(Camera camera, Scene scene, RenderPipeline frameGraph = null)
         {
             this.scene = scene;
             this.camera = camera;
 
-            FrameGraph = frameGraph;
+            RenderPipeline = frameGraph;
 
-            FrameGraph?.Init(this);
+            RenderPipeline?.Init(this);
 
 
         }
@@ -271,17 +219,13 @@ namespace SharpGame
 
             UpdateGeometry();
 
-            if (FrameGraph == null)
+            if (RenderPipeline == null)
             {
-                FrameGraph = new FrameGraph
-                {
-                    new ShadowPass(),
-                    new ScenePass()
-                };
-                FrameGraph.Init(this);
+                RenderPipeline = new ForwardRenderer();
+                RenderPipeline.Init(this);
             }
 
-            FrameGraph?.Update(this);
+            RenderPipeline?.Update(this);
 
             if (DrawDebug)
             {
@@ -293,7 +237,7 @@ namespace SharpGame
 
         public void Render()
         {
-            FrameGraph?.Draw(this);
+            RenderPipeline?.Draw(this);
 
             if (DrawDebug)
             {
@@ -400,7 +344,7 @@ namespace SharpGame
         {
             Profiler.BeginSample("Submit");
 
-            FrameGraph?.Submit(cb, passQueue, imageIndex);
+            RenderPipeline?.Submit(cb, passQueue, imageIndex);
 
             if (DrawDebug)
             {

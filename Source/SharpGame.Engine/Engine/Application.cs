@@ -42,7 +42,7 @@ namespace SharpGame
         protected FileSystem fileSystem;
         protected Resources cache;
         protected Graphics graphics;
-        protected Renderer renderer;
+        protected RenderSystem renderer;
         protected Input input;
         protected bool paused = false;
         private bool shouldQuit = false;
@@ -101,7 +101,7 @@ namespace SharpGame
 
             graphics = CreateSubsystem<Graphics>(Settings);
             graphics.Init(window.SdlWindowHandle);
-            renderer = CreateSubsystem<Renderer>();
+            renderer = CreateSubsystem<RenderSystem>();
             input = CreateSubsystem<Input>();
             renderer.Initialize();
 

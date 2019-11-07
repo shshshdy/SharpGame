@@ -32,7 +32,7 @@ namespace SharpGame
         public uint Subpass { get; set; }
 
         [IgnoreDataMember]
-        public FrameGraph FrameGraph
+        public RenderPipeline FrameGraph
         {
             get => frameGraph;
             set
@@ -42,14 +42,14 @@ namespace SharpGame
             }
         }
 
-        FrameGraph frameGraph;
+        RenderPipeline frameGraph;
 
         protected CommandBuffer cmdBuffer;
         public CommandBuffer CmdBuffer => cmdBuffer;
 
         public Graphics Graphics => Graphics.Instance;
 
-        public Renderer Renderer => Renderer.Instance;
+        public RenderSystem Renderer => RenderSystem.Instance;
 
         public FrameGraphPass()
         {
@@ -63,7 +63,7 @@ namespace SharpGame
         {
         }
 
-        protected virtual void OnSetFrameGraph(FrameGraph frameGraph)
+        protected virtual void OnSetFrameGraph(RenderPipeline frameGraph)
         {
         }
 

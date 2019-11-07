@@ -9,7 +9,7 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = 0)]
     public class Lighting : Sample
     {
-        FrameGraph frameGraph;
+        RenderPipeline frameGraph;
         List<Light> lights = new List<Light>();
         FastList<Spherical> sphericals = new FastList<Spherical>();
         ClusterRenderer clusterRenderer;
@@ -48,7 +48,7 @@ namespace SharpGame.Samples
             scene.GetComponents(lights, true);
           
             clusterRenderer = new ClusterRenderer();
-            frameGraph = new FrameGraph
+            frameGraph = new RenderPipeline
             {
                 new ShadowPass(),
                 clusterRenderer

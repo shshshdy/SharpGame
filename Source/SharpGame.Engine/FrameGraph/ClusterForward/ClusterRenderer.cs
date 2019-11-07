@@ -115,7 +115,7 @@ namespace SharpGame
             this.OnSubmitEnd -= ClusterRenderer_OnSubmitEnd;
         }
 
-        protected override void OnSetFrameGraph(FrameGraph frameGraph)
+        protected override void OnSetFrameGraph(RenderPipeline frameGraph)
         {
             clusterPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawClustering);
             clusterPass.PassQueue = PassQueue.EarlyGraphics;
