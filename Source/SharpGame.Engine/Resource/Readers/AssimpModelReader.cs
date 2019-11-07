@@ -271,17 +271,17 @@ namespace SharpGame
         Material ConvertMaterial(string path, Assimp.Material aiMaterial, bool hasTangent)
         {
             Shader shader = null;
-            BlendType blendType = BlendType.None;
+            BlendFlags blendType = BlendFlags.Solid;
             if (hasTangent)
             {
                 if (aiMaterial.HasTextureOpacity)
                 {
-                    blendType = BlendType.AlphaTest;
+                    blendType = BlendFlags.AlphaTest;
                     shader = Resources.Instance.Load<Shader>("Shaders/LitAlphaTest.shader");
                 }
                 else if (aiMaterial.Opacity < 1)
                 {
-                    blendType = BlendType.AlphaBlend;
+                    blendType = BlendFlags.AlphaBlend;
                     shader = Resources.Instance.Load<Shader>("Shaders/LitParticle.shader");
                 }
                 else

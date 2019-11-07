@@ -16,11 +16,12 @@ namespace SharpGame
         Custom
     }
 
-    public enum BlendType : int
+    public enum BlendFlags : int
     {
-        None,
-        AlphaTest,
-        AlphaBlend
+        Solid = 1,
+        AlphaTest = 2,
+        AlphaBlend = 4,
+        All = 7
     }
 
 
@@ -32,7 +33,26 @@ namespace SharpGame
         public FastList<TextureParameter> TextureParameters { get; set; }
         public FastList<BufferParameter> BufferParameters { get; set; }
 
-        public BlendType BlendType { get; set; }
+        public BlendFlags BlendType
+        {
+            get => (BlendFlags)(1 << blendType);
+            set
+            {
+                switch (value)
+                {
+                    case BlendFlags.Solid:
+                        blendType = 0;
+                        break;
+                    case BlendFlags.AlphaTest:
+                        blendType = 1;
+                        break;
+                    case BlendFlags.AlphaBlend:
+                        blendType = 2;
+                        break;
+                }
+            }
+        }
+        public int blendType { get; private set; }
 
         [IgnoreDataMember]
         public Shader Shader { get => shader; set => SetShader(value); }

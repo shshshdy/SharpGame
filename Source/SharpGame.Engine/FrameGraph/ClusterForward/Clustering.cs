@@ -11,15 +11,15 @@ namespace SharpGame
         const uint SUBPASS_DEPTH = 0;
         const uint SUBPASS_CLUSTER_FLAG = 1;
        
-        RenderTarget depthRT;
-        RenderPass clusterRP;
-        Framebuffer clusterFB;
+        protected RenderTarget depthRT;
+        protected RenderPass clusterRP;
+        protected Framebuffer clusterFB;
 
-        Format depthFormat = Device.GetSupportedDepthFormat();// Format.D16Unorm;
+        protected Format depthFormat = Device.GetSupportedDepthFormat();// Format.D16Unorm;
 
-        
-        ResourceLayout clusterLayout1;
-        ResourceSet[] clusterSet1 = new ResourceSet[2];
+
+        protected ResourceLayout clusterLayout1;
+        protected ResourceSet[] clusterSet1 = new ResourceSet[2];
 
         private void InitCluster()
         {
@@ -79,9 +79,6 @@ namespace SharpGame
             depthRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
 
-            clusterPass.RenderPass = clusterRP;
-            clusterPass.Framebuffer= clusterFB;
-
             //Renderer.AddDebugImage(rtDepth.view);
 
             clusterLayout1 = new ResourceLayout
@@ -94,24 +91,19 @@ namespace SharpGame
             clusterSet1[1] = new ResourceSet(clusterLayout1, uboCluster[1], grid_flags);
         }
 
-        unsafe void DrawEarlyZ(GraphicsPass renderPass, RenderView view)
+        protected void DrawClustering(GraphicsPass renderPass, RenderView view)
         {
+            renderPass.BeginRenderPass(view);
+
             var cmd = renderPass.CmdBuffer;
-            var batches = view.batches[0];
-            var pass_id = Pass.GetID(Pass.EarlyZ);
 
-            cmd.ResetQueryPool(QueryPool, 0, 2);
-
-            foreach (var batch in batches)
+            if (cmd == null)
             {
-                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, null/*clusteringSet1[Graphics.WorkContext]*/);
+                cmd = renderPass.GetCmdBuffer();
+                cmd.SetViewport(view.Viewport);
+                cmd.SetScissor(view.ViewRect);
             }
 
-        }
-
-        void DrawClustering(GraphicsPass renderPass, RenderView view)
-        {
-            var cmd = renderPass.CmdBuffer;
             var batches = view.batches[0];
 
             //cmd.ResetQueryPool(QueryPool, 2, 2);
@@ -136,6 +128,10 @@ namespace SharpGame
             }
 
             cmd.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CLUSTERING * 2 + 1);
+
+            cmd.End();
+
+            renderPass.EndRenderPass(view);
 
         }
     }

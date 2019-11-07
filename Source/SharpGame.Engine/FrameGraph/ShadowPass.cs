@@ -147,7 +147,7 @@ namespace SharpGame
                 {
                     foreach (SourceBatch batch in drawable.Batches)
                     {
-                        casters[(int)batch.material.BlendType].Add(batch);
+                        casters[batch.material.blendType].Add(batch);
 
                         if(batch.frameNum != view.Frame.frameNumber)
                         {

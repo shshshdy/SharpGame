@@ -44,9 +44,9 @@ namespace SharpGame
             new FastList<SourceBatch>(), new FastList<SourceBatch>(), new FastList<SourceBatch>()
         };
 
-        internal FastList<SourceBatch> opaqueBatches => batches[(int)BlendType.None];
-        internal FastList<SourceBatch> alphaTestBatches => batches[(int)BlendType.AlphaTest];
-        internal FastList<SourceBatch> translucentBatches => batches[(int)BlendType.AlphaBlend];
+        internal FastList<SourceBatch> opaqueBatches => batches[0];
+        internal FastList<SourceBatch> alphaTestBatches => batches[1];
+        internal FastList<SourceBatch> translucentBatches => batches[2];
 
         FrustumOctreeQuery frustumOctreeQuery = new FrustumOctreeQuery();
 
@@ -167,7 +167,7 @@ namespace SharpGame
 
                 foreach (SourceBatch batch in drawable.Batches)
                 {
-                    batches[(int)batch.material.BlendType].Add(batch);
+                    batches[batch.material.blendType].Add(batch);
 
                     if (batch.frameNum != Frame.frameNumber)
                     {
@@ -225,7 +225,7 @@ namespace SharpGame
                 RenderPipeline.Init(this);
             }
 
-            RenderPipeline?.Update();
+            RenderPipeline.Update();
 
             if (DrawDebug)
             {
@@ -237,7 +237,7 @@ namespace SharpGame
 
         public void Render()
         {
-            RenderPipeline?.Draw();
+            RenderPipeline.Draw();
 
             if (DrawDebug)
             {
@@ -344,7 +344,7 @@ namespace SharpGame
         {
             Profiler.BeginSample("Submit");
 
-            RenderPipeline?.Submit(cb, passQueue, imageIndex);
+            RenderPipeline.Submit(cb, passQueue, imageIndex);
 
             if (DrawDebug)
             {

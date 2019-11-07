@@ -179,7 +179,9 @@ namespace SharpGame
             {
                 if((renderPass.PassQueue & passQueue) == renderPass.PassQueue)
                 {
+                    OnBeginSubmit(renderPass, cb, imageIndex);
                     renderPass.Submit(cb, imageIndex);
+                    OnEndSubmit(renderPass, cb, imageIndex);
                 }
             }
         }
@@ -200,6 +202,14 @@ namespace SharpGame
         }
 
         protected virtual void OnUpdate()
+        {
+        }
+
+        protected virtual void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
+        {
+        }
+
+        protected virtual void OnEndSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
         {
         }
 

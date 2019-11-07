@@ -20,8 +20,6 @@ namespace SharpGame
         public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
 
         public Action<GraphicsPass, RenderView> OnDraw { get; set; }
-        public event Action<CommandBuffer, int> OnSubmitBegin;
-        public event Action<CommandBuffer, int> OnSubmitEnd;
 
         protected int workCount = 16;
         protected FastList<CommandBufferPool[]> cmdBufferPools = new FastList<CommandBufferPool[]>();
@@ -39,10 +37,6 @@ namespace SharpGame
             new FastListPool<CommandBuffer>(),
             new FastListPool<CommandBuffer>()
         };
-
-        FastList<Task> renderTasks = new FastList<Task>();
-
-        protected ResourceSet[] resourceSets = new ResourceSet[2];
 
         public GraphicsPass() : this("", 0)
         {
@@ -71,11 +65,6 @@ namespace SharpGame
             }
 
             cmdBufferPools.Add(cmdBufferPool);
-        }
-
-        public void SetGlobalResourceSet(int index, ResourceSet rs)
-        {
-            resourceSets[index] = rs;
         }
 
         public CommandBuffer GetCmdBuffer(int index = -1)
@@ -196,6 +185,7 @@ namespace SharpGame
 
         protected void End(RenderView view)
         {
+            cmdBuffer = null;
         }
 
         protected virtual void DrawImpl(RenderView view)
@@ -216,65 +206,6 @@ namespace SharpGame
             EndRenderPass(view);
         }
 
-        public void DrawBatches(RenderView view, FastList<SourceBatch> batches, CommandBuffer cb, ResourceSet set0, ResourceSet set1 = null, ResourceSet set2 = null)
-        {
-            var cmd = cb;
-
-            if (cmd == null)
-            {
-                cmd = GetCmdBuffer();
-                cmd.SetViewport(view.Viewport);
-                cmd.SetScissor(view.ViewRect);
-            }
-
-            foreach (var batch in batches)
-            {
-                DrawBatch(passID, cmd, batch, default, set0, set1, set2);
-            }
-
-            cmd.End();
-        }
-
-        public void DrawBatchesMT(RenderView view, FastList<SourceBatch> batches, ResourceSet set0, ResourceSet set1 = null, ResourceSet set2 = null)
-        {
-            renderTasks.Clear();
-
-            int dpPerBatch = (int)Math.Ceiling(view.opaqueBatches.Count / (float)workCount);
-            if (dpPerBatch < 200)
-            {
-                dpPerBatch = 200;
-            }
-
-            int idx = 0;
-            for (int i = 0; i < batches.Count; i += dpPerBatch)
-            {
-                int from = i;
-                int to = Math.Min(i + dpPerBatch, batches.Count);
-                int cmdIndex = idx;
-                var t = Task.Run(() =>
-                {
-                    var cb = GetCmdBuffer(cmdIndex);
-                    cb.SetViewport(view.Viewport);
-                    cb.SetScissor(view.ViewRect);
-                    Draw(view, batches.AsSpan(from, to - from), cb, set0, set1, set2);
-                    cb.End();
-                });
-                renderTasks.Add(t);
-                idx++;
-            }
-
-            Task.WaitAll(renderTasks.ToArray());
-        }
-
-        protected void Draw(RenderView view, Span<SourceBatch> sourceBatches, CommandBuffer commandBuffer, ResourceSet set0, ResourceSet set1, ResourceSet set2)
-        {
-            foreach (var batch in sourceBatches)
-            {
-                DrawBatch(passID, commandBuffer, batch, default, set0, set1, set2);
-            }
-        }
-
-
         public void DrawBatch(ulong passID, CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts,
             ResourceSet resourceSet, ResourceSet resourceSet1, ResourceSet resourceSet2 = null)
         {
@@ -283,7 +214,7 @@ namespace SharpGame
             {
                 return;
             }
-            
+
             var pass = shader.GetPass(passID);
             var pipe = pass.GetGraphicsPipeline(RenderPass, Subpass, batch.geometry);
 
@@ -311,8 +242,6 @@ namespace SharpGame
 
         public override void Submit(CommandBuffer cb, int imageIndex)
         {
-            OnSubmitBegin?.Invoke(cb, imageIndex);
-
             var rpInfo = renderPassInfo[imageIndex];
             if(rpInfo.Count > 0)
             {
@@ -323,7 +252,6 @@ namespace SharpGame
                 }
             }
 
-            OnSubmitEnd?.Invoke(cb, imageIndex);
         }
 
     }

@@ -85,7 +85,7 @@ namespace SharpGame
         protected ResourceLayout resourceLayout0;
         protected ResourceLayout resourceLayout1;
         protected ResourceSet[] resourceSet0 = new ResourceSet[2];
-        protected ResourceSet resourceSet1;
+        protected ResourceSet[] resourceSet1 = new ResourceSet[2];
 
         QueryPool[] query_pool = new QueryPool[3];
 
@@ -95,7 +95,7 @@ namespace SharpGame
 
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
-        protected GraphicsPass clusterPass;
+        protected ScenePass geometryPass;
         protected ComputePass lightPass;
         protected ScenePass mainPass;
 
@@ -109,42 +109,23 @@ namespace SharpGame
             base.Destroy();
 
             Renderer.OnSubmit -= Renderer_OnSubmit;
-            mainPass.OnSubmitBegin -= ClusterRenderer_OnSubmitBegin;
-            mainPass.OnSubmitEnd -= ClusterRenderer_OnSubmitEnd;
         }
         
         protected override void OnInit()
         {
-            clusterPass = new GraphicsPass(Pass.EarlyZ, 8)
-            {
-                OnDraw = DrawClustering,
-                PassQueue = PassQueue.EarlyGraphics
-            };
-
-            lightPass = new ComputePass(ComputeLight);
-
-            mainPass = new ScenePass("cluster_forward")
-            {
-                OnDraw = DrawScene,
-#if NO_DEPTHWRITE
-                RenderPass = Graphics.CreateRenderPass(true, false)
-#endif
-            };
-
-            mainPass.OnSubmitBegin += ClusterRenderer_OnSubmitBegin;
-            mainPass.OnSubmitEnd += ClusterRenderer_OnSubmitEnd;
-
-            Add(new ShadowPass())
-            .Add(clusterPass)
-            .Add(lightPass)
-            .Add(mainPass);
-
             CreateResources();
             InitCluster();
             InitLightCompute();
+
+            var it = CreateRenderPass();
+            while (it.MoveNext())
+            {
+                Add(it.Current);
+            }
+
         }
 
-        private void CreateResources()
+        protected virtual void CreateResources()
         {
             query_count_ = (uint)QUERY_HSIZE * 2;
             for (int i = 0; i < 3; i++)
@@ -207,10 +188,41 @@ namespace SharpGame
             light_list = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light idx
             grid_light_counts_compare = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
 
-            resourceSet1 = new ResourceSet(resourceLayout1,
+            resourceSet1[0] = resourceSet1[1] = new ResourceSet(resourceLayout1,
                 grid_flags, light_bounds, grid_light_counts, grid_light_count_total,
                 grid_light_count_offsets, light_list, grid_light_counts_compare);
 
+        }
+
+        protected virtual IEnumerator<FrameGraphPass> CreateRenderPass()
+        {
+            yield return new ShadowPass();
+
+            geometryPass = new ScenePass("clustering")
+            {
+                PassQueue = PassQueue.EarlyGraphics,
+                OnDraw = DrawClustering,
+
+                RenderPass = clusterRP,
+                Framebuffer = clusterFB,
+                //Set1 = clusterSet1
+            };
+
+            yield return geometryPass;
+
+            lightPass = new ComputePass(ComputeLight);
+            yield return lightPass;
+
+            mainPass = new ScenePass("cluster_forward")
+            {
+#if NO_DEPTHWRITE
+                RenderPass = Graphics.CreateRenderPass(true, false),
+#endif
+                Set1 = resourceSet0,
+                Set2 = resourceSet1,             
+            };
+
+            yield return mainPass;
         }
 
         protected override void OnUpdate()
@@ -245,48 +257,36 @@ namespace SharpGame
             uboCluster.Flush();
         }
 
-        protected void DrawScene(GraphicsPass renderPass, RenderView view)
+        protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
         {
-            renderPass.BeginRenderPass(view);
-
-            //BeginRenderPass(Framebuffers[Graphics.WorkImage], view.ViewRect, ClearColorValue);
-
-            var batches = view.opaqueBatches;
-
-//             if (MultiThreaded)
-//             {
-                renderPass.DrawBatchesMT(view, batches, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
-//             }
-//             else
-//             {
-//                 renderPass.DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
-//             }
-
-            if (view.alphaTestBatches.Count > 0)
+            if (renderPass == geometryPass)
             {
-                renderPass.DrawBatches(view, view.alphaTestBatches, renderPass.CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
             }
-
-            if (view.translucentBatches.Count > 0)
+            else if (renderPass == mainPass)
             {
-                renderPass.DrawBatches(view, view.translucentBatches, renderPass.CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
-            }
+                var queryPool = query_pool[imageIndex];
+                cb.ResetQueryPool(queryPool, 10, 4);
+                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
 
-            renderPass.EndRenderPass(view);
+            }
         }
 
-        private void ClusterRenderer_OnSubmitBegin(CommandBuffer cmd_buf, int imageIndex)
+        protected override void OnEndSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
         {
-            var queryPool = query_pool[imageIndex];
-            cmd_buf.ResetQueryPool(queryPool, 10, 4);
-            cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
+            if (renderPass == mainPass)
+            {
+                var queryPool = query_pool[imageIndex];
+
+                cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
+
+                ClearBuffers(cb, imageIndex);
+            }
         }
 
-        private void ClusterRenderer_OnSubmitEnd(CommandBuffer cmd_buf, int imageIndex)
+        private void ClearBuffers(CommandBuffer cmd_buf, int imageIndex)
         {
             var queryPool = query_pool[imageIndex];
-            cmd_buf.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
-
+            
             // clean up buffers
             unsafe
             {
