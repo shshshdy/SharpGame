@@ -38,7 +38,7 @@ namespace SharpGame
         public uint ClearBuffer => transfer[1] - transfer[0];
     }
 
-    public partial class ClusterRenderer : ScenePass
+    public partial class ClusterRenderer : RenderPipeline
     {
         protected uint MAX_WIDTH = 1920;
         protected uint MAX_HEIGHT = 1080;
@@ -97,13 +97,12 @@ namespace SharpGame
 
         protected GraphicsPass clusterPass;
         protected ComputePass lightPass;
+        protected ScenePass mainPass;
 
-        public ClusterRenderer(string name = "cluster_forward") : base(name)
+        public ClusterRenderer(string name = "cluster_forward")// : base(name)
         {
             Renderer.OnSubmit += Renderer_OnSubmit;
 
-            this.OnSubmitBegin += ClusterRenderer_OnSubmitBegin;
-            this.OnSubmitEnd += ClusterRenderer_OnSubmitEnd;
         }
         
         protected override void Destroy()
@@ -111,10 +110,10 @@ namespace SharpGame
             base.Destroy();
 
             Renderer.OnSubmit -= Renderer_OnSubmit;
-            this.OnSubmitBegin -= ClusterRenderer_OnSubmitBegin;
-            this.OnSubmitEnd -= ClusterRenderer_OnSubmitEnd;
+            mainPass.OnSubmitBegin -= ClusterRenderer_OnSubmitBegin;
+            mainPass.OnSubmitEnd -= ClusterRenderer_OnSubmitEnd;
         }
-
+        /*
         protected override void OnSetFrameGraph(RenderPipeline frameGraph)
         {
             clusterPass = PreappendGraphicsPass(Pass.EarlyZ, 8, DrawClustering);
@@ -123,14 +122,23 @@ namespace SharpGame
             lightPass = PreappendComputePass(ComputeLight);
 
             this.OnDraw = DrawScene;
-        }
+        }*/
 
-        public override void Init()
+        protected override void OnInit()
         {
-            base.Init();
+            AddPass<ShadowPass>(null);
 
+            clusterPass = AddPass<GraphicsPass>(/*Pass.EarlyZ, 8,*/ DrawClustering);
+            clusterPass.PassQueue = PassQueue.EarlyGraphics;
+
+            lightPass = AddComputePass(ComputeLight);
+
+            mainPass = AddPass<ScenePass>(DrawScene);
+            mainPass.Name = "cluster_forward";
+            mainPass.OnSubmitBegin += ClusterRenderer_OnSubmitBegin;
+            mainPass.OnSubmitEnd += ClusterRenderer_OnSubmitEnd;
 #if NO_DEPTHWRITE
-            RenderPass = Graphics.CreateRenderPass(true, false);
+            mainPass.RenderPass = Graphics.CreateRenderPass(true, false);
 #endif
             CreateResources();
 
@@ -208,8 +216,9 @@ namespace SharpGame
 
         }
 
-        public override void Update(RenderView view)
+        protected override void OnUpdate()
         {
+            RenderView view = View;
             UpdateLight(view);
 
             tile_count_x = ((uint)view.Width - 1) / TILE_WIDTH + 1;
@@ -241,32 +250,32 @@ namespace SharpGame
 
         protected void DrawScene(GraphicsPass renderPass, RenderView view)
         {
-            BeginRenderPass(view);
+            renderPass.BeginRenderPass(view);
 
             //BeginRenderPass(Framebuffers[Graphics.WorkImage], view.ViewRect, ClearColorValue);
 
             var batches = view.opaqueBatches;
 
-            if (MultiThreaded)
-            {
+//             if (MultiThreaded)
+//             {
                 renderPass.DrawBatchesMT(view, batches, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
-            }
-            else
-            {
-                renderPass.DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
-            }
+//             }
+//             else
+//             {
+//                 renderPass.DrawBatches(view, batches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
+//             }
 
             if (view.alphaTestBatches.Count > 0)
             {
-                renderPass.DrawBatches(view, view.alphaTestBatches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
+                renderPass.DrawBatches(view, view.alphaTestBatches, renderPass.CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
             }
 
             if (view.translucentBatches.Count > 0)
             {
-                renderPass.DrawBatches(view, view.translucentBatches, CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
+                renderPass.DrawBatches(view, view.translucentBatches, renderPass.CmdBuffer, view.Set0, resourceSet0[Graphics.WorkContext], resourceSet1);
             }
 
-            EndRenderPass(view);
+            renderPass.EndRenderPass(view);
         }
 
         private void ClusterRenderer_OnSubmitBegin(CommandBuffer cmd_buf, int imageIndex)

@@ -44,6 +44,10 @@ namespace SharpGame
 
         protected ResourceSet[] resourceSets = new ResourceSet[2];
 
+        public GraphicsPass() : this("", 0)
+        {
+        }
+
         public GraphicsPass(string name = "", int workCount = 0)
         {
             PassQueue = PassQueue.Graphics;

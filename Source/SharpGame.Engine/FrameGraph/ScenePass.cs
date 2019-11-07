@@ -12,6 +12,10 @@ namespace SharpGame
     {
         public static bool MultiThreaded = true;
 
+        public ScenePass() : this("main")
+        {
+        }
+
         public ScenePass(string name = "main") : base(name, 16)
         {
         }

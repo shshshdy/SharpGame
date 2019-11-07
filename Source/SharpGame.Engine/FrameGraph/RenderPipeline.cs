@@ -17,7 +17,10 @@ namespace SharpGame
         public RenderView View { get; private set; }
 
         bool initialized = false;
-        
+
+        public Graphics Graphics => Graphics.Instance;
+        public RenderSystem Renderer => RenderSystem.Instance;
+
         public RenderPipeline()
         {
         }
@@ -76,7 +79,7 @@ namespace SharpGame
         }
 
 
-        public void AddGraphicsPass(Action<GraphicsPass, RenderView> onDraw)
+        public GraphicsPass AddGraphicsPass(Action<GraphicsPass, RenderView> onDraw)
         {
             var renderPass = new GraphicsPass
             {
@@ -84,9 +87,20 @@ namespace SharpGame
             };
             
             AddRenderPass(renderPass);
+            return renderPass;
         }
 
-        public void InsertGraphicsPass(int index, Action<GraphicsPass, RenderView> onDraw)
+        public T AddPass<T>(Action<GraphicsPass, RenderView> onDraw) where T : GraphicsPass, new()
+        {
+            var renderPass = new T
+            {
+                OnDraw = onDraw
+            };
+
+            AddRenderPass(renderPass);
+            return renderPass;
+        }
+        public GraphicsPass InsertGraphicsPass(int index, Action<GraphicsPass, RenderView> onDraw)
         {
             var renderPass = new GraphicsPass
             {
@@ -94,9 +108,10 @@ namespace SharpGame
             };
 
             InsertRenderPass(index, renderPass);
+            return renderPass;
         }
 
-        public void AddComputePass(Action<ComputePass, RenderView> onDraw)
+        public ComputePass AddComputePass(Action<ComputePass, RenderView> onDraw)
         {
             var renderPass = new ComputePass
             {
@@ -104,6 +119,7 @@ namespace SharpGame
             };
 
             AddRenderPass(renderPass);
+            return renderPass;
         }
 
         public void InsertRenderPass(int index, FrameGraphPass renderPass)

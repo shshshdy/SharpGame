@@ -48,13 +48,13 @@ namespace SharpGame.Samples
             scene.GetComponents(lights, true);
           
             clusterRenderer = new ClusterRenderer();
-            frameGraph = new RenderPipeline
-            {
-                new ShadowPass(),
-                clusterRenderer
-            };
+ //           frameGraph = clusterRenderer;// new RenderPipeline
+//             {
+//                 new ShadowPass(),
+//                 clusterRenderer
+//             };
 
-            MainView.Attach(camera, scene, frameGraph);
+            MainView.Attach(camera, scene, clusterRenderer);
         }
 
         vec3 center = vec3.Zero;

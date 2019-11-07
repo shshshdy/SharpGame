@@ -4,7 +4,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public partial class ClusterRenderer : ScenePass
+    public partial class ClusterRenderer : RenderPipeline
     {
         private ResourceLayout computeLayout0;
         private ResourceLayout computeLayout1;

@@ -5,7 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public partial class ClusterRenderer : ScenePass
+    public partial class ClusterRenderer : RenderPipeline
     {
         const uint ATTACHMENT_REFERENCE_DEPTH = 0;
         const uint SUBPASS_DEPTH = 0;
