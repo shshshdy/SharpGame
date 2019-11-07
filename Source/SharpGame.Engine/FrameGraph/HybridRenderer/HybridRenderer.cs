@@ -14,17 +14,15 @@ namespace SharpGame
         {
             yield return new ShadowPass();
 
-            geometryPass = new ScenePass("gbuffer")
+            clusterPass = new ScenePass("gbuffer")
             {
-                PassQueue = PassQueue.EarlyGraphics,
-                OnDraw = DrawClustering,
-
+                PassQueue = PassQueue.EarlyGraphics,                
                 RenderPass = clusterRP,
                 Framebuffer = clusterFB,
-                //Set1 = clusterSet1
+                Set1 = clusterSet1
             };
 
-            yield return geometryPass;
+            yield return clusterPass;
 
             lightPass = new ComputePass(ComputeLight);
             yield return lightPass;

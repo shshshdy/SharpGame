@@ -13,8 +13,11 @@ namespace SharpGame
         private ResourceSet computeSet1;
         PipelineLayout pipelineLayout;
 
+        protected Shader clusterLight;
         private void InitLightCompute()
         {
+            clusterLight = Resources.Instance.Load<Shader>("Shaders/ClusterLight.shader");
+
 
             computeLayout0 = new ResourceLayout
             {

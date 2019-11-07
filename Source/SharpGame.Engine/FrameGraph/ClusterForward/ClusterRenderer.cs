@@ -81,21 +81,18 @@ namespace SharpGame
         private Buffer light_list;
         private Buffer grid_light_counts_compare;
 
-        protected Shader clusterLight;
         protected ResourceLayout resourceLayout0;
         protected ResourceLayout resourceLayout1;
         protected ResourceSet[] resourceSet0 = new ResourceSet[2];
         protected ResourceSet[] resourceSet1 = new ResourceSet[2];
 
         QueryPool[] query_pool = new QueryPool[3];
-
         QueryData[] queryData = new QueryData[3];
 
         public ref QueryData QueryData => ref queryData[Graphics.WorkImage];
-
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
-        protected ScenePass geometryPass;
+        protected ScenePass clusterPass;
         protected ComputePass lightPass;
         protected ScenePass mainPass;
 
@@ -134,26 +131,6 @@ namespace SharpGame
                 query_pool[i] = new QueryPool(ref queryPoolCreateInfo);
             }
 
-            clusterLight = Resources.Instance.Load<Shader>("Shaders/ClusterLight.shader");
-
-            resourceLayout0 = new ResourceLayout
-            {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-            };
-
-            resourceLayout1 = new ResourceLayout
-            {
-                new ResourceLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-            };
-
             uint[] queue_families = null;
             uint size = 0;
             SharingMode sharingMode = SharingMode.Exclusive;
@@ -176,9 +153,6 @@ namespace SharpGame
                 MAX_NUM_LIGHTS * sizeof(uint), sharingMode, queue_families);
             light_colors.CreateView(Format.R8g8b8a8Unorm);
 
-            resourceSet0[0] = new ResourceSet(resourceLayout0, uboCluster[0], light_pos_ranges[0], light_colors[0]);
-            resourceSet0[1] = new ResourceSet(resourceLayout0, uboCluster[1], light_pos_ranges[1], light_colors[1]);
-
             uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
             grid_flags = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count, Format.R8Uint, sharingMode, queue_families);
             light_bounds = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, MAX_NUM_LIGHTS * 6 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // max tile count 1d (z 256)
@@ -187,6 +161,27 @@ namespace SharpGame
             grid_light_count_offsets = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // same as above
             light_list = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light idx
             grid_light_counts_compare = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
+
+            resourceLayout0 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+            };
+
+            resourceLayout1 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new ResourceLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+            };
+
+            resourceSet0[0] = new ResourceSet(resourceLayout0, uboCluster[0], light_pos_ranges[0], light_colors[0]);
+            resourceSet0[1] = new ResourceSet(resourceLayout0, uboCluster[1], light_pos_ranges[1], light_colors[1]);
 
             resourceSet1[0] = resourceSet1[1] = new ResourceSet(resourceLayout1,
                 grid_flags, light_bounds, grid_light_counts, grid_light_count_total,
@@ -198,17 +193,15 @@ namespace SharpGame
         {
             yield return new ShadowPass();
 
-            geometryPass = new ScenePass("clustering")
+            clusterPass = new ScenePass("clustering")
             {
                 PassQueue = PassQueue.EarlyGraphics,
-                OnDraw = DrawClustering,
-
                 RenderPass = clusterRP,
                 Framebuffer = clusterFB,
-                //Set1 = clusterSet1
+                Set1 = clusterSet1
             };
 
-            yield return geometryPass;
+            yield return clusterPass;
 
             lightPass = new ComputePass(ComputeLight);
             yield return lightPass;
@@ -257,36 +250,10 @@ namespace SharpGame
             uboCluster.Flush();
         }
 
-        protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
-        {
-            if (renderPass == geometryPass)
-            {
-            }
-            else if (renderPass == mainPass)
-            {
-                var queryPool = query_pool[imageIndex];
-                cb.ResetQueryPool(queryPool, 10, 4);
-                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
-
-            }
-        }
-
-        protected override void OnEndSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
-        {
-            if (renderPass == mainPass)
-            {
-                var queryPool = query_pool[imageIndex];
-
-                cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
-
-                ClearBuffers(cb, imageIndex);
-            }
-        }
-
         private void ClearBuffers(CommandBuffer cmd_buf, int imageIndex)
         {
             var queryPool = query_pool[imageIndex];
-            
+
             // clean up buffers
             unsafe
             {
@@ -333,6 +300,40 @@ namespace SharpGame
                                             0, null);
 
                 cmd_buf.WriteTimestamp(PipelineStageFlags.Transfer, queryPool, QUERY_TRANSFER * 2 + 1);
+            }
+        }
+
+        protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
+        {
+            if (renderPass == clusterPass)
+            {
+                var queryPool = query_pool[imageIndex];
+                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
+
+            }
+            else if (renderPass == mainPass)
+            {
+                var queryPool = query_pool[imageIndex];
+                cb.ResetQueryPool(queryPool, 10, 4);
+                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
+
+            }
+        }
+
+        protected override void OnEndSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
+        {
+            if(renderPass == clusterPass)
+            {
+                var queryPool = query_pool[imageIndex];
+                cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);
+            }
+            else if (renderPass == mainPass)
+            {
+                var queryPool = query_pool[imageIndex];
+
+                cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
+
+                ClearBuffers(cb, imageIndex);
             }
         }
 

@@ -6,18 +6,11 @@ using Vulkan;
 namespace SharpGame
 {
     public partial class ClusterRenderer : RenderPipeline
-    {
-        const uint ATTACHMENT_REFERENCE_DEPTH = 0;
-        const uint SUBPASS_DEPTH = 0;
-        const uint SUBPASS_CLUSTER_FLAG = 1;
-       
+    {      
         protected RenderTarget depthRT;
         protected RenderPass clusterRP;
         protected Framebuffer clusterFB;
-
-        protected Format depthFormat = Device.GetSupportedDepthFormat();// Format.D16Unorm;
-
-
+        protected Format depthFormat = Device.GetSupportedDepthFormat();
         protected ResourceLayout clusterLayout1;
         protected ResourceSet[] clusterSet1 = new ResourceSet[2];
 
@@ -33,7 +26,7 @@ namespace SharpGame
 
             var depthStencilAttachment = new []
             {
-                 new AttachmentReference(ATTACHMENT_REFERENCE_DEPTH, ImageLayout.DepthStencilAttachmentOptimal)
+                 new AttachmentReference(0, ImageLayout.DepthStencilAttachmentOptimal)
             };
 
             SubpassDescription[] subpassDescription =
@@ -52,7 +45,7 @@ namespace SharpGame
                 new SubpassDependency
                 {
                     srcSubpass = VulkanNative.SubpassExternal,
-                    dstSubpass = SUBPASS_DEPTH,
+                    dstSubpass = 0,
                     srcStageMask = PipelineStageFlags.BottomOfPipe,
                     dstStageMask = PipelineStageFlags.VertexShader,
                     srcAccessMask = AccessFlags.MemoryWrite,
@@ -73,7 +66,6 @@ namespace SharpGame
             };
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-
             clusterRP = new RenderPass(ref renderPassInfo);
 
             depthRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
@@ -91,48 +83,5 @@ namespace SharpGame
             clusterSet1[1] = new ResourceSet(clusterLayout1, uboCluster[1], grid_flags);
         }
 
-        protected void DrawClustering(GraphicsPass renderPass, RenderView view)
-        {
-            renderPass.BeginRenderPass(view);
-
-            var cmd = renderPass.CmdBuffer;
-
-            if (cmd == null)
-            {
-                cmd = renderPass.GetCmdBuffer();
-                cmd.SetViewport(view.Viewport);
-                cmd.SetScissor(view.ViewRect);
-            }
-
-            var batches = view.batches[0];
-
-            //cmd.ResetQueryPool(QueryPool, 2, 2);
-
-            cmd.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CLUSTERING * 2);
-
-            var pass_id = Pass.GetID("clustering");
-
-            foreach (var batch in batches)
-            {
-                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusterSet1[Graphics.WorkContext]);
-            }
-
-            foreach (var batch in view.batches[1])
-            {
-                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusterSet1[Graphics.WorkContext]);
-            }
-
-            foreach (var batch in view.batches[2])
-            {
-                renderPass.DrawBatch(pass_id, cmd, batch, default, view.Set0, clusterSet1[Graphics.WorkContext]);
-            }
-
-            cmd.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CLUSTERING * 2 + 1);
-
-            cmd.End();
-
-            renderPass.EndRenderPass(view);
-
-        }
     }
 }
