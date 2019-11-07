@@ -38,16 +38,10 @@ namespace SharpGame
         public CommandBuffer CmdBuffer => cmdBuffer;
 
         public Graphics Graphics => Graphics.Instance;
-
         public RenderSystem Renderer => RenderSystem.Instance;
 
         public FrameGraphPass()
         {
-        }
-
-        public FrameGraphPass(RenderPipeline renderPipeline)
-        {
-            renderPipeline.Add(this);
         }
 
         public virtual void Init()

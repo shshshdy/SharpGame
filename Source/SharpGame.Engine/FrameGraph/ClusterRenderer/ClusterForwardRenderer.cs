@@ -10,7 +10,6 @@ namespace SharpGame
         protected RenderTarget depthRT;
         protected RenderPass clusterRP;
         protected Framebuffer clusterFB;
-        protected Format depthFormat = Device.GetSupportedDepthFormat();
 
         public ClusterForwardRenderer()
         {
@@ -23,6 +22,7 @@ namespace SharpGame
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
 
+            Format depthFormat = Device.GetSupportedDepthFormat();
             AttachmentDescription[] attachments =
             {
                 new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)

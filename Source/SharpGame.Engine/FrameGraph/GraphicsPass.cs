@@ -38,10 +38,6 @@ namespace SharpGame
             new FastListPool<CommandBuffer>()
         };
 
-        public GraphicsPass() : this("", 0)
-        {
-        }
-
         public GraphicsPass(string name = "", int workCount = 0)
         {
             PassQueue = PassQueue.Graphics;
@@ -260,11 +256,11 @@ namespace SharpGame
     {
         public uint workImage;
         public RenderPassBeginInfo rpBeginInfo;
-        public Framebuffer Framebuffer => rpBeginInfo.framebuffer;
-        public RenderPass RenderPass => rpBeginInfo.renderPass;
-
         public int currentSubpass;
         public FastList<CommandBuffer> commandList;
+
+        public Framebuffer Framebuffer => rpBeginInfo.framebuffer;
+        public RenderPass RenderPass => rpBeginInfo.renderPass;
 
         public void AddCommandBuffer(CommandBuffer cb)
         {
