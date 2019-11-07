@@ -14,7 +14,7 @@ namespace SharpGame
 
         public List<FrameGraphPass> RenderPassList { get; set; } = new List<FrameGraphPass>();
 
-        protected RenderView renderView;
+        public RenderView View { get; private set; }
 
         bool initialized = false;
         
@@ -29,7 +29,9 @@ namespace SharpGame
                 return;
             }
 
-            this.renderView = renderView;
+            View = renderView;
+
+            OnInit();
 
             foreach (var rp in RenderPassList)
             {
@@ -41,6 +43,8 @@ namespace SharpGame
 
         public void Reset()
         {
+            OnReset();
+
             foreach (var rp in RenderPassList)
             {
                 rp.Reset();
@@ -53,6 +57,8 @@ namespace SharpGame
             {
                 rp.Shutdown();
             }
+
+            OnShutdown();
 
             initialized = false;
         }
@@ -127,22 +133,26 @@ namespace SharpGame
             return RenderPassList.IndexOf(frameGraphPass);
         }
 
-        public void Update(RenderView view)
+        public void Update()
         {
             Profiler.BeginSample("FrameGraph.Update");
+
+            OnUpdate();
+
             foreach (var renderPass in RenderPassList)
             {
-                renderPass.Update(view);
+                renderPass.Update(View);
             }
+
             Profiler.EndSample();
         }
 
-        public void Draw(RenderView view)
+        public void Draw()
         {
             Profiler.BeginSample("FrameGraph.Draw");
             foreach (var renderPass in RenderPassList)
             {
-                renderPass.Draw(view);
+                renderPass.Draw(View);
             }
             Profiler.EndSample();
         }
@@ -174,7 +184,21 @@ namespace SharpGame
             return ((IEnumerable)RenderPassList).GetEnumerator();
         }
 
+        protected virtual void OnInit()
+        {
+        }
 
+        protected virtual void OnReset()
+        {
+        }
+
+        protected virtual void OnUpdate()
+        {
+        }
+
+        protected virtual void OnShutdown()
+        {
+        }
     }
 
     public class ForwardRenderer : RenderPipeline

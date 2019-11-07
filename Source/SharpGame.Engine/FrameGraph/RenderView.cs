@@ -225,7 +225,7 @@ namespace SharpGame
                 RenderPipeline.Init(this);
             }
 
-            RenderPipeline?.Update(this);
+            RenderPipeline?.Update();
 
             if (DrawDebug)
             {
@@ -237,7 +237,7 @@ namespace SharpGame
 
         public void Render()
         {
-            RenderPipeline?.Draw(this);
+            RenderPipeline?.Draw();
 
             if (DrawDebug)
             {
