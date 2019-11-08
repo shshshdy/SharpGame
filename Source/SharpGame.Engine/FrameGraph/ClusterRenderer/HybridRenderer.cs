@@ -7,9 +7,16 @@ namespace SharpGame
 {
     public class HybridRenderer : ClusterRenderer
     {
-        protected RenderTarget depthRT;
-        protected RenderPass geometryRP;
-        protected Framebuffer geometryFB;
+        private RenderTarget albedoRT;
+        private RenderTarget normalRT;
+        private RenderTarget depthRT;
+
+        private Framebuffer geometryFB;
+        private RenderPass geometryRP;
+
+        protected GraphicsPass lightingPass;
+        protected GraphicsPass compositePass;
+        protected ScenePass translucentPass;
 
         public HybridRenderer()
         {
@@ -25,7 +32,15 @@ namespace SharpGame
 
             AttachmentDescription[] attachments =
             {
+                new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
+                new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
                 new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)
+            };
+
+            var colorAttachments = new[]
+            {
+                 new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal),
+                 new AttachmentReference(1, ImageLayout.ColorAttachmentOptimal)
             };
 
             var depthStencilAttachment = new[]
@@ -39,6 +54,7 @@ namespace SharpGame
                 new SubpassDescription
                 {
                     pipelineBindPoint = PipelineBindPoint.Graphics,
+                    pColorAttachments = colorAttachments,
                     pDepthStencilAttachment = depthStencilAttachment
                 },
             };
@@ -51,9 +67,9 @@ namespace SharpGame
                     srcSubpass = VulkanNative.SubpassExternal,
                     dstSubpass = 0,
                     srcStageMask = PipelineStageFlags.BottomOfPipe,
-                    dstStageMask = PipelineStageFlags.VertexShader,
-                    srcAccessMask = AccessFlags.MemoryWrite,
-                    dstAccessMask = AccessFlags.UniformRead,
+                    dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
+                    srcAccessMask = AccessFlags.MemoryRead,
+                    dstAccessMask = AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
 
@@ -61,10 +77,10 @@ namespace SharpGame
                 {
                     srcSubpass = 0,
                     dstSubpass = VulkanNative.SubpassExternal,
-                    srcStageMask = PipelineStageFlags.FragmentShader,
-                    dstStageMask = PipelineStageFlags.ComputeShader,
-                    srcAccessMask =  AccessFlags.ShaderWrite,
-                    dstAccessMask = AccessFlags.ShaderRead,
+                    srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
+                    dstStageMask = PipelineStageFlags.BottomOfPipe,
+                    srcAccessMask = AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite,
+                    dstAccessMask = AccessFlags.MemoryRead,
                     dependencyFlags = DependencyFlags.ByRegion
                 },
             };
@@ -72,10 +88,24 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             geometryRP = new RenderPass(ref renderPassInfo);
 
-            depthRT = Graphics.DepthRT;
-            geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { depthRT.view });
+            albedoRT = new RenderTarget(width, height, 1, Format.R8g8b8a8Unorm,
+                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
+                        SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-            //Renderer.AddDebugImage(rtDepth.view);
+            normalRT = new RenderTarget(width, height, 1, Format.R8g8b8a8Unorm,
+                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
+                        SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
+
+            depthRT = new RenderTarget(width, height, 1, depthFormat,
+                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth,
+                        SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal);
+
+            geometryFB = Framebuffer.Create(geometryRP, width, height, 1,
+                new[] { albedoRT.view, normalRT.view, depthRT.view });
+
+            Renderer.AddDebugImage(albedoRT.view);
+            Renderer.AddDebugImage(normalRT.view);
+            Renderer.AddDebugImage(depthRT.view);
 
         }
 
@@ -83,7 +113,7 @@ namespace SharpGame
         {
             yield return new ShadowPass();
 
-            clusterPass = new ScenePass("gbuffer")
+            clustering = new ScenePass("gbuffer")
             {
                 PassQueue = PassQueue.EarlyGraphics,                
                 RenderPass = geometryRP,
@@ -91,21 +121,19 @@ namespace SharpGame
                 Set1 = clusterSet1
             };
 
-            yield return clusterPass;
+            yield return clustering;
 
-            lightPass = new ComputePass(ComputeLight);
-            yield return lightPass;
+            lightCull = new ComputePass(ComputeLight);
+            yield return lightCull;
 
-            mainPass = new ScenePass("cluster_forward")
+            translucentPass = new ScenePass("cluster_forward")
             {
-#if NO_DEPTHWRITE
-                RenderPass = Graphics.CreateRenderPass(true, false),
-#endif
                 Set1 = resourceSet0,
                 Set2 = resourceSet1,
+                BlendFlags = BlendFlags.AlphaBlend
             };
 
-            yield return mainPass;
+            yield return translucentPass;
         }
 
     }

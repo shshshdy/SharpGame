@@ -73,13 +73,13 @@ namespace SharpGame
         protected DoubleBuffer light_pos_ranges;
         protected DoubleBuffer light_colors;
 
-        private Buffer grid_flags;
-        private Buffer light_bounds;
-        private Buffer grid_light_counts;
-        private Buffer grid_light_count_total;
-        private Buffer grid_light_count_offsets;
-        private Buffer light_list;
-        private Buffer grid_light_counts_compare;
+        private Buffer gridFlags;
+        private Buffer lightBounds;
+        private Buffer gridLightCounts;
+        private Buffer gridLightCountTotal;
+        private Buffer gridLightCountOffsets;
+        private Buffer lightList;
+        private Buffer gridLightCountsCompare;
 
         protected ResourceLayout resourceLayout0;
         protected ResourceLayout resourceLayout1;
@@ -95,9 +95,8 @@ namespace SharpGame
         public ref QueryData QueryData => ref queryData[Graphics.WorkImage];
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
-        protected ScenePass clusterPass;
-        protected ComputePass lightPass;
-        protected ScenePass mainPass;
+        protected ScenePass clustering;
+        protected ComputePass lightCull;
 
         public ClusterRenderer()
         {
@@ -160,13 +159,13 @@ namespace SharpGame
             light_colors.CreateView(Format.R8g8b8a8Unorm);
 
             uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
-            grid_flags = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count, Format.R8Uint, sharingMode, queue_families);
-            light_bounds = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, MAX_NUM_LIGHTS * 6 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // max tile count 1d (z 256)
-            grid_light_counts = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
-            grid_light_count_total = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count total * max grid count
-            grid_light_count_offsets = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // same as above
-            light_list = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light idx
-            grid_light_counts_compare = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
+            gridFlags = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count, Format.R8Uint, sharingMode, queue_families);
+            lightBounds = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, MAX_NUM_LIGHTS * 6 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // max tile count 1d (z 256)
+            gridLightCounts = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
+            gridLightCountTotal = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count total * max grid count
+            gridLightCountOffsets = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // same as above
+            lightList = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light idx
+            gridLightCountsCompare = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
 
             resourceLayout0 = new ResourceLayout
             {
@@ -190,8 +189,8 @@ namespace SharpGame
             resourceSet0[1] = new ResourceSet(resourceLayout0, uboCluster[1], light_pos_ranges[1], light_colors[1]);
 
             resourceSet1[0] = resourceSet1[1] = new ResourceSet(resourceLayout1,
-                grid_flags, light_bounds, grid_light_counts, grid_light_count_total,
-                grid_light_count_offsets, light_list, grid_light_counts_compare);
+                gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
+                gridLightCountOffsets, lightList, gridLightCountsCompare);
 
 
             clusterLayout1 = new ResourceLayout
@@ -200,8 +199,8 @@ namespace SharpGame
                 new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
             };
 
-            clusterSet1[0] = new ResourceSet(clusterLayout1, uboCluster[0], grid_flags);
-            clusterSet1[1] = new ResourceSet(clusterLayout1, uboCluster[1], grid_flags);
+            clusterSet1[0] = new ResourceSet(clusterLayout1, uboCluster[0], gridFlags);
+            clusterSet1[1] = new ResourceSet(clusterLayout1, uboCluster[1], gridFlags);
         }
 
         protected virtual IEnumerator<FrameGraphPass> CreateRenderPass()
@@ -250,10 +249,10 @@ namespace SharpGame
             {
                 BufferMemoryBarrier* transfer_barriers = stackalloc BufferMemoryBarrier[]
                 {
-                    new BufferMemoryBarrier(grid_flags, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
-                    new BufferMemoryBarrier(grid_light_counts, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
-                    new BufferMemoryBarrier(grid_light_count_offsets, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
-                    new BufferMemoryBarrier(light_list, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite)
+                    new BufferMemoryBarrier(gridFlags, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
+                    new BufferMemoryBarrier(gridLightCounts, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
+                    new BufferMemoryBarrier(gridLightCountOffsets, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
+                    new BufferMemoryBarrier(lightList, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite)
                 };
 
                 cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_TRANSFER * 2);
@@ -266,20 +265,20 @@ namespace SharpGame
                             transfer_barriers,
                             0, null);
 
-                cmd_buf.FillBuffer(grid_flags, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(light_bounds, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(grid_light_counts, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(grid_light_count_offsets, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(grid_light_count_total, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(light_list, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(grid_light_counts_compare, 0, Buffer.WholeSize, 0);
+                cmd_buf.FillBuffer(gridFlags, 0, Buffer.WholeSize, 0);
+                cmd_buf.FillBuffer(lightBounds, 0, Buffer.WholeSize, 0);
+                cmd_buf.FillBuffer(gridLightCounts, 0, Buffer.WholeSize, 0);
+                cmd_buf.FillBuffer(gridLightCountOffsets, 0, Buffer.WholeSize, 0);
+                cmd_buf.FillBuffer(gridLightCountTotal, 0, Buffer.WholeSize, 0);
+                cmd_buf.FillBuffer(lightList, 0, Buffer.WholeSize, 0);
+                cmd_buf.FillBuffer(gridLightCountsCompare, 0, Buffer.WholeSize, 0);
 
                 BufferMemoryBarrier* transfer_barriers1 = stackalloc BufferMemoryBarrier[]
                 {
-                    new BufferMemoryBarrier(grid_flags, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
-                    new BufferMemoryBarrier(grid_light_counts, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
-                    new BufferMemoryBarrier(grid_light_count_offsets, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
-                    new BufferMemoryBarrier(light_list, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite)
+                    new BufferMemoryBarrier(gridFlags, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
+                    new BufferMemoryBarrier(gridLightCounts, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
+                    new BufferMemoryBarrier(gridLightCountOffsets, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
+                    new BufferMemoryBarrier(lightList, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite)
                 };
 
                 cmd_buf.PipelineBarrier(PipelineStageFlags.Transfer,

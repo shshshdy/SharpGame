@@ -24,19 +24,6 @@ Shader "LitSolid"
 		
 	}
 
-	Pass "early_z"
-	{
-		CullMode = Back
-		
-		FrontFace = CounterClockwise
-
-		@VertexShader
-		{
-			#include "clustering.vert"
-		}
-
-	}
-
     Pass "gbuffer"
     {
         CullMode = Back

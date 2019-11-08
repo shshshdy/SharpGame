@@ -30,18 +30,19 @@ namespace SharpGame
 
     public class Framebuffer : DisposeBase
     {
-        internal VkFramebuffer handle;
         public RenderPass renderPass { get; }
         public uint Width { get; }
         public uint Height { get; }
 
+        internal VkFramebuffer handle;
+
         public Framebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
         {
             renderPass = framebufferCreateInfo.renderPass;
-            framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo vkFramebufferCreateInfo);
-            handle = Device.CreateFramebuffer(ref vkFramebufferCreateInfo);
-            Width = vkFramebufferCreateInfo.width;
-            Height = vkFramebufferCreateInfo.height;
+            framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo native);
+            handle = Device.CreateFramebuffer(ref native);
+            Width = native.width;
+            Height = native.height;
         }
 
         protected override void Destroy(bool disposing)

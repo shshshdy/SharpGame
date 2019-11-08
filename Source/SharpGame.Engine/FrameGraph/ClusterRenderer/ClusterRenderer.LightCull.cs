@@ -42,8 +42,8 @@ namespace SharpGame
             pipelineLayout = new PipelineLayout(computeLayout0, computeLayout1);
 
             computeSet1 = new ResourceSet(computeLayout1,
-                grid_flags, light_bounds, grid_light_counts, grid_light_count_total,
-                grid_light_count_offsets, light_list, grid_light_counts_compare);
+                gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
+                gridLightCountOffsets, lightList, gridLightCountsCompare);
         }
 
         private void UpdateLight(RenderView view)
@@ -102,10 +102,10 @@ namespace SharpGame
 
                 cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2 + 1);
 
-                barriers[0] = new BufferMemoryBarrier(light_bounds, AccessFlags.ShaderRead | AccessFlags.ShaderWrite,
+                barriers[0] = new BufferMemoryBarrier(lightBounds, AccessFlags.ShaderRead | AccessFlags.ShaderWrite,
                                 AccessFlags.ShaderRead | AccessFlags.ShaderWrite);
                 barriers[1] = barriers[0];
-                barriers[1].Buffer = grid_light_counts;
+                barriers[1].Buffer = gridLightCounts;
                 cmd_buf.PipelineBarrier(PipelineStageFlags.ComputeShader,
                             PipelineStageFlags.ComputeShader,
                             DependencyFlags.ByRegion,
@@ -128,8 +128,8 @@ namespace SharpGame
 
                 cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_GRID_OFFSETS * 2 + 1);
 
-                barriers[0].Buffer = grid_light_count_total;
-                barriers[1].Buffer = grid_light_count_offsets;
+                barriers[0].Buffer = gridLightCountTotal;
+                barriers[1].Buffer = gridLightCountOffsets;
                 cmd_buf.PipelineBarrier(PipelineStageFlags.ComputeShader,
                             PipelineStageFlags.ComputeShader,
                             DependencyFlags.ByRegion,

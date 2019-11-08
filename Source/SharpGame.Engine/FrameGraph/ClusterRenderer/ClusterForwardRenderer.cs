@@ -7,6 +7,7 @@ namespace SharpGame
 {
     public class ClusterForwardRenderer : ClusterRenderer
     {
+        protected ScenePass mainPass;
         protected RenderTarget depthRT;
         protected RenderPass clusterRP;
         protected Framebuffer clusterFB;
@@ -83,7 +84,7 @@ namespace SharpGame
         {
             yield return new ShadowPass();
 
-            clusterPass = new ScenePass("clustering")
+            clustering = new ScenePass("clustering")
             {
                 PassQueue = PassQueue.EarlyGraphics,
                 RenderPass = clusterRP,
@@ -91,10 +92,10 @@ namespace SharpGame
                 Set1 = clusterSet1
             };
 
-            yield return clusterPass;
+            yield return clustering;
 
-            lightPass = new ComputePass(ComputeLight);
-            yield return lightPass;
+            lightCull = new ComputePass(ComputeLight);
+            yield return lightCull;
 
             mainPass = new ScenePass("cluster_forward")
             {
@@ -110,7 +111,7 @@ namespace SharpGame
 
         protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
         {
-            if (renderPass == clusterPass)
+            if (renderPass == clustering)
             {
                 var queryPool = query_pool[imageIndex];
                 cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
@@ -127,7 +128,7 @@ namespace SharpGame
 
         protected override void OnEndSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
         {
-            if (renderPass == clusterPass)
+            if (renderPass == clustering)
             {
                 var queryPool = query_pool[imageIndex];
                 cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);

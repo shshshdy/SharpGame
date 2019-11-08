@@ -66,19 +66,6 @@ namespace SharpGame
             initialized = false;
         }
 
-        public T Get<T>() where T : FrameGraphPass
-        {
-            foreach(var rp in RenderPassList)
-            {
-                if(rp is T)
-                {
-                    return rp as T;
-                }
-            }
-            return null;
-        }
-
-
         public GraphicsPass AddGraphicsPass(Action<GraphicsPass, RenderView> onDraw)
         {
             var renderPass = new GraphicsPass
@@ -142,11 +129,6 @@ namespace SharpGame
             {
                 renderPass.Init();
             }
-        }
-
-        public int IndexOf(FrameGraphPass frameGraphPass)
-        {
-            return RenderPassList.IndexOf(frameGraphPass);
         }
 
         public void Update()
