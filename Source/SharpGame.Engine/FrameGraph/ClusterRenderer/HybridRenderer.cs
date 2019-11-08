@@ -15,7 +15,8 @@ namespace SharpGame
         private RenderPass geometryRP;
 
         protected ScenePass geometryPass;
-        protected GraphicsPass lightingPass;
+        protected ScenePass translucentClustering;
+        protected GraphicsPass deferredLighting;
         protected ScenePass translucentPass;
 
         public HybridRenderer()
@@ -123,6 +124,16 @@ namespace SharpGame
             };
 
             yield return geometryPass;
+            /*
+            translucentClustering = new ScenePass("clustering")
+            {
+                PassQueue = PassQueue.EarlyGraphics,
+                RenderPass = clusterRP,
+                Framebuffer = clusterFB,
+                Set1 = clusterSet1
+            };
+
+            yield return translucentClustering;*/
 
             lightCull = new ComputePass(ComputeLight);
             yield return lightCull;
