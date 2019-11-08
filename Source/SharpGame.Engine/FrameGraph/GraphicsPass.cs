@@ -16,11 +16,12 @@ namespace SharpGame
         public Framebuffer[] Framebuffers { get; set; }
         [IgnoreDataMember]
         public Framebuffer Framebuffer { set => Framebuffers = new[] { value, value, value }; }
-        public ClearColorValue ClearColorValue { get; set; } = new ClearColorValue(0.25f, 0.25f, 0.25f, 1);
-        public ClearDepthStencilValue ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
+        public ClearColorValue[] ClearColorValue { get; set; } = { new ClearColorValue(0.25f, 0.25f, 0.25f, 1) };
+        public ClearDepthStencilValue? ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
 
         public Action<GraphicsPass, RenderView> OnDraw { get; set; }
 
+        private ClearValue[] clearValues = new ClearValue[5];
         protected int workCount = 16;
         protected FastList<CommandBufferPool[]> cmdBufferPools = new FastList<CommandBufferPool[]>();
 
@@ -134,10 +135,39 @@ namespace SharpGame
                 renderArea = new Rect2D(0, 0, Graphics.Width, Graphics.Height);
             }
 
-            BeginRenderPass(framebuffer, renderArea, ClearColorValue, ClearDepthStencilValue);
+            int clearValuesCount = 0;
+            if(ClearColorValue != null)
+            {
+                clearValuesCount = ClearColorValue.Length;
+            }
+
+            if(ClearDepthStencilValue.HasValue)
+            {
+                clearValuesCount += 1;
+            }
+
+            if(clearValues.Length != clearValuesCount)
+            {
+                Array.Resize(ref clearValues, clearValuesCount);
+            }
+
+            if (ClearColorValue != null)
+            {
+                for (int i = 0; i < ClearColorValue.Length; i++)
+                {
+                    clearValues[i] = ClearColorValue[i];
+                }
+            }
+
+            if (ClearDepthStencilValue.HasValue)
+            {
+                clearValues[clearValues.Length - 1] = ClearDepthStencilValue.Value;
+            }
+
+            BeginRenderPass(framebuffer, renderArea, clearValues);
         }
 
-        public void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
+        public void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, ClearValue[] clearValues)
         {
             if(inRenderPass)
             {

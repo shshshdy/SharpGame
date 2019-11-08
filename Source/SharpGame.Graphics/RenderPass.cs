@@ -8,12 +8,16 @@ namespace SharpGame
 {
     public class RenderPass : DisposeBase
     {
+        public uint ColorAttachmentCount { get; }
+
         internal VkRenderPass handle;
 
         public RenderPass(ref RenderPassCreateInfo renderPassCreateInfo)
         {
             renderPassCreateInfo.ToNative(out VkRenderPassCreateInfo vkRenderPassCreateInfo);
             handle = Device.CreateRenderPass(ref vkRenderPassCreateInfo);
+            var pColorAttach = renderPassCreateInfo.pSubpasses[0].pColorAttachments;
+            ColorAttachmentCount = (uint)(pColorAttach?.Length ?? 1);
         }
 
         protected override void Destroy(bool disposing)

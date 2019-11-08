@@ -7,10 +7,12 @@ namespace SharpGame
 {
     public class ClusterForwardRenderer : ClusterRenderer
     {
-        protected ScenePass mainPass;
         protected RenderTarget depthRT;
         protected RenderPass clusterRP;
         protected Framebuffer clusterFB;
+
+        protected ScenePass clustering;
+        protected ScenePass mainPass;
 
         public ClusterForwardRenderer()
         {

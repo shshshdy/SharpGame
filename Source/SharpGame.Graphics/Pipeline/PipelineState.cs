@@ -235,11 +235,21 @@ namespace SharpGame
             }
         };
 
-        public unsafe void ToNative(out VkPipelineColorBlendStateCreateInfo native)
+        public unsafe void ToNative(out VkPipelineColorBlendStateCreateInfo native, uint attachmentCount)
         {
             native = VkPipelineColorBlendStateCreateInfo.New();
             native.logicOpEnable = logicOpEnable;
             native.logicOp = logicOp;
+
+            if(attachmentCount > attachments.Length)
+            {
+                Array.Resize(ref attachments, (int)attachmentCount);
+                for(int i = 1; i < attachmentCount; i++)
+                {
+                    attachments[i] = attachments[0];
+                }
+            }
+
             native.attachmentCount = (uint)attachments.Length;
             native.pAttachments = (VkPipelineColorBlendAttachmentState*)Utilities.AsPointer(ref attachments[0]);
             native.blendConstants_0 = blendConstants_0;

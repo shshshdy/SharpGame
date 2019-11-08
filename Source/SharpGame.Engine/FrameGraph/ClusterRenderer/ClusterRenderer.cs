@@ -95,7 +95,6 @@ namespace SharpGame
         public ref QueryData QueryData => ref queryData[Graphics.WorkImage];
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
-        protected ScenePass clustering;
         protected ComputePass lightCull;
 
         public ClusterRenderer()

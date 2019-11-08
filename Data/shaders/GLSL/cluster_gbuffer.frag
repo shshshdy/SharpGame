@@ -29,7 +29,7 @@ vec3 DecodeNormal(vec4 normalInput)
 
 void main ()
 {
-	vec4 albedo = vec4(1)
+	vec4 albedo = vec4(1);
 #ifdef ALPHA_TEST
     albedo = texture(DiffMap, inUV);
     if (albedo.a < 0.5) {

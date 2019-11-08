@@ -45,17 +45,15 @@ namespace SharpGame
             var set1 = Set1?[Graphics.WorkContext] ?? view.Set1;
             var set2 = Set2?[Graphics.WorkContext];
 
-            var batches = view.opaqueBatches;
-
             if((BlendFlags & BlendFlags.Solid) != 0)
             {
                 if (MultiThreaded)
                 {
-                    DrawBatchesMT(view, batches, set0, set1, set2);
+                    DrawBatchesMT(view, view.opaqueBatches, set0, set1, set2);
                 }
                 else
                 {
-                    DrawBatches(view, batches, CmdBuffer, set0, set1, set2);
+                    DrawBatches(view, view.opaqueBatches, CmdBuffer, set0, set1, set2);
                 }
             }
         

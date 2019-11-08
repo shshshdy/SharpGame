@@ -9,10 +9,8 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = 0)]
     public class Lighting : Sample
     {
-        RenderPipeline frameGraph;
-        List<Light> lights = new List<Light>();
-        FastList<Spherical> sphericals = new FastList<Spherical>();
         ClusterRenderer clusterRenderer;
+        List<Light> lights = new List<Light>();
 
         public override void Init()
         {

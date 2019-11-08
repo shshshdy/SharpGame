@@ -471,7 +471,7 @@ namespace SharpGame
             depthStencilState_.ToNative(out VkPipelineDepthStencilStateCreateInfo depthStencilState);
             pipelineCreateInfo.pDepthStencilState = &depthStencilState;
 
-            ColorBlendState.ToNative(out VkPipelineColorBlendStateCreateInfo colorBlendState);
+            ColorBlendState.ToNative(out var colorBlendState, renderPass.ColorAttachmentCount);
             pipelineCreateInfo.pColorBlendState = &colorBlendState;
 
             VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;

@@ -1,8 +1,12 @@
-﻿namespace SharpGame.Samples
+﻿using System.Collections.Generic;
+
+namespace SharpGame.Samples
 {
     [SampleDesc(sortOrder = 2)]
     public class Sponza : Sample
     {
+        ClusterRenderer clusterRenderer;
+        List<Light> lights = new List<Light>();
         public override void Init()
         {
             scene = new Scene
@@ -23,19 +27,41 @@
                 },
             };
 
-            {
-                var model = Resources.Load<Model>("Models/crysponza_bubbles/sponza.obj");
-                var node = scene.CreateChild("sponza");
-                var staticModel = node.AddComponent<StaticModel>();
-                //staticModel.CastShadows = true;
-                staticModel.SetModel(model);
-            }
+            var model = Resources.Load<Model>("Models/crysponza_bubbles/sponza.obj");
+            var node = scene.CreateChild("sponza");
+            var staticModel = node.AddComponent<StaticModel>();
+            //staticModel.CastShadows = true;
+            staticModel.SetModel(model);
+            
 
             camera = scene.GetComponent<Camera>(true);
-            
-            MainView.Attach(camera, scene);
+
+            BoundingBox aabb = staticModel.WorldBoundingBox;
+            Lighting.SetupLights(scene, aabb, 1024);
+            scene.GetComponents(lights, true);
+
+            //clusterRenderer = new ClusterForwardRenderer();
+            clusterRenderer = new HybridRenderer();
+            MainView.Attach(camera, scene, clusterRenderer);
 
         }
+
+        vec3 center = vec3.Zero;
+        public override void Update()
+        {
+            base.Update();
+
+            Spherical s = new Spherical();
+            foreach (var l in lights)
+            {
+                s.Set(l.Node.Position - center);
+                s.el.z += 0.001f;
+                s.Restrict();
+                var v = s.GetVec();
+                l.Node.Position = center + v;
+            }
+        }
+
     }
 }
 

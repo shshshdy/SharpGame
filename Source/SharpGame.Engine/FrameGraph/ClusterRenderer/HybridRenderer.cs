@@ -14,8 +14,8 @@ namespace SharpGame
         private Framebuffer geometryFB;
         private RenderPass geometryRP;
 
+        protected ScenePass geometryPass;
         protected GraphicsPass lightingPass;
-        protected GraphicsPass compositePass;
         protected ScenePass translucentPass;
 
         public HybridRenderer()
@@ -45,7 +45,7 @@ namespace SharpGame
 
             var depthStencilAttachment = new[]
             {
-                 new AttachmentReference(0, ImageLayout.DepthStencilAttachmentOptimal)
+                 new AttachmentReference(2, ImageLayout.DepthStencilAttachmentOptimal)
             };
 
             SubpassDescription[] subpassDescription =
@@ -105,7 +105,7 @@ namespace SharpGame
 
             Renderer.AddDebugImage(albedoRT.view);
             Renderer.AddDebugImage(normalRT.view);
-            Renderer.AddDebugImage(depthRT.view);
+            //Renderer.AddDebugImage(depthRT.view);
 
         }
 
@@ -113,19 +113,20 @@ namespace SharpGame
         {
             yield return new ShadowPass();
 
-            clustering = new ScenePass("gbuffer")
+            geometryPass = new ScenePass("gbuffer")
             {
                 PassQueue = PassQueue.EarlyGraphics,                
                 RenderPass = geometryRP,
                 Framebuffer = geometryFB,
+                ClearColorValue = new [] { new ClearColorValue(0.25f, 0.25f, 0.25f, 1), new ClearColorValue(0, 0, 0, 1) },
                 Set1 = clusterSet1
             };
 
-            yield return clustering;
+            yield return geometryPass;
 
             lightCull = new ComputePass(ComputeLight);
             yield return lightCull;
-
+            
             translucentPass = new ScenePass("cluster_forward")
             {
                 Set1 = resourceSet0,
@@ -136,5 +137,38 @@ namespace SharpGame
             yield return translucentPass;
         }
 
+        protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
+        {
+            if (renderPass == geometryPass)
+            {
+                var queryPool = query_pool[imageIndex];
+                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
+
+            }
+            else if (renderPass == translucentPass)
+            {
+                var queryPool = query_pool[imageIndex];
+                cb.ResetQueryPool(queryPool, 10, 4);
+                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
+
+            }
+        }
+
+        protected override void OnEndSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
+        {
+            if (renderPass == geometryPass)
+            {
+                var queryPool = query_pool[imageIndex];
+                cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);
+            }
+            else if (renderPass == translucentPass)
+            {
+                var queryPool = query_pool[imageIndex];
+
+                cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
+
+                ClearBuffers(cb, imageIndex);
+            }
+        }
     }
 }

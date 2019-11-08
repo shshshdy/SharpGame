@@ -64,9 +64,7 @@ namespace SharpGame
 
         public Semaphore PresentComplete { get; }
         public Semaphore RenderComplete { get; }
-
-        private Fence computeFence;
-
+        
         private RenderTarget depthStencil;
         public RenderTarget DepthRT => depthStencil;
 
@@ -80,7 +78,6 @@ namespace SharpGame
             public Semaphore acquireSemaphore;
             public Semaphore preRenderSemaphore;
             public Semaphore computeSemaphore;
-
             public Semaphore renderSemaphore;
             public Fence presentFence;
         }
@@ -111,8 +108,6 @@ namespace SharpGame
             // Create synchronization objects
             PresentComplete = new Semaphore();
             RenderComplete = new Semaphore();
-
-            computeFence = new Fence(FenceCreateFlags.None);
 
             commandPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
 

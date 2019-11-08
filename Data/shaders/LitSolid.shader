@@ -35,6 +35,7 @@ Shader "LitSolid"
 
         @PixelShader
         {
+#define ALPHA_TEST
 #include "cluster_gbuffer.frag"
         }
     }
