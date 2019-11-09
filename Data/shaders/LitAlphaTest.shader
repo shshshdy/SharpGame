@@ -18,29 +18,74 @@ Shader "LitAlphaTest"
 		@PixelShader
 		{
             #define SHADOW
-#define ALPHA_TEST
+			#define ALPHA_TEST
             #define ALPHA_MAP
             #include "general.frag"
 		}
 		
 	}
 
-	Pass "early_z"
+	Pass "gbuffer"
 	{
 		CullMode = Back
-		
-		FrontFace = CounterClockwise
 
 		@VertexShader
 		{
-#define ALPHA_TEST
+#include "cluster_gbuffer.vert"
+		}
+
+		@PixelShader
+		{
+			#define ALPHA_TEST
+			#define ALPHA_MAP
+			#include "cluster_gbuffer.frag"
+		}
+	}
+
+	Pass "clustering"
+	{
+		CullMode = Back
+
+		FrontFace = CounterClockwise
+		//DepthWrite = false
+
+		@VertexShader
+		{
+			#define ALPHA_TEST
 			#include "clustering.vert"
 		}
 
 		@PixelShader
 		{
-#define ALPHA_TEST    
+			#define ALPHA_TEST
+			#define ALPHA_MAP
 			#include "clustering.frag"
+		}
+
+	}
+
+	Pass "cluster_forward"
+	{
+		CullMode = Back
+
+		FrontFace = CounterClockwise
+		//DepthWrite = false
+
+		PushConstant Material_properties
+		{
+			StageFlags = Fragment
+			Offset = 0
+			Size = 32
+		}
+
+		@VertexShader
+		{
+#include "cluster_forward.vert"
+		}
+
+		@PixelShader
+		{
+#include "cluster_forward.frag"
 		}
 
 	}

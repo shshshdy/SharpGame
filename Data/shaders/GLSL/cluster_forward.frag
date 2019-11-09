@@ -41,7 +41,6 @@ void main()
 {
     vec4 mtl_c_diffuse = texture(DiffMap, uv_in);// * mtl_in.diffuse;
 
-	//frag_color = mtl_c_diffuse; return;
     vec3 ambient = vec3(AMBIENT_GLOBAL);
 
     mat3 invBTN = inNormal;// inverse(transpose(mat3(normalize(world_tangent_in), normalize(world_bitangent_in), normalize(world_normal_in))));
@@ -64,41 +63,35 @@ void main()
     uvec3 grid_coord = view_pos_to_grid_coord(gl_FragCoord.xy, view_pos.z);
     int grid_idx = grid_coord_to_grid_idx(grid_coord.x, grid_coord.y, grid_coord.z);
 	
-	//frag_color = vec4(grid_coord/10.0f, 1); return;
-
-	//frag_color = vec4(light_color, 1); return;
-
     vec3 lighting = vec3(0.f);
     if (imageLoad(grid_flags, grid_idx).r == 1)
     {
 		uint offset = imageLoad(grid_light_count_offsets, grid_idx).r;
 		uint light_count = imageLoad(grid_light_counts, grid_idx).r;
 
-		//frag_color = vec4(offset, /*light_count*/0, 1, 1); return;
-
 		for (uint i = 0; i < light_count; i ++)
 		{
-			int light_idx =/*int(i);//*/ int(imageLoad(light_list, int(offset + i)).r);
+			int light_idx = int(imageLoad(light_list, int(offset + i)).r);
 			vec4 light_pos_range = imageLoad(light_pos_ranges, light_idx);
 			float dist = distance(light_pos_range.xyz, world_pos_in.xyz);
-			if (dist < light_pos_range.w) {
-			vec3 l = normalize(light_pos_range.xyz - world_pos_in.xyz);
-			vec3 h = normalize(0.5f * (v + l));
+			if (dist < light_pos_range.w) 
+			{
+				vec3 l = normalize(light_pos_range.xyz - world_pos_in.xyz);
+				vec3 h = normalize(0.5f * (v + l));
 
-			float lambertien = max(dot(world_normal, l), 0.f);
-			float atten = max(1.f - max(0.f, dist / light_pos_range.w), 0.f);
+				float lambertien = max(dot(world_normal, l), 0.f);
+				float atten = max(1.f - max(0.f, dist / light_pos_range.w), 0.f);
 
-			vec3 specular;
-			if (mtl_in.specular_exponent > 0.f) {
-				vec3 blinn_phong_specular = mtl_c_specular * pow(max(0.f, dot(h, world_normal)), mtl_in.specular_exponent);
-				specular = fresnel_specular + blinn_phong_specular;
-			} else {
-				specular = 0.5f * fresnel_specular;
-			}
+				vec3 specular;
+				if (mtl_in.specular_exponent > 0.f) {
+					vec3 blinn_phong_specular = mtl_c_specular * pow(max(0.f, dot(h, world_normal)), mtl_in.specular_exponent);
+					specular = fresnel_specular + blinn_phong_specular;
+				} else {
+					specular = 0.5f * fresnel_specular;
+				}
 
-			vec3 light_color = imageLoad(light_colors, light_idx).rgb;
-			//frag_color = vec4(light_color, 1); return;
-			lighting += light_color * lambertien * atten * (mtl_c_diffuse.rgb + specular);
+				vec3 light_color = imageLoad(light_colors, light_idx).rgb;
+				lighting += light_color * lambertien * atten * (mtl_c_diffuse.rgb + specular);
 			}
 		}
     }

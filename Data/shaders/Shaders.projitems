@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Basic.shader" />
     <None Include="$(MSBuildThisFileDirectory)Brdf.shader" />
+    <None Include="$(MSBuildThisFileDirectory)ClusterDeferred.shader" />
     <None Include="$(MSBuildThisFileDirectory)Common\Clustering.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\GridCoord.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Lighting.glsl" />
@@ -32,6 +33,8 @@
     <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_gbuffer.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\debug.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\debug.vert" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_deferred.frag" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_deferred.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\depth.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\depth.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_gbuffer.frag" />

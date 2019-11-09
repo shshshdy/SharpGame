@@ -20,6 +20,14 @@ namespace SharpGame
         protected ScenePass translucentClustering;
         protected GraphicsPass compositePass;
         protected ScenePass translucentPass;
+        protected Shader clusterDeferred;
+        private Pipeline pipeline;
+
+        ResourceLayout deferredLayout0;
+        ResourceLayout deferredLayout1;
+
+        ResourceSet deferredSet0;
+        ResourceSet deferredSet1;
 
         public HybridRenderer()
         {
@@ -112,6 +120,17 @@ namespace SharpGame
 
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
 
+            clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
+            pipeline = clusterDeferred.Main.CreateGraphicsPipeline(Graphics.RenderPass, 0, null, PrimitiveTopology.TriangleList);
+
+
+            deferredLayout0 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                //new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+            };
+            deferredSet0 = new ResourceSet(deferredLayout0, albedoRT, normalRT/*, depthRT*/);
         }
 
         protected override IEnumerator<FrameGraphPass> CreateRenderPass()
@@ -141,15 +160,22 @@ namespace SharpGame
 
             lightCull = new ComputePass(ComputeLight);
             yield return lightCull;
-
+           /*
             compositePass = new GraphicsPass("composite")
             {
+                RenderPass = Graphics.RenderPass,
+                Framebuffers = Graphics.Framebuffers,
                 OnDraw = Composite
             };
-            yield return compositePass;
-
+            yield return compositePass;*/
+            
+            //var renderPass = Graphics.CreateRenderPass(false, false);
             translucentPass = new ScenePass("cluster_forward")
             {
+                //RenderPass = renderPass,
+                //Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
+                OnDraw = Composite,
+
                 Set1 = resourceSet0,
                 Set2 = resourceSet1,
                 BlendFlags = BlendFlags.AlphaBlend
@@ -160,7 +186,26 @@ namespace SharpGame
 
         void Composite(GraphicsPass graphicsPass, RenderView view)
         {
+            graphicsPass.BeginRenderPass(view);
+            var cmd = graphicsPass.CmdBuffer;
 
+            if(cmd == null)
+            {
+                cmd = graphicsPass.GetCmdBuffer();
+                cmd.SetViewport(view.Viewport);
+                cmd.SetScissor(view.ViewRect);
+            }
+
+            var pass = clusterDeferred.Main;
+            cmd.BindPipeline(PipelineBindPoint.Graphics, pipeline);
+            cmd.BindGraphicsResourceSet(pass.PipelineLayout, 0, deferredSet0);
+            //cmd.BindGraphicsResourceSet(pass.PipelineLayout, 1, deferredSet1);
+            cmd.Draw(3, 1, 0, 0);
+            cmd.End();
+
+            var scenePass = graphicsPass as ScenePass;
+            scenePass.DrawScene(view, BlendFlags.AlphaBlend);
+            graphicsPass.EndRenderPass(view);
         }
 
         protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)

@@ -482,7 +482,7 @@ namespace SharpGame
             }
 
             var handle = new Pipeline(Device.CreateGraphicsPipeline(ref pipelineCreateInfo));
-            pipelines.TryAdd(vertexInput.GetHashCode(), handle);
+            pipelines.TryAdd(vertexInput?.GetHashCode()??0, handle);
             return handle;
         }
 

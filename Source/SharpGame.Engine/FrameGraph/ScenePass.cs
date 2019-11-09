@@ -40,12 +40,19 @@ namespace SharpGame
         public void DrawScene(RenderView view)
         {
             BeginRenderPass(view);
+            DrawScene(view, BlendFlags);
+            EndRenderPass(view);
+
+        }
+
+        public void DrawScene(RenderView view, BlendFlags blendFlags)
+        {
 
             var set0 = Set0?[Graphics.WorkContext] ?? view.Set0;
             var set1 = Set1?[Graphics.WorkContext] ?? view.Set1;
             var set2 = Set2?[Graphics.WorkContext];
 
-            if((BlendFlags & BlendFlags.Solid) != 0)
+            if ((blendFlags & BlendFlags.Solid) != 0)
             {
                 if (MultiThreaded)
                 {
@@ -56,19 +63,17 @@ namespace SharpGame
                     DrawBatches(view, view.opaqueBatches, CmdBuffer, set0, set1, set2);
                 }
             }
-        
 
-            if ((BlendFlags & BlendFlags.AlphaTest) != 0 && view.alphaTestBatches.Count > 0)
+
+            if ((blendFlags & BlendFlags.AlphaTest) != 0 && view.alphaTestBatches.Count > 0)
             {
                 DrawBatches(view, view.alphaTestBatches, CmdBuffer, set0, set1, set2);
             }
 
-            if((BlendFlags & BlendFlags.AlphaBlend) != 0 && view.translucentBatches.Count > 0)
+            if ((blendFlags & BlendFlags.AlphaBlend) != 0 && view.translucentBatches.Count > 0)
             {
                 DrawBatches(view, view.translucentBatches, CmdBuffer, set0, set1, set2);
             }
-
-            EndRenderPass(view);
 
         }
 
