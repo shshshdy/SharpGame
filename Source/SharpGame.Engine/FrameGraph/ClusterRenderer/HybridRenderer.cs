@@ -116,7 +116,7 @@ namespace SharpGame
 
             Renderer.AddDebugImage(albedoRT.view);
             Renderer.AddDebugImage(normalRT.view);
-            //Renderer.AddDebugImage(depthRT.view);
+            Renderer.AddDebugImage(depthRT.view);
 
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
 
@@ -128,9 +128,10 @@ namespace SharpGame
             {
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
                 new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-                //new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
-            deferredSet0 = new ResourceSet(deferredLayout0, albedoRT, normalRT/*, depthRT*/);
+
+            deferredSet0 = new ResourceSet(deferredLayout0, albedoRT, normalRT, depthRT);
         }
 
         protected override IEnumerator<FrameGraphPass> CreateRenderPass()
