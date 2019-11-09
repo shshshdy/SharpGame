@@ -14,9 +14,11 @@ namespace SharpGame
         private Framebuffer geometryFB;
         private RenderPass geometryRP;
 
+        protected Framebuffer clusterFB;
+
         protected ScenePass geometryPass;
         protected ScenePass translucentClustering;
-        protected GraphicsPass deferredLighting;
+        protected GraphicsPass compositePass;
         protected ScenePass translucentPass;
 
         public HybridRenderer()
@@ -98,15 +100,17 @@ namespace SharpGame
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
             depthRT = new RenderTarget(width, height, 1, depthFormat,
-                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth,
-                        SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal);
+                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth | ImageAspectFlags.Stencil,
+                        SampleCountFlags.Count1, ImageLayout.DepthStencilAttachmentOptimal/*ImageLayout.DepthStencilReadOnlyOptimal*/
+                        );
 
-            geometryFB = Framebuffer.Create(geometryRP, width, height, 1,
-                new[] { albedoRT.view, normalRT.view, depthRT.view });
+            geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view });
 
             Renderer.AddDebugImage(albedoRT.view);
             Renderer.AddDebugImage(normalRT.view);
             //Renderer.AddDebugImage(depthRT.view);
+
+            clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
 
         }
 
@@ -124,7 +128,7 @@ namespace SharpGame
             };
 
             yield return geometryPass;
-            /*
+            
             translucentClustering = new ScenePass("clustering")
             {
                 PassQueue = PassQueue.EarlyGraphics,
@@ -133,11 +137,17 @@ namespace SharpGame
                 Set1 = clusterSet1
             };
 
-            yield return translucentClustering;*/
+            yield return translucentClustering;
 
             lightCull = new ComputePass(ComputeLight);
             yield return lightCull;
-            
+
+            compositePass = new GraphicsPass("composite")
+            {
+                OnDraw = Composite
+            };
+            yield return compositePass;
+
             translucentPass = new ScenePass("cluster_forward")
             {
                 Set1 = resourceSet0,
@@ -148,19 +158,24 @@ namespace SharpGame
             yield return translucentPass;
         }
 
+        void Composite(GraphicsPass graphicsPass, RenderView view)
+        {
+
+        }
+
         protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
         {
             if (renderPass == geometryPass)
             {
                 var queryPool = query_pool[imageIndex];
-                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
+                //cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
 
             }
             else if (renderPass == translucentPass)
             {
                 var queryPool = query_pool[imageIndex];
-                cb.ResetQueryPool(queryPool, 10, 4);
-                cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
+                //cb.ResetQueryPool(queryPool, 10, 4);
+                //cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
 
             }
         }
@@ -170,13 +185,13 @@ namespace SharpGame
             if (renderPass == geometryPass)
             {
                 var queryPool = query_pool[imageIndex];
-                cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);
+                //cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);
             }
             else if (renderPass == translucentPass)
             {
                 var queryPool = query_pool[imageIndex];
 
-                cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
+                //cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
 
                 ClearBuffers(cb, imageIndex);
             }

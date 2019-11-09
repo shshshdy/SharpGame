@@ -45,8 +45,8 @@ namespace SharpGame.Samples
 
             scene.GetComponents(lights, true);
           
-            clusterRenderer = new ClusterForwardRenderer();
-
+            //clusterRenderer = new ClusterForwardRenderer();
+            clusterRenderer = new HybridRenderer();
             MainView.Attach(camera, scene, clusterRenderer);
         }
 

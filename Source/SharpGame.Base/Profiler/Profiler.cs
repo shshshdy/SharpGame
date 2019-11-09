@@ -18,7 +18,8 @@ namespace SharpGame
 
         FastList<Cmd> commands = new FastList<Cmd>();
         Stack<int> cmdStack = new Stack<int>();
-        public FastList<Block> blocks = new FastList<Block>();
+        public FastList<Block> Blocks { get; } = new FastList<Block>();
+
         Dictionary<StringID, int> blockToID = new Dictionary<StringID, int>();
 
         FastList<Cmd> publicCmds = new FastList<Cmd>();
@@ -67,8 +68,8 @@ namespace SharpGame
                 return id;
             }
 
-            blocks.Add(new Block(name));
-            int newID = blocks.Count - 1;
+            Blocks.Add(new Block(name));
+            int newID = Blocks.Count - 1;
             blockToID[name] = newID;
             return newID;
         }
@@ -119,8 +120,6 @@ namespace SharpGame
     {
         ConcurrentDictionary<int, ThreadedProfiler> profilers = new ConcurrentDictionary<int, ThreadedProfiler>();
         
-        static Profiler self => Instance;
-
         public static ConcurrentDictionary<int, ThreadedProfiler> Profilers => Instance.profilers;
 
         public static ThreadedProfiler ThreadedProfiler
@@ -129,14 +128,14 @@ namespace SharpGame
             {
                 var thread = System.Threading.Thread.CurrentThread;
                 int threadID = thread.ManagedThreadId;
-                if (!self.profilers.TryGetValue(threadID, out ThreadedProfiler threadedProfiler))
+                if (!Profilers.TryGetValue(threadID, out ThreadedProfiler threadedProfiler))
                 {
                     threadedProfiler = new ThreadedProfiler
                     {
                         name = thread.Name,
                         threadID = threadID
                     };
-                    self.profilers.TryAdd(threadID, threadedProfiler);
+                    Profilers.TryAdd(threadID, threadedProfiler);
                 }
 
                 return threadedProfiler;

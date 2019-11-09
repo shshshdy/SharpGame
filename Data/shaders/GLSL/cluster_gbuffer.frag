@@ -37,9 +37,9 @@ void main ()
     }
 #endif
 
-	float specular = texture(SpecMap, inUV).r;
+	//float specular = texture(SpecMap, inUV).r;
 
-	outAlbedoSpec = vec4(albedo.rgb, specular);
+	outAlbedoSpec = vec4(albedo.rgb, 1);
 
 	vec3 N = normalize(inNormal * DecodeNormal(texture(NormalMap, inUV)));
 	outNormalRoughness = vec4(N, 1);

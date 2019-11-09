@@ -342,7 +342,7 @@ namespace SharpGame
 
         public void Submit(CommandBuffer cb, PassQueue passQueue, int imageIndex)
         {
-            Profiler.BeginSample("Submit");
+            Profiler.BeginSample("RenderView.Submit");
 
             RenderPipeline.Submit(cb, passQueue, imageIndex);
 

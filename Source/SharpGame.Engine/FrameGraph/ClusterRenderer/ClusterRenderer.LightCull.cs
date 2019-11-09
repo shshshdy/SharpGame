@@ -81,7 +81,7 @@ namespace SharpGame
             cmd_buf.Begin();
 
             cmd_buf.ResetQueryPool(QueryPool, 4, 6);
-            cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2);
+            //cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2);
 
             BufferMemoryBarrier* barriers = stackalloc BufferMemoryBarrier[2];
             barriers[0] = new BufferMemoryBarrier(light_pos_ranges.Buffer, AccessFlags.HostWrite, AccessFlags.ShaderRead);
@@ -100,7 +100,7 @@ namespace SharpGame
                 cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
                 cmd_buf.Dispatch((num_lights - 1) / 32 + 1, 1, 1);
 
-                cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2 + 1);
+             //   cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2 + 1);
 
                 barriers[0] = new BufferMemoryBarrier(lightBounds, AccessFlags.ShaderRead | AccessFlags.ShaderWrite,
                                 AccessFlags.ShaderRead | AccessFlags.ShaderWrite);
@@ -117,7 +117,7 @@ namespace SharpGame
             // reads grid_flags, grid_light_counts
             // writes grid_light_count_total, grid_light_offsets
             {
-                cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_GRID_OFFSETS * 2);
+            //    cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_GRID_OFFSETS * 2);
 
                 var pass = clusterLight.Pass[1];
                 cmd_buf.BindComputePipeline(pass);
@@ -126,7 +126,7 @@ namespace SharpGame
 
                 cmd_buf.Dispatch((tile_count_x - 1) / 16 + 1, (tile_count_y - 1) / 16 + 1, TILE_COUNT_Z);
 
-                cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_GRID_OFFSETS * 2 + 1);
+            //    cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_GRID_OFFSETS * 2 + 1);
 
                 barriers[0].Buffer = gridLightCountTotal;
                 barriers[1].Buffer = gridLightCountOffsets;
@@ -141,7 +141,7 @@ namespace SharpGame
             // reads grid_flags, light_bounds, grid_light_counts, grid_light_offsets
             // writes grid_light_counts_compare, light_list
             {
-                cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_LIGHT_LIST * 2);
+             //   cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_LIGHT_LIST * 2);
 
                 var pass = clusterLight.Pass[2];
 
@@ -150,7 +150,7 @@ namespace SharpGame
                 cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
                 cmd_buf.Dispatch((num_lights - 1) / 32 + 1, 1, 1);
 
-                cmd_buf.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CALC_LIGHT_LIST * 2 + 1);
+            //    cmd_buf.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CALC_LIGHT_LIST * 2 + 1);
 
             }
 

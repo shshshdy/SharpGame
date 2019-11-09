@@ -154,7 +154,7 @@ namespace SharpGame
 
         public void Submit()
         {
-            Profiler.BeginSample("Submit");
+            Profiler.BeginSample("RenderSystem.Submit");
 
             Graphics.BeginRender();
 
@@ -166,6 +166,8 @@ namespace SharpGame
             var currentBuffer = Graphics.currentBuffer;
 
             {
+                Profiler.BeginSample("RenderSystem.PreRender");
+
                 var fence = preRenderCmdBlk[imageIndex].submitFence;
                 fence.Wait();
                 fence.Reset();
@@ -185,9 +187,11 @@ namespace SharpGame
                     cmdBuffer, currentBuffer.preRenderSemaphore, fence);
 
                 OnSubmit?.Invoke(imageIndex, PassQueue.EarlyGraphics);
+                Profiler.EndSample();
             }
 
             {
+                Profiler.BeginSample("RenderSystem.Compute");
                 var fence = computeCmdBlk[imageIndex].submitFence;
 
                 fence.Wait();
@@ -212,9 +216,11 @@ namespace SharpGame
                 }
 
                 OnSubmit?.Invoke(imageIndex, PassQueue.Compute);
+                Profiler.EndSample();
             }
 
             {
+                Profiler.BeginSample("RenderSystem.Render");
                 var fence = renderCmdBlk[imageIndex].submitFence;
                 fence.Wait();
                 fence.Reset();
@@ -236,6 +242,7 @@ namespace SharpGame
                     cmdBuffer, currentBuffer.renderSemaphore, fence);
 
                 OnSubmit?.Invoke(imageIndex, PassQueue.Graphics);
+                Profiler.EndSample();
             }
 
             OnEndSubmit?.Invoke(imageIndex);

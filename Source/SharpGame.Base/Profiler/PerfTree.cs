@@ -22,7 +22,7 @@ namespace SharpGame
 
         public PerfNode GetNode(ThreadedProfiler profiler, PerfNode parent, int id)
         {
-            ref Block block = ref profiler.blocks.At(id);
+            ref Block block = ref profiler.Blocks.At(id);
             var node = blockPool.Request();
             node.Reset(block.name, this, parent);
             return node;

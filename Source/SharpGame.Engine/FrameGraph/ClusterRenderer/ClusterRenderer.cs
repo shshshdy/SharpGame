@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -96,6 +97,8 @@ namespace SharpGame
         public QueryPool QueryPool => query_pool[Graphics.WorkImage];
 
         protected ComputePass lightCull;
+
+        protected RenderPass clusterRP;
 
         public ClusterRenderer()
         {
@@ -200,6 +203,58 @@ namespace SharpGame
 
             clusterSet1[0] = new ResourceSet(clusterLayout1, uboCluster[0], gridFlags);
             clusterSet1[1] = new ResourceSet(clusterLayout1, uboCluster[1], gridFlags);
+
+
+            Format depthFormat = Device.GetSupportedDepthFormat();
+            AttachmentDescription[] attachments =
+            {
+                new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)
+            };
+
+            var depthStencilAttachment = new[]
+            {
+                 new AttachmentReference(0, ImageLayout.DepthStencilAttachmentOptimal)
+            };
+
+            SubpassDescription[] subpassDescription =
+            {
+		        // clustering subpass
+                new SubpassDescription
+                {
+                    pipelineBindPoint = PipelineBindPoint.Graphics,
+                    pDepthStencilAttachment = depthStencilAttachment
+                },
+            };
+
+            // Subpass dependencies for layout transitions
+            SubpassDependency[] dependencies =
+            {
+                new SubpassDependency
+                {
+                    srcSubpass = VulkanNative.SubpassExternal,
+                    dstSubpass = 0,
+                    srcStageMask = PipelineStageFlags.BottomOfPipe,
+                    dstStageMask = PipelineStageFlags.VertexShader,
+                    srcAccessMask = AccessFlags.MemoryWrite,
+                    dstAccessMask = AccessFlags.UniformRead,
+                    dependencyFlags = DependencyFlags.ByRegion
+                },
+
+                new SubpassDependency
+                {
+                    srcSubpass = 0,
+                    dstSubpass = VulkanNative.SubpassExternal,
+                    srcStageMask = PipelineStageFlags.FragmentShader,
+                    dstStageMask = PipelineStageFlags.ComputeShader,
+                    srcAccessMask =  AccessFlags.ShaderWrite,
+                    dstAccessMask = AccessFlags.ShaderRead,
+                    dependencyFlags = DependencyFlags.ByRegion
+                },
+            };
+
+            var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
+            clusterRP = new RenderPass(ref renderPassInfo);
+
         }
 
         protected virtual IEnumerator<FrameGraphPass> CreateRenderPass()
@@ -254,7 +309,7 @@ namespace SharpGame
                     new BufferMemoryBarrier(lightList, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite)
                 };
 
-                cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_TRANSFER * 2);
+                //cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_TRANSFER * 2);
 
                 cmd_buf.PipelineBarrier(PipelineStageFlags.FragmentShader,
                             PipelineStageFlags.Transfer,
@@ -288,7 +343,7 @@ namespace SharpGame
                                             transfer_barriers1,
                                             0, null);
 
-                cmd_buf.WriteTimestamp(PipelineStageFlags.Transfer, queryPool, QUERY_TRANSFER * 2 + 1);
+                //cmd_buf.WriteTimestamp(PipelineStageFlags.Transfer, queryPool, QUERY_TRANSFER * 2 + 1);
             }
         }
 
@@ -297,15 +352,15 @@ namespace SharpGame
             var queryPool = query_pool[imageIndex];
             if (passQueue == PassQueue.EarlyGraphics)
             {
-                queryPool.GetResults(2, 2, 2 * sizeof(uint), queryData[imageIndex].clustering.Data, sizeof(uint), QueryResults.QueryWait);
+                //queryPool.GetResults(2, 2, 2 * sizeof(uint), queryData[imageIndex].clustering.Data, sizeof(uint), QueryResults.QueryWait);
             }
             else if (passQueue == PassQueue.Compute)
             {
-                queryPool.GetResults(4, 6, 6 * sizeof(uint), queryData[imageIndex].calc_light_grids.Data, sizeof(uint), QueryResults.QueryWait);
+               // queryPool.GetResults(4, 6, 6 * sizeof(uint), queryData[imageIndex].calc_light_grids.Data, sizeof(uint), QueryResults.QueryWait);
             }
             else if (passQueue == PassQueue.Graphics)
             {
-                queryPool.GetResults(10, 4, 4 * sizeof(uint), queryData[imageIndex].onscreen.Data, sizeof(uint), QueryResults.QueryWait);
+                //queryPool.GetResults(10, 4, 4 * sizeof(uint), queryData[imageIndex].onscreen.Data, sizeof(uint), QueryResults.QueryWait);
             }
            
         }
