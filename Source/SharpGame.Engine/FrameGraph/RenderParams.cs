@@ -22,6 +22,8 @@ namespace SharpGame
         public float NearClip;
         public vec3 FrustumSize;
         public float FarClip;
+        public vec4 DepthMode;
+        public vec4 GBufferOffsets;
     }
 
     [StructLayout(LayoutKind.Sequential)]

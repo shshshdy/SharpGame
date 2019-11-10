@@ -1,3 +1,4 @@
+
 layout (binding = 0) uniform CameraVS
 {
     mat4 View;
@@ -6,15 +7,16 @@ layout (binding = 0) uniform CameraVS
 	vec3 CameraPos;
 	float NearClip;
 	vec3 FrustumSize;
-	float FarClip;
+	float FarClip;	
+    vec4 DepthMode;
+    vec4 GBufferOffsets;
 };
 
-layout(constant_id=0) const int TransformMode = 0;
-layout (constant_id = 1) const int MATRICES_COUNT = 64;
-//layout(constant_id=1) const int MatricesCount = 0;
-layout(constant_id=2) const int ShadingMode = 64;
-layout(constant_id=3) const int LightCount = 2;
-layout(constant_id=4) const int HasNormalMap = 0;
+layout(constant_id = 0) const int TransformMode = 0;
+layout(constant_id = 1) const int MATRICES_COUNT = 64;
+layout(constant_id = 2) const int ShadingMode = 1;
+layout(constant_id = 3) const int LightCount = 2;
+layout(constant_id = 4) const int HasNormalMap = 0;
 
 layout (binding = 1) uniform ObjectVS_dynamic
 {

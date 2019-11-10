@@ -282,18 +282,32 @@ namespace SharpGame
             cameraVS.ViewInv = glm.inverse(cameraVS.View);
             cameraVS.ViewProj = camera.VkProjection*camera.View;
             cameraVS.CameraPos = camera.Node.Position;
-            //camera.GetHalfViewSize()
-            //cameraVS.FrustumSize = camera.Frustum;
+
+            camera.GetFrustumSize(out var nearVector, out var farVector);
+
+            float nearClip = camera.NearClip;
+            float farClip = camera.FarClip;
+
+            cameraVS.FrustumSize = farVector;
+
             cameraVS.NearClip = camera.NearClip;
             cameraVS.FarClip = camera.FarClip;
+
 
             ubCameraVS.SetData(ref cameraVS);
             ubCameraVS.Flush();
 
             cameraPS.ViewInv = cameraVS.ViewInv;
             cameraPS.CameraPos = camera.Node.Position;
-            cameraPS.NearClip = camera.NearClip;
-            cameraPS.FarClip = camera.FarClip;
+
+            vec4 depthReconstruct = new vec4(farClip / (farClip - nearClip), -nearClip / (farClip - nearClip),
+                camera.Orthographic ? 1.0f : 0.0f, camera.Orthographic ? 0.0f : 1.0f);
+            cameraPS.DepthReconstruct = depthReconstruct;
+
+            cameraPS.GBufferInvSize = new vec2(1.0f / Width, 1.0f / Height);
+
+            cameraPS.NearClip = nearClip;
+            cameraPS.FarClip = farClip;
 
             ubCameraPS.SetData(ref cameraPS);
 

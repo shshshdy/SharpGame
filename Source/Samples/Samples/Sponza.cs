@@ -33,15 +33,14 @@ namespace SharpGame.Samples
             //staticModel.CastShadows = true;
             staticModel.SetModel(model);
             
-
             camera = scene.GetComponent<Camera>(true);
 
             BoundingBox aabb = staticModel.WorldBoundingBox;
             Lighting.SetupLights(scene, aabb, 1024);
             scene.GetComponents(lights, true);
 
-            //clusterRenderer = new ClusterForwardRenderer();
-            clusterRenderer = new HybridRenderer();
+            clusterRenderer = new ClusterForwardRenderer();
+            //clusterRenderer = new HybridRenderer();
             MainView.Attach(camera, scene, clusterRenderer);
 
         }
