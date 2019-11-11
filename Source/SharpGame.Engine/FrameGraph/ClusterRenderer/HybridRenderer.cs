@@ -22,10 +22,12 @@ namespace SharpGame
         protected ScenePass translucentPass;
         protected Shader clusterDeferred;
 
+        Geometry quad;
+
         ResourceLayout deferredLayout0;
         ResourceLayout deferredLayout1;
 
-        ResourceSet deferredSet0;
+        ResourceSet[] deferredSet0 = new ResourceSet[2];
         ResourceSet deferredSet1;
 
         public HybridRenderer()
@@ -115,20 +117,29 @@ namespace SharpGame
 
             Renderer.AddDebugImage(albedoRT.view);
             Renderer.AddDebugImage(normalRT.view);
-            Renderer.AddDebugImage(depthRT.view);
+            //Renderer.AddDebugImage(depthRT.view);
 
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
 
             clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
-         
+            quad = GeometricPrimitive.CreateUnitQuad();
+
             deferredLayout0 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+            };
+
+            deferredSet0[0] = deferredSet0[1] = new ResourceSet(deferredLayout0, View.ubCameraVS[0]);
+
+            deferredLayout1 = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
                 new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
                 new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
 
-            deferredSet0 = new ResourceSet(deferredLayout0, albedoRT, normalRT, depthRT);
+            deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
+
         }
 
         protected override IEnumerator<FrameGraphPass> CreateRenderPass()
@@ -195,7 +206,10 @@ namespace SharpGame
                 cmd.SetScissor(view.ViewRect);
             }
 
-            scenePass.DrawFullScreenQuad(clusterDeferred.Main, cmd, deferredSet0, null);
+            var pass = clusterDeferred.Main;
+
+            Span<ResourceSet> sets = new [] { deferredSet0[Graphics.WorkContext], deferredSet1 };
+            cmd.DrawGeometry(quad, pass, 0, sets);
 
             cmd.End();
 

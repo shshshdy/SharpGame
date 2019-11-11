@@ -27,7 +27,7 @@ layout(push_constant) uniform Material_properties
     float alpha;
 
     vec3 specular;
-    float specular_exponent;
+    float specularPower;
 } mtl_in;
 
 layout(location = 0) in vec4 world_pos_in;
@@ -43,16 +43,10 @@ void main()
 
     vec3 ambient = vec3(AMBIENT_GLOBAL);
 
-    mat3 invBTN = inNormal;// inverse(transpose(mat3(normalize(world_tangent_in), normalize(world_bitangent_in), normalize(world_normal_in))));
-    vec3 normal_sample = texture(NormalMap, uv_in).rgb * vec3(2.f) - vec3(1.f);
-    vec3 world_normal = invBTN * normal_sample;
+    vec3 normal_sample = texture(NormalMap, uv_in).rgb * 2.f - 1.f;
+    vec3 world_normal = inNormal * normal_sample;
 	
     vec3 v = normalize(ubo_in.cam_pos - world_pos_in.xyz);
-    // only draw the face facing camera if it's transparent
-    //if (mtl_in.alpha < 1.f && dot(v, world_normal) < 0.f) {
-	//frag_color = vec4(0.f);
-	//return;
-    //}
 	
     float r0 = 0.02f;
     float fresnel = max(0.f, r0 + (1.f - r0) * pow(1.f - max(dot(v, world_normal), 0.f), 5.f));
@@ -83,8 +77,8 @@ void main()
 				float atten = max(1.f - max(0.f, dist / light_pos_range.w), 0.f);
 
 				vec3 specular;
-				if (mtl_in.specular_exponent > 0.f) {
-					vec3 blinn_phong_specular = mtl_c_specular * pow(max(0.f, dot(h, world_normal)), mtl_in.specular_exponent);
+				if (mtl_in.specularPower > 0.f) {
+					vec3 blinn_phong_specular = mtl_c_specular * pow(max(0.f, dot(h, world_normal)), mtl_in.specularPower*255);
 					specular = fresnel_specular + blinn_phong_specular;
 				} else {
 					specular = 0.5f * fresnel_specular;

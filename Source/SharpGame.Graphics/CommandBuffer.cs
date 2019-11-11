@@ -326,11 +326,14 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void DrawGeometry(Geometry geometry, Pass pass, uint subPass, ResourceSet resourceSet)
+        public unsafe void DrawGeometry(Geometry geometry, Pass pass, uint subPass, Span<ResourceSet> resourceSet)
         {
             var pipe = pass.GetGraphicsPipeline(renderPass, subPass, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);
-            BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, 0, resourceSet);
+            for (int i = 0; i < resourceSet.Length; i++)
+            {
+                BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, i, resourceSet[i]);
+            }
             geometry.Draw(this);
         }
 

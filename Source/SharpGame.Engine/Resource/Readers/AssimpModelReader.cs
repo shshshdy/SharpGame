@@ -327,6 +327,8 @@ namespace SharpGame
                     Color c = new Color(aiMaterial.ColorDiffuse[0], aiMaterial.ColorDiffuse[1],
                         aiMaterial.ColorDiffuse[2], aiMaterial.ColorDiffuse[3]* aiMaterial.Opacity);
                     material.SetTexture("DiffMap", Texture.CreateByColor(c));
+
+                    material.SetShaderParameter("diffuse", c);
                 }
                 else
                 {
@@ -376,7 +378,19 @@ namespace SharpGame
             }
             else
             {
-                material.SetTexture("SpecMap", Texture.Black);
+                if (aiMaterial.HasColorSpecular)
+                {
+                    Color c = new Color(aiMaterial.ColorSpecular[0], aiMaterial.ColorSpecular[1],
+                        aiMaterial.ColorSpecular[2], aiMaterial.Shininess/ 255.0f);
+                    material.SetTexture("SpecMap", Texture.CreateByColor(c));
+
+                    material.SetShaderParameter("specular", c);
+                }
+                else
+                {
+                    material.SetTexture("SpecMap", Texture.Black);
+                }
+
             }
 
 

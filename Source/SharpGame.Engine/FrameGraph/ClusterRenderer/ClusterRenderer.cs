@@ -16,6 +16,8 @@ namespace SharpGame
         public vec2 tile_size;
         public FixedArray2<uint> grid_dim;
         public vec3 cam_pos;
+        public float cam_near;
+        public vec3 cam_forward;
         public float cam_far;
         public vec2 resolution;
         public uint num_lights;
@@ -284,6 +286,8 @@ namespace SharpGame
             clusterUniforms.grid_dim[1] = tile_count_y;
 
             clusterUniforms.cam_pos = camera.Node.WorldPosition;
+            clusterUniforms.cam_near = camera.NearClip;
+            clusterUniforms.cam_forward = camera.Node.WorldDirection;
             clusterUniforms.cam_far = camera.FarClip;
 
             clusterUniforms.resolution[0] = (float)(view.Width);

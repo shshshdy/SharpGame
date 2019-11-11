@@ -66,12 +66,19 @@ Shader "LitSolid"
 		FrontFace = CounterClockwise
 		//DepthWrite = false
 
-		PushConstant Material_properties
+		PushConstant diffuse
 		{
 			StageFlags = Fragment
 			Offset = 0
-			Size = 32
+			Size = 16
 		}
+
+        PushConstant specular
+        {
+            StageFlags = Fragment
+            Offset = 16
+            Size = 16
+        }
 
 		@VertexShader
 		{

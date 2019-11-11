@@ -19,9 +19,22 @@ vec3 Uncharted2Tonemap(vec3 color)
 	return ((color*(A*color+C*B)+D*E)/(color*(A*color+B)+D*F))-E/F;
 }
 
+vec3 ACESToneMapping(vec3 color, float adapted_lum)
+{
+	const float A = 2.51f;
+	const float B = 0.03f;
+	const float C = 2.43f;
+	const float D = 0.59f;
+	const float E = 0.14f;
+
+	color *= adapted_lum;
+	return (color * (A * color + B)) / (color * (C * color + D) + E);
+}
+
 vec4 tonemap(vec4 color)
 {
-	vec3 outcol = Uncharted2Tonemap(color.rgb * exposure);
+	//vec3 outcol = Uncharted2Tonemap(color.rgb * exposure);
+	vec3 outcol = ACESToneMapping(color.rgb, exposure); 
 	outcol = outcol * (1.0f / Uncharted2Tonemap(vec3(11.2f)));	
 	return vec4(pow(outcol, vec3(1.0f / gamma)), color.a);
 }

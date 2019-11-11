@@ -129,9 +129,11 @@ void main()
 	}
 
 	// Final fragment color.
-	//color = vec4(directLighting + ambientLighting, 1.0);
-    
+	color = vec4(directLighting + ambientLighting, 1.0);
+    color = tonemap(color);return;
+
 	vec3 c = directLighting + ambientLighting;
+    
 
 	float luminance = dot(c, vec3(0.2126, 0.7152, 0.0722));
 	float mappedLuminance = (luminance * (1.0 + luminance/(pureWhite*pureWhite))) / (1.0 + luminance);

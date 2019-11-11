@@ -16,6 +16,9 @@ layout(set = UBO_SET, binding = 0) uniform UBO
     uvec2 grid_dim; // xy
 
     vec3 cam_pos;
+    float cam_near;
+    
+    vec3 cam_forward;
     float cam_far;
 
     vec2 resolution;
