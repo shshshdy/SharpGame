@@ -145,5 +145,30 @@ namespace SharpGame
         }
 
 
+        public static Geometry CreateUnitQuad()
+        {
+            VertexPos[] vertices =
+            {
+                new VertexPos(-1, -1, 0),
+                new VertexPos(1, -1, 0),
+                new VertexPos(-1, 1, 0),
+                new VertexPos(1, 1, 0),
+            };
+
+            int[] indices =
+            {
+                0, 1, 2, 1, 3, 2,
+            };
+
+            var geom = new Geometry
+            {
+                VertexBuffers = new[] { Buffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
+                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexLayout = VertexPos.Layout
+            };
+
+            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length);
+            return geom;
+        }
     }
 }

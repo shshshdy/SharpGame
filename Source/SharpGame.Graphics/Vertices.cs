@@ -137,6 +137,25 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    public struct VertexPos
+    {
+        public vec3 Position;
+        public VertexPos(float x, float y, float z)
+        {
+            Position.x = x;
+            Position.y = y;
+            Position.z = z;
+        }
+
+        public static int Size => Utilities.SizeOf<VertexPosColor>();
+
+        public static VertexLayout Layout = new VertexLayout
+        (
+            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0)
+        );
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct VertexPos2dTexColor
     {
         public vec2 Position;
