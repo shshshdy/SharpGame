@@ -20,5 +20,6 @@ void main()
 	// Ambient part
 	vec3 fragcolor  = albedo.rgb;
 	
-	outFragcolor = vec4(depth, depth, depth, 1.0);	
+	outFragcolor = vec4(albedo.xyz, 1.0);	
+	//outFragcolor = vec4(depth, depth, depth, 1.0);	
 }

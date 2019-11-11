@@ -21,7 +21,6 @@ namespace SharpGame
         protected GraphicsPass compositePass;
         protected ScenePass translucentPass;
         protected Shader clusterDeferred;
-        private Pipeline pipeline;
 
         ResourceLayout deferredLayout0;
         ResourceLayout deferredLayout1;
@@ -121,9 +120,7 @@ namespace SharpGame
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
 
             clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
-            pipeline = clusterDeferred.Main.CreateGraphicsPipeline(Graphics.RenderPass, 0, null, PrimitiveTopology.TriangleList);
-
-
+         
             deferredLayout0 = new ResourceLayout
             {
                 new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
@@ -187,7 +184,8 @@ namespace SharpGame
 
         void Composite(GraphicsPass graphicsPass, RenderView view)
         {
-            graphicsPass.BeginRenderPass(view);
+            var scenePass = graphicsPass as ScenePass;
+            scenePass.BeginRenderPass(view);
             var cmd = graphicsPass.CmdBuffer;
 
             if(cmd == null)
@@ -197,16 +195,12 @@ namespace SharpGame
                 cmd.SetScissor(view.ViewRect);
             }
 
-            var pass = clusterDeferred.Main;
-            cmd.BindPipeline(PipelineBindPoint.Graphics, pipeline);
-            cmd.BindGraphicsResourceSet(pass.PipelineLayout, 0, deferredSet0);
-            //cmd.BindGraphicsResourceSet(pass.PipelineLayout, 1, deferredSet1);
-            cmd.Draw(3, 1, 0, 0);
+            scenePass.DrawFullScreenQuad(clusterDeferred.Main, cmd, deferredSet0, null);
+
             cmd.End();
 
-            var scenePass = graphicsPass as ScenePass;
             scenePass.DrawScene(view, BlendFlags.AlphaBlend);
-            graphicsPass.EndRenderPass(view);
+            scenePass.EndRenderPass(view);
         }
 
         protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
