@@ -18,7 +18,7 @@ Shader "LitSolid"
 		@PixelShader
 		{
             #define SHADOW
-#define ALPHA_TEST
+            #define ALPHA_TEST
             #include "general.frag"
 		}
 		
@@ -30,13 +30,13 @@ Shader "LitSolid"
 
         @VertexShader
         {
-#include "cluster_gbuffer.vert"
+            #include "cluster_gbuffer.vert"
         }
 
         @PixelShader
         {
-#define ALPHA_TEST
-#include "cluster_gbuffer.frag"
+            #define ALPHA_TEST
+            #include "cluster_gbuffer.frag"
         }
     }
 
@@ -49,12 +49,12 @@ Shader "LitSolid"
 
 		@VertexShader
 		{
-#include "clustering.vert"
+            #include "clustering.vert"
 		}
 
 		@PixelShader
 		{
-#include "clustering.frag"
+            #include "clustering.frag"
 		}
 
 	}
@@ -66,28 +66,14 @@ Shader "LitSolid"
 		FrontFace = CounterClockwise
 		//DepthWrite = false
 
-		PushConstant diffuse
-		{
-			StageFlags = Fragment
-			Offset = 0
-			Size = 16
-		}
-
-        PushConstant specular
-        {
-            StageFlags = Fragment
-            Offset = 16
-            Size = 16
-        }
-
 		@VertexShader
 		{
-#include "cluster_forward.vert"
+            #include "cluster_forward.vert"
 		}
 
 		@PixelShader
 		{
-#include "cluster_forward.frag"
+            #include "cluster_forward.frag"
 		}
 
 	}
@@ -106,13 +92,13 @@ Shader "LitSolid"
 
         @VertexShader
         {
-#define ALPHA_TEST
+            #define ALPHA_TEST
             #include "shadow.vert"
         }
 
         @PixelShader
         {
-#define ALPHA_TEST            
+            #define ALPHA_TEST            
             #include "shadow.frag"
         }
 
