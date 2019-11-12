@@ -15,6 +15,8 @@ layout(set = UBO_SET, binding = 0) uniform UBO
     vec2 tile_size; // xy
     uvec2 grid_dim; // xy
 
+	vec4 depth_reconstruct;
+
     vec3 cam_pos;
     float cam_near;
     

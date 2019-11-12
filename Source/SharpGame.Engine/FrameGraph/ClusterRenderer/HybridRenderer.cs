@@ -208,7 +208,14 @@ namespace SharpGame
 
             var pass = clusterDeferred.Main;
 
-            Span<ResourceSet> sets = new [] { deferredSet0[Graphics.WorkContext], deferredSet1 };
+            Span<ResourceSet> sets = new []
+            {
+                deferredSet0[Graphics.WorkContext],
+                resourceSet0[Graphics.WorkContext],
+                resourceSet1[Graphics.WorkContext],
+                deferredSet1
+            };
+
             cmd.DrawGeometry(quad, pass, 0, sets);
 
             cmd.End();

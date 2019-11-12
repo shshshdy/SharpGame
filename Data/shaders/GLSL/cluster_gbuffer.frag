@@ -42,7 +42,7 @@ void main ()
 	outAlbedoSpec = vec4(albedo.rgb, 1);
 
 	vec3 N = normalize(inNormal * DecodeNormal(texture(NormalMap, inUV)));
-	outNormalRoughness = vec4(N, 1);
+	outNormalRoughness = vec4((N + 1.0f) * 0.5f, 1);
    
     int grid_idx = ViewPosToGridIdx(gl_FragCoord.xy, inViewPos.z);
     imageStore(grid_flags, int(grid_idx), uvec4(1, 0, 0, 0));

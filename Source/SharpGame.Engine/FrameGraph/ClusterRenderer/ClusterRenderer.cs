@@ -15,6 +15,7 @@ namespace SharpGame
         public mat4 projection_clip;
         public vec2 tile_size;
         public FixedArray2<uint> grid_dim;
+        public vec4 depth_reconstruct;
         public vec3 cam_pos;
         public float cam_near;
         public vec3 cam_forward;
@@ -285,10 +286,17 @@ namespace SharpGame
             clusterUniforms.grid_dim[0] = tile_count_x;
             clusterUniforms.grid_dim[1] = tile_count_y;
 
+
+            vec4 depthReconstruct = new vec4(camera.FarClip / (camera.FarClip - camera.NearClip),
+                -camera.NearClip / (camera.FarClip - camera.NearClip),
+                camera.Orthographic ? 1.0f : 0.0f, camera.Orthographic ? 0.0f : 1.0f);
+            clusterUniforms.depth_reconstruct = depthReconstruct;
+
             clusterUniforms.cam_pos = camera.Node.WorldPosition;
             clusterUniforms.cam_near = camera.NearClip;
             clusterUniforms.cam_forward = camera.Node.WorldDirection;
             clusterUniforms.cam_far = camera.FarClip;
+
 
             clusterUniforms.resolution[0] = (float)(view.Width);
             clusterUniforms.resolution[1] = (float)(view.Height);
