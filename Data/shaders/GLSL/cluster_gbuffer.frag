@@ -21,10 +21,17 @@ layout (location = 2) in mat3 inNormal;
 
 layout(location = 0) out vec4 outAlbedoSpec;
 layout(location = 1) out vec4 outNormalRoughness;
+layout(location = 2) out vec4 outDepth;
 
 vec3 DecodeNormal(vec4 normalInput)
 {
 	return normalize(normalInput.rgb * 2.0 - 1.0);
+}
+
+float linearDepth(float depth)
+{
+	float z = depth * 2.0f - 1.0f; 
+	return (2.0f * ubo_in.cam_near * ubo_in.cam_far) / (ubo_in.cam_far + ubo_in.cam_near - z * (ubo_in.cam_far - ubo_in.cam_near));	
 }
 
 void main ()
@@ -43,6 +50,9 @@ void main ()
 
 	vec3 N = normalize(inNormal * DecodeNormal(texture(NormalMap, inUV)));
 	outNormalRoughness = vec4((N + 1.0f) * 0.5f, 1);
+
+	float z = linearDepth(gl_FragCoord.z);
+	outDepth = vec4(z, z, z, z);
    
     int grid_idx = ViewPosToGridIdx(gl_FragCoord.xy, inViewPos.z);
     imageStore(grid_flags, int(grid_idx), uvec4(1, 0, 0, 0));

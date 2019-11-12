@@ -10,6 +10,7 @@ namespace SharpGame
         private RenderTarget albedoRT;
         private RenderTarget normalRT;
         private RenderTarget depthRT;
+        private RenderTarget depthHWRT;
 
         private Framebuffer geometryFB;
         private RenderPass geometryRP;
@@ -46,18 +47,20 @@ namespace SharpGame
             {
                 new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
                 new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
+                new AttachmentDescription(Format.R32Sfloat, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
                 new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)
             };
 
             var colorAttachments = new[]
             {
                  new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal),
-                 new AttachmentReference(1, ImageLayout.ColorAttachmentOptimal)
+                 new AttachmentReference(1, ImageLayout.ColorAttachmentOptimal),
+                 new AttachmentReference(2, ImageLayout.ColorAttachmentOptimal)
             };
 
             var depthStencilAttachment = new[]
             {
-                 new AttachmentReference(2, ImageLayout.DepthStencilAttachmentOptimal)
+                 new AttachmentReference(3, ImageLayout.DepthStencilAttachmentOptimal)
             };
 
             SubpassDescription[] subpassDescription =
@@ -108,18 +111,23 @@ namespace SharpGame
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-            depthRT = new RenderTarget(width, height, 1, depthFormat,
+            depthRT = new RenderTarget(width, height, 1, Format.R32Sfloat,
+                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
+                        SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
+
+
+            depthHWRT = new RenderTarget(width, height, 1, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth | ImageAspectFlags.Stencil,
-                        SampleCountFlags.Count1, ImageLayout.DepthStencilAttachmentOptimal/*ImageLayout.DepthStencilReadOnlyOptimal*/
+                        SampleCountFlags.Count1, /*ImageLayout.DepthStencilAttachmentOptimal*/ImageLayout.DepthStencilReadOnlyOptimal
                         );
 
-            geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view });
+            geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view, depthHWRT.view });
 
             Renderer.AddDebugImage(albedoRT.view);
             Renderer.AddDebugImage(normalRT.view);
-            //Renderer.AddDebugImage(depthRT.view);
+            Renderer.AddDebugImage(depthRT.view);
 
-            clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
+            clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthHWRT.view });
 
             clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
             quad = GeometricPrimitive.CreateUnitQuad();
@@ -129,7 +137,8 @@ namespace SharpGame
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
             };
 
-            deferredSet0[0] = deferredSet0[1] = new ResourceSet(deferredLayout0, View.ubCameraVS[0]);
+            deferredSet0[0] =  new ResourceSet(deferredLayout0, View.ubCameraVS[0]);
+            deferredSet0[1] = new ResourceSet(deferredLayout0, View.ubCameraVS[1]);
 
             deferredLayout1 = new ResourceLayout
             {
@@ -151,7 +160,7 @@ namespace SharpGame
                 PassQueue = PassQueue.EarlyGraphics,                
                 RenderPass = geometryRP,
                 Framebuffer = geometryFB,
-                ClearColorValue = new [] { new ClearColorValue(0.25f, 0.25f, 0.25f, 1), new ClearColorValue(0, 0, 0, 1) },
+                ClearColorValue = new [] { new ClearColorValue(0.25f, 0.25f, 0.25f, 1), new ClearColorValue(0, 0, 0, 1), new ClearColorValue(0, 0, 0, 0) },
                 Set1 = clusterSet1
             };
 
