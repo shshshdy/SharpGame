@@ -41,7 +41,11 @@ vec3 ClusterLighting(vec3 world_pos, vec3 world_norm, vec3 diffColor,
                 vec3 l = normalize(light_pos_range.xyz - world_pos);
                 vec3 h = normalize(0.5f * (V + l));
 
-                float lambertien = max(dot(world_norm, l), 0.f);
+#ifdef TRANSLUCENT
+				float lambertien = abs(dot(world_norm, l));
+#else
+				float lambertien = max(dot(world_norm, l), 0.f);
+#endif
                 float atten = max(1.f - max(0.f, dist / light_pos_range.w), 0.f);
 
                 vec3 specular;

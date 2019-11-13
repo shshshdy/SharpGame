@@ -60,6 +60,7 @@ Shader "LitParticle"
 
         @PixelShader
         {
+#define TRANSLUCENT
             #include "cluster_forward.frag"
         }
 
