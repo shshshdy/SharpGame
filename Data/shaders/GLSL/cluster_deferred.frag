@@ -37,7 +37,7 @@ void main()
 
 	vec4 pos = texture(samplerDepth, inUV);
 
-    vec3 worldPos = pos.rgb;// ReconstructPositionFromDepth(depth);
+    vec3 worldPos = pos.xyz;// ReconstructPositionFromDepth(depth);
 
     //depth = ReconstructDepth(depth);
       

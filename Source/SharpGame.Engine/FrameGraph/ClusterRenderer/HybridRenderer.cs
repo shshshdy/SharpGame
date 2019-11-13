@@ -47,7 +47,7 @@ namespace SharpGame
             {
                 new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
                 new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
-                new AttachmentDescription(Format.R32Sfloat, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
+                new AttachmentDescription(Format.R32g32b32a32Sfloat, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
                 new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)
             };
 
@@ -116,10 +116,10 @@ namespace SharpGame
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
 
-            depthHWRT = new RenderTarget(width, height, 1, depthFormat,
-                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth | ImageAspectFlags.Stencil,
-                        SampleCountFlags.Count1, /*ImageLayout.DepthStencilAttachmentOptimal*/ImageLayout.DepthStencilReadOnlyOptimal
-                        );
+            depthHWRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat,
+                        //ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth | ImageAspectFlags.Stencil,
+                        //SampleCountFlags.Count1, /*ImageLayout.DepthStencilAttachmentOptimal*/ImageLayout.DepthStencilReadOnlyOptimal
+                        //);
 
             geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view, depthHWRT.view });
 
