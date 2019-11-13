@@ -111,7 +111,7 @@ namespace SharpGame
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-            depthRT = new RenderTarget(width, height, 1, Format.R32Sfloat,
+            depthRT = new RenderTarget(width, height, 1, Format.R32g32b32a32Sfloat,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 

@@ -28,9 +28,13 @@ out gl_PerVertex
 
 mat3 GetCameraRot()
 {
-    return mat3(ViewInv[0][0], ViewInv[0][1], ViewInv[0][2],
-        ViewInv[1][0], ViewInv[1][1], ViewInv[1][2],
-        ViewInv[2][0], ViewInv[2][1], ViewInv[2][2]);
+    return mat3(ViewInv[0][0], ViewInv[1][0], ViewInv[2][0],
+        ViewInv[0][1], ViewInv[1][1], ViewInv[2][1],
+        ViewInv[0][2], ViewInv[1][2], ViewInv[2][2]);
+
+    //return mat3(ViewInv[0][0], ViewInv[0][1], ViewInv[0][2],
+    //    ViewInv[1][0], ViewInv[1][1], ViewInv[1][2],
+    //    ViewInv[2][0], ViewInv[2][1], ViewInv[2][2]);
 }
 
 vec3 GetFarRay(vec4 clipPos)

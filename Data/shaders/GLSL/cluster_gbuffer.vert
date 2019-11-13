@@ -18,7 +18,7 @@ layout(location = 4) in vec3 inBitangent;
 layout(location = 3) in vec4 inTangent;
 #endif
 
-layout(location = 0) out vec4 outViewPos;
+layout(location = 0) out vec4 outWorldPos;
 layout(location = 1) out vec2 outUV;
 layout(location = 2) out mat3 outNormal;
 
@@ -33,7 +33,7 @@ void main()
 
 	gl_Position = ViewProj * worldPos;
 
-	outViewPos = View * worldPos;
+	outWorldPos = /*View **/ worldPos;
 	outUV = inUV;
 
 	#ifdef TBN

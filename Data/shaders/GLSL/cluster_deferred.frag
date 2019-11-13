@@ -35,19 +35,19 @@ void main()
 	vec4 albedo = texture(samplerAlbedo, inUV);
 	vec4 normal = texture(samplerNormal, inUV);
 
-	float depth = texture(samplerDepth, inUV).r;
+	vec4 pos = texture(samplerDepth, inUV);
 
-    //vec3 worldPos = ReconstructPositionFromDepth(depth);
+    vec3 worldPos = pos.rgb;// ReconstructPositionFromDepth(depth);
 
-    depth = ReconstructDepth(depth);
+    //depth = ReconstructDepth(depth);
       
 #ifdef ORTHO
-    vec3 worldPos = lerp(iNearRay, iFarRay, depth);
+    //vec3 worldPos = lerp(iNearRay, iFarRay, depth);
 #else
-    vec3 worldPos = iFarRay * depth;
+    //vec3 worldPos = iFarRay * depth;
 #endif
 
-    worldPos += ubo_in.cam_pos;
+    //worldPos += ubo_in.cam_pos;
 
     vec3 specColor = vec3(albedo.a);
 
