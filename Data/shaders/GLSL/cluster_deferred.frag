@@ -11,17 +11,9 @@ layout(location = 0) in vec2 inUV;
 layout(location = 1) in vec3 iFarRay;
 layout(location = 2) in vec3 iNearRay;
 
-//layout(location = 1) in vec3 inViewRay;
-
 layout(location = 0) out vec4 outFragcolor;
 
-//vec3 ReconstructPositionFromDepth(float depth)
-//{
-//  depth = (ubo_in.cam_near * ubo_in.cam_far) / (ubo_in.cam_far + depth * (ubo_in.cam_near - ubo_in.cam_far));
-//  const vec3 viewRay = normalize(inViewRay);
-//  const float viewZDist = dot(ubo_in.cam_forward, viewRay);
-//  return ubo_in.cam_pos + viewRay * (depth / viewZDist);
-//}
+//#define DEPTH_RECONSTRUCT
 
 float ReconstructDepth(float hwDepth)
 {
@@ -37,17 +29,21 @@ void main()
 
 	vec4 pos = texture(samplerDepth, inUV);
 
-    vec3 worldPos = pos.xyz;// ReconstructPositionFromDepth(depth);
+#ifdef DEPTH_RECONSTRUCT
 
-    //depth = ReconstructDepth(depth);
+    float depth = /*pos.w;//*/ReconstructDepth(pos.w);
       
 #ifdef ORTHO
-    //vec3 worldPos = lerp(iNearRay, iFarRay, depth);
+    vec3 worldPos = lerp(iNearRay, iFarRay, depth);
 #else
-    //vec3 worldPos = iFarRay * depth;
+    vec3 worldPos = iFarRay * depth;
+#endif
+    worldPos += ubo_in.cam_pos;
+
+#else
+    vec3 worldPos = pos.xyz;// ReconstructPositionFromDepth(depth);
 #endif
 
-    //worldPos += ubo_in.cam_pos;
 
     vec3 specColor = vec3(albedo.a);
 

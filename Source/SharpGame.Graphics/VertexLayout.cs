@@ -64,25 +64,25 @@ namespace SharpGame
         InstanceMatrix4 = 0x800,
     }
 
-    public class VertexLayout
+    public class VertexLayout : IEnumerable<VertexInputAttribute>
     {
         public VertexInputBinding[] bindings;
-        public VertexInputAttribute[] attributes;
-
+        public FastList<VertexInputAttribute> attributes;
+        bool needUpdate = true;
         public VertexLayout()
         {
         }
 
         public VertexLayout(params VertexInputAttribute[] attributes)
         {
-            this.attributes = attributes;
-            Update();
+            this.attributes = new FastList<VertexInputAttribute>(attributes);            
         }
 
         public VertexLayout(VertexInputBinding[] bindings, VertexInputAttribute[] attributes)
         {
             this.bindings = bindings;
-            this.attributes = attributes;
+            this.attributes = new FastList<VertexInputAttribute>(attributes);
+            needUpdate = false;
         }
 
         void Update()
@@ -145,11 +145,17 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkPipelineVertexInputStateCreateInfo native)
         {
+            if(needUpdate)
+            {
+                Update();
+                needUpdate = false;
+            }
+
             native = VkPipelineVertexInputStateCreateInfo.New();
             native.vertexBindingDescriptionCount = (uint)bindings.Length;
-            native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AllocToPointer(bindings);
-            native.vertexAttributeDescriptionCount = (uint)attributes.Length;
-            native.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)Utilities.AllocToPointer(attributes);           
+            native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AsPointer(ref bindings[0]);
+            native.vertexAttributeDescriptionCount = (uint)attributes.Count;
+            native.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)Utilities.AsPointer(ref attributes.Front());           
         }
 
         public void Print()
@@ -162,6 +168,21 @@ namespace SharpGame
             }
         }
 
+        public void Add(VertexInputAttribute binding)
+        {
+
+            needUpdate = true;
+        }
+
+        public IEnumerator<VertexInputAttribute> GetEnumerator()
+        {
+            return ((IEnumerable<VertexInputAttribute>)attributes).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<VertexInputAttribute>)attributes).GetEnumerator();
+        }
     }
 
 

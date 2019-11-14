@@ -51,10 +51,12 @@ void main ()
 	vec3 N = normalize(inNormal * DecodeNormal(texture(NormalMap, inUV)));
 	outNormalRoughness = vec4((N + 1.0f) * 0.5f, 1);
 
-	float z = linearDepth(gl_FragCoord.z);
-	outDepth = vec4(inWorldPos.xyz, z);
+	float z = /*linearDepth*/(gl_FragCoord.z/ubo_in.cam_far);
+
+    outDepth = vec4(inWorldPos.xyz, z);
 
     vec4 viewPos = ubo_in.view*inWorldPos;
+
     int grid_idx = ViewPosToGridIdx(gl_FragCoord.xy, viewPos.z);
     imageStore(grid_flags, int(grid_idx), uvec4(1, 0, 0, 0));
 }
