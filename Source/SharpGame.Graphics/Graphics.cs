@@ -196,15 +196,13 @@ namespace SharpGame
         {
             AttachmentDescription[] attachments =
             {
-                new AttachmentDescription
+                new AttachmentDescription(ColorFormat)
                 {
-                    format = ColorFormat,
                     finalLayout = ImageLayout.PresentSrcKHR
                 },
 
-                new AttachmentDescription
+                new AttachmentDescription(DepthFormat)
                 {
-                    format = DepthFormat,
                     finalLayout = ImageLayout.DepthStencilAttachmentOptimal
                 }
             };
@@ -260,18 +258,16 @@ namespace SharpGame
             AttachmentDescription[] attachments =
             {
                 // Color attachment
-                new AttachmentDescription
+                new AttachmentDescription(ColorFormat)
                 {
-                    format = ColorFormat,
                     loadOp = clearColor? AttachmentLoadOp.Clear : AttachmentLoadOp.Load,
                     storeOp = AttachmentStoreOp.Store,
                     finalLayout = ImageLayout.PresentSrcKHR
                 },
 
                 // Depth attachment
-                new AttachmentDescription
+                new AttachmentDescription(DepthFormat)
                 {
-                    format = DepthFormat,
                     loadOp = clearDepth? AttachmentLoadOp.Clear: AttachmentLoadOp.DontCare,
                     storeOp = AttachmentStoreOp.DontCare,
                     finalLayout = ImageLayout.DepthStencilAttachmentOptimal
