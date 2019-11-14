@@ -65,9 +65,9 @@ namespace SharpGame.Samples
 
                 VertexLayout = new VertexLayout
                 (
-                    new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
+                    new VertexAttribute(0, 0, Format.R32g32Sfloat, 0),
                     //new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
-                    new VertexInputAttribute(0, 1, Format.R32g32b32a32Sfloat, 16)
+                    new VertexAttribute(0, 1, Format.R32g32b32a32Sfloat, 16)
                     
                 )
 
@@ -85,8 +85,8 @@ namespace SharpGame.Samples
             var tex = texReader.Load("textures/particle01_rgba.ktx");            
             var tex1 = texReader.Load("textures/particle_gradient_rgba.ktx");
 
-            Renderer.AddDebugImage(tex);
-            Renderer.AddDebugImage(tex1);
+            FrameGraph.AddDebugImage(tex);
+            FrameGraph.AddDebugImage(tex1);
 
             material.PipelineResourceSet[0].ResourceSet[0].Bind(tex, tex1);
 

@@ -10,8 +10,6 @@ namespace SharpGame
 {
     public class RenderPipeline : Object
     {
-        public RenderTarget[] RenderTargets { get; set; }
-
         public List<FrameGraphPass> RenderPassList { get; set; } = new List<FrameGraphPass>();
 
         public RenderView View { get; private set; }
@@ -19,7 +17,7 @@ namespace SharpGame
         bool initialized = false;
 
         public Graphics Graphics => Graphics.Instance;
-        public RenderSystem Renderer => RenderSystem.Instance;
+        public FrameGraph FrameGraph => FrameGraph.Instance;
 
         public RenderPipeline()
         {
@@ -87,6 +85,7 @@ namespace SharpGame
             AddRenderPass(renderPass);
             return renderPass;
         }
+
         public GraphicsPass InsertGraphicsPass(int index, Action<GraphicsPass, RenderView> onDraw)
         {
             var renderPass = new GraphicsPass

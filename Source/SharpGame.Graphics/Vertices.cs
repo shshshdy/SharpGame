@@ -30,11 +30,11 @@ namespace SharpGame
         }
 
         public static VertexLayout Layout = new VertexLayout
-        (
-            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 12),
-            new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 20)
-        );
+        {
+            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexAttribute(0, 1, Format.R32g32Sfloat, 12),
+            new VertexAttribute(0, 2, Format.R32g32b32Sfloat, 20)
+        };
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -58,13 +58,13 @@ namespace SharpGame
         public static int Size => Utilities.SizeOf<VertexPosTexNTB>();
 
         public static VertexLayout Layout = new VertexLayout
-        (
-            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 12),
-            new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 20),
-            new VertexInputAttribute(0, 3, Format.R32g32b32Sfloat, 32),
-            new VertexInputAttribute(0, 4, Format.R32g32b32Sfloat, 44)            
-        );
+        {
+            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexAttribute(0, 1, Format.R32g32Sfloat, 12),
+            new VertexAttribute(0, 2, Format.R32g32b32Sfloat, 20),
+            new VertexAttribute(0, 3, Format.R32g32b32Sfloat, 32),
+            new VertexAttribute(0, 4, Format.R32g32b32Sfloat, 44)
+        };
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -86,12 +86,12 @@ namespace SharpGame
         public static int Size => Utilities.SizeOf<VertexPosTexNormTangent>();
 
         public static VertexLayout Layout = new VertexLayout
-        (
-            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 12),
-            new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 20),
-            new VertexInputAttribute(0, 3, Format.R32g32b32a32Sfloat, 32)
-        );
+        {
+            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexAttribute(0, 1, Format.R32g32Sfloat, 12),
+            new VertexAttribute(0, 2, Format.R32g32b32Sfloat, 20),
+            new VertexAttribute(0, 3, Format.R32g32b32a32Sfloat, 32)
+        };
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -113,12 +113,12 @@ namespace SharpGame
         }
 
         public static VertexLayout Layout = new VertexLayout
-        (
-            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
-            new VertexInputAttribute(0, 2, Format.R32g32b32Sfloat, 20),
-            new VertexInputAttribute(0, 3, Format.R8g8b8a8Unorm, 32)
-        );
+        {
+            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexAttribute(0, 1, Format.R32g32Sfloat, 8),
+            new VertexAttribute(0, 2, Format.R32g32b32Sfloat, 20),
+            new VertexAttribute(0, 3, Format.R8g8b8a8Unorm, 32)
+        };
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -130,10 +130,10 @@ namespace SharpGame
         public static int Size => Utilities.SizeOf<VertexPosColor>();
 
         public static VertexLayout Layout = new VertexLayout
-        (
-            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexInputAttribute(0, 1, Format.R8g8b8a8Unorm, 12)
-        );
+        {
+            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexAttribute(0, 1, Format.R8g8b8a8Unorm, 12)
+        };
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -150,9 +150,9 @@ namespace SharpGame
         public static int Size => Utilities.SizeOf<VertexPosColor>();
 
         public static VertexLayout Layout = new VertexLayout
-        (
-            new VertexInputAttribute(0, 0, Format.R32g32b32Sfloat, 0)
-        );
+        {
+            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0)
+        };
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -165,10 +165,10 @@ namespace SharpGame
         public static int Size => Utilities.SizeOf<VertexPos2dTexColor>();
 
         public static VertexLayout Layout = new VertexLayout
-        (
-            new VertexInputAttribute(0, 0, Format.R32g32Sfloat, 0),
-            new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
-            new VertexInputAttribute(0, 2, Format.R8g8b8a8Unorm, 16)
-        );
+        {
+            new VertexAttribute(0, 0, Format.R32g32Sfloat, 0),
+            new VertexAttribute(0, 1, Format.R32g32Sfloat, 8),
+            new VertexAttribute(0, 2, Format.R8g8b8a8Unorm, 16)
+        };
     }
 }

@@ -42,7 +42,7 @@ namespace SharpGame
         protected FileSystem fileSystem;
         protected Resources cache;
         protected Graphics graphics;
-        protected RenderSystem renderer;
+        protected FrameGraph frameGraph;
         protected Input input;
         protected bool paused = false;
         private bool shouldQuit = false;
@@ -101,16 +101,16 @@ namespace SharpGame
 
             graphics = CreateSubsystem<Graphics>(Settings);
             graphics.Init(window.SdlWindowHandle);
-            renderer = CreateSubsystem<RenderSystem>();
+            frameGraph = CreateSubsystem<FrameGraph>();
             input = CreateSubsystem<Input>();
-            renderer.Initialize();
+            frameGraph.Initialize();
 
             CreateSubsystem<ImGUI>();
         }
 
         protected virtual void Init()
         {
-            mainView = renderer.CreateRenderView();
+            mainView = frameGraph.CreateRenderView();
         }
 
         protected virtual void CreateWindow()
@@ -177,7 +177,7 @@ namespace SharpGame
                
                 UpdateFrame();
 
-                renderer.Submit();
+                frameGraph.Submit();
 
                 ApplyFrameLimit();
                 Profiler.End();
@@ -270,7 +270,7 @@ namespace SharpGame
                 }
 
                 Profiler.Begin();
-                renderer.Submit();
+                frameGraph.Submit();
                 Profiler.End();
 
             }
@@ -310,9 +310,9 @@ namespace SharpGame
                 timeDelta = Time.Delta
             });
 
-            renderer.Update();
+            frameGraph.Update();
 
-            renderer.Render();
+            frameGraph.Render();
 
             this.SendGlobalEvent(new EndFrame());
 

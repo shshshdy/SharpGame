@@ -18,7 +18,7 @@ namespace SharpGame
         private Camera camera;
         public Camera Camera => camera;
 
-        public RenderPipeline RenderPipeline { get; set; }
+        public RenderPipeline Renderer { get; set; }
 
         private Viewport viewport;
         public ref Viewport Viewport => ref viewport;
@@ -27,7 +27,7 @@ namespace SharpGame
         public float Width => viewport.width;
         public float Height => viewport.height;
 
-        public bool DrawDebug { get => RenderSystem.drawDebug && drawDebug; set => drawDebug = value; }
+        public bool DrawDebug { get => FrameGraph.drawDebug && drawDebug; set => drawDebug = value; }
         bool drawDebug = true;
         GraphicsPass debugPass;
 
@@ -74,7 +74,7 @@ namespace SharpGame
         ResourceSet[] psResourceSet = new ResourceSet[2];
 
         Graphics Graphics => Graphics.Instance;
-        RenderSystem Renderer => RenderSystem.Instance;
+        FrameGraph FrameGraph => FrameGraph.Instance;
 
         public RenderView()
         {
@@ -109,7 +109,7 @@ namespace SharpGame
 
         public void Reset()
         {
-            RenderPipeline?.Reset();
+            Renderer?.Reset();
             debugPass?.Reset();
         }
 
@@ -118,9 +118,9 @@ namespace SharpGame
             this.scene = scene;
             this.camera = camera;
 
-            RenderPipeline = frameGraph;
+            Renderer = frameGraph;
 
-            RenderPipeline?.Init(this);
+            Renderer?.Init(this);
 
 
         }
@@ -140,8 +140,8 @@ namespace SharpGame
                 new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
             };
 
-            vsResourceSet[0] = new ResourceSet(vsResLayout, ubCameraVS[0], Renderer.TransformBuffer[0]);
-            vsResourceSet[1] = new ResourceSet(vsResLayout, ubCameraVS[1], Renderer.TransformBuffer[1]);
+            vsResourceSet[0] = new ResourceSet(vsResLayout, ubCameraVS[0], FrameGraph.TransformBuffer[0]);
+            vsResourceSet[1] = new ResourceSet(vsResLayout, ubCameraVS[1], FrameGraph.TransformBuffer[1]);
 
             psResLayout = new ResourceLayout
             {
@@ -172,7 +172,7 @@ namespace SharpGame
                     if (batch.frameNum != Frame.frameNumber)
                     {
                         batch.frameNum = Frame.frameNumber;
-                        batch.offset = Renderer.GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
+                        batch.offset = FrameGraph.GetTransform(batch.worldTransform, (uint)batch.numWorldTransforms);
                     }
 
                 }
@@ -219,13 +219,13 @@ namespace SharpGame
 
             UpdateGeometry();
 
-            if (RenderPipeline == null)
+            if (Renderer == null)
             {
-                RenderPipeline = new ForwardRenderer();
-                RenderPipeline.Init(this);
+                Renderer = new ForwardRenderer();
+                Renderer.Init(this);
             }
 
-            RenderPipeline.Update();
+            Renderer.Update();
 
             if (DrawDebug)
             {
@@ -237,7 +237,7 @@ namespace SharpGame
 
         public void Render()
         {
-            RenderPipeline.Draw();
+            Renderer.Draw();
 
             if (DrawDebug)
             {
@@ -317,6 +317,7 @@ namespace SharpGame
             cameraPS.FarClip = farClip;
 
             ubCameraPS.SetData(ref cameraPS);
+            //ubCameraPS.Flush();
 
         }
 
@@ -365,7 +366,7 @@ namespace SharpGame
         {
             Profiler.BeginSample("RenderView.Submit");
 
-            RenderPipeline.Submit(cb, passQueue, imageIndex);
+            Renderer.Submit(cb, passQueue, imageIndex);
 
             if (DrawDebug)
             {

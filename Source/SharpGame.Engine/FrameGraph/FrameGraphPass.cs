@@ -38,7 +38,7 @@ namespace SharpGame
         public CommandBuffer CmdBuffer => cmdBuffer;
 
         public Graphics Graphics => Graphics.Instance;
-        public RenderSystem Renderer => RenderSystem.Instance;
+        public FrameGraph FrameGraph => FrameGraph.Instance;
 
         public FrameGraphPass()
         {

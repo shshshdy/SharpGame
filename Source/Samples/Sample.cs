@@ -33,7 +33,7 @@ namespace SharpGame.Samples
         public FileSystem FileSystem => FileSystem.Instance;
         public Resources Resources => Resources.Instance;
         public Graphics Graphics => Graphics.Instance;
-        public RenderSystem Renderer => RenderSystem.Instance;
+        public FrameGraph FrameGraph => FrameGraph.Instance;
         public RenderView MainView => Application.Instance.MainView;
 
         public Sample()

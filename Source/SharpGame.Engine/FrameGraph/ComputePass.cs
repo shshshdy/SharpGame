@@ -21,7 +21,7 @@ namespace SharpGame
 
         public override void Draw(RenderView view)
         {
-            cmdBuffer = Renderer.WorkComputeCmdBuffer;
+            cmdBuffer = FrameGraph.WorkComputeCmdBuffer;
             OnDraw?.Invoke(this, view);
             cmdBuffer = null;
         }

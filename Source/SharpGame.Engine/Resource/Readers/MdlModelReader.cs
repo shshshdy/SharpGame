@@ -121,7 +121,7 @@ namespace SharpGame
                     }*/
 
                     uint numElements = stream.Read<uint>();
-                    FastList<VertexInputAttribute> attrs = new FastList<VertexInputAttribute>();
+                    FastList<VertexAttribute> attrs = new FastList<VertexAttribute>();
                     uint offset = 0;
                     for (uint j = 0; j < numElements; ++j)
                     {
@@ -130,7 +130,7 @@ namespace SharpGame
                         uint semantic =((elementDesc >> 8) & 0xff);
                         uint index = ((elementDesc >> 16) & 0xff);
 
-                        VertexInputAttribute attr = new VertexInputAttribute(0, j, semanticToFormat[semantic], offset);
+                        VertexAttribute attr = new VertexAttribute(0, j, semanticToFormat[semantic], offset);
                         offset += semanticSize[semantic];
                         attrs.Add(attr);
                     }
@@ -138,7 +138,7 @@ namespace SharpGame
                     vertexSize = offset;
                     var layout = new VertexLayout(attrs.ToArray());
                     loadVBData_[i].layout = layout;
-                    layout.Print();
+                    //layout.Print();
                     
                 }
 
@@ -383,54 +383,54 @@ namespace SharpGame
         uint[] semanticSize = { 12, 12, 16, 16, 8, 4, 16, 4 };
         static VertexLayout CreateVertexInputStateCreateInfo(uint mask, out uint stride)
         {
-            List<VertexInputAttribute> vertexInputAttributes = new List<VertexInputAttribute>();
+            List<VertexAttribute> vertexInputAttributes = new List<VertexAttribute>();
             stride = 0;
             uint location = 0;
             if ((mask & MASK_POSITION) != 0)
             {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32b32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32b32Sfloat, stride));
                 stride += 12;
                 location++;
             }
             if ((mask & MASK_NORMAL) != 0)
             {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32b32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32b32Sfloat, stride));
                 stride += 12;
                 location++;
             }
             if ((mask & MASK_COLOR) != 0)
             {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R8g8b8a8Unorm, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R8g8b8a8Unorm, stride));
                 stride += 4;
                 location++;
             }
             if ((mask & MASK_TEXCOORD1) != 0)
             {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32Sfloat, stride));
                 stride += 8;
                 location++;
             }
             if ((mask & MASK_TEXCOORD2) != 0)
             {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32Sfloat, stride));
                 stride += 8;
                 location++;
             }
             if ((mask & MASK_TANGENT) != 0)
             {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32b32a32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32b32a32Sfloat, stride));
                 stride += 16;
                 location++;
             }
             if ((mask & MASK_BLENDWEIGHTS) != 0)
             {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R32g32b32a32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32b32a32Sfloat, stride));
                 stride += 16;
                 location++;
             }
             if ((mask & MASK_BLENDINDICES) != 0)
             {
-                vertexInputAttributes.Add(new VertexInputAttribute(0, location, Format.R8g8b8a8Uint, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R8g8b8a8Uint, stride));
                 stride += 4;
                 location++;
             }

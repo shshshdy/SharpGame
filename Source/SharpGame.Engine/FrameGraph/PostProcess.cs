@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class PostProcessManager : FrameGraphPass
+    public class PostProcess : GraphicsPass
     {
     }
 }

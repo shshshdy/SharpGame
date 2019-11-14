@@ -15,13 +15,13 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexInputBinding
+    public struct VertexBinding
     {
         public uint binding;
         public uint stride;
         public VertexInputRate inputRate;
 
-        public VertexInputBinding(uint binding, uint stride, VertexInputRate inputRate)
+        public VertexBinding(uint binding, uint stride, VertexInputRate inputRate)
         {
             this.binding = binding;
             this.stride = stride;
@@ -30,14 +30,14 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexInputAttribute
+    public struct VertexAttribute
     {
         public uint location;
         public uint binding;
         public Format format;
         public uint offset;
 
-        public VertexInputAttribute(uint bind, uint loc, Format fmt, uint offset)
+        public VertexAttribute(uint bind, uint loc, Format fmt, uint offset)
         {
             binding = bind;
             location = loc;
@@ -64,24 +64,24 @@ namespace SharpGame
         InstanceMatrix4 = 0x800,
     }
 
-    public class VertexLayout : IEnumerable<VertexInputAttribute>
+    public class VertexLayout : IEnumerable<VertexAttribute>
     {
-        public VertexInputBinding[] bindings;
-        public FastList<VertexInputAttribute> attributes;
+        public VertexBinding[] bindings;
+        public FastList<VertexAttribute> attributes;
         bool needUpdate = true;
         public VertexLayout()
         {
         }
 
-        public VertexLayout(params VertexInputAttribute[] attributes)
+        public VertexLayout(params VertexAttribute[] attributes)
         {
-            this.attributes = new FastList<VertexInputAttribute>(attributes);            
+            this.attributes = new FastList<VertexAttribute>(attributes);            
         }
 
-        public VertexLayout(VertexInputBinding[] bindings, VertexInputAttribute[] attributes)
+        public VertexLayout(VertexBinding[] bindings, VertexAttribute[] attributes)
         {
             this.bindings = bindings;
-            this.attributes = new FastList<VertexInputAttribute>(attributes);
+            this.attributes = new FastList<VertexAttribute>(attributes);
             needUpdate = false;
         }
 
@@ -103,7 +103,7 @@ namespace SharpGame
                 }
             }
 
-            bindings = new[] { new VertexInputBinding(0, offset + size, VertexInputRate.Vertex) };
+            bindings = new[] { new VertexBinding(0, offset + size, VertexInputRate.Vertex) };
         }
 
         uint GetFormatSize(Format format)
@@ -168,20 +168,25 @@ namespace SharpGame
             }
         }
 
-        public void Add(VertexInputAttribute binding)
+        public void Add(VertexAttribute binding)
         {
+            if(attributes == null)
+            {
+                attributes = new FastList<VertexAttribute>();
+            }
 
+            attributes.Add(binding);
             needUpdate = true;
         }
 
-        public IEnumerator<VertexInputAttribute> GetEnumerator()
+        public IEnumerator<VertexAttribute> GetEnumerator()
         {
-            return ((IEnumerable<VertexInputAttribute>)attributes).GetEnumerator();
+            return ((IEnumerable<VertexAttribute>)attributes).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<VertexInputAttribute>)attributes).GetEnumerator();
+            return ((IEnumerable<VertexAttribute>)attributes).GetEnumerator();
         }
     }
 

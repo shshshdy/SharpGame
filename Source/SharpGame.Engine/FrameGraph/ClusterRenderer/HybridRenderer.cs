@@ -123,9 +123,9 @@ namespace SharpGame
 
             geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view, depthHWRT.view });
 
-            Renderer.AddDebugImage(albedoRT.view);
-            Renderer.AddDebugImage(normalRT.view);
-            Renderer.AddDebugImage(depthRT.view);
+            FrameGraph.AddDebugImage(albedoRT.view);
+            FrameGraph.AddDebugImage(normalRT.view);
+            FrameGraph.AddDebugImage(depthRT.view);
 
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthHWRT.view });
 

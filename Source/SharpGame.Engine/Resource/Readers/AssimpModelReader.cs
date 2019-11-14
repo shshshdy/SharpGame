@@ -209,7 +209,7 @@ namespace SharpGame
                 }
             }
 
-            vertexLayout.Print();
+            //vertexLayout.Print();
                 
             vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNorm), vertexBuffer.Count, vertexBuffer.Data);
             ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
@@ -259,7 +259,7 @@ namespace SharpGame
                 }
             }
 
-            vertexLayout.Print();
+            //vertexLayout.Print();
 
             vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNTB), vertexBuffer.Count, vertexBuffer.Data);
             ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);

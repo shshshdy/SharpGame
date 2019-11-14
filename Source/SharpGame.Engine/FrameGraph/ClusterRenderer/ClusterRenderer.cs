@@ -105,14 +105,14 @@ namespace SharpGame
 
         public ClusterRenderer()
         {
-            Renderer.OnSubmit += Renderer_OnSubmit;
+            FrameGraph.OnSubmit += Renderer_OnSubmit;
         }
         
         protected override void Destroy()
         {
             base.Destroy();
 
-            Renderer.OnSubmit -= Renderer_OnSubmit;
+            FrameGraph.OnSubmit -= Renderer_OnSubmit;
         }
         
         protected override void OnInit()

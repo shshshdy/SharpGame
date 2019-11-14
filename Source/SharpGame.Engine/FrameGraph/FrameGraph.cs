@@ -8,7 +8,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class RenderSystem : System<RenderSystem>
+    public class FrameGraph : System<FrameGraph>
     {
         private List<RenderView> views = new List<RenderView>();
         public Graphics Graphics => Graphics.Instance;
@@ -50,7 +50,7 @@ namespace SharpGame
         public static bool debugOctree;
         public static bool debugImage = false;
 
-        public RenderSystem()
+        public FrameGraph()
         {
             this.Subscribe<GUIEvent>(e => OnDebugImage());
 
@@ -178,7 +178,7 @@ namespace SharpGame
 
                 foreach (var viewport in views)
                 {
-                    viewport.RenderPipeline.Submit(cmdBuffer, PassQueue.EarlyGraphics, imageIndex);
+                    viewport.Renderer.Submit(cmdBuffer, PassQueue.EarlyGraphics, imageIndex);
                 }
 
                 cmdBuffer.End();
@@ -201,7 +201,7 @@ namespace SharpGame
 
                 foreach (var viewport in views)
                 {
-                    viewport.RenderPipeline.Submit(null, PassQueue.Compute, imageIndex);
+                    viewport.Renderer.Submit(null, PassQueue.Compute, imageIndex);
                 }
 
                 if (cmdBuffer.NeedSubmit)

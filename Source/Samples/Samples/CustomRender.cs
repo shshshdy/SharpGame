@@ -64,8 +64,8 @@ namespace SharpGame.Samples
 
             ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint) Utilities.SizeOf<CameraVS>());
 
-            resourceSet[0] = new ResourceSet(resourceLayout, ubCameraVS[0], Renderer.TransformBuffer[0]);
-            resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], Renderer.TransformBuffer[1]);
+            resourceSet[0] = new ResourceSet(resourceLayout, ubCameraVS[0], FrameGraph.TransformBuffer[0]);
+            resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], FrameGraph.TransformBuffer[1]);
 
             frameGraph.AddGraphicsPass(CustomDraw);
 
@@ -158,7 +158,7 @@ namespace SharpGame.Samples
             {
                 mat4 worldTransform = glm.translate(gridSize * (i / 10), 0, gridSize * (i % 10));
 
-                batches[i].offset = (int)RenderSystem.Instance.GetTransform(Utilities.AsPointer(ref worldTransform), 1);
+                batches[i].offset = (int)FrameGraph.Instance.GetTransform(Utilities.AsPointer(ref worldTransform), 1);
             }
 
             for (int i = 0; i < COUNT; i++)

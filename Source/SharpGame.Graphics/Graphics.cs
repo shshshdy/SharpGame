@@ -64,7 +64,7 @@ namespace SharpGame
 
         public Semaphore PresentComplete { get; }
         public Semaphore RenderComplete { get; }
-        
+
         private RenderTarget depthStencil;
         public RenderTarget DepthRT => depthStencil;
 
@@ -99,12 +99,12 @@ namespace SharpGame
             enabledFeatures.shaderStorageImageExtendedFormats = True;
 
             device = Device.Create(settings, enabledFeatures, EnabledExtensions);
-           
+
             // Get a graphics queue from the Device
             GraphicsQueue = Queue.GetDeviceQueue(Device.QFGraphics, 0);
             ComputeQueue = Queue.GetDeviceQueue(Device.QFCompute, 0);
-            DepthFormat = Device.GetSupportedDepthFormat();            
-               
+            DepthFormat = Device.GetSupportedDepthFormat();
+
             // Create synchronization objects
             PresentComplete = new Semaphore();
             RenderComplete = new Semaphore();
@@ -172,7 +172,7 @@ namespace SharpGame
 
         protected void CreateFrameBuffer()
         {
-            if(Framebuffers != null)
+            if (Framebuffers != null)
             {
                 for (int i = 0; i < Framebuffers.Length; i++)
                 {
@@ -197,15 +197,16 @@ namespace SharpGame
             AttachmentDescription[] attachments =
             {
                 new AttachmentDescription
-                (
-                    ColorFormat, 
-                    finalLayout : ImageLayout.PresentSrcKHR
-                ),
+                {
+                    format = ColorFormat,
+                    finalLayout = ImageLayout.PresentSrcKHR
+                },
+
                 new AttachmentDescription
-                (
-                    DepthFormat,
-                    finalLayout : ImageLayout.DepthStencilAttachmentOptimal
-                )
+                {
+                    format = DepthFormat,
+                    finalLayout = ImageLayout.DepthStencilAttachmentOptimal
+                }
             };
 
             SubpassDescription[] subpassDescription =
@@ -260,21 +261,21 @@ namespace SharpGame
             {
                 // Color attachment
                 new AttachmentDescription
-                (
-                    ColorFormat,
-                    loadOp : clearColor? AttachmentLoadOp.Clear : AttachmentLoadOp.Load,
-                    storeOp : AttachmentStoreOp.Store,
-                    finalLayout : ImageLayout.PresentSrcKHR
-                ),
+                {
+                    format = ColorFormat,
+                    loadOp = clearColor? AttachmentLoadOp.Clear : AttachmentLoadOp.Load,
+                    storeOp = AttachmentStoreOp.Store,
+                    finalLayout = ImageLayout.PresentSrcKHR
+                },
 
                 // Depth attachment
                 new AttachmentDescription
-                (
-                    DepthFormat,
-                    loadOp : clearDepth ? AttachmentLoadOp.Clear : AttachmentLoadOp.DontCare,
-                    storeOp : AttachmentStoreOp.DontCare,
-                    finalLayout : ImageLayout.DepthStencilAttachmentOptimal
-                )
+                {
+                    format = DepthFormat,
+                    loadOp = clearDepth? AttachmentLoadOp.Clear: AttachmentLoadOp.DontCare,
+                    storeOp = AttachmentStoreOp.DontCare,
+                    finalLayout = ImageLayout.DepthStencilAttachmentOptimal
+                }
             };
 
             SubpassDescription[] subpassDescription =
