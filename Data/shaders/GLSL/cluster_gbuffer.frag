@@ -51,7 +51,7 @@ void main ()
 	vec3 N = normalize(inNormal * DecodeNormal(texture(NormalMap, inUV)));
 	outNormalRoughness = vec4((N + 1.0f) * 0.5f, 1);
 
-	float z = /*linearDepth*/(gl_FragCoord.z/ubo_in.cam_far);
+	float z = linearDepth(gl_FragCoord.z);
 
     outDepth = vec4(inWorldPos.xyz, z);
 

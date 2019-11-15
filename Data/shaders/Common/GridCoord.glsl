@@ -11,6 +11,7 @@ layout(set = UBO_SET, binding = 0) uniform UBO
 {
     mat4 view;
     mat4 projection_clip;
+    mat4 inv_view_proj;
 
     vec2 tile_size; // xy
     uvec2 grid_dim; // xy

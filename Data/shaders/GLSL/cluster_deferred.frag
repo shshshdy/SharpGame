@@ -1,5 +1,6 @@
 #version 450
 
+
 #include "GridCoord.glsl"
 #include "cluster_lighting.h"
 
@@ -13,6 +14,7 @@ layout(location = 2) in vec3 iNearRay;
 
 layout(location = 0) out vec4 outFragcolor;
 
+precision highp float;
 //#define DEPTH_RECONSTRUCT
 
 float ReconstructDepth(float hwDepth)
@@ -27,11 +29,15 @@ void main()
 	vec4 albedo = texture(samplerAlbedo, inUV);
 	vec4 normal = texture(samplerNormal, inUV);
 
-	vec4 pos = texture(samplerDepth, inUV);
-
 #ifdef DEPTH_RECONSTRUCT
 
-    float depth = /*pos.w;//*/ReconstructDepth(pos.w);
+	float depth = texture(samplerDepth, inUV).w;
+	vec4 clip = vec4(gl_FragCoord.xy * 2.0 / ubo_in.resolution - 1.0, depth, 1.0);
+	highp vec4 world_w = ubo_in.inv_view_proj * clip;
+	highp vec3 worldPos = world_w.xyz / world_w.w;
+
+    /*
+    float depth = ReconstructDepth(pos.w);
       
 #ifdef ORTHO
     vec3 worldPos = lerp(iNearRay, iFarRay, depth);
@@ -39,8 +45,9 @@ void main()
     vec3 worldPos = iFarRay * depth;
 #endif
     worldPos += ubo_in.cam_pos;
-
+    */
 #else
+	vec4 pos = texture(samplerDepth, inUV);
     vec3 worldPos = pos.xyz;// ReconstructPositionFromDepth(depth);
 #endif
 

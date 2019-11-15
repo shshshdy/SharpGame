@@ -13,6 +13,7 @@ namespace SharpGame
     {
         public mat4 view;
         public mat4 projection_clip;
+        public mat4 inv_view_proj;
         public vec2 tile_size;
         public FixedArray2<uint> grid_dim;
         public vec4 depth_reconstruct;
@@ -278,9 +279,9 @@ namespace SharpGame
 
             mat4 clip = new mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f, 1.0f);
 
-            clusterUniforms.projection_clip = clip*camera.Projection;
-            //clusterUniforms.projection_clip = camera.VkProjection;
-
+            //clusterUniforms.projection_clip = clip*camera.Projection;
+            clusterUniforms.projection_clip = camera.VkProjection;
+            clusterUniforms.inv_view_proj = glm.inverse(camera.VkProjection * camera.View);
             clusterUniforms.tile_size[0] = (float)(TILE_WIDTH);
             clusterUniforms.tile_size[1] = (float)(TILE_HEIGHT);
             clusterUniforms.grid_dim[0] = tile_count_x;

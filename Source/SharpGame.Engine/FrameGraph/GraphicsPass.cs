@@ -324,7 +324,7 @@ namespace SharpGame
         {
             System.Diagnostics.Debug.Assert(imageIndex == workImage);
 
-            cb.BeginRenderPass(ref rpBeginInfo, SubpassContents.SecondaryCommandBuffers);
+            cb.BeginRenderPass(in rpBeginInfo, SubpassContents.SecondaryCommandBuffers);
 
             foreach (var cmd in commandList)
             {

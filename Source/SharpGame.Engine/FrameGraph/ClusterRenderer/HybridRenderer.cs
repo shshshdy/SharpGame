@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define HWDEPTH
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Vulkan;
@@ -41,7 +42,7 @@ namespace SharpGame
 
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
-            Format depthFormat = Device.GetSupportedDepthFormat();
+            Format depthFormat = Format.D32Sfloat;// Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
             {
@@ -116,10 +117,10 @@ namespace SharpGame
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
 
-            depthHWRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat,
-                        //ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth | ImageAspectFlags.Stencil,
-                        //SampleCountFlags.Count1, /*ImageLayout.DepthStencilAttachmentOptimal*/ImageLayout.DepthStencilReadOnlyOptimal
-                        //);
+            depthHWRT =/* Graphics.DepthRT;//*/ new RenderTarget(width, height, 1, depthFormat,
+                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth | ImageAspectFlags.Stencil,
+                        SampleCountFlags.Count1, /*ImageLayout.DepthStencilAttachmentOptimal*/ImageLayout.DepthStencilReadOnlyOptimal
+                        );
 
             geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view, depthHWRT.view });
 

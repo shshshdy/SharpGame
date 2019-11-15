@@ -11,6 +11,7 @@ namespace SharpGame
     public class RenderPipeline : Object
     {
         public List<FrameGraphPass> RenderPassList { get; set; } = new List<FrameGraphPass>();
+        public PostProcess PostProcess { get; } = new PostProcess();
 
         public RenderView View { get; private set; }
 
@@ -31,6 +32,8 @@ namespace SharpGame
             }
 
             View = renderView;
+
+            PostProcess.Init();
 
             OnInit();
 
