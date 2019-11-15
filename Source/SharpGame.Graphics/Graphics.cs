@@ -65,8 +65,8 @@ namespace SharpGame
         public Semaphore PresentComplete { get; }
         public Semaphore RenderComplete { get; }
 
-        private RenderTarget depthStencil;
-        public RenderTarget DepthRT => depthStencil;
+        private FramebufferAttachment depthStencil;
+        public FramebufferAttachment DepthRT => depthStencil;
 
         private TransientBufferManager transientVB = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
         private TransientBufferManager transientIB = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
@@ -352,7 +352,7 @@ namespace SharpGame
         protected void CreateDepthStencil()
         {
             depthStencil?.Dispose();         
-            depthStencil = new RenderTarget((uint)Width, (uint)Height, 1, DepthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth | ImageAspectFlags.Stencil);
+            depthStencil = new FramebufferAttachment((uint)Width, (uint)Height, 1, DepthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth | ImageAspectFlags.Stencil);
         }
         
         private void CreateCommandPool()

@@ -8,10 +8,10 @@ namespace SharpGame
 {
     public class HybridRenderer : ClusterRenderer
     {
-        private RenderTarget albedoRT;
-        private RenderTarget normalRT;
-        private RenderTarget depthRT;
-        private RenderTarget depthHWRT;
+        private FramebufferAttachment albedoRT;
+        private FramebufferAttachment normalRT;
+        private FramebufferAttachment depthRT;
+        private FramebufferAttachment depthHWRT;
 
         private Framebuffer geometryFB;
         private RenderPass geometryRP;
@@ -42,7 +42,7 @@ namespace SharpGame
 
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
-            Format depthFormat = Format.D32Sfloat;// Device.GetSupportedDepthFormat();
+            Format depthFormat = Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
             {
@@ -104,23 +104,23 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             geometryRP = new RenderPass(ref renderPassInfo);
 
-            albedoRT = new RenderTarget(width, height, 1, Format.R8g8b8a8Unorm,
+            albedoRT = new FramebufferAttachment(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-            normalRT = new RenderTarget(width, height, 1, Format.R8g8b8a8Unorm,
+            normalRT = new FramebufferAttachment(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-            depthRT = new RenderTarget(width, height, 1, Format.R32g32b32a32Sfloat,
+            depthRT = new FramebufferAttachment(width, height, 1, Format.R32g32b32a32Sfloat,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
 
-            depthHWRT =/* Graphics.DepthRT;//*/ new RenderTarget(width, height, 1, depthFormat,
+            depthHWRT =Graphics.DepthRT;/*  new RenderTarget(width, height, 1, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth | ImageAspectFlags.Stencil,
-                        SampleCountFlags.Count1, /*ImageLayout.DepthStencilAttachmentOptimal*/ImageLayout.DepthStencilReadOnlyOptimal
-                        );
+                        SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal
+                        );*/
 
             geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view, depthHWRT.view });
 
