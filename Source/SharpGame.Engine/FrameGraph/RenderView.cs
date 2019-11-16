@@ -27,6 +27,8 @@ namespace SharpGame
         public float Width => viewport.width;
         public float Height => viewport.height;
 
+        public RenderTarget RenderTarget { get; set; }
+
         public bool DrawDebug { get => FrameGraph.drawDebug && drawDebug; set => drawDebug = value; }
         bool drawDebug = true;
         GraphicsPass debugPass;

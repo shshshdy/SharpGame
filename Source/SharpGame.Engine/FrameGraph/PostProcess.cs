@@ -10,6 +10,9 @@ namespace SharpGame
 
         public FastList<PostSubpass> SubPassList { get; } = new FastList<PostSubpass>();
 
+        public RenderTarget InputTarget { get; private set; }
+
+
         public struct PostPassInfo
         {
             public RenderPassBeginInfo rpBeginInfo;
@@ -72,7 +75,21 @@ namespace SharpGame
 
         public override void Init()
         {
+            Format fmt = HDR ? Format.R16g16b16a16Sfloat : Format.R8g8b8a8Unorm;
+            InputTarget = new RenderTarget(Graphics.Width, Graphics.Height, 1, fmt,
+                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
+                        SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
+        }
 
+        public RenderTarget GetInputRenderTarget()
+        {
+            ref var rpInfo = ref postPassInfo[Graphics.WorkImage];
+            if (rpInfo.subPassList.Count == 0)
+            {
+                return Renderer.View.RenderTarget;
+            }
+
+            return InputTarget;
         }
 
         public override void Draw(RenderView view)

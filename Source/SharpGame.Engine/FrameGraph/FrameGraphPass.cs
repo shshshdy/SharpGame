@@ -32,7 +32,7 @@ namespace SharpGame
         public uint Subpass { get; set; }
 
         [IgnoreDataMember]
-        public RenderPipeline RenderPipeline { get; set; }
+        public RenderPipeline Renderer { get; set; }
 
         protected CommandBuffer cmdBuffer;
         public CommandBuffer CmdBuffer => cmdBuffer;

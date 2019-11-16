@@ -8,10 +8,10 @@ namespace SharpGame
 {
     public class HybridRenderer : ClusterRenderer
     {
-        private FramebufferAttachment albedoRT;
-        private FramebufferAttachment normalRT;
-        private FramebufferAttachment depthRT;
-        private FramebufferAttachment depthHWRT;
+        private RenderTarget albedoRT;
+        private RenderTarget normalRT;
+        private RenderTarget depthRT;
+        private RenderTarget depthHWRT;
 
         private Framebuffer geometryFB;
         private RenderPass geometryRP;
@@ -104,15 +104,15 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             geometryRP = new RenderPass(ref renderPassInfo);
 
-            albedoRT = new FramebufferAttachment(width, height, 1, Format.R8g8b8a8Unorm,
+            albedoRT = new RenderTarget(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-            normalRT = new FramebufferAttachment(width, height, 1, Format.R8g8b8a8Unorm,
+            normalRT = new RenderTarget(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-            depthRT = new FramebufferAttachment(width, height, 1, Format.R32g32b32a32Sfloat,
+            depthRT = new RenderTarget(width, height, 1, Format.R32g32b32a32Sfloat,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 

@@ -114,7 +114,7 @@ namespace SharpGame
         public void InsertRenderPass(int index, FrameGraphPass renderPass)
         {
             RenderPassList.Insert(index, renderPass);
-            renderPass.RenderPipeline = this;
+            renderPass.Renderer = this;
 
             if (initialized)
             {
@@ -125,7 +125,7 @@ namespace SharpGame
         public void AddRenderPass(FrameGraphPass renderPass)
         {
             RenderPassList.Add(renderPass);
-            renderPass.RenderPipeline = this;
+            renderPass.Renderer = this;
 
             if(initialized)
             {
@@ -173,7 +173,7 @@ namespace SharpGame
         public RenderPipeline Add(FrameGraphPass renderPass)
         {
             RenderPassList.Add(renderPass);
-            renderPass.RenderPipeline = this;
+            renderPass.Renderer = this;
             return this;
         }
 

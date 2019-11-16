@@ -22,15 +22,15 @@ namespace SharpGame
         const int SHADOW_MAP_CASCADE_COUNT = 4;
         const uint SHADOWMAP_DIM = 2048;
 
-        static FramebufferAttachment depthRT;
-        public static FramebufferAttachment DepthRT
+        static RenderTarget depthRT;
+        public static RenderTarget DepthRT
         {
             get
             {
                 if (depthRT == null)
                 {
                     var depthFormat = Device.GetSupportedDepthFormat();
-                    depthRT = new FramebufferAttachment(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat,
+                    depthRT = new RenderTarget(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth,
                         SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal);
                 }
