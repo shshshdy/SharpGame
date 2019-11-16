@@ -81,13 +81,14 @@ namespace SharpGame.Samples
 
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             if (current)
             {
                 current.Dispose();
             }
 
+            base.Destroy(disposing);
         }
 
 

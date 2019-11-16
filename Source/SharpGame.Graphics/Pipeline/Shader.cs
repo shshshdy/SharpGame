@@ -131,7 +131,7 @@ namespace SharpGame
             return ((IEnumerable<Pass>)Pass).GetEnumerator();
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             foreach (var pass in Pass)
             {
@@ -140,7 +140,7 @@ namespace SharpGame
 
             Pass.Clear();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
     }

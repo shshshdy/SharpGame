@@ -349,11 +349,11 @@ namespace SharpGame
 
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            base.Destroy();
-
             debugImages.Clear();
+
+            base.Destroy(disposing);
         }
 
     }

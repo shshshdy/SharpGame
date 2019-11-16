@@ -86,10 +86,8 @@ namespace SharpGame
         /// Force animation update after becoming visible flag.
         bool forceAnimationUpdate_ = false;
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            base.Destroy();
-
             if(!skinMatrices_.IsEmpty)
             {
                 NativePool<mat4>.Shared.Release(skinMatrices_);
@@ -101,6 +99,8 @@ namespace SharpGame
             }
 
             geometrySkinMatrices_.Clear();
+
+            base.Destroy(disposing);
         }
 
         public override void Update(in FrameInfo frame)

@@ -109,11 +109,11 @@ namespace SharpGame
             FrameGraph.OnSubmit += Renderer_OnSubmit;
         }
         
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            base.Destroy();
-
             FrameGraph.OnSubmit -= Renderer_OnSubmit;
+
+            base.Destroy(disposing);
         }
         
         protected override void OnInit()

@@ -484,10 +484,8 @@ namespace SharpGame
             scene_ = null;
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            base.Destroy();
-
             RemoveAllChildren();
             RemoveAllComponents();
 
@@ -496,6 +494,9 @@ namespace SharpGame
                 scene_.NodeRemoved(this);
 
             NativePool<mat4>.Shared.Release(worldTransform_);
+
+            base.Destroy(disposing);
+
         }
 
         public void Add(Component component)

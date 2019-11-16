@@ -143,11 +143,11 @@ namespace SharpGame
             }
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             Device.Shutdown();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
         public void Resize(int w, int h)

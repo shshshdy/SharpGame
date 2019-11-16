@@ -322,16 +322,16 @@ namespace SharpGame
             pipelineResourceSet[pass].PushConstants(cmd);
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            base.Destroy();
-
             foreach (var prs in pipelineResourceSet)
             {
                 prs.Dispose();
             }
 
             pipelineResourceSet.Clear();
+
+            base.Destroy(disposing);
 
         }
 

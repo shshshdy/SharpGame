@@ -126,7 +126,7 @@ namespace SharpGame
             return shaderModule != null;
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             if(shaderModule != 0)
             {
@@ -136,7 +136,7 @@ namespace SharpGame
 
             Code = null;
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
     }

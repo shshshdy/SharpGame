@@ -218,16 +218,8 @@ namespace SharpGame
             cachedResources.Add(resourceName, resource);
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            foreach (var res in cachedResources.Values)
-            {
-                if(res.Release() != 0)
-                {
-                    Log.Warn("Resource properly disposed : " + res.FileName);
-                }
-            }
-
             cachedResources.Clear();
         }
     }

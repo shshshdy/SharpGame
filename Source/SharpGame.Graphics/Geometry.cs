@@ -123,7 +123,7 @@ namespace SharpGame
             }
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             foreach (var vb in VertexBuffers)
             {
@@ -132,7 +132,7 @@ namespace SharpGame
 
             IndexBuffer?.Dispose();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
     }

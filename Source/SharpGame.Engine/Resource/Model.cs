@@ -103,7 +103,7 @@ namespace SharpGame
             return Materials[index];
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             foreach (var vb in vertexBuffers)
             {
@@ -120,6 +120,8 @@ namespace SharpGame
             indexBuffers.Clear();
 
             Geometries.Clear();
+
+            base.Destroy(disposing);
         }
 
         public static Model Create(List<Geometry> geometries, List<BoundingBox> bboxList = null)

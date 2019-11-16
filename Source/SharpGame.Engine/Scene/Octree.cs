@@ -39,13 +39,13 @@ namespace SharpGame
             numLevels_ = DEFAULT_OCTREE_LEVELS;
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             // Reset root pointer from all child octants now so that they do not move their drawables to root
             drawableUpdates_.Clear();
             Root.ResetRoot();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
         internal Octant GetOctant(in BoundingBox box, int level, Octant parent, Octree root, int index)

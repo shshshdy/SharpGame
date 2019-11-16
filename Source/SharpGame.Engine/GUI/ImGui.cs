@@ -95,7 +95,7 @@ namespace SharpGame
 
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             texture.Dispose();
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Object : RefCounted, IObserver
+    public class Object : DisposeBase, IObserver
     {
         protected Dictionary<Type, List<IEventHandler>> eventHandlers;
 
@@ -55,7 +55,7 @@ namespace SharpGame
             }
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             this.UnsubscribeAllEvents();
         }

@@ -187,8 +187,6 @@ namespace SharpGame
             // Flush device to make sure all resources can be freed 
             graphics.WaitIdle();
 
-            Destroy();
-
         }
 
         private void DoubleLoop()
@@ -254,7 +252,6 @@ namespace SharpGame
 
             window.Destroy();
 
-            Destroy();
         }
 
         bool started = false;

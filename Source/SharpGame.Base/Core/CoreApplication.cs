@@ -32,7 +32,7 @@ namespace SharpGame
             return InstanceHoler<T>.inst;
         }
         
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             while (subsystems.Count > 0)
                 subsystems.Pop().Dispose();

@@ -170,13 +170,13 @@ namespace SharpGame
             descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             image?.Dispose();
             imageView?.Dispose();
             sampler?.Dispose();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
         public static Texture White;

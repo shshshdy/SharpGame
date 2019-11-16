@@ -168,11 +168,11 @@ namespace SharpGame.Samples
        
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             scene?.Dispose();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
     }
 
