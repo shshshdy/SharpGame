@@ -1,4 +1,4 @@
-﻿#define HWDEPTH
+﻿//#define HWDEPTH
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -42,7 +42,7 @@ namespace SharpGame
 
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
-            Format depthFormat = Device.GetSupportedDepthFormat();
+            Format depthFormat = Format.D32Sfloat;// Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
             {
@@ -117,16 +117,16 @@ namespace SharpGame
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
 
-            depthHWRT =Graphics.DepthRT;/*  new RenderTarget(width, height, 1, depthFormat,
+            depthHWRT =/* Graphics.DepthRT; */new RenderTarget(width, height, 1, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth | ImageAspectFlags.Stencil,
                         SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal
-                        );*/
+                        );
 
             geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view, depthHWRT.view });
 
             FrameGraph.AddDebugImage(albedoRT.view);
             FrameGraph.AddDebugImage(normalRT.view);
-            FrameGraph.AddDebugImage(depthRT.view);
+            FrameGraph.AddDebugImage(depthHWRT.view);
 
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthHWRT.view });
 
@@ -147,8 +147,11 @@ namespace SharpGame
                 new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
                 new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
-
+#if HWDEPTH
+            deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
+#else
             deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
+#endif
 
         }
 
@@ -166,7 +169,7 @@ namespace SharpGame
             };
 
             yield return geometryPass;
-            
+           
             translucentClustering = new ScenePass("clustering")
             {
                 PassQueue = PassQueue.EarlyGraphics,

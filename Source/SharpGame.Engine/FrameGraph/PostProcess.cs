@@ -81,16 +81,7 @@ namespace SharpGame
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
         }
 
-        public RenderTarget GetInputRenderTarget()
-        {
-            ref var rpInfo = ref postPassInfo[Graphics.WorkImage];
-            if (rpInfo.subPassList.Count == 0)
-            {
-                return Renderer.View.RenderTarget;
-            }
-
-            return InputTarget;
-        }
+        public RenderTarget FinalRenderTarget => Renderer.View.RenderTarget;
 
         public override void Draw(RenderView view)
         {

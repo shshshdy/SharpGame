@@ -14,7 +14,7 @@ layout(location = 2) in vec3 iNearRay;
 
 layout(location = 0) out vec4 outFragcolor;
 
-precision highp float;
+//precision highp float;
 //#define DEPTH_RECONSTRUCT
 
 float ReconstructDepth(float hwDepth)
@@ -22,6 +22,14 @@ float ReconstructDepth(float hwDepth)
     return dot(vec2(hwDepth, ubo_in.depth_reconstruct.y / (hwDepth - ubo_in.depth_reconstruct.x)),
             ubo_in.depth_reconstruct.zw);
 }
+/*
+vec3 ReconstructWSPosFromDepth(vec2 uv, float depth)
+{
+	vec4 pos = vec4(uv * 2.0 - 1.0, depth, 1.0f);
+	vec4 posVS = uboConstant.invProj * pos;
+	vec3 posNDC = posVS.xyz / posVS.w;
+	return (uboConstant.invView * vec4(posNDC, 1)).xyz;
+}*/
 
 void main() 
 {
@@ -31,8 +39,8 @@ void main()
 
 #ifdef DEPTH_RECONSTRUCT
 
-	float depth = texture(samplerDepth, inUV).w;
-	vec4 clip = vec4(gl_FragCoord.xy * 2.0 / ubo_in.resolution - 1.0, depth, 1.0);
+	float depth = texture(samplerDepth, inUV).r;
+	vec4 clip = vec4(inUV * 2.0 - 1.0, depth, 1.0);
 	highp vec4 world_w = ubo_in.inv_view_proj * clip;
 	highp vec3 worldPos = world_w.xyz / world_w.w;
 

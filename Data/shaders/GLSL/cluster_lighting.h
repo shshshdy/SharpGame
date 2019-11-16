@@ -48,15 +48,22 @@ vec3 ClusterLighting(vec3 world_pos, vec3 world_norm, vec3 diffColor,
 #endif
                 float atten = max(1.f - max(0.f, dist / light_pos_range.w), 0.f);
 
-                vec3 specular;
-                if (specularPower > 0.f) {
+				vec3 specular; 
+#ifdef TRANSLUCENT
+
+				specular = 0.5f * fresnel_specular;
+				//specular = specularColor* pow(abs(dot(h, world_norm)), specularPower);
+#else
+				if (specularPower > 0.f) {
+
                     vec3 blinn_phong_specular = specularColor * pow(max(0.f, dot(h, world_norm)), specularPower);
+
                     specular = fresnel_specular + blinn_phong_specular;
                 }
                 else {
                     specular = 0.5f * fresnel_specular;
                 }
-
+#endif
                 vec3 light_color = imageLoad(light_colors, light_idx).rgb;
                 vec3 diffuse = light_color * lambertien * atten;
 
