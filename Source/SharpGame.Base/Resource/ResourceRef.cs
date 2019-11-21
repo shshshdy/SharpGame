@@ -6,26 +6,25 @@ using System.Text;
 namespace SharpGame
 {
     [DataContract]
-    public class ResourceRef
+    public class ResourceRef : DisposeBase
     {
         [DataMember]
-        public string Type { get => type.Name; set => type = Resource.GetType(value); }
+        public string Type { get => type?.Name; set => type = Resource.GetType(value); }
+
         [DataMember]
         public string FilePath;
 
+        [DataMember]
+        public Guid FileID;
+
         [IgnoreDataMember]
         public Type type;
+
         [IgnoreDataMember]
         public Resource resource;
         
         public ResourceRef()
         {
-        }
-
-        public ResourceRef(Type type, Resource resource = null)            
-        {
-            Type = type.Name;
-            this.resource = resource;
         }
 
         public ResourceRef(Type type, string filePath, Resource resource = null)
