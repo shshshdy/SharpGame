@@ -81,7 +81,7 @@ namespace SharpGame
 
         protected override bool OnBuild()
         {
-            if(ShaderResource != null)
+            if(ShaderResource != ResourceRef.Null)
             {
                 Shader = ShaderResource.Load<Shader>();
             }
