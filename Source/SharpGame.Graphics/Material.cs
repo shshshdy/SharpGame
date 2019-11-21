@@ -144,8 +144,7 @@ namespace SharpGame
                 for (int j = 0; j < TextureParameters.Count; j++)
                 {
                     ref TextureParameter texParam = ref TextureParameters.At(j);
-                    var res = texParam.texture.Load();
-                    UpdateResourceSet(texParam.name, res as Texture);
+                    UpdateResourceSet(texParam.name, texParam.texture);
                 }
             }
         }
@@ -225,7 +224,7 @@ namespace SharpGame
 
             return ref TextureParameter.Null;
         }
-
+        /*
         public void SetTexture(StringID name, ResourceRef texRef)
         {
             if (TextureParameters == null)
@@ -246,7 +245,7 @@ namespace SharpGame
 
             TextureParameters.Add(new TextureParameter { name = name, texture = texRef });
             UpdateResourceSet(name, (Texture)texRef.resource);
-        }
+        }*/
 
         public void SetTexture(StringID name, Texture tex)
         {
@@ -260,16 +259,16 @@ namespace SharpGame
                 ref TextureParameter param = ref TextureParameters.At(i);
                 if (param.name == name)
                 {
-                    if(tex.ResourceRef != param.texture)
+                    if(tex != param.texture)
                     {
-                        param.texture = tex.ResourceRef;
+                        param.texture = tex;
                         UpdateResourceSet(name, tex);
                     }
                     return;
                 }
             }
 
-            TextureParameters.Add(new TextureParameter { name = name, texture = tex.ResourceRef });
+            TextureParameters.Add(new TextureParameter { name = name, texture = tex });
             UpdateResourceSet(name, tex);
         }
 

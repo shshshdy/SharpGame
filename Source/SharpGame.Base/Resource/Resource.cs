@@ -11,9 +11,6 @@ namespace SharpGame
     public abstract class Resource : Object
     {
         [IgnoreDataMember]
-        public Guid Guid { get; set; }
-
-        [IgnoreDataMember]
         public string FileName { get; set; }
 
         [IgnoreDataMember]
@@ -24,8 +21,8 @@ namespace SharpGame
 
         [IgnoreDataMember]
         public Type ResourceType => GetType();
-        [IgnoreDataMember]
-        public ResourceRef ResourceRef => new ResourceRef(ResourceType, Guid, this);
+        //[IgnoreDataMember]
+        //public ResourceRef ResourceRef => new ResourceRef(ResourceType, Guid, this);
 
         protected FileSystem FileSystem => FileSystem.Instance;
 

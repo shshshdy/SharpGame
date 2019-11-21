@@ -350,7 +350,7 @@ namespace SharpGame
             if (!string.IsNullOrEmpty(materialDef.DiffuseTexture))
             {
                 Texture tex = Resources.Instance.Load<Texture>(path + materialDef.DiffuseTexture);
-                material.SetTexture("DiffMap", tex.ResourceRef);
+                material.SetTexture("DiffMap", tex);
             }
             else
             {
@@ -362,7 +362,7 @@ namespace SharpGame
             if (!string.IsNullOrEmpty(materialDef.BumpMap))
             {
                 Texture tex = Resources.Instance.Load<Texture>(path + materialDef.BumpMap);
-                material.SetTexture("NormalMap", tex.ResourceRef);
+                material.SetTexture("NormalMap", tex);
             }
             else
             {
@@ -372,7 +372,7 @@ namespace SharpGame
             if (!string.IsNullOrEmpty(materialDef.SpecularColorTexture))
             {
                 Texture tex = Resources.Instance.Load<Texture>(path + materialDef.SpecularColorTexture);
-                material.SetTexture("SpecMap", tex.ResourceRef);
+                material.SetTexture("SpecMap", tex);
             }
             else
             {
@@ -382,7 +382,7 @@ namespace SharpGame
             if (!string.IsNullOrEmpty(materialDef.AlphaMap))
             {
                 Texture tex = Resources.Instance.Load<Texture>(path + materialDef.AlphaMap);
-                material.SetTexture("AlphaMap", tex.ResourceRef);
+                material.SetTexture("AlphaMap", tex);
             }
             else
             {

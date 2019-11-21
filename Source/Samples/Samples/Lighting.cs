@@ -38,7 +38,7 @@ namespace SharpGame.Samples
        
             var node = scene.CreateChild("Mesh");
             var staticModel = node.AddComponent<StaticModel>();
-            staticModel.SetModel("models/sibenik/sibenik_bubble.fbx");// "models/voyager/voyager.dae");
+            staticModel.ModelFile = "models/sibenik/sibenik_bubble.fbx";// "models/voyager/voyager.dae");
 
             BoundingBox aabb = staticModel.WorldBoundingBox;
             SetupLights(scene, aabb, 1024);

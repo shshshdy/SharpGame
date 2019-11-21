@@ -66,7 +66,7 @@ namespace SharpGame
 
         public T Load<T>(ResourceRef resourceRef) where T : Resource, new()
         {
-            var res = Load(resourceRef.type, resourceRef.FileID) as T;
+            var res = Load(resourceRef.type, resourceRef.FilePath) as T;
             if (res != null)
             {
                 return res;
@@ -77,7 +77,7 @@ namespace SharpGame
 
         public Resource Load(ResourceRef resourceRef)
         {
-            var res = Load(resourceRef.type, resourceRef.FileID);
+            var res = Load(resourceRef.type, resourceRef.FilePath);
             if(res != null)
             {
                 resourceRef.resource = res;
@@ -88,28 +88,7 @@ namespace SharpGame
             resourceRef.resource = res;
             return res;
         }
-
-        public T Load<T>(Guid guid) where T : Resource, new()
-        {
-            if (!idToPath.TryGetValue(guid, out string path))
-            {
-                return null;
-            }
-
-            return Load<T>(path);
-        }
-
-        public Resource Load(Type type, Guid guid)
-        {
-            if (!idToPath.TryGetValue(guid, out string path))
-            {
-                return null;
-            }
-
-            return Load(type, path);
-
-        }
-
+        
         public T Load<T>(string resourceName) where T : Resource, new()
         {
             return Load(typeof(T), resourceName) as T;
@@ -213,8 +192,6 @@ namespace SharpGame
 
         protected void RegisterResource(string resourceName, Resource resource)
         {
-            Guid guid = GetGuid(resourceName);
-            resource.Guid = guid;
             cachedResources.Add(resourceName, resource);
         }
 

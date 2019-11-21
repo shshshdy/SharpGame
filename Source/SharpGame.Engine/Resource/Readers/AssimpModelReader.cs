@@ -303,7 +303,7 @@ namespace SharpGame
                 Texture tex = Resources.Instance.Load<Texture>(texPath);
                 if(tex != null)
                 {
-                    material.SetTexture("DiffMap", tex.ResourceRef);
+                    material.SetTexture("DiffMap", tex);
                 }
                 else
                 {
@@ -316,7 +316,7 @@ namespace SharpGame
                     tex = Resources.Instance.Load<Texture>(texPath.Replace(".ktx", "_bc3_unorm.ktx"));
                     if (tex != null)
                     {
-                        material.SetTexture("DiffMap", tex.ResourceRef);
+                        material.SetTexture("DiffMap", tex);
                     }
                 }
             }
@@ -343,14 +343,14 @@ namespace SharpGame
                 Texture tex = Resources.Instance.Load<Texture>(texPath);
                 if (tex != null)
                 {
-                    material.SetTexture("NormalMap", tex.ResourceRef);
+                    material.SetTexture("NormalMap", tex);
                 }
                 else
                 {
                     tex = Resources.Instance.Load<Texture>(texPath.Replace(".ktx", "_bc3_unorm.ktx"));
                     if (tex != null)
                     {
-                        material.SetTexture("NormalMap", tex.ResourceRef);
+                        material.SetTexture("NormalMap", tex);
                     }
                 }
             }
@@ -365,14 +365,14 @@ namespace SharpGame
                 Texture tex = Resources.Instance.Load<Texture>(texPath);
                 if (tex != null)
                 {
-                    material.SetTexture("SpecMap", tex.ResourceRef);
+                    material.SetTexture("SpecMap", tex);
                 }
                 else
                 {
                     tex = Resources.Instance.Load<Texture>(texPath.Replace(".ktx", "_bc3_unorm.ktx"));
                     if (tex != null)
                     {
-                        material.SetTexture("SpecMap", tex.ResourceRef);
+                        material.SetTexture("SpecMap", tex);
                     }
                 }
             }

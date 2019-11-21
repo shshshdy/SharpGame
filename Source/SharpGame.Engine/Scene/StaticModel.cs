@@ -19,8 +19,8 @@ namespace SharpGame
         {
         }
 
-        private ResourceRefList materialList;
-        public ResourceRefList MaterialList
+        private List<ResourceRef> materialList;
+        public List<ResourceRef> MaterialList
         {
             get
             {
@@ -32,21 +32,24 @@ namespace SharpGame
             }
         }
 
-        public ResourceRef ModelResource
+        public Model Model
         {
             get
             {
-                if(model_ == null)
-                {
-                    return null;
-                }
-
-                return  model_.ResourceRef;
+                return  model_;
             }
 
             set
             {
-                SetModelAttr(value);
+                SetModel(value);
+            }
+        }
+
+        public string ModelFile
+        {
+            set
+            {
+                SetModel(Resources.Instance.Load<Model>(value));
             }
         }
 
@@ -118,23 +121,12 @@ namespace SharpGame
 
         }
 
-        public void SetModel(string modelFile)
-        {
-            SetModelAttr(SharpGame.ResourceRef.Create<Model>(modelFile));
-        }
-
-        public void SetModelAttr(ResourceRef resourceRef)
-        {
-            var model = Resources.Instance.Load<Model>(resourceRef.FileID);
-            SetModel(model);            
-        }
-
-        public void SetMaterialAttr(ResourceRefList resourceRef)
+        public void SetMaterialAttr(List<ResourceRef> resourceRef)
         {
             materialList = resourceRef;
-            for (int i = 0; i < resourceRef.fileIDs.Count; i++)
+            for (int i = 0; i < resourceRef.Count; i++)
             {
-                Material mat = Resources.Instance.Load<Material>(resourceRef.fileIDs[i]);
+                Material mat = Resources.Instance.Load<Material>(resourceRef[i]);
                 SetMaterial(i, mat);
             }
 
