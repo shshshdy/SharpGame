@@ -47,7 +47,7 @@ namespace SharpGame
     public struct TextureParameter
     {
         public string name;
-        public Texture texture;
+        public ResourceRef texture;
         public vec4 uvOffset;
 
         [IgnoreDataMember]

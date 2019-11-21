@@ -17,10 +17,7 @@ namespace SharpGame.Samples
 
                 new Node("Camera", new vec3(0, 20, -30), glm.radians(30, 0, 0) )
                 {
-                    new Camera
-                    {
-                    },
-
+                    new Camera(),
                 },
             };
 

@@ -67,7 +67,6 @@ namespace SharpGame
         /// Geometry centers.
         public List<vec3> GeometryCenters { get; set; } = new List<vec3>();
         public List<Material> Materials { get; set; } = new List<Material>();
-        public List<ResourceRef> MaterialList { get; set; }
 
         public Model()
         {

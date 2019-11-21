@@ -19,19 +19,6 @@ namespace SharpGame
         {
         }
 
-        private List<ResourceRef> materialList;
-        public List<ResourceRef> MaterialList
-        {
-            get
-            {
-                return materialList;
-            }
-            set
-            {
-                SetMaterialAttr(value);
-            }
-        }
-
         public Model Model
         {
             get
@@ -69,16 +56,10 @@ namespace SharpGame
             ResetLodLevels();
         }
 
-        public void SetModel(Model model)
+        public StaticModel SetModel(Model model)
         {
             if (model == model_)
-                return;
-
-            if (!node_)
-            {
-                Log.Error("Can not set model while model component is not attached to a scene node");
-                return;
-            }
+                return this;
 
             model_ = model;
 
@@ -94,8 +75,11 @@ namespace SharpGame
                     geometries_[i] = (Geometry[])geometries[i].Clone();
                     geometryData_[i].center_ = geometryCenters[i];
 
-                    batches[i].geometry = geometries_[i][0];                    
-                    batches[i].worldTransform = node_.worldTransform_;
+                    batches[i].geometry = geometries_[i][0];
+                    if (node_)
+                    {
+                        batches[i].worldTransform = node_.worldTransform_;
+                    }
                     batches[i].numWorldTransforms = 1;
 
                     var m = GetMaterial(i);
@@ -119,12 +103,12 @@ namespace SharpGame
                 SetBoundingBox(BoundingBox.Empty);
             }
 
+            return this;
         }
 
-        public void SetMaterialAttr(List<ResourceRef> resourceRef)
+        public void SetMaterialAttr(string[] resourceRef)
         {
-            materialList = resourceRef;
-            for (int i = 0; i < resourceRef.Count; i++)
+            for (int i = 0; i < resourceRef.Length; i++)
             {
                 Material mat = Resources.Instance.Load<Material>(resourceRef[i]);
                 SetMaterial(i, mat);
@@ -145,6 +129,7 @@ namespace SharpGame
                 ref mat4 worldTransform = ref node_.WorldTransform;
                 for (int i = 0; i < batches.Length; ++i)
                 {
+                    batches[i].worldTransform = node_.worldTransform_;
                     vec3.Transform(geometryData_[i].center_, worldTransform, out vec3 worldCenter);
                     batches[i].distance = frame.camera.GetDistance(worldCenter);
                 }

@@ -22,7 +22,7 @@ namespace SharpGame
         {
         }
 
-        public ResourceRef(Type type, Guid guid, Resource resource = null)            
+        public ResourceRef(Type type, Resource resource = null)            
         {
             Type = type.Name;
             this.resource = resource;
@@ -35,9 +35,9 @@ namespace SharpGame
             this.resource = resource;
         }
 
-        public Resource Load()
+        public T Load<T>() where T : Resource
         {
-            return Resources.Instance.Load(this);
+            return Resources.Instance.Load(type, FilePath) as T;
         }
 
         public static ResourceRef Create<T>(string file)

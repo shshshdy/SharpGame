@@ -25,19 +25,21 @@ namespace SharpGame.Samples
                     },
 
                 },
-            };
 
-            var model = Resources.Load<Model>("Models/crysponza_bubbles/sponza.obj");
-            var node = scene.CreateChild("sponza");
-            var staticModel = node.AddComponent<StaticModel>();
-            //staticModel.CastShadows = true;
-            staticModel.SetModel(model);
-            
+                new Node("sponza")
+                {
+                    new StaticModel
+                    {
+                        ModelFile = "Models/crysponza_bubbles/sponza.obj"
+                    },
+                },
+            };
+                        
             camera = scene.GetComponent<Camera>(true);
+            var staticModel = scene.GetComponent<StaticModel>(true);
 
             BoundingBox aabb = staticModel.WorldBoundingBox;
-            Lighting.SetupLights(scene, aabb, 1024);
-            scene.GetComponents(lights, true);
+            Lighting.SetupLights(scene, aabb, 1024, lights);
 
             //clusterRenderer = new ClusterForwardRenderer();
             clusterRenderer = new HybridRenderer();

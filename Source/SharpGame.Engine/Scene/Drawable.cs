@@ -51,11 +51,7 @@ namespace SharpGame
         public IntPtr worldTransform;
         /// Number of world transforms.
         public int numWorldTransforms;
-        /// Per-instance data. If not null, must contain enough data to fill instancing buffer.
-        //public IntPtr instancingData;
-
         public int offset;
-
         public int frameNum;
         /// %Geometry type.
         public GeometryType geometryType;
@@ -219,6 +215,20 @@ namespace SharpGame
         {
             if(node != null)
                 node.AddListener(this);
+
+            if(node_)
+            {
+                IntPtr worldTransform = node_.worldTransform_;
+
+                for (int i = 0; i < batches.Length; ++i)
+                {
+                    if (batches[i].numWorldTransforms == 1)
+                    {
+                        batches[i].worldTransform = worldTransform;
+                    }
+                }
+            }
+
         }
 
         public override void OnSceneSet(Scene scene)

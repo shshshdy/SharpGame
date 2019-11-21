@@ -21,8 +21,9 @@ namespace SharpGame
 
         [IgnoreDataMember]
         public Type ResourceType => GetType();
-        //[IgnoreDataMember]
-        //public ResourceRef ResourceRef => new ResourceRef(ResourceType, Guid, this);
+
+        [IgnoreDataMember]
+        public ResourceRef ResourceRef => new ResourceRef(ResourceType, FileName, this);
 
         protected FileSystem FileSystem => FileSystem.Instance;
 

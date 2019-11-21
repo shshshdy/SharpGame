@@ -32,18 +32,22 @@ namespace SharpGame.Samples
                         Fov = glm.radians(60)
                     },
                 },
+
+                new Node("Mesh")
+                {
+                    new StaticModel
+                    {
+                        ModelFile = "models/sibenik/sibenik_bubble.fbx"
+                    },
+                },
             };
 
-            camera = scene.GetComponent<Camera>(true);
-       
-            var node = scene.CreateChild("Mesh");
-            var staticModel = node.AddComponent<StaticModel>();
-            staticModel.ModelFile = "models/sibenik/sibenik_bubble.fbx";// "models/voyager/voyager.dae");
+            camera = scene.GetComponent<Camera>(true);       
+            var staticModel = scene.GetComponent<StaticModel>(true);
 
             BoundingBox aabb = staticModel.WorldBoundingBox;
-            SetupLights(scene, aabb, 1024);
 
-            scene.GetComponents(lights, true);
+            SetupLights(scene, aabb, 1024, lights);
           
             //clusterRenderer = new ClusterForwardRenderer();
             clusterRenderer = new HybridRenderer();
@@ -84,7 +88,7 @@ namespace SharpGame.Samples
             }
         }
 
-        public static void SetupLights(Scene scene, BoundingBox aabb, int num_lights)
+        public static void SetupLights(Scene scene, BoundingBox aabb, int num_lights, List<Light> lights)
         {
             float light_vol = aabb.Volume / (float)(num_lights);
             float base_range = (float)Math.Pow(light_vol, 1.0f / 3.0f);
@@ -127,6 +131,7 @@ namespace SharpGame.Samples
                 light.LightType = LightType.Point;
                 light.Range = range;
                 light.Color = (Color4)fcol;
+                lights?.Add(light);
             }
 
         }

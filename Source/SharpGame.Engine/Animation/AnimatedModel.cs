@@ -204,12 +204,6 @@ namespace SharpGame
             if(model == model_)
                 return;
 
-            if(!node_)
-            {
-                Log.Error("Can not set model while model component is not attached to a scene node");
-                return;
-            }
-
             // Unsubscribe from the reload event of previous model (if any), then subscribe to the new
             //if(model_)
             //    UnsubscribeFromEvent(model_, E_RELOADFINISHED);
@@ -296,7 +290,12 @@ namespace SharpGame
                     else
                     {
                         batches[i].geometryType = GeometryType.Static;
-                        batches[i].worldTransform = node_.worldTransform_;
+
+                        if (node_)
+                        {
+                            batches[i].worldTransform = node_.worldTransform_;
+                        }
+
                         batches[i].numWorldTransforms = 1;
                     }
                 }
