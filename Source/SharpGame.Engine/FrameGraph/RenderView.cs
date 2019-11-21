@@ -62,7 +62,7 @@ namespace SharpGame
         internal Buffer ubFrameInfo;
         public DoubleBuffer ubCameraVS;
 
-        internal Buffer ubCameraPS;
+        internal DoubleBuffer ubCameraPS;
         internal Buffer ubLight;
 
 
@@ -133,7 +133,7 @@ namespace SharpGame
 
             ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
 
-            ubCameraPS = Buffer.CreateUniformBuffer<CameraPS>();
+            ubCameraPS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraPS>());
             ubLight = Buffer.CreateUniformBuffer<LightParameter>();
 
             vsResLayout = new ResourceLayout
@@ -152,8 +152,8 @@ namespace SharpGame
                 new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
 
-            psResourceSet[0] = new ResourceSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);
-            psResourceSet[1] = new ResourceSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);
+            psResourceSet[0] = new ResourceSet(psResLayout, ubCameraPS[0], ubLight, ShadowPass.DepthRT);
+            psResourceSet[1] = new ResourceSet(psResLayout, ubCameraPS[1], ubLight, ShadowPass.DepthRT);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -319,7 +319,7 @@ namespace SharpGame
             cameraPS.FarClip = farClip;
 
             ubCameraPS.SetData(ref cameraPS);
-            //ubCameraPS.Flush();
+            ubCameraPS.Flush();
 
         }
 

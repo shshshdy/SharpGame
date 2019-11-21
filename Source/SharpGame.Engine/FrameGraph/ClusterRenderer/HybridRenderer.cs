@@ -30,7 +30,7 @@ namespace SharpGame
         ResourceLayout deferredLayout1;
 
         ResourceSet[] deferredSet0 = new ResourceSet[2];
-        ResourceSet deferredSet1;
+        ResourceSet[] deferredSet1 = new ResourceSet[2];
 
         public HybridRenderer()
         {
@@ -42,7 +42,7 @@ namespace SharpGame
 
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
-            Format depthFormat = Format.D32Sfloat;// Device.GetSupportedDepthFormat();
+            Format depthFormat = Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
             {
@@ -118,7 +118,7 @@ namespace SharpGame
 
 
             depthHWRT =/* Graphics.DepthRT; */new RenderTarget(width, height, 1, depthFormat,
-                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth | ImageAspectFlags.Stencil,
+                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth /*| ImageAspectFlags.Stencil*/,
                         SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal
                         );
 
@@ -148,9 +148,9 @@ namespace SharpGame
                 new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
 #if HWDEPTH
-            deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
+            deferredSet1[0] = deferredSet1[1] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
 #else
-            deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
+            deferredSet1[0] = deferredSet1[1] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
 #endif
 
         }
@@ -226,7 +226,7 @@ namespace SharpGame
                 deferredSet0[Graphics.WorkContext],
                 resourceSet0[Graphics.WorkContext],
                 resourceSet1[Graphics.WorkContext],
-                deferredSet1
+                deferredSet1[Graphics.WorkContext],
             };
 
             cmd.DrawGeometry(quad, pass, 0, sets);

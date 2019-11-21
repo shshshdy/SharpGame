@@ -170,7 +170,11 @@ namespace SharpGame.Samples
 
         protected override void Destroy(bool disposing)
         {
+            MainView.Attach(null, null, null);
+            camera = null;
+
             scene?.Dispose();
+            scene = null;
 
             base.Destroy(disposing);
         }
