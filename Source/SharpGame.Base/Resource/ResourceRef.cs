@@ -24,6 +24,7 @@ namespace SharpGame
             Type = type.Name;
             FilePath = filePath;
             this.resource = resource;
+            FileID = default;
         }
 
         public T Load<T>() where T : Resource

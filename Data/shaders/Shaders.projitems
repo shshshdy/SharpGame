@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Basic.shader" />
+    <None Include="$(MSBuildThisFileDirectory)Bloom.shader" />
     <None Include="$(MSBuildThisFileDirectory)Brdf.shader" />
     <None Include="$(MSBuildThisFileDirectory)ClusterDeferred.shader" />
     <None Include="$(MSBuildThisFileDirectory)Common\Clustering.glsl" />
@@ -24,6 +25,7 @@
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ClusterLight.shader" />
     <None Include="$(MSBuildThisFileDirectory)Debug.shader" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\brightness_mask.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\calc_grid_offsets.comp" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\calc_light_grids.comp" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\calc_light_list.comp" />
@@ -39,10 +41,12 @@
     <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_deferred.vert" />
     <None Include="$(MSBuildThisFileDirectory)Common\earlyz.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_gbuffer.frag" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\gaussian_blur.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\general.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\general.vert" />
     <None Include="$(MSBuildThisFileDirectory)Common\shadow.frag" />
     <None Include="$(MSBuildThisFileDirectory)Common\shadow.vert" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\merge.frag" />
     <None Include="$(MSBuildThisFileDirectory)LitAlphaTest.shader" />
     <None Include="$(MSBuildThisFileDirectory)Shadow.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\irmap.comp" />
