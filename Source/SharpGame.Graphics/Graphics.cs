@@ -260,7 +260,7 @@ namespace SharpGame
                 // Color attachment
                 new AttachmentDescription(ColorFormat)
                 {
-                    loadOp = clearColor? AttachmentLoadOp.Clear : AttachmentLoadOp.Load,
+                    loadOp = clearColor? AttachmentLoadOp.Clear : AttachmentLoadOp.DontCare, // AttachmentLoadOp.Load,
                     storeOp = AttachmentStoreOp.Store,
                     finalLayout = ImageLayout.PresentSrcKHR
                 },
@@ -596,7 +596,7 @@ namespace SharpGame
             bool ok = mainSem.WaitOne(-1);
             if (ok)
             {
-                stats.LogicWait = Stopwatch.GetTimestamp() - curTime;
+                stats.logicWait = Stopwatch.GetTimestamp() - curTime;
                 return true;
             }
 
@@ -617,7 +617,7 @@ namespace SharpGame
             {
                 long curTime = Stopwatch.GetTimestamp();
                 bool ok = renderSem.WaitOne();
-                stats.RenderWait = Stopwatch.GetTimestamp() - curTime;
+                stats.renderWait = Stopwatch.GetTimestamp() - curTime;
             }
         }
 
@@ -633,8 +633,8 @@ namespace SharpGame
 
     public struct Stats
     {
-        public long LogicWait;
-        public long RenderWait;
+        public long logicWait;
+        public long renderWait;
         public static int drawCall;
         public static int triCount;
         

@@ -143,8 +143,8 @@ namespace SharpGame.Samples
                 //ImGui.Text(string.Format("ImageCount : {0}", graphics.ImageCount));
                 //ImGui.Text(string.Format("ImageIndex : {0}", graphics.currentImage));
 
-                ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.LogicWait * Timer.MilliSecsPerTick));
-                ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.RenderWait * Timer.MilliSecsPerTick));
+                ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.logicWait * Timer.MilliSecsPerTick));
+                ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.renderWait * Timer.MilliSecsPerTick));
 
                 ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
                 ImGui.Checkbox("Show Stats", ref showStats);
