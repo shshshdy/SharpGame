@@ -140,6 +140,7 @@ namespace SharpGame
         {
             this.SendGlobalEvent(new BeginRender());
 
+            int imageIndex = (int)Graphics.WorkImage;
             foreach (var viewport in views)
             {
                 viewport.Render();
@@ -150,6 +151,47 @@ namespace SharpGame
             this.SendGlobalEvent(new EndRender());
 
             //Log.Info("Render frame " + Graphics.WorkImage);
+
+
+            {
+                CommandBuffer cmdBuffer = preRenderCmdBlk[imageIndex].cmdBuffer;
+               
+                cmdBuffer.Begin();
+
+                foreach (var viewport in views)
+                {
+                    viewport.Renderer.Submit(cmdBuffer, PassQueue.EarlyGraphics, imageIndex);
+                }
+
+                cmdBuffer.End();
+
+            }
+
+            {
+                CommandBuffer cmdBuffer = computeCmdBlk[imageIndex].cmdBuffer;
+
+                foreach (var viewport in views)
+                {
+                    viewport.Renderer.Submit(null, PassQueue.Compute, imageIndex);
+                }
+
+            }
+
+            {
+                CommandBuffer cmdBuffer = renderCmdBlk[imageIndex].cmdBuffer;
+
+                cmdBuffer.Begin();
+
+                foreach (var viewport in views)
+                {
+                    viewport.Submit(cmdBuffer, PassQueue.Graphics, imageIndex);
+                }
+
+                OverlayPass?.Submit(cmdBuffer, imageIndex);
+
+                cmdBuffer.End();
+
+            }
         }
 
         public void Submit()
@@ -173,19 +215,8 @@ namespace SharpGame
                 fence.Reset();
 
                 CommandBuffer cmdBuffer = preRenderCmdBlk[imageIndex].cmdBuffer;
-
-                cmdBuffer.Begin();
-
-                foreach (var viewport in views)
-                {
-                    viewport.Renderer.Submit(cmdBuffer, PassQueue.EarlyGraphics, imageIndex);
-                }
-
-                cmdBuffer.End();
-
                 Graphics.GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.FragmentShader,
                     cmdBuffer, currentBuffer.preRenderSemaphore, fence);
-
                 OnSubmit?.Invoke(imageIndex, PassQueue.EarlyGraphics);
                 Profiler.EndSample();
             }
@@ -198,12 +229,6 @@ namespace SharpGame
                 fence.Reset();
 
                 CommandBuffer cmdBuffer = computeCmdBlk[imageIndex].cmdBuffer;
-
-                foreach (var viewport in views)
-                {
-                    viewport.Renderer.Submit(null, PassQueue.Compute, imageIndex);
-                }
-
                 if (cmdBuffer.NeedSubmit)
                 {
                     Graphics.ComputeQueue.Submit(currentBuffer.preRenderSemaphore, PipelineStageFlags.ComputeShader,
@@ -226,18 +251,6 @@ namespace SharpGame
                 fence.Reset();
 
                 CommandBuffer cmdBuffer = renderCmdBlk[imageIndex].cmdBuffer;
-                
-                cmdBuffer.Begin();
-
-                foreach (var viewport in views)
-                {
-                    viewport.Submit(cmdBuffer, PassQueue.Graphics, imageIndex);
-                }
-
-                OverlayPass?.Submit(cmdBuffer, imageIndex);
-
-                cmdBuffer.End();
-
                 Graphics.GraphicsQueue.Submit(currentBuffer.computeSemaphore, PipelineStageFlags.ColorAttachmentOutput,
                     cmdBuffer, currentBuffer.renderSemaphore, fence);
 
