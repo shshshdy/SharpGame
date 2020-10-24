@@ -41,7 +41,7 @@ namespace SharpGame
         public uint Width { get; private set; }
         public uint Height { get; private set; }
 
-        public uint ImageCount => Swapchain.ImageCount;
+        public int ImageCount => (int)Swapchain.ImageCount;
 
         private Framebuffer[] framebuffers;
         public Framebuffer[] Framebuffers => framebuffers;
@@ -55,11 +55,11 @@ namespace SharpGame
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
 
-        private uint currentImage = (uint)0xffffffff;
-        private uint nextImage = 0;
+        private int currentImage = -1;
+        private int nextImage = 0;
 
-        public uint RenderImage => currentImage;
-        public uint WorkImage => nextImage;
+        public int RenderImage => currentImage;
+        public int WorkImage => nextImage;
 
 
         public Semaphore PresentComplete { get; }
@@ -73,7 +73,7 @@ namespace SharpGame
 
         public class BackBuffer
         {
-            public uint imageIndex;
+            public int imageIndex;
 
             public Semaphore acquireSemaphore;
             public Semaphore preRenderSemaphore;
@@ -453,7 +453,7 @@ namespace SharpGame
 
 #endif
 
-            uint curImage = currentImage;
+            int curImage = currentImage;
 
 #if NEW_BACK_BUFF
             Swapchain.AcquireNextImage(frame.acquireSemaphore, ref currentImage);
@@ -486,7 +486,7 @@ namespace SharpGame
             Profiler.BeginSample("Present");
 
 #if NEW_BACK_BUFF
-            Swapchain.QueuePresent(GraphicsQueue, currentImage, currentBuffer.renderSemaphore);
+            Swapchain.QueuePresent(GraphicsQueue, (uint)currentImage, currentBuffer.renderSemaphore);
             GraphicsQueue.Submit(null, currentBuffer.presentFence);
 #else
             Swapchain.QueuePresent(GraphicsQueue, currentImage, RenderComplete);
@@ -525,7 +525,7 @@ namespace SharpGame
         private int currentFrame;
         public int CurrentFrame => currentFrame;
 
-        public uint NextImage { get => nextImage; set => nextImage = value; }
+        public int NextImage { get => nextImage; set => nextImage = value; }
 
         private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(1, 1);
         private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);

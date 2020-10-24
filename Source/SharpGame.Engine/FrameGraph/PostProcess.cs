@@ -93,7 +93,7 @@ namespace SharpGame
 
         }
 
-        public override void Submit(CommandBuffer cb, int imageIndex)
+        protected override void Submit(CommandBuffer cb, int imageIndex)
         {
             ref var rpInfo = ref postPassInfo[imageIndex];
             cb.BeginRenderPass(in rpInfo.rpBeginInfo, SubpassContents.Inline);

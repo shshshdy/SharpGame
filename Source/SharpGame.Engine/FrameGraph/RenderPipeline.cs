@@ -156,7 +156,7 @@ namespace SharpGame
             }
             Profiler.EndSample();
         }
-
+        /*
         public void Submit(CommandBuffer cb, PassQueue passQueue, int imageIndex)
         {
             foreach (var renderPass in RenderPassList)
@@ -168,7 +168,7 @@ namespace SharpGame
                     OnEndSubmit(renderPass, cb, imageIndex);
                 }
             }
-        }
+        }*/
 
         public RenderPipeline Add(FrameGraphPass renderPass)
         {

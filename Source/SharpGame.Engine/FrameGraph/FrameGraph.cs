@@ -41,6 +41,22 @@ namespace SharpGame
         public CommandBuffer WorkComputeCmdBuffer => computeCmdBlk[Graphics.WorkImage].cmdBuffer;
         public CommandBuffer RenderCmdBuffer => renderCmdBlk[Graphics.RenderImage].cmdBuffer;
 
+
+        public CommandBuffer GetWorkCmdBuffer(PassQueue queue)
+        {
+            switch (queue)
+            {
+                case PassQueue.EarlyGraphics:
+                    return preRenderCmdBlk[Graphics.WorkImage].cmdBuffer;
+                case PassQueue.Compute:
+                    return computeCmdBlk[Graphics.WorkImage].cmdBuffer;
+                case PassQueue.Graphics:
+                    return renderCmdBlk[Graphics.WorkImage].cmdBuffer;
+                default:
+                    return null;
+            }
+        }
+
         public event Action<int> OnBeginSubmit;
         public event Action<int, PassQueue> OnSubmit;
         public event Action<int> OnEndSubmit;
@@ -141,6 +157,10 @@ namespace SharpGame
             this.SendGlobalEvent(new BeginRender());
 
             int imageIndex = (int)Graphics.WorkImage;
+
+            preRenderCmdBlk[imageIndex].cmdBuffer.Begin();
+            computeCmdBlk[imageIndex].cmdBuffer.Begin();
+            renderCmdBlk[imageIndex].cmdBuffer.Begin();
             foreach (var viewport in views)
             {
                 viewport.Render();
@@ -148,11 +168,17 @@ namespace SharpGame
 
             OverlayPass?.Draw(null);
 
+            //OverlayPass?.Submit(renderCmdBlk[imageIndex].cmdBuffer, imageIndex);
+
+            preRenderCmdBlk[imageIndex].cmdBuffer.End();
+            computeCmdBlk[imageIndex].cmdBuffer.End();
+            renderCmdBlk[imageIndex].cmdBuffer.End();
+
             this.SendGlobalEvent(new EndRender());
 
             //Log.Info("Render frame " + Graphics.WorkImage);
 
-
+            /*
             {
                 CommandBuffer cmdBuffer = preRenderCmdBlk[imageIndex].cmdBuffer;
                
@@ -191,7 +217,7 @@ namespace SharpGame
 
                 cmdBuffer.End();
 
-            }
+            }*/
         }
 
         public void Submit()

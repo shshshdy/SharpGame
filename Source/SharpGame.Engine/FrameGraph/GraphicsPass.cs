@@ -66,7 +66,7 @@ namespace SharpGame
 
         public CommandBuffer GetCmdBuffer(int index = -1)
         {
-            uint workContext = Graphics.WorkImage;
+            int workContext = Graphics.WorkImage;
             var cb = cmdBufferPools[index + 1][workContext].Get();
             cb.renderPass = CurrentRenderPass.RenderPass;
 
@@ -98,7 +98,7 @@ namespace SharpGame
 
         protected virtual void Clear()
         {
-            uint workContext = Graphics.WorkImage;
+            int workContext = Graphics.WorkImage;
 
             for (int i = 0; i < cmdBufferPools.Count; i++)
             {
@@ -212,6 +212,9 @@ namespace SharpGame
         protected void End(RenderView view)
         {
             cmdBuffer = null;
+
+
+            Submit(FrameGraph.GetWorkCmdBuffer(PassQueue), (int)Graphics.WorkImage);
         }
 
         protected virtual void DrawImpl(RenderView view)
@@ -286,7 +289,7 @@ namespace SharpGame
             cb.Draw(3, 1, 0, 0);
         }
 
-        public override void Submit(CommandBuffer cb, int imageIndex)
+        protected override void Submit(CommandBuffer cb, int imageIndex)
         {
             var rpInfo = renderPassInfo[imageIndex];
             if(rpInfo.Count > 0)
@@ -304,7 +307,7 @@ namespace SharpGame
 
     public struct RenderPassInfo
     {
-        public uint workImage;
+        public int workImage;
         public RenderPassBeginInfo rpBeginInfo;
         public int currentSubpass;
         public FastList<CommandBuffer> commandList;

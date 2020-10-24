@@ -363,7 +363,7 @@ namespace SharpGame
 
             ubLight.SetData(ref lightParameter);
         }
-
+        /*
         public void Submit(CommandBuffer cb, PassQueue passQueue, int imageIndex)
         {
             Profiler.BeginSample("RenderView.Submit");
@@ -376,7 +376,7 @@ namespace SharpGame
             }
 
             Profiler.EndSample();
-        }
+        }*/
     }
     
 

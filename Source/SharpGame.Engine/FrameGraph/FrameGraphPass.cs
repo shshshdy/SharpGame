@@ -60,7 +60,7 @@ namespace SharpGame
         {
         }
 
-        public virtual void Submit(CommandBuffer cb, int imageIndex)
+        protected virtual void Submit(CommandBuffer cb, int imageIndex)
         {
         }
 

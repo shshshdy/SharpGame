@@ -334,14 +334,15 @@ namespace SharpGame
             }
         }
 
-        public void AcquireNextImage(Semaphore presentCompleteSemaphore, ref uint imageIndex)
+        public void AcquireNextImage(Semaphore presentCompleteSemaphore, ref int imageIndex)
         {
             // By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
             // With that we don't have to handle VK_NOT_READY
 
             VkResult res = VkResult.Timeout;
-
-            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref imageIndex);
+            uint nextImageIndex = (uint)imageIndex;
+            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref nextImageIndex);
+            
             if (res == VkResult.ErrorOutOfDateKHR)
             {
                 Log.Info(res.ToString());
@@ -357,6 +358,8 @@ namespace SharpGame
             {
                 Log.Info(res.ToString());
             }
+
+            imageIndex = (int)nextImageIndex;
 
         }
 
