@@ -176,10 +176,13 @@ namespace SharpGame
 
         public void Submit()
         {
+
+            if (!Graphics.BeginRender())
+            {
+                return;
+            }
+
             Profiler.BeginSample("RenderSystem.Submit");
-
-            Graphics.BeginRender();
-
             int imageIndex = (int)Graphics.RenderImage;
             //Log.Info("Submit frame " + imageIndex);
 

@@ -46,6 +46,7 @@ namespace SharpGame
         protected Input input;
         protected bool paused = false;
         private bool shouldQuit = false;
+        bool rendering = false;
 
         protected bool singleLoop = false;
         private bool mainThreadRender = false;
@@ -189,24 +190,8 @@ namespace SharpGame
 
         }
 
+        Thread renderThread;
         private void DoubleLoop()
-        {
-            if(mainThreadRender)
-            {
-                new Thread(SimulateLoop).Start();
-               
-                RenderLoop();
-            }
-            else
-            {
-                new Thread(RenderLoop).Start();
-                SimulateLoop();     
-            }
-
-            
-        }
-
-        private void SimulateLoop()
         {
             Graphics.SetMainThread();
 
@@ -215,12 +200,31 @@ namespace SharpGame
             Init();
 
             Start();
+
             started = true;
+            rendering = true;
+            renderThread = new Thread(RenderLoop);
+            renderThread.Start();
+            SimulateLoop();
+            renderThread.Join();
+
+
+            timer.Stop();
+            // Flush device to make sure all resources can be freed 
+            graphics.WaitIdle();
+
+            window.Destroy();
+        }
+
+        private void SimulateLoop()
+        {
 
             //graphics.WakeRender();           
 
             while (!shouldQuit)
             {
+                graphics.WaitRender();
+
                 timer.Restart();
 
                 Profiler.Begin();
@@ -228,29 +232,27 @@ namespace SharpGame
                 Time.Tick(timeStep);
 
                 input.snapshot = window.PumpEvents();
-
+                /*
                 if(resized)
                 {
                     resized = false;
                     graphics.Frame();
                     Profiler.End();
                     continue;
-                }
+                }*/
 
                 UpdateFrame();
 
                 ApplyFrameLimit();
-
+                graphics.MainSemPost();
                 Profiler.End();
             }
 
-            graphics.Frame();
+            rendering = false;
 
-            timer.Stop();
-            // Flush device to make sure all resources can be freed 
-            graphics.WaitIdle();
+            graphics.WaitRender();
+            //graphics.Frame();
 
-            window.Destroy();
 
         }
 
@@ -259,20 +261,15 @@ namespace SharpGame
         {
             Graphics.SetRenderThread();
 
-            while (!shouldQuit)
+            while (rendering)
             {
-                if (!started)
-                {
-                    continue;
-                }
-
                 Profiler.Begin();
                 frameGraph.Submit();
                 Profiler.End();
 
             }
 
-            graphics.Close();
+            //graphics.Close();
         }
 
         void Start()
@@ -313,7 +310,7 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndFrame());
 
-            graphics.Frame();
+            //graphics.Frame();
             Profiler.EndSample();
         }
 

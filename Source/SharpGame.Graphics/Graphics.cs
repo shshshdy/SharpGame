@@ -56,7 +56,7 @@ namespace SharpGame
         public RenderPass RenderPass => renderPass;
 
         private int currentImage = -1;
-        private int nextImage = 0;
+        private int nextImage = -1;
 
         public int RenderImage => currentImage;
         public int WorkImage => nextImage;
@@ -81,14 +81,15 @@ namespace SharpGame
             public Semaphore renderSemaphore;
             public Fence presentFence;
         }
+        Semaphore firstSemaphore;
 
-        Queue<BackBuffer> backBuffers = new Queue<BackBuffer>();
+        List<BackBuffer> backBuffers = new List<BackBuffer>();
         public BackBuffer currentBuffer;
 
         public Graphics(Settings settings)
         {
 #if DEBUG
-            settings.Validation = true;
+            //settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -132,7 +133,7 @@ namespace SharpGame
 
             for (int i = 0; i < Swapchain.ImageCount; i++)
             {
-                backBuffers.Enqueue(new BackBuffer
+                backBuffers.Add(new BackBuffer
                 {
                     acquireSemaphore = new Semaphore(),
                     preRenderSemaphore = new Semaphore(),
@@ -141,6 +142,9 @@ namespace SharpGame
                     //presentFence = new Fence(FenceCreateFlags.None)
                 });
             }
+
+            firstSemaphore = new Semaphore();
+
         }
 
         protected override void Destroy(bool disposing)
@@ -426,12 +430,26 @@ namespace SharpGame
             device.WaitIdle();
         }
 
-        public void BeginRender()
+        public bool BeginRender()
         {
+            MainSemWait();
+
             Profiler.BeginSample("Acquire");
 
-#if NEW_BACK_BUFF
-            var frame = backBuffers.Peek();
+
+            currentImage = nextImage;
+            var sem = currentImage == -1 ? firstSemaphore : backBuffers[currentImage].acquireSemaphore;
+            Swapchain.AcquireNextImage(sem, ref nextImage);
+
+            RenderSemPost();
+
+            if (currentImage == -1)
+            {
+                return false;
+            }
+
+
+            var frame = backBuffers[currentImage];
             if(frame.presentFence == null)
             {
                 frame.presentFence = new Fence(FenceCreateFlags.None);
@@ -451,59 +469,41 @@ namespace SharpGame
                 }
             }
 
-#endif
-
-            int curImage = currentImage;
-
-#if NEW_BACK_BUFF
-            Swapchain.AcquireNextImage(frame.acquireSemaphore, ref currentImage);
             currentBuffer = frame;
             currentBuffer.imageIndex = currentImage;
-            backBuffers.Dequeue();
-#else
-            Swapchain.AcquireNextImage(PresentComplete, ref currentImage);            
-#endif
+
+            //backBuffers.Dequeue();
 
             //Debug.Assert(currentImage == (curImage + 1) % ImageCount);
 
 
             Profiler.EndSample();
             
-            Profiler.BeginSample("MainSemWait");
+            //MainSemWait();
 
-            MainSemWait();
-
-            nextImage = (currentImage + 1) % ImageCount;
-
-            Profiler.EndSample();
+            //nextImage = (currentImage + 1) % ImageCount;
 
             transientVB.Flush();
             transientIB.Flush();
+
+
+
+            return true;
         }
       
         public void EndRender()
         {            
             Profiler.BeginSample("Present");
 
-#if NEW_BACK_BUFF
             Swapchain.QueuePresent(GraphicsQueue, (uint)currentImage, currentBuffer.renderSemaphore);
             GraphicsQueue.Submit(null, currentBuffer.presentFence);
-#else
-            Swapchain.QueuePresent(GraphicsQueue, currentImage, RenderComplete);
-#endif
+
             GraphicsQueue.WaitIdle();
 
-#if NEW_BACK_BUFF
-            backBuffers.Enqueue(currentBuffer);
-#endif
+            //backBuffers.Enqueue(currentBuffer);
 
             Profiler.EndSample();
 
-            Profiler.BeginSample("RenderSemPost");
-
-            RenderSemPost();
-
-            Profiler.EndSample();
         }
 
 #region MULTITHREADED   
@@ -527,8 +527,8 @@ namespace SharpGame
 
         public int NextImage { get => nextImage; set => nextImage = value; }
 
-        private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(1, 1);
-        private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(0, 1);
+        private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
+        private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(1, 1);
 
         List<System.Action> actions = new List<Action>();
 
@@ -611,7 +611,7 @@ namespace SharpGame
             }
         }
 
-        void WaitRender()
+        public void WaitRender()
         {
             if (!SingleLoop)
             {
