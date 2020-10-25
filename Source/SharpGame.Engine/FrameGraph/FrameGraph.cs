@@ -168,8 +168,6 @@ namespace SharpGame
 
             OverlayPass?.Draw(null);
 
-            //OverlayPass?.Submit(renderCmdBlk[imageIndex].cmdBuffer, imageIndex);
-
             preRenderCmdBlk[imageIndex].cmdBuffer.End();
             computeCmdBlk[imageIndex].cmdBuffer.End();
             renderCmdBlk[imageIndex].cmdBuffer.End();
@@ -178,46 +176,6 @@ namespace SharpGame
 
             //Log.Info("Render frame " + Graphics.WorkImage);
 
-            /*
-            {
-                CommandBuffer cmdBuffer = preRenderCmdBlk[imageIndex].cmdBuffer;
-               
-                cmdBuffer.Begin();
-
-                foreach (var viewport in views)
-                {
-                    viewport.Renderer.Submit(cmdBuffer, PassQueue.EarlyGraphics, imageIndex);
-                }
-
-                cmdBuffer.End();
-
-            }
-
-            {
-                CommandBuffer cmdBuffer = computeCmdBlk[imageIndex].cmdBuffer;
-
-                foreach (var viewport in views)
-                {
-                    viewport.Renderer.Submit(null, PassQueue.Compute, imageIndex);
-                }
-
-            }
-
-            {
-                CommandBuffer cmdBuffer = renderCmdBlk[imageIndex].cmdBuffer;
-
-                cmdBuffer.Begin();
-
-                foreach (var viewport in views)
-                {
-                    viewport.Submit(cmdBuffer, PassQueue.Graphics, imageIndex);
-                }
-
-                OverlayPass?.Submit(cmdBuffer, imageIndex);
-
-                cmdBuffer.End();
-
-            }*/
         }
 
         public void Submit()

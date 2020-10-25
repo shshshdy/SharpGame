@@ -20,8 +20,70 @@ namespace SharpGame
 
         FastList<Task> renderTasks = new FastList<Task>();
 
+        protected int workCount = 16;
+        protected FastList<CommandBufferPool[]> cmdBufferPools = new FastList<CommandBufferPool[]>();
+
+        FastListPool<CommandBuffer>[] commdListPool = new[]
+        {
+            new FastListPool<CommandBuffer>(),
+            new FastListPool<CommandBuffer>(),
+            new FastListPool<CommandBuffer>()
+        };
+
         public ScenePass(string name = "main") : base(name, 16)
         {
+            CreateCommandPool(4);
+
+            for (int i = 0; i < workCount; i++)
+            {
+                CreateCommandPool(1);
+            }
+        }
+
+        protected void CreateCommandPool(uint numCmd = 1)
+        {
+            var cmdBufferPool = new CommandBufferPool[3];
+            for (int i = 0; i < 3; i++)
+            {
+                cmdBufferPool[i] = new CommandBufferPool(Graphics.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
+                cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, numCmd);
+            }
+
+            cmdBufferPools.Add(cmdBufferPool);
+        }
+
+        public CommandBuffer GetCmdBuffer(int index = -1)
+        {
+            int workContext = Graphics.WorkImage;
+            var cb = cmdBufferPools[index + 1][workContext].Get();
+            //cb.renderPass = CurrentRenderPass.RenderPass;
+            //CurrentRenderPass.AddCommandBuffer(cb);
+            if (!cb.IsOpen)
+            {
+                CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
+                {
+                    framebuffer = Framebuffers[workContext],
+                    renderPass = RenderPass
+                };
+
+                cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
+                    | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
+            }
+
+            return cb;
+        }
+
+        protected override void Clear()
+        {
+            int workContext = Graphics.WorkImage;
+
+            for (int i = 0; i < cmdBufferPools.Count; i++)
+            {
+                var cmd = cmdBufferPools[i][workContext];
+                cmd.currentIndex = 0;
+            }
+
+            base.Clear();
         }
 
         protected override void DrawImpl(RenderView view)
@@ -47,23 +109,25 @@ namespace SharpGame
 
         public void DrawScene(RenderView view, BlendFlags blendFlags)
         {
-
             var set0 = Set0?[Graphics.WorkContext] ?? view.Set0;
             var set1 = Set1?[Graphics.WorkContext] ?? view.Set1;
             var set2 = Set2?[Graphics.WorkContext];
 
+            var cmd = CmdBuffer;
+            cmd.SetViewport(view.Viewport);
+            cmd.SetScissor(view.ViewRect);
+
             if ((blendFlags & BlendFlags.Solid) != 0)
-            {
+            {/*
                 if (MultiThreaded)
                 {
                     DrawBatchesMT(view, view.opaqueBatches, set0, set1, set2);
                 }
-                else
+                else*/
                 {
                     DrawBatches(view, view.opaqueBatches, CmdBuffer, set0, set1, set2);
                 }
             }
-
 
             if ((blendFlags & BlendFlags.AlphaTest) != 0 && view.alphaTestBatches.Count > 0)
             {
@@ -82,19 +146,11 @@ namespace SharpGame
         {
             var cmd = cb;
 
-            if (cmd == null)
-            {
-                cmd = GetCmdBuffer();
-                cmd.SetViewport(view.Viewport);
-                cmd.SetScissor(view.ViewRect);
-            }
-
             foreach (var batch in batches)
             {
                 DrawBatch(passID, cmd, batch, default, set0, set1, set2);
             }
 
-            cmd.End();
         }
 
         public void DrawBatchesMT(RenderView view, FastList<SourceBatch> batches, ResourceSet set0, ResourceSet set1 = null, ResourceSet set2 = null)

@@ -211,13 +211,13 @@ namespace SharpGame
             var scenePass = graphicsPass as ScenePass;
             scenePass.BeginRenderPass(view);
             var cmd = graphicsPass.CmdBuffer;
-
+            /*
             if(cmd == null)
             {
                 cmd = graphicsPass.GetCmdBuffer();
                 cmd.SetViewport(view.Viewport);
                 cmd.SetScissor(view.ViewRect);
-            }
+            }*/
 
             var pass = clusterDeferred.Main;
 
@@ -231,7 +231,7 @@ namespace SharpGame
 
             cmd.DrawGeometry(quad, pass, 0, sets);
 
-            cmd.End();
+            //cmd.End();
 
             scenePass.DrawScene(view, BlendFlags.AlphaBlend);
             scenePass.EndRenderPass(view);

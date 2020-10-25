@@ -166,8 +166,8 @@ namespace SharpGame
                 Rect2D renderArea = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
 
                 BeginRenderPass(cascades[i].frameBuffer, renderArea, clearDepth);
-                
-                var cmd = GetCmdBuffer();
+
+                var cmd = FrameGraph.GetWorkCmdBuffer(PassQueue);// GetCmdBuffer();
 
                 cmd.SetViewport(viewport);
                 cmd.SetScissor(renderArea);
@@ -184,7 +184,7 @@ namespace SharpGame
                     DrawBatch(passID, cmd, batch, consts, VSSet, null);
                 }
 
-                cmd.End();
+                //cmd.End();
 
                 EndRenderPass(view);
             }
