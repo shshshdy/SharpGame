@@ -21,7 +21,8 @@ namespace SharpGame
             public uint size;
         }
 
-        FastList<TransientBufferDesc>[] buffers = new [] { new FastList<TransientBufferDesc>(), new FastList<TransientBufferDesc> ()};
+        FastList<TransientBufferDesc>[] buffers = new [] { 
+            new FastList<TransientBufferDesc>(), new FastList<TransientBufferDesc> (), new FastList<TransientBufferDesc> ()};
         public BufferUsageFlags BufferUsageFlags { get; }
         public uint Size { get; }
 
@@ -39,6 +40,11 @@ namespace SharpGame
             }
 
             foreach (var buf in buffers[1])
+            {
+                buf.buffer.Release();
+            }
+
+            foreach (var buf in buffers[2])
             {
                 buf.buffer.Release();
             }

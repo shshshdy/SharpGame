@@ -401,8 +401,9 @@ namespace SharpGame
 
         public CommandBuffer BeginWorkCommandBuffer()
         {
-            workCmdPool[WorkContext].Begin(CommandBufferUsageFlags.OneTimeSubmit);
-            return workCmdPool[WorkContext];
+            var cmd = workCmdPool.Get();
+            cmd.Begin(CommandBufferUsageFlags.OneTimeSubmit);
+            return cmd;
         }
 
         public void EndWorkCommandBuffer(CommandBuffer commandBuffer)
@@ -518,9 +519,11 @@ namespace SharpGame
 
         public bool SingleLoop => Settings.SingleLoop;
 
-        private int currentContext;
-        public int WorkContext => SingleLoop ? 0 : currentContext;
-        public int RenderContext => SingleLoop ? 0 : 1 - currentContext;
+        //private int currentContext;
+        //public int WorkContext => SingleLoop ? 0 : currentContext;
+        //public int RenderContext => SingleLoop ? 0 : 1 - currentContext;
+        public int WorkContext => nextImage;
+        public int RenderContext => currentImage;
 
         private int currentFrame;
         public int CurrentFrame => currentFrame;
@@ -536,19 +539,7 @@ namespace SharpGame
         {
             actions.Add(action);
         }
-
-        public void Frame()
-        {
-            Profiler.BeginSample("RenderSemWait");
-            WaitRender();
-            WakeRender();
-
-            transientVB.Reset();
-            transientIB.Reset();
-
-            Profiler.EndSample();
-        }
-
+        /*
         void SwapContext()
         {
             if(actions.Count > 0)
@@ -568,14 +559,7 @@ namespace SharpGame
                 currentContext = 1 - currentContext;
             }
 
-        }
-
-        public void WakeRender()
-        {
-            SwapContext();
-            // release render thread
-            MainSemPost();
-        }
+        }*/
 
         public void MainSemPost()
         {
@@ -619,6 +603,10 @@ namespace SharpGame
                 bool ok = renderSem.WaitOne();
                 stats.renderWait = Stopwatch.GetTimestamp() - curTime;
             }
+
+            transientVB.Reset();
+            transientIB.Reset();
+            currentFrame++;
         }
 
         public void Close()

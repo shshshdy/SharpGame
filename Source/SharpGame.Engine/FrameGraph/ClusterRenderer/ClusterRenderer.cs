@@ -74,9 +74,9 @@ namespace SharpGame
 
         protected ClusterUniforms clusterUniforms = new ClusterUniforms();
 
-        protected DoubleBuffer uboCluster;
-        protected DoubleBuffer light_pos_ranges;
-        protected DoubleBuffer light_colors;
+        protected SharedBuffer uboCluster;
+        protected SharedBuffer light_pos_ranges;
+        protected SharedBuffer light_colors;
 
         private Buffer gridFlags;
         private Buffer lightBounds;
@@ -153,14 +153,14 @@ namespace SharpGame
                 size = (uint)queue_families.Length;
             }
 
-            uboCluster = new DoubleBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
+            uboCluster = new SharedBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
                 (uint)Utilities.SizeOf<ClusterUniforms>(), sharingMode, queue_families);
 
-            light_pos_ranges = new DoubleBuffer(BufferUsageFlags.StorageTexelBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
+            light_pos_ranges = new SharedBuffer(BufferUsageFlags.StorageTexelBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
                 MAX_NUM_LIGHTS * 4 * sizeof(float), SharingMode.Exclusive, queue_families);
             light_pos_ranges.CreateView(Format.R32g32b32a32Sfloat);
 
-            light_colors = new DoubleBuffer(BufferUsageFlags.StorageTexelBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
+            light_colors = new SharedBuffer(BufferUsageFlags.StorageTexelBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
                 MAX_NUM_LIGHTS * sizeof(uint), sharingMode, queue_families);
             light_colors.CreateView(Format.R8g8b8a8Unorm);
 

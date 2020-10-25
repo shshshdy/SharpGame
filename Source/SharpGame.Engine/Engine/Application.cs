@@ -384,18 +384,7 @@ namespace SharpGame
             Height = window.Width;
             //resized = true;
 
-            if(singleLoop)
-            {
-                graphics.Resize(Width, Height);
-            }
-            else
-            {
-                graphics.Execute(() =>
-                           {
-                               graphics.Resize(Width, Height);
-
-                           });
-            }
+            graphics.Resize(Width, Height);         
            
 
         }

@@ -58,20 +58,20 @@ namespace SharpGame
         private LightParameter lightParameter = new LightParameter();
 
         internal Buffer ubFrameInfo;
-        public DoubleBuffer ubCameraVS;
+        public SharedBuffer ubCameraVS;
 
-        internal DoubleBuffer ubCameraPS;
+        internal SharedBuffer ubCameraPS;
         internal Buffer ubLight;
 
 
         private ResourceLayout vsResLayout;
 
         public ResourceSet Set0 => vsResourceSet[Graphics.Instance.WorkContext];
-        ResourceSet[] vsResourceSet = new ResourceSet[2];
+        ResourceSet[] vsResourceSet = new ResourceSet[3];
 
         private ResourceLayout psResLayout;
         public ResourceSet Set1 => psResourceSet[Graphics.Instance.WorkContext];
-        ResourceSet[] psResourceSet = new ResourceSet[2];
+        ResourceSet[] psResourceSet = new ResourceSet[3];
 
         Graphics Graphics => Graphics.Instance;
         FrameGraph FrameGraph => FrameGraph.Instance;
@@ -130,9 +130,9 @@ namespace SharpGame
         {
             ubFrameInfo = Buffer.CreateUniformBuffer<FrameUniform>();
 
-            ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
+            ubCameraVS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
 
-            ubCameraPS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraPS>());
+            ubCameraPS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraPS>());
             ubLight = Buffer.CreateUniformBuffer<LightParameter>();
 
             vsResLayout = new ResourceLayout
@@ -143,6 +143,7 @@ namespace SharpGame
 
             vsResourceSet[0] = new ResourceSet(vsResLayout, ubCameraVS[0], FrameGraph.TransformBuffer[0]);
             vsResourceSet[1] = new ResourceSet(vsResLayout, ubCameraVS[1], FrameGraph.TransformBuffer[1]);
+            vsResourceSet[2] = new ResourceSet(vsResLayout, ubCameraVS[2], FrameGraph.TransformBuffer[1]);
 
             psResLayout = new ResourceLayout
             {
@@ -153,6 +154,8 @@ namespace SharpGame
 
             psResourceSet[0] = new ResourceSet(psResLayout, ubCameraPS[0], ubLight, ShadowPass.DepthRT);
             psResourceSet[1] = new ResourceSet(psResLayout, ubCameraPS[1], ubLight, ShadowPass.DepthRT);
+            psResourceSet[2] = new ResourceSet(psResLayout, ubCameraPS[2], ubLight, ShadowPass.DepthRT);
+
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

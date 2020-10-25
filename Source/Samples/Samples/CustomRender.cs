@@ -29,9 +29,9 @@ namespace SharpGame.Samples
 
         CameraVS cameraVS = new CameraVS();
 
-        ResourceSet[] resourceSet = new ResourceSet[2];
+        ResourceSet[] resourceSet = new ResourceSet[3];
 
-        DoubleBuffer ubCameraVS;
+        SharedBuffer ubCameraVS;
 
         Geometry cube;
         vec3 cameraPos;
@@ -62,10 +62,11 @@ namespace SharpGame.Samples
                 batches.Add(batch);
             }
 
-            ubCameraVS = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint) Utilities.SizeOf<CameraVS>());
+            ubCameraVS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint) Utilities.SizeOf<CameraVS>());
 
             resourceSet[0] = new ResourceSet(resourceLayout, ubCameraVS[0], FrameGraph.TransformBuffer[0]);
             resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], FrameGraph.TransformBuffer[1]);
+            resourceSet[2] = new ResourceSet(resourceLayout, ubCameraVS[2], FrameGraph.TransformBuffer[2]);
 
             frameGraph.AddGraphicsPass(CustomDraw);
 

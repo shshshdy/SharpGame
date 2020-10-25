@@ -41,13 +41,13 @@ namespace SharpGame
 
         Cascade[] cascades = new Cascade[SHADOW_MAP_CASCADE_COUNT];
 
-        DoubleBuffer ubShadow;
+        SharedBuffer ubShadow;
 
         float cascadeSplitLambda = 0.95f;
 
         Shader depthShader;
 
-        ResourceSet[] vsSet = new ResourceSet[2];
+        ResourceSet[] vsSet = new ResourceSet[3];
 
         FastList<SourceBatch>[] casters = new FastList<SourceBatch>[]
         {
@@ -117,12 +117,13 @@ namespace SharpGame
                 //Renderer.Instance.AddDebugImage(cascades[i].view);
             }
 
-            ubShadow = new DoubleBuffer(BufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));
+            ubShadow = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));
 
             depthShader = Resources.Instance.Load<Shader>("shaders/shadow.shader");
 
             vsSet[0] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[0], FrameGraph.TransformBuffer.Buffer[0]);
             vsSet[1] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[1], FrameGraph.TransformBuffer.Buffer[1]);
+            vsSet[2] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[2], FrameGraph.TransformBuffer.Buffer[2]);
 
         }
 

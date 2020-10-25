@@ -15,8 +15,8 @@ namespace SharpGame
 
     public class ImGUI : System<ImGUI>
     {
-        Buffer[] vertexBuffer = new Buffer[2];
-        Buffer[] indexBuffer = new Buffer[2];
+        Buffer[] vertexBuffer = new Buffer[3];
+        Buffer[] indexBuffer = new Buffer[3];
         Buffer uniformBufferVS = new Buffer();
         Texture texture;
         Shader uiShader;
@@ -108,6 +108,8 @@ namespace SharpGame
             indexBuffer[0]?.Dispose();
             vertexBuffer[1]?.Dispose();
             indexBuffer[1]?.Dispose();
+            vertexBuffer[2]?.Dispose();
+            indexBuffer[2]?.Dispose();
             uniformBufferVS.Dispose();
             uiShader.Dispose();
         }

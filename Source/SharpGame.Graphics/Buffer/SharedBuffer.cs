@@ -6,27 +6,31 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class DoubleBuffer : DisposeBase
+    public class SharedBuffer : DisposeBase
     {
-        Buffer[] buffers = new Buffer[2];
+        Buffer[] buffers = new Buffer[3];
         public Buffer Buffer => buffers[Graphics.Instance.WorkContext];
         public IntPtr Mapped => buffers[Graphics.Instance.WorkContext].Mapped;
 
-        public DoubleBuffer(BufferUsageFlags bufferUsage, uint size)
+        public SharedBuffer(BufferUsageFlags bufferUsage, uint size)
         {
             buffers[0] = new Buffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
             buffers[0].Map(0, size);
             buffers[1] = new Buffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
             buffers[1].Map(0, size);
+            buffers[2] = new Buffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
+            buffers[2].Map(0, size);
         }
 
-        public DoubleBuffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropFlags, ulong size, 
+        public SharedBuffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropFlags, ulong size, 
             SharingMode sharingMode = SharingMode.Exclusive, uint[] queueFamilyIndices = null)
         {
             buffers[0] = new Buffer(usageFlags, memoryPropFlags, size, 1, sharingMode, queueFamilyIndices);
             buffers[0].Map(0, size);
             buffers[1] = new Buffer(usageFlags, memoryPropFlags, size, 1, sharingMode, queueFamilyIndices);
             buffers[1].Map(0, size);
+            buffers[2] = new Buffer(usageFlags, memoryPropFlags, size, 1, sharingMode, queueFamilyIndices);
+            buffers[2].Map(0, size);
         }
 
         public Buffer this[int index] => buffers[index];
@@ -35,6 +39,7 @@ namespace SharpGame
         {
             buffers[0].CreateView(format, offset, range);
             buffers[1].CreateView(format, offset, range);
+            buffers[2].CreateView(format, offset, range);
         }
 
         public void SetData<T>(ref T data, uint offset = 0) where T : struct
@@ -59,13 +64,14 @@ namespace SharpGame
 
             buffers[0]?.Dispose();
             buffers[1]?.Dispose();
+            buffers[2]?.Dispose();
         }
     }
 
 
     public class DynamicBuffer : DisposeBase
     {
-        public DoubleBuffer Buffer { get; }
+        public SharedBuffer Buffer { get; }
         public uint Size { get; }
 
         uint offset;
@@ -73,7 +79,7 @@ namespace SharpGame
         public DynamicBuffer(BufferUsageFlags bufferUsage, uint size)
         {
             this.Size = size;
-            Buffer = new DoubleBuffer(bufferUsage, size);
+            Buffer = new SharedBuffer(bufferUsage, size);
             
         }
 
