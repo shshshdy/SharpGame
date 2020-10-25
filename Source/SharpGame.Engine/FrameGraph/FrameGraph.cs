@@ -38,10 +38,6 @@ namespace SharpGame
         CmdBufferBlock[] computeCmdBlk = new CmdBufferBlock[3];
         CmdBufferBlock[] renderCmdBlk = new CmdBufferBlock[3];
 
-        public CommandBuffer WorkComputeCmdBuffer => computeCmdBlk[Graphics.WorkImage].cmdBuffer;
-        public CommandBuffer RenderCmdBuffer => renderCmdBlk[Graphics.RenderImage].cmdBuffer;
-
-
         public CommandBuffer GetWorkCmdBuffer(PassQueue queue)
         {
             switch (queue)

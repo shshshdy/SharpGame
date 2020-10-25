@@ -90,7 +90,7 @@ namespace SharpGame
 #if DEBUG
             settings.Validation = true;
 #else
-            //settings.Validation = true;
+            settings.Validation = false;
 #endif
             Settings = settings;
 

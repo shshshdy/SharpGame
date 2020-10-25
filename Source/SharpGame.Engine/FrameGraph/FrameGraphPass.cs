@@ -144,7 +144,10 @@ namespace SharpGame
                 clearValues[clearValues.Length - 1] = ClearDepthStencilValue.Value;
             }
 
+            var cb = CmdBuffer;
             BeginRenderPass(framebuffer, renderArea, clearValues);
+            cb.SetViewport(in viewport);
+            cb.SetScissor(in renderArea);
         }
 
         public void BeginRenderPass(Framebuffer framebuffer, Rect2D renderArea, ClearValue[] clearValues)
@@ -152,9 +155,8 @@ namespace SharpGame
             var cb = CmdBuffer;
             var rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues);
 
-            cb.BeginRenderPass(in rpBeginInfo, SubpassContents.SecondaryCommandBuffers);
-            cb.SetViewport(in viewport);
-            cb.SetScissor(in renderArea);
+            cb.BeginRenderPass(in rpBeginInfo, SubpassContents.Inline);
+
             Subpass = 0;
         }
 
