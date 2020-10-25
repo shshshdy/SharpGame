@@ -73,7 +73,7 @@ namespace SharpGame
             return cb;
         }
 
-        protected override void Clear()
+        protected void Clear()
         {
             int workContext = Graphics.WorkImage;
 
@@ -83,12 +83,13 @@ namespace SharpGame
                 cmd.currentIndex = 0;
             }
 
-            base.Clear();
         }
 
         protected override void DrawImpl(RenderView view)
         {
-            if(OnDraw != null)
+            Clear();
+
+            if (OnDraw != null)
             {
                 OnDraw.Invoke(this, view);
             }
@@ -101,10 +102,7 @@ namespace SharpGame
 
         public void DrawScene(RenderView view)
         {
-            BeginRenderPass(view);
             DrawScene(view, BlendFlags);
-            EndRenderPass(view);
-
         }
 
         public void DrawScene(RenderView view, BlendFlags blendFlags)

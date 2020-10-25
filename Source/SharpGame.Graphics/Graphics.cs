@@ -88,9 +88,9 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            //settings.Validation = true;
+            settings.Validation = true;
 #else
-            settings.Validation = false;
+            //settings.Validation = true;
 #endif
             Settings = settings;
 

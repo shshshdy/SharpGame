@@ -17,38 +17,18 @@ namespace SharpGame
         public GraphicsPass(string name = "", int workCount = 0)
         {
             Name = name;
-
         }
-
-        protected void Begin(RenderView view)
-        {
-            Clear();
-        }
-
-        protected virtual void Clear()
-        {
-        }
-
+        
         public override void Draw(RenderView view)
         {
-            Begin(view);
-
+            BeginRenderPass(view);
             DrawImpl(view);
-
-            End(view);
+            EndRenderPass(view);
         }
-
-        protected void End(RenderView view)
-        {
-        }
-
+        
         protected virtual void DrawImpl(RenderView view)
         {
-            BeginRenderPass(view);
-
             OnDraw?.Invoke(this, view);
-
-            EndRenderPass(view);
         }
 
         public void DrawBatch(ulong passID, CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts,

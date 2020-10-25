@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
@@ -6,11 +7,9 @@ namespace SharpGame
 {
     public enum PassQueue
     {
-        None,
-        EarlyGraphics = 1,
-        Compute = 2,
-        Graphics = 4,
-        All = 7
+        EarlyGraphics = 0,
+        Compute = 1,
+        Graphics = 2,
     }
 
     public class FrameGraphPass : Object
@@ -34,7 +33,6 @@ namespace SharpGame
         [IgnoreDataMember]
         public RenderPipeline Renderer { get; set; }
 
-        //protected CommandBuffer cmdBuffer;
         public CommandBuffer CmdBuffer => FrameGraph.GetWorkCmdBuffer(PassQueue);
 
         public Graphics Graphics => Graphics.Instance;
@@ -49,12 +47,23 @@ namespace SharpGame
 
         protected ClearValue[] clearValues = new ClearValue[5];
 
+        List<Subpass> subpasses = new List<Subpass>();
+
         public FrameGraphPass()
         {
         }
 
+        public void AddSubpass(Subpass subpass)
+        {
+            subpasses.Add(subpass);
+        }
+
         public virtual void Init()
         {
+            foreach(var subpass in subpasses)
+            {
+                subpass.Init();
+            }
         }
 
         public virtual void Reset()
@@ -63,10 +72,22 @@ namespace SharpGame
 
         public virtual void Update(RenderView view)
         {
+            foreach (var subpass in subpasses)
+            {
+                subpass.Update(view);
+            }
         }
 
         public virtual void Draw(RenderView view)
         {
+            BeginRenderPass(view);
+
+            foreach (var subpass in subpasses)
+            {
+                subpass.Draw(view, 0);
+            }
+
+            EndRenderPass(view);
         }
 
         Viewport viewport;

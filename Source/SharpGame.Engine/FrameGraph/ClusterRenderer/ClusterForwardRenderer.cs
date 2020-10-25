@@ -49,9 +49,9 @@ namespace SharpGame
 
             mainPass = new ScenePass("cluster_forward")
             {
-#if NO_DEPTHWRITE
+//#if NO_DEPTHWRITE
                 RenderPass = Graphics.CreateRenderPass(true, false),
-#endif
+//#endif
                 Set1 = resourceSet0,
                 Set2 = resourceSet1,
             };

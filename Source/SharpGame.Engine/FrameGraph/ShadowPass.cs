@@ -124,8 +124,7 @@ namespace SharpGame
 
         }
 
-
-        protected override void DrawImpl(RenderView view)
+        public override void Draw(RenderView view)
         {
             if(view.Camera == null)
             {
