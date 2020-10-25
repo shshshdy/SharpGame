@@ -10,7 +10,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class GraphicsPass : FrameGraphPass
+    public class GraphicsPass : Subpass
     {
         public Action<GraphicsPass, RenderView> OnDraw { get; set; }
 
@@ -19,11 +19,11 @@ namespace SharpGame
             Name = name;
         }
         
-        public override void Draw(RenderView view)
+        public override void Draw(RenderView view, uint subpass)
         {
-            BeginRenderPass(view);
+            //BeginRenderPass(view);
             DrawImpl(view);
-            EndRenderPass(view);
+            //EndRenderPass(view);
         }
         
         protected virtual void DrawImpl(RenderView view)
@@ -41,7 +41,7 @@ namespace SharpGame
             }
 
             var pass = shader.GetPass(passID);
-            var pipe = pass.GetGraphicsPipeline(RenderPass, Subpass, batch.geometry);
+            var pipe = pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, FrameGraphPass.Subpass, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
@@ -67,7 +67,7 @@ namespace SharpGame
 
         public void DrawFullScreenQuad(Pass pass, CommandBuffer cb, ResourceSet resourceSet, ResourceSet resourceSet1, ResourceSet resourceSet2 = null)
         {
-            var pipe = pass.GetGraphicsPipeline(RenderPass, Subpass, null);
+            var pipe = pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, FrameGraphPass.Subpass, null);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet);

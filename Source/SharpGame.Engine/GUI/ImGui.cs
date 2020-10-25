@@ -31,7 +31,7 @@ namespace SharpGame
         RenderPass renderPass;
         Framebuffer[] framebuffers;
 
-        GraphicsPass guiPass;
+        FrameGraphPass guiPass;
 
         private struct ResourceSetInfo
         {
@@ -79,15 +79,20 @@ namespace SharpGame
 
             this.Subscribe<BeginFrame>((e) => Update());
 
-            guiPass = new GraphicsPass
+            guiPass = new FrameGraphPass
             {
                 Framebuffers = framebuffers,
                 RenderPass = renderPass,
-               
-                OnDraw = (pass, view) =>
+                Subpasses = new[]
                 {
-                    var cmdBuffer = pass.CmdBuffer;
-                    RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
+                   new GraphicsPass
+                   {
+                        OnDraw = (pass, view) =>
+                        {
+                            var cmdBuffer = pass.CmdBuffer;
+                            RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
+                        }
+                    }
                 }
             };
 

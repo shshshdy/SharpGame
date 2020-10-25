@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -12,20 +13,8 @@ namespace SharpGame
         Graphics = 2,
     }
 
-    public class FrameGraphPass : Object
+    public class FrameGraphPass : Object, IEnumerable<Subpass>
     {
-        private StringID name;
-        public StringID Name
-        {
-            get => name;
-            set
-            {
-                name = value;
-                passID = Pass.GetID(name);
-            }
-        }
-
-        protected ulong passID = 1;
         public PassQueue PassQueue { get; set; } = PassQueue.Graphics;
         public RenderPass RenderPass { get; set; }
         public uint Subpass { get; set; }
@@ -48,13 +37,24 @@ namespace SharpGame
         protected ClearValue[] clearValues = new ClearValue[5];
 
         List<Subpass> subpasses = new List<Subpass>();
+        public Subpass[] Subpasses
+        {
+            set
+            {
+                foreach(var subpass in value)
+                {
+                    Add(subpass);
+                }
+            }
+        }
 
         public FrameGraphPass()
         {
         }
 
-        public void AddSubpass(Subpass subpass)
+        public void Add(Subpass subpass)
         {
+            subpass.FrameGraphPass = this;
             subpasses.Add(subpass);
         }
 
@@ -162,12 +162,22 @@ namespace SharpGame
         {
             var cb = CmdBuffer;
             cb.EndRenderPass();
-
         }
 
         public virtual void Shutdown()
         {
         }
+
+        public IEnumerator<Subpass> GetEnumerator()
+        {
+            return ((IEnumerable<Subpass>)subpasses).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<Subpass>)subpasses).GetEnumerator();
+        }
+
     }
 
 

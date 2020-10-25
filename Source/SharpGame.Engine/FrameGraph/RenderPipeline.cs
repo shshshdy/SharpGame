@@ -64,22 +64,34 @@ namespace SharpGame
             initialized = false;
         }
 
-        public GraphicsPass AddGraphicsPass(Action<GraphicsPass, RenderView> onDraw)
+        public FrameGraphPass AddGraphicsPass(Action<GraphicsPass, RenderView> onDraw)
         {
-            var renderPass = new GraphicsPass
+            var renderPass = new FrameGraphPass
             {
-                OnDraw = onDraw
+                Subpasses = new[]
+                {
+                    new GraphicsPass
+                    {
+                        OnDraw = onDraw
+                    }
+                }
             };
-            
+
             AddRenderPass(renderPass);
             return renderPass;
         }
 
-        public T AddPass<T>(Action<GraphicsPass, RenderView> onDraw) where T : GraphicsPass, new()
+        public FrameGraphPass AddPass<T>(Action<GraphicsPass, RenderView> onDraw) where T : GraphicsPass, new()
         {
-            var renderPass = new T
+            var renderPass = new FrameGraphPass
             {
-                OnDraw = onDraw
+                Subpasses = new[]
+                {
+                    new T
+                    {
+                        OnDraw = onDraw
+                    }
+                }
             };
 
             AddRenderPass(renderPass);
@@ -102,7 +114,7 @@ namespace SharpGame
             RenderPassList.Add(renderPass);
             renderPass.Renderer = this;
 
-            if(initialized)
+            if (initialized)
             {
                 renderPass.Init();
             }
@@ -169,9 +181,13 @@ namespace SharpGame
         public ForwardRenderer()
         {
             Add(new ShadowPass())
-            .Add(new ScenePass
+            .Add(new FrameGraphPass
             {
-                RenderPass = Graphics.RenderPass
+                RenderPass = Graphics.RenderPass,
+                Subpasses = new[]
+                {
+                    new ScenePass()
+                }
             });
         }
 

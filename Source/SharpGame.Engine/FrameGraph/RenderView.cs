@@ -82,6 +82,7 @@ namespace SharpGame
         {
             CreateBuffers();
 
+            /*
             var renderPass = Graphics.CreateRenderPass();
 
             debugPass = new GraphicsPass
@@ -104,7 +105,7 @@ namespace SharpGame
                     var cmdBuffer = pass.CmdBuffer;
                     debug.Render(view, cmdBuffer);
                 }
-            };
+            };*/
 
 
         }
@@ -112,7 +113,7 @@ namespace SharpGame
         public void Reset()
         {
             Renderer?.Reset();
-            debugPass?.Reset();
+            //debugPass?.Reset();
         }
 
         public void Attach(Camera camera, Scene scene, RenderPipeline frameGraph = null)
@@ -243,7 +244,7 @@ namespace SharpGame
 
             if (DrawDebug)
             {
-                debugPass?.Draw(this);
+            //    debugPass?.Draw(this);
             }
 
 

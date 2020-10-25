@@ -9,8 +9,8 @@ namespace SharpGame
     {
         protected Framebuffer clusterFB;
 
-        protected ScenePass clustering;
-        protected ScenePass mainPass;
+        protected FrameGraphPass clustering;
+        protected FrameGraphPass mainPass;
 
         public ClusterForwardRenderer()
         {
@@ -34,12 +34,18 @@ namespace SharpGame
         {
             yield return new ShadowPass();
 
-            clustering = new ScenePass("clustering")
+            clustering = new FrameGraphPass
             {
                 PassQueue = PassQueue.EarlyGraphics,
                 RenderPass = clusterRP,
                 Framebuffer = clusterFB,
-                Set1 = clusterSet1
+                Subpasses = new[]
+                {
+                    new ScenePass("clustering")
+                    {
+                        Set1 = clusterSet1
+                    }
+                }
             };
 
             yield return clustering;
@@ -47,13 +53,19 @@ namespace SharpGame
             lightCull = new ComputePass(ComputeLight);
             yield return lightCull;
 
-            mainPass = new ScenePass("cluster_forward")
-            {
+            mainPass = new FrameGraphPass
+            { 
 //#if NO_DEPTHWRITE
                 RenderPass = Graphics.CreateRenderPass(true, false),
-//#endif
-                Set1 = resourceSet0,
-                Set2 = resourceSet1,
+            //#endif
+                Subpasses = new[]
+                {
+                    new ScenePass("cluster_forward")
+                    {
+                        Set1 = resourceSet0,
+                        Set2 = resourceSet1,
+                    }
+                }
             };
 
             yield return mainPass;

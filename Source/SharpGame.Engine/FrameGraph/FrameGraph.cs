@@ -20,7 +20,7 @@ namespace SharpGame
         public DynamicBuffer InstanceBuffer { get; }
         public DynamicBuffer MaterialBuffer { get; }
 
-        public GraphicsPass OverlayPass { get; set; }
+        public FrameGraphPass OverlayPass { get; set; }
 
         public static bool EarlyZ { get; set; }
 

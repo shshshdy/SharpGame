@@ -17,7 +17,7 @@ namespace SharpGame
 
     }
 
-    public class ShadowPass : GraphicsPass
+    public class ShadowPass : FrameGraphPass
     {
         const int SHADOW_MAP_CASCADE_COUNT = 4;
         const uint SHADOWMAP_DIM = 2048;
@@ -56,7 +56,7 @@ namespace SharpGame
         FrustumOctreeQuery shadowCasterQuery = new FrustumOctreeQuery();
 
         ResourceSet VSSet => vsSet[Graphics.WorkContext];
-        public ShadowPass() : base(Pass.Shadow)
+        public ShadowPass() //: base(Pass.Shadow)
         {
             PassQueue = PassQueue.EarlyGraphics;
             var depthFormat = Device.GetSupportedDepthFormat();
@@ -180,7 +180,7 @@ namespace SharpGame
 
                 foreach (var batch in casters[0])
                 {
-                    DrawBatch(passID, cmd, batch, consts, VSSet, null);
+                    //DrawBatch(passID, cmd, batch, consts, VSSet, null);
                 }
 
                 //cmd.End();

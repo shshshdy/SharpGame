@@ -18,10 +18,10 @@ namespace SharpGame
 
         protected Framebuffer clusterFB;
 
-        protected ScenePass geometryPass;
-        protected ScenePass translucentClustering;
-        protected GraphicsPass compositePass;
-        protected ScenePass translucentPass;
+        protected FrameGraphPass geometryPass;
+        protected FrameGraphPass translucentClustering;
+        protected FrameGraphPass compositePass;
+        protected FrameGraphPass translucentPass;
         protected Shader clusterDeferred;
 
         Geometry quad;
@@ -159,23 +159,34 @@ namespace SharpGame
         {
             yield return new ShadowPass();
 
-            geometryPass = new ScenePass("gbuffer")
+            geometryPass = new FrameGraphPass
             {
-                PassQueue = PassQueue.EarlyGraphics,                
+                PassQueue = PassQueue.EarlyGraphics,
                 RenderPass = geometryRP,
                 Framebuffer = geometryFB,
-                ClearColorValue = new [] { new ClearColorValue(0.25f, 0.25f, 0.25f, 1), new ClearColorValue(0, 0, 0, 1), new ClearColorValue(0, 0, 0, 0) },
-                Set1 = clusterSet1
+                ClearColorValue = new[] { new ClearColorValue(0.25f, 0.25f, 0.25f, 1), new ClearColorValue(0, 0, 0, 1), new ClearColorValue(0, 0, 0, 0) },
+                Subpasses = new []
+                {
+                    new ScenePass("gbuffer")
+                    { Set1 = clusterSet1
+                    }
+                }
             };
 
             yield return geometryPass;
            
-            translucentClustering = new ScenePass("clustering")
+            translucentClustering = new FrameGraphPass
             {
                 PassQueue = PassQueue.EarlyGraphics,
                 RenderPass = clusterRP,
                 Framebuffer = clusterFB,
-                Set1 = clusterSet1
+                Subpasses = new[]
+                {
+                    new ScenePass("clustering")
+                    {
+                        Set1 = clusterSet1
+                    }
+                }
             };
 
             yield return translucentClustering;
@@ -192,15 +203,21 @@ namespace SharpGame
             yield return compositePass;*/
             
             //var renderPass = Graphics.CreateRenderPass(false, false);
-            translucentPass = new ScenePass("cluster_forward")
+            translucentPass = new FrameGraphPass
             {
-                //RenderPass = renderPass,
-                //Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
-                OnDraw = Composite,
+                Subpasses = new[]
+                {
+                        //RenderPass = renderPass,
+                        //Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
+                    new ScenePass("cluster_forward")
+                    {
+                        OnDraw = Composite,
 
-                Set1 = resourceSet0,
-                Set2 = resourceSet1,
-                BlendFlags = BlendFlags.AlphaBlend
+                        Set1 = resourceSet0,
+                        Set2 = resourceSet1,
+                        BlendFlags = BlendFlags.AlphaBlend
+                    }
+                }
             };
 
             yield return translucentPass;
@@ -209,7 +226,8 @@ namespace SharpGame
         void Composite(GraphicsPass graphicsPass, RenderView view)
         {
             var scenePass = graphicsPass as ScenePass;
-            scenePass.BeginRenderPass(view);
+
+            scenePass.FrameGraphPass.BeginRenderPass(view);
             var cmd = graphicsPass.CmdBuffer;
             /*
             if(cmd == null)
@@ -234,7 +252,7 @@ namespace SharpGame
             //cmd.End();
 
             scenePass.DrawScene(view, BlendFlags.AlphaBlend);
-            scenePass.EndRenderPass(view);
+            scenePass.FrameGraphPass.EndRenderPass(view);
         }
 
         protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
