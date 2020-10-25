@@ -12,16 +12,10 @@ namespace SharpGame
 {
     public class GraphicsPass : FrameGraphPass
     {
-        [IgnoreDataMember]
-        public Framebuffer[] Framebuffers { get; set; }
-        [IgnoreDataMember]
-        public Framebuffer Framebuffer { set => Framebuffers = new[] { value, value, value }; }
-        public ClearColorValue[] ClearColorValue { get; set; } = { new ClearColorValue(0.25f, 0.25f, 0.25f, 1) };
-        public ClearDepthStencilValue? ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
-
         public Action<GraphicsPass, RenderView> OnDraw { get; set; }
 
         private ClearValue[] clearValues = new ClearValue[5];
+
         protected int workCount = 16;
         protected FastList<CommandBufferPool[]> cmdBufferPools = new FastList<CommandBufferPool[]>();
 
@@ -41,7 +35,6 @@ namespace SharpGame
 
         public GraphicsPass(string name = "", int workCount = 0)
         {
-            PassQueue = PassQueue.Graphics;
             Name = name;
 
             CreateCommandPool(4);

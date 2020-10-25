@@ -156,7 +156,7 @@ namespace SharpGame.Samples
                 AccessFlags.ShaderWrite, AccessFlags.VertexAttributeRead,
                 Graphics.ComputeQueue.FamilyIndex, Graphics.GraphicsQueue.FamilyIndex);
 
-            cb.Begin();
+            //cb.Begin();
 
             // Add memory barrier to ensure that the (graphics) vertex shader has fetched attributes
             // before compute starts to write to the buffer.
@@ -168,7 +168,7 @@ namespace SharpGame.Samples
             // Without this the (rendering) vertex shader may display incomplete results (partial
             // data from last frame).
             cb.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.VertexInput, ref computeToGraphicsBarrier);
-            cb.End();
+            //cb.End();
         }
 
     }

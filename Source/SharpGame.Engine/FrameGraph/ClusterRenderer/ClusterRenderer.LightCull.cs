@@ -78,7 +78,7 @@ namespace SharpGame
 
             var cmd_buf = renderPass.CmdBuffer;
 
-            cmd_buf.Begin();
+            //cmd_buf.Begin();
 
             cmd_buf.ResetQueryPool(QueryPool, 4, 6);
             //cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2);
@@ -154,7 +154,7 @@ namespace SharpGame
 
             }
 
-            cmd_buf.End();
+            //cmd_buf.End();
 
         }
 

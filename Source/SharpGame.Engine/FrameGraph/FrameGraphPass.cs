@@ -27,7 +27,7 @@ namespace SharpGame
         }
 
         protected ulong passID = 1;
-        public PassQueue PassQueue { get; set; }
+        public PassQueue PassQueue { get; set; } = PassQueue.Graphics;
         public RenderPass RenderPass { get; set; }
         public uint Subpass { get; set; }
 
@@ -39,6 +39,16 @@ namespace SharpGame
 
         public Graphics Graphics => Graphics.Instance;
         public FrameGraph FrameGraph => FrameGraph.Instance;
+
+
+        [IgnoreDataMember]
+        public Framebuffer[] Framebuffers { get; set; }
+        [IgnoreDataMember]
+        public Framebuffer Framebuffer { set => Framebuffers = new[] { value, value, value }; }
+        public ClearColorValue[] ClearColorValue { get; set; } = { new ClearColorValue(0.25f, 0.25f, 0.25f, 1) };
+        public ClearDepthStencilValue? ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
+
+
 
         public FrameGraphPass()
         {
