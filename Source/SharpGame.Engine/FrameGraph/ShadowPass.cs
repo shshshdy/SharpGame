@@ -22,15 +22,15 @@ namespace SharpGame
         const int SHADOW_MAP_CASCADE_COUNT = 4;
         const uint SHADOWMAP_DIM = 2048;
 
-        static RenderTarget depthRT;
-        public static RenderTarget DepthRT
+        static RenderTexture depthRT;
+        public static RenderTexture DepthRT
         {
             get
             {
                 if (depthRT == null)
                 {
                     var depthFormat = Device.GetSupportedDepthFormat();
-                    depthRT = new RenderTarget(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat,
+                    depthRT = new RenderTexture(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth,
                         SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal);
                 }
@@ -56,6 +56,8 @@ namespace SharpGame
         FrustumOctreeQuery shadowCasterQuery = new FrustumOctreeQuery();
 
         ResourceSet VSSet => vsSet[Graphics.WorkContext];
+
+        ulong passID = Pass.GetID(Pass.Shadow);
         public ShadowPass() //: base(Pass.Shadow)
         {
             PassQueue = PassQueue.EarlyGraphics;
@@ -180,14 +182,46 @@ namespace SharpGame
 
                 foreach (var batch in casters[0])
                 {
-                    //DrawBatch(passID, cmd, batch, consts, VSSet, null);
+                    DrawBatch(passID, cmd, batch, consts, VSSet, null);
                 }
-
-                //cmd.End();
 
                 EndRenderPass(view);
             }
 
+        }
+
+        void DrawBatch(ulong passID, CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts,
+            ResourceSet resourceSet, ResourceSet resourceSet1, ResourceSet resourceSet2 = null)
+        {
+            var shader = batch.material.Shader;
+            if ((passID & shader.passFlags) == 0)
+            {
+                return;
+            }
+
+            var pass = shader.GetPass(passID);
+            var pipe = pass.GetGraphicsPipeline(RenderPass, Subpass, batch.geometry);
+
+            cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
+
+            if (resourceSet1 != null)
+            {
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, -1);
+            }
+
+            if (resourceSet2 != null)
+            {
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, 2, resourceSet2, -1);
+            }
+
+            foreach (ConstBlock constBlock in pushConsts)
+            {
+                cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
+            }
+
+            batch.material.Bind(pass.passIndex, cb);
+            batch.geometry.Draw(cb);
         }
 
         /*

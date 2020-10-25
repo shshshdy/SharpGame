@@ -8,10 +8,10 @@ namespace SharpGame
 {
     public class HybridRenderer : ClusterRenderer
     {
-        private RenderTarget albedoRT;
-        private RenderTarget normalRT;
-        private RenderTarget depthRT;
-        private RenderTarget depthHWRT;
+        private RenderTexture albedoRT;
+        private RenderTexture normalRT;
+        private RenderTexture depthRT;
+        private RenderTexture depthHWRT;
 
         private Framebuffer geometryFB;
         private RenderPass geometryRP;
@@ -104,20 +104,20 @@ namespace SharpGame
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             geometryRP = new RenderPass(ref renderPassInfo);
 
-            albedoRT = new RenderTarget(width, height, 1, Format.R8g8b8a8Unorm,
+            albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-            normalRT = new RenderTarget(width, height, 1, Format.R8g8b8a8Unorm,
+            normalRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-            depthRT = new RenderTarget(width, height, 1, Format.R32g32b32a32Sfloat,
+            depthRT = new RenderTexture(width, height, 1, Format.R32g32b32a32Sfloat,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
 
-            depthHWRT =/* Graphics.DepthRT; */new RenderTarget(width, height, 1, depthFormat,
+            depthHWRT =/* Graphics.DepthRT; */new RenderTexture(width, height, 1, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth /*| ImageAspectFlags.Stencil*/,
                         SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal
                         );
@@ -202,13 +202,13 @@ namespace SharpGame
             };
             yield return compositePass;*/
             
-            //var renderPass = Graphics.CreateRenderPass(false, false);
+            var renderPass = Graphics.CreateRenderPass(false, false);
             translucentPass = new FrameGraphPass
             {
+                RenderPass = renderPass,
+                Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
                 Subpasses = new[]
                 {
-                        //RenderPass = renderPass,
-                        //Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
                     new ScenePass("cluster_forward")
                     {
                         OnDraw = Composite,
@@ -227,15 +227,7 @@ namespace SharpGame
         {
             var scenePass = graphicsPass as ScenePass;
 
-            scenePass.FrameGraphPass.BeginRenderPass(view);
             var cmd = graphicsPass.CmdBuffer;
-            /*
-            if(cmd == null)
-            {
-                cmd = graphicsPass.GetCmdBuffer();
-                cmd.SetViewport(view.Viewport);
-                cmd.SetScissor(view.ViewRect);
-            }*/
 
             var pass = clusterDeferred.Main;
 
@@ -249,10 +241,8 @@ namespace SharpGame
 
             cmd.DrawGeometry(quad, pass, 0, sets);
 
-            //cmd.End();
-
             scenePass.DrawScene(view, BlendFlags.AlphaBlend);
-            scenePass.FrameGraphPass.EndRenderPass(view);
+
         }
 
         protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)

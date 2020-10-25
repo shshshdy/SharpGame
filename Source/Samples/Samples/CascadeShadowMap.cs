@@ -32,7 +32,7 @@ namespace SharpGame.Samples
             };
 
             camera = scene.GetComponent<Camera>(true);
-            
+
             {
                 var model = GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32, true);
                 var node = scene.CreateChild("Plane");
@@ -68,7 +68,7 @@ namespace SharpGame.Samples
                 AssimpModelReader.Import("Models/oak_leafs.dae", geoList, bboxList);
                 var model = Model.Create(geoList, bboxList);
 
-                for(int i = 0; i < 400; i++)
+                for (int i = 0; i < 400; i++)
                 {
                     var node = scene.CreateChild("Model");
                     node.Position = new vec3(glm.random(-40, 40), 0, glm.random(-40, 40));

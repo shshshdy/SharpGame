@@ -26,7 +26,7 @@ namespace SharpGame
             var depthRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
 
-            //Renderer.AddDebugImage(depthRT.view);
+            //FrameGraph.AddDebugImage(depthRT.view);
 
         }
 
@@ -56,7 +56,7 @@ namespace SharpGame
             mainPass = new FrameGraphPass
             { 
 //#if NO_DEPTHWRITE
-                RenderPass = Graphics.CreateRenderPass(true, false),
+                RenderPass = Graphics.CreateRenderPass(false, false),
             //#endif
                 Subpasses = new[]
                 {

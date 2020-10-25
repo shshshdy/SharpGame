@@ -5,7 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public struct RenderTargetInfo :IEquatable<RenderTargetInfo>
+    public struct RenderTextureInfo :IEquatable<RenderTextureInfo>
     {
         public uint width;
         public uint height;
@@ -16,25 +16,25 @@ namespace SharpGame
         public SampleCountFlags samples;
         public ImageLayout imageLayout;
 
-        public bool Equals(RenderTargetInfo other)
+        public bool Equals(RenderTextureInfo other)
         {
             return width == other.width && height == other.height && layers == other.layers && format == other.format
                 && usage == other.usage && aspectMask == other.aspectMask && samples == other.samples && imageLayout == other.imageLayout;
         }
     }
 
-    public class RenderTarget : RefCounted, IBindableResource
+    public class RenderTexture : RefCounted, IBindableResource
     {
         public Image image;
         public ImageView view;
         public Sampler sampler;
 
-        RenderTargetInfo renderTargetInfo;
-        public ref RenderTargetInfo Info => ref renderTargetInfo;
+        RenderTextureInfo renderTargetInfo;
+        public ref RenderTextureInfo Info => ref renderTargetInfo;
 
         internal DescriptorImageInfo descriptor;
         
-        public RenderTarget(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, ImageAspectFlags aspectMask,
+        public RenderTexture(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, ImageAspectFlags aspectMask,
             SampleCountFlags samples = SampleCountFlags.Count1, ImageLayout imageLayout = ImageLayout.Undefined)
         {
             image = Image.Create(width, height, ImageCreateFlags.None, layers, 1, format, SampleCountFlags.Count1, usage);
@@ -42,7 +42,7 @@ namespace SharpGame
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
             descriptor = new DescriptorImageInfo(sampler, view, imageLayout); 
 
-            renderTargetInfo = new RenderTargetInfo
+            renderTargetInfo = new RenderTextureInfo
             {
                 width = width,
                 height = height,
