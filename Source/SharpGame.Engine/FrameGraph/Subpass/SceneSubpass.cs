@@ -16,7 +16,7 @@ namespace SharpGame
         public ResourceSet[] Set1 { get; set; }
         public ResourceSet[] Set2 { get; set; }
 
-        public static bool MultiThreaded = true;
+        public static bool MultiThreaded = false;
 
         FastList<Task> renderTasks = new FastList<Task>();
 

@@ -126,7 +126,7 @@ namespace SharpGame
 
             FrameGraph.AddDebugImage(albedoRT.view);
             FrameGraph.AddDebugImage(normalRT.view);
-            FrameGraph.AddDebugImage(depthHWRT.view);
+            //FrameGraph.AddDebugImage(depthHWRT.view);
 
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthHWRT.view });
 
@@ -208,6 +208,9 @@ namespace SharpGame
             {
                 RenderPass = renderPass,
                 Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
+
+                OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkContext),
+
                 Subpasses = new[]
                 {
                     new SceneSubpass("cluster_forward")
@@ -246,8 +249,10 @@ namespace SharpGame
 
         }
 
-        protected override void OnBeginSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
+        protected override void OnBeginPass(FrameGraphPass renderPass)
         {
+            CommandBuffer cb = renderPass.CmdBuffer;
+            int imageIndex = Graphics.WorkImage;
             if (renderPass == geometryPass)
             {
                 var queryPool = query_pool[imageIndex];
@@ -263,8 +268,11 @@ namespace SharpGame
             }
         }
 
-        protected override void OnEndSubmit(FrameGraphPass renderPass, CommandBuffer cb, int imageIndex)
+        protected override void OnEndPass(FrameGraphPass renderPass)
         {
+            CommandBuffer cb = renderPass.CmdBuffer;
+            int imageIndex = Graphics.WorkImage;
+
             if (renderPass == geometryPass)
             {
                 var queryPool = query_pool[imageIndex];
@@ -276,7 +284,7 @@ namespace SharpGame
 
                 //cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
 
-                ClearBuffers(cb, imageIndex);
+                //ClearBuffers(cb, imageIndex);
             }
         }
     }

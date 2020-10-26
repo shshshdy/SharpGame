@@ -51,6 +51,10 @@ namespace SharpGame
             }
         }
 
+        public Action<CommandBuffer> OnBegin { get; set; }
+
+        public Action<CommandBuffer> OnEnd { get; set; }
+
         public FrameGraphPass()
         {
         }
@@ -83,6 +87,9 @@ namespace SharpGame
 
         public virtual void Draw(RenderView view)
         {
+            var cb = CmdBuffer;
+            OnBegin?.Invoke(cb);
+
             BeginRenderPass(view);
 
             foreach (var subpass in subpasses)
@@ -91,6 +98,8 @@ namespace SharpGame
             }
 
             EndRenderPass(view);
+
+            OnEnd?.Invoke(cb);
         }
 
         Viewport viewport;

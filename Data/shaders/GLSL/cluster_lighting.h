@@ -30,12 +30,14 @@ vec3 ClusterLighting(vec3 world_pos, vec3 world_norm, vec3 diffColor,
     {
         uint offset = imageLoad(grid_light_count_offsets, grid_idx).r;
         uint light_count = imageLoad(grid_light_counts, grid_idx).r;
+        float c = light_count / 10.0f;
 
         for (uint i = 0; i < light_count; i++)
         {
             int light_idx = int(imageLoad(light_list, int(offset + i)).r);
             vec4 light_pos_range = imageLoad(light_pos_ranges, light_idx);
             float dist = distance(light_pos_range.xyz, world_pos);
+        
             if (dist < light_pos_range.w)
             {
                 vec3 l = normalize(light_pos_range.xyz - world_pos);

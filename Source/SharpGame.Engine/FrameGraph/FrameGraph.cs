@@ -53,9 +53,9 @@ namespace SharpGame
             }
         }
 
-        public event Action<int> OnBeginSubmit;
-        public event Action<int, PassQueue> OnSubmit;
-        public event Action<int> OnEndSubmit;
+//         public event Action<int> OnBeginSubmit;
+//         public event Action<int, PassQueue> OnSubmit;
+//         public event Action<int> OnEndSubmit;
 
         public static bool drawDebug;
         public static bool debugDepthTest;
@@ -186,7 +186,7 @@ namespace SharpGame
             int imageIndex = (int)Graphics.RenderImage;
             //Log.Info("Submit frame " + imageIndex);
 
-            OnBeginSubmit?.Invoke(imageIndex);
+            //OnBeginSubmit?.Invoke(imageIndex);
 
             var currentBuffer = Graphics.currentBuffer;
 
@@ -200,7 +200,7 @@ namespace SharpGame
                 CommandBuffer cmdBuffer = preRenderCmdBlk[imageIndex].cmdBuffer;
                 Graphics.GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.FragmentShader,
                     cmdBuffer, currentBuffer.preRenderSemaphore, fence);
-                OnSubmit?.Invoke(imageIndex, PassQueue.EarlyGraphics);
+                //OnSubmit?.Invoke(imageIndex, PassQueue.EarlyGraphics);
                 Profiler.EndSample();
             }
 
@@ -223,7 +223,7 @@ namespace SharpGame
                     null, currentBuffer.computeSemaphore, fence);
                 }
 
-                OnSubmit?.Invoke(imageIndex, PassQueue.Compute);
+                //OnSubmit?.Invoke(imageIndex, PassQueue.Compute);
                 Profiler.EndSample();
             }
 
@@ -237,11 +237,11 @@ namespace SharpGame
                 Graphics.GraphicsQueue.Submit(currentBuffer.computeSemaphore, PipelineStageFlags.ColorAttachmentOutput,
                     cmdBuffer, currentBuffer.renderSemaphore, fence);
 
-                OnSubmit?.Invoke(imageIndex, PassQueue.Graphics);
+                //OnSubmit?.Invoke(imageIndex, PassQueue.Graphics);
                 Profiler.EndSample();
             }
 
-            OnEndSubmit?.Invoke(imageIndex);
+            //OnEndSubmit?.Invoke(imageIndex);
 
             Graphics.EndRender();
 
