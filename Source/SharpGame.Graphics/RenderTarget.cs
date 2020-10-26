@@ -63,4 +63,10 @@ namespace SharpGame
             sampler?.Dispose();
         }
     }
+
+    public class RenderTarget
+    {
+
+    }
+
 }

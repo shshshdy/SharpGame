@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class SharedBuffer : DisposeBase
+    public class SharedBuffer : DisposeBase, IBindableResource
     {
         Buffer[] buffers = new Buffer[3];
         public Buffer Buffer => buffers[Graphics.Instance.WorkImage];

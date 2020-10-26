@@ -58,7 +58,7 @@ namespace SharpGame
             //#if NO_DEPTHWRITE
                 RenderPass = Graphics.RenderPass,// Graphics.CreateRenderPass(false, false),
             //#endif
-                OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkImage),
+                //OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkImage),
 
                 Subpasses = new[]
                 {
@@ -109,6 +109,7 @@ namespace SharpGame
                 var queryPool = query_pool[imageIndex];
 
                 //cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
+                ClearBuffers(cb, imageIndex);
 
             }
         }

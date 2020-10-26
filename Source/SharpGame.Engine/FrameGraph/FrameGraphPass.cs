@@ -16,20 +16,22 @@ namespace SharpGame
 
     public class FrameGraphPass : Object, IEnumerable<Subpass>
     {
+        public string Name { get; }
+
         public SubmitQueue Queue { get; set; } = SubmitQueue.Graphics;
         public RenderPass RenderPass { get; set; }
         public uint Subpass { get; set; }
         public bool UseSecondCmdBuffer { get; set; } = false;
 
-        [IgnoreDataMember]
         public RenderPipeline Renderer { get; set; }
+
+        public RenderView View => Renderer.View;
 
         public CommandBuffer CmdBuffer => FrameGraph.GetWorkCmdBuffer(Queue);
 
         public Graphics Graphics => Graphics.Instance;
         public FrameGraph FrameGraph => FrameGraph.Instance;
 
-        [IgnoreDataMember]
         public Framebuffer[] Framebuffers { get => framebuffers; set => framebuffers = value; }
         Framebuffer[] framebuffers = new Framebuffer[3];
 
@@ -52,12 +54,13 @@ namespace SharpGame
             }
         }
 
-        public Action<CommandBuffer> OnBegin { get; set; }
-
-        public Action<CommandBuffer> OnEnd { get; set; }
-
         public FrameGraphPass()
         {
+        }
+
+        public FrameGraphPass(string name)
+        {
+            Name = name;
         }
 
         public void Add(Subpass subpass)
@@ -76,6 +79,19 @@ namespace SharpGame
 
         public virtual void Reset()
         {
+            CreateRenderTargets();
+
+            CreateRenderPass();
+        }
+
+        private void CreateRenderTargets()
+        {
+
+        }
+
+        private void CreateRenderPass()
+        {
+
         }
 
         public virtual void Update(RenderView view)
@@ -88,19 +104,24 @@ namespace SharpGame
 
         public virtual void Draw(RenderView view)
         {
-            var cb = CmdBuffer;
-            OnBegin?.Invoke(cb);
-
             BeginRenderPass(view);
+            
+            var cmd = CmdBuffer;
 
+            int subpassIndex = 0;
             foreach (var subpass in subpasses)
             {
-                subpass.Draw(view, 0);
+                if(subpassIndex > 0)
+                {
+                    cmd.NextSubpass(SubpassContents.Inline);
+                }
+
+                subpass.Draw(view, subpassIndex);
+                subpassIndex++;
             }
 
             EndRenderPass(view);
 
-            OnEnd?.Invoke(cb);
         }
 
         Viewport viewport;

@@ -209,7 +209,7 @@ namespace SharpGame
                 RenderPass = renderPass,
                 Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
 
-                OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkImage),
+                //OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkImage),
 
                 Subpasses = new[]
                 {
@@ -284,7 +284,7 @@ namespace SharpGame
 
                 //cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
 
-                //ClearBuffers(cb, imageIndex);
+                ClearBuffers(cb, imageIndex);
             }
         }
     }

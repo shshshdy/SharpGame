@@ -130,6 +130,7 @@ namespace SharpGame
             {
                 case DescriptorType.Sampler:
                     break;
+                case DescriptorType.InputAttachment:
                 case DescriptorType.CombinedImageSampler:
                     {
                         if(bindable is Texture texture)
@@ -179,8 +180,7 @@ namespace SharpGame
                     }
                     
                     break;
-                case DescriptorType.InputAttachment:
-                    break;
+                   
             }
             return this;
         }
