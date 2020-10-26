@@ -61,10 +61,6 @@ namespace SharpGame
         public int RenderImage => currentImage;
         public int WorkImage => nextImage;
 
-
-        public Semaphore PresentComplete { get; }
-        public Semaphore RenderComplete { get; }
-
         private RenderTexture depthStencil;
         public RenderTexture DepthRT => depthStencil;
 
@@ -89,7 +85,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            settings.Validation = true;
+           // settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -106,16 +102,13 @@ namespace SharpGame
             ComputeQueue = Queue.GetDeviceQueue(Device.QFCompute, 0);
             DepthFormat = Device.GetSupportedDepthFormat();
 
-            // Create synchronization objects
-            PresentComplete = new Semaphore();
-            RenderComplete = new Semaphore();
+            firstSemaphore = new Semaphore();
 
             commandPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
 
             DescriptorPoolManager = new DescriptorPoolManager();
 
             Texture.Init();
-
             Sampler.Init();
 
         }
@@ -143,7 +136,6 @@ namespace SharpGame
                 });
             }
 
-            firstSemaphore = new Semaphore();
 
         }
 
@@ -493,6 +485,11 @@ namespace SharpGame
             GraphicsQueue.Submit(null, currentBuffer.presentFence);
 
             GraphicsQueue.WaitIdle();
+
+            foreach(var action in postActions)
+            {
+                action.Invoke();
+            }
 
             Profiler.EndSample();
 

@@ -23,21 +23,19 @@ namespace SharpGame
         protected int workCount = 16;
         protected FastList<CommandBufferPool[]> cmdBufferPools = new FastList<CommandBufferPool[]>();
 
-        FastListPool<CommandBuffer>[] commdListPool = new[]
-        {
-            new FastListPool<CommandBuffer>(),
-            new FastListPool<CommandBuffer>(),
-            new FastListPool<CommandBuffer>()
-        };
+        List<CommandBuffer> secondCmdBuffers = new List<CommandBuffer>();
 
         public ScenePass(string name = "main") : base(name, 16)
         {
-            CreateCommandPool(4);
-
             for (int i = 0; i < workCount; i++)
             {
                 CreateCommandPool(1);
             }
+        }
+
+        public override void Init()
+        {
+            FrameGraphPass.UseSecondCmdBuffer = MultiThreaded;
         }
 
         protected void CreateCommandPool(uint numCmd = 1)
@@ -52,10 +50,10 @@ namespace SharpGame
             cmdBufferPools.Add(cmdBufferPool);
         }
 
-        public CommandBuffer GetCmdBuffer(int index = -1)
+        public CommandBuffer GetCmdBuffer(int index)
         {
             int workContext = Graphics.WorkImage;
-            var cb = cmdBufferPools[index + 1][workContext].Get();
+            var cb = cmdBufferPools[index][workContext].Get();
 
             if (!cb.IsOpen)
             {
@@ -79,7 +77,7 @@ namespace SharpGame
             for (int i = 0; i < cmdBufferPools.Count; i++)
             {
                 var cmd = cmdBufferPools[i][workContext];
-                cmd.currentIndex = 0;
+                cmd.Clear();
             }
 
         }
@@ -115,12 +113,12 @@ namespace SharpGame
             cmd.SetScissor(view.ViewRect);
 
             if ((blendFlags & BlendFlags.Solid) != 0)
-            {/*
+            {
                 if (MultiThreaded)
                 {
                     DrawBatchesMT(view, view.opaqueBatches, set0, set1, set2);
                 }
-                else*/
+                else
                 {
                     DrawBatches(view, view.opaqueBatches, CmdBuffer, set0, set1, set2);
                 }
@@ -165,10 +163,10 @@ namespace SharpGame
             {
                 int from = i;
                 int to = Math.Min(i + dpPerBatch, batches.Count);
-                int cmdIndex = idx;
+                var cb = GetCmdBuffer(idx);
+                secondCmdBuffers.Add(cb);
                 var t = Task.Run(() =>
                 {
-                    var cb = GetCmdBuffer(cmdIndex);
                     cb.SetViewport(view.Viewport);
                     cb.SetScissor(view.ViewRect);
                     Draw(view, batches.AsSpan(from, to - from), cb, set0, set1, set2);
@@ -179,6 +177,15 @@ namespace SharpGame
             }
 
             Task.WaitAll(renderTasks.ToArray());
+
+            int workContext = Graphics.WorkContext;
+            var cmd = CmdBuffer;
+            foreach(var c in secondCmdBuffers)
+            {
+                cmd.ExecuteCommand(c);
+            }
+            secondCmdBuffers.Clear();
+
         }
 
         protected void Draw(RenderView view, Span<SourceBatch> sourceBatches, CommandBuffer commandBuffer, ResourceSet set0, ResourceSet set1, ResourceSet set2)

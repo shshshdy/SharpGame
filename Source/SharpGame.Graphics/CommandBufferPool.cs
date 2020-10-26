@@ -23,7 +23,8 @@ namespace SharpGame
         private VkCommandPool cmdPool;
         private NativeList<VkCommandBuffer> cmdBuffers = new NativeList<VkCommandBuffer>();
 
-        public int currentIndex;
+        int currentIndex = 0;
+        public int CurrentIndex => currentIndex;
 
         public IntPtr GetAddress(uint idx) => cmdBuffers.GetAddress(idx);
 
@@ -89,6 +90,11 @@ namespace SharpGame
             int idx = currentIndex;
             Interlocked.Increment(ref currentIndex);
             return CommandBuffers[idx % CommandBuffers.Length];
+        }
+
+        public void Clear()
+        {
+            currentIndex = 0;
         }
 
         public void Reset()

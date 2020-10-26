@@ -18,6 +18,7 @@ namespace SharpGame
         public PassQueue PassQueue { get; set; } = PassQueue.Graphics;
         public RenderPass RenderPass { get; set; }
         public uint Subpass { get; set; }
+        public bool UseSecondCmdBuffer { get; set; } = false;
 
         [IgnoreDataMember]
         public RenderPipeline Renderer { get; set; }
@@ -28,9 +29,11 @@ namespace SharpGame
         public FrameGraph FrameGraph => FrameGraph.Instance;
 
         [IgnoreDataMember]
-        public Framebuffer[] Framebuffers { get; set; }
+        public Framebuffer[] Framebuffers { get => framebuffers; set => framebuffers = value; }
+        Framebuffer[] framebuffers = new Framebuffer[3];
+
         [IgnoreDataMember]
-        public Framebuffer Framebuffer { set => Framebuffers = new[] { value, value, value }; }
+        public Framebuffer Framebuffer { set => framebuffers[0] = framebuffers[1] = framebuffers[2] = value; }
         public ClearColorValue[] ClearColorValue { get; set; } = { new ClearColorValue(0.25f, 0.25f, 0.25f, 1) };
         public ClearDepthStencilValue? ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
 
@@ -94,14 +97,11 @@ namespace SharpGame
         Rect2D renderArea;
         public void BeginRenderPass(RenderView view)
         {
-            Framebuffer framebuffer = null;
-            if (Framebuffers == null)
+            ref Framebuffer framebuffer = ref framebuffers[Graphics.WorkImage];
+
+            if (framebuffer == null)
             {
                 framebuffer = Graphics.Framebuffers[Graphics.WorkImage];
-            }
-            else
-            {
-                framebuffer = Framebuffers[Graphics.WorkImage];
             }
 
             if (view != null)
@@ -155,7 +155,7 @@ namespace SharpGame
             var cb = CmdBuffer;
             var rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues);
 
-            cb.BeginRenderPass(in rpBeginInfo, SubpassContents.Inline);
+            cb.BeginRenderPass(in rpBeginInfo, UseSecondCmdBuffer? SubpassContents.SecondaryCommandBuffers : SubpassContents.Inline);
 
             Subpass = 0;
         }

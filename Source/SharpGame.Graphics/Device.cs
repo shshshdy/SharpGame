@@ -291,7 +291,7 @@ namespace SharpGame
         {
             // Attach debug callback.
             var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
-                //VkDebugReportFlagsEXT.InformationEXT |
+                VkDebugReportFlagsEXT.InformationEXT |
                 //VkDebugReportFlagsEXT.WarningEXT |
                 //VkDebugReportFlagsEXT.PerformanceWarningEXT |
                 VkDebugReportFlagsEXT.ErrorEXT |
