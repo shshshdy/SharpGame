@@ -12,24 +12,24 @@ namespace SharpGame
 {
     public class GraphicsSubpass : Subpass
     {
-        public Action<GraphicsSubpass, RenderView> OnDraw { get; set; }
+        public Action<GraphicsSubpass, CommandBuffer> OnDraw { get; set; }
 
         public GraphicsSubpass(string name = "", int workCount = 0)
         {
             Name = name;
         }
         
-        public override void Draw(RenderView view, uint subpass)
+        public override void Draw(CommandBuffer cb, uint subpass)
         {
-            DrawImpl(view);
+            DrawImpl(cb);
         }
         
-        protected virtual void DrawImpl(RenderView view)
+        protected virtual void DrawImpl(CommandBuffer cb)
         {
-            OnDraw?.Invoke(this, view);
+            OnDraw?.Invoke(this, cb);
         }
 
-        public void DrawBatch(ulong passID, CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts,
+        public void DrawBatch(CommandBuffer cb, ulong passID, SourceBatch batch, Span<ConstBlock> pushConsts,
             ResourceSet resourceSet, ResourceSet resourceSet1, ResourceSet resourceSet2 = null)
         {
             var shader = batch.material.Shader;

@@ -21,8 +21,8 @@ namespace SharpGame
 
         public Graphics Graphics => Graphics.Instance;
         public FrameGraph FrameGraph => FrameGraph.Instance;
-
         public FrameGraphPass FrameGraphPass { get; internal set; }
+        public RenderView View => FrameGraphPass.View;
 
         public CommandBuffer CmdBuffer => FrameGraph.GetWorkCmdBuffer(FrameGraphPass.Queue);
 
@@ -30,11 +30,11 @@ namespace SharpGame
         {
         }
         
-        public virtual void Update(RenderView view)
+        public virtual void Update()
         {
         }
 
-        public virtual void Draw(RenderView view, uint subpass)
+        public virtual void Draw(CommandBuffer cmd, uint subpass)
         {
         }
     }

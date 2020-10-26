@@ -29,7 +29,7 @@ namespace SharpGame
 
         public bool DrawDebug { get => FrameGraph.drawDebug && drawDebug; set => drawDebug = value; }
         bool drawDebug = true;
-        GraphicsSubpass debugPass;
+        FrameGraph debugPass;
 
         public uint ViewMask { get; set; } = 1;
         public ref FrameInfo Frame => ref frameInfo;
@@ -233,7 +233,7 @@ namespace SharpGame
 
             if (DrawDebug)
             {
-                debugPass?.Update(this);
+                debugPass?.Update();
             }
 
             Profiler.EndSample();

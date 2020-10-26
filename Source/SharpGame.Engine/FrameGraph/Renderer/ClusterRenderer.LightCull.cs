@@ -71,12 +71,10 @@ namespace SharpGame
             light_colors.Flush();
         }
 
-        protected unsafe void ComputeLight(ComputePass renderPass, RenderView view)
+        protected unsafe void ComputeLight(ComputePass renderPass, CommandBuffer cmd_buf)
         {
-            tile_count_x = ((uint)view.ViewRect.width - 1) / TILE_WIDTH + 1;
-            tile_count_y = ((uint)view.ViewRect.height - 1) / TILE_HEIGHT + 1;
-
-            var cmd_buf = renderPass.CmdBuffer;
+            tile_count_x = ((uint)View.ViewRect.width - 1) / TILE_WIDTH + 1;
+            tile_count_y = ((uint)View.ViewRect.height - 1) / TILE_HEIGHT + 1;
 
             cmd_buf.ResetQueryPool(QueryPool, 4, 6);
             //cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2);

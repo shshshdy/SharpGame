@@ -227,7 +227,7 @@ namespace SharpGame
             yield return translucentPass;
         }
 
-        void Composite(GraphicsSubpass graphicsPass, RenderView view)
+        void Composite(GraphicsSubpass graphicsPass, CommandBuffer cb)
         {
             var scenePass = graphicsPass as SceneSubpass;
 
@@ -245,7 +245,7 @@ namespace SharpGame
 
             cmd.DrawGeometry(quad, pass, 0, sets);
 
-            scenePass.DrawScene(view, BlendFlags.AlphaBlend);
+            scenePass.DrawScene(cb, BlendFlags.AlphaBlend);
 
         }
 

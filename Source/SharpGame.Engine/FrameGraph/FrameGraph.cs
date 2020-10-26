@@ -141,7 +141,7 @@ namespace SharpGame
                 DrawDebugGeometry();
             }
 
-            OverlayPass?.Update(null);
+            OverlayPass?.Update();
 
             this.SendGlobalEvent(new PostRenderUpdate());
 
@@ -162,7 +162,7 @@ namespace SharpGame
                 viewport.Render();
             }
 
-            OverlayPass?.Draw(null);
+            OverlayPass?.Draw();
 
             preRenderCmdBlk[imageIndex].cmdBuffer.End();
             computeCmdBlk[imageIndex].cmdBuffer.End();

@@ -127,8 +127,9 @@ namespace SharpGame
 
         }
 
-        public override void Draw(RenderView view)
+        public override void Draw()
         {
+            var view = View;
             if(view.Camera == null)
             {
                 return;
@@ -161,6 +162,8 @@ namespace SharpGame
             });
 
             ClearValue[] clearDepth = { (ClearValue)ClearDepthStencilValue };
+
+            var cmd = CmdBuffer;
             //todo:multi thread
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
@@ -169,7 +172,6 @@ namespace SharpGame
 
                 BeginRenderPass(cascades[i].frameBuffer, renderArea, clearDepth);
 
-                var cmd = FrameGraph.GetWorkCmdBuffer(Queue);// GetCmdBuffer();
 
                 cmd.SetViewport(viewport);
                 cmd.SetScissor(renderArea);
@@ -183,15 +185,15 @@ namespace SharpGame
 
                 foreach (var batch in casters[0])
                 {
-                    DrawBatch(passID, cmd, batch, consts, VSSet, null);
+                    DrawBatch(cmd, passID, batch, consts, VSSet, null);
                 }
 
-                EndRenderPass(view);
+                EndRenderPass(cmd);
             }
 
         }
 
-        void DrawBatch(ulong passID, CommandBuffer cb, SourceBatch batch, Span<ConstBlock> pushConsts,
+        void DrawBatch(CommandBuffer cb, ulong passID, SourceBatch batch, Span<ConstBlock> pushConsts,
             ResourceSet resourceSet, ResourceSet resourceSet1, ResourceSet resourceSet2 = null)
         {
             var shader = batch.material.Shader;

@@ -6,22 +6,22 @@ namespace SharpGame
 {
     public class ComputePass : FrameGraphPass
     {
-        public Action<ComputePass, RenderView> OnDraw { get; set; }
+        public Action<ComputePass, CommandBuffer> OnDraw { get; set; }
 
         public ComputePass()
         {
             Queue = SubmitQueue.Compute;
         }
 
-        public ComputePass(Action<ComputePass, RenderView> onDraw)
+        public ComputePass(Action<ComputePass, CommandBuffer> onDraw)
         {
             Queue = SubmitQueue.Compute;
             OnDraw = onDraw;
         }
 
-        public override void Draw(RenderView view)
+        public override void Draw()
         {
-            OnDraw?.Invoke(this, view);
+            OnDraw?.Invoke(this, CmdBuffer);
         }
         
     }

@@ -133,7 +133,7 @@ namespace SharpGame.Samples
             mousePos = input.MousePosition;
         }
 
-        void CustomDraw(GraphicsSubpass pass, RenderView view)
+        void CustomDraw(GraphicsSubpass pass, CommandBuffer cmd)
         {
             var rs = resourceSet[Graphics.WorkImage];
             var ub = ubCameraVS;
@@ -165,7 +165,7 @@ namespace SharpGame.Samples
             for (int i = 0; i < COUNT; i++)
             {
                 var batch = batches[i];
-                pass.DrawBatch(1, pass.CmdBuffer, batch, default, rs, null);
+                pass.DrawBatch(cmd, 1, batch, default, rs, null);
             }
         }
     }

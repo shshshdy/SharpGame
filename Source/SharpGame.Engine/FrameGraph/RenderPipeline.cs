@@ -64,7 +64,7 @@ namespace SharpGame
             initialized = false;
         }
 
-        public FrameGraphPass AddGraphicsPass(Action<GraphicsSubpass, RenderView> onDraw)
+        public FrameGraphPass AddGraphicsPass(Action<GraphicsSubpass, CommandBuffer> onDraw)
         {
             var renderPass = new FrameGraphPass
             {
@@ -81,7 +81,7 @@ namespace SharpGame
             return renderPass;
         }
 
-        public FrameGraphPass AddPass<T>(Action<GraphicsSubpass, RenderView> onDraw) where T : GraphicsSubpass, new()
+        public FrameGraphPass AddPass<T>(Action<GraphicsSubpass, CommandBuffer> onDraw) where T : GraphicsSubpass, new()
         {
             var renderPass = new FrameGraphPass
             {
@@ -98,7 +98,7 @@ namespace SharpGame
             return renderPass;
         }
 
-        public ComputePass AddComputePass(Action<ComputePass, RenderView> onDraw)
+        public ComputePass AddComputePass(Action<ComputePass, CommandBuffer> onDraw)
         {
             var renderPass = new ComputePass
             {
@@ -128,7 +128,7 @@ namespace SharpGame
 
             foreach (var renderPass in RenderPassList)
             {
-                renderPass.Update(View);
+                renderPass.Update();
             }
 
             Profiler.EndSample();
@@ -143,7 +143,7 @@ namespace SharpGame
             foreach (var renderPass in RenderPassList)
             {
                 OnBeginPass(renderPass);
-                renderPass.Draw(View);
+                renderPass.Draw();
                 OnEndPass(renderPass);
             }
 
