@@ -56,8 +56,7 @@ namespace SharpGame
         {
             int workContext = Graphics.WorkImage;
             var cb = cmdBufferPools[index + 1][workContext].Get();
-            //cb.renderPass = CurrentRenderPass.RenderPass;
-            //CurrentRenderPass.AddCommandBuffer(cb);
+
             if (!cb.IsOpen)
             {
                 CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo

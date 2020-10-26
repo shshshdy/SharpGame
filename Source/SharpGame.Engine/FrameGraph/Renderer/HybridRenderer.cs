@@ -29,8 +29,8 @@ namespace SharpGame
         ResourceLayout deferredLayout0;
         ResourceLayout deferredLayout1;
 
-        ResourceSet[] deferredSet0 = new ResourceSet[2];
-        ResourceSet[] deferredSet1 = new ResourceSet[2];
+        ResourceSet[] deferredSet0 = new ResourceSet[3];
+        ResourceSet[] deferredSet1 = new ResourceSet[3];
 
         public HybridRenderer()
         {
@@ -140,6 +140,7 @@ namespace SharpGame
 
             deferredSet0[0] =  new ResourceSet(deferredLayout0, View.ubCameraVS[0]);
             deferredSet0[1] = new ResourceSet(deferredLayout0, View.ubCameraVS[1]);
+            deferredSet0[2] = new ResourceSet(deferredLayout0, View.ubCameraVS[2]);
 
             deferredLayout1 = new ResourceLayout
             {
@@ -148,9 +149,9 @@ namespace SharpGame
                 new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
 #if HWDEPTH
-            deferredSet1[0] = deferredSet1[1] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
+            deferredSet1[0] = deferredSet1[1] = deferredSet1[2] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
 #else
-            deferredSet1[0] = deferredSet1[1] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
+            deferredSet1[0] = deferredSet1[1] = deferredSet1[2] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
 #endif
 
         }

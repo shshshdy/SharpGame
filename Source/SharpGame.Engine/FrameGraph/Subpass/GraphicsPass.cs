@@ -21,9 +21,7 @@ namespace SharpGame
         
         public override void Draw(RenderView view, uint subpass)
         {
-            //BeginRenderPass(view);
             DrawImpl(view);
-            //EndRenderPass(view);
         }
         
         protected virtual void DrawImpl(RenderView view)

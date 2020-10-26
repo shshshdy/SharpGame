@@ -9,7 +9,7 @@ namespace SharpGame
         private ResourceLayout computeLayout0;
         private ResourceLayout computeLayout1;
 
-        private ResourceSet[] computeSet0 = new ResourceSet[2];
+        private ResourceSet[] computeSet0 = new ResourceSet[3];
         private ResourceSet computeSet1;
         PipelineLayout pipelineLayout;
 
@@ -38,6 +38,7 @@ namespace SharpGame
 
             computeSet0[0] = new ResourceSet(computeLayout0, uboCluster[0], light_pos_ranges[0]);
             computeSet0[1] = new ResourceSet(computeLayout0, uboCluster[1], light_pos_ranges[1]);
+            computeSet0[2] = new ResourceSet(computeLayout0, uboCluster[2], light_pos_ranges[2]);
 
             pipelineLayout = new PipelineLayout(computeLayout0, computeLayout1);
 

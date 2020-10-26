@@ -50,7 +50,7 @@ namespace SharpGame.Samples
             SetupLights(scene, aabb, 1024, lights);
           
             //clusterRenderer = new ClusterForwardRenderer();
-            clusterRenderer = new HybridRenderer();
+            //clusterRenderer = new HybridRenderer();
             MainView.Attach(camera, scene, clusterRenderer);
         }
 
@@ -76,15 +76,18 @@ namespace SharpGame.Samples
 
             if (ImGui.Begin("HUD"))
             {
-                ref var queryData = ref clusterRenderer.QueryData;
+                if(clusterRenderer)
+                {
+                    ref var queryData = ref clusterRenderer.QueryData;
 
-                ImGui.Text("query data (in ms)");
-                ImGui.Text("subpass clustering :" + queryData.Clustering / 1000000.0f);
-                ImGui.Text("calc light grids :" + queryData.CalcLightGrids / 1000000.0f);
-                ImGui.Text("calc grid offsets :" + queryData.CalcGridOffsets / 1000000.0f);
-                ImGui.Text("calc light list :" + queryData.CalcLightList / 1000000.0f);
-                ImGui.Text("subpass scene :" + queryData.SceneRender / 1000000.0f);
-                ImGui.Text("clear :" + queryData.ClearBuffer / 1000000.0f);
+                    ImGui.Text("query data (in ms)");
+                    ImGui.Text("subpass clustering :" + queryData.Clustering / 1000000.0f);
+                    ImGui.Text("calc light grids :" + queryData.CalcLightGrids / 1000000.0f);
+                    ImGui.Text("calc grid offsets :" + queryData.CalcGridOffsets / 1000000.0f);
+                    ImGui.Text("calc light list :" + queryData.CalcLightList / 1000000.0f);
+                    ImGui.Text("subpass scene :" + queryData.SceneRender / 1000000.0f);
+                    ImGui.Text("clear :" + queryData.ClearBuffer / 1000000.0f);
+                }
             }
         }
 

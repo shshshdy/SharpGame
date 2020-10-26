@@ -176,21 +176,5 @@ namespace SharpGame
         }
     }
 
-    public class ForwardRenderer : RenderPipeline
-    {
-        public ForwardRenderer()
-        {
-            Add(new ShadowPass())
-            .Add(new FrameGraphPass
-            {
-                RenderPass = Graphics.RenderPass,
-                Subpasses = new[]
-                {
-                    new ScenePass()
-                }
-            });
-        }
-
-    }
 
 }

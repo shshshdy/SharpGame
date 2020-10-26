@@ -196,12 +196,9 @@ namespace SharpGame
             Graphics.SetMainThread();
 
             Setup();
-
             Init();
-
             Start();
 
-            started = true;
             rendering = true;
             renderThread = new Thread(RenderLoop);
             renderThread.Start();
@@ -217,10 +214,7 @@ namespace SharpGame
         }
 
         private void SimulateLoop()
-        {
-
-            //graphics.WakeRender();           
-
+        {        
             while (!shouldQuit)
             {
                 graphics.WaitRender();
@@ -232,18 +226,11 @@ namespace SharpGame
                 Time.Tick(timeStep);
 
                 input.snapshot = window.PumpEvents();
-                /*
-                if(resized)
-                {
-                    resized = false;
-                    graphics.Frame();
-                    Profiler.End();
-                    continue;
-                }*/
 
                 UpdateFrame();
 
                 ApplyFrameLimit();
+
                 graphics.MainSemPost();
                 Profiler.End();
             }
@@ -251,12 +238,10 @@ namespace SharpGame
             rendering = false;
 
             graphics.WaitRender();
-            //graphics.Frame();
 
 
         }
 
-        bool started = false;
         private void RenderLoop()
         {
             Graphics.SetRenderThread();
@@ -269,7 +254,6 @@ namespace SharpGame
 
             }
 
-            //graphics.Close();
         }
 
         void Start()
@@ -310,7 +294,6 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndFrame());
 
-            //graphics.Frame();
             Profiler.EndSample();
         }
 

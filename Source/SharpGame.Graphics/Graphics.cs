@@ -89,7 +89,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            //settings.Validation = true;
+            settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -446,6 +446,7 @@ namespace SharpGame
 
             if (currentImage == -1)
             {
+                Profiler.EndSample();
                 return false;
             }
 
@@ -473,20 +474,12 @@ namespace SharpGame
             currentBuffer = frame;
             currentBuffer.imageIndex = currentImage;
 
-            //backBuffers.Dequeue();
 
-            //Debug.Assert(currentImage == (curImage + 1) % ImageCount);
-
-
-            Profiler.EndSample();
             
-            //MainSemWait();
-
-            //nextImage = (currentImage + 1) % ImageCount;
-
             transientVB.Flush();
             transientIB.Flush();
 
+            Profiler.EndSample();
 
 
             return true;
@@ -500,8 +493,6 @@ namespace SharpGame
             GraphicsQueue.Submit(null, currentBuffer.presentFence);
 
             GraphicsQueue.WaitIdle();
-
-            //backBuffers.Enqueue(currentBuffer);
 
             Profiler.EndSample();
 
@@ -519,47 +510,21 @@ namespace SharpGame
 
         public bool SingleLoop => Settings.SingleLoop;
 
-        //private int currentContext;
-        //public int WorkContext => SingleLoop ? 0 : currentContext;
-        //public int RenderContext => SingleLoop ? 0 : 1 - currentContext;
         public int WorkContext => nextImage;
         public int RenderContext => currentImage;
 
         private int currentFrame;
         public int CurrentFrame => currentFrame;
 
-        public int NextImage { get => nextImage; set => nextImage = value; }
-
         private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
         private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(1, 1);
 
-        List<System.Action> actions = new List<Action>();
+        List<System.Action> postActions = new List<Action>();
 
-        public void Execute(System.Action action)
+        public void Post(System.Action action)
         {
-            actions.Add(action);
+            postActions.Add(action);
         }
-        /*
-        void SwapContext()
-        {
-            if(actions.Count > 0)
-            {
-                foreach(var action in actions)
-                {
-                    action.Invoke();
-                }
-
-                actions.Clear();
-            }
-
-            currentFrame++;
-
-            if(!SingleLoop)
-            {
-                currentContext = 1 - currentContext;
-            }
-
-        }*/
 
         public void MainSemPost()
         {
@@ -607,12 +572,6 @@ namespace SharpGame
             transientVB.Reset();
             transientIB.Reset();
             currentFrame++;
-        }
-
-        public void Close()
-        {
-            MainSemWait();
-            RenderSemPost();
         }
 
 #endregion

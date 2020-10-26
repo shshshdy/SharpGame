@@ -90,9 +90,9 @@ namespace SharpGame
         protected ResourceLayout resourceLayout1;
         protected ResourceLayout clusterLayout1;
 
-        protected ResourceSet[] resourceSet0 = new ResourceSet[2];
-        protected ResourceSet[] resourceSet1 = new ResourceSet[2];
-        protected ResourceSet[] clusterSet1 = new ResourceSet[2];
+        protected ResourceSet[] resourceSet0 = new ResourceSet[3];
+        protected ResourceSet[] resourceSet1 = new ResourceSet[3];
+        protected ResourceSet[] clusterSet1 = new ResourceSet[3];
 
         protected QueryPool[] query_pool = new QueryPool[3];
         protected QueryData[] queryData = new QueryData[3];
@@ -193,8 +193,9 @@ namespace SharpGame
 
             resourceSet0[0] = new ResourceSet(resourceLayout0, uboCluster[0], light_pos_ranges[0], light_colors[0]);
             resourceSet0[1] = new ResourceSet(resourceLayout0, uboCluster[1], light_pos_ranges[1], light_colors[1]);
+            resourceSet0[2] = new ResourceSet(resourceLayout0, uboCluster[2], light_pos_ranges[2], light_colors[2]);
 
-            resourceSet1[0] = resourceSet1[1] = new ResourceSet(resourceLayout1,
+            resourceSet1[0] = resourceSet1[1] = resourceSet1[2] = new ResourceSet(resourceLayout1,
                 gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
                 gridLightCountOffsets, lightList, gridLightCountsCompare);
 
@@ -207,6 +208,7 @@ namespace SharpGame
 
             clusterSet1[0] = new ResourceSet(clusterLayout1, uboCluster[0], gridFlags);
             clusterSet1[1] = new ResourceSet(clusterLayout1, uboCluster[1], gridFlags);
+            clusterSet1[2] = new ResourceSet(clusterLayout1, uboCluster[2], gridFlags);
 
 
             Format depthFormat = Device.GetSupportedDepthFormat();
