@@ -168,7 +168,7 @@ namespace SharpGame
                 ClearColorValue = new[] { new ClearColorValue(0.25f, 0.25f, 0.25f, 1), new ClearColorValue(0, 0, 0, 1), new ClearColorValue(0, 0, 0, 0) },
                 Subpasses = new []
                 {
-                    new ScenePass("gbuffer")
+                    new SceneSubpass("gbuffer")
                     { Set1 = clusterSet1
                     }
                 }
@@ -183,7 +183,7 @@ namespace SharpGame
                 Framebuffer = clusterFB,
                 Subpasses = new[]
                 {
-                    new ScenePass("clustering")
+                    new SceneSubpass("clustering")
                     {
                         Set1 = clusterSet1
                     }
@@ -194,15 +194,15 @@ namespace SharpGame
 
             lightCull = new ComputePass(ComputeLight);
             yield return lightCull;
-           /*
-            compositePass = new GraphicsPass("composite")
-            {
-                RenderPass = Graphics.RenderPass,
-                Framebuffers = Graphics.Framebuffers,
-                OnDraw = Composite
-            };
-            yield return compositePass;*/
-            
+            /*
+             compositePass = new GraphicsSubpass("composite")
+             {
+                 RenderPass = Graphics.RenderPass,
+                 Framebuffers = Graphics.Framebuffers,
+                 OnDraw = Composite
+             };
+             yield return compositePass;*/
+
             var renderPass = Graphics.CreateRenderPass(false, false);
             translucentPass = new FrameGraphPass
             {
@@ -210,7 +210,7 @@ namespace SharpGame
                 Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
                 Subpasses = new[]
                 {
-                    new ScenePass("cluster_forward")
+                    new SceneSubpass("cluster_forward")
                     {
                         OnDraw = Composite,
 
@@ -224,9 +224,9 @@ namespace SharpGame
             yield return translucentPass;
         }
 
-        void Composite(GraphicsPass graphicsPass, RenderView view)
+        void Composite(GraphicsSubpass graphicsPass, RenderView view)
         {
-            var scenePass = graphicsPass as ScenePass;
+            var scenePass = graphicsPass as SceneSubpass;
 
             var cmd = graphicsPass.CmdBuffer;
 

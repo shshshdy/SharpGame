@@ -64,13 +64,13 @@ namespace SharpGame
             initialized = false;
         }
 
-        public FrameGraphPass AddGraphicsPass(Action<GraphicsPass, RenderView> onDraw)
+        public FrameGraphPass AddGraphicsPass(Action<GraphicsSubpass, RenderView> onDraw)
         {
             var renderPass = new FrameGraphPass
             {
                 Subpasses = new[]
                 {
-                    new GraphicsPass
+                    new GraphicsSubpass
                     {
                         OnDraw = onDraw
                     }
@@ -81,7 +81,7 @@ namespace SharpGame
             return renderPass;
         }
 
-        public FrameGraphPass AddPass<T>(Action<GraphicsPass, RenderView> onDraw) where T : GraphicsPass, new()
+        public FrameGraphPass AddPass<T>(Action<GraphicsSubpass, RenderView> onDraw) where T : GraphicsSubpass, new()
         {
             var renderPass = new FrameGraphPass
             {

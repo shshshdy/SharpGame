@@ -14,7 +14,7 @@ namespace SharpGame
                 RenderPass = Graphics.RenderPass,
                 Subpasses = new[]
                 {
-                    new ScenePass()
+                    new SceneSubpass()
                 }
             });
         }

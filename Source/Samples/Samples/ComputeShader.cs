@@ -136,7 +136,7 @@ namespace SharpGame.Samples
             uniformBuffer.SetData(ref ubo);
         }
 
-        private void DrawQuad(GraphicsPass renderPass, RenderView view)
+        private void DrawQuad(GraphicsSubpass renderPass, RenderView view)
         {
             var cb = renderPass.CmdBuffer;
             var shader = material.Shader;

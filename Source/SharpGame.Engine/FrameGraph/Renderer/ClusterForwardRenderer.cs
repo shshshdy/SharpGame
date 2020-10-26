@@ -41,7 +41,7 @@ namespace SharpGame
                 Framebuffer = clusterFB,
                 Subpasses = new[]
                 {
-                    new ScenePass("clustering")
+                    new SceneSubpass("clustering")
                     {
                         Set1 = clusterSet1
                     }
@@ -60,7 +60,7 @@ namespace SharpGame
             //#endif
                 Subpasses = new[]
                 {
-                    new ScenePass("cluster_forward")
+                    new SceneSubpass("cluster_forward")
                     {
                         Set1 = resourceSet0,
                         Set2 = resourceSet1,

@@ -133,7 +133,7 @@ namespace SharpGame.Samples
             mousePos = input.MousePosition;
         }
 
-        void CustomDraw(GraphicsPass pass, RenderView view)
+        void CustomDraw(GraphicsSubpass pass, RenderView view)
         {
             var rs = resourceSet[Graphics.WorkContext];
             var ub = ubCameraVS;

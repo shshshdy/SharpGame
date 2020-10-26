@@ -85,7 +85,7 @@ namespace SharpGame
                 RenderPass = renderPass,
                 Subpasses = new[]
                 {
-                   new GraphicsPass
+                   new GraphicsSubpass
                    {
                         OnDraw = (pass, view) =>
                         {

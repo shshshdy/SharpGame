@@ -146,7 +146,7 @@ namespace SharpGame.Samples
                 ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.logicWait * Timer.MilliSecsPerTick));
                 ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.renderWait * Timer.MilliSecsPerTick));
 
-                ImGui.Checkbox("Multi-Threaded Work", ref ScenePass.MultiThreaded);
+                ImGui.Checkbox("Multi-Threaded Work", ref SceneSubpass.MultiThreaded);
                 ImGui.Checkbox("Show Stats", ref showStats);
                 ImGui.Checkbox("DebugRenderer", ref FrameGraph.drawDebug);
                 ImGui.Checkbox("Debug Scene", ref FrameGraph.debugOctree);

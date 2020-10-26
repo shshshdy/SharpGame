@@ -8,7 +8,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class ScenePass : GraphicsPass
+    public class SceneSubpass : GraphicsSubpass
     {
         public BlendFlags BlendFlags { get; set; } = BlendFlags.All;
 
@@ -25,7 +25,7 @@ namespace SharpGame
 
         List<CommandBuffer> secondCmdBuffers = new List<CommandBuffer>();
 
-        public ScenePass(string name = "main") : base(name, 16)
+        public SceneSubpass(string name = "main") : base(name, 16)
         {
             for (int i = 0; i < workCount; i++)
             {

@@ -10,11 +10,11 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class GraphicsPass : Subpass
+    public class GraphicsSubpass : Subpass
     {
-        public Action<GraphicsPass, RenderView> OnDraw { get; set; }
+        public Action<GraphicsSubpass, RenderView> OnDraw { get; set; }
 
-        public GraphicsPass(string name = "", int workCount = 0)
+        public GraphicsSubpass(string name = "", int workCount = 0)
         {
             Name = name;
         }

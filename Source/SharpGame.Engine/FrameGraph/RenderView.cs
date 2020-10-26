@@ -29,7 +29,7 @@ namespace SharpGame
 
         public bool DrawDebug { get => FrameGraph.drawDebug && drawDebug; set => drawDebug = value; }
         bool drawDebug = true;
-        GraphicsPass debugPass;
+        GraphicsSubpass debugPass;
 
         public uint ViewMask { get; set; } = 1;
         public ref FrameInfo Frame => ref frameInfo;
