@@ -75,7 +75,7 @@ namespace SharpGame
 
             if (data != IntPtr.Zero)
             {
-                SetData(data, 0, Size);
+                SetData(data, 0, size);
             }
 
             SetupDescriptor();

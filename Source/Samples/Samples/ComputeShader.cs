@@ -148,27 +148,9 @@ namespace SharpGame.Samples
         {
             // Record particle movements.
             var cb = renderPass.CmdBuffer;
-//             var graphicsToComputeBarrier = new BufferMemoryBarrier(storageBuffer,
-//                 AccessFlags.VertexAttributeRead, AccessFlags.ShaderWrite,
-//                 Graphics.GraphicsQueue.FamilyIndex, Graphics.ComputeQueue.FamilyIndex);
-
-//             var computeToGraphicsBarrier = new BufferMemoryBarrier(storageBuffer,
-//                 AccessFlags.ShaderWrite, AccessFlags.VertexAttributeRead,
-//                 Graphics.ComputeQueue.FamilyIndex, Graphics.GraphicsQueue.FamilyIndex);
-
-            //cb.Begin();
-
-            // Add memory barrier to ensure that the (graphics) vertex shader has fetched attributes
-            // before compute starts to write to the buffer.
-            //cb.PipelineBarrier(PipelineStageFlags.VertexInput, PipelineStageFlags.ComputeShader, ref graphicsToComputeBarrier);
             cb.BindComputePipeline(computePipeline);
             cb.BindComputeResourceSet(computePipeline.PipelineLayout, 0, computeResourceSet);
-            cb.Dispatch((uint)storageBuffer.Count / 256, 1, 1);
-            // Add memory barrier to ensure that compute shader has finished writing to the buffer.
-            // Without this the (rendering) vertex shader may display incomplete results (partial
-            // data from last frame).
-            //cb.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.VertexInput, ref computeToGraphicsBarrier);
-            //cb.End();
+            cb.Dispatch((uint)storageBuffer.Count / 256, 1, 1);        
         }
 
     }

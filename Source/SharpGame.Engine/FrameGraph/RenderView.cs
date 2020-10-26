@@ -143,7 +143,7 @@ namespace SharpGame
 
             vsResourceSet[0] = new ResourceSet(vsResLayout, ubCameraVS[0], FrameGraph.TransformBuffer[0]);
             vsResourceSet[1] = new ResourceSet(vsResLayout, ubCameraVS[1], FrameGraph.TransformBuffer[1]);
-            vsResourceSet[2] = new ResourceSet(vsResLayout, ubCameraVS[2], FrameGraph.TransformBuffer[1]);
+            vsResourceSet[2] = new ResourceSet(vsResLayout, ubCameraVS[2], FrameGraph.TransformBuffer[2]);
 
             psResLayout = new ResourceLayout
             {

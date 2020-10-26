@@ -25,9 +25,10 @@ namespace SharpGame
     {
         public ResourceLayout[] ResourceLayout { get; set; }
 
-        public PushConstantRange[] PushConstant { get => pushConstant; set => pushConstant = value; }
+        public PushConstantRange[] PushConstant { get => pushConstant; set { SetPushConstants(value); } }
         private PushConstantRange[] pushConstant;
 
+        private NativeList<PushConstantRange> combindePushConstant = new NativeList<PushConstantRange>();
         public List<string> PushConstantNames { get; set; }
 
         public DefaultResourcSet DefaultResourcSet { get; set;}
@@ -62,6 +63,36 @@ namespace SharpGame
             return null;
         }
 
+        void SetPushConstants(PushConstantRange[] pushConstant)
+        {
+            this.pushConstant = pushConstant;
+            foreach(var c in pushConstant)
+            {
+                bool found = false;
+                for(int i = 0; i < combindePushConstant.Count; i++)
+                {
+                    ref PushConstantRange c1 = ref combindePushConstant[i]; 
+                    if (c1.stageFlags == c.stageFlags)
+                    {
+                        c1.offset = glm.min(c1.offset, c.offset);
+                        if(c.offset + c.size > c1.offset  + c1.size)
+                        {
+                            c1.size = c.offset + c.size - c1.offset;
+                        }
+
+                        found = true;
+                        break;
+
+                    }
+                    
+                }
+
+                if(!found)
+                combindePushConstant.Add(c);
+
+            }
+        }
+
         public unsafe void Build()
         {
             VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo.New();
@@ -86,8 +117,8 @@ namespace SharpGame
 
             if (!pushConstant.IsNullOrEmpty())
             {
-                pipelineLayoutCreateInfo.pushConstantRangeCount = (uint)pushConstant.Length;
-                pipelineLayoutCreateInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref pushConstant[0]);
+                pipelineLayoutCreateInfo.pushConstantRangeCount = (uint)combindePushConstant.Count;
+                pipelineLayoutCreateInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref combindePushConstant[0]);
             }
 
             handle = Device.CreatePipelineLayout(ref pipelineLayoutCreateInfo);

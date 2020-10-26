@@ -6,7 +6,7 @@ using Vulkan;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 1)]
+    [SampleDesc(sortOrder = -1)]
     public class PbrLighting : Sample
     {
         const int kEnvMapSize = 1024;
@@ -63,7 +63,8 @@ namespace SharpGame.Samples
             pitch = camera.Node.EulerAngles.x;
             roll = camera.Node.EulerAngles.z;
 
-            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0, ImageUsageFlags.Storage);
+            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0,
+                ImageUsageFlags.Storage | ImageUsageFlags.TransferSrc);
             irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);
             brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, ImageViewType.Image2D, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
 
@@ -196,7 +197,7 @@ namespace SharpGame.Samples
 
                     commandBuffer.CopyImage(cubeMap.image, ImageLayout.TransferSrcOptimal, envMap.image, ImageLayout.TransferDstOptimal, ref copyRegion);
                     commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.ComputeShader, postCopyBarriers);
-
+                 
                     // Pre-filter rest of the mip-chain.
                     List<ImageView> envTextureMipTailViews = new List<ImageView>();
                      
@@ -206,7 +207,7 @@ namespace SharpGame.Samples
                     Span<DescriptorImageInfo> envTextureMipTailDescriptors = stackalloc DescriptorImageInfo[(int)numMipTailLevels];
                     for (uint level = 0; level < numMipTailLevels; ++level)
                     {
-                        var view = ImageView.Create(envMap.image, ImageViewType.ImageCube, Format.R16g16b16a16Sfloat, ImageAspectFlags.Color, level + 1, 1);
+                        var view = ImageView.Create(envMap.image, ImageViewType.ImageCube, Format.R16g16b16a16Sfloat, ImageAspectFlags.Color, level + 1, 1, 0, envMap.image.arrayLayers);
                         envTextureMipTailViews.Add(view);
                         envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, ImageLayout.General);
                     }
@@ -229,7 +230,7 @@ namespace SharpGame.Samples
                   
                     var barrier = new ImageMemoryBarrier(envMap.image, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal);
                     commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, ref barrier);
-
+                    
                 }
 
                 Graphics.EndWorkCommandBuffer(commandBuffer);
