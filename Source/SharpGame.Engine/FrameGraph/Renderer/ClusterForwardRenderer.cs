@@ -36,7 +36,7 @@ namespace SharpGame
 
             clustering = new FrameGraphPass
             {
-                PassQueue = PassQueue.EarlyGraphics,
+                Queue = SubmitQueue.EarlyGraphics,
                 RenderPass = clusterRP,
                 Framebuffer = clusterFB,
                 Subpasses = new[]
@@ -58,7 +58,7 @@ namespace SharpGame
             //#if NO_DEPTHWRITE
                 RenderPass = Graphics.RenderPass,// Graphics.CreateRenderPass(false, false),
             //#endif
-                OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkContext),
+                OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkImage),
 
                 Subpasses = new[]
                 {

@@ -38,24 +38,9 @@ namespace SharpGame
         CmdBufferBlock[] computeCmdBlk = new CmdBufferBlock[3];
         CmdBufferBlock[] renderCmdBlk = new CmdBufferBlock[3];
 
-        public CommandBuffer GetWorkCmdBuffer(PassQueue queue)
-        {
-            switch (queue)
-            {
-                case PassQueue.EarlyGraphics:
-                    return preRenderCmdBlk[Graphics.WorkImage].cmdBuffer;
-                case PassQueue.Compute:
-                    return computeCmdBlk[Graphics.WorkImage].cmdBuffer;
-                case PassQueue.Graphics:
-                    return renderCmdBlk[Graphics.WorkImage].cmdBuffer;
-                default:
-                    return null;
-            }
-        }
-
-//         public event Action<int> OnBeginSubmit;
-//         public event Action<int, PassQueue> OnSubmit;
-//         public event Action<int> OnEndSubmit;
+        public event Action<int> OnBeginSubmit;
+        public event Action<int, SubmitQueue> OnSubmit;
+        public event Action<int> OnEndSubmit;
 
         public static bool drawDebug;
         public static bool debugDepthTest;
@@ -105,6 +90,21 @@ namespace SharpGame
             views.Add(view);
             view.Attach(camera, scene, frameGraph);
             return view;
+        }
+
+        public CommandBuffer GetWorkCmdBuffer(SubmitQueue queue)
+        {
+            switch (queue)
+            {
+                case SubmitQueue.EarlyGraphics:
+                    return preRenderCmdBlk[Graphics.WorkImage].cmdBuffer;
+                case SubmitQueue.Compute:
+                    return computeCmdBlk[Graphics.WorkImage].cmdBuffer;
+                case SubmitQueue.Graphics:
+                    return renderCmdBlk[Graphics.WorkImage].cmdBuffer;
+                default:
+                    return null;
+            }
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -176,7 +176,6 @@ namespace SharpGame
 
         public void Submit()
         {
-
             if (!Graphics.BeginRender())
             {
                 return;
@@ -186,7 +185,7 @@ namespace SharpGame
             int imageIndex = (int)Graphics.RenderImage;
             //Log.Info("Submit frame " + imageIndex);
 
-            //OnBeginSubmit?.Invoke(imageIndex);
+            OnBeginSubmit?.Invoke(imageIndex);
 
             var currentBuffer = Graphics.currentBuffer;
 
@@ -200,7 +199,9 @@ namespace SharpGame
                 CommandBuffer cmdBuffer = preRenderCmdBlk[imageIndex].cmdBuffer;
                 Graphics.GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.FragmentShader,
                     cmdBuffer, currentBuffer.preRenderSemaphore, fence);
-                //OnSubmit?.Invoke(imageIndex, PassQueue.EarlyGraphics);
+
+                OnSubmit?.Invoke(imageIndex, SubmitQueue.EarlyGraphics);
+
                 Profiler.EndSample();
             }
 
@@ -223,7 +224,7 @@ namespace SharpGame
                     null, currentBuffer.computeSemaphore, fence);
                 }
 
-                //OnSubmit?.Invoke(imageIndex, PassQueue.Compute);
+                OnSubmit?.Invoke(imageIndex, SubmitQueue.Compute);
                 Profiler.EndSample();
             }
 
@@ -237,11 +238,11 @@ namespace SharpGame
                 Graphics.GraphicsQueue.Submit(currentBuffer.computeSemaphore, PipelineStageFlags.ColorAttachmentOutput,
                     cmdBuffer, currentBuffer.renderSemaphore, fence);
 
-                //OnSubmit?.Invoke(imageIndex, PassQueue.Graphics);
+                OnSubmit?.Invoke(imageIndex, SubmitQueue.Graphics);
                 Profiler.EndSample();
             }
 
-            //OnEndSubmit?.Invoke(imageIndex);
+            OnEndSubmit?.Invoke(imageIndex);
 
             Graphics.EndRender();
 

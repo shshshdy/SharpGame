@@ -106,12 +106,12 @@ namespace SharpGame
 
         public ClusterRenderer()
         {
-            //FrameGraph.OnSubmit += Renderer_OnSubmit;
+            FrameGraph.OnSubmit += Renderer_OnSubmit;
         }
         
         protected override void Destroy(bool disposing)
         {
-            //FrameGraph.OnSubmit -= Renderer_OnSubmit;
+            FrameGraph.OnSubmit -= Renderer_OnSubmit;
 
             base.Destroy(disposing);
         }
@@ -362,18 +362,18 @@ namespace SharpGame
             }
         }
 
-        private void Renderer_OnSubmit(int imageIndex, PassQueue passQueue)
+        private void Renderer_OnSubmit(int imageIndex, SubmitQueue passQueue)
         {
             var queryPool = query_pool[imageIndex];
-            if (passQueue == PassQueue.EarlyGraphics)
+            if (passQueue == SubmitQueue.EarlyGraphics)
             {
                 //queryPool.GetResults(2, 2, 2 * sizeof(uint), queryData[imageIndex].clustering.Data, sizeof(uint), QueryResults.QueryWait);
             }
-            else if (passQueue == PassQueue.Compute)
+            else if (passQueue == SubmitQueue.Compute)
             {
                // queryPool.GetResults(4, 6, 6 * sizeof(uint), queryData[imageIndex].calc_light_grids.Data, sizeof(uint), QueryResults.QueryWait);
             }
-            else if (passQueue == PassQueue.Graphics)
+            else if (passQueue == SubmitQueue.Graphics)
             {
                 //queryPool.GetResults(10, 4, 4 * sizeof(uint), queryData[imageIndex].onscreen.Data, sizeof(uint), QueryResults.QueryWait);
             }

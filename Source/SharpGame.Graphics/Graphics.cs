@@ -507,7 +507,7 @@ namespace SharpGame
 
         public bool SingleLoop => Settings.SingleLoop;
 
-        public int WorkContext => nextImage;
+        //public int WorkImage => nextImage;
         public int RenderContext => currentImage;
 
         private int currentFrame;

@@ -66,11 +66,11 @@ namespace SharpGame
 
         private ResourceLayout vsResLayout;
 
-        public ResourceSet Set0 => vsResourceSet[Graphics.Instance.WorkContext];
+        public ResourceSet Set0 => vsResourceSet[Graphics.Instance.WorkImage];
         ResourceSet[] vsResourceSet = new ResourceSet[3];
 
         private ResourceLayout psResLayout;
-        public ResourceSet Set1 => psResourceSet[Graphics.Instance.WorkContext];
+        public ResourceSet Set1 => psResourceSet[Graphics.Instance.WorkImage];
         ResourceSet[] psResourceSet = new ResourceSet[3];
 
         Graphics Graphics => Graphics.Instance;

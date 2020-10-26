@@ -58,7 +58,7 @@ namespace SharpGame
                 size = size
             };
 
-            var currentBuffers = buffers[Graphics.Instance.WorkContext];
+            var currentBuffers = buffers[Graphics.Instance.WorkImage];
             for (int i = 0; i < currentBuffers.Count; i++)
             {
                 ref TransientBufferDesc tbc = ref currentBuffers.At(i);
@@ -80,7 +80,7 @@ namespace SharpGame
 
         public void Reset()
         {
-            var currentBuffers = buffers[Graphics.Instance.WorkContext];
+            var currentBuffers = buffers[Graphics.Instance.WorkImage];
             for (int i = 0; i < currentBuffers.Count; i++)
             {
                 ref TransientBufferDesc tbc = ref currentBuffers.At(i);                
@@ -104,7 +104,7 @@ namespace SharpGame
 
         private ref TransientBufferDesc CreateNewBuffer()
         {
-            var currentBuffers = buffers[Graphics.Instance.WorkContext];
+            var currentBuffers = buffers[Graphics.Instance.WorkImage];
             var buffer = new Buffer(BufferUsageFlags, MemoryPropertyFlags.HostVisible, Size);
             buffer.Map();
             currentBuffers.Add(new TransientBufferDesc { buffer = buffer, size = 0 });

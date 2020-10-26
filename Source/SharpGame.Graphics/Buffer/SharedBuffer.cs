@@ -9,8 +9,8 @@ namespace SharpGame
     public class SharedBuffer : DisposeBase
     {
         Buffer[] buffers = new Buffer[3];
-        public Buffer Buffer => buffers[Graphics.Instance.WorkContext];
-        public IntPtr Mapped => buffers[Graphics.Instance.WorkContext].Mapped;
+        public Buffer Buffer => buffers[Graphics.Instance.WorkImage];
+        public IntPtr Mapped => buffers[Graphics.Instance.WorkImage].Mapped;
 
         public SharedBuffer(BufferUsageFlags bufferUsage, uint size)
         {

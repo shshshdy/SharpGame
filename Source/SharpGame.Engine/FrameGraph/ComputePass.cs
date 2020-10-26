@@ -10,12 +10,12 @@ namespace SharpGame
 
         public ComputePass()
         {
-            PassQueue = PassQueue.Compute;
+            Queue = SubmitQueue.Compute;
         }
 
         public ComputePass(Action<ComputePass, RenderView> onDraw)
         {
-            PassQueue = PassQueue.Compute;
+            Queue = SubmitQueue.Compute;
             OnDraw = onDraw;
         }
 

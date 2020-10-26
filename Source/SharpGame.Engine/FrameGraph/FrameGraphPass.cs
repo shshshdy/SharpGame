@@ -6,16 +6,17 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    public enum PassQueue
+    public enum SubmitQueue
     {
         EarlyGraphics = 0,
         Compute = 1,
         Graphics = 2,
+        MaxCount
     }
 
     public class FrameGraphPass : Object, IEnumerable<Subpass>
     {
-        public PassQueue PassQueue { get; set; } = PassQueue.Graphics;
+        public SubmitQueue Queue { get; set; } = SubmitQueue.Graphics;
         public RenderPass RenderPass { get; set; }
         public uint Subpass { get; set; }
         public bool UseSecondCmdBuffer { get; set; } = false;
@@ -23,7 +24,7 @@ namespace SharpGame
         [IgnoreDataMember]
         public RenderPipeline Renderer { get; set; }
 
-        public CommandBuffer CmdBuffer => FrameGraph.GetWorkCmdBuffer(PassQueue);
+        public CommandBuffer CmdBuffer => FrameGraph.GetWorkCmdBuffer(Queue);
 
         public Graphics Graphics => Graphics.Instance;
         public FrameGraph FrameGraph => FrameGraph.Instance;

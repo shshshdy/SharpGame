@@ -162,7 +162,7 @@ namespace SharpGame
 
             geometryPass = new FrameGraphPass
             {
-                PassQueue = PassQueue.EarlyGraphics,
+                Queue = SubmitQueue.EarlyGraphics,
                 RenderPass = geometryRP,
                 Framebuffer = geometryFB,
                 ClearColorValue = new[] { new ClearColorValue(0.25f, 0.25f, 0.25f, 1), new ClearColorValue(0, 0, 0, 1), new ClearColorValue(0, 0, 0, 0) },
@@ -178,7 +178,7 @@ namespace SharpGame
            
             translucentClustering = new FrameGraphPass
             {
-                PassQueue = PassQueue.EarlyGraphics,
+                Queue = SubmitQueue.EarlyGraphics,
                 RenderPass = clusterRP,
                 Framebuffer = clusterFB,
                 Subpasses = new[]
@@ -209,7 +209,7 @@ namespace SharpGame
                 RenderPass = renderPass,
                 Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
 
-                OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkContext),
+                OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkImage),
 
                 Subpasses = new[]
                 {
@@ -237,10 +237,10 @@ namespace SharpGame
 
             Span<ResourceSet> sets = new []
             {
-                deferredSet0[Graphics.WorkContext],
-                resourceSet0[Graphics.WorkContext],
-                resourceSet1[Graphics.WorkContext],
-                deferredSet1[Graphics.WorkContext],
+                deferredSet0[Graphics.WorkImage],
+                resourceSet0[Graphics.WorkImage],
+                resourceSet1[Graphics.WorkImage],
+                deferredSet1[Graphics.WorkImage],
             };
 
             cmd.DrawGeometry(quad, pass, 0, sets);

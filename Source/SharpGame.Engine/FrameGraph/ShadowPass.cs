@@ -55,12 +55,12 @@ namespace SharpGame
         };
         FrustumOctreeQuery shadowCasterQuery = new FrustumOctreeQuery();
 
-        ResourceSet VSSet => vsSet[Graphics.WorkContext];
+        ResourceSet VSSet => vsSet[Graphics.WorkImage];
 
         ulong passID = Pass.GetID(Pass.Shadow);
         public ShadowPass() //: base(Pass.Shadow)
         {
-            PassQueue = PassQueue.EarlyGraphics;
+            Queue = SubmitQueue.EarlyGraphics;
             var depthFormat = Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
@@ -169,7 +169,7 @@ namespace SharpGame
 
                 BeginRenderPass(cascades[i].frameBuffer, renderArea, clearDepth);
 
-                var cmd = FrameGraph.GetWorkCmdBuffer(PassQueue);// GetCmdBuffer();
+                var cmd = FrameGraph.GetWorkCmdBuffer(Queue);// GetCmdBuffer();
 
                 cmd.SetViewport(viewport);
                 cmd.SetScissor(renderArea);

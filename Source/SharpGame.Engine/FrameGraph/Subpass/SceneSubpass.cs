@@ -104,9 +104,9 @@ namespace SharpGame
 
         public void DrawScene(RenderView view, BlendFlags blendFlags)
         {
-            var set0 = Set0?[Graphics.WorkContext] ?? view.Set0;
-            var set1 = Set1?[Graphics.WorkContext] ?? view.Set1;
-            var set2 = Set2?[Graphics.WorkContext];
+            var set0 = Set0?[Graphics.WorkImage] ?? view.Set0;
+            var set1 = Set1?[Graphics.WorkImage] ?? view.Set1;
+            var set2 = Set2?[Graphics.WorkImage];
 
             var cmd = CmdBuffer;
             cmd.SetViewport(view.Viewport);
@@ -178,7 +178,7 @@ namespace SharpGame
 
             Task.WaitAll(renderTasks.ToArray());
 
-            int workContext = Graphics.WorkContext;
+            int workContext = Graphics.WorkImage;
             var cmd = CmdBuffer;
             foreach(var c in secondCmdBuffers)
             {
