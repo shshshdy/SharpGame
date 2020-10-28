@@ -190,7 +190,8 @@ namespace SharpGame.Sdl2
         /// <summary>
         /// Sdl2Window should be treated as a popup menu.
         /// </summary>
-        PopupMenu = 0x00080000
+        PopupMenu = 0x00080000,
+        Vulkan   = 0x10000000,
     }
 
     public enum SDL_FullscreenMode : uint
