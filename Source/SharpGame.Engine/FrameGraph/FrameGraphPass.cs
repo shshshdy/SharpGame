@@ -16,21 +16,23 @@ namespace SharpGame
 
     public class FrameGraphPass : Object, IEnumerable<Subpass>
     {
+        public RenderPipeline Renderer { get; set; }
+        public RenderView View => Renderer?.View;
+        public CommandBuffer CmdBuffer => FrameGraph.GetWorkCmdBuffer(Queue);
+        public Graphics Graphics => Graphics.Instance;
+        public FrameGraph FrameGraph => FrameGraph.Instance;
+
         public string Name { get; }
 
         public SubmitQueue Queue { get; set; } = SubmitQueue.Graphics;
+
+        public RenderTextureInfo[] Attachments { get; set; }
+
+        public RenderTarget renderTarget;
+
         public RenderPass RenderPass { get; set; }
         public uint Subpass { get; set; }
         public bool UseSecondCmdBuffer { get; set; } = false;
-
-        public RenderPipeline Renderer { get; set; }
-
-        public RenderView View => Renderer?.View;
-
-        public CommandBuffer CmdBuffer => FrameGraph.GetWorkCmdBuffer(Queue);
-
-        public Graphics Graphics => Graphics.Instance;
-        public FrameGraph FrameGraph => FrameGraph.Instance;
 
         public Framebuffer[] Framebuffers { get => framebuffers; set => framebuffers = value; }
         Framebuffer[] framebuffers = new Framebuffer[3];
@@ -53,6 +55,9 @@ namespace SharpGame
                 }
             }
         }
+
+        public Func<RenderPass> renderPassCreator { get; set; }
+        public Func<RenderPass, Framebuffer[]> frameBufferCreator { get; set; }
 
         public FrameGraphPass()
         {
@@ -77,20 +82,35 @@ namespace SharpGame
             }
         }
 
-        public virtual void Reset()
+        public virtual void DeviceLost()
         {
+            RenderPass = null;
+            Framebuffers = null;
+        }
+
+        public virtual void DeviceReset()
+        {
+            CreateRenderPass();
+
             CreateRenderTargets();
 
-            CreateRenderPass();
         }
 
         private void CreateRenderTargets()
         {
+            if (frameBufferCreator != null)
+            {
+                framebuffers = frameBufferCreator.Invoke(RenderPass);
+            }
 
         }
 
         private void CreateRenderPass()
         {
+            if(renderPassCreator != null)
+            {
+                RenderPass = renderPassCreator.Invoke();
+            }
 
         }
 
@@ -129,6 +149,17 @@ namespace SharpGame
         Rect2D renderArea;
         public void BeginRenderPass(CommandBuffer cb)
         {
+            if(RenderPass == null)
+            {
+                CreateRenderPass();
+            }
+
+            if(Framebuffers == null)
+            {
+                CreateRenderTargets();
+            }
+
+
             ref Framebuffer framebuffer = ref framebuffers[Graphics.WorkImage];
 
             if (framebuffer == null)
@@ -177,6 +208,7 @@ namespace SharpGame
             }
 
             BeginRenderPass(framebuffer, renderArea, clearValues);
+
             cb.SetViewport(in viewport);
             cb.SetScissor(in renderArea);
         }

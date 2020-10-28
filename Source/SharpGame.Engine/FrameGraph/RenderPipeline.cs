@@ -41,14 +41,21 @@ namespace SharpGame
 
             initialized = true;
         }
-
-        public void Reset()
+        public void DeviceLost()
+        {
+            foreach (var rp in RenderPassList)
+            {
+                rp.DeviceLost();
+            }
+        }
+          
+        public void DeviceReset()
         {
             OnReset();
 
             foreach (var rp in RenderPassList)
             {
-                rp.Reset();
+                rp.DeviceReset();
             }
         }
 

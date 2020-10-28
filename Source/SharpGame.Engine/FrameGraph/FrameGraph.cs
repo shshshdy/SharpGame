@@ -62,27 +62,59 @@ namespace SharpGame
 
         public void Initialize()
         {
+            CreateCmdBuffers();
+        }
+
+        void CreateCmdBuffers()
+        {
             preRenderCmdPool.Allocate(CommandBufferLevel.Primary, 3);
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 preRenderCmdBlk[i].cmdBuffer = preRenderCmdPool.CommandBuffers[i];
-                preRenderCmdBlk[i].submitFence = new Fence(FenceCreateFlags.Signaled);
-            }            
+                if (preRenderCmdBlk[i].submitFence == null)
+                    preRenderCmdBlk[i].submitFence = new Fence(FenceCreateFlags.Signaled);
+            }
 
             computeCmdPool.Allocate(CommandBufferLevel.Primary, 3);
             for (int i = 0; i < 3; i++)
             {
                 computeCmdBlk[i].cmdBuffer = computeCmdPool.CommandBuffers[i];
-                computeCmdBlk[i].submitFence = new Fence(FenceCreateFlags.Signaled);
+                if (computeCmdBlk[i].submitFence == null)
+                    computeCmdBlk[i].submitFence = new Fence(FenceCreateFlags.Signaled);
             }
 
             renderCmdPool.Allocate(CommandBufferLevel.Primary, 3);
             for (int i = 0; i < 3; i++)
             {
                 renderCmdBlk[i].cmdBuffer = renderCmdPool.CommandBuffers[i];
-                renderCmdBlk[i].submitFence = new Fence(FenceCreateFlags.Signaled);
+                if (renderCmdBlk[i].submitFence == null)
+                    renderCmdBlk[i].submitFence = new Fence(FenceCreateFlags.Signaled);
             }
+
         }
+
+        public void Resize(int w, int h)
+        {
+            foreach (var viewport in views)
+            {
+                viewport.Renderer.DeviceLost();
+
+            }
+
+            OverlayPass?.DeviceLost();
+
+            Graphics.Resize(w, h);
+
+            foreach (var viewport in views)
+            {
+                viewport.Renderer.DeviceReset();
+            }
+
+            OverlayPass?.DeviceReset();
+
+            CreateCmdBuffers();
+        }
+
 
         public RenderView CreateRenderView(Camera camera = null, Scene scene = null, RenderPipeline frameGraph = null)
         {
@@ -170,7 +202,7 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndRender());
 
-            //Log.Info("Render frame " + Graphics.WorkImage);
+            Log.Info("Render frame " + Graphics.WorkImage);
 
         }
 
@@ -183,7 +215,7 @@ namespace SharpGame
 
             Profiler.BeginSample("RenderSystem.Submit");
             int imageIndex = (int)Graphics.RenderImage;
-            //Log.Info("Submit frame " + imageIndex);
+            Log.Info("          Submit frame " + imageIndex);
 
             OnBeginSubmit?.Invoke(imageIndex);
 

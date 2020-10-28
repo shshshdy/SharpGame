@@ -172,7 +172,6 @@ namespace SharpGame
 
                 BeginRenderPass(cascades[i].frameBuffer, renderArea, clearDepth);
 
-
                 cmd.SetViewport(viewport);
                 cmd.SetScissor(renderArea);
 

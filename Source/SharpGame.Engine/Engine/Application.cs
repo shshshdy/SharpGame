@@ -117,7 +117,7 @@ namespace SharpGame
         protected virtual void CreateWindow()
         {
             windowInstance = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
-            window = new Sdl2Window(Title, 50, 50, Width, Height, /*SDL_WindowFlags.Resizable|*/0, threadedProcessing: false)
+            window = new Sdl2Window(Title, 50, 50, Width, Height, SDL_WindowFlags.Resizable| 0, threadedProcessing: false)
             {
                 X = 50,
                 Y = 50,
@@ -364,10 +364,11 @@ namespace SharpGame
         {
             // Recreate swap chain
             Width = window.Width;
-            Height = window.Width;
+            Height = window.Height;
             //resized = true;
 
-            graphics.Resize(Width, Height);         
+            FrameGraph.Instance.Resize(Width, Height);
+            //graphics.Resize(Width, Height);         
            
 
         }

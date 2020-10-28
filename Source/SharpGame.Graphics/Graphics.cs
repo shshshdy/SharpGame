@@ -429,10 +429,27 @@ namespace SharpGame
 
             Profiler.BeginSample("Acquire");
 
+            //currentImage = nextImage;
+
+            var sem = nextImage == -1 ? firstSemaphore : backBuffers[nextImage].acquireSemaphore;
+
+            int imageIndex = nextImage;
+            Swapchain.AcquireNextImage(sem, out imageIndex);
+            if(imageIndex != (nextImage + 1) % this.ImageCount )
+            {
+                //RenderSemPost();
+
+                Log.Info("-------acquire next image error" + imageIndex);
+                backBuffers[nextImage].acquireSemaphore.Dispose();
+                backBuffers[nextImage].acquireSemaphore = new Semaphore();
+                MainSemPost();
+                Profiler.EndSample();
+                return false;
+            }
 
             currentImage = nextImage;
-            var sem = currentImage == -1 ? firstSemaphore : backBuffers[currentImage].acquireSemaphore;
-            Swapchain.AcquireNextImage(sem, ref nextImage);
+            nextImage = imageIndex;
+            Log.Info("-------acquire next image " + nextImage);
 
             RenderSemPost();
 

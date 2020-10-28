@@ -110,7 +110,7 @@ namespace SharpGame
 
         public void Reset()
         {
-            Renderer?.Reset();
+            Renderer?.DeviceReset();
             //debugPass?.Reset();
         }
 

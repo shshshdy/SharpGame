@@ -28,9 +28,6 @@ namespace SharpGame
         ResourceSet resourceSetTex;
         private IntPtr fontAtlasID = (IntPtr)1;
 
-        RenderPass renderPass;
-        Framebuffer[] framebuffers;
-
         FrameGraphPass guiPass;
 
         private struct ResourceSetInfo
@@ -79,10 +76,30 @@ namespace SharpGame
 
             this.Subscribe<BeginFrame>((e) => Update());
 
+            var graphics = Graphics.Instance;
+
+            //RenderPass renderPass;
+            //Framebuffer[] framebuffers;
+            //renderPass = graphics.CreateRenderPass();
+            //framebuffers = graphics.CreateSwapChainFramebuffers(renderPass);
+
             guiPass = new FrameGraphPass
             {
-                Framebuffers = framebuffers,
-                RenderPass = renderPass,
+                renderPassCreator = ()=>
+                { 
+                    var rp = graphics.CreateRenderPass();
+                    pipeline = pass.CreateGraphicsPipeline(rp, 0, VertexPos2dTexColor.Layout, PrimitiveTopology.TriangleList);
+
+                    return rp;
+                },
+
+                frameBufferCreator = (rp)=>
+                { 
+                    return graphics.CreateSwapChainFramebuffers(rp);
+                },
+                //Framebuffers = framebuffers,
+                //RenderPass = renderPass,
+
                 Subpasses = new[]
                 {
                    new GraphicsSubpass
@@ -137,11 +154,6 @@ namespace SharpGame
             specializationInfo.Write(0, RenderView.NegativeViewport? 0 : 1);
             pass.VertexShader.SpecializationInfo = specializationInfo;
 
-            var graphics = Graphics.Instance;
-
-            renderPass = graphics.CreateRenderPass();
-            framebuffers = graphics.CreateSwapChainFramebuffers(renderPass);
-            pipeline = pass.CreateGraphicsPipeline(renderPass, 0, VertexPos2dTexColor.Layout, PrimitiveTopology.TriangleList);
         }
 
         private unsafe void RecreateFontDeviceTexture()

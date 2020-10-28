@@ -8,10 +8,15 @@ namespace SharpGame
     {
         public ForwardRenderer()
         {
-            Add(new ShadowPass())
-            .Add(new FrameGraphPass
+            //Add(new ShadowPass());
+
+            Add(new FrameGraphPass
             {
-                RenderPass = Graphics.RenderPass,
+                //RenderPass = Graphics.RenderPass,
+                renderPassCreator = () => Graphics.RenderPass,
+
+                frameBufferCreator = (rp) => Graphics.Framebuffers,
+
                 Subpasses = new[]
                 {
                     new SceneSubpass()
