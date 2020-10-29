@@ -55,12 +55,6 @@ namespace SharpGame
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
 
-        private int currentImage = -1;
-        private int nextImage = -1;
-
-        public int RenderImage => currentImage;
-        public int WorkImage => nextImage;
-
         private RenderTexture depthStencil;
         public RenderTexture DepthRT => depthStencil;
 
@@ -70,7 +64,7 @@ namespace SharpGame
         public class BackBuffer
         {
             public int imageIndex;
-
+            public int context;
             public Semaphore acquireSemaphore;
             public Semaphore preRenderSemaphore;
             public Semaphore computeSemaphore;
@@ -85,7 +79,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            settings.Validation = true;
+            //settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -128,6 +122,7 @@ namespace SharpGame
             {
                 backBuffers.Add(new BackBuffer
                 {
+                    context = i,
                     acquireSemaphore = new Semaphore(),
                     preRenderSemaphore = new Semaphore(),
                     computeSemaphore = new Semaphore(),
@@ -158,11 +153,14 @@ namespace SharpGame
             // Recreate the frame buffers
             CreateDepthStencil();
 
+            CreateDefaultRenderPass();
             CreateFrameBuffer();
 
             // Command buffers need to be recreated as they may store
             // references to the recreated frame buffer
             CreateCommandBuffers();
+
+            //contextToImage[WorkContext] = -1;
 
         }
 
@@ -220,7 +218,7 @@ namespace SharpGame
                 }
             };
 
-            SubpassDependency[] dependencies = 
+            SubpassDependency[] dependencies =
             {
                 new SubpassDependency
                 {
@@ -246,7 +244,7 @@ namespace SharpGame
             };
 
             RenderPassCreateInfo renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            renderPass = new RenderPass(ref renderPassInfo);           
+            renderPass = new RenderPass(ref renderPassInfo);
         }
 
         public RenderPass CreateRenderPass(bool clearColor = false, bool clearDepth = false)
@@ -327,7 +325,7 @@ namespace SharpGame
 
             var frameBufferCreateInfo = new FramebufferCreateInfo
             {
-                renderPass = vkRenderPass,                
+                renderPass = vkRenderPass,
                 attachments = attachments,
                 width = (uint)Width,
                 height = (uint)Height,
@@ -344,13 +342,13 @@ namespace SharpGame
 
             return framebuffers;
         }
-        
+
         protected void CreateDepthStencil()
         {
-            depthStencil?.Dispose();         
+            depthStencil?.Dispose();
             depthStencil = new RenderTexture((uint)Width, (uint)Height, 1, DepthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth | ImageAspectFlags.Stencil);
         }
-        
+
         private void CreateCommandPool()
         {
             workCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
@@ -417,7 +415,7 @@ namespace SharpGame
         {
             return transientIB.Alloc(count);
         }
-        
+
         public void WaitIdle()
         {
             device.WaitIdle();
@@ -429,39 +427,27 @@ namespace SharpGame
 
             Profiler.BeginSample("Acquire");
 
-            //currentImage = nextImage;
+            renderContext = workContext;
+            var sem = workContext == -1 ? firstSemaphore : backBuffers[workContext].acquireSemaphore;
+            Swapchain.AcquireNextImage(sem, out int imageIndex);
 
-            var sem = nextImage == -1 ? firstSemaphore : backBuffers[nextImage].acquireSemaphore;
+            workContext = (workContext + 1) % ImageCount;
 
-            int imageIndex = nextImage;
-            Swapchain.AcquireNextImage(sem, out imageIndex);
-            if(imageIndex != (nextImage + 1) % this.ImageCount )
-            {
-                //RenderSemPost();
+            contextToImage[workContext] = imageIndex;
 
-                Log.Info("-------acquire next image error" + imageIndex);
-                backBuffers[nextImage].acquireSemaphore.Dispose();
-                backBuffers[nextImage].acquireSemaphore = new Semaphore();
-                MainSemPost();
-                Profiler.EndSample();
-                return false;
-            }
-
-            currentImage = nextImage;
-            nextImage = imageIndex;
-            Log.Info("-------acquire next image " + nextImage);
-
+            Log.Info("-------acquire next image :" + imageIndex + "  context: " + workContext);
+           
             RenderSemPost();
 
-            if (currentImage == -1)
+            if (renderContext == -1 || contextToImage[renderContext] == -1)
             {
                 Profiler.EndSample();
                 return false;
             }
 
 
-            var frame = backBuffers[currentImage];
-            if(frame.presentFence == null)
+            var frame = backBuffers[renderContext];
+            if (frame.presentFence == null)
             {
                 frame.presentFence = new Fence(FenceCreateFlags.None);
             }
@@ -481,10 +467,8 @@ namespace SharpGame
             }
 
             currentBuffer = frame;
-            currentBuffer.imageIndex = currentImage;
+            currentBuffer.imageIndex = contextToImage[renderContext];
 
-
-            
             transientVB.Flush();
             transientIB.Flush();
 
@@ -493,17 +477,17 @@ namespace SharpGame
 
             return true;
         }
-      
+
         public void EndRender()
-        {            
+        {
             Profiler.BeginSample("Present");
 
-            Swapchain.QueuePresent(GraphicsQueue, (uint)currentImage, currentBuffer.renderSemaphore);
+            Swapchain.QueuePresent(GraphicsQueue, (uint)currentBuffer.imageIndex, currentBuffer.renderSemaphore);
             GraphicsQueue.Submit(null, currentBuffer.presentFence);
 
             GraphicsQueue.WaitIdle();
 
-            foreach(var action in postActions)
+            foreach (var action in postActions)
             {
                 action.Invoke();
             }
@@ -512,7 +496,7 @@ namespace SharpGame
 
         }
 
-#region MULTITHREADED   
+        #region MULTITHREADED   
 
         static int mainThreadID;
         static int renderThreadID;
@@ -524,16 +508,29 @@ namespace SharpGame
 
         public bool SingleLoop => Settings.SingleLoop;
 
-        //public int WorkImage => nextImage;
-        public int RenderContext => currentImage;
-
-        private int currentFrame;
-        public int CurrentFrame => currentFrame;
-
         private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
         private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(1, 1);
 
         List<System.Action> postActions = new List<Action>();
+
+        //private int currentImage = -1;
+        //private int nextImage = -1;
+
+        public int WorkContext => workContext;
+        public int RenderContext => renderContext;
+
+        public int RenderImage => contextToImage[renderContext];
+
+        //todo:
+        private int workContext = -1;
+        private int renderContext = -1;
+        public int WorkImage => contextToImage[workContext];
+
+        int[] contextToImage = new int[3] { -1, -1, -1 };
+
+
+        private int frameNum;
+        public int FrameNum => frameNum;
 
         public void Post(System.Action action)
         {
@@ -585,10 +582,10 @@ namespace SharpGame
 
             transientVB.Reset();
             transientIB.Reset();
-            currentFrame++;
+            frameNum++;
         }
 
-#endregion
+        #endregion
 
     }
 
@@ -598,7 +595,7 @@ namespace SharpGame
         public long renderWait;
         public static int drawCall;
         public static int triCount;
-        
+
         public static void Tick(float timeStep)
         {
             drawCall = 0;

@@ -129,11 +129,11 @@ namespace SharpGame
             switch (queue)
             {
                 case SubmitQueue.EarlyGraphics:
-                    return preRenderCmdBlk[Graphics.WorkImage].cmdBuffer;
+                    return preRenderCmdBlk[Graphics.WorkContext].cmdBuffer;
                 case SubmitQueue.Compute:
-                    return computeCmdBlk[Graphics.WorkImage].cmdBuffer;
+                    return computeCmdBlk[Graphics.WorkContext].cmdBuffer;
                 case SubmitQueue.Graphics:
-                    return renderCmdBlk[Graphics.WorkImage].cmdBuffer;
+                    return renderCmdBlk[Graphics.WorkContext].cmdBuffer;
                 default:
                     return null;
             }
@@ -184,7 +184,7 @@ namespace SharpGame
         {
             this.SendGlobalEvent(new BeginRender());
 
-            int imageIndex = (int)Graphics.WorkImage;
+            int imageIndex = (int)Graphics.WorkContext;
 
             preRenderCmdBlk[imageIndex].cmdBuffer.Begin();
             computeCmdBlk[imageIndex].cmdBuffer.Begin();
@@ -202,7 +202,7 @@ namespace SharpGame
 
             this.SendGlobalEvent(new EndRender());
 
-            Log.Info("Render frame " + Graphics.WorkImage);
+            Log.Info("Render frame " + Graphics.WorkContext);
 
         }
 
@@ -214,7 +214,7 @@ namespace SharpGame
             }
 
             Profiler.BeginSample("RenderSystem.Submit");
-            int imageIndex = (int)Graphics.RenderImage;
+            int imageIndex = (int)Graphics.RenderContext;
             Log.Info("          Submit frame " + imageIndex);
 
             OnBeginSubmit?.Invoke(imageIndex);
@@ -230,7 +230,7 @@ namespace SharpGame
 
                 CommandBuffer cmdBuffer = preRenderCmdBlk[imageIndex].cmdBuffer;
                 Graphics.GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.FragmentShader,
-                    cmdBuffer, currentBuffer.preRenderSemaphore, fence);
+                    /*cmdBuffer.IsOpen ?*/ cmdBuffer /*: null*/, currentBuffer.preRenderSemaphore, fence);
 
                 OnSubmit?.Invoke(imageIndex, SubmitQueue.EarlyGraphics);
 
@@ -268,7 +268,7 @@ namespace SharpGame
 
                 CommandBuffer cmdBuffer = renderCmdBlk[imageIndex].cmdBuffer;
                 Graphics.GraphicsQueue.Submit(currentBuffer.computeSemaphore, PipelineStageFlags.ColorAttachmentOutput,
-                    cmdBuffer, currentBuffer.renderSemaphore, fence);
+                    /*cmdBuffer.IsOpen ? */cmdBuffer /*: null*/, currentBuffer.renderSemaphore, fence);
 
                 OnSubmit?.Invoke(imageIndex, SubmitQueue.Graphics);
                 Profiler.EndSample();

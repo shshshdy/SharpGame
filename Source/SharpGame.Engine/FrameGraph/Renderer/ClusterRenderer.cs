@@ -97,8 +97,8 @@ namespace SharpGame
         protected QueryPool[] query_pool = new QueryPool[3];
         protected QueryData[] queryData = new QueryData[3];
 
-        public ref QueryData QueryData => ref queryData[Graphics.WorkImage];
-        public QueryPool QueryPool => query_pool[Graphics.WorkImage];
+        public ref QueryData QueryData => ref queryData[Graphics.WorkContext];
+        public QueryPool QueryPool => query_pool[Graphics.WorkContext];
 
         protected ComputePass lightCull;
 
@@ -211,6 +211,12 @@ namespace SharpGame
             clusterSet1[2] = new ResourceSet(clusterLayout1, uboCluster[2], gridFlags);
 
 
+        }
+
+        protected RenderPass OnCreateClusterRenderPass()
+        {
+
+
             Format depthFormat = Device.GetSupportedDepthFormat();
             AttachmentDescription[] attachments =
             {
@@ -260,7 +266,7 @@ namespace SharpGame
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             clusterRP = new RenderPass(ref renderPassInfo);
-
+            return clusterRP;
         }
 
         protected virtual IEnumerator<FrameGraphPass> CreateRenderPass()

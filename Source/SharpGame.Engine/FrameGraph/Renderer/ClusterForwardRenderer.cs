@@ -20,6 +20,11 @@ namespace SharpGame
         {
             base.CreateResources();
 
+
+        }
+
+        Framebuffer[] OnCreateFramebuffers(RenderPass rp)
+        {
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
 
@@ -27,7 +32,7 @@ namespace SharpGame
             clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
 
             //FrameGraph.AddDebugImage(depthRT.view);
-
+            return new Framebuffer[] { clusterFB, clusterFB, clusterFB };
         }
 
         protected override IEnumerator<FrameGraphPass> CreateRenderPass()
@@ -37,8 +42,13 @@ namespace SharpGame
             clustering = new FrameGraphPass
             {
                 Queue = SubmitQueue.EarlyGraphics,
-                RenderPass = clusterRP,
-                Framebuffer = clusterFB,
+
+                //RenderPass = clusterRP,
+                //Framebuffer = clusterFB,
+
+                renderPassCreator = OnCreateClusterRenderPass,
+                frameBufferCreator = OnCreateFramebuffers,
+
                 Subpasses = new[]
                 {
                     new SceneSubpass("clustering")
@@ -56,9 +66,11 @@ namespace SharpGame
             mainPass = new FrameGraphPass
             {
             //#if NO_DEPTHWRITE
-                RenderPass = Graphics.RenderPass,// Graphics.CreateRenderPass(false, false),
-            //#endif
-                //OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkImage),
+                //RenderPass = Graphics.RenderPass,// Graphics.CreateRenderPass(false, false),
+                //#endif
+
+                renderPassCreator = () => Graphics.RenderPass,
+                frameBufferCreator = (rp) => Graphics.Framebuffers,
 
                 Subpasses = new[]
                 {
@@ -76,7 +88,7 @@ namespace SharpGame
         protected override void OnBeginPass(FrameGraphPass renderPass)
         {
             CommandBuffer cb = renderPass.CmdBuffer;
-            int imageIndex = Graphics.WorkImage;
+            int imageIndex = Graphics.WorkContext;
 
             if (renderPass == clustering)
             {
@@ -97,7 +109,7 @@ namespace SharpGame
         protected override void OnEndPass(FrameGraphPass renderPass)
         {
             CommandBuffer cb = renderPass.CmdBuffer;
-            int imageIndex = Graphics.WorkImage;
+            int imageIndex = Graphics.WorkContext;
 
             if (renderPass == clustering)
             {

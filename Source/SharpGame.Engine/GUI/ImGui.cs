@@ -305,8 +305,8 @@ namespace SharpGame
                 return;
             }
 
-            ref Buffer vb = ref vertexBuffer[graphics.WorkImage];
-            ref Buffer ib = ref indexBuffer[graphics.WorkImage];
+            ref Buffer vb = ref vertexBuffer[graphics.WorkContext];
+            ref Buffer ib = ref indexBuffer[graphics.WorkContext];
             if (vb == null || draw_data.TotalVtxCount * sizeof(ImDrawVert) > (int)vb.Size)
             {
                 vb?.Dispose();

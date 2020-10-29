@@ -135,7 +135,7 @@ namespace SharpGame.Samples
 
         void CustomDraw(GraphicsSubpass pass, CommandBuffer cmd)
         {
-            var rs = resourceSet[Graphics.WorkImage];
+            var rs = resourceSet[Graphics.WorkContext];
             var ub = ubCameraVS;
 
             mat4 rotM = glm.mat4(1.0f);

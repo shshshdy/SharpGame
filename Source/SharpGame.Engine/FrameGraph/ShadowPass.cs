@@ -55,7 +55,7 @@ namespace SharpGame
         };
         FrustumOctreeQuery shadowCasterQuery = new FrustumOctreeQuery();
 
-        ResourceSet VSSet => vsSet[Graphics.WorkImage];
+        ResourceSet VSSet => vsSet[Graphics.WorkContext];
 
         ulong passID = Pass.GetID(Pass.Shadow);
         public ShadowPass() //: base(Pass.Shadow)

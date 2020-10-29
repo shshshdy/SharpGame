@@ -52,7 +52,7 @@ namespace SharpGame
 
         public CommandBuffer GetCmdBuffer(int index)
         {
-            int workContext = Graphics.WorkImage;
+            int workContext = Graphics.WorkContext;
             var cb = cmdBufferPools[index][workContext].Get();
 
             if (!cb.IsOpen)
@@ -72,7 +72,7 @@ namespace SharpGame
 
         protected void Clear()
         {
-            int workContext = Graphics.WorkImage;
+            int workContext = Graphics.WorkContext;
 
             for (int i = 0; i < cmdBufferPools.Count; i++)
             {
@@ -104,9 +104,9 @@ namespace SharpGame
 
         public void DrawScene(CommandBuffer cmd, BlendFlags blendFlags)
         {
-            var set0 = Set0?[Graphics.WorkImage] ?? View.Set0;
-            var set1 = Set1?[Graphics.WorkImage] ?? View.Set1;
-            var set2 = Set2?[Graphics.WorkImage];
+            var set0 = Set0?[Graphics.WorkContext] ?? View.Set0;
+            var set1 = Set1?[Graphics.WorkContext] ?? View.Set1;
+            var set2 = Set2?[Graphics.WorkContext];
 
             cmd.SetViewport(View.Viewport);
             cmd.SetScissor(View.ViewRect);
@@ -175,7 +175,7 @@ namespace SharpGame
 
             Task.WaitAll(renderTasks.ToArray());
 
-            int workContext = Graphics.WorkImage;           
+            int workContext = Graphics.WorkContext;           
             foreach(var c in secondCmdBuffers)
             {
                 cmd.ExecuteCommand(c);

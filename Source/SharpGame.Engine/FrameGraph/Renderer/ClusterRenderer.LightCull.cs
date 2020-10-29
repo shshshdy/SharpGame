@@ -92,7 +92,7 @@ namespace SharpGame
             {
                 var pass = clusterLight.Pass[0];
                 cmd_buf.BindComputePipeline(pass);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0[Graphics.Instance.WorkImage]);
+                cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0[Graphics.Instance.WorkContext]);
                 cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
                 cmd_buf.Dispatch((num_lights - 1) / 32 + 1, 1, 1);
 
@@ -117,7 +117,7 @@ namespace SharpGame
 
                 var pass = clusterLight.Pass[1];
                 cmd_buf.BindComputePipeline(pass);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0[Graphics.Instance.WorkImage]);
+                cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0[Graphics.Instance.WorkContext]);
                 cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
 
                 cmd_buf.Dispatch((tile_count_x - 1) / 16 + 1, (tile_count_y - 1) / 16 + 1, TILE_COUNT_Z);
@@ -142,7 +142,7 @@ namespace SharpGame
                 var pass = clusterLight.Pass[2];
 
                 cmd_buf.BindComputePipeline(pass);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0[Graphics.Instance.WorkImage]);
+                cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0[Graphics.Instance.WorkContext]);
                 cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
                 cmd_buf.Dispatch((num_lights - 1) / 32 + 1, 1, 1);
 

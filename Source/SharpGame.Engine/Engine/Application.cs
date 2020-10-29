@@ -226,6 +226,12 @@ namespace SharpGame
                 Time.Tick(timeStep);
 
                 input.snapshot = window.PumpEvents();
+                if(resized)
+                {
+                    //graphics.MainSemPost();
+                    //Profiler.End();
+                    //continue;
+                }
 
                 UpdateFrame();
 
@@ -368,6 +374,7 @@ namespace SharpGame
             //resized = true;
 
             FrameGraph.Instance.Resize(Width, Height);
+            this.resized = true;
             //graphics.Resize(Width, Height);         
            
 

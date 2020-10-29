@@ -145,7 +145,7 @@ namespace SharpGame
         {
             Profiler.BeginSample("FrameGraph.Draw");
 
-            int workImage = Graphics.WorkImage;
+            int workImage = Graphics.WorkContext;
 
             foreach (var renderPass in RenderPassList)
             {

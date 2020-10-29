@@ -35,7 +35,7 @@ namespace SharpGame
         public bool UseSecondCmdBuffer { get; set; } = false;
 
         public Framebuffer[] Framebuffers { get => framebuffers; set => framebuffers = value; }
-        Framebuffer[] framebuffers = new Framebuffer[3];
+        Framebuffer[] framebuffers/* = new Framebuffer[3]*/;
 
         [IgnoreDataMember]
         public Framebuffer Framebuffer { set => framebuffers[0] = framebuffers[1] = framebuffers[2] = value; }
@@ -154,7 +154,7 @@ namespace SharpGame
                 CreateRenderPass();
             }
 
-            if(Framebuffers == null)
+            if(framebuffers == null)
             {
                 CreateRenderTargets();
             }

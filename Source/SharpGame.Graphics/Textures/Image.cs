@@ -52,7 +52,8 @@ namespace SharpGame
         {
             Device.FreeMemory(memory);
 
-            Device.Destroy(handle);
+            if(memory != VkDeviceMemory.Null)
+                Device.Destroy(handle);
         }
 
         public unsafe static Image Create(uint width, uint height, ImageCreateFlags flags, uint layers, uint levels, Format format, SampleCountFlags samples,

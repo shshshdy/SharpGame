@@ -1,4 +1,5 @@
 ﻿//#define HWDEPTH
+using Assimp;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -40,8 +41,36 @@ namespace SharpGame
         {
             base.CreateResources();
 
-            uint width = (uint)Graphics.Width;
-            uint height = (uint)Graphics.Height;
+            //FrameGraph.AddDebugImage(albedoRT.view);
+            //FrameGraph.AddDebugImage(normalRT.view);
+            //FrameGraph.AddDebugImage(depthHWRT.view);
+
+            //clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthHWRT.view });
+
+            clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
+            quad = GeometricPrimitive.CreateUnitQuad();
+
+            deferredLayout0 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+            };
+
+            deferredSet0[0] =  new ResourceSet(deferredLayout0, View.ubCameraVS[0]);
+            deferredSet0[1] = new ResourceSet(deferredLayout0, View.ubCameraVS[1]);
+            deferredSet0[2] = new ResourceSet(deferredLayout0, View.ubCameraVS[2]);
+
+            deferredLayout1 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+            };
+
+        }
+
+        RenderPass OnCreateRenderPass()
+        {
+
             Format depthFormat = Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
@@ -103,6 +132,15 @@ namespace SharpGame
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             geometryRP = new RenderPass(ref renderPassInfo);
+            return geometryRP;
+        }
+
+        Framebuffer[] OnCreateFramebuffer(RenderPass rp)
+        {
+
+            uint width = (uint)Graphics.Width;
+            uint height = (uint)Graphics.Height;
+            Format depthFormat = Device.GetSupportedDepthFormat();
 
             albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
@@ -124,38 +162,14 @@ namespace SharpGame
 
             geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view, depthHWRT.view });
 
-            FrameGraph.AddDebugImage(albedoRT.view);
-            FrameGraph.AddDebugImage(normalRT.view);
-            //FrameGraph.AddDebugImage(depthHWRT.view);
-
-            clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthHWRT.view });
-
-            clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
-            quad = GeometricPrimitive.CreateUnitQuad();
-
-            deferredLayout0 = new ResourceLayout
-            {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-            };
-
-            deferredSet0[0] =  new ResourceSet(deferredLayout0, View.ubCameraVS[0]);
-            deferredSet0[1] = new ResourceSet(deferredLayout0, View.ubCameraVS[1]);
-            deferredSet0[2] = new ResourceSet(deferredLayout0, View.ubCameraVS[2]);
-
-            deferredLayout1 = new ResourceLayout
-            {
-                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-                new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-            };
 #if HWDEPTH
             deferredSet1[0] = deferredSet1[1] = deferredSet1[2] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
 #else
             deferredSet1[0] = deferredSet1[1] = deferredSet1[2] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
 #endif
+            return new Framebuffer[] { geometryFB, geometryFB, geometryFB };
 
         }
-
         protected override IEnumerator<FrameGraphPass> CreateRenderPass()
         {
             yield return new ShadowPass();
@@ -163,24 +177,41 @@ namespace SharpGame
             geometryPass = new FrameGraphPass
             {
                 Queue = SubmitQueue.EarlyGraphics,
-                RenderPass = geometryRP,
-                Framebuffer = geometryFB,
+
+                //RenderPass = geometryRP,
+                //Framebuffer = geometryFB,
+                renderPassCreator = OnCreateRenderPass,
+                frameBufferCreator = OnCreateFramebuffer,
+
+
                 ClearColorValue = new[] { new ClearColorValue(0.25f, 0.25f, 0.25f, 1), new ClearColorValue(0, 0, 0, 1), new ClearColorValue(0, 0, 0, 0) },
                 Subpasses = new []
                 {
                     new SceneSubpass("gbuffer")
-                    { Set1 = clusterSet1
+                    { 
+                        Set1 = clusterSet1
                     }
                 }
             };
 
             yield return geometryPass;
-           
+
+            uint width = (uint)Graphics.Width;
+            uint height = (uint)Graphics.Height;
             translucentClustering = new FrameGraphPass
             {
                 Queue = SubmitQueue.EarlyGraphics,
-                RenderPass = clusterRP,
-                Framebuffer = clusterFB,
+
+                //RenderPass = clusterRP,
+                //Framebuffer = clusterFB,
+                renderPassCreator = OnCreateClusterRenderPass,
+
+
+                frameBufferCreator = (rp) => {
+                    clusterFB = Framebuffer.Create(rp, width, height, 1, new[] { depthHWRT.view });
+                    return new Framebuffer[3] { clusterFB, clusterFB, clusterFB };
+                },
+
                 Subpasses = new[]
                 {
                     new SceneSubpass("clustering")
@@ -206,10 +237,11 @@ namespace SharpGame
             var renderPass = Graphics.CreateRenderPass(false, false);
             translucentPass = new FrameGraphPass
             {
-                RenderPass = renderPass,
-                Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
+                //RenderPass = renderPass,
+                //Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
 
-                //OnEnd = (cb) => ClearBuffers(cb, Graphics.WorkImage),
+                renderPassCreator = () => Graphics.CreateRenderPass(false, false),
+                frameBufferCreator = (rp) => Graphics.CreateSwapChainFramebuffers(rp),
 
                 Subpasses = new[]
                 {
@@ -237,10 +269,10 @@ namespace SharpGame
 
             Span<ResourceSet> sets = new []
             {
-                deferredSet0[Graphics.WorkImage],
-                resourceSet0[Graphics.WorkImage],
-                resourceSet1[Graphics.WorkImage],
-                deferredSet1[Graphics.WorkImage],
+                deferredSet0[Graphics.WorkContext],
+                resourceSet0[Graphics.WorkContext],
+                resourceSet1[Graphics.WorkContext],
+                deferredSet1[Graphics.WorkContext],
             };
 
             cmd.DrawGeometry(quad, pass, 0, sets);
@@ -252,7 +284,7 @@ namespace SharpGame
         protected override void OnBeginPass(FrameGraphPass renderPass)
         {
             CommandBuffer cb = renderPass.CmdBuffer;
-            int imageIndex = Graphics.WorkImage;
+            int imageIndex = Graphics.WorkContext;
             if (renderPass == geometryPass)
             {
                 var queryPool = query_pool[imageIndex];
@@ -271,7 +303,7 @@ namespace SharpGame
         protected override void OnEndPass(FrameGraphPass renderPass)
         {
             CommandBuffer cb = renderPass.CmdBuffer;
-            int imageIndex = Graphics.WorkImage;
+            int imageIndex = Graphics.WorkContext;
 
             if (renderPass == geometryPass)
             {
