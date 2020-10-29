@@ -167,7 +167,7 @@ namespace SharpGame.Samples
 
                 spSet = new ResourceSet(resLayout);
 
-                CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
+                CommandBuffer commandBuffer = Graphics.BeginPrimaryCmd();
 
                 // Copy base mipmap level into destination environment map.
                 {
@@ -233,7 +233,7 @@ namespace SharpGame.Samples
                     
                 }
 
-                Graphics.EndWorkCommandBuffer(commandBuffer);
+                Graphics.EndPrimaryCmd(commandBuffer);
             }
 
             // Compute diffuse irradiance cubemap
@@ -242,7 +242,7 @@ namespace SharpGame.Samples
                 ResourceLayout resLayout = pass.GetResourceLayout(0);
                 irSet = new ResourceSet(resLayout, cubeMap, irMap);
 
-                CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
+                CommandBuffer commandBuffer = Graphics.BeginPrimaryCmd();
                 {
                     Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(irMap.image, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General) };
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
@@ -255,7 +255,7 @@ namespace SharpGame.Samples
                     commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, postDispatchBarrier);
                 }
 
-                Graphics.EndWorkCommandBuffer(commandBuffer);
+                Graphics.EndPrimaryCmd(commandBuffer);
             }
 
             // Compute Cook-Torrance BRDF 2D LUT for split-sum approximation.
@@ -264,7 +264,7 @@ namespace SharpGame.Samples
                 ResourceLayout resLayout = pass.GetResourceLayout(0);
                 brdfLUTSet = new ResourceSet(resLayout, brdfLUT);
 
-                CommandBuffer commandBuffer = Graphics.BeginWorkCommandBuffer();
+                CommandBuffer commandBuffer = Graphics.BeginPrimaryCmd();
                 {
                     Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(brdfLUT.image, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General)};
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
@@ -277,7 +277,7 @@ namespace SharpGame.Samples
                     commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, postDispatchBarrier);
                 }
 
-                Graphics.EndWorkCommandBuffer(commandBuffer);
+                Graphics.EndPrimaryCmd(commandBuffer);
 
             }
         }

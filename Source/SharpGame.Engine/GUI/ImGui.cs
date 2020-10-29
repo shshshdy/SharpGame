@@ -78,11 +78,6 @@ namespace SharpGame
 
             var graphics = Graphics.Instance;
 
-            //RenderPass renderPass;
-            //Framebuffer[] framebuffers;
-            //renderPass = graphics.CreateRenderPass();
-            //framebuffers = graphics.CreateSwapChainFramebuffers(renderPass);
-
             guiPass = new FrameGraphPass
             {
                 renderPassCreator = ()=>
@@ -97,17 +92,14 @@ namespace SharpGame
                 { 
                     return graphics.CreateSwapChainFramebuffers(rp);
                 },
-                //Framebuffers = framebuffers,
-                //RenderPass = renderPass,
 
                 Subpasses = new[]
                 {
                    new GraphicsSubpass
                    {
-                        OnDraw = (pass, view) =>
+                        OnDraw = (pass, cmd) =>
                         {
-                            var cmdBuffer = pass.CmdBuffer;
-                            RenderImDrawData(cmdBuffer, ImGui.GetDrawData());
+                            RenderImDrawData(cmd, ImGui.GetDrawData());
                         }
                     }
                 }

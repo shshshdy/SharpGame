@@ -259,12 +259,9 @@ namespace SharpGame
             yield return translucentPass;
         }
 
-        void Composite(GraphicsSubpass graphicsPass, CommandBuffer cb)
+        void Composite(GraphicsSubpass graphicsPass, CommandBuffer cmd)
         {
             var scenePass = graphicsPass as SceneSubpass;
-
-            var cmd = graphicsPass.CmdBuffer;
-
             var pass = clusterDeferred.Main;
 
             Span<ResourceSet> sets = new []
@@ -277,13 +274,12 @@ namespace SharpGame
 
             cmd.DrawGeometry(quad, pass, 0, sets);
 
-            scenePass.DrawScene(cb, BlendFlags.AlphaBlend);
+            scenePass.DrawScene(cmd, BlendFlags.AlphaBlend);
 
         }
 
-        protected override void OnBeginPass(FrameGraphPass renderPass)
+        protected override void OnBeginPass(FrameGraphPass renderPass, CommandBuffer cmd)
         {
-            CommandBuffer cb = renderPass.CmdBuffer;
             int imageIndex = Graphics.WorkContext;
             if (renderPass == geometryPass)
             {
@@ -300,9 +296,8 @@ namespace SharpGame
             }
         }
 
-        protected override void OnEndPass(FrameGraphPass renderPass)
+        protected override void OnEndPass(FrameGraphPass renderPass, CommandBuffer cmd)
         {
-            CommandBuffer cb = renderPass.CmdBuffer;
             int imageIndex = Graphics.WorkContext;
 
             if (renderPass == geometryPass)
@@ -316,7 +311,7 @@ namespace SharpGame
 
                 //cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
 
-                ClearBuffers(cb, imageIndex);
+                ClearBuffers(cmd, imageIndex);
             }
         }
     }

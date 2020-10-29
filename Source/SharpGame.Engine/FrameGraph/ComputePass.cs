@@ -19,9 +19,9 @@ namespace SharpGame
             OnDraw = onDraw;
         }
 
-        public override void Draw()
+        public override void Draw(CommandBuffer cmd)
         {
-            OnDraw?.Invoke(this, CmdBuffer);
+            OnDraw?.Invoke(this, cmd);
         }
         
     }

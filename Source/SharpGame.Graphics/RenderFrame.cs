@@ -5,14 +5,24 @@ using System.Text;
 namespace SharpGame
 {
 
-    public class BackBuffer
+    public class RenderFrame
     {
-        public int context;
         public int imageIndex;
+
         public Semaphore acquireSemaphore;
+
         public Semaphore preRenderSemaphore;
         public Semaphore computeSemaphore;
         public Semaphore renderSemaphore;
+
         public Fence presentFence;
+
+        public RenderFrame()
+        {
+            acquireSemaphore = new Semaphore();
+            preRenderSemaphore = new Semaphore();
+            computeSemaphore = new Semaphore();
+            renderSemaphore = new Semaphore();
+        }
     }
 }

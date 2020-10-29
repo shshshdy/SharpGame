@@ -93,11 +93,11 @@ namespace SharpGame
 
             ImageSubresourceRange subresourceRange = new ImageSubresourceRange(ImageAspectFlags.Color, 0, mipLevels, 0, layers);
 
-            CommandBuffer copyCmd = Graphics.Instance.BeginWorkCommandBuffer();
+            CommandBuffer copyCmd = Graphics.BeginPrimaryCmd();
             copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
             copyCmd.CopyBufferToImage(stagingBuffer, image, ImageLayout.TransferDstOptimal, bufferCopyRegions);
             copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, imageLayout, subresourceRange);
-            Graphics.Instance.EndWorkCommandBuffer(copyCmd);
+            Graphics.EndPrimaryCmd(copyCmd);
 
             imageLayout = ImageLayout.ShaderReadOnlyOptimal;
 
@@ -122,7 +122,7 @@ namespace SharpGame
 
         public void GenerateMipmaps()
         {
-            CommandBuffer commandBuffer = Graphics.Instance.BeginWorkCommandBuffer();
+            CommandBuffer commandBuffer = Graphics.BeginPrimaryCmd();
 
             // Iterate through mip chain and consecutively blit from previous level to next level with linear filtering.
             for (uint level = 1, prevLevelWidth = width, prevLevelHeight = height; level < mipLevels; ++level, prevLevelWidth /= 2, prevLevelHeight /= 2)
@@ -164,7 +164,7 @@ namespace SharpGame
                 commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.BottomOfPipe, ref barrier);
             }
 
-            Graphics.Instance.EndWorkCommandBuffer(commandBuffer);
+            Graphics.EndPrimaryCmd(commandBuffer);
         }
 
         internal void UpdateDescriptor()
@@ -258,11 +258,11 @@ namespace SharpGame
 
                 // The sub resource range describes the regions of the image we will be transition
                 ImageSubresourceRange subresourceRange = new ImageSubresourceRange(ImageAspectFlags.Color, 0, 1, 0, 1);
-                CommandBuffer copyCmd = Graphics.Instance.BeginWorkCommandBuffer();
+                CommandBuffer copyCmd = Graphics.BeginPrimaryCmd();
                 copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
                 copyCmd.CopyBufferToImage(stagingBuffer, texture.image, ImageLayout.TransferDstOptimal, ref bufferCopyRegion);
                 copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, texture.imageLayout, subresourceRange);
-                Graphics.Instance.EndWorkCommandBuffer(copyCmd);
+                Graphics.EndPrimaryCmd(copyCmd);
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;

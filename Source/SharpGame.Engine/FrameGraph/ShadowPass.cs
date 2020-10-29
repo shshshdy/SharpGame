@@ -58,9 +58,10 @@ namespace SharpGame
         ResourceSet VSSet => vsSet[Graphics.WorkContext];
 
         ulong passID = Pass.GetID(Pass.Shadow);
-        public ShadowPass() //: base(Pass.Shadow)
+        public ShadowPass()
         {
             Queue = SubmitQueue.EarlyGraphics;
+
             var depthFormat = Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
@@ -127,7 +128,7 @@ namespace SharpGame
 
         }
 
-        public override void Draw()
+        public override void Draw(CommandBuffer cmd)
         {
             var view = View;
             if(view.Camera == null)
@@ -163,14 +164,13 @@ namespace SharpGame
 
             ClearValue[] clearDepth = { (ClearValue)ClearDepthStencilValue };
 
-            var cmd = CmdBuffer;
             //todo:multi thread
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
                 Viewport viewport = new Viewport(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM, 0.0f, 1.0f);
                 Rect2D renderArea = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
 
-                BeginRenderPass(cascades[i].frameBuffer, renderArea, clearDepth);
+                BeginRenderPass(cmd, cascades[i].frameBuffer, renderArea, clearDepth);
 
                 cmd.SetViewport(viewport);
                 cmd.SetScissor(renderArea);

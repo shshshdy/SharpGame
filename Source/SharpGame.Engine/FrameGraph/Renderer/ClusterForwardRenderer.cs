@@ -85,9 +85,8 @@ namespace SharpGame
             yield return mainPass;
         }
 
-        protected override void OnBeginPass(FrameGraphPass renderPass)
+        protected override void OnBeginPass(FrameGraphPass renderPass, CommandBuffer cmd)
         {
-            CommandBuffer cb = renderPass.CmdBuffer;
             int imageIndex = Graphics.WorkContext;
 
             if (renderPass == clustering)
@@ -106,9 +105,8 @@ namespace SharpGame
             }
         }
 
-        protected override void OnEndPass(FrameGraphPass renderPass)
+        protected override void OnEndPass(FrameGraphPass renderPass, CommandBuffer cmd)
         {
-            CommandBuffer cb = renderPass.CmdBuffer;
             int imageIndex = Graphics.WorkContext;
 
             if (renderPass == clustering)
@@ -121,7 +119,7 @@ namespace SharpGame
                 var queryPool = query_pool[imageIndex];
 
                 //cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
-                ClearBuffers(cb, imageIndex);
+                ClearBuffers(cmd, imageIndex);
 
             }
         }

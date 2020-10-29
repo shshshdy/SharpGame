@@ -59,7 +59,7 @@ namespace SharpGame
             {
                 CommandBufferInheritanceInfo inherit = new CommandBufferInheritanceInfo
                 {
-                    framebuffer = FrameGraphPass.Framebuffers[workContext],
+                    framebuffer = FrameGraphPass.Framebuffers[Graphics.WorkImage],
                     renderPass = FrameGraphPass.RenderPass
                 };
 

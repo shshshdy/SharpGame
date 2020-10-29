@@ -145,13 +145,12 @@ namespace SharpGame
         {
             Profiler.BeginSample("FrameGraph.Draw");
 
-            int workImage = Graphics.WorkContext;
-
             foreach (var renderPass in RenderPassList)
             {
-                OnBeginPass(renderPass);
-                renderPass.Draw();
-                OnEndPass(renderPass);
+                var cmd = FrameGraph.GetWorkCmdBuffer(renderPass.Queue);
+                OnBeginPass(renderPass, cmd);
+                renderPass.Draw(cmd);
+                OnEndPass(renderPass, cmd);
             }
 
             Profiler.EndSample();
@@ -176,11 +175,11 @@ namespace SharpGame
         {
         }
 
-        protected virtual void OnBeginPass(FrameGraphPass renderPass)
+        protected virtual void OnBeginPass(FrameGraphPass renderPass, CommandBuffer cmd)
         {
         }
 
-        protected virtual void OnEndPass(FrameGraphPass renderPass)
+        protected virtual void OnEndPass(FrameGraphPass renderPass, CommandBuffer cmd)
         {
         }
 
