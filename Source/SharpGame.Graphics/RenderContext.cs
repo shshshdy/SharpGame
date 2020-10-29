@@ -39,6 +39,7 @@ namespace SharpGame
 
         private TransientBufferManager transientVB = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
         private TransientBufferManager transientIB = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
+        private TransientBufferManager transientUB = new TransientBufferManager(BufferUsageFlags.UniformBuffer, 1024 * 1024);
 
 
         public List<System.Action> postActions = new List<Action>();
@@ -46,7 +47,7 @@ namespace SharpGame
         //
         static CommandBufferPool[] pools = new CommandBufferPool[(int)SubmitQueue.MaxCount];
 
-        public RenderContext(int id)
+        public RenderContext(int id = -1)
         {
             this.id = id;
 

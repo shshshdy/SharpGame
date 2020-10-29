@@ -3,6 +3,7 @@
 namespace SharpGame
 {
     using global::System;
+    using System.Collections.Generic;
     using global::System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
     using System.Threading;
@@ -126,6 +127,8 @@ namespace SharpGame
         bool opened = false;
         public bool IsOpen => opened;
         public bool NeedSubmit { get; set; }
+
+        Dictionary<IntPtr, ResourceSet> resourceSet;
 
         internal CommandBuffer(VkCommandBuffer cmdBuffer)
         {
