@@ -155,10 +155,12 @@ namespace SharpGame
             {
                 using (Buffer stagingBuffer = CreateStagingBuffer(size, data))
                 {
-                    CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
-                    BufferCopy copyRegion = new BufferCopy { srcOffset = offset, size = size };
-                    copyCmd.CopyBuffer(stagingBuffer, this, ref copyRegion);
-                    Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
+                    Graphics.WithCommandBuffer((cmd) =>
+                    {
+                        BufferCopy copyRegion = new BufferCopy { srcOffset = offset, size = size };
+                        cmd.CopyBuffer(stagingBuffer, this, ref copyRegion);
+                    });
+
                 }
             }
             else

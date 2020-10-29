@@ -184,11 +184,11 @@ namespace SharpGame
         {
             this.SendGlobalEvent(new BeginRender());
 
-            int imageIndex = (int)Graphics.WorkContext;
+            int workContext = (int)Graphics.WorkContext;
 
-            preRenderCmdBlk[imageIndex].cmdBuffer.Begin();
-            computeCmdBlk[imageIndex].cmdBuffer.Begin();
-            renderCmdBlk[imageIndex].cmdBuffer.Begin();
+            preRenderCmdBlk[workContext].cmdBuffer.Begin();
+            computeCmdBlk[workContext].cmdBuffer.Begin();
+            renderCmdBlk[workContext].cmdBuffer.Begin();
             foreach (var viewport in views)
             {
                 viewport.Render();
@@ -196,13 +196,13 @@ namespace SharpGame
 
             OverlayPass?.Draw();
 
-            preRenderCmdBlk[imageIndex].cmdBuffer.End();
-            computeCmdBlk[imageIndex].cmdBuffer.End();
-            renderCmdBlk[imageIndex].cmdBuffer.End();
+            preRenderCmdBlk[workContext].cmdBuffer.End();
+            computeCmdBlk[workContext].cmdBuffer.End();
+            renderCmdBlk[workContext].cmdBuffer.End();
 
             this.SendGlobalEvent(new EndRender());
 
-            Log.Info("Render frame " + Graphics.WorkContext);
+            //Log.Info("Render frame " + Graphics.WorkContext);
 
         }
 
@@ -214,67 +214,60 @@ namespace SharpGame
             }
 
             Profiler.BeginSample("RenderSystem.Submit");
-            int imageIndex = (int)Graphics.RenderContext;
-            Log.Info("          Submit frame " + imageIndex);
+            int renderContext = (int)Graphics.RenderContext;
+            //Log.Info("          Submit frame " + renderContext);
 
-            OnBeginSubmit?.Invoke(imageIndex);
+            OnBeginSubmit?.Invoke(renderContext);
 
             var currentBuffer = Graphics.currentBuffer;
 
             {
                 Profiler.BeginSample("RenderSystem.PreRender");
 
-                var fence = preRenderCmdBlk[imageIndex].submitFence;
+                var fence = preRenderCmdBlk[renderContext].submitFence;
                 fence.Wait();
                 fence.Reset();
 
-                CommandBuffer cmdBuffer = preRenderCmdBlk[imageIndex].cmdBuffer;
+                CommandBuffer cmdBuffer = preRenderCmdBlk[renderContext].cmdBuffer;
                 Graphics.GraphicsQueue.Submit(currentBuffer.acquireSemaphore, PipelineStageFlags.FragmentShader,
-                    /*cmdBuffer.IsOpen ?*/ cmdBuffer /*: null*/, currentBuffer.preRenderSemaphore, fence);
+                    cmdBuffer, currentBuffer.preRenderSemaphore, fence);
 
-                OnSubmit?.Invoke(imageIndex, SubmitQueue.EarlyGraphics);
+                OnSubmit?.Invoke(renderContext, SubmitQueue.EarlyGraphics);
 
                 Profiler.EndSample();
             }
 
             {
                 Profiler.BeginSample("RenderSystem.Compute");
-                var fence = computeCmdBlk[imageIndex].submitFence;
+                var fence = computeCmdBlk[renderContext].submitFence;
 
                 fence.Wait();
                 fence.Reset();
 
-                CommandBuffer cmdBuffer = computeCmdBlk[imageIndex].cmdBuffer;
-                if (cmdBuffer.NeedSubmit)
-                {
-                    Graphics.ComputeQueue.Submit(currentBuffer.preRenderSemaphore, PipelineStageFlags.ComputeShader,
-                    cmdBuffer, currentBuffer.computeSemaphore, fence);                    
-                }
-                else
-                {
-                    Graphics.ComputeQueue.Submit(currentBuffer.preRenderSemaphore, PipelineStageFlags.ComputeShader,
-                    null, currentBuffer.computeSemaphore, fence);
-                }
+                CommandBuffer cmdBuffer = computeCmdBlk[renderContext].cmdBuffer;
 
-                OnSubmit?.Invoke(imageIndex, SubmitQueue.Compute);
+                Graphics.ComputeQueue.Submit(currentBuffer.preRenderSemaphore, PipelineStageFlags.ComputeShader,
+                cmdBuffer, currentBuffer.computeSemaphore, fence);                    
+
+                OnSubmit?.Invoke(renderContext, SubmitQueue.Compute);
                 Profiler.EndSample();
             }
 
             {
                 Profiler.BeginSample("RenderSystem.Render");
-                var fence = renderCmdBlk[imageIndex].submitFence;
+                var fence = renderCmdBlk[renderContext].submitFence;
                 fence.Wait();
                 fence.Reset();
 
-                CommandBuffer cmdBuffer = renderCmdBlk[imageIndex].cmdBuffer;
+                CommandBuffer cmdBuffer = renderCmdBlk[renderContext].cmdBuffer;
                 Graphics.GraphicsQueue.Submit(currentBuffer.computeSemaphore, PipelineStageFlags.ColorAttachmentOutput,
-                    /*cmdBuffer.IsOpen ? */cmdBuffer /*: null*/, currentBuffer.renderSemaphore, fence);
+                    cmdBuffer, currentBuffer.renderSemaphore, fence);
 
-                OnSubmit?.Invoke(imageIndex, SubmitQueue.Graphics);
+                OnSubmit?.Invoke(renderContext, SubmitQueue.Graphics);
                 Profiler.EndSample();
             }
 
-            OnEndSubmit?.Invoke(imageIndex);
+            OnEndSubmit?.Invoke(renderContext);
 
             Graphics.EndRender();
 

@@ -61,16 +61,6 @@ namespace SharpGame
         private TransientBufferManager transientVB = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
         private TransientBufferManager transientIB = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
 
-        public class BackBuffer
-        {
-            public int imageIndex;
-            public int context;
-            public Semaphore acquireSemaphore;
-            public Semaphore preRenderSemaphore;
-            public Semaphore computeSemaphore;
-            public Semaphore renderSemaphore;
-            public Fence presentFence;
-        }
         Semaphore firstSemaphore;
 
         List<BackBuffer> backBuffers = new List<BackBuffer>();
@@ -102,8 +92,6 @@ namespace SharpGame
 
             DescriptorPoolManager = new DescriptorPoolManager();
 
-            Texture.Init();
-            Sampler.Init();
 
         }
 
@@ -131,6 +119,8 @@ namespace SharpGame
                 });
             }
 
+            Texture.Init();
+            Sampler.Init();
 
         }
 
@@ -359,6 +349,18 @@ namespace SharpGame
             workCmdPool.Allocate(CommandBufferLevel.Primary, (uint)Swapchain.ImageCount);
         }
 
+        public static void WithCommandBuffer(Action<CommandBuffer> action)
+        {
+            var cmdBuffer = commandPool.AllocateCommandBuffer(CommandBufferLevel.Primary);
+            cmdBuffer.Begin(CommandBufferUsageFlags.None);
+            action(cmdBuffer);
+            cmdBuffer.End();
+            GraphicsQueue.Submit(null, PipelineStageFlags.None, cmdBuffer, null);
+            GraphicsQueue.WaitIdle();
+            commandPool.FreeCommandBuffer(cmdBuffer);
+
+        }
+        /*
         public static CommandBuffer CreateCommandBuffer(CommandBufferLevel level, bool begin = false)
         {
             var cmdBuffer = commandPool.AllocateCommandBuffer(level);
@@ -387,7 +389,7 @@ namespace SharpGame
                 commandPool.FreeCommandBuffer(commandBuffer);
             }
 
-        }
+        }*/
 
         public CommandBuffer BeginWorkCommandBuffer()
         {
@@ -428,23 +430,21 @@ namespace SharpGame
             Profiler.BeginSample("Acquire");
 
             renderContext = workContext;
-            var sem = workContext == -1 ? firstSemaphore : backBuffers[workContext].acquireSemaphore;
+            var sem = backBuffers[workContext].acquireSemaphore;
             Swapchain.AcquireNextImage(sem, out int imageIndex);
 
             workContext = (workContext + 1) % ImageCount;
-
             contextToImage[workContext] = imageIndex;
 
-            Log.Info("-------acquire next image :" + imageIndex + "  context: " + workContext);
+            //Log.Info("-------acquire next image :" + imageIndex + "  context: " + workContext);
            
             RenderSemPost();
 
-            if (renderContext == -1 || contextToImage[renderContext] == -1)
+            if (contextToImage[renderContext] == -1)
             {
                 Profiler.EndSample();
                 return false;
             }
-
 
             var frame = backBuffers[renderContext];
             if (frame.presentFence == null)
@@ -513,24 +513,13 @@ namespace SharpGame
 
         List<System.Action> postActions = new List<Action>();
 
-        //private int currentImage = -1;
-        //private int nextImage = -1;
-
+        private int workContext = 0;
+        private int renderContext = -1;
+        int[] contextToImage = new int[3] { -1, -1, -1 };
         public int WorkContext => workContext;
         public int RenderContext => renderContext;
-
-        public int RenderImage => contextToImage[renderContext];
-
-        //todo:
-        private int workContext = -1;
-        private int renderContext = -1;
         public int WorkImage => contextToImage[workContext];
-
-        int[] contextToImage = new int[3] { -1, -1, -1 };
-
-
-        private int frameNum;
-        public int FrameNum => frameNum;
+        public int RenderImage => contextToImage[renderContext];
 
         public void Post(System.Action action)
         {
@@ -582,7 +571,6 @@ namespace SharpGame
 
             transientVB.Reset();
             transientIB.Reset();
-            frameNum++;
         }
 
         #endregion

@@ -102,6 +102,10 @@ namespace SharpGame
             {
                 framebuffers = frameBufferCreator.Invoke(RenderPass);
             }
+            else
+            {
+                framebuffers = Graphics.Framebuffers;
+            }
 
         }
 
@@ -111,7 +115,10 @@ namespace SharpGame
             {
                 RenderPass = renderPassCreator.Invoke();
             }
-
+            else
+            {
+                RenderPass = Graphics.RenderPass;
+            }
         }
 
         public virtual void Update()

@@ -92,11 +92,13 @@ namespace SharpGame
             stagingBuffer.Unmap();
 
             ImageSubresourceRange subresourceRange = new ImageSubresourceRange(ImageAspectFlags.Color, 0, mipLevels, 0, layers);
-            CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
+
+            CommandBuffer copyCmd = Graphics.Instance.BeginWorkCommandBuffer();
             copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
             copyCmd.CopyBufferToImage(stagingBuffer, image, ImageLayout.TransferDstOptimal, bufferCopyRegions);
             copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, imageLayout, subresourceRange);
-            Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
+            Graphics.Instance.EndWorkCommandBuffer(copyCmd);
+
             imageLayout = ImageLayout.ShaderReadOnlyOptimal;
 
             stagingBuffer.Dispose();
@@ -254,15 +256,13 @@ namespace SharpGame
                     bufferOffset = 0
                 };
 
-                CommandBuffer copyCmd = Graphics.CreateCommandBuffer(CommandBufferLevel.Primary, true);
                 // The sub resource range describes the regions of the image we will be transition
                 ImageSubresourceRange subresourceRange = new ImageSubresourceRange(ImageAspectFlags.Color, 0, 1, 0, 1);
-
+                CommandBuffer copyCmd = Graphics.Instance.BeginWorkCommandBuffer();
                 copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
                 copyCmd.CopyBufferToImage(stagingBuffer, texture.image, ImageLayout.TransferDstOptimal, ref bufferCopyRegion);
                 copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, texture.imageLayout, subresourceRange);
-
-                Graphics.FlushCommandBuffer(copyCmd, Graphics.GraphicsQueue, true);
+                Graphics.Instance.EndWorkCommandBuffer(copyCmd);
 
                 // Change texture image layout to shader read after all mip levels have been copied
                 texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
