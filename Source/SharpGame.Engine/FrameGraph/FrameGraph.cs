@@ -23,24 +23,10 @@ namespace SharpGame
         public FrameGraphPass OverlayPass { get; set; }
 
         public static bool EarlyZ { get; set; }
-
-        struct SubmitQueueData
-        {
-            public CommandBuffer cmdBuffer;
-            public Fence submitFence;
-        };
-
-        CommandBufferPool preRenderCmdPool;
-        CommandBufferPool computeCmdPool;
-        CommandBufferPool renderCmdPool;
-
-        SubmitQueueData[] preRenderCmdBlk = new SubmitQueueData[3];
-        SubmitQueueData[] computeCmdBlk = new SubmitQueueData[3];
-        SubmitQueueData[] renderCmdBlk = new SubmitQueueData[3];
-
-        public event Action<int> OnBeginSubmit;
-        public event Action<int, SubmitQueue> OnSubmit;
-        public event Action<int> OnEndSubmit;
+        
+        public event Action<RenderContext> OnBeginSubmit;
+        public event Action<RenderContext, SubmitQueue> OnSubmit;
+        public event Action<RenderContext> OnEndSubmit;
 
         public static bool drawDebug;
         public static bool debugDepthTest;
@@ -51,46 +37,9 @@ namespace SharpGame
         {
             this.Subscribe<GUIEvent>(e => OnDebugImage());
 
-            preRenderCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
-            computeCmdPool = new CommandBufferPool(Device.QFCompute, CommandPoolCreateFlags.ResetCommandBuffer);
-            renderCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
-
             uint size = Graphics.Settings.Validation ? 64 * 1000u : 64 * 1000 * 100u;
 
             TransformBuffer = new DynamicBuffer(BufferUsageFlags.UniformBuffer, size);
-        }
-
-        public void Initialize()
-        {
-            CreateCmdBuffers();
-        }
-
-        void CreateCmdBuffers()
-        {
-            preRenderCmdPool.Allocate(CommandBufferLevel.Primary, 3);
-            for (int i = 0; i < 3; i++)
-            {
-                preRenderCmdBlk[i].cmdBuffer = preRenderCmdPool.CommandBuffers[i];
-                if (preRenderCmdBlk[i].submitFence == null)
-                    preRenderCmdBlk[i].submitFence = new Fence(FenceCreateFlags.Signaled);
-            }
-
-            computeCmdPool.Allocate(CommandBufferLevel.Primary, 3);
-            for (int i = 0; i < 3; i++)
-            {
-                computeCmdBlk[i].cmdBuffer = computeCmdPool.CommandBuffers[i];
-                if (computeCmdBlk[i].submitFence == null)
-                    computeCmdBlk[i].submitFence = new Fence(FenceCreateFlags.Signaled);
-            }
-
-            renderCmdPool.Allocate(CommandBufferLevel.Primary, 3);
-            for (int i = 0; i < 3; i++)
-            {
-                renderCmdBlk[i].cmdBuffer = renderCmdPool.CommandBuffers[i];
-                if (renderCmdBlk[i].submitFence == null)
-                    renderCmdBlk[i].submitFence = new Fence(FenceCreateFlags.Signaled);
-            }
-
         }
 
         public void Resize(int w, int h)
@@ -98,7 +47,6 @@ namespace SharpGame
             foreach (var viewport in views)
             {
                 viewport.Renderer.DeviceLost();
-
             }
 
             OverlayPass?.DeviceLost();
@@ -112,7 +60,6 @@ namespace SharpGame
 
             OverlayPass?.DeviceReset();
 
-            CreateCmdBuffers();
         }
 
 
@@ -126,17 +73,7 @@ namespace SharpGame
 
         public CommandBuffer GetWorkCmdBuffer(SubmitQueue queue)
         {
-            switch (queue)
-            {
-                case SubmitQueue.EarlyGraphics:
-                    return preRenderCmdBlk[Graphics.WorkContext].cmdBuffer;
-                case SubmitQueue.Compute:
-                    return computeCmdBlk[Graphics.WorkContext].cmdBuffer;
-                case SubmitQueue.Graphics:
-                    return renderCmdBlk[Graphics.WorkContext].cmdBuffer;
-                default:
-                    return null;
-            }
+            return Graphics.WorkFrame.submitQueue[(int)queue].cmdBuffer;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -184,22 +121,18 @@ namespace SharpGame
         {
             this.SendGlobalEvent(new BeginRender());
 
-            int workContext = (int)Graphics.WorkContext;
+            var workFrame = Graphics.WorkFrame;
 
-            preRenderCmdBlk[workContext].cmdBuffer.Begin();
-            computeCmdBlk[workContext].cmdBuffer.Begin();
-            renderCmdBlk[workContext].cmdBuffer.Begin();
+            workFrame.Begin();
 
             foreach (var viewport in views)
             {
-                viewport.Render();
+                viewport.Render(workFrame);
             }
 
-            OverlayPass?.Draw(renderCmdBlk[workContext].cmdBuffer);
+            OverlayPass?.Draw(workFrame.RenderCmdBuffer);
 
-            preRenderCmdBlk[workContext].cmdBuffer.End();
-            computeCmdBlk[workContext].cmdBuffer.End();
-            renderCmdBlk[workContext].cmdBuffer.End();
+            workFrame.End();
 
             this.SendGlobalEvent(new EndRender());
 
@@ -209,68 +142,19 @@ namespace SharpGame
 
         public void Submit()
         {
-            if (!Graphics.BeginRender())
-            {
-                return;
-            }
-
             Profiler.BeginSample("RenderSystem.Submit");
-            int renderContext = (int)Graphics.RenderContext;
-            //Log.Info("          Submit frame " + renderContext);
-
-            OnBeginSubmit?.Invoke(renderContext);
-
-            var renderFrame = Graphics.renderFrame;
-
+            
+            if (Graphics.BeginRender())
             {
-                Profiler.BeginSample("RenderSystem.PreRender");
+                var renderFrame = Graphics.renderFrame;
+                //Log.Info("          Submit frame " + renderFrame.id);
 
-                var fence = preRenderCmdBlk[renderContext].submitFence;
-                fence.Wait();
-                fence.Reset();
+                OnBeginSubmit?.Invoke(renderFrame);
+                renderFrame.Submit(OnSubmit);            
+                OnEndSubmit?.Invoke(renderFrame);
 
-                CommandBuffer cmdBuffer = preRenderCmdBlk[renderContext].cmdBuffer;
-                Graphics.GraphicsQueue.Submit(renderFrame.acquireSemaphore, PipelineStageFlags.FragmentShader,
-                    cmdBuffer, renderFrame.preRenderSemaphore, fence);
-
-                OnSubmit?.Invoke(renderContext, SubmitQueue.EarlyGraphics);
-
-                Profiler.EndSample();
+                Graphics.EndRender();
             }
-
-            {
-                Profiler.BeginSample("RenderSystem.Compute");
-                var fence = computeCmdBlk[renderContext].submitFence;
-
-                fence.Wait();
-                fence.Reset();
-
-                CommandBuffer cmdBuffer = computeCmdBlk[renderContext].cmdBuffer;
-
-                Graphics.ComputeQueue.Submit(renderFrame.preRenderSemaphore, PipelineStageFlags.ComputeShader,
-                cmdBuffer, renderFrame.computeSemaphore, fence);                    
-
-                OnSubmit?.Invoke(renderContext, SubmitQueue.Compute);
-                Profiler.EndSample();
-            }
-
-            {
-                Profiler.BeginSample("RenderSystem.Render");
-                var fence = renderCmdBlk[renderContext].submitFence;
-                fence.Wait();
-                fence.Reset();
-
-                CommandBuffer cmdBuffer = renderCmdBlk[renderContext].cmdBuffer;
-                Graphics.GraphicsQueue.Submit(renderFrame.computeSemaphore, PipelineStageFlags.ColorAttachmentOutput,
-                    cmdBuffer, renderFrame.renderSemaphore, fence);
-
-                OnSubmit?.Invoke(renderContext, SubmitQueue.Graphics);
-                Profiler.EndSample();
-            }
-
-            OnEndSubmit?.Invoke(renderContext);
-
-            Graphics.EndRender();
 
             Profiler.EndSample();
 

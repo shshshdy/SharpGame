@@ -495,10 +495,11 @@ namespace SharpGame
                 return;
 
             Graphics graphics = Graphics.Instance;
+            var workFrame = graphics.WorkFrame;
 
             int numVertices = (lines_.Count + noDepthLines_.Count) * 2 + (triangles_.Count + noDepthTriangles_.Count) * 3;
 
-            TransientBuffer vertex_buffer = graphics.AllocVertexBuffer((uint)(numVertices * VertexPosColor.Size));
+            TransientBuffer vertex_buffer = workFrame.AllocVertexBuffer((uint)(numVertices * VertexPosColor.Size));
 
             float* dest = (float*)vertex_buffer.Data;
 

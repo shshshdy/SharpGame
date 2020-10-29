@@ -56,12 +56,9 @@ namespace SharpGame
         private RenderTexture depthStencil;
         public RenderTexture DepthRT => depthStencil;
 
-        private TransientBufferManager transientVB = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
-        private TransientBufferManager transientIB = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
-
-        List<RenderFrame> renderFrames = new List<RenderFrame>();
-        public RenderFrame WorkFrame => renderFrames[WorkContext];
-        public RenderFrame renderFrame;
+        List<RenderContext> renderFrames = new List<RenderContext>();
+        public RenderContext WorkFrame => renderFrames[WorkContext];
+        public RenderContext renderFrame;
 
         public Graphics(Settings settings)
         {
@@ -100,18 +97,23 @@ namespace SharpGame
             CreateFrameBuffer();
             CreateCommandPool();
 
-            for (int i = 0; i < Swapchain.ImageCount; i++)
-            {
-                renderFrames.Add(new RenderFrame());
-            }
-
             Texture.Init();
             Sampler.Init();
+
+            RenderContext.Init();
+
+            for (int i = 0; i < Swapchain.ImageCount; i++)
+            {
+                renderFrames.Add(new RenderContext(i));
+            }
+
 
         }
 
         protected override void Destroy(bool disposing)
         {
+            RenderContext.Shutdown();
+
             Device.Shutdown();
 
             base.Destroy(disposing);
@@ -125,12 +127,22 @@ namespace SharpGame
             // Ensure all operations on the device have been finished before destroying resources
             WaitIdle();
 
+            foreach(var rf in renderFrames)
+            {
+                rf.DeviceLost();
+            }
+
             CreateSwapChain();
             // Recreate the frame buffers
             CreateDepthStencil();
 
             CreateDefaultRenderPass();
             CreateFrameBuffer();
+
+            foreach (var rf in renderFrames)
+            {
+                rf.DeviceReset();
+            }
 
             //contextToImage[WorkContext] = -1;
 
@@ -349,16 +361,6 @@ namespace SharpGame
 
         }
 
-        public TransientBuffer AllocVertexBuffer(uint count)
-        {
-            return transientVB.Alloc(count);
-        }
-
-        public TransientBuffer AllocIndexBuffer(uint count)
-        {
-            return transientIB.Alloc(count);
-        }
-
         public void WaitIdle()
         {
             device.WaitIdle();
@@ -409,9 +411,7 @@ namespace SharpGame
 
             renderFrame = frame;
             renderFrame.imageIndex = contextToImage[renderContext];
-
-            transientVB.Flush();
-            transientIB.Flush();
+            renderFrame.FlushBuffers();
 
             Profiler.EndSample();
 
@@ -424,11 +424,12 @@ namespace SharpGame
             Profiler.BeginSample("Present");
 
             Swapchain.QueuePresent(GraphicsQueue, (uint)renderFrame.imageIndex, renderFrame.renderSemaphore);
+
             GraphicsQueue.Submit(null, renderFrame.presentFence);
 
             GraphicsQueue.WaitIdle();
 
-            foreach (var action in postActions)
+            foreach (var action in renderFrame.postActions)
             {
                 action.Invoke();
             }
@@ -452,20 +453,13 @@ namespace SharpGame
         private System.Threading.Semaphore renderSem = new System.Threading.Semaphore(0, 1);
         private System.Threading.Semaphore mainSem = new System.Threading.Semaphore(1, 1);
 
-        List<System.Action> postActions = new List<Action>();
-
         private int workContext = 0;
         private int renderContext = -1;
         int[] contextToImage = new int[3] { -1, -1, -1 };
         public int WorkContext => workContext;
-        public int RenderContext => renderContext;
+        //public int RenderContext => renderContext;
         public int WorkImage => contextToImage[workContext];
         public int RenderImage => contextToImage[renderContext];
-
-        public void Post(System.Action action)
-        {
-            postActions.Add(action);
-        }
 
         public void MainSemPost()
         {
@@ -510,8 +504,7 @@ namespace SharpGame
                 stats.renderWait = Stopwatch.GetTimestamp() - curTime;
             }
 
-            transientVB.Reset();
-            transientIB.Reset();
+            WorkFrame.ResetBuffers();
         }
 
         #endregion

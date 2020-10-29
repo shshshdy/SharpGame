@@ -6,14 +6,6 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    public enum SubmitQueue
-    {
-        EarlyGraphics = 0,
-        Compute = 1,
-        Graphics = 2,
-        MaxCount
-    }
-
     public class FrameGraphPass : Object, IEnumerable<Subpass>
     {
         public RenderPipeline Renderer { get; set; }

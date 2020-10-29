@@ -104,7 +104,6 @@ namespace SharpGame
             graphics.Init(window.SdlWindowHandle);
             frameGraph = CreateSubsystem<FrameGraph>();
             input = CreateSubsystem<Input>();
-            frameGraph.Initialize();
 
             CreateSubsystem<ImGUI>();
         }

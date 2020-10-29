@@ -141,13 +141,13 @@ namespace SharpGame
             Profiler.EndSample();
         }
 
-        public void Draw()
+        public void Draw(RenderContext renderFrame)
         {
             Profiler.BeginSample("FrameGraph.Draw");
 
             foreach (var renderPass in RenderPassList)
             {
-                var cmd = FrameGraph.GetWorkCmdBuffer(renderPass.Queue);
+                var cmd = renderFrame.GetCmdBuffer(renderPass.Queue);
                 OnBeginPass(renderPass, cmd);
                 renderPass.Draw(cmd);
                 OnEndPass(renderPass, cmd);

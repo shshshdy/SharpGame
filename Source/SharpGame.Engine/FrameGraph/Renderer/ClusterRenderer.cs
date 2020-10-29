@@ -368,9 +368,9 @@ namespace SharpGame
             }
         }
 
-        private void Renderer_OnSubmit(int imageIndex, SubmitQueue passQueue)
+        private void Renderer_OnSubmit(RenderContext renderFrame, SubmitQueue passQueue)
         {
-            var queryPool = query_pool[imageIndex];
+            //var queryPool = query_pool[imageIndex];
             if (passQueue == SubmitQueue.EarlyGraphics)
             {
                 //queryPool.GetResults(2, 2, 2 * sizeof(uint), queryData[imageIndex].clustering.Data, sizeof(uint), QueryResults.QueryWait);
