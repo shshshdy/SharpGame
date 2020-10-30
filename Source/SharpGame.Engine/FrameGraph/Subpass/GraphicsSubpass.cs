@@ -14,7 +14,7 @@ namespace SharpGame
     {
         public Action<GraphicsSubpass, CommandBuffer> OnDraw { get; set; }
 
-        public GraphicsSubpass(string name = "", int workCount = 0)
+        public GraphicsSubpass(string name = "")
         {
             Name = name;
         }

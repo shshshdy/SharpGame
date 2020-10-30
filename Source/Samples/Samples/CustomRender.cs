@@ -24,7 +24,7 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = 6)]
     public class CustomRender : Sample
     {
-        RenderPipeline frameGraph = new RenderPipeline();
+        RenderPipeline renderer = new RenderPipeline();
         List<SourceBatch> batches = new List<SourceBatch>();
 
         CameraVS cameraVS = new CameraVS();
@@ -68,11 +68,11 @@ namespace SharpGame.Samples
             resourceSet[1] = new ResourceSet(resourceLayout, ubCameraVS[1], FrameGraph.TransformBuffer[1]);
             resourceSet[2] = new ResourceSet(resourceLayout, ubCameraVS[2], FrameGraph.TransformBuffer[2]);
 
-            frameGraph.AddGraphicsPass(CustomDraw);
+            renderer.AddGraphicsPass(CustomDraw);
 
             cameraPos = new vec3(0, 5, -50);
             
-            MainView.Attach(null, null, frameGraph);
+            MainView.Attach(null, null, renderer);
 
         }
 

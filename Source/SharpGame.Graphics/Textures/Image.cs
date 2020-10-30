@@ -8,16 +8,17 @@ namespace SharpGame
 {
     public class Image : DisposeBase
     {
+        internal VkImage handle;
+        internal VkDeviceMemory memory;
+        internal ulong allocationSize;
+        internal uint memoryTypeIndex;
+
         public ImageType imageType;
         public Format format;
         public Extent3D extent;
         public uint mipLevels;
         public uint arrayLayers;
 
-        internal VkImage handle;
-        internal VkDeviceMemory memory;
-        internal ulong allocationSize;
-        internal uint memoryTypeIndex;
 
         internal Image(VkImage handle)
         {
@@ -52,6 +53,7 @@ namespace SharpGame
         {
             Device.FreeMemory(memory);
 
+            //Donot destroy swapchain image 
             if(memory != VkDeviceMemory.Null)
                 Device.Destroy(handle);
         }

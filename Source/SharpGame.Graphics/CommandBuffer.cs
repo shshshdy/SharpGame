@@ -120,7 +120,7 @@ namespace SharpGame
         }
     }
 
-    public class CommandBuffer : DisposeBase
+    public partial class CommandBuffer : DisposeBase
     {
         internal VkCommandBuffer commandBuffer;
         public RenderPass renderPass;

@@ -7,6 +7,7 @@ using Vulkan;
 namespace SharpGame
 {
     using global::System.Runtime.Serialization;
+    using System.Data.Common;
     using System.Runtime.CompilerServices;
 
     public class ResourceSet : IDisposable
@@ -22,6 +23,10 @@ namespace SharpGame
         internal VkDescriptorSet descriptorSet;
         internal VkDescriptorPool descriptorPool;
         internal WriteDescriptorSet[] writeDescriptorSets;
+
+        List<DescriptorImageInfo> descriptorImageInfos = new List<DescriptorImageInfo>();
+        List<DescriptorBufferInfo> descriptorBufferInfos = new List<DescriptorBufferInfo>();
+
         public ResourceSet(ResourceLayout resLayout)
         {
             resLayout.Build();
@@ -206,7 +211,16 @@ namespace SharpGame
                 imageLayout = (VkImageLayout)imageLayout,
             };
         }
+        /*
+        public static bool operator==(in DescriptorImageInfo left, in DescriptorImageInfo right)
+        {
+            return left.native == right.native;
+        }
 
+        public static bool operator !=(in DescriptorImageInfo left, in DescriptorImageInfo right)
+        {
+            return left.native != right.native;
+        }*/
     }
 
     public struct DescriptorBufferInfo

@@ -25,8 +25,10 @@ namespace SharpGame
 
         List<CommandBuffer> secondCmdBuffers = new List<CommandBuffer>();
 
-        public SceneSubpass(string name = "main") : base(name, 16)
+        public SceneSubpass(string name = "main", int workCount = 16) : base(name)
         {
+            this.workCount = workCount;
+
             for (int i = 0; i < workCount; i++)
             {
                 CreateCommandPool(1);

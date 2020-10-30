@@ -164,16 +164,23 @@ namespace SharpGame
             return transientIB.Alloc(count);
         }
 
+        public TransientBuffer AllocUniformBuffer(uint count)
+        {
+            return transientUB.Alloc(count);
+        }
+
         public void ResetBuffers()
         {
             transientVB.Reset();
             transientIB.Reset();
+            transientUB.Reset();
         }
 
         public void FlushBuffers()
         {
             transientVB.Flush();
             transientIB.Flush();
+            transientUB.Flush();
         }
 
     }

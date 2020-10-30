@@ -24,7 +24,6 @@ namespace SharpGame
         public FrameGraphPass FrameGraphPass { get; internal set; }
         public RenderView View => FrameGraphPass.View;
 
-        //public CommandBuffer CmdBuffer => FrameGraph.GetWorkCmdBuffer(FrameGraphPass.Queue);
 
         public virtual void Init()
         {
