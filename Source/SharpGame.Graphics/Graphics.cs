@@ -144,7 +144,6 @@ namespace SharpGame
                 rf.DeviceReset();
             }
 
-            //contextToImage[WorkContext] = -1;
 
         }
 

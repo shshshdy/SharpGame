@@ -750,7 +750,10 @@ namespace SharpGame
             vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null);
         }
 
-
+        public static void UpdateDescriptorSets(uint descriptorWriteCount, ref VkWriteDescriptorSet pDescriptorWrites, uint descriptorCopyCount, IntPtr pDescriptorCopies)
+        {
+            vkUpdateDescriptorSets(device, descriptorWriteCount, ref pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
+        }
     }
 
 }

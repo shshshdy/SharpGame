@@ -22,8 +22,9 @@ namespace SharpGame
 
         internal VkDescriptorSet descriptorSet;
         internal VkDescriptorPool descriptorPool;
-        internal uint count = 0;
+   
         internal WriteDescriptorSet[] writeDescriptorSets;
+        internal bool[] updated;
 
         NativeList<DescriptorImageInfo> descriptorImageInfos = new NativeList<DescriptorImageInfo>();
         NativeList<DescriptorBufferInfo> descriptorBufferInfos = new NativeList<DescriptorBufferInfo>();
@@ -46,6 +47,7 @@ namespace SharpGame
             }
 
             writeDescriptorSets = new WriteDescriptorSet[resLayout.NumBindings];
+            updated = new bool[resLayout.NumBindings];
         }
 
         public ResourceSet(ResourceLayout resLayout, params IBindableResource[] bindables)
@@ -66,13 +68,15 @@ namespace SharpGame
             }
 
             System.Diagnostics.Debug.Assert(bindables.Length == resLayout.NumBindings);
-            //count = (uint)bindables.Length;
+
             writeDescriptorSets = new WriteDescriptorSet[resLayout.NumBindings];
+            updated = new bool[resLayout.NumBindings];
 
             for(uint i = 0; i < resLayout.NumBindings; i++)
             {
                 Bind(i, bindables[i]);
             }
+
 
             UpdateSets();
         }
@@ -102,6 +106,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
                                descriptorType, ref imageInfo, 1);
+            updated[dstBinding] = false;
             return this;
         }
 
@@ -110,6 +115,8 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
                                descriptorType, ref imageInfo[0], (uint)imageInfo.Length);
+
+            updated[dstBinding] = false;
             return this;
         }
 
@@ -118,6 +125,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
                                descriptorType, ref bufferInfo, 1);
+            updated[dstBinding] = false;
             return this;
         }
 
@@ -126,6 +134,16 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
                                descriptorType, ref bufferInfo[0], (uint)bufferInfo.Length);
+            updated[dstBinding] = false;
+            return this;
+        }
+
+        public ResourceSet Bind(uint dstBinding, ref DescriptorBufferInfo bufferInfo, BufferView bufferView)
+        {
+            var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
+            writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+                               descriptorType, ref bufferInfo, bufferView);
+            updated[dstBinding] = false;
             return this;
         }
 
@@ -141,19 +159,17 @@ namespace SharpGame
                     {
                         if(bindable is Texture texture)
                         {
-                            writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-                                descriptorType, ref texture.descriptor, 1);
-                        }
-                        else if (bindable is RenderTexture renderTarget)
-                        {
-                            writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-                                descriptorType, ref renderTarget.descriptor, 1);
+                            Bind(dstBinding, ref texture.descriptor);
                         }
                         else if(bindable is ImageView textureView)
                         {
-                            writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-                                descriptorType, ref textureView.Descriptor, 1);
+                            Bind(dstBinding, ref textureView.Descriptor);
                         }
+                        else
+                        {
+                            Debug.Assert(false);
+                        }
+
                     }
                     break;
                 case DescriptorType.SampledImage:
@@ -161,8 +177,9 @@ namespace SharpGame
                 case DescriptorType.StorageImage:
                     {
                         var texture = bindable as Texture;
-                        writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-                            descriptorType, ref texture.descriptor, 1);
+                        Bind(dstBinding, ref texture.descriptor);
+//                         writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+//                             descriptorType, ref texture.descriptor, 1);                         
                     }
                     break;
 
@@ -170,8 +187,9 @@ namespace SharpGame
                 case DescriptorType.StorageTexelBuffer:
                     {
                         var buffer = bindable as Buffer;
-                        writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-                            descriptorType, ref buffer.descriptor, buffer.view);
+                        Bind(dstBinding, ref buffer.descriptor, buffer.view);
+//                         writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+//                             descriptorType, ref buffer.descriptor, buffer.view);
                     }
                     break;
 
@@ -181,10 +199,14 @@ namespace SharpGame
                 case DescriptorType.StorageBufferDynamic:
                     {
                         var buffer = bindable as Buffer;
-                        writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-                            descriptorType, ref buffer.descriptor, 1);
+                        Bind(dstBinding, ref buffer.descriptor);
+//                         writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
+//                             descriptorType, ref buffer.descriptor, 1);
                     }
                     
+                    break;
+                default:
+                    Debug.Assert(false);
                     break;
                    
             }
@@ -193,8 +215,32 @@ namespace SharpGame
 
         public void UpdateSets()
         {
-            VulkanNative.vkUpdateDescriptorSets(Graphics.device, (uint)writeDescriptorSets.Length,
-                ref Unsafe.As<WriteDescriptorSet, VkWriteDescriptorSet>(ref writeDescriptorSets[0]), 0, IntPtr.Zero);
+            uint index = 0;
+            uint count = 0;
+            for(uint i = 0; i < writeDescriptorSets.Length; i++)
+            {
+                if (!updated[i])
+                {
+                    count++;
+                    updated[i] = true;
+                }
+                else{
+
+                    if(count > 0)
+                    {
+                        Device.UpdateDescriptorSets(count, ref writeDescriptorSets[index].native, 0, IntPtr.Zero);
+                    }
+                    count = 0;
+                    index = i + 1;
+                }
+            }
+
+            if (count > 0)
+            {
+                Device.UpdateDescriptorSets(count, ref writeDescriptorSets[index].native, 0, IntPtr.Zero);
+            }
+
+            //Device.UpdateDescriptorSets((uint)writeDescriptorSets.Length, ref writeDescriptorSets[0].native, 0, IntPtr.Zero);
             Updated = true;
         }
 
