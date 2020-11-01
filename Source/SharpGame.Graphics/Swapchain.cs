@@ -37,25 +37,28 @@ namespace SharpGame
                 throw new InvalidOperationException("Couldn't retrieve SDL window info.");
             }
 
+            VkSurfaceKHR surface;
+
+            if (SDL_Vulkan_CreateSurface(sdlWindow, Device.VkInstance.Handle, (IntPtr)(&surface)) == 0)
+            {
+                var error = UTF8String.FromPointer(SDL_GetError());
+                Log.Error("create surface failed." + error);
+            };
+
+            Surface = surface;
+
             VkResult err;
+
+            /*
             if (sysWmInfo.subsystem == SysWMType.Windows)
             {
-                VkSurfaceKHR surface;
-
-                if (SDL_Vulkan_CreateSurface(sdlWindow, Device.VkInstance.Handle, (IntPtr)(&surface)) == 0)
-                {
-                    var error = UTF8String.FromPointer( SDL_GetError());
-
-                    Log.Error("create surface failed." + error);
-                };
-                /*
                 Win32WindowInfo win32Info = Unsafe.Read<Win32WindowInfo>(&sysWmInfo.info);
                 // Create the os-specific Surface
                 VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = VkWin32SurfaceCreateInfoKHR.New();
                 var processHandle = Process.GetCurrentProcess().SafeHandle.DangerousGetHandle();
                 surfaceCreateInfo.hinstance = processHandle;
                 surfaceCreateInfo.hwnd = win32Info.Sdl2Window;
-                err = vkCreateWin32SurfaceKHR(Device.VkInstance, &surfaceCreateInfo, null, &surface);*/
+                err = vkCreateWin32SurfaceKHR(Device.VkInstance, &surfaceCreateInfo, null, &surface);
                 Surface = surface;
             }
             else if (sysWmInfo.subsystem == SysWMType.X11)
@@ -64,14 +67,13 @@ namespace SharpGame
                 VkXlibSurfaceCreateInfoKHR surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR.New();
                 surfaceCreateInfo.dpy = (Vulkan.Xlib.Display*)x11Info.display;
                 surfaceCreateInfo.window = new Vulkan.Xlib.Window { Value = x11Info.Sdl2Window };
-                VkSurfaceKHR surface;
                 err = vkCreateXlibSurfaceKHR(Device.VkInstance, &surfaceCreateInfo, null, out surface);
                 Surface = surface;
             }
             else
             {
                 throw new NotImplementedException($"SDL backend not implemented: {sysWmInfo.subsystem}.");
-            }
+            }*/
 
             // Get available queue family properties
             uint queueCount;

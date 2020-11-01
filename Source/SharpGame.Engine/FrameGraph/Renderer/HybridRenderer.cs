@@ -143,24 +143,24 @@ namespace SharpGame
             Format depthFormat = Device.GetSupportedDepthFormat();
 
             albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
-                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
+                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, 
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
             normalRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
-                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
+                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
             depthRT = new RenderTexture(width, height, 1, Format.R32g32b32a32Sfloat,
-                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Color,
+                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
 
             depthHWRT =/* Graphics.DepthRT; */new RenderTexture(width, height, 1, depthFormat,
-                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth /*| ImageAspectFlags.Stencil*/,
+                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, /*ImageAspectFlags.Depth | ImageAspectFlags.Stencil,*/
                         SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal
                         );
 
-            geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.view, normalRT.view, depthRT.view, depthHWRT.view });
+            geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, depthRT.imageView, depthHWRT.imageView });
 
 #if HWDEPTH
             deferredSet1[0] = deferredSet1[1] = deferredSet1[2] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
@@ -202,13 +202,10 @@ namespace SharpGame
             {
                 Queue = SubmitQueue.EarlyGraphics,
 
-                //RenderPass = clusterRP,
-                //Framebuffer = clusterFB,
                 renderPassCreator = OnCreateClusterRenderPass,
 
-
                 frameBufferCreator = (rp) => {
-                    clusterFB = Framebuffer.Create(rp, width, height, 1, new[] { depthHWRT.view });
+                    clusterFB = Framebuffer.Create(rp, width, height, 1, new[] { depthHWRT.imageView });
                     return new Framebuffer[3] { clusterFB, clusterFB, clusterFB };
                 },
 
@@ -237,9 +234,6 @@ namespace SharpGame
             var renderPass = Graphics.CreateRenderPass(false, false);
             translucentPass = new FrameGraphPass
             {
-                //RenderPass = renderPass,
-                //Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
-
                 renderPassCreator = () => Graphics.CreateRenderPass(false, false),
                 frameBufferCreator = (rp) => Graphics.CreateSwapChainFramebuffers(rp),
 
@@ -280,16 +274,16 @@ namespace SharpGame
 
         protected override void OnBeginPass(FrameGraphPass renderPass, CommandBuffer cmd)
         {
-            int imageIndex = Graphics.WorkContext;
+            int workContext = Graphics.WorkContext;
             if (renderPass == geometryPass)
             {
-                var queryPool = query_pool[imageIndex];
+                var queryPool = query_pool[workContext];
                 //cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
 
             }
             else if (renderPass == translucentPass)
             {
-                var queryPool = query_pool[imageIndex];
+                var queryPool = query_pool[workContext];
                 //cb.ResetQueryPool(queryPool, 10, 4);
                 //cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_ONSCREEN * 2);
 
@@ -298,20 +292,20 @@ namespace SharpGame
 
         protected override void OnEndPass(FrameGraphPass renderPass, CommandBuffer cmd)
         {
-            int imageIndex = Graphics.WorkContext;
+            int workContext = Graphics.WorkContext;
 
             if (renderPass == geometryPass)
             {
-                var queryPool = query_pool[imageIndex];
+                var queryPool = query_pool[workContext];
                 //cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);
             }
             else if (renderPass == translucentPass)
             {
-                var queryPool = query_pool[imageIndex];
+                var queryPool = query_pool[workContext];
 
                 //cb.WriteTimestamp(PipelineStageFlags.ColorAttachmentOutput, queryPool, QUERY_ONSCREEN * 2 + 1);
 
-                ClearBuffers(cmd, imageIndex);
+                ClearBuffers(cmd, workContext);
             }
         }
     }

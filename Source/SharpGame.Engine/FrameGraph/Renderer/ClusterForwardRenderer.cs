@@ -29,7 +29,7 @@ namespace SharpGame
             uint height = (uint)Graphics.Height;
 
             var depthRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
-            clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.view });
+            clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.imageView });
 
             //FrameGraph.AddDebugImage(depthRT.view);
             return new Framebuffer[] { clusterFB, clusterFB, clusterFB };

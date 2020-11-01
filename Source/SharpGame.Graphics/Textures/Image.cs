@@ -12,13 +12,11 @@ namespace SharpGame
         internal VkDeviceMemory memory;
         internal ulong allocationSize;
         internal uint memoryTypeIndex;
-
         public ImageType imageType;
         public Format format;
         public Extent3D extent;
         public uint mipLevels;
         public uint arrayLayers;
-
 
         internal Image(VkImage handle)
         {

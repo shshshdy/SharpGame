@@ -18,35 +18,39 @@ namespace SharpGame
         public bool isSwapchain;
     }
 
-    public class RenderTexture : RefCounted, IBindableResource
+    public class RenderTexture : Texture
     {
-        public Image image;
-        public ImageView view;
-        public Sampler sampler;
+        public ImageAspectFlags aspectMask;
+        public SampleCountFlags samples;
+        public bool isSwapchain;
 
-        RenderTextureInfo renderTargetInfo;
-
-        public ref RenderTextureInfo Info => ref renderTargetInfo;
-
-        internal DescriptorImageInfo descriptor;
+        public RenderTexture(Image swapchainImage)
+        {
+            this.width = swapchainImage.extent.width;
+            this.height = swapchainImage.extent.height;
+            this.layers = 1;
+            this.format = swapchainImage.format;
+            this.imageUsageFlags = ImageUsageFlags.ColorAttachment;
+            this.aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;
+            this.samples = SampleCountFlags.Count1;
+            this.imageLayout = ImageLayout.ColorAttachmentOptimal;
+            this.isSwapchain = true;
+        }
         
-        public RenderTexture(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, ImageAspectFlags aspectMask,
+        public RenderTexture(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, //ImageAspectFlags aspectMask,
             SampleCountFlags samples = SampleCountFlags.Count1, ImageLayout imageLayout = ImageLayout.Undefined)
         {
-            renderTargetInfo = new RenderTextureInfo
-            {
-                width = width,
-                height = height,
-                layers = layers,
-                format = format,
-                usage = usage,
-                aspectMask = aspectMask,
-                samples = samples,
-                imageLayout = imageLayout,
-                isSwapchain = false,
-            };
+            this.width = width;
+            this.height = height;
+            this.layers = layers;
+            this.format = format;
+            this.imageUsageFlags = usage;
+            this.aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;// aspectMask;
+            this.samples = samples;
+            this.imageLayout = imageLayout;
+            this.isSwapchain = false;
 
-            Create(renderTargetInfo);
+            Create();
         }
 
         public RenderTexture(in RenderTextureInfo info)
@@ -56,18 +60,25 @@ namespace SharpGame
 
         void Create(in RenderTextureInfo info)
         {
-            renderTargetInfo = info;
-            image = Image.Create(info.width, info.height, ImageCreateFlags.None, info.layers, 1, info.format, SampleCountFlags.Count1, info.usage);
-            view = ImageView.Create(image, info.layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, info.format, info.aspectMask, 0, 1, 0, info.layers);
-            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
-            descriptor = new DescriptorImageInfo(sampler, view, info.imageLayout);
+            this.width = info.width;
+            this.height = info.height;
+            this.layers = info.layers;
+            this.format = info.format;
+            this.imageUsageFlags = info.usage;
+            this.aspectMask = info.aspectMask;
+            this.samples = info.samples;
+            this.imageLayout = info.imageLayout;
+            this.isSwapchain = info.isSwapchain;
+
+            Create();
         }
 
-        protected override void Destroy()
+        protected void Create()
         {
-            image?.Dispose();
-            view?.Dispose();
-            sampler?.Dispose();
+            image = Image.Create(width, height, ImageCreateFlags.None, layers, 1, format, this.samples, imageUsageFlags);
+            imageView = ImageView.Create(image, layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
+            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+            descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
         }
     }
 

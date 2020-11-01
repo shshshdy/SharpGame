@@ -386,6 +386,21 @@ namespace SharpGame
             return Format.Undefined;
         }
 
+        public static bool IsDepthFormat(Format format)
+        {
+            switch (format)
+            {
+                case Format.D32SfloatS8Uint:
+                case Format.D32Sfloat:
+                case Format.D24UnormS8Uint:
+                case Format.D16UnormS8Uint:
+                case Format.D16Unorm:
+                    return true;
+            }
+
+            return false;
+        }
+
         public static void GetPhysicalDeviceFormatProperties(VkFormat format, out VkFormatProperties pFeatures)
         {
             vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, out pFeatures);

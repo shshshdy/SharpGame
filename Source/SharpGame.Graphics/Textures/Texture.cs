@@ -10,21 +10,20 @@ namespace SharpGame
 
     public partial class Texture : Resource, IBindableResource
     {
+        public Image image;
+        public ImageView imageView;
+        public Sampler sampler;
+
         public uint width;
         public uint height;
         public uint layers;
         public uint mipLevels;
         public uint depth;
-
         public Format format;
         public ImageCreateFlags imageCreateFlags = ImageCreateFlags.None;
         public ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled;
         public ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal;
         public SamplerAddressMode samplerAddressMode = SamplerAddressMode.Repeat;
-
-        public Image image;
-        public ImageView imageView;
-        public Sampler sampler;
 
         internal DescriptorImageInfo descriptor;
 
@@ -54,7 +53,8 @@ namespace SharpGame
 
             Buffer stagingBuffer = Buffer.CreateStagingBuffer(totalSize, IntPtr.Zero);
 
-            image = Image.Create(width, height, imageCreateFlags/*layers == 6 ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None*/, layers, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
+            image = Image.Create(width, height, imageCreateFlags/*layers == 6 ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None*/, 
+                layers, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
 
             IntPtr mapped = stagingBuffer.Map();
             // Setup buffer copy regions for each face including all of it's miplevels

@@ -22,10 +22,11 @@ namespace SharpGame
 
         internal VkDescriptorSet descriptorSet;
         internal VkDescriptorPool descriptorPool;
+        internal uint count = 0;
         internal WriteDescriptorSet[] writeDescriptorSets;
 
-        List<DescriptorImageInfo> descriptorImageInfos = new List<DescriptorImageInfo>();
-        List<DescriptorBufferInfo> descriptorBufferInfos = new List<DescriptorBufferInfo>();
+        NativeList<DescriptorImageInfo> descriptorImageInfos = new NativeList<DescriptorImageInfo>();
+        NativeList<DescriptorBufferInfo> descriptorBufferInfos = new NativeList<DescriptorBufferInfo>();
 
         public ResourceSet(ResourceLayout resLayout)
         {
@@ -65,7 +66,7 @@ namespace SharpGame
             }
 
             System.Diagnostics.Debug.Assert(bindables.Length == resLayout.NumBindings);
-
+            //count = (uint)bindables.Length;
             writeDescriptorSets = new WriteDescriptorSet[resLayout.NumBindings];
 
             for(uint i = 0; i < resLayout.NumBindings; i++)
@@ -211,16 +212,18 @@ namespace SharpGame
                 imageLayout = (VkImageLayout)imageLayout,
             };
         }
-        /*
+
         public static bool operator==(in DescriptorImageInfo left, in DescriptorImageInfo right)
         {
-            return left.native == right.native;
+            return left.native.sampler == right.native.sampler
+                && left.native.imageView == right.native.imageView
+                && left.native.imageLayout == right.native.imageLayout;
         }
 
         public static bool operator !=(in DescriptorImageInfo left, in DescriptorImageInfo right)
         {
-            return left.native != right.native;
-        }*/
+            return !(left == right);
+        }
     }
 
     public struct DescriptorBufferInfo
@@ -234,6 +237,18 @@ namespace SharpGame
             this.buffer = buffer.buffer;
             this.offset = offset;
             this.range = range;
+        }
+
+        public static bool operator ==(in DescriptorBufferInfo left, in DescriptorBufferInfo right)
+        {
+            return left.buffer == right.buffer
+                && left.offset == right.offset
+                && left.range == right.range;
+        }
+
+        public static bool operator !=(in DescriptorBufferInfo left, in DescriptorBufferInfo right)
+        {
+            return !(left == right);
         }
     }
 

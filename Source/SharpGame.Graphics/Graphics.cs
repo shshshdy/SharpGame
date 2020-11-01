@@ -305,7 +305,7 @@ namespace SharpGame
         {
             Span<VkImageView> attachments = stackalloc VkImageView[2];
             // Depth/Stencil attachment is the same for all frame buffers
-            attachments[1] = depthStencil.view.handle;
+            attachments[1] = depthStencil.imageView.handle;
 
             var frameBufferCreateInfo = new FramebufferCreateInfo
             {
@@ -330,7 +330,8 @@ namespace SharpGame
         protected void CreateDepthStencil()
         {
             depthStencil?.Dispose();
-            depthStencil = new RenderTexture((uint)Width, (uint)Height, 1, DepthFormat, ImageUsageFlags.DepthStencilAttachment, ImageAspectFlags.Depth | ImageAspectFlags.Stencil);
+            depthStencil = new RenderTexture((uint)Width, (uint)Height, 1, DepthFormat, ImageUsageFlags.DepthStencilAttachment
+                /*,ImageAspectFlags.Depth | ImageAspectFlags.Stencil*/);
         }
 
         private void CreateCommandPool()
