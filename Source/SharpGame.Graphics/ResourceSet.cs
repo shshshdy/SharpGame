@@ -26,9 +26,6 @@ namespace SharpGame
         internal WriteDescriptorSet[] writeDescriptorSets;
         internal bool[] updated;
 
-        NativeList<DescriptorImageInfo> descriptorImageInfos = new NativeList<DescriptorImageInfo>();
-        NativeList<DescriptorBufferInfo> descriptorBufferInfos = new NativeList<DescriptorBufferInfo>();
-
         public ResourceSet(ResourceLayout resLayout)
         {
             resLayout.Build();
@@ -38,12 +35,12 @@ namespace SharpGame
 
             unsafe
             {
-                VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo.New();
+                var descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo.New();
                 descriptorSetAllocateInfo.descriptorPool = descriptorPool;
                 descriptorSetAllocateInfo.pSetLayouts = (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.DescriptorSetLayout);
                 descriptorSetAllocateInfo.descriptorSetCount = 1;
 
-                VulkanNative.vkAllocateDescriptorSets(Graphics.device, ref descriptorSetAllocateInfo, out descriptorSet);
+                descriptorSet = Device.AllocateDescriptorSets(ref descriptorSetAllocateInfo);
             }
 
             writeDescriptorSets = new WriteDescriptorSet[resLayout.NumBindings];
@@ -59,12 +56,12 @@ namespace SharpGame
 
             unsafe
             {
-                VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo.New();
+                var descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo.New();
                 descriptorSetAllocateInfo.descriptorPool = descriptorPool;
                 descriptorSetAllocateInfo.pSetLayouts = (VkDescriptorSetLayout*)Unsafe.AsPointer(ref resLayout.DescriptorSetLayout);
                 descriptorSetAllocateInfo.descriptorSetCount = 1;
 
-                VulkanNative.vkAllocateDescriptorSets(Graphics.device, ref descriptorSetAllocateInfo, out descriptorSet);
+                descriptorSet = Device.AllocateDescriptorSets(ref descriptorSetAllocateInfo);
             }
 
             System.Diagnostics.Debug.Assert(bindables.Length == resLayout.NumBindings);
@@ -83,7 +80,7 @@ namespace SharpGame
 
         public void Dispose()
         {
-            VulkanNative.vkFreeDescriptorSets(Graphics.device, descriptorPool, 1, ref descriptorSet);
+            Device.FreeDescriptorSets(descriptorPool, 1, ref descriptorSet);
             Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
         }
 

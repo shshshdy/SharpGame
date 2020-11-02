@@ -38,11 +38,9 @@ namespace SharpGame
             this.pipelineLayout = pipelineLayout;
 
             foreach (var layout in pipelineLayout.ResourceLayout)
-            {
-                if (layout.DefaultResourcSet == DefaultResourcSet.None)
-                    ResourceSet.Add(new ResourceSet(layout));
+            {                  
+                ResourceSet.Add(new ResourceSet(layout));
             }
-
 
             if (pipelineLayout.PushConstantNames != null)
             {

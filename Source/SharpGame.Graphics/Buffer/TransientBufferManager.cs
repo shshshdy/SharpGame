@@ -24,11 +24,33 @@ namespace SharpGame
         FastList<TransientBufferDesc> buffers = new FastList<TransientBufferDesc>();
         public BufferUsageFlags BufferUsageFlags { get; }
         public uint Size { get; }
-
-        public TransientBufferManager(BufferUsageFlags useage, uint size)
+        public ulong alignment;
+        public TransientBufferManager(BufferUsageFlags usage, uint size)
         {
-            BufferUsageFlags = useage;
+            BufferUsageFlags = usage;
             Size = size;
+
+            if (usage == BufferUsageFlags.UniformBuffer)
+            {
+                alignment = Device.Properties.limits.minUniformBufferOffsetAlignment;
+            }
+            else if (usage == BufferUsageFlags.StorageBuffer)
+            {
+                alignment = Device.Properties.limits.minStorageBufferOffsetAlignment;
+            }
+            else if (usage == BufferUsageFlags.UniformTexelBuffer)
+            {
+                alignment = Device.Properties.limits.minTexelBufferOffsetAlignment;
+            }
+            else if (usage == BufferUsageFlags.IndexBuffer || usage == BufferUsageFlags.VertexBuffer || usage == BufferUsageFlags.IndirectBuffer)
+            {
+                // Used to calculate the offset, required when allocating memory (its value should be power of 2)
+                alignment = 16;
+            }
+            else
+            {
+                throw new Exception("Usage not recognised");
+            }
         }
 
         protected override void Destroy(bool disposing)
@@ -54,7 +76,7 @@ namespace SharpGame
                 {
                     tb.offset = tbc.size;
                     tb.buffer = tbc.buffer;
-                    tbc.size += MathUtil.Align(size, (uint)Device.Properties.limits.nonCoherentAtomSize);
+                    tbc.size += MathUtil.Align(size, (uint)alignment);
                     return tb;
                 }
             }
@@ -62,7 +84,7 @@ namespace SharpGame
             ref TransientBufferDesc desc = ref CreateNewBuffer();
             tb.offset = desc.size;
             tb.buffer = desc.buffer;
-            desc.size += MathUtil.Align(size, (uint)Device.Properties.limits.nonCoherentAtomSize);
+            desc.size += MathUtil.Align(size, (uint)alignment);
             return tb;
         }
 

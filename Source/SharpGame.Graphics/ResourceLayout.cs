@@ -60,7 +60,6 @@ namespace SharpGame
     public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
     {
         public int Set { get; set; }
-        public DefaultResourcSet DefaultResourcSet { get; set; } = DefaultResourcSet.None;
         public List<ResourceLayoutBinding> Bindings { get; set; } = new List<ResourceLayoutBinding>();
 
         private VkDescriptorSetLayoutBinding[] bindings;
@@ -117,24 +116,14 @@ namespace SharpGame
             descriptorSetLayoutCreateInfo.pBindings = (VkDescriptorSetLayoutBinding*)Utilities.AsPointer(ref bindings[0]);
             descriptorSetLayoutCreateInfo.bindingCount = (uint)bindings.Length;
 
-            VulkanNative.vkCreateDescriptorSetLayout(Graphics.device, ref descriptorSetLayoutCreateInfo, IntPtr.Zero, out descriptorSetLayout);
+            descriptorSetLayout = Device.CreateDescriptorSetLayout(ref descriptorSetLayoutCreateInfo);
 
             descriptorResourceCounts = new DescriptorResourceCounts();            
             foreach (var binding in bindings)
             {
                 descriptorResourceCounts[(int)binding.descriptorType] += 1;
             }
-
-            if (GetBinding("CameraVS") != null)
-            {
-                DefaultResourcSet |= DefaultResourcSet.Set0;
-            }
-
-            if (GetBinding("CameraPS") != null)
-            {
-                DefaultResourcSet |= DefaultResourcSet.Set1;
-            }
-
+            
             return this;
         }
 
@@ -189,7 +178,7 @@ namespace SharpGame
         {
             if (descriptorSetLayout != 0)
             {
-                VulkanNative.vkDestroyDescriptorSetLayout(Graphics.device, descriptorSetLayout, IntPtr.Zero);
+                Device.DestroyDescriptorSetLayout(descriptorSetLayout);
             }
         }
 

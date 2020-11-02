@@ -178,7 +178,7 @@ namespace SharpGame
         }
 
         static VkResult CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
-            bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute)
+            bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
         {
             // Desired queues need to be requested upon logical device creation
             // Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if the application
@@ -351,6 +351,11 @@ namespace SharpGame
         public static void Shutdown()
         {
             debugReportCallbackExt?.Dispose();
+        }
+
+        public static void WaitIdle()
+        {
+            VulkanUtil.CheckResult(vkDeviceWaitIdle(device));
         }
 
         public static VkQueue GetDeviceQueue(uint queueFamilyIndex, uint queueIndex)
@@ -620,6 +625,16 @@ namespace SharpGame
             return (flags & VkMemoryPropertyFlags.HostVisible) == 0;
         }
 
+        public static void FlushMappedMemoryRanges(uint memoryRangeCount, ref VkMappedMemoryRange pMemoryRanges)
+        {
+            VulkanUtil.CheckResult(vkFlushMappedMemoryRanges(device, memoryRangeCount, ref pMemoryRanges));
+        }
+
+        public static void InvalidateMappedMemoryRanges(uint memoryRangeCount, ref VkMappedMemoryRange pMemoryRanges)
+        {
+            VulkanUtil.CheckResult(vkInvalidateMappedMemoryRanges(device, memoryRangeCount, ref pMemoryRanges));
+        }
+
         public static void GetImageMemoryRequirements(VkImage image, out VkMemoryRequirements pMemoryRequirements)
         {
             vkGetImageMemoryRequirements(device, image, out pMemoryRequirements);
@@ -740,9 +755,27 @@ namespace SharpGame
             vkFreeMemory(device, memory, null);
         }
 
+
+        public static VkDescriptorPool CreateDescriptorPool(ref VkDescriptorPoolCreateInfo pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateDescriptorPool(device, ref pCreateInfo, null, out VkDescriptorPool pDescriptorPool));
+            return pDescriptorPool;
+        }
+
+        public static void DestroyDescriptorPool(VkDescriptorPool descriptorPool)
+        {
+            vkDestroyDescriptorPool(device, descriptorPool, IntPtr.Zero);
+        }
+
         public static void DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
         {
             vkDestroyPipelineLayout(device, pipelineLayout, null);
+        }
+
+        public static VkDescriptorSetLayout CreateDescriptorSetLayout(ref VkDescriptorSetLayoutCreateInfo pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateDescriptorSetLayout(device, ref pCreateInfo, null, out var setLayout));
+            return setLayout;
         }
 
         public static void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
@@ -750,9 +783,20 @@ namespace SharpGame
             vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null);
         }
 
+        public static VkDescriptorSet AllocateDescriptorSets(ref VkDescriptorSetAllocateInfo pAllocateInfo)
+        {
+            VulkanUtil.CheckResult(vkAllocateDescriptorSets(device, ref pAllocateInfo, out VkDescriptorSet pDescriptorSets));
+            return pDescriptorSets;
+        }
+
         public static void UpdateDescriptorSets(uint descriptorWriteCount, ref VkWriteDescriptorSet pDescriptorWrites, uint descriptorCopyCount, IntPtr pDescriptorCopies)
         {
             vkUpdateDescriptorSets(device, descriptorWriteCount, ref pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
+        }
+
+        public static void FreeDescriptorSets(VkDescriptorPool descriptorPool, uint descriptorSetCount, ref VkDescriptorSet pDescriptorSets)
+        {
+            VulkanUtil.CheckResult(vkFreeDescriptorSets(device, descriptorPool, descriptorSetCount, ref pDescriptorSets));
         }
     }
 

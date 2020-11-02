@@ -9,118 +9,7 @@ namespace SharpGame
     using System.Threading;
     using static VulkanNative;
 
-    public enum PipelineBindPoint
-    {
-        Graphics = 0,
-        Compute = 1
-    }
-
-    public enum CommandBufferLevel
-    {
-        Primary = 0,
-        Secondary = 1
-    }
-
-    public struct RenderPassBeginInfo
-    {
-        public RenderPass renderPass;
-        public Framebuffer framebuffer;
-        public Rect2D renderArea;
-        public ClearValue[] clearValues;
-        public int numClearValues;
-
-        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
-        {
-            this.renderPass = renderPass;
-            this.framebuffer = framebuffer;
-            this.renderArea = renderArea;
-            this.clearValues = clearValues;
-            numClearValues = clearValues.Length;
-        }
-
-        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, ClearValue[] clearValues, int num)
-        {
-            this.renderPass = renderPass;
-            this.framebuffer = framebuffer;
-            this.renderArea = renderArea;
-            this.clearValues = clearValues;
-            numClearValues = num;
-        }
-
-        public unsafe void ToNative(out VkRenderPassBeginInfo native)
-        {
-            native = VkRenderPassBeginInfo.New();
-            native.renderPass = framebuffer.renderPass.handle;
-            native.framebuffer = framebuffer.handle;
-            native.renderArea = new VkRect2D(renderArea.x, renderArea.y, renderArea.width, renderArea.height);
-
-            if (clearValues != null && clearValues.Length > 0)
-            {
-                native.clearValueCount = (uint)numClearValues;
-                native.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues[0]);
-            }
-            else
-            {
-                native.clearValueCount = 0;
-                native.pClearValues = null;
-            }
-        }
-
-    }
-
-    [Flags]
-    public enum CommandBufferUsageFlags
-    {
-        None = 0,
-        OneTimeSubmit = 1,
-        RenderPassContinue = 2,
-        SimultaneousUse = 4
-    }
-
-    public enum QueryControlFlags
-    {
-        None = 0,
-        Precise = 1
-    }
-
-    public enum QueryPipelineStatisticFlags
-    {
-        None = 0,
-        InputAssemblyVertices = 1,
-        InputAssemblyPrimitives = 2,
-        VertexShaderInvocations = 4,
-        GeometryShaderInvocations = 8,
-        GeometryShaderPrimitives = 16,
-        ClippingInvocations = 32,
-        ClippingPrimitives = 64,
-        FragmentShaderInvocations = 128,
-        TessellationControlShaderPatches = 256,
-        TessellationEvaluationShaderInvocations = 512,
-        ComputeShaderInvocations = 1024
-    }
-
-    public struct CommandBufferInheritanceInfo
-    {
-        public RenderPass renderPass;
-        public uint subpass;
-        public Framebuffer framebuffer;
-        public bool occlusionQueryEnable;
-        public QueryControlFlags queryFlags;
-        public QueryPipelineStatisticFlags pipelineStatistics;
-
-        public unsafe void ToNative(out VkCommandBufferInheritanceInfo native)
-        {
-            native = VkCommandBufferInheritanceInfo.New();
-            native.renderPass = renderPass.handle;
-            native.subpass = subpass;
-            native.framebuffer = framebuffer.handle;
-            native.occlusionQueryEnable = occlusionQueryEnable;
-            native.queryFlags = (VkQueryControlFlags)queryFlags;
-            native.pipelineStatistics = (VkQueryPipelineStatisticFlags)pipelineStatistics;
-        }
-    }
-
-    public partial class CommandBuffer : DisposeBase
+    public unsafe partial class CommandBuffer : DisposeBase
     {
         internal VkCommandBuffer commandBuffer;
         public RenderPass renderPass;
@@ -128,7 +17,10 @@ namespace SharpGame
         public bool IsOpen => opened;
         public bool NeedSubmit { get; set; }
 
-        Dictionary<IntPtr, ResourceSet> resourceSet;
+        VkPipeline currentPipeline;
+        FixedArray8<VkDescriptorSet> descriptorSets = new FixedArray8<VkDescriptorSet>();
+        FixedArray8<uint> dynamicOffsetCounts = new FixedArray8<uint>();
+        FixedArray8<uint> dynamicOffsets = new FixedArray8<uint>();
 
         internal CommandBuffer(VkCommandBuffer cmdBuffer)
         {
@@ -158,6 +50,7 @@ namespace SharpGame
             }
             opened = true;
             NeedSubmit = true;
+            ClearDescriptorSets();
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -173,6 +66,7 @@ namespace SharpGame
             renderPassBeginInfo.ToNative(out VkRenderPassBeginInfo vkRenderPassBeginInfo);
             vkCmdBeginRenderPass(commandBuffer, ref vkRenderPassBeginInfo, (VkSubpassContents)contents);
             renderPass = renderPassBeginInfo.renderPass;
+            ClearDescriptorSets();
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -193,11 +87,25 @@ namespace SharpGame
             vkCmdSetViewport(commandBuffer, 0, 1, Utilities.AsIntPtr(in pViewports));
         }
 
+        void ClearDescriptorSets()
+        {
+            currentPipeline = default;
+            descriptorSets.Clear();
+            dynamicOffsetCounts.Clear();
+            dynamicOffsets.Clear();
+        }
+
         [MethodImpl((MethodImplOptions)0x100)]
         public void BindComputePipeline(Pass pass)
         {
             var pipe = pass.GetComputePipeline();
-            vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Compute, pipe.handle);
+
+            if(pipe.handle != currentPipeline)
+            {
+                ClearDescriptorSets();
+                currentPipeline = pipe.handle;
+                vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Compute, pipe.handle);
+            }
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -236,7 +144,17 @@ namespace SharpGame
         public unsafe void BindResourceSet(PipelineBindPoint pipelineBindPoint,
             PipelineLayout pipelineLayout, int set, ResourceSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
         {
-            vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
+            if(descriptorSets[set] != pDescriptorSets.descriptorSet
+                || dynamicOffsetCounts[set] != dynamicOffsetCount
+                || (pDynamicOffsets != null && dynamicOffsets[set] != *pDynamicOffsets))
+            {
+
+                descriptorSets[set] = pDescriptorSets.descriptorSet;
+                dynamicOffsetCounts[set] = dynamicOffsetCount;
+                if(dynamicOffsetCount > 0)
+                dynamicOffsets[set] = *pDynamicOffsets;
+                vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
+            }
         }
 
         /*
@@ -250,7 +168,15 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public void BindPipeline(PipelineBindPoint pipelineBindPoint, Pipeline pipeline)
         {
-            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.handle);
+            if (pipeline.handle != currentPipeline)
+            {
+                ClearDescriptorSets();
+                currentPipeline = pipeline.handle;
+
+                vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.handle);
+            }
+
+            //vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.handle);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -592,274 +518,116 @@ namespace SharpGame
         }
     }
 
-
-    /// <summary>
-    /// Structure specifying a clear color value.
-    /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct ClearColorValue
+    public enum PipelineBindPoint
     {
-        /// <summary>
-        /// Are the color clear values when the format of the image or attachment is one of the
-        /// formats other than signed integer or unsigned integer. Floating point values are
-        /// automatically converted to the format of the image, with the clear value being treated as
-        /// linear if the image is sRGB.
-        /// </summary>
-        [FieldOffset(0)] public Color4 Float4;
-        /// <summary>
-        /// Are the color clear values when the format of the image or attachment is signed integer.
-        /// Signed integer values are converted to the format of the image by casting to the smaller
-        /// type (with negative 32-bit values mapping to negative values in the smaller type). If the
-        /// integer clear value is not representable in the target type (e.g. would overflow in
-        /// conversion to that type), the clear value is undefined.
-        /// </summary>
-        //[FieldOffset(0)] public Int4 Int4;
+        Graphics = 0,
+        Compute = 1
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ClearColorValue"/> structure.
-        /// </summary>
-        /// <param name="value">
-        /// Are the color clear values when the format of the image or attachment is one of the
-        /// formats other than signed integer or unsigned integer. Floating point values are
-        /// automatically converted to the format of the image, with the clear value being treated as
-        /// linear if the image is sRGB.
-        /// </param>
-        public ClearColorValue(Color4 value) : this()
+    public enum CommandBufferLevel
+    {
+        Primary = 0,
+        Secondary = 1
+    }
+
+    public struct RenderPassBeginInfo
+    {
+        public RenderPass renderPass;
+        public Framebuffer framebuffer;
+        public Rect2D renderArea;
+        public ClearValue[] clearValues;
+        public int numClearValues;
+
+        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
         {
-            Float4 = value;
+            this.renderPass = renderPass;
+            this.framebuffer = framebuffer;
+            this.renderArea = renderArea;
+            this.clearValues = clearValues;
+            numClearValues = clearValues.Length;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ClearColorValue"/> structure.
-        /// </summary>
-        /// <param name="value">
-        /// Are the color clear values when the format of the image or attachment is signed integer.
-        /// Signed integer values are converted to the format of the image by casting to the smaller
-        /// type (with negative 32-bit values mapping to negative values in the smaller type). If the
-        /// integer clear value is not representable in the target type (e.g. would overflow in
-        /// conversion to that type), the clear value is undefined.
-        /// </param>
-//         public ClearColorValue(Int4 value) : this()
-//         {
-//             Int4 = value;
-//         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ClearColorValue"/> structure.
-        /// </summary>
-        /// <param name="r">The red clear value.</param>
-        /// <param name="g">The green clear value.</param>
-        /// <param name="b">The blue clear value.</param>
-        /// <param name="a">The alpha clear value.</param>
-        public ClearColorValue(float r, float g, float b, float a = 1.0f) : this()
+        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, ClearValue[] clearValues, int num)
         {
-            Float4 = new Color4(r, g, b, a);
-        }
-    }
-
-    /// <summary>
-    /// Structure specifying a clear depth stencil value.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ClearDepthStencilValue
-    {
-        /// <summary>
-        /// The clear value for the depth aspect of the depth/stencil attachment. It is a
-        /// floating-point value which is automatically converted to the attachment’s format.
-        /// <para>Must be between 0.0 and 1.0, inclusive.</para>
-        /// </summary>
-        public float Depth;
-        /// <summary>
-        /// The clear value for the stencil aspect of the depth/stencil attachment. It is a 32-bit
-        /// integer value which is converted to the attachment's format by taking the appropriate
-        /// number of LSBs.
-        /// </summary>
-        public int Stencil;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ClearDepthStencilValue"/> structure.
-        /// </summary>
-        /// <param name="depth">
-        /// The clear value for the depth aspect of the depth/stencil attachment. It is a
-        /// floating-point value which is automatically converted to the attachment’s format.
-        /// </param>
-        /// <param name="stencil">
-        /// The clear value for the stencil aspect of the depth/stencil attachment. It is a 32-bit
-        /// integer value which is converted to the attachment's format by taking the appropriate
-        /// number of LSBs.
-        /// </param>
-        public ClearDepthStencilValue(float depth, int stencil)
-        {
-            Depth = depth;
-            Stencil = stencil;
-        }
-    }
-
-    /// <summary>
-    /// Structure specifying a clear value.
-    /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct ClearValue
-    {
-        /// <summary>
-        /// Specifies the color image clear values to use when clearing a color image or attachment.
-        /// </summary>
-        [FieldOffset(0)] public ClearColorValue Color;
-        /// <summary>
-        /// Specifies the depth and stencil clear values to use when clearing a depth/stencil image
-        /// or attachment.
-        /// </summary>
-        [FieldOffset(0)] public ClearDepthStencilValue DepthStencil;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ClearValue"/> structure.
-        /// </summary>
-        /// <param name="color">
-        /// Specifies the color image clear values to use when clearing a color image or attachment.
-        /// </param>
-        public ClearValue(ClearColorValue color) : this()
-        {
-            Color = color;
+            this.renderPass = renderPass;
+            this.framebuffer = framebuffer;
+            this.renderArea = renderArea;
+            this.clearValues = clearValues;
+            numClearValues = num;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ClearValue"/> structure.
-        /// </summary>
-        /// <param name="depthStencil">
-        /// Specifies the depth and stencil clear values to use when clearing a depth/stencil image
-        /// or attachment.
-        /// </param>
-        public ClearValue(ClearDepthStencilValue depthStencil) : this()
+        public unsafe void ToNative(out VkRenderPassBeginInfo native)
         {
-            DepthStencil = depthStencil;
-        }
+            native = VkRenderPassBeginInfo.New();
+            native.renderPass = framebuffer.renderPass.handle;
+            native.framebuffer = framebuffer.handle;
+            native.renderArea = new VkRect2D(renderArea.x, renderArea.y, renderArea.width, renderArea.height);
 
-        /// <summary>
-        /// Implicitly converts an instance of <see cref="ClearColorValue"/> to an instance of <see cref="ClearValue"/>.
-        /// </summary>
-        /// <param name="value">Instance to convert.</param>
-        public static implicit operator ClearValue(ClearColorValue value) => new ClearValue(value);
-
-        /// <summary>
-        /// Implicitly converts an instance of <see cref="ClearDepthStencilValue"/> to an instance of
-        /// <see cref="ClearValue"/>.
-        /// </summary>
-        /// <param name="value">Instance to convert.</param>
-        public static implicit operator ClearValue(ClearDepthStencilValue value) => new ClearValue(value);
-    }
-
-    /// <summary>
-    /// Specify how commands in the first subpass of a render pass are provided.
-    /// </summary>
-    public enum SubpassContents
-    {
-        /// <summary>
-        /// Specifies that the contents of the subpass will be recorded inline in the primary command
-        /// buffer, and secondary command buffers must not be executed within the subpass.
-        /// </summary>
-        Inline = 0,
-        /// <summary>
-        /// Specifies that the contents are recorded in secondary command buffers that will be called
-        /// from the primary command buffer, and <see cref="CommandBuffer.CmdExecuteCommands"/> is
-        /// the only valid command on the command buffer until <see
-        /// cref="CommandBuffer.vkCmdNextSubpass"/> or <see cref="CommandBuffer.CmdEndRenderPass"/>.
-        /// </summary>
-        SecondaryCommandBuffers = 1
-    }
-
-    public struct BufferCopy
-    {
-        public ulong srcOffset;
-        public ulong dstOffset;
-        public ulong size;
-    }
-
-    /// <summary>
-    /// Structure specifying an image resolve operation.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ImageResolve
-    {
-        /// <summary>
-        /// Specifies the image subresource of the source image data. Resolve of depth/stencil image
-        /// is not supported.
-        /// </summary>
-        public ImageSubresourceLayers SrcSubresource;
-        /// <summary>
-        /// Selects the initial <c>X</c>, <c>Y</c>, and <c>Z</c> offsets in texels of the sub-region
-        /// of the source image data.
-        /// </summary>
-        public Offset3D SrcOffset;
-        /// <summary>
-        /// Specifies the image subresource of the destination image data. Resolve of depth/stencil
-        /// image is not supported.
-        /// </summary>
-        public ImageSubresourceLayers DstSubresource;
-        /// <summary>
-        /// Selects the initial <c>X</c>, <c>Y</c>, and <c>Z</c> offsets in texels of the sub-region
-        /// of the destination image data.
-        /// </summary>
-        public Offset3D DstOffset;
-        /// <summary>
-        /// The size in texels of the source image to resolve in width, height and depth.
-        /// </summary>
-        public Extent3D Extent;
-    }
-
-    public struct BufferImageCopy
-    {
-        public ulong bufferOffset;
-        public uint bufferRowLength;
-        public uint bufferImageHeight;
-        public ImageSubresourceLayers imageSubresource;
-        public Offset3D imageOffset;
-        public Extent3D imageExtent;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct MemoryBarrier
-    {
-        internal VkMemoryBarrier native;
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemoryBarrier"/> structure.
-        /// </summary>
-        /// <param name="srcAccessMask">Specifies a source access mask.</param>
-        /// <param name="dstAccessMask">Specifies a destination access mask.</param>
-        public MemoryBarrier(AccessFlags srcAccessMask, AccessFlags dstAccessMask)
-        {
-            native = VkMemoryBarrier.New();
-            native.srcAccessMask = (VkAccessFlags)srcAccessMask;
-            native.dstAccessMask = (VkAccessFlags)dstAccessMask;
-        }
-    }
-
-    /// <summary>
-    /// Structure specifying a buffer memory barrier.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct BufferMemoryBarrier
-    {
-        public Buffer Buffer { set => native.buffer = value.buffer; }
-
-        internal VkBufferMemoryBarrier native;
-      
-        public BufferMemoryBarrier(Buffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ulong offset = 0, ulong size = WholeSize)
-            : this(buffer, srcAccessMask, dstAccessMask, uint.MaxValue, uint.MaxValue, offset, size)
-        {
-        }
-
-        public BufferMemoryBarrier(Buffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask,
-            uint srcQueueFamilyIndex, uint dstQueueFamilyIndex, ulong offset = 0, ulong size = WholeSize)
-        {
-            native = VkBufferMemoryBarrier.New();
-            native.buffer = buffer.buffer;
-            native.offset = offset;
-            native.size = size;
-            native.srcAccessMask = (VkAccessFlags)srcAccessMask;
-            native.dstAccessMask = (VkAccessFlags)dstAccessMask;
-            native.srcQueueFamilyIndex = srcQueueFamilyIndex;
-            native.dstQueueFamilyIndex = dstQueueFamilyIndex;
+            if (clearValues != null && clearValues.Length > 0)
+            {
+                native.clearValueCount = (uint)numClearValues;
+                native.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues[0]);
+            }
+            else
+            {
+                native.clearValueCount = 0;
+                native.pClearValues = null;
+            }
         }
 
     }
+
+    [Flags]
+    public enum CommandBufferUsageFlags
+    {
+        None = 0,
+        OneTimeSubmit = 1,
+        RenderPassContinue = 2,
+        SimultaneousUse = 4
+    }
+
+    public enum QueryControlFlags
+    {
+        None = 0,
+        Precise = 1
+    }
+
+    public enum QueryPipelineStatisticFlags
+    {
+        None = 0,
+        InputAssemblyVertices = 1,
+        InputAssemblyPrimitives = 2,
+        VertexShaderInvocations = 4,
+        GeometryShaderInvocations = 8,
+        GeometryShaderPrimitives = 16,
+        ClippingInvocations = 32,
+        ClippingPrimitives = 64,
+        FragmentShaderInvocations = 128,
+        TessellationControlShaderPatches = 256,
+        TessellationEvaluationShaderInvocations = 512,
+        ComputeShaderInvocations = 1024
+    }
+
+    public struct CommandBufferInheritanceInfo
+    {
+        public RenderPass renderPass;
+        public uint subpass;
+        public Framebuffer framebuffer;
+        public bool occlusionQueryEnable;
+        public QueryControlFlags queryFlags;
+        public QueryPipelineStatisticFlags pipelineStatistics;
+
+        public unsafe void ToNative(out VkCommandBufferInheritanceInfo native)
+        {
+            native = VkCommandBufferInheritanceInfo.New();
+            native.renderPass = renderPass.handle;
+            native.subpass = subpass;
+            native.framebuffer = framebuffer.handle;
+            native.occlusionQueryEnable = occlusionQueryEnable;
+            native.queryFlags = (VkQueryControlFlags)queryFlags;
+            native.pipelineStatistics = (VkQueryPipelineStatisticFlags)pipelineStatistics;
+        }
+    }
+
+
 }

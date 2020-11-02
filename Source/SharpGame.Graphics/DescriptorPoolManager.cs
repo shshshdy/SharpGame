@@ -69,14 +69,13 @@ namespace SharpGame
                 sizes[i].descriptorCount = descriptorCount;
             }
 
-            VkDescriptorPoolCreateInfo poolCI = VkDescriptorPoolCreateInfo.New();
+            var poolCI = VkDescriptorPoolCreateInfo.New();
             poolCI.flags = VkDescriptorPoolCreateFlags.FreeDescriptorSet;
             poolCI.poolSizeCount = poolSizeCount;
             poolCI.maxSets = totalSets;
             poolCI.pPoolSizes = sizes;
 
-            VkDescriptorPool descriptorPool;
-            VulkanUtil.CheckResult(vkCreateDescriptorPool(Graphics.device, ref poolCI, null, out descriptorPool));
+            var descriptorPool = Device.CreateDescriptorPool(ref poolCI);
             return new PoolInfo(descriptorPool, totalSets, descriptorCount);
         }
 
@@ -84,7 +83,7 @@ namespace SharpGame
         {
             foreach (PoolInfo poolInfo in _pools)
             {
-                vkDestroyDescriptorPool(Graphics.device, poolInfo.Pool, null);
+                Device.DestroyDescriptorPool(poolInfo.Pool);
             }
 
             _pools.Clear();

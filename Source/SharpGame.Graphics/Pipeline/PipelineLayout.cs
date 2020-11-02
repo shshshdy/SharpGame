@@ -101,7 +101,7 @@ namespace SharpGame
                 foreach(var resLayout in ResourceLayout)
                 {
                     resLayout.Build();
-                    DefaultResourcSet |= resLayout.DefaultResourcSet;
+                    //DefaultResourcSet |= resLayout.DefaultResourcSet;
                 }
 
                 VkDescriptorSetLayout* pSetLayouts = stackalloc VkDescriptorSetLayout[ResourceLayout.Length];

@@ -110,7 +110,8 @@ namespace SharpGame
 
         public void Flush()
         {
-            Buffer.Flush(MathUtil.Align(offset, (uint)Device.Properties.limits.nonCoherentAtomSize), 0);
+            if(offset > 0)
+                Buffer.Flush(MathUtil.Align(offset, (uint)Device.Properties.limits.nonCoherentAtomSize), 0);
         }
 
         protected override void Destroy(bool disposing)

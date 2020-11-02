@@ -30,9 +30,9 @@ namespace SharpGame
         public VkPhysicalDeviceFeatures enabledFeatures;
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
 
-        public static VkDevice device { get; protected set; }
         public static Queue GraphicsQueue { get; protected set; }
         public static Queue ComputeQueue { get; protected set; }
+        public static Queue TransferQueue { get; protected set; }
 
         public Format ColorFormat => Swapchain.ColorFormat;
         public Format DepthFormat { get; protected set; }
@@ -73,17 +73,18 @@ namespace SharpGame
             enabledFeatures.depthClamp = True;
             enabledFeatures.shaderStorageImageExtendedFormats = True;
 
-            device = Device.Create(settings, enabledFeatures, EnabledExtensions);
+            Device.Create(settings, enabledFeatures, EnabledExtensions);
 
             // Get a graphics queue from the Device
             GraphicsQueue = Queue.GetDeviceQueue(Device.QFGraphics, 0);
             ComputeQueue = Queue.GetDeviceQueue(Device.QFCompute, 0);
+            TransferQueue = Queue.GetDeviceQueue(Device.QFTransfer, 0);
+
             DepthFormat = Device.GetSupportedDepthFormat();
 
             primaryCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
 
             DescriptorPoolManager = new DescriptorPoolManager();
-
 
         }
 
@@ -363,7 +364,7 @@ namespace SharpGame
 
         public void WaitIdle()
         {
-            device.WaitIdle();
+            Device.WaitIdle();
         }
 
         public bool BeginRender()

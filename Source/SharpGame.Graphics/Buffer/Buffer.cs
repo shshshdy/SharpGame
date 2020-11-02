@@ -178,7 +178,7 @@ namespace SharpGame
             mappedRange.memory = memory;
             mappedRange.offset = offset;
             mappedRange.size = size;            
-            VulkanUtil.CheckResult(vkFlushMappedMemoryRanges(Graphics.device, 1, &mappedRange));
+            Device.FlushMappedMemoryRanges(1, ref mappedRange);
         }
 
         public unsafe void Invalidate(ulong size = WholeSize, ulong offset = 0)
@@ -187,7 +187,7 @@ namespace SharpGame
             mappedRange.memory = memory;
             mappedRange.offset = offset;
             mappedRange.size = size;
-            VulkanUtil.CheckResult(vkInvalidateMappedMemoryRanges(Graphics.device, 1, &mappedRange));
+            Device.InvalidateMappedMemoryRanges(1, ref mappedRange);
         }
 
         protected override void Destroy()
