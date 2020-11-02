@@ -84,13 +84,13 @@ namespace SharpGame
 
         }
 
-        protected override void DrawImpl(CommandBuffer cb)
+        public override void Draw(RenderContext rc, CommandBuffer cb)
         {
             Clear();
 
             if (OnDraw != null)
             {
-                OnDraw.Invoke(this, cb);
+                OnDraw.Invoke(this, rc, cb);
             }
             else
             {

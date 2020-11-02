@@ -128,7 +128,7 @@ namespace SharpGame
 
         }
 
-        public override void Draw(CommandBuffer cmd)
+        public override void Draw(RenderContext rc, CommandBuffer cmd)
         {
             var view = View;
             if(view.Camera == null)
@@ -202,7 +202,7 @@ namespace SharpGame
             }
 
             var pass = shader.GetPass(passID);
-            var pipe = pass.GetGraphicsPipeline(RenderPass, Subpass, batch.geometry);
+            var pipe = pass.GetGraphicsPipeline(RenderPass, 0, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);

@@ -24,6 +24,8 @@ namespace SharpGame
         public FrameGraphPass FrameGraphPass { get; internal set; }
         public RenderView View => FrameGraphPass.View;
 
+        public uint subpassIndex = 0;
+
         uint[] inputAttachments = new uint[0];
         uint[] outputAttachments = new uint[2];
 
@@ -43,7 +45,7 @@ namespace SharpGame
         {
         }
 
-        public virtual void Draw(CommandBuffer cmd, uint subpass)
+        public virtual void Draw(RenderContext rc, CommandBuffer cmd)
         {
         }
     }

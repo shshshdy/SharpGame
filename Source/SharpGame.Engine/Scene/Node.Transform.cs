@@ -108,7 +108,7 @@ namespace SharpGame
             }
         }
 
-        protected quat worldRotation_;
+        protected quat worldRotation_ = quat.Identity;
         public void SetWorldRotation(quat rotation)
         {
             Rotation = ((parent_ == scene_ || !parent_) ? rotation :  glm.inverse(parent_.WorldRotation) * rotation);

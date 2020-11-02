@@ -239,9 +239,9 @@ namespace SharpGame
             Profiler.EndSample();
         }
 
-        public void Render(RenderContext renderFrame)
+        public void Render(RenderContext rc)
         {
-            Renderer.Draw(renderFrame);
+            Renderer.Draw(rc);
 
             if (DrawDebug)
             {

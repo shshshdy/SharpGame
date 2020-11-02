@@ -97,7 +97,7 @@ namespace SharpGame
                 {
                    new GraphicsSubpass
                    {
-                        OnDraw = (pass, cmd) =>
+                        OnDraw = (pass, rc, cmd) =>
                         {
                             RenderImDrawData(cmd, ImGui.GetDrawData());
                         }

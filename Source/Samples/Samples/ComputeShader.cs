@@ -136,14 +136,14 @@ namespace SharpGame.Samples
             uniformBuffer.SetData(ref ubo);
         }
 
-        private void DrawQuad(GraphicsSubpass renderPass, CommandBuffer cmd)
+        private void DrawQuad(GraphicsSubpass renderPass, RenderContext rc, CommandBuffer cmd)
         {
             var shader = material.Shader;
 
             cmd.DrawGeometry(geometry, shader.Main, 0, material);
         }
 
-        private void Docompute(ComputePass renderPass, CommandBuffer cb)
+        private void Docompute(ComputePass renderPass, RenderContext rc, CommandBuffer cb)
         {
             // Record particle movements.
             cb.BindComputePipeline(computePipeline);

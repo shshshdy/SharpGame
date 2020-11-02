@@ -12,21 +12,16 @@ namespace SharpGame
 {
     public class GraphicsSubpass : Subpass
     {
-        public Action<GraphicsSubpass, CommandBuffer> OnDraw { get; set; }
+        public Action<GraphicsSubpass, RenderContext, CommandBuffer> OnDraw { get; set; }
 
         public GraphicsSubpass(string name = "")
         {
             Name = name;
         }
         
-        public override void Draw(CommandBuffer cb, uint subpass)
+        public override void Draw(RenderContext rc, CommandBuffer cb)
         {
-            DrawImpl(cb);
-        }
-        
-        protected virtual void DrawImpl(CommandBuffer cb)
-        {
-            OnDraw?.Invoke(this, cb);
+            OnDraw?.Invoke(this, rc, cb);
         }
 
         public void DrawBatch(CommandBuffer cb, ulong passID, SourceBatch batch, Span<ConstBlock> pushConsts,
@@ -39,7 +34,7 @@ namespace SharpGame
             }
 
             var pass = shader.GetPass(passID);
-            var pipe = pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, FrameGraphPass.Subpass, batch.geometry);
+            var pipe = pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, subpassIndex, batch.geometry);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);

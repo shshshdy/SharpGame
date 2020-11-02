@@ -71,7 +71,7 @@ namespace SharpGame
             light_colors.Flush();
         }
 
-        protected unsafe void ComputeLight(ComputePass renderPass, CommandBuffer cmd_buf)
+        protected unsafe void ComputeLight(ComputePass renderPass, RenderContext rc, CommandBuffer cmd_buf)
         {
             tile_count_x = ((uint)View.ViewRect.width - 1) / TILE_WIDTH + 1;
             tile_count_y = ((uint)View.ViewRect.height - 1) / TILE_HEIGHT + 1;

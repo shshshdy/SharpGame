@@ -131,7 +131,7 @@ namespace SharpGame.Samples
             mousePos = input.MousePosition;
         }
 
-        void CustomDraw(GraphicsSubpass pass, CommandBuffer cmd)
+        void CustomDraw(GraphicsSubpass pass, RenderContext rc, CommandBuffer cmd)
         {
             var rs = resourceSet;// resourceSet[Graphics.WorkContext];
 

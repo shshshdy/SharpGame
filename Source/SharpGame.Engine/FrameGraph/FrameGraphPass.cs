@@ -12,17 +12,11 @@ namespace SharpGame
         public RenderView View => Renderer?.View;
         public Graphics Graphics => Graphics.Instance;
         public FrameGraph FrameGraph => FrameGraph.Instance;
-
         public string Name { get; }
-
         public SubmitQueue Queue { get; set; } = SubmitQueue.Graphics;
-
         public RenderTextureInfo[] Attachments { get; set; }
-
         public RenderTarget renderTarget;
-
         public RenderPass RenderPass { get; set; }
-        public uint Subpass { get; set; }
         public bool UseSecondCmdBuffer { get; set; } = false;
 
         protected Framebuffer[] framebuffers;
@@ -60,6 +54,7 @@ namespace SharpGame
         public void Add(Subpass subpass)
         {
             subpass.FrameGraphPass = this;
+            subpass.subpassIndex = (uint)subpasses.Count;
             subpasses.Add(subpass);
         }
 
@@ -128,22 +123,19 @@ namespace SharpGame
             }
         }
 
-        public virtual void Draw(CommandBuffer cmd)
+        public virtual void Draw(RenderContext rc, CommandBuffer cmd)
         {
-            //var cmd = CmdBuffer;
-
             BeginRenderPass(cmd);
-            
-            uint subpassIndex = 0;
-            foreach (var subpass in subpasses)
+
+            for(int i = 0; i < subpasses.Count; i++)
             {
-                if(subpassIndex > 0)
+                if(i > 0)
                 {
                     cmd.NextSubpass(SubpassContents.Inline);
                 }
 
-                subpass.Draw(cmd, subpassIndex);
-                subpassIndex++;
+                subpasses[i].Draw(rc, cmd);
+
             }
 
             EndRenderPass(cmd);
@@ -221,10 +213,7 @@ namespace SharpGame
         public void BeginRenderPass(CommandBuffer cb, Framebuffer framebuffer, Rect2D renderArea, ClearValue[] clearValues)
         {
             var rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues);
-
             cb.BeginRenderPass(in rpBeginInfo, UseSecondCmdBuffer? SubpassContents.SecondaryCommandBuffers : SubpassContents.Inline);
-
-            Subpass = 0;
         }
 
         public void EndRenderPass(CommandBuffer cb)

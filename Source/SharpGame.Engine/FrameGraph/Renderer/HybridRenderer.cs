@@ -253,7 +253,7 @@ namespace SharpGame
             yield return translucentPass;
         }
 
-        void Composite(GraphicsSubpass graphicsPass, CommandBuffer cmd)
+        void Composite(GraphicsSubpass graphicsPass, RenderContext rc, CommandBuffer cmd)
         {
             var scenePass = graphicsPass as SceneSubpass;
             var pass = clusterDeferred.Main;

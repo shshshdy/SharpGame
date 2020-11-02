@@ -121,18 +121,18 @@ namespace SharpGame
         {
             this.SendGlobalEvent(new BeginRender());
 
-            var workFrame = Graphics.WorkFrame;
+            var rc = Graphics.WorkFrame;
 
-            workFrame.Begin();
+            rc.Begin();
 
             foreach (var viewport in views)
             {
-                viewport.Render(workFrame);
+                viewport.Render(rc);
             }
 
-            OverlayPass?.Draw(workFrame.RenderCmdBuffer);
+            OverlayPass?.Draw(rc, rc.RenderCmdBuffer);
 
-            workFrame.End();
+            rc.End();
 
             this.SendGlobalEvent(new EndRender());
 
