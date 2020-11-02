@@ -134,7 +134,7 @@ namespace SharpGame
             }
             else
             {
-                return MessagePack.MessagePackSerializer.NonGeneric.Deserialize(type, stream) as Resource;
+                return MessagePack.MessagePackSerializer.Deserialize(type, stream) as Resource;
             }
 
         }

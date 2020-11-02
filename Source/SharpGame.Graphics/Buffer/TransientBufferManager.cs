@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Vulkan;
 
 namespace SharpGame
 {
@@ -11,6 +12,9 @@ namespace SharpGame
         public uint size;
 
         public IntPtr Data => buffer.Mapped + (int)offset;
+
+        public void SetData<T>(ref T data) where T : unmanaged => buffer.SetData(ref data, offset);
+        public VkDescriptorBufferInfo Descriptor => new VkDescriptorBufferInfo { buffer = buffer.buffer, offset = offset, range = size };
     }
 
     public class TransientBufferManager : DisposeBase

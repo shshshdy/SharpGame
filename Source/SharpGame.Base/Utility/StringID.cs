@@ -91,15 +91,14 @@ namespace SharpGame
         // serialize/deserialize internal field.
         class StringIDFormatter : IMessagePackFormatter<StringID>
         {
-            public int Serialize(ref byte[] bytes, int offset, StringID value, IFormatterResolver formatterResolver)
+            public void Serialize(ref MessagePackWriter writer, StringID value, MessagePackSerializerOptions options)
             {
-                return formatterResolver.GetFormatterWithVerify<string>().Serialize(ref bytes, offset, value.Str, formatterResolver);
+                writer.Write(value.Str);
             }
 
-            public StringID Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+            public StringID Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
             {
-                var id = formatterResolver.GetFormatterWithVerify<string>().Deserialize(bytes, offset, formatterResolver, out readSize);
-                return new StringID(id);
+                return reader.ReadString();
             }
         }
 

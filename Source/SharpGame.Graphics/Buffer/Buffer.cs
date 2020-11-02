@@ -144,7 +144,7 @@ namespace SharpGame
             view = new BufferView(this, format, offset, range);
         }
 
-        public void SetData<T>(ref T data, uint offset = 0) where T : struct
+        public void SetData<T>(ref T data, uint offset = 0) where T : unmanaged
         {
             SetData(Utilities.AsPointer(ref data), (uint)offset, (uint)Unsafe.SizeOf<T>());
         }

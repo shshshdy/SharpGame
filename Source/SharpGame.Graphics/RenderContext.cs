@@ -125,6 +125,8 @@ namespace SharpGame
 
         public void Submit(Action<RenderContext, SubmitQueue> onSubmit)
         {
+            FlushBuffers();
+
             var sem = this.acquireSemaphore;
             for (int i = 0; i < (int)SubmitQueue.MaxCount; i++)
             {
@@ -156,19 +158,19 @@ namespace SharpGame
             postActions.Add(action);
         }
 
-        public TransientBuffer AllocVertexBuffer(uint count)
+        public TransientBuffer AllocVertexBuffer(uint sz)
         {
-            return transientVB.Alloc(count);
+            return transientVB.Alloc(sz);
         }
 
-        public TransientBuffer AllocIndexBuffer(uint count)
+        public TransientBuffer AllocIndexBuffer(uint sz)
         {
-            return transientIB.Alloc(count);
+            return transientIB.Alloc(sz);
         }
 
-        public TransientBuffer AllocUniformBuffer(uint count)
+        public TransientBuffer AllocUniformBuffer(uint sz)
         {
-            return transientUB.Alloc(count);
+            return transientUB.Alloc(sz);
         }
 
         public void ResetBuffers()

@@ -412,7 +412,7 @@ namespace SharpGame
 
             renderFrame = frame;
             renderFrame.imageIndex = contextToImage[renderContext];
-            renderFrame.FlushBuffers();
+            //renderFrame.FlushBuffers();
 
             Profiler.EndSample();
 

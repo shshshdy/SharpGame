@@ -152,6 +152,9 @@ namespace SharpGame.Samples
             ub.SetData(ref cameraVS);
             ub.Flush();
 
+//             var tb = rc.AllocUniformBuffer((uint)Unsafe.SizeOf<CameraVS>());
+//             tb.SetData(ref cameraVS);
+//             var descriptor = tb.Descriptor;
             rs.Bind(0, ub.Buffer);
             rs.Bind(1, FrameGraph.TransformBuffer[Graphics.WorkContext]);
             rs.UpdateSets();
