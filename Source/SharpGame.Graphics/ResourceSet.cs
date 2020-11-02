@@ -117,7 +117,7 @@ namespace SharpGame
             return this;
         }
 
-        public ResourceSet Bind(uint dstBinding, ref DescriptorBufferInfo bufferInfo)
+        public ResourceSet Bind(uint dstBinding, ref VkDescriptorBufferInfo bufferInfo)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
@@ -126,7 +126,7 @@ namespace SharpGame
             return this;
         }
 
-        public ResourceSet Bind(uint dstBinding, Span<DescriptorBufferInfo> bufferInfo)
+        public ResourceSet Bind(uint dstBinding, Span<VkDescriptorBufferInfo> bufferInfo)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
@@ -135,7 +135,7 @@ namespace SharpGame
             return this;
         }
 
-        public ResourceSet Bind(uint dstBinding, ref DescriptorBufferInfo bufferInfo, BufferView bufferView)
+        public ResourceSet Bind(uint dstBinding, ref VkDescriptorBufferInfo bufferInfo, BufferView bufferView)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
@@ -174,9 +174,7 @@ namespace SharpGame
                 case DescriptorType.StorageImage:
                     {
                         var texture = bindable as Texture;
-                        Bind(dstBinding, ref texture.descriptor);
-//                         writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-//                             descriptorType, ref texture.descriptor, 1);                         
+                        Bind(dstBinding, ref texture.descriptor);                       
                     }
                     break;
 
@@ -185,8 +183,6 @@ namespace SharpGame
                     {
                         var buffer = bindable as Buffer;
                         Bind(dstBinding, ref buffer.descriptor, buffer.view);
-//                         writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-//                             descriptorType, ref buffer.descriptor, buffer.view);
                     }
                     break;
 
@@ -197,8 +193,6 @@ namespace SharpGame
                     {
                         var buffer = bindable as Buffer;
                         Bind(dstBinding, ref buffer.descriptor);
-//                         writeDescriptorSets[dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet,
-//                             descriptorType, ref buffer.descriptor, 1);
                     }
                     
                     break;
@@ -255,44 +249,6 @@ namespace SharpGame
                 imageLayout = (VkImageLayout)imageLayout,
             };
         }
-
-        public static bool operator==(in DescriptorImageInfo left, in DescriptorImageInfo right)
-        {
-            return left.native.sampler == right.native.sampler
-                && left.native.imageView == right.native.imageView
-                && left.native.imageLayout == right.native.imageLayout;
-        }
-
-        public static bool operator !=(in DescriptorImageInfo left, in DescriptorImageInfo right)
-        {
-            return !(left == right);
-        }
-    }
-
-    public struct DescriptorBufferInfo
-    {
-        internal VkBuffer buffer;
-        public ulong offset;
-        public ulong range;
-
-        public DescriptorBufferInfo(Buffer buffer, ulong offset, ulong range)
-        {
-            this.buffer = buffer.buffer;
-            this.offset = offset;
-            this.range = range;
-        }
-
-        public static bool operator ==(in DescriptorBufferInfo left, in DescriptorBufferInfo right)
-        {
-            return left.buffer == right.buffer
-                && left.offset == right.offset
-                && left.range == right.range;
-        }
-
-        public static bool operator !=(in DescriptorBufferInfo left, in DescriptorBufferInfo right)
-        {
-            return !(left == right);
-        }
     }
 
     public struct WriteDescriptorSet
@@ -301,7 +257,7 @@ namespace SharpGame
         public unsafe WriteDescriptorSet(uint binding,
             VkDescriptorSet dstSet,
             DescriptorType type,
-            ref DescriptorBufferInfo bufferInfo,
+            ref VkDescriptorBufferInfo bufferInfo,
             uint descriptorCount = 1)
         {
             native = VkWriteDescriptorSet.New();
@@ -330,7 +286,7 @@ namespace SharpGame
         public unsafe WriteDescriptorSet(uint binding,
             VkDescriptorSet dstSet,
             DescriptorType type,
-            ref DescriptorBufferInfo bufferInfo,
+            ref VkDescriptorBufferInfo bufferInfo,
             BufferView bufferView)
         {
             native = VkWriteDescriptorSet.New();

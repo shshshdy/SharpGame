@@ -35,6 +35,11 @@ namespace SharpGame
             this.samples = SampleCountFlags.Count1;
             this.imageLayout = ImageLayout.ColorAttachmentOptimal;
             this.isSwapchain = true;
+            this.image = swapchainImage;
+
+            imageView = ImageView.Create(image, layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
+            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+            descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
         }
         
         public RenderTexture(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, //ImageAspectFlags aspectMask,

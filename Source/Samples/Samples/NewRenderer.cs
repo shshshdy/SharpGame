@@ -22,7 +22,7 @@ namespace SharpGame.Samples
     }
 
     [SampleDesc(sortOrder = -6)]
-    public class CustomRender : Sample
+    public class NewRenderer : Sample
     {
         RenderPipeline renderer = new RenderPipeline();
         List<SourceBatch> batches = new List<SourceBatch>();
@@ -134,6 +134,7 @@ namespace SharpGame.Samples
         void CustomDraw(GraphicsSubpass pass, CommandBuffer cmd)
         {
             var rs = resourceSet;// resourceSet[Graphics.WorkContext];
+
             var ub = ubCameraVS;
 
             mat4 rotM = glm.mat4(1.0f);

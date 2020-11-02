@@ -24,11 +24,21 @@ namespace SharpGame
         public FrameGraphPass FrameGraphPass { get; internal set; }
         public RenderView View => FrameGraphPass.View;
 
+        uint[] inputAttachments = new uint[0];
+        uint[] outputAttachments = new uint[2];
 
         public virtual void Init()
         {
         }
-        
+
+        public virtual void DeviceLost()
+        {
+        }
+
+        public virtual void DeviceReset()
+        {
+        }
+
         public virtual void Update()
         {
         }

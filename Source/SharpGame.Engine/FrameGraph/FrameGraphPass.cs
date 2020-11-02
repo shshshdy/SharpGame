@@ -73,14 +73,26 @@ namespace SharpGame
 
         public virtual void DeviceLost()
         {
+            foreach (var subpass in subpasses)
+            {
+                subpass.DeviceLost();
+            }
+
             RenderPass = null;
             framebuffers = null;
+
         }
 
         public virtual void DeviceReset()
         {
             CreateRenderPass();
             CreateRenderTargets();
+
+            foreach (var subpass in subpasses)
+            {
+                subpass.DeviceReset();
+            }
+
         }
 
         protected virtual void CreateRenderTargets()

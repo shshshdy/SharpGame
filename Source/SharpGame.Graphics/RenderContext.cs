@@ -25,6 +25,8 @@ namespace SharpGame
         public int id;
         public int imageIndex;
 
+        public RenderTexture renderSurface;
+
         public Semaphore acquireSemaphore;
 
         public Semaphore preRenderSemaphore => submitQueue[0].semaphore;

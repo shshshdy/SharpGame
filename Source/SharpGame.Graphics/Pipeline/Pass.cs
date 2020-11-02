@@ -152,6 +152,7 @@ namespace SharpGame
         public int passIndex;
 
         readonly ShaderModule[] shaderModels = new ShaderModule[6];
+
         [DataMember]
         public ShaderModule[] ShaderModels { get => shaderModels; }
 

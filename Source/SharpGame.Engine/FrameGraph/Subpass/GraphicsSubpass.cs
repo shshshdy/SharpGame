@@ -63,26 +63,6 @@ namespace SharpGame
             batch.geometry.Draw(cb);
         }
 
-        public void DrawFullScreenQuad(Pass pass, CommandBuffer cb, ResourceSet resourceSet, ResourceSet resourceSet1, ResourceSet resourceSet2 = null)
-        {
-            var pipe = pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, FrameGraphPass.Subpass, null);
-
-            cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet);
-
-            if (resourceSet1 != null)
-            {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1);
-            }
-
-            if (resourceSet2 != null)
-            {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, 2, resourceSet2, -1);
-            }
-
-            cb.Draw(3, 1, 0, 0);
-        }
-
 
     }
 

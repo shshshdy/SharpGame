@@ -48,6 +48,14 @@
     <None Include="$(MSBuildThisFileDirectory)Common\shadow.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\merge.frag" />
     <None Include="$(MSBuildThisFileDirectory)LitAlphaTest.shader" />
+    <None Include="$(MSBuildThisFileDirectory)post\blur.frag" />
+    <None Include="$(MSBuildThisFileDirectory)post\brightness_mask.frag" />
+    <None Include="$(MSBuildThisFileDirectory)post\fullscreen.frag" />
+    <None Include="$(MSBuildThisFileDirectory)post\fullscreen.vert" />
+    <None Include="$(MSBuildThisFileDirectory)post\gaussian_blur.frag" />
+    <None Include="$(MSBuildThisFileDirectory)post\merge.frag" />
+    <None Include="$(MSBuildThisFileDirectory)post\outline.frag" />
+    <None Include="$(MSBuildThisFileDirectory)post\ssao.frag" />
     <None Include="$(MSBuildThisFileDirectory)Shadow.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\irmap.comp" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\pbr.frag" />

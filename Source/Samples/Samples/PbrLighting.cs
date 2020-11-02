@@ -120,9 +120,9 @@ namespace SharpGame.Samples
 
             SetCubeMap(cubeMaps[0]);
 
-            FrameGraph.AddDebugImage(envMap);
-            FrameGraph.AddDebugImage(irMap);
-            FrameGraph.AddDebugImage(brdfLUT);
+//             FrameGraph.AddDebugImage(envMap);
+//             FrameGraph.AddDebugImage(irMap);
+//             FrameGraph.AddDebugImage(brdfLUT);
 
             MainView.Attach(camera, scene);
 

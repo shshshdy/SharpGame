@@ -19,7 +19,7 @@ namespace SharpGame
 
         public IntPtr Mapped { get; private set; }
 
-        internal DescriptorBufferInfo descriptor;
+        internal VkDescriptorBufferInfo descriptor;
         internal MemoryPropertyFlags memoryPropertyFlags;
 
         Format viewFormat;
