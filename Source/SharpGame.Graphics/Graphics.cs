@@ -31,6 +31,7 @@ namespace SharpGame
         public NativeList<IntPtr> EnabledExtensions { get; } = new NativeList<IntPtr>();
 
         public static Queue GraphicsQueue { get; protected set; }
+        public static Queue WorkQueue { get; protected set; }
         public static Queue ComputeQueue { get; protected set; }
         public static Queue TransferQueue { get; protected set; }
 
@@ -60,10 +61,12 @@ namespace SharpGame
         public RenderContext WorkFrame => renderFrames[WorkContext];
         public RenderContext renderFrame;
 
+        public Semaphore acquireSemaphore;
+
         public Graphics(Settings settings)
         {
 #if DEBUG
-            //settings.Validation = true;
+            settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -77,6 +80,7 @@ namespace SharpGame
 
             // Get a graphics queue from the Device
             GraphicsQueue = Queue.GetDeviceQueue(Device.QFGraphics, 0);
+            WorkQueue = Queue.GetDeviceQueue(Device.QFGraphics, 0);
             ComputeQueue = Queue.GetDeviceQueue(Device.QFCompute, 0);
             TransferQueue = Queue.GetDeviceQueue(Device.QFTransfer, 0);
 
@@ -85,6 +89,8 @@ namespace SharpGame
             primaryCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
 
             DescriptorPoolManager = new DescriptorPoolManager();
+
+            acquireSemaphore = new Semaphore();
 
         }
 
@@ -356,8 +362,10 @@ namespace SharpGame
         public static void EndPrimaryCmd(CommandBuffer cmdBuffer)
         {
             cmdBuffer.End();
-            GraphicsQueue.Submit(null, PipelineStageFlags.None, cmdBuffer, null);
-            GraphicsQueue.WaitIdle();
+
+            WorkQueue.Submit(null, PipelineStageFlags.None, cmdBuffer, null);
+            WorkQueue.WaitIdle();
+
             primaryCmdPool.FreeCommandBuffer(cmdBuffer);
 
         }
@@ -374,7 +382,7 @@ namespace SharpGame
             Profiler.BeginSample("Acquire");
 
             renderContext = workContext;
-            var sem = renderFrames[workContext].acquireSemaphore;
+            var sem = contextToImage[renderContext] == -1 ? acquireSemaphore : renderFrames[workContext].acquireSemaphore;
             Swapchain.AcquireNextImage(sem, out int imageIndex);
 
             workContext = (workContext + 1) % ImageCount;
@@ -412,7 +420,6 @@ namespace SharpGame
 
             renderFrame = frame;
             renderFrame.imageIndex = contextToImage[renderContext];
-            //renderFrame.FlushBuffers();
 
             Profiler.EndSample();
 
@@ -505,7 +512,6 @@ namespace SharpGame
                 stats.renderWait = Stopwatch.GetTimestamp() - curTime;
             }
 
-            WorkFrame.ResetBuffers();
         }
 
         #endregion

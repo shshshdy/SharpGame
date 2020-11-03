@@ -8,7 +8,7 @@ using System.Diagnostics;
 #endif
 namespace SharpGame
 {
-    public unsafe class NativeList<T> : IEnumerable<T>, IDisposable where T : struct
+    public unsafe class NativeList<T> : IEnumerable<T>, IDisposable where T : unmanaged
     {
         private byte* dataPtr;
         private uint capacity;
@@ -453,7 +453,7 @@ namespace SharpGame
         }
     }
 
-    public struct ReadOnlyNativeListView<T> : IEnumerable<T> where T : struct
+    public struct ReadOnlyNativeListView<T> : IEnumerable<T> where T : unmanaged
     {
         private readonly NativeList<T> _list;
         private readonly uint _start;

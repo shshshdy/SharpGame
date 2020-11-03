@@ -25,6 +25,8 @@ namespace SharpGame
         public NativeList<VkImage> Images { get; set; } = new NativeList<VkImage>();
         public SwapChainBuffer[] Buffers { get; set; }
         
+        public const uint IMAGE_COUNT = 3;
+
         public unsafe Swapchain(IntPtr sdlWindow)
         {
             SDL_version version;
@@ -264,9 +266,10 @@ namespace SharpGame
                 }
 
                 // Determine the number of Images
-                uint desiredNumberOfSwapchainImages = 3;// surfCaps.minImageCount + 1;
+                uint desiredNumberOfSwapchainImages = IMAGE_COUNT;// surfCaps.minImageCount + 1;
                 if ((surfCaps.maxImageCount > 0) && (desiredNumberOfSwapchainImages > surfCaps.maxImageCount))
                 {
+                    Debug.Assert(false);
                     desiredNumberOfSwapchainImages = surfCaps.maxImageCount;
                 }
 
@@ -351,13 +354,12 @@ namespace SharpGame
 
             VkResult res = VkResult.Timeout;
             uint nextImageIndex = (uint)0;
-            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore.native, new VkFence(), ref nextImageIndex);
+            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore? presentCompleteSemaphore.native : VkSemaphore.Null, new VkFence(), ref nextImageIndex);
             
             if (res == VkResult.ErrorOutOfDateKHR)
             {
-                Log.Info(res.ToString());
-                uint w = 0, h = 0;
-                w = 0;
+                Log.Error(res.ToString());
+                //uint w = 0, h = 0;                
                 //Create(ref w, ref h, false);
             }
             else if (res == VkResult.SuboptimalKHR)
@@ -378,7 +380,7 @@ namespace SharpGame
 
         public unsafe void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = null)
         {
-            VkPresentInfoKHR presentInfo = VkPresentInfoKHR.New();
+            var presentInfo = VkPresentInfoKHR.New();
             presentInfo.pNext = null;
             presentInfo.swapchainCount = 1;
             var sc = swapchain;

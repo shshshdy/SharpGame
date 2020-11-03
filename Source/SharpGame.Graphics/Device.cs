@@ -36,7 +36,7 @@ namespace SharpGame
 
 
         public static VkDevice Create(Settings settings, VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
-            bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute)
+            bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
         {
             CreateInstance(settings);
 

@@ -107,6 +107,8 @@ namespace SharpGame
 
         public void Begin()
         {
+            ResetBuffers();
+
             for (int i = 0; i < (int)SubmitQueue.MaxCount; i++)
             {
                 submitQueue[i].cmdBuffer.Begin();
@@ -121,12 +123,12 @@ namespace SharpGame
                 submitQueue[i].cmdBuffer.End();
             }
 
+            FlushBuffers();
+
         }
 
         public void Submit(Action<RenderContext, SubmitQueue> onSubmit)
         {
-            FlushBuffers();
-
             var sem = this.acquireSemaphore;
             for (int i = 0; i < (int)SubmitQueue.MaxCount; i++)
             {

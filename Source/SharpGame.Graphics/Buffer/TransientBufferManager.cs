@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Vulkan;
 
@@ -13,7 +14,11 @@ namespace SharpGame
 
         public IntPtr Data => buffer.Mapped + (int)offset;
 
-        public void SetData<T>(ref T data) where T : unmanaged => buffer.SetData(ref data, offset);
+        public void SetData<T>(ref T data) where T : unmanaged
+        {
+            Utilities.CopyMemory(Data, Utilities.AsPointer(ref data), (int)size);
+        }
+
         public VkDescriptorBufferInfo Descriptor => new VkDescriptorBufferInfo { buffer = buffer.buffer, offset = offset, range = size };
     }
 
@@ -116,7 +121,7 @@ namespace SharpGame
 
         private ref TransientBufferDesc CreateNewBuffer()
         {
-            var buffer = new Buffer(BufferUsageFlags, MemoryPropertyFlags.HostVisible, Size);
+            var buffer = new Buffer(BufferUsageFlags, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, Size);
             buffer.Map();
             buffers.Add(new TransientBufferDesc { buffer = buffer, size = 0 });
             return ref buffers.At(buffers.Count - 1);

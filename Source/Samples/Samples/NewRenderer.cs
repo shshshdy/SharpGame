@@ -29,7 +29,7 @@ namespace SharpGame.Samples
 
         CameraVS cameraVS = new CameraVS();
 
-        ResourceSet resourceSet;
+        ResourceSet[] resourceSet = new ResourceSet[3];
 
         SharedBuffer ubCameraVS;
 
@@ -64,7 +64,9 @@ namespace SharpGame.Samples
 
             ubCameraVS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint) Utilities.SizeOf<CameraVS>());
 
-            resourceSet = new ResourceSet(resourceLayout);
+            resourceSet[0] = new ResourceSet(resourceLayout);
+            resourceSet[1] = new ResourceSet(resourceLayout);
+            resourceSet[2] = new ResourceSet(resourceLayout);
 
             renderer.AddGraphicsPass(CustomDraw);
 
@@ -133,7 +135,7 @@ namespace SharpGame.Samples
 
         void CustomDraw(GraphicsSubpass pass, RenderContext rc, CommandBuffer cmd)
         {
-            var rs = resourceSet;// resourceSet[Graphics.WorkContext];
+            var rs = resourceSet[Graphics.WorkContext];
 
             var ub = ubCameraVS;
 
@@ -152,10 +154,11 @@ namespace SharpGame.Samples
             ub.SetData(ref cameraVS);
             ub.Flush();
 
-//             var tb = rc.AllocUniformBuffer((uint)Unsafe.SizeOf<CameraVS>());
-//             tb.SetData(ref cameraVS);
-//             var descriptor = tb.Descriptor;
-            rs.Bind(0, ub.Buffer);
+            var tb = rc.AllocUniformBuffer((uint)Unsafe.SizeOf<CameraVS>());
+            tb.SetData(ref cameraVS);
+            var descriptor = tb.Descriptor;
+            rs.Bind(0, ref descriptor);
+            //rs.Bind(0, ub.Buffer);
             rs.Bind(1, FrameGraph.TransformBuffer[Graphics.WorkContext]);
             rs.UpdateSets();
 
