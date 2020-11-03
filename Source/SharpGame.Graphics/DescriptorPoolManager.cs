@@ -16,12 +16,6 @@ namespace SharpGame
             _pools.Add(CreateNewPool());
         }
 
-        public VkDescriptorPool Allocate(ResourceLayout resLayout)
-        {
-            VkDescriptorPool pool = GetPool(ref resLayout.descriptorResourceCounts);
-            return pool;
-        }
-
         public void Free(VkDescriptorPool pool, ref DescriptorResourceCounts counts)
         {
             lock (_lock)
@@ -36,13 +30,13 @@ namespace SharpGame
             }
         }
 
-        private VkDescriptorPool GetPool(ref DescriptorResourceCounts counts)
+        public VkDescriptorPool GetPool(ref DescriptorResourceCounts counts, uint count = 1)
         {
             lock (_lock)
             {
                 foreach (PoolInfo poolInfo in _pools)
                 {
-                    if (poolInfo.Allocate(counts))
+                    if (poolInfo.Allocate(counts, count))
                     {
                         return poolInfo.Pool;
                     }
@@ -50,7 +44,7 @@ namespace SharpGame
 
                 PoolInfo newPool = CreateNewPool();
                 _pools.Add(newPool);
-                bool result = newPool.Allocate(counts);
+                bool result = newPool.Allocate(counts, count);
                 Debug.Assert(result);
                 return newPool.Pool;
             }
@@ -106,7 +100,7 @@ namespace SharpGame
                 }
             }
 
-            internal bool Allocate(DescriptorResourceCounts counts)
+            internal bool Allocate(DescriptorResourceCounts counts, uint count = 1)
             {
                 if(RemainingSets <= 0)
                 {
@@ -115,7 +109,7 @@ namespace SharpGame
 
                 for(int i = 0; i < 11; i++)
                 {
-                    if(RemainingCount[i] < counts[i])
+                    if(RemainingCount[i] < counts[i] * count)
                     {
                         return false;
                     }
@@ -124,7 +118,7 @@ namespace SharpGame
                 RemainingSets -= 1;
                 for (int i = 0; i < 11; i++)
                 {
-                    RemainingCount[i] -= counts[i];
+                    RemainingCount[i] -= counts[i] * count;
                 }
 
                 return true;               

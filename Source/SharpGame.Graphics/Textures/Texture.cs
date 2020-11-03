@@ -274,6 +274,65 @@ namespace SharpGame
             return texture;
         }
 
+        // Prepare a texture target that is used to store compute shader calculations
+        public static Texture CreateStorage(uint width, uint height, Format format)
+        {
+            var texture = new Texture
+            {
+                width = width,
+                height = height,
+                mipLevels = 1,
+                depth = 1,
+                format = format
+            };
+
+            ImageCreateInfo createInfo = new ImageCreateInfo
+            {
+                flags = ImageCreateFlags.None,
+                imageType = ImageType.Image2D,
+                format = format,
+                extent = new Extent3D { width = width, height = height, depth = 1 },
+                mipLevels = 1,
+                arrayLayers = 1,
+                samples = SampleCountFlags.Count1,
+                tiling = ImageTiling.Optimal,
+                usage = ImageUsageFlags.Storage | ImageUsageFlags.Sampled,
+                sharingMode = SharingMode.Exclusive,
+                initialLayout = ImageLayout.Preinitialized
+            };
+
+            texture.image = new Image(ref createInfo);
+
+            Graphics.WithCommandBuffer((cmd) => {
+                /*
+                // Get device properties for the requested texture format
+                VkFormatProperties formatProperties;
+                formatProperties = gfx.gpu().getFormatProperties(format);
+                // Check if requested image format supports image storage operations
+                assert(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eStorageImage);
+              
+                vk::ImageCreateInfo imageCreateInfo;
+                imageCreateInfo.imageType = vk::ImageType::e2D;
+                imageCreateInfo.format = format;
+                imageCreateInfo.extent = vk::Extent3D { width, height, 1 };
+                imageCreateInfo.mipLevels = 1;
+                imageCreateInfo.arrayLayers = 1;
+                imageCreateInfo.samples = vk::SampleCountFlagBits::e1;
+                imageCreateInfo.tiling = vk::ImageTiling::eOptimal;
+                imageCreateInfo.initialLayout = vk::ImageLayout::ePreinitialized;
+                // vk::Image will be sampled in the fragment shader and used as storage target in the compute shader
+                imageCreateInfo.usage = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage;
+
+                gfx.createImage(*this, imageCreateInfo, vk::MemoryPropertyFlagBits::eDeviceLocal);*/
+                cmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.Preinitialized, ImageLayout.General);
+
+            });
+
+            texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, texture.mipLevels);
+            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
+            texture.UpdateDescriptor();
+            return texture;
+        }
     }
 
     public class ImageData

@@ -31,7 +31,7 @@ namespace SharpGame
         {
             resLayout.Build();
 
-            descriptorPool = Graphics.DescriptorPoolManager.Allocate(resLayout);
+            descriptorPool = Graphics.DescriptorPoolManager.GetPool(ref resLayout.descriptorResourceCounts, Swapchain.IMAGE_COUNT);
             resourceLayout = resLayout;
 
             unsafe
@@ -57,7 +57,7 @@ namespace SharpGame
         {
             resLayout.Build();
 
-            descriptorPool = Graphics.DescriptorPoolManager.Allocate(resLayout);
+            descriptorPool = Graphics.DescriptorPoolManager.GetPool(ref resLayout.descriptorResourceCounts, Swapchain.IMAGE_COUNT);
             resourceLayout = resLayout;
 
             unsafe
