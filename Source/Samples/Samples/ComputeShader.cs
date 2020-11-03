@@ -14,7 +14,7 @@ namespace SharpGame.Samples
     {
         const int PARTICLE_COUNT = 256 * 1024;
 
-        private RenderPipeline frameGraph = new RenderPipeline();
+        private RenderPipeline renderer = new RenderPipeline();
         private Buffer storageBuffer;
         private Buffer uniformBuffer;
 
@@ -93,10 +93,10 @@ namespace SharpGame.Samples
             computePipeline = shader.GetPass("compute");
             computeResourceSet = new ResourceSet(computePipeline.PipelineLayout.ResourceLayout[0], storageBuffer, uniformBuffer);
 
-            frameGraph.AddComputePass(Docompute);
-            frameGraph.AddGraphicsPass(DrawQuad);
+            renderer.AddComputePass(Docompute);
+            renderer.AddGraphicsPass(DrawQuad);
 
-            MainView.Attach(null, null, frameGraph);
+            MainView.Attach(null, null, renderer);
 
         }
 

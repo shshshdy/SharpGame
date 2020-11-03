@@ -29,7 +29,7 @@ namespace SharpGame
 
         public bool DrawDebug { get => FrameGraph.drawDebug && drawDebug; set => drawDebug = value; }
         bool drawDebug = true;
-        FrameGraph debugPass;
+        FrameGraphPass debugPass;
 
         public uint ViewMask { get; set; } = 1;
         public ref FrameInfo Frame => ref frameInfo;
@@ -63,15 +63,14 @@ namespace SharpGame
         internal SharedBuffer ubCameraPS;
         internal Buffer ubLight;
 
-
         private ResourceLayout vsResLayout;
 
-        public ResourceSet Set0 => vsResourceSet[Graphics.Instance.WorkContext];
-        ResourceSet[] vsResourceSet = new ResourceSet[3];
+        public ResourceSet Set0 => vsResourceSet;
+        ResourceSet vsResourceSet;
 
         private ResourceLayout psResLayout;
-        public ResourceSet Set1 => psResourceSet[Graphics.Instance.WorkContext];
-        ResourceSet[] psResourceSet = new ResourceSet[3];
+        public ResourceSet Set1 => psResourceSet;
+        ResourceSet psResourceSet;
 
         Graphics Graphics => Graphics.Instance;
         FrameGraph FrameGraph => FrameGraph.Instance;
@@ -141,9 +140,7 @@ namespace SharpGame
                 new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
             };
 
-            vsResourceSet[0] = new ResourceSet(vsResLayout, ubCameraVS[0], FrameGraph.TransformBuffer[0]);
-            vsResourceSet[1] = new ResourceSet(vsResLayout, ubCameraVS[1], FrameGraph.TransformBuffer[1]);
-            vsResourceSet[2] = new ResourceSet(vsResLayout, ubCameraVS[2], FrameGraph.TransformBuffer[2]);
+            vsResourceSet = new ResourceSet(vsResLayout, ubCameraVS, FrameGraph.TransformBuffer);
 
             psResLayout = new ResourceLayout
             {
@@ -152,9 +149,7 @@ namespace SharpGame
                 new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
 
-            psResourceSet[0] = new ResourceSet(psResLayout, ubCameraPS[0], ubLight, ShadowPass.DepthRT);
-            psResourceSet[1] = new ResourceSet(psResLayout, ubCameraPS[1], ubLight, ShadowPass.DepthRT);
-            psResourceSet[2] = new ResourceSet(psResLayout, ubCameraPS[2], ubLight, ShadowPass.DepthRT);
+            psResourceSet = new ResourceSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);
 
         }
 

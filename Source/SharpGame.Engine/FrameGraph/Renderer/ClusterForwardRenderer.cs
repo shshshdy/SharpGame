@@ -43,9 +43,6 @@ namespace SharpGame
             {
                 Queue = SubmitQueue.EarlyGraphics,
 
-                //RenderPass = clusterRP,
-                //Framebuffer = clusterFB,
-
                 renderPassCreator = OnCreateClusterRenderPass,
                 frameBufferCreator = OnCreateFramebuffers,
 

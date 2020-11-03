@@ -30,8 +30,8 @@ namespace SharpGame
         ResourceLayout deferredLayout0;
         ResourceLayout deferredLayout1;
 
-        ResourceSet[] deferredSet0 = new ResourceSet[3];
-        ResourceSet[] deferredSet1 = new ResourceSet[3];
+        ResourceSet deferredSet0;
+        ResourceSet deferredSet1;
 
         public HybridRenderer()
         {
@@ -55,9 +55,9 @@ namespace SharpGame
                 new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
             };
 
-            deferredSet0[0] =  new ResourceSet(deferredLayout0, View.ubCameraVS[0]);
-            deferredSet0[1] = new ResourceSet(deferredLayout0, View.ubCameraVS[1]);
-            deferredSet0[2] = new ResourceSet(deferredLayout0, View.ubCameraVS[2]);
+            deferredSet0 =  new ResourceSet(deferredLayout0, View.ubCameraVS);
+            deferredSet0 = new ResourceSet(deferredLayout0, View.ubCameraVS);
+            deferredSet0 = new ResourceSet(deferredLayout0, View.ubCameraVS);
 
             deferredLayout1 = new ResourceLayout
             {
@@ -163,9 +163,9 @@ namespace SharpGame
             geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, depthRT.imageView, depthHWRT.imageView });
 
 #if HWDEPTH
-            deferredSet1[0] = deferredSet1[1] = deferredSet1[2] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
+            deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
 #else
-            deferredSet1[0] = deferredSet1[1] = deferredSet1[2] = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
+            deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
 #endif
             return new Framebuffer[] { geometryFB, geometryFB, geometryFB };
 
@@ -260,10 +260,10 @@ namespace SharpGame
 
             Span<ResourceSet> sets = new []
             {
-                deferredSet0[Graphics.WorkContext],
-                resourceSet0[Graphics.WorkContext],
-                resourceSet1[Graphics.WorkContext],
-                deferredSet1[Graphics.WorkContext],
+                deferredSet0,
+                resourceSet0,
+                resourceSet1,
+                deferredSet1,
             };
 
             cmd.DrawGeometry(quad, pass, 0, sets);

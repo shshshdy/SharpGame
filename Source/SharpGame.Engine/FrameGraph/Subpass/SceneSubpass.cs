@@ -12,9 +12,9 @@ namespace SharpGame
     {
         public BlendFlags BlendFlags { get; set; } = BlendFlags.All;
 
-        public ResourceSet[] Set0 { get; set; }
-        public ResourceSet[] Set1 { get; set; }
-        public ResourceSet[] Set2 { get; set; }
+        public ResourceSet Set0 { get; set; }
+        public ResourceSet Set1 { get; set; }
+        public ResourceSet Set2 { get; set; }
 
         public static bool MultiThreaded = false;
 
@@ -106,9 +106,9 @@ namespace SharpGame
 
         public void DrawScene(CommandBuffer cmd, BlendFlags blendFlags)
         {
-            var set0 = Set0?[Graphics.WorkContext] ?? View.Set0;
-            var set1 = Set1?[Graphics.WorkContext] ?? View.Set1;
-            var set2 = Set2?[Graphics.WorkContext];
+            var set0 = Set0 ?? View.Set0;
+            Span<ResourceSet> set1 =  new []{ Set1 ?? View.Set1 };
+            //var set2 = Set2;
 
             cmd.SetViewport(View.Viewport);
             cmd.SetScissor(View.ViewRect);
@@ -117,37 +117,37 @@ namespace SharpGame
             {
                 if (MultiThreaded)
                 {
-                    DrawBatchesMT(cmd, View.opaqueBatches, set0, set1, set2);
+                    DrawBatchesMT(cmd, View.opaqueBatches, set0, set1);
                 }
                 else
                 {
-                    DrawBatches(cmd, View.opaqueBatches, set0, set1, set2);
+                    DrawBatches(cmd, View.opaqueBatches, set0, set1);
                 }
             }
 
             if ((blendFlags & BlendFlags.AlphaTest) != 0 && View.alphaTestBatches.Count > 0)
             {
-                DrawBatches(cmd, View.alphaTestBatches, set0, set1, set2);
+                DrawBatches(cmd, View.alphaTestBatches, set0, set1);
             }
 
             if ((blendFlags & BlendFlags.AlphaBlend) != 0 && View.translucentBatches.Count > 0)
             {
-                DrawBatches(cmd, View.translucentBatches, set0, set1, set2);
+                DrawBatches(cmd, View.translucentBatches, set0, set1);
             }
 
         }
 
 
-        public void DrawBatches(CommandBuffer cmd, FastList<SourceBatch> batches, ResourceSet set0, ResourceSet set1 = null, ResourceSet set2 = null)
+        public void DrawBatches(CommandBuffer cmd, FastList<SourceBatch> batches, ResourceSet set0, Span<ResourceSet> set1)
         {
             foreach (var batch in batches)
             {
-                DrawBatch(cmd, passID, batch, default, set0, set1, set2);
+                DrawBatch(cmd, passID, batch, default, set0, set1);
             }
 
         }
 
-        public void DrawBatchesMT(CommandBuffer cmd, FastList<SourceBatch> batches, ResourceSet set0, ResourceSet set1 = null, ResourceSet set2 = null)
+        public void DrawBatchesMT(CommandBuffer cmd, FastList<SourceBatch> batches, ResourceSet set0, Span<ResourceSet> set1)
         {
             renderTasks.Clear();
 
@@ -168,7 +168,7 @@ namespace SharpGame
                 {
                     cb.SetViewport(View.Viewport);
                     cb.SetScissor(View.ViewRect);
-                    Draw(cb, batches.AsSpan(from, to - from), set0, set1, set2);
+                    //Draw(cb, batches.AsSpan(from, to - from), set0, set1);
                     cb.End();
                 });
                 renderTasks.Add(t);
@@ -186,11 +186,11 @@ namespace SharpGame
 
         }
 
-        protected void Draw(CommandBuffer commandBuffer, Span<SourceBatch> sourceBatches, ResourceSet set0, ResourceSet set1, ResourceSet set2)
+        protected void Draw(CommandBuffer commandBuffer, Span<SourceBatch> sourceBatches, ResourceSet set0, Span<ResourceSet> set1)
         {
             foreach (var batch in sourceBatches)
             {
-                DrawBatch(commandBuffer, passID, batch, default, set0, set1, set2);
+                DrawBatch(commandBuffer, passID, batch, default, set0, set1);
             }
         }
 

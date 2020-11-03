@@ -25,7 +25,7 @@ namespace SharpGame
         }
 
         public void DrawBatch(CommandBuffer cb, ulong passID, SourceBatch batch, Span<ConstBlock> pushConsts,
-            ResourceSet resourceSet, ResourceSet resourceSet1, ResourceSet resourceSet2 = null)
+            ResourceSet resourceSet, Span<ResourceSet> resourceSet1)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
@@ -39,15 +39,20 @@ namespace SharpGame
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
 
-            if (resourceSet1 != null)
+            foreach(var rs in resourceSet1)
             {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, -1);
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, rs, -1);
             }
 
-            if (resourceSet2 != null)
-            {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, 2, resourceSet2, -1);
-            }
+//             if (resourceSet1 != null)
+//             {
+//                 cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, -1);
+//             }
+// 
+//             if (resourceSet2 != null)
+//             {
+//                 cb.BindGraphicsResourceSet(pass.PipelineLayout, 2, resourceSet2, -1);
+//             }
 
             foreach (ConstBlock constBlock in pushConsts)
             {

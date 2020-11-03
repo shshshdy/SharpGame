@@ -189,6 +189,20 @@ namespace SharpGame
             return this;
         }
 
+        public ResourceSet BindTexel(uint dstBinding, SharedBuffer buffer)
+        {
+            var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
+
+            for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
+            {
+                writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
+                               descriptorType, ref buffer.Buffer.descriptor, buffer.Buffer.view);
+                updated[img][dstBinding] = false;
+            }
+
+            return this;
+        }
+
         public ResourceSet Bind(uint dstBinding, IBindableResource bindable)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
@@ -226,8 +240,10 @@ namespace SharpGame
                 case DescriptorType.UniformTexelBuffer:
                 case DescriptorType.StorageTexelBuffer:
                     {
-                        var buffer = bindable as Buffer;
-                        Bind(dstBinding, ref buffer.descriptor, buffer.view);
+                        if (bindable is Buffer buffer)
+                            Bind(dstBinding, ref buffer.descriptor, buffer.view);
+                        else if (bindable is SharedBuffer sharedBuffer)
+                            BindTexel(dstBinding, sharedBuffer);
                     }
                     break;
 
