@@ -122,9 +122,9 @@ namespace SharpGame
 
             depthShader = Resources.Instance.Load<Shader>("shaders/shadow.shader");
 
-            vsSet[0] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[0], FrameGraph.TransformBuffer.Buffer[0]);
-            vsSet[1] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[1], FrameGraph.TransformBuffer.Buffer[1]);
-            vsSet[2] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[2], FrameGraph.TransformBuffer.Buffer[2]);
+            vsSet[0] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[0], FrameGraph.TransformBuffer[0]);
+            vsSet[1] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[1], FrameGraph.TransformBuffer[1]);
+            vsSet[2] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[2], FrameGraph.TransformBuffer[2]);
 
         }
 

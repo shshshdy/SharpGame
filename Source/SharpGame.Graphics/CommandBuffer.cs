@@ -144,16 +144,19 @@ namespace SharpGame
         public unsafe void BindResourceSet(PipelineBindPoint pipelineBindPoint,
             PipelineLayout pipelineLayout, int set, ResourceSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
         {
-            if(descriptorSets[set] != pDescriptorSets.descriptorSet
+            if(descriptorSets[set] != pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext]
                 || dynamicOffsetCounts[set] != dynamicOffsetCount
                 || (pDynamicOffsets != null && dynamicOffsets[set] != *pDynamicOffsets))
             {
 
-                descriptorSets[set] = pDescriptorSets.descriptorSet;
+                descriptorSets[set] = pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext];
                 dynamicOffsetCounts[set] = dynamicOffsetCount;
                 if(dynamicOffsetCount > 0)
                 dynamicOffsets[set] = *pDynamicOffsets;
-                vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, ref pDescriptorSets.descriptorSet, dynamicOffsetCount, pDynamicOffsets);
+
+                var t = pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext];
+
+                vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, ref t, dynamicOffsetCount, pDynamicOffsets);
             }
         }
 
@@ -224,7 +227,8 @@ namespace SharpGame
             //    (uint)resourceSet.writeDescriptorSets.Length, ref resourceSet.writeDescriptorSets[0]);
 
             Device.CmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pipelineLayout.handle, (uint)resourceSet.Set,
-                (uint)resourceSet.writeDescriptorSets.Length, (VkWriteDescriptorSet*)Unsafe.AsPointer(ref resourceSet.writeDescriptorSets[0]));
+                (uint)resourceSet.writeDescriptorSets[Graphics.Instance.WorkContext].Length, 
+                (VkWriteDescriptorSet*)Unsafe.AsPointer(ref resourceSet.writeDescriptorSets[Graphics.Instance.WorkContext][0]));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

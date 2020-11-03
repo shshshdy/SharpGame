@@ -69,21 +69,16 @@ namespace SharpGame
     }
 
 
-    public class DynamicBuffer : DisposeBase
+    public class DynamicBuffer : SharedBuffer
     {
-        public SharedBuffer Buffer { get; }
         public uint Size { get; }
 
         uint offset;
 
-        public DynamicBuffer(BufferUsageFlags bufferUsage, uint size)
+        public DynamicBuffer(BufferUsageFlags bufferUsage, uint size) : base(bufferUsage, size)
         {
-            this.Size = size;
-            Buffer = new SharedBuffer(bufferUsage, size);
-            
+            this.Size = size;            
         }
-
-        public Buffer this[int index] => Buffer[index];
 
         [MethodImpl((MethodImplOptions)0x100)]
         public uint Alloc(uint size, IntPtr data)
@@ -97,7 +92,7 @@ namespace SharpGame
                 return 0;
             }
 #endif
-            Buffer.SetData(data, offset, size);
+            SetData(data, offset, size);
             uint oldOffset = offset;
             offset += dynamicAlignment;
             return oldOffset;
@@ -108,18 +103,11 @@ namespace SharpGame
             offset = 0;
         }
 
-        public void Flush()
+        public void FlushAll()
         {
             if(offset > 0)
-                Buffer.Flush(MathUtil.Align(offset, (uint)Device.Properties.limits.nonCoherentAtomSize), 0);
+                Flush(MathUtil.Align(offset, (uint)Device.Properties.limits.nonCoherentAtomSize), 0);
         }
 
-        protected override void Destroy(bool disposing)
-        {
-            base.Destroy(disposing);
-
-            Buffer?.Dispose();
-
-        }
     }
 }

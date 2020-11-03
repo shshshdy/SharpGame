@@ -21,7 +21,7 @@ namespace SharpGame.Samples
         public float FarClip;
     }
 
-    [SampleDesc(sortOrder = -6)]
+    [SampleDesc(sortOrder = 6)]
     public class NewRenderer : Sample
     {
         RenderPipeline renderer = new RenderPipeline();
@@ -29,7 +29,7 @@ namespace SharpGame.Samples
 
         CameraVS cameraVS = new CameraVS();
 
-        ResourceSet[] resourceSet = new ResourceSet[3];
+        ResourceSet resourceSet;
 
         SharedBuffer ubCameraVS;
 
@@ -64,9 +64,7 @@ namespace SharpGame.Samples
 
             ubCameraVS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint) Utilities.SizeOf<CameraVS>());
 
-            resourceSet[0] = new ResourceSet(resourceLayout);
-            resourceSet[1] = new ResourceSet(resourceLayout);
-            resourceSet[2] = new ResourceSet(resourceLayout);
+            resourceSet = new ResourceSet(resourceLayout, ubCameraVS, FrameGraph.Instance.TransformBuffer);
 
             renderer.AddGraphicsPass(CustomDraw);
 
@@ -135,7 +133,7 @@ namespace SharpGame.Samples
 
         void CustomDraw(GraphicsSubpass pass, RenderContext rc, CommandBuffer cmd)
         {
-            var rs = resourceSet[Graphics.WorkContext];
+            var rs = resourceSet/*[Graphics.WorkContext]*/;
 
             var ub = ubCameraVS;
 
@@ -153,14 +151,6 @@ namespace SharpGame.Samples
             cameraVS.ViewProj = proj * cameraVS.View ;
             ub.SetData(ref cameraVS);
             ub.Flush();
-
-            var tb = rc.AllocUniformBuffer((uint)Unsafe.SizeOf<CameraVS>());
-            tb.SetData(ref cameraVS);
-            var descriptor = tb.Descriptor;
-            rs.Bind(0, ref descriptor);
-            //rs.Bind(0, ub.Buffer);
-            rs.Bind(1, FrameGraph.TransformBuffer[Graphics.WorkContext]);
-            rs.UpdateSets();
 
             float gridSize = 15;
 

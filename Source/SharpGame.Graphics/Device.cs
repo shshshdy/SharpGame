@@ -789,6 +789,11 @@ namespace SharpGame
             return pDescriptorSets;
         }
 
+        public static void AllocateDescriptorSets(ref VkDescriptorSetAllocateInfo pAllocateInfo, VkDescriptorSet* pDescriptorSets)
+        {
+            VulkanUtil.CheckResult(vkAllocateDescriptorSets(device, ref pAllocateInfo, pDescriptorSets));
+        }
+
         public static void UpdateDescriptorSets(uint descriptorWriteCount, ref VkWriteDescriptorSet pDescriptorWrites, uint descriptorCopyCount, IntPtr pDescriptorCopies)
         {
             vkUpdateDescriptorSets(device, descriptorWriteCount, ref pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
@@ -798,6 +803,7 @@ namespace SharpGame
         {
             VulkanUtil.CheckResult(vkFreeDescriptorSets(device, descriptorPool, descriptorSetCount, ref pDescriptorSets));
         }
+
     }
 
 }

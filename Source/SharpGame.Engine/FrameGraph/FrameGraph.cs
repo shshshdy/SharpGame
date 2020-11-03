@@ -114,7 +114,7 @@ namespace SharpGame
 
             this.SendGlobalEvent(new PostRenderUpdate());
 
-            TransformBuffer.Flush();
+            TransformBuffer.FlushAll();
         }
 
         public void Render()
