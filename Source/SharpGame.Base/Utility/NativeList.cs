@@ -34,6 +34,7 @@ namespace SharpGame
         {
             Allocate(existingList.capacity);
             Unsafe.CopyBlock(dataPtr, existingList.dataPtr, existingList.count * s_elementByteSize);
+            Count = existingList.count;
         }
 
         public IntPtr Data

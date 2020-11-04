@@ -21,7 +21,7 @@ namespace SharpGame.Samples
         public float FarClip;
     }
 
-    [SampleDesc(sortOrder = 6)]
+    [SampleDesc(sortOrder = -6)]
     public class NewRenderer : Sample
     {
         RenderPipeline renderer = new RenderPipeline();
@@ -133,7 +133,7 @@ namespace SharpGame.Samples
 
         void CustomDraw(GraphicsSubpass pass, RenderContext rc, CommandBuffer cmd)
         {
-            var rs = resourceSet/*[Graphics.WorkContext]*/;
+            var rs = resourceSet;
 
             var ub = ubCameraVS;
 

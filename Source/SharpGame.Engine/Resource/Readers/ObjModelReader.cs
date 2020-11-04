@@ -512,7 +512,7 @@ namespace SharpGame
             vec3 n = NormalizeRobust(a, out l, out div);
             invOriginalLength = l / div;
             // guard for NaNs
-            Debug.Assert(n == n);
+            Debug.Assert( n == n);
             Debug.Assert(invOriginalLength == invOriginalLength);
             Debug.Assert(IsNormalized(n));
             return n;

@@ -34,13 +34,21 @@ namespace SharpGame
         private static UTF8String engineName = "SharpGame";
         private static List<string> supportedExtensions = new List<string>();
 
+        private static NativeList<IntPtr> instanceExtensions = new NativeList<IntPtr>(8);
 
         public static VkDevice Create(Settings settings, VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
             bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
         {
+            instanceExtensions.Add(Strings.VK_KHR_SURFACE_EXTENSION_NAME);
+            instanceExtensions.Add(Strings.VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+
+            enabledExtensions.Add(Strings.VK_KHR_MAINTENANCE1_EXTENSION_NAME);
+            enabledExtensions.Add(Strings.VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME);
+
+            //enabledExtensions.Add(Strings.VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT);
+
             CreateInstance(settings);
 
-            enabledExtensions.Add(Strings.VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME);
             // Physical Device
             uint gpuCount = 0;
             VulkanUtil.CheckResult(vkEnumeratePhysicalDevices(VkInstance, &gpuCount, null));
@@ -69,6 +77,39 @@ namespace SharpGame
 
             Features = features;
 
+            if (features.multiDrawIndirect)
+            {
+                enabledFeatures.multiDrawIndirect = true;
+            }
+            // Enable anisotropic filtering if supported
+            if (features.samplerAnisotropy)
+            {
+                enabledFeatures.samplerAnisotropy = true;
+            }
+            // Enable texture compression  
+            if (features.textureCompressionBC)
+            {
+                enabledFeatures.textureCompressionBC = true;
+            }
+            else if (features.textureCompressionASTC_LDR)
+            {
+                enabledFeatures.textureCompressionASTC_LDR = true;
+            }
+            else if (features.textureCompressionETC2)
+            {
+                enabledFeatures.textureCompressionETC2 = true;
+            }
+
+            if (features.sparseBinding && features.sparseResidencyImage2D)
+            {
+                enabledFeatures.sparseBinding = true;
+                enabledFeatures.sparseResidencyImage2D = true;
+            }
+            else
+            {
+                Log.Warn("Sparse binding not supported");
+            }
+
             // Memory properties are used regularly for creating all kinds of buffers
             VkPhysicalDeviceMemoryProperties memoryProperties;
             vkGetPhysicalDeviceMemoryProperties(physicalDevice, out memoryProperties);
@@ -78,13 +119,8 @@ namespace SharpGame
             vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, ref queueFamilyCount, null);
             Debug.Assert(queueFamilyCount > 0);
             QueueFamilyProperties.Resize(queueFamilyCount);
-            vkGetPhysicalDeviceQueueFamilyProperties(
-                physicalDevice,
-                &queueFamilyCount,
-                (VkQueueFamilyProperties*)QueueFamilyProperties.Data.ToPointer());
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, (VkQueueFamilyProperties*)QueueFamilyProperties.Data.ToPointer());
             QueueFamilyProperties.Count = queueFamilyCount;
-
-            //enabledExtensions.Add(Strings.VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT);
 
             // Get list of supported extensions
             uint extCount = 0;
@@ -98,15 +134,17 @@ namespace SharpGame
                     {
                         var ext = extensions[i];
                         string strExt = UTF8String.FromPointer(ext.extensionName);
-                        enabledExtensions.Add((IntPtr)ext.extensionName);
+                        //enabledExtensions.Add((IntPtr)ext.extensionName);
                         supportedExtensions.Add(strExt);
                     }
                 }
             }
 
-            VulkanUtil.CheckResult(CreateLogicalDevice(/*enabledFeatures*/Features, enabledExtensions));
+            VulkanUtil.CheckResult(CreateLogicalDevice(Features, enabledExtensions));
             queue = GetDeviceQueue(QFGraphics, 0);
+
             vkCmdPushDescriptorSetKHR();
+
             return device;
         }
 
@@ -122,13 +160,7 @@ namespace SharpGame
                 pEngineName = engineName,
             };
 
-            //enabledDeviceExtensions.push_back(VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME);
-            //enabledDeviceExtensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
-            //enabledInstanceExtensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
-            NativeList<IntPtr> instanceExtensions = new NativeList<IntPtr>(2);
-            instanceExtensions.Add(Strings.VK_KHR_SURFACE_EXTENSION_NAME);
-            instanceExtensions.Add(Strings.VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 instanceExtensions.Add(Strings.VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -155,12 +187,10 @@ namespace SharpGame
                 instanceCreateInfo.ppEnabledExtensionNames = (byte**)instanceExtensions.Data;
             }
 
+            using NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr> { Strings.StandardValidationLayeName };
+
             if (enableValidation)
             {
-                NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr>(1)
-                {
-                    Strings.StandardValidationLayeName
-                };
                 instanceCreateInfo.enabledLayerCount = enabledLayerNames.Count;
                 instanceCreateInfo.ppEnabledLayerNames = (byte**)enabledLayerNames.Data;
             }
@@ -298,7 +328,8 @@ namespace SharpGame
                 VkDebugReportFlagsEXT.DebugEXT,
                 (args) =>
                 {
-                    System.Diagnostics.Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}] {args.Message}");
+                    System.Diagnostics.Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}]");
+                    System.Diagnostics.Debug.WriteLine("\t" + args.Message);
                     return args.Flags.HasFlag(DebugReportFlagsExt.Error);
                 }, IntPtr.Zero
             );
@@ -513,7 +544,7 @@ namespace SharpGame
 
         public static void GetQueryPoolResults(VkQueryPool queryPool, uint firstQuery, uint queryCount, UIntPtr dataSize, void* pData, ulong stride, VkQueryResultFlags flags)
         {
-            VulkanUtil.CheckResult(vkGetQueryPoolResults( device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags));
+            VulkanUtil.CheckResult(vkGetQueryPoolResults(device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags));
         }
 
         public static void DestroyQueryPool(ref VkQueryPool queryPool)
@@ -739,7 +770,7 @@ namespace SharpGame
         {
             vkDestroyPipeline(device, pipeline, null);
         }
-        
+
         public static void DestroyBuffer(VkBuffer buffer)
         {
             vkDestroyBuffer(device, buffer, null);

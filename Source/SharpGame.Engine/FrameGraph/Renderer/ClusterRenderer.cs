@@ -207,8 +207,6 @@ namespace SharpGame
 
         protected RenderPass OnCreateClusterRenderPass()
         {
-
-
             Format depthFormat = Device.GetSupportedDepthFormat();
             AttachmentDescription[] attachments =
             {
