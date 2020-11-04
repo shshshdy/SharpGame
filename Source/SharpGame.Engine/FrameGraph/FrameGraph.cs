@@ -8,6 +8,22 @@ using System.Text;
 
 namespace SharpGame
 {
+    public struct RenderUpdate
+    {
+    }
+
+    public struct PostRenderUpdate
+    {
+    }
+
+    public struct BeginRender
+    {
+    }
+
+    public struct EndRender
+    {
+    }
+
     public class FrameGraph : System<FrameGraph>
     {
         private List<RenderView> views = new List<RenderView>();

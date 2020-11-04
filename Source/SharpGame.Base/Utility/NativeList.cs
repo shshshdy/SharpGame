@@ -10,7 +10,7 @@ namespace SharpGame
 {
     public unsafe class NativeList<T> : IEnumerable<T>, IDisposable where T : unmanaged
     {
-        private byte* dataPtr;
+        private T* dataPtr;
         private uint capacity;
         private uint count;
 
@@ -60,7 +60,7 @@ namespace SharpGame
                 {
                     uint newLements = value - Count;
                     CoreResize(value);
-                    Unsafe.InitBlock(dataPtr + count * s_elementByteSize, 0, newLements * s_elementByteSize);
+                    Unsafe.InitBlock(dataPtr + count /** s_elementByteSize*/, 0, newLements * s_elementByteSize);
                 }
 
                 count = value;
@@ -80,7 +80,7 @@ namespace SharpGame
 #else
                 Debug.Assert(index < count);
 #endif
-                return ref Unsafe.AsRef<T>(dataPtr + index * s_elementByteSize);
+                return ref Unsafe.AsRef<T>(dataPtr + index/* * s_elementByteSize*/);
             }
         }
 
@@ -97,7 +97,7 @@ namespace SharpGame
 #else
                 Debug.Assert(index >= 0 && index < count);
 #endif
-                return ref Unsafe.AsRef<T>(dataPtr + index * s_elementByteSize);
+                return ref Unsafe.AsRef<T>(dataPtr + index/* * s_elementByteSize*/);
             }
         }
 
@@ -129,7 +129,7 @@ namespace SharpGame
 
         public bool IsDisposed => dataPtr == null;
 
-        public void Add(ref T item)
+        public void Add(ref T item, uint numElements)
         {
             ThrowIfDisposed();
             if (count == capacity)
@@ -137,8 +137,9 @@ namespace SharpGame
                 CoreResize((uint)(capacity * GrowthFactor));
             }
 
-            Unsafe.Copy(dataPtr + count * s_elementByteSize, ref item);
-            count += 1;
+            //Unsafe.Copy(dataPtr + count, ref item);
+            Unsafe.CopyBlock(dataPtr + count, Unsafe.AsPointer(ref item), numElements * s_elementByteSize);
+            count += numElements;
         }
 
         public void Add(T item)
@@ -149,7 +150,7 @@ namespace SharpGame
                 CoreResize((uint)(capacity * GrowthFactor));
             }
 
-            Unsafe.Write(dataPtr + count * s_elementByteSize, item);
+            Unsafe.Write(dataPtr + count /** s_elementByteSize*/, item);
             count += 1;
         }
 
@@ -162,7 +163,7 @@ namespace SharpGame
                 CoreResize((uint)(needed * GrowthFactor));
             }
 
-            Unsafe.CopyBlock(dataPtr + count * s_elementByteSize, data, numElements * s_elementByteSize);
+            Unsafe.CopyBlock(dataPtr + count, data, numElements * s_elementByteSize);
             count += numElements;
         }
 
@@ -206,7 +207,7 @@ namespace SharpGame
             byte* itemPtr = (byte*)Unsafe.AsPointer(ref item);
             for (index = 0; index < count; index++)
             {
-                byte* ptr = dataPtr + index * s_elementByteSize;
+                byte* ptr = (byte*)(dataPtr + index) /** s_elementByteSize*/;
                 if (Equals(ptr, itemPtr, s_elementByteSize))
                 {
                     return true;
@@ -222,7 +223,7 @@ namespace SharpGame
             byte* itemPtr = (byte*)Unsafe.AsPointer(ref item);
             for (index = 0; index < count; index++)
             {
-                byte* ptr = dataPtr + index * s_elementByteSize;
+                byte* ptr = (byte*)(dataPtr + index) /** s_elementByteSize*/;
                 if (Equals(ptr, itemPtr, s_elementByteSize))
                 {
                     return true;
@@ -244,7 +245,7 @@ namespace SharpGame
 #else
             Debug.Assert(index < count);
 #endif
-            return new IntPtr(dataPtr + (index * s_elementByteSize));
+            return new IntPtr(dataPtr + (index/* * s_elementByteSize*/));
         }
 
         public void Resize(uint elementCount)
@@ -268,13 +269,13 @@ namespace SharpGame
 
         private void CoreResize(uint elementCount)
         {
-            dataPtr = (byte*)Marshal.ReAllocHGlobal(new IntPtr(dataPtr), (IntPtr)(elementCount * s_elementByteSize));
+            dataPtr = (T*)Marshal.ReAllocHGlobal(new IntPtr(dataPtr), (IntPtr)(elementCount * s_elementByteSize));
             capacity = elementCount;
         }
 
         private void Allocate(uint elementCount)
         {
-            dataPtr = (byte*)Marshal.AllocHGlobal((int)(elementCount * s_elementByteSize));
+            dataPtr = (T*)Marshal.AllocHGlobal((int)(elementCount * s_elementByteSize));
             capacity = elementCount;
         }
 
@@ -294,7 +295,7 @@ namespace SharpGame
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CoreRemoveAt(uint index)
         {
-            Unsafe.CopyBlock(dataPtr + index * s_elementByteSize, dataPtr + (count - 1) * s_elementByteSize, s_elementByteSize);
+            Unsafe.CopyBlock(dataPtr + index /** s_elementByteSize*/, dataPtr + (count - 1) /** s_elementByteSize*/, s_elementByteSize);
             count -= 1;
         }
 
@@ -344,12 +345,12 @@ namespace SharpGame
 
         public struct Enumerator : IEnumerator<T>
         {
-            private byte* _basePtr;
+            private T* _basePtr;
             private uint _count;
             private uint _currentIndex;
             private T _current;
 
-            public Enumerator(byte* basePtr, uint count)
+            public Enumerator(T* basePtr, uint count)
             {
                 _basePtr = basePtr;
                 _count = count;
@@ -364,7 +365,7 @@ namespace SharpGame
             {
                 if (_currentIndex != _count)
                 {
-                    _current = Unsafe.Read<T>(_basePtr + _currentIndex * s_elementByteSize);
+                    _current = Unsafe.Read<T>(_basePtr + _currentIndex);
                     _currentIndex += 1;
                     return true;
                 }
@@ -391,7 +392,7 @@ namespace SharpGame
                 _parent = parent;
             }
 
-            public uint Count => (_parent.Count * NativeList<T>.s_elementByteSize) / s_elementByteSize;
+            public uint Count => (_parent.Count /** NativeList<T>.s_elementByteSize*/) /*/ s_elementByteSize*/;
 
             public ViewType this[uint index]
             {

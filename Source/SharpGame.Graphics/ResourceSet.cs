@@ -310,7 +310,6 @@ namespace SharpGame
                 Device.UpdateDescriptorSets(count, ref writeDescriptorSets[img][index].native, 0, IntPtr.Zero);
             }
 
-            //Device.UpdateDescriptorSets((uint)writeDescriptorSets.Length, ref writeDescriptorSets[0].native, 0, IntPtr.Zero);
             Updated = true;
         }
 

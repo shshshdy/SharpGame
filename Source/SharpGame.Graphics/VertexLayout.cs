@@ -47,21 +47,24 @@ namespace SharpGame
         
     }
 
-    [Flags]
-    public enum VertexMask
+    public enum VertexComponent : byte
     {
-        Position = 0x1,
-        Texcoord1 = 0x2,
-        Normal = 0x4,
-        Tangent = 0x8,
-        BlendWeights = 0x10,
-        BlendIndices = 0x20,
-        Color = 0x40,
-        Texcoord2 = 0x80,
-        InstanceMatrix1 = 0x100,
-        InstanceMatrix2 = 0x200,
-        InstanceMatrix3 = 0x400,
-        InstanceMatrix4 = 0x800,
+        Position,
+        Texcoord,
+        Normal,
+        Tangent,
+        BlendWeights,
+        BlendIndices,
+        Color,
+
+        Int1,
+        Int2,
+        Int3,
+        Int4,
+        Float1,
+        Float2,
+        Float3,
+        Float4,
     }
 
     public class VertexLayout : IEnumerable<VertexAttribute>
@@ -73,10 +76,10 @@ namespace SharpGame
         {
         }
 
-//         public VertexLayout(params VertexAttribute[] attributes)
-//         {
-//             this.attributes = new FastList<VertexAttribute>(attributes);            
-//         }
+        public VertexLayout(VertexComponent[] vertexComponents)
+        {
+            throw new NotImplementedException();
+        }
 
         public VertexLayout(VertexAttribute[] attributes, VertexBinding[] bindings = null)
         {
