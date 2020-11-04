@@ -1,37 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 8)]
+    [SampleDesc(sortOrder = -8)]
     public class Raytracing : Sample
     {
+        [StructLayout(LayoutKind.Sequential)]
         struct UboCompute
         {
-            vec3 lightPos;
+            public vec3 lightPos;
             // Aspect ratio of the viewport
-            float aspectRatio;
-            vec4 fogColor;// = glm::vec4(0.0f);
+            public float aspectRatio;
+            public vec4 fogColor;// = glm::vec4(0.0f);
 
-            vec3 pos;// = glm::vec3(0.0f, 1.5f, 4.0f);
-            float padding;
-            vec3 lookat;// = glm::vec3(0.0f, 0.5f, 0.0f);
-            float fov;// = 10.0f;
-        
+            public vec3 pos;// = glm::vec3(0.0f, 1.5f, 4.0f);
+            public float padding;
+            public vec3 lookat;// = glm::vec3(0.0f, 0.5f, 0.0f);
+            public float fov;// = 10.0f;
+                    
         }
 
         private RenderPipeline renderer = new RenderPipeline();
         private Texture storageTex;
-        private Buffer uniformBuffer;
+        private SharedBuffer uniformBuffer;
 
         private Geometry geometry;
         private Material material;
 
 
+        private Shader computeShader;
         private Pass computePipeline;
         private ResourceSet computeResourceSet;
 
+        UboCompute ubo = new UboCompute
+        {
+            pos = glm.vec3(0.0f, 1.5f, 4.0f),
+            lookat = glm.vec3(0.0f, 0.5f, 0.0f),
+            fov = 10.0f
+        };
 
         public override void Init()
         {
@@ -39,16 +48,16 @@ namespace SharpGame.Samples
 
             GenerateQuad();
 
-            var shader = Resources.Load<Shader>("shaders/Particle.shader");
+            var shader = Resources.Load<Shader>("shaders/raytracing.shader");
 
             storageTex = Texture.CreateStorage(2048, 2048, Format.R8g8b8a8Snorm);
-            uniformBuffer = Buffer.CreateUniformBuffer<UboCompute>();
+            uniformBuffer = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<UboCompute>());
             
             material = new Material(shader);
+            material.SetTexture("samplerColor", storageTex);
 
-            material.PipelineResourceSet[0].ResourceSet[0].Bind(storageTex);
-
-            computePipeline = shader.GetPass("compute");
+            //computeShader = Resources.Load<Shader>("shaders/raytracing.shader");
+            computePipeline = shader.GetPass("Compute");
             computeResourceSet = new ResourceSet(computePipeline.PipelineLayout.ResourceLayout[0], storageTex, uniformBuffer);
 
             renderer.AddComputePass(Docompute);
@@ -57,38 +66,32 @@ namespace SharpGame.Samples
             MainView.Attach(null, null, renderer);
 
         }
-        // Setup vertices for a single uv-mapped quad
+
         void GenerateQuad()
         {
             const float dim = 1.0f;
-            Buffer vertexBuffer = null;
-            /*
-            = Buffer.Create( { { { dim, dim, 0.0f }, { 1.0f, 1.0f } },
-        { { -dim, dim, 0.0f }, { 0.0f, 1.0f } },
-        { { -dim, -dim, 0.0f }, { 0.0f, 0.0f } },
-        { { dim, -dim, 0.0f }, { 1.0f, 0.0f } } };
 
-            vertices.create(vertexBuffer, vk::BufferUsageFlagBits::eVertexBuffer);
-            std::vector<uint32_t> indexBuffer = { 0, 1, 2, 2, 3, 0 };
-            indexCount = (uint32_t)indexBuffer.size();
-            indices.create(indexBuffer, vk::BufferUsageFlagBits::eIndexBuffer);
-            */
+            VertexPosTex[] vertices =
+            {
+                new VertexPosTex(dim, dim, 0, 1.0f, 1.0f),
+                new VertexPosTex(-dim, dim, 0, 0.0f, 1.0f),
+                new VertexPosTex(-dim, -dim, 0, 0.0f, 0.0f),
+                new VertexPosTex(dim, -dim, 0, 1.0f, 0.0f),
+            };
+
+            int[] indices =
+            {
+                0, 1, 2, 2, 3, 0,
+            };
 
             geometry = new Geometry
             {
-                VertexBuffers = new[] { vertexBuffer },
-
-                VertexLayout = new VertexLayout
-                (
-                    new VertexAttribute(0, 0, Format.R32g32Sfloat, 0),
-                    //new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
-                    new VertexAttribute(0, 1, Format.R32g32b32a32Sfloat, 16)
-
-                )
-
+                VertexBuffers = new[] { Buffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
+                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexLayout = VertexPosTex.Layout
             };
 
-            geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, 6);
+            geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length);         
 
         }
 
@@ -96,7 +99,13 @@ namespace SharpGame.Samples
         {
             base.Update();
 
-            //uniformBuffer.SetData(ref ubo);
+            ubo.aspectRatio = (float)Graphics.Width / (float)Graphics.Height;
+            ubo.lightPos.x = 0.0f + glm.sin(glm.radians(Time.Elapsed * 90.0f)) * 2.0f;
+            ubo.lightPos.y = 5.0f;
+            ubo.lightPos.z = 1.0f;
+            ubo.lightPos.z = 0.0f + glm.cos(glm.radians(Time.Elapsed * 90.0f)) * 2.0f;
+       
+            uniformBuffer.SetData(ref ubo);
         }
 
         private void DrawQuad(GraphicsSubpass renderPass, RenderContext rc, CommandBuffer cmd)

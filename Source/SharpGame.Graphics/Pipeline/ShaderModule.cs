@@ -91,11 +91,10 @@ namespace SharpGame
             Build();
         }
 
-        public ShaderModule(ShaderStage stage, byte[] code, string funcName = "main")
+        public ShaderModule(ShaderStage stage, byte[] code)
         {
             Stage = stage;
             Code = code;
-            FuncName = funcName;        
 
             Build();
         }

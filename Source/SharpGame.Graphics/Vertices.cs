@@ -7,6 +7,52 @@ using Vulkan;
 namespace SharpGame
 {
     [StructLayout(LayoutKind.Sequential)]
+    public struct VertexPos
+    {
+        public vec3 Position;
+        public VertexPos(float x, float y, float z)
+        {
+            Position.x = x;
+            Position.y = y;
+            Position.z = z;
+        }
+
+        public static int Size => Utilities.SizeOf<VertexPosColor>();
+
+        public static VertexLayout Layout = new VertexLayout
+        {
+            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0)
+        };
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct VertexPosTex
+    {
+        public vec3 position;
+        public vec2 texcoord;
+
+        public static int Size => Utilities.SizeOf<VertexPosTex>();
+
+        public VertexPosTex(vec3 p, vec2 uv)
+        {
+            position = p;
+            texcoord = uv;
+        }
+
+        public VertexPosTex(float px, float py, float pz, float u, float v)
+        {
+            position = new vec3(px, py, pz);
+            texcoord = new vec2(u, v);
+        }
+
+        public static VertexLayout Layout = new VertexLayout
+        {
+            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
+            new VertexAttribute(0, 1, Format.R32g32Sfloat, 12),
+        };
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct VertexPosTexNorm
     {
         public vec3 position;
@@ -136,24 +182,6 @@ namespace SharpGame
         };
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPos
-    {
-        public vec3 Position;
-        public VertexPos(float x, float y, float z)
-        {
-            Position.x = x;
-            Position.y = y;
-            Position.z = z;
-        }
-
-        public static int Size => Utilities.SizeOf<VertexPosColor>();
-
-        public static VertexLayout Layout = new VertexLayout
-        {
-            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0)
-        };
-    }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPos2dTexColor

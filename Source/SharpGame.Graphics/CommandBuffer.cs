@@ -35,6 +35,7 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
             opened = true;
             NeedSubmit = true;
+            ClearDescriptorSets();
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

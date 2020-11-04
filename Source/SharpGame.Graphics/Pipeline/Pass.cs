@@ -220,7 +220,7 @@ namespace SharpGame
         {
         }
 
-        public Pass(string vertexShader = null, string pixelShader = null, string geometryShader = null,
+        public Pass(string vertexShader, string pixelShader, string geometryShader = null,
             string hullShader = null, string domainShader = null, string computeShader = null)
         {
             if (!string.IsNullOrEmpty(vertexShader))
@@ -255,7 +255,17 @@ namespace SharpGame
 
             Build();
         }
-                
+
+        public Pass(string computeShader)
+        {
+            if (!string.IsNullOrEmpty(computeShader))
+            {
+                ComputeShader = new ShaderModule(ShaderStage.Compute, computeShader);
+            }
+
+            Build();
+        }
+
         public void Build()
         {
             if (builded_)
