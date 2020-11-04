@@ -59,15 +59,12 @@ namespace SharpGame
     {
         [DataMember]
         public ShaderStage Stage { get; set; }
-        [DataMember]
-        public string FuncName { get; set; }
+
         [DataMember]
         public byte[] Code { get; set; }
 
         [DataMember]
         public ShaderReflection ShaderReflection { get; set; }
-
-        internal string FileName { get; set; }
 
         public SpecializationInfo SpecializationInfo { get; set; }
 
@@ -75,20 +72,6 @@ namespace SharpGame
 
         public ShaderModule()
         {
-        }
-
-        public ShaderModule(ShaderStage stage, string fileName, string funcName = "main")
-        {
-            Stage = stage;
-            FileName = fileName;
-            FuncName = funcName;
-                        
-            using (File stream = FileSystem.Instance.GetFile(fileName))
-            {
-                Code = stream.ReadAllBytes();
-            }
-
-            Build();
         }
 
         public ShaderModule(ShaderStage stage, byte[] code)
@@ -103,10 +86,7 @@ namespace SharpGame
         {
             if (Code == null)
             {
-                using (File stream = FileSystem.Instance.GetFile(FileName))
-                {
-                    Code = stream.ReadAllBytes();
-                }
+                return false;
             }
 
             unsafe

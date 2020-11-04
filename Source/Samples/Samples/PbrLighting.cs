@@ -69,7 +69,7 @@ namespace SharpGame.Samples
             brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, ImageViewType.Image2D, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
 
             {
-                var model = GeometricPrimitive.CreateCubeModel(10, 10, 10);
+                var model = GeometryUtil.CreateCubeModel(10, 10, 10);
                 var node = scene.CreateChild("Sky");
                
                 var staticModel = node.AddComponent<StaticModel>();

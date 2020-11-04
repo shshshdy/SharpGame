@@ -47,9 +47,7 @@ namespace SharpGame
         protected bool paused = false;
         private bool shouldQuit = false;
         bool rendering = false;
-
         protected bool singleLoop = false;
-        private bool mainThreadRender = false;
 
         private float fps;
         public float Fps => fps;

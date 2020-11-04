@@ -321,7 +321,7 @@ namespace SharpGame
         }
 
         static Dictionary<string, IncludeResult> includes = new Dictionary<string, IncludeResult>();
-        IncludeResult IncludeHandler(string requestedSource, string requestingSource, CompileOptions.IncludeType type)
+        static IncludeResult IncludeHandler(string requestedSource, string requestingSource, CompileOptions.IncludeType type)
         {
             if(includes.TryGetValue(requestedSource, out var res))
             {
@@ -348,38 +348,16 @@ namespace SharpGame
 
         ShaderModule LoadShaderModel(ShaderStage shaderStage, string code, string[] defs)
         {
-            ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;
-            switch(shaderStage)
-            {
-                case ShaderStage.Vertex:
-                    stage = ShaderCompiler.Stage.Vertex;
-                    break;
-                case ShaderStage.Fragment:
-                    stage = ShaderCompiler.Stage.Fragment;
-                    break;
-                case ShaderStage.Geometry:
-                    stage = ShaderCompiler.Stage.Geometry;
-                    break;
-                case ShaderStage.Compute:
-                    stage = ShaderCompiler.Stage.Compute;
-                    break;
-                case ShaderStage.TessControl:
-                    stage = ShaderCompiler.Stage.TessControl;
-                    break;
-                case ShaderStage.TessEvaluation:
-                    stage = ShaderCompiler.Stage.TessEvaluation;
-                    break;
-            }
 
             List<string> saveLines = new List<string>();
             string ver = "";
 
             StringReader reader = new StringReader(code);
 
-            while(true)
+            while (true)
             {
                 string line = reader.ReadLine();
-                if(line == null)
+                if (line == null)
                 {
                     break;
                 }
@@ -393,7 +371,7 @@ namespace SharpGame
 
                 if (str.StartsWith("#include"))
                 {
-                    if(ReadInclude(str.Substring(8), saveLines, out ver))
+                    if (ReadInclude(str.Substring(8), saveLines, out ver))
                     {
                         break;
                     }
@@ -415,7 +393,7 @@ namespace SharpGame
                 }
             }
 
-            foreach(var line in saveLines)
+            foreach (var line in saveLines)
             {
                 sb.AppendLine(line);
             }
@@ -424,22 +402,48 @@ namespace SharpGame
 
             code = sb.ToString();
 
-            var c = new ShaderCompiler();
+            return CreateShaderModule(shaderStage, code);
+        }
 
+        public static ShaderModule CreateShaderModule(ShaderStage shaderStage, string code)
+        {
+            ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;
+            switch (shaderStage)
+            {
+                case ShaderStage.Vertex:
+                    stage = ShaderCompiler.Stage.Vertex;
+                    break;
+                case ShaderStage.Fragment:
+                    stage = ShaderCompiler.Stage.Fragment;
+                    break;
+                case ShaderStage.Geometry:
+                    stage = ShaderCompiler.Stage.Geometry;
+                    break;
+                case ShaderStage.Compute:
+                    stage = ShaderCompiler.Stage.Compute;
+                    break;
+                case ShaderStage.TessControl:
+                    stage = ShaderCompiler.Stage.TessControl;
+                    break;
+                case ShaderStage.TessEvaluation:
+                    stage = ShaderCompiler.Stage.TessEvaluation;
+                    break;
+            }
+
+            var c = new ShaderCompiler();
             CompileOptions o = new CompileOptions(IncludeHandler)
             {
                 Language = CompileOptions.InputLanguage.GLSL,
                 Target = CompileOptions.Environment.Vulkan,
             };
 
-
             var r = c.Preprocess(code, stage, o, "main");
-            if(r.NumberOfErrors > 0)
+            if (r.NumberOfErrors > 0)
             {
                 Log.Error(r.ErrorMessage);
             }
 
-            if(r.CompileStatus != CompileResult.Status.Success)
+            if (r.CompileStatus != CompileResult.Status.Success)
             {
                 return null;
             }
@@ -464,6 +468,7 @@ namespace SharpGame
             {
                 ShaderReflection = refl
             };
+
             return shaderModule;
         }
 

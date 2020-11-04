@@ -5,7 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class GeometricPrimitive
+    public class GeometryUtil
     {
         public static Model CreatePlaneModel(float width, float height, float tileX = 1.0f, float tileZ = 1.0f, bool hasTangent = false)
         {

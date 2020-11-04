@@ -9,18 +9,6 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CameraVS
-    {
-        public mat4 View;
-        public mat4 ViewInv;
-        public mat4 ViewProj;
-        public vec3 CameraPos;
-        public float NearClip;
-        public vec3 FrustumSize;
-        public float FarClip;
-    }
-
     [SampleDesc(sortOrder = -6)]
     public class NewRenderer : Sample
     {
@@ -48,7 +36,7 @@ namespace SharpGame.Samples
             var mat = new Material("Shaders/Basic.shader");
             mat.SetTexture("DiffMap", Texture.White);
 
-            cube = GeometricPrimitive.CreateCube(10, 10, 10);
+            cube = GeometryUtil.CreateCube(10, 10, 10);
 
             for(int i = 0; i < COUNT; i++)
             {
@@ -134,13 +122,10 @@ namespace SharpGame.Samples
         void CustomDraw(GraphicsSubpass pass, RenderContext rc, CommandBuffer cmd)
         {
             var rs = resourceSet;
-
             var ub = ubCameraVS;
 
-            mat4 rotM = glm.mat4(1.0f);
-            
+            mat4 rotM = glm.mat4(1.0f);            
             rotM = glm.yawPitchRoll(yaw, pitch, 0);
-
             var m = glm.translate(cameraPos)* rotM ;
 
             cameraVS.View = glm.inverse(m);

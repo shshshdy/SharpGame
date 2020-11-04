@@ -220,52 +220,6 @@ namespace SharpGame
         {
         }
 
-        public Pass(string vertexShader, string pixelShader, string geometryShader = null,
-            string hullShader = null, string domainShader = null, string computeShader = null)
-        {
-            if (!string.IsNullOrEmpty(vertexShader))
-            {
-                VertexShader = new ShaderModule(ShaderStage.Vertex, vertexShader);
-            }
-
-            if (!string.IsNullOrEmpty(pixelShader))
-            {
-                PixelShader = new ShaderModule(ShaderStage.Fragment, pixelShader);
-            }
-
-            if (!string.IsNullOrEmpty(geometryShader))
-            {
-                GeometryShader = new ShaderModule(ShaderStage.Geometry, geometryShader);
-            }
-
-            if (!string.IsNullOrEmpty(hullShader))
-            {
-                HullShader = new ShaderModule(ShaderStage.TessControl, hullShader);
-            }
-
-            if (!string.IsNullOrEmpty(domainShader))
-            {
-                DomainShader = new ShaderModule(ShaderStage.TessEvaluation, domainShader);
-            }
-
-            if (!string.IsNullOrEmpty(computeShader))
-            {
-                ComputeShader = new ShaderModule(ShaderStage.Compute, computeShader);
-            }
-
-            Build();
-        }
-
-        public Pass(string computeShader)
-        {
-            if (!string.IsNullOrEmpty(computeShader))
-            {
-                ComputeShader = new ShaderModule(ShaderStage.Compute, computeShader);
-            }
-
-            Build();
-        }
-
         public void Build()
         {
             if (builded_)

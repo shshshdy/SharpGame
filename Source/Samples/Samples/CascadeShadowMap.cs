@@ -34,7 +34,7 @@ namespace SharpGame.Samples
             camera = scene.GetComponent<Camera>(true);
 
             {
-                var model = GeometricPrimitive.CreatePlaneModel(100, 100, 32, 32, true);
+                var model = GeometryUtil.CreatePlaneModel(100, 100, 32, 32, true);
                 var node = scene.CreateChild("Plane");
                 var staticModel = node.AddComponent<StaticModel>();
                 staticModel.SetModel(model);

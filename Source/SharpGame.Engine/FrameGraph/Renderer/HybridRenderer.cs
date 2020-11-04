@@ -48,7 +48,7 @@ namespace SharpGame
             //clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthHWRT.view });
 
             clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
-            quad = GeometricPrimitive.CreateUnitQuad();
+            quad = GeometryUtil.CreateUnitQuad();
 
             deferredLayout0 = new ResourceLayout
             {

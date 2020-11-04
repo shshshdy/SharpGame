@@ -222,17 +222,6 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void PushDescriptorSet(PipelineLayout pipelineLayout, ResourceSet resourceSet)
-        {
-            //vkCmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pass.pipelineLayout, (uint)resourceSet.Set,
-            //    (uint)resourceSet.writeDescriptorSets.Length, ref resourceSet.writeDescriptorSets[0]);
-
-            Device.CmdPushDescriptorSetKHR(commandBuffer, VkPipelineBindPoint.Graphics, pipelineLayout.handle, (uint)resourceSet.Set,
-                (uint)resourceSet.writeDescriptorSets[Graphics.Instance.WorkContext].Length, 
-                (VkWriteDescriptorSet*)Unsafe.AsPointer(ref resourceSet.writeDescriptorSets[Graphics.Instance.WorkContext][0]));
-        }
-
-        [MethodImpl((MethodImplOptions)0x100)]
         public void Draw(uint vertexCount, uint instanceCount, uint firstVertex, uint firstInstance)
         {
             vkCmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
@@ -269,6 +258,21 @@ namespace SharpGame
                 BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, i, resourceSet[i]);
             }
             geometry.Draw(this);
+        }
+
+        public void DrawIndirect(Buffer buffer, ulong offset, uint drawCount, uint stride)
+        {
+            vkCmdDrawIndirect(commandBuffer, buffer.buffer, offset, drawCount, stride);
+        }
+
+        public void DrawIndexedIndirect(Buffer buffer, ulong offset, uint drawCount, uint stride)
+        {
+            vkCmdDrawIndexedIndirect(commandBuffer, buffer.buffer, offset, drawCount, stride);
+        }
+
+        public void DispatchIndirect(Buffer buffer, ulong offset)
+        {
+            vkCmdDispatchIndirect(commandBuffer, buffer.buffer, offset);
         }
 
         public void Dispatch(uint groupCountX, uint groupCountY, uint groupCountZ)

@@ -73,16 +73,16 @@ namespace SharpGame
         {
         }
 
-        public VertexLayout(params VertexAttribute[] attributes)
-        {
-            this.attributes = new FastList<VertexAttribute>(attributes);            
-        }
+//         public VertexLayout(params VertexAttribute[] attributes)
+//         {
+//             this.attributes = new FastList<VertexAttribute>(attributes);            
+//         }
 
-        public VertexLayout(VertexBinding[] bindings, VertexAttribute[] attributes)
+        public VertexLayout(VertexAttribute[] attributes, VertexBinding[] bindings = null)
         {
-            this.bindings = bindings;
             this.attributes = new FastList<VertexAttribute>(attributes);
-            needUpdate = false;
+            this.bindings = bindings;
+            needUpdate = (bindings== null);
         }
 
         void Update()

@@ -64,12 +64,12 @@ namespace SharpGame.Samples
                 VertexBuffers = new [] { storageBuffer },
 
                 VertexLayout = new VertexLayout
-                (
+                {
                     new VertexAttribute(0, 0, Format.R32g32Sfloat, 0),
                     //new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
                     new VertexAttribute(0, 1, Format.R32g32b32a32Sfloat, 16)
-                    
-                )
+
+                }
 
             };
 

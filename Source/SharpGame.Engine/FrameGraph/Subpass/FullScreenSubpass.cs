@@ -10,7 +10,7 @@ namespace SharpGame
         protected PipelineResourceSet pipelineResourceSet;
         public FullScreenSubpass(string fs)
         {
-            pass = new Pass("shaders/common/fullscreen.vert", fs);
+            pass = ShaderUtil.CreatePass("shaders/common/fullscreen.vert", fs);
         }
 
         public override void DeviceReset()
