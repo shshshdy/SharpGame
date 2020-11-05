@@ -54,13 +54,13 @@ namespace SharpGame
 
         private FrameUniform frameUniform = new FrameUniform();
         private CameraVS cameraVS = new CameraVS();
-        private CameraPS cameraPS = new CameraPS();
+        //private CameraPS cameraPS = new CameraPS();
         private LightParameter lightParameter = new LightParameter();
 
         internal Buffer ubFrameInfo;
         public SharedBuffer ubCameraVS;
 
-        internal SharedBuffer ubCameraPS;
+        //internal SharedBuffer ubCameraPS;
         internal Buffer ubLight;
 
         private ResourceLayout vsResLayout;
@@ -131,7 +131,7 @@ namespace SharpGame
 
             ubCameraVS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
 
-            ubCameraPS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraPS>());
+            //ubCameraPS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraPS>());
             ubLight = Buffer.CreateUniformBuffer<LightParameter>();
 
             vsResLayout = new ResourceLayout
@@ -149,7 +149,7 @@ namespace SharpGame
                 new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
 
-            psResourceSet = new ResourceSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);
+            //psResourceSet = new ResourceSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);
 
         }
 
@@ -303,20 +303,20 @@ namespace SharpGame
             ubCameraVS.SetData(ref cameraVS);
             ubCameraVS.Flush();
 
-            cameraPS.ViewInv = cameraVS.ViewInv;
-            cameraPS.CameraPos = camera.Node.Position;
+//             cameraPS.ViewInv = cameraVS.ViewInv;
+//             cameraPS.CameraPos = camera.Node.Position;
+// 
+//             vec4 depthReconstruct = new vec4(farClip / (farClip - nearClip), -nearClip / (farClip - nearClip),
+//                 camera.Orthographic ? 1.0f : 0.0f, camera.Orthographic ? 0.0f : 1.0f);
+//             cameraPS.DepthReconstruct = depthReconstruct;
+// 
+//             cameraPS.GBufferInvSize = new vec2(1.0f / Width, 1.0f / Height);
+// 
+//             cameraPS.NearClip = nearClip;
+//             cameraPS.FarClip = farClip;
 
-            vec4 depthReconstruct = new vec4(farClip / (farClip - nearClip), -nearClip / (farClip - nearClip),
-                camera.Orthographic ? 1.0f : 0.0f, camera.Orthographic ? 0.0f : 1.0f);
-            cameraPS.DepthReconstruct = depthReconstruct;
-
-            cameraPS.GBufferInvSize = new vec2(1.0f / Width, 1.0f / Height);
-
-            cameraPS.NearClip = nearClip;
-            cameraPS.FarClip = farClip;
-
-            ubCameraPS.SetData(ref cameraPS);
-            ubCameraPS.Flush();
+            //ubCameraPS.SetData(ref cameraPS);
+            //ubCameraPS.Flush();
 
         }
 

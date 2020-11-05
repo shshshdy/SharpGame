@@ -21,6 +21,7 @@
     <None Include="$(MSBuildThisFileDirectory)Common\Shadow.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\ToneMap.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Transform.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\Uniforms.h" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsPS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ClusterLight.shader" />
@@ -74,6 +75,10 @@
     <None Include="$(MSBuildThisFileDirectory)Skinned.shader" />
     <None Include="$(MSBuildThisFileDirectory)Skybox.shader" />
     <None Include="$(MSBuildThisFileDirectory)UnLit.shader" />
+    <None Include="$(MSBuildThisFileDirectory)vegetation\indirectdraw.frag" />
+    <None Include="$(MSBuildThisFileDirectory)vegetation\indirectdraw.vert" />
+    <None Include="$(MSBuildThisFileDirectory)vegetation\skysphere.frag" />
+    <None Include="$(MSBuildThisFileDirectory)vegetation\skysphere.vert" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)LitPbr.shader" />

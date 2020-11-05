@@ -29,9 +29,6 @@ namespace SharpGame.Samples
 
         private Geometry geometry;
         private Material material;
-
-
-        private Shader computeShader;
         private Pass computePipeline;
         private ResourceSet computeResourceSet;
 
@@ -56,7 +53,6 @@ namespace SharpGame.Samples
             material = new Material(shader);
             material.SetTexture("samplerColor", storageTex);
 
-            //computeShader = Resources.Load<Shader>("shaders/raytracing.shader");
             computePipeline = shader.GetPass("Compute");
             computeResourceSet = new ResourceSet(computePipeline.PipelineLayout.ResourceLayout[0], storageTex, uniformBuffer);
 

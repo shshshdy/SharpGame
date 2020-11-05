@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SharpGame
@@ -179,7 +180,7 @@ namespace SharpGame
             
         }
 
-        static void ConvertGeom(float scale, Assimp.Mesh mesh,
+        static unsafe void ConvertGeom(float scale, Assimp.Mesh mesh,
             out BoundingBox meshBoundingBox, out Buffer vb, out Buffer ib, VertexComponent[] vertexComponents)
         {
             NativeList<float> vertexBuffer = new NativeList<float>();
@@ -202,6 +203,14 @@ namespace SharpGame
                             var normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
                             vertexBuffer.Add(ref normal.x, 3);
                             break;
+                        case VertexComponent.Tangent:
+                            var tan = new vec3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);
+                            vertexBuffer.Add(ref tan.x, 3);
+                            break;
+                        case VertexComponent.Bitangent:
+                            var bitan = new vec3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
+                            vertexBuffer.Add(ref bitan.x, 3);
+                            break;
                         case VertexComponent.Texcoord:
                             vec2 texcoord = vec2.Zero;
                             // Texture coordinates and colors may have multiple channels, we only use the first [0] one
@@ -210,6 +219,16 @@ namespace SharpGame
                                 texcoord = new vec2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
                             }
                             vertexBuffer.Add(ref texcoord.x, 2);
+                            break;
+                        case VertexComponent.Color:
+                            uint color = 0xffffffff;
+                            if (mesh.VertexColorChannelCount > 0)
+                            {
+                                var c = mesh.VertexColorChannels[0][v];
+                                color = (uint)(c.A*255) << 24 | (uint)(c.B * 255) << 16 | (uint)(c.G * 255) << 8 | (uint)(c.R * 255);
+                            }
+                            vertexBuffer.Add(Unsafe.AsPointer(ref color), 1);
+
                             break;
                     }
 

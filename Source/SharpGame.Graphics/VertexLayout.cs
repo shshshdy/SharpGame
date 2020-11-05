@@ -53,6 +53,7 @@ namespace SharpGame
         Texcoord,
         Normal,
         Tangent,
+        Bitangent,
         BlendWeights,
         BlendIndices,
         Color,
@@ -78,7 +79,23 @@ namespace SharpGame
 
         public VertexLayout(VertexComponent[] vertexComponents)
         {
-            throw new NotImplementedException();
+            attributes = new FastList<VertexAttribute>(vertexComponents.Length);
+            uint offset = 0;
+            for(uint i = 0; i < vertexComponents.Length; i++)
+            {
+                var fmt = GetFormat(vertexComponents[i]);
+                attributes.Add(new VertexAttribute
+                {
+                    location = i,
+                    binding = 0,
+                    format = fmt,
+                    offset = offset
+                });
+
+                offset += GetFormatSize(fmt);
+            }
+
+            needUpdate = true;
         }
 
         public VertexLayout(VertexAttribute[] attributes, VertexBinding[] bindings = null)
@@ -109,6 +126,26 @@ namespace SharpGame
             bindings = new[] { new VertexBinding(0, offset + size, VertexInputRate.Vertex) };
         }
 
+        Format GetFormat(VertexComponent vc)
+        {
+            switch (vc)
+            {
+                case VertexComponent.Position:
+                case VertexComponent.Normal:
+                    return Format.R32g32b32Sfloat;
+                case VertexComponent.Texcoord:
+                    return Format.R32g32Sfloat;
+                case VertexComponent.Tangent:
+                    return Format.R32g32b32Sfloat;
+                case VertexComponent.Bitangent:
+                    return Format.R32g32b32Sfloat;
+                case VertexComponent.Color:
+                    return Format.R8g8b8a8Unorm;
+            }
+
+            return Format.Undefined;
+        }
+       
         uint GetFormatSize(Format format)
         {
             switch(format)

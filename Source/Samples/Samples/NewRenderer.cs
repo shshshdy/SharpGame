@@ -13,144 +13,58 @@ namespace SharpGame.Samples
     public class NewRenderer : Sample
     {
         RenderPipeline renderer = new RenderPipeline();
-        List<SourceBatch> batches = new List<SourceBatch>();
 
-        CameraVS cameraVS = new CameraVS();
-
-        ResourceSet resourceSet;
-
-        SharedBuffer ubCameraVS;
-
-        Geometry cube;
-        vec3 cameraPos;
-        const int COUNT = 100;
 
         public override void Init()
         {
-            var resourceLayout = new ResourceLayout(0)
+
+            scene = new Scene()
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-                new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
+                new Octree { },
+                new DebugRenderer { },
+
+                new Environment
+                {
+                    SunlightDir = glm.normalize(new vec3(-1.0f, -1.0f, 0.0f))
+                },
+
+                new Node("Camera", new vec3(0, 2, -10), glm.radians(10, 0, 0) )
+                {
+                    new Camera
+                    {
+                        NearClip = 0.5f,
+                        FarClip = 100,
+                    },
+
+                },
+
             };
 
-            var mat = new Material("Shaders/Basic.shader");
-            mat.SetTexture("DiffMap", Texture.White);
+            camera = scene.GetComponent<Camera>(true);
 
-            cube = GeometryUtil.CreateCube(10, 10, 10);
-
-            for(int i = 0; i < COUNT; i++)
             {
-                var batch = new SourceBatch
-                {
-                    geometry = cube,
-                    material = mat,
-                    numWorldTransforms = 1,
-                };
+                var node = scene.CreateChild("Sky");
+                var staticModel = node.AddComponent<StaticModel>();
+                staticModel.ModelFile = "models/vegetation/skysphere.dae";
 
-                batches.Add(batch);
+                var mat = Resources.Load<Material>("materials/Grass.material");
+                mat.SetTexture("NormalMap", Texture.Blue);
+                staticModel.SetMaterial(mat);
+            }
+            {
+                var node = scene.CreateChild("Plane");
+                var staticModel = node.AddComponent<StaticModel>();
+                var model = GeometryUtil.CreatePlaneModel(100, 100, 32, 32, true);
+                staticModel.SetModel(model);
+                //staticModel.ModelFile = "models/vegetation/plane_circle.dae";
+                var mat = new Material("shaders/Grass.material");
+                
+                staticModel.SetMaterial(mat);
             }
 
-            ubCameraVS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint) Utilities.SizeOf<CameraVS>());
-
-            resourceSet = new ResourceSet(resourceLayout, ubCameraVS, FrameGraph.Instance.TransformBuffer);
-
-            renderer.AddGraphicsPass(CustomDraw);
-
-            cameraPos = new vec3(0, 5, -50);
-            
-            MainView.Attach(null, null, renderer);
+            MainView.Attach(camera, scene);
 
         }
 
-        public override void Update()
-        {
-            UpdateInput();
-        }
-
-        private void UpdateInput()
-        {
-            var input = Input.Instance;
-            if (input.snapshot == null)
-            {
-                return;
-            }
-
-            if (mousePos == vec2.Zero)
-                mousePos = input.MousePosition;
-
-            vec3 offset = default;
-            if (input.IsMouseDown(MouseButton.Right))
-            {
-                vec2 delta = (input.MousePosition - mousePos) * Time.Delta * rotSpeed;
-                yaw += delta.X;
-                pitch += delta.Y;
-
-                if (input.IsKeyPressed(Key.W))
-                {
-                    offset.z += 1.0f;
-                }
-
-                if (input.IsKeyPressed(Key.S))
-                {
-                    offset.z -= 1.0f;
-                }
-
-                if (input.IsKeyPressed(Key.A))
-                {
-                    offset.x -= 1.0f;
-                }
-
-                if (input.IsKeyPressed(Key.D))
-                {
-                    offset.x += 1.0f;
-                }
-            }
-
-            if (input.IsMouseDown(MouseButton.Middle))
-            {
-                vec2 delta = input.MousePosition - mousePos;
-                offset.x = delta.X;
-                offset.y = delta.Y;
-            }
-
-            cameraPos += offset * (Time.Delta * moveSpeed);
-            cameraPos += new vec3(0, 0, input.WheelDelta * wheelSpeed);
-
-            mousePos = input.MousePosition;
-        }
-
-        void CustomDraw(GraphicsSubpass pass, RenderContext rc, CommandBuffer cmd)
-        {
-            var rs = resourceSet;
-            var ub = ubCameraVS;
-
-            mat4 rotM = glm.mat4(1.0f);            
-            rotM = glm.yawPitchRoll(yaw, pitch, 0);
-            var m = glm.translate(cameraPos)* rotM ;
-
-            cameraVS.View = glm.inverse(m);
-
-            var proj = glm.perspective((float)Math.PI / 4, 16 / 9.0f, 1, 1000);
-            proj.M22 = -proj.M22;
-
-            cameraVS.ViewProj = proj * cameraVS.View ;
-            ub.SetData(ref cameraVS);
-            ub.Flush();
-
-            float gridSize = 15;
-
-            for (int i = 0; i < COUNT; i++)
-            {
-                mat4 worldTransform = glm.translate(gridSize * (i / 10), 0, gridSize * (i % 10));
-
-                batches[i].offset = (int)FrameGraph.Instance.GetTransform(Utilities.AsPointer(ref worldTransform), 1);
-            }
-
-            for (int i = 0; i < COUNT; i++)
-            {
-                var batch = batches[i];
-                pass.DrawBatch(cmd, 1, batch, default, rs, null);
-            }
-        }
     }
 }
