@@ -41,24 +41,33 @@ namespace SharpGame.Samples
             };
 
             camera = scene.GetComponent<Camera>(true);
-
+            
             {
                 var node = scene.CreateChild("Sky");
                 var staticModel = node.AddComponent<StaticModel>();
-                staticModel.ModelFile = "models/vegetation/skysphere.dae";
 
-                var mat = Resources.Load<Material>("materials/Grass.material");
-                mat.SetTexture("NormalMap", Texture.Blue);
+                var importer = new AssimpModelReader 
+                { 
+                    vertexComponents = new[] 
+                    { 
+                        VertexComponent.Position, 
+                        VertexComponent.Texcoord
+                    }
+                };
+                var model = importer.Load("models/vegetation/skysphere.dae");
+                staticModel.SetModel(model);
+                staticModel.SetBoundingBox(new BoundingBox(-10000, 10000));
+                var mat = new Material("shaders/SkySphere.shader");
                 staticModel.SetMaterial(mat);
             }
+            
             {
                 var node = scene.CreateChild("Plane");
                 var staticModel = node.AddComponent<StaticModel>();
                 var model = GeometryUtil.CreatePlaneModel(100, 100, 32, 32, true);
                 staticModel.SetModel(model);
-                //staticModel.ModelFile = "models/vegetation/plane_circle.dae";
-                var mat = new Material("shaders/Grass.material");
-                
+                var mat = Resources.Load<Material>("materials/Grass.material");
+                mat.SetTexture("NormalMap", Texture.Blue);
                 staticModel.SetMaterial(mat);
             }
 

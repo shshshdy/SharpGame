@@ -3,9 +3,9 @@
 #include "UniformsVS.glsl"
 
 layout (location= 0) in vec3 inPos;
-//#ifdef ALPHA_TEST
+#ifdef ALPHA_TEST
 layout(location = 1) in vec2 inUV;
-//#endif
+#endif
 
 out gl_PerVertex
 {

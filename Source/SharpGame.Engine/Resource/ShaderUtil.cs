@@ -56,13 +56,12 @@ namespace SharpGame
             return pass;
         }
 
-
         public static ShaderModule CreateShaderModule(ShaderStage stage, string fileName, string funcName = "main")
         {
             using (File stream = FileSystem.Instance.GetFile(fileName))
             {
                 var source = stream.ReadAllText();
-                var shaderModule = ShaderReader.CreateShaderModule(stage, source);
+                var shaderModule = ShaderReader.CreateShaderModule(stage, source, fileName);
                 shaderModule.Build();
                 return shaderModule;
             }

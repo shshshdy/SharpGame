@@ -7,7 +7,7 @@ layout (binding = 0) uniform CameraVS
 	vec3 CameraPos;
 	float NearClip;
 	vec3 FrustumSize;
-	float FarClip;	
+	float FarClip;
     vec4 DepthMode;
     vec4 GBufferOffsets;
 };

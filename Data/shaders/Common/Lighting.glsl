@@ -64,8 +64,3 @@ vec3 DecodeNormal(vec4 normalInput)
         return normalize(normalInput.rgb * 2.0 - 1.0);
     #endif
 }
-
-float ReconstructDepth(float hwDepth)
-{
-    return dot(vec2(hwDepth, DepthReconstruct.y / (hwDepth - DepthReconstruct.x)), DepthReconstruct.zw);
-}

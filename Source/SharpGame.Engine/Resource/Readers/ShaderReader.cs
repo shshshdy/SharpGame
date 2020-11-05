@@ -351,7 +351,7 @@ namespace SharpGame
 
             List<string> saveLines = new List<string>();
             string ver = "";
-
+            string includeFile = "";
             StringReader reader = new StringReader(code);
 
             while (true)
@@ -371,7 +371,13 @@ namespace SharpGame
 
                 if (str.StartsWith("#include"))
                 {
-                    if (ReadInclude(str.Substring(8), saveLines, out ver))
+                    var incFile = str.Substring(8);
+                    if(string.IsNullOrEmpty(includeFile))
+                    {
+                        includeFile = incFile;
+                    }
+
+                    if (ReadInclude(incFile, saveLines, out ver))
                     {
                         break;
                     }
@@ -402,10 +408,10 @@ namespace SharpGame
 
             code = sb.ToString();
 
-            return CreateShaderModule(shaderStage, code);
+            return CreateShaderModule(shaderStage, code, includeFile);
         }
 
-        public static ShaderModule CreateShaderModule(ShaderStage shaderStage, string code)
+        public static ShaderModule CreateShaderModule(ShaderStage shaderStage, string code, string includeFile)
         {
             ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;
             switch (shaderStage)
@@ -453,7 +459,7 @@ namespace SharpGame
             LayoutParser layoutParser = new LayoutParser(source);
             var refl = layoutParser.Reflection();
 
-            var res = c.Compile(source, stage, o, "main");
+            var res = c.Compile(source, stage, o, includeFile, "main");
             if (res.NumberOfErrors > 0)
             {
                 Log.Error(res.ErrorMessage);

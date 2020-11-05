@@ -74,6 +74,7 @@
     <None Include="$(MSBuildThisFileDirectory)Reflect.shader" />
     <None Include="$(MSBuildThisFileDirectory)Skinned.shader" />
     <None Include="$(MSBuildThisFileDirectory)Skybox.shader" />
+    <None Include="$(MSBuildThisFileDirectory)SkySphere.shader" />
     <None Include="$(MSBuildThisFileDirectory)UnLit.shader" />
     <None Include="$(MSBuildThisFileDirectory)vegetation\indirectdraw.frag" />
     <None Include="$(MSBuildThisFileDirectory)vegetation\indirectdraw.vert" />

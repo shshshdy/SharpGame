@@ -1,14 +1,9 @@
 #version 450
+#include "UniformsVS.glsl"
 
 // Vertex attributes
 layout (location = 0) in vec4 inPos;
-layout (location = 2) in vec2 inUV;
-
-layout (binding = 0) uniform UBO 
-{
-	mat4 projection;
-	mat4 modelview;
-} ubo;
+layout (location = 1) in vec2 inUV;
 
 layout (location = 0) out vec2 outUV;
 
@@ -21,5 +16,5 @@ void main()
 {
 	outUV = vec2(inUV.s, 1.0-inUV.t);
 	// Skysphere always at center, only use rotation part of modelview matrix
-	gl_Position = ubo.projection * mat4(mat3(ubo.modelview)) * vec4(inPos.xyz, 1.0);
+	gl_Position = ViewProj * vec4(inPos.xyz + CameraPos, 1.0);
 }

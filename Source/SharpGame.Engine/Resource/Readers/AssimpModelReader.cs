@@ -19,7 +19,7 @@ namespace SharpGame
         Assimp.PostProcessSteps.OptimizeMeshes |
         Assimp.PostProcessSteps.Debone |
         Assimp.PostProcessSteps.ValidateDataStructure;
-
+        public VertexComponent[] vertexComponents;
         public AssimpModelReader() : base("")
         {
         }
@@ -74,7 +74,7 @@ namespace SharpGame
                     Log.Error("No material : " + mesh.Name);
                 }
 
-                ConvertGeometry(mesh, scale, hasNormalMap, null, out Geometry geometry, out var meshBoundingBox);
+                ConvertGeometry(mesh, scale, hasNormalMap, vertexComponents, out Geometry geometry, out var meshBoundingBox);
 
                 model.VertexBuffers.Add(geometry.VertexBuffers[0]);
                 model.IndexBuffers.Add(geometry.IndexBuffer);
@@ -235,6 +235,13 @@ namespace SharpGame
                 }
             }
 
+            for (int f = 0; f < mesh.FaceCount; f++)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    indexBuffer.Add((uint)mesh.Faces[f].Indices[i]);
+                }
+            }
             vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(float), vertexBuffer.Count, vertexBuffer.Data);
             ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 

@@ -18,7 +18,7 @@ namespace SharpGame
         {
             Name = name;
         }
-        
+
         public override void Draw(RenderContext rc, CommandBuffer cb)
         {
             OnDraw?.Invoke(this, rc, cb);
@@ -39,20 +39,15 @@ namespace SharpGame
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
 
-            foreach(var rs in resourceSet1)
+            int firstSet = 1;
+            foreach (var rs in resourceSet1)
             {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, rs, -1);
+                if (firstSet < pass.PipelineLayout.ResourceLayout.Length)
+                {
+                    cb.BindGraphicsResourceSet(pass.PipelineLayout, firstSet, rs, -1);
+                }
+                firstSet++;
             }
-
-//             if (resourceSet1 != null)
-//             {
-//                 cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, -1);
-//             }
-// 
-//             if (resourceSet2 != null)
-//             {
-//                 cb.BindGraphicsResourceSet(pass.PipelineLayout, 2, resourceSet2, -1);
-//             }
 
             foreach (ConstBlock constBlock in pushConsts)
             {

@@ -132,7 +132,8 @@ namespace SharpGame
         public void Add(ref T item, uint numElements)
         {
             ThrowIfDisposed();
-            if (count == capacity)
+
+            while (count + numElements > capacity)
             {
                 CoreResize((uint)(capacity * GrowthFactor));
             }
@@ -145,6 +146,7 @@ namespace SharpGame
         public void Add(T item)
         {
             ThrowIfDisposed();
+
             if (count == capacity)
             {
                 CoreResize((uint)(capacity * GrowthFactor));
@@ -157,10 +159,11 @@ namespace SharpGame
         public void Add(void* data, uint numElements)
         {
             ThrowIfDisposed();
+
             uint needed = count + numElements;
-            if (numElements > capacity)
+            while (needed > capacity)
             {
-                CoreResize((uint)(needed * GrowthFactor));
+                CoreResize((uint)(capacity * GrowthFactor));
             }
 
             Unsafe.CopyBlock(dataPtr + count, data, numElements * s_elementByteSize);

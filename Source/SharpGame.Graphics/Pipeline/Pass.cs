@@ -243,15 +243,16 @@ namespace SharpGame
                         ResourceLayout currentLayout = null;
                         foreach (var des in descriptors)
                         {
-                            if(currentLayout == null || currentLayout.Set != des.set)
+                            currentLayout = reslayouts.Find((i) => i.Set == des.set);
+                            if (currentLayout == null)
                             {
                                 currentLayout = new ResourceLayout(des.set);
                                 reslayouts.Add(currentLayout);
                             }
-
-                            if(!currentLayout.Contains(des.binding))
+                            ResourceLayoutBinding resBinding = currentLayout.Bindings.Find((i) => i.binding == des.binding);
+                            if (resBinding == null)
                             {
-                                ResourceLayoutBinding resBinding = new ResourceLayoutBinding
+                                resBinding = new ResourceLayoutBinding
                                 {
                                     name = des.name,
                                     binding = des.binding,
@@ -263,7 +264,13 @@ namespace SharpGame
                             }
                             else
                             {
-                                Log.Warn("Duplicate binding : " + des.name);
+
+                                if(resBinding.name == des.name && resBinding.descriptorType == des.descriptorType)
+                                {
+                                    resBinding.stageFlags |= sm.Stage;
+                                }
+                                else
+                                    Log.Warn("Duplicate binding : " + des.name);
                             }
 
 
