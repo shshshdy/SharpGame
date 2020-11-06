@@ -69,12 +69,13 @@ namespace SharpGame.ImageSharp
   
         public unsafe Texture CreateDeviceTexture()
         {
-            MipmapData[] mipmaps = new MipmapData[Images.Length];
+            MipmapLevel[] mipmaps = new MipmapLevel[Images.Length];
             for(int i = 0; i < this.Images.Length; i++)
             {
                 var image = Images[i];
                 uint imageSize = (uint)(image.Width * image.Height * Unsafe.SizeOf<Rgba32>());
-                mipmaps[i] = new MipmapData(imageSize, MemoryMarshal.AsBytes(image.GetPixelSpan()).ToArray(), (uint)image.Width, (uint)image.Height);
+                mipmaps[i] = new MipmapLevel(imageSize, MemoryMarshal.AsBytes(image.GetPixelSpan()).ToArray(),
+                    (uint)image.Width, (uint)image.Height, 1);
             }
 
             ImageData face = new ImageData((uint)Width, (uint)Height, (uint)Images.Length, mipmaps);
@@ -89,7 +90,7 @@ namespace SharpGame.ImageSharp
                 imageLayout = ImageLayout.ShaderReadOnlyOptimal,
             };
 
-            tex.SetImageData(new[] { face });
+            tex.SetImageData(face);
 
             return tex;
 

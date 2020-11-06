@@ -31,25 +31,14 @@ namespace SharpGame
         {
         }
 
-        public unsafe void SetImageData(ImageData[] imageData)
+        public unsafe void SetImageData(ImageData imageData)
         {
-            width = imageData[0].Width;
-            height = imageData[0].Height;
+            width = imageData.Width;
+            height = imageData.Height;
+            mipLevels = (uint)imageData.Mipmaps.Length;
+            layers = (uint)imageData.Mipmaps[0].ArrayElements.Length;
 
-            mipLevels = (uint)imageData[0].Mipmaps.Length;
-            layers = (uint)imageData.Length;
-
-            uint totalSize = 0;
-            for (int face = 0; face < imageData.Length; face++)
-            {
-                uint numberOfMipmapLevels = (uint)imageData[face].Mipmaps.Length;
-                Debug.Assert(numberOfMipmapLevels == mipLevels);
-                for (int mipLevel = 0; mipLevel < numberOfMipmapLevels; mipLevel++)
-                {
-                    MipmapData mipmap = imageData[face].Mipmaps[mipLevel];
-                    totalSize += mipmap.SizeInBytes;
-                }
-            }
+            ulong totalSize = imageData.GetTotalSize();        
 
             Buffer stagingBuffer = Buffer.CreateStagingBuffer(totalSize, IntPtr.Zero);
 
@@ -58,35 +47,38 @@ namespace SharpGame
 
             IntPtr mapped = stagingBuffer.Map();
             // Setup buffer copy regions for each face including all of it's miplevels
-            Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(layers * mipLevels)];
+            Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(/*layers **/ mipLevels)];
             uint offset = 0;
             int index = 0;
-            for (uint face = 0; face < layers; face++)
+
+            for (uint level = 0; level < mipLevels; level++)
             {
-                for (uint level = 0; level < mipLevels; level++)
+                var mipLevel = imageData.Mipmaps[level];
+                for (uint layer = 0; layer < mipLevel.ArrayElementSize; layer++)
                 {
-                    MipmapData mipmap = imageData[face].Mipmaps[level];
-                    BufferImageCopy bufferCopyRegion = new BufferImageCopy
+                    for (uint face = 0; face < layers; face++)
                     {
-                        imageSubresource = new ImageSubresourceLayers
-                        {
-                            aspectMask = ImageAspectFlags.Color,
-                            mipLevel = level,
-                            baseArrayLayer = face,
-                            layerCount = 1
-                        },
-
-                        imageExtent = new Extent3D(mipmap.Width, mipmap.Height, 1),
-                        bufferOffset = offset
-                    };
-
-                    bufferCopyRegions[index++] = bufferCopyRegion;
-
-                    Unsafe.CopyBlock((void*)(mapped + (int)offset), Unsafe.AsPointer(ref mipmap.Data[0]), (uint)mipmap.Data.Length);
-
-                    // Increase offset into staging buffer for next level / face
-                    offset += imageData[face].Mipmaps[level].SizeInBytes;
+                        var faceElement = mipLevel.ArrayElements[layer].Faces[face]; 
+                        Unsafe.CopyBlock((void*)(mapped + (int)offset), Unsafe.AsPointer(ref faceElement.Data[0]), (uint)faceElement.Data.Length);
+                    }
                 }
+
+                BufferImageCopy bufferCopyRegion = new BufferImageCopy
+                {
+                    imageSubresource = new ImageSubresourceLayers
+                    {
+                        aspectMask = ImageAspectFlags.Color,
+                        mipLevel = level,
+                        baseArrayLayer = 0,
+                        layerCount = mipLevel.ArrayElementSize
+                    },
+
+                    imageExtent = new Extent3D(mipLevel.Width, mipLevel.Height, mipLevel.Depth),
+                    bufferOffset = offset
+                };
+
+                bufferCopyRegions[index++] = bufferCopyRegion;
+                offset += mipLevel.TotalSize;
             }
 
             stagingBuffer.Unmap();
@@ -320,9 +312,9 @@ namespace SharpGame
         public uint Width { get; set; }
         public uint Height { get; set; }
         public uint NumberOfMipmapLevels { get; }
-        public MipmapData[] Mipmaps { get; }
+        public MipmapLevel[] Mipmaps { get; }
 
-        public ImageData(uint width, uint height, uint numberOfMipmapLevels, MipmapData[] mipmaps)
+        public ImageData(uint width, uint height, uint numberOfMipmapLevels, MipmapLevel[] mipmaps)
         {
             Width = width;
             Height = height;
@@ -333,7 +325,7 @@ namespace SharpGame
         public ImageData(uint numberOfMipmapLevels)
         {
             NumberOfMipmapLevels = numberOfMipmapLevels;
-            Mipmaps = new MipmapData[numberOfMipmapLevels];
+            Mipmaps = new MipmapLevel[numberOfMipmapLevels];
         }
 
         public ulong GetTotalSize()
@@ -342,45 +334,70 @@ namespace SharpGame
 
             for (int mipLevel = 0; mipLevel < Mipmaps.Length; mipLevel++)
             {
-                MipmapData mipmap = Mipmaps[mipLevel];
-                totalSize += mipmap.SizeInBytes;
+                var mipmap = Mipmaps[mipLevel];
+                totalSize += mipmap.TotalSize;
 
             }
 
             return totalSize;
         }
 
-
-        public byte[] GetAllTextureData()
-        {
-            byte[] result = new byte[GetTotalSize()];
-            uint start = 0;
-
-            for (int mipLevel = 0; mipLevel < Mipmaps.Length; mipLevel++)
-            {
-                MipmapData mipmap = Mipmaps[mipLevel];
-                mipmap.Data.CopyTo(result, (int)start);
-                start += mipmap.SizeInBytes;
-            }
-
-
-            return result;
-        }
     }
 
-    public class MipmapData
+    // for each mipmap_level in numberOfMipmapLevels
+    public struct MipmapLevel
     {
-        public uint SizeInBytes { get; }
-        public byte[] Data { get; }
+        public MipmapLevel(uint totalSize, byte[] data, uint width, uint height, uint depth)
+        {
+            Width = width;
+            Height = height;
+            Depth = depth;
+            TotalSize = totalSize;
+            ArrayElementSize = 1;
+
+            ArrayElements = new[]
+            {
+                new ArrayElement(new[] { new ImageFace(data) })
+            };
+
+        }
+
+        public MipmapLevel(uint width, uint height, uint depth, uint totalSize, uint arraySliceSize, ArrayElement[] slices)
+        {
+            Width = width;
+            Height = height;
+            Depth = depth;
+            TotalSize = totalSize;
+            ArrayElementSize = arraySliceSize;
+            ArrayElements = slices;
+        }
+
         public uint Width { get; }
         public uint Height { get; }
+        public uint Depth { get; }
+        public uint TotalSize { get; }
+        public uint ArrayElementSize { get; }
+        public ArrayElement[] ArrayElements { get; }
+    }
 
-        public MipmapData(uint sizeInBytes, byte[] data, uint width, uint height)
+    public struct ArrayElement
+    {
+        public ImageFace[] Faces { get; }
+        public ArrayElement(ImageFace[] faces)
         {
-            SizeInBytes = sizeInBytes;
-            Data = data;
-            Width = Math.Max(1, width);
-            Height = Math.Max(1, height);
+            Faces = faces;
         }
+
+    }
+
+    // for each face in numberOfFaces
+    public struct ImageFace
+    {
+        public byte[] Data { get; }
+        public ImageFace(byte[] data)
+        {
+            Data = data;
+        }
+
     }
 }

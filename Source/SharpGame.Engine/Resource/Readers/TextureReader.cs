@@ -74,13 +74,14 @@ namespace SharpGame
                     newData = image.Data;
                 }
 
-                MipmapData[] mipmaps = new MipmapData[image.MipMaps.Length + 1];
-                mipmaps[0] = new MipmapData((uint)image.DataLen, newData.AsSpan(0, image.DataLen).ToArray(), (uint)image.Width, (uint)image.Height);
+                MipmapLevel[] mipmaps = new MipmapLevel[image.MipMaps.Length + 1];
+                mipmaps[0] = new MipmapLevel((uint)image.DataLen, newData.AsSpan(0, image.DataLen).ToArray(),
+                    (uint)image.Width, (uint)image.Height, 1);
                 for (int i = 1; i < mipmaps.Length; i++)
                 {
                     var mip = image.MipMaps[i - 1];
                     uint imageSize = (uint)mip.DataLen;
-                    mipmaps[i] = new MipmapData(imageSize, newData.AsSpan(mip.DataOffset, mip.DataLen).ToArray(), (uint)mip.Width, (uint)mip.Height);
+                    mipmaps[i] = new MipmapLevel(imageSize, newData.AsSpan(mip.DataOffset, mip.DataLen).ToArray(), (uint)mip.Width, (uint)mip.Height, 1);
                 }
 
                 Format fmt = Format.R8g8b8a8Unorm;
@@ -121,7 +122,7 @@ namespace SharpGame
                     imageLayout = ImageLayout.ShaderReadOnlyOptimal,
                 };
 
-                tex.SetImageData(new[] { face });
+                tex.SetImageData(face);
                 return tex;
             }
         }
@@ -162,12 +163,12 @@ namespace SharpGame
             tex.format = fmt;
             tex.samplerAddressMode = SamplerAddressMode;
 
-            if(texFile.Faces.Length == 6)
-            {
-                tex.imageCreateFlags = ImageCreateFlags.CubeCompatible;
-            }
+//             if(texFile.Faces.Length == 6)
+//             {
+//                 tex.imageCreateFlags = ImageCreateFlags.CubeCompatible;
+//             }
 
-            tex.SetImageData(texFile.Faces);
+            //tex.SetImageData(texFile.Faces);
 
             return tex;
         }
