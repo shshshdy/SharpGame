@@ -19,6 +19,10 @@ namespace SharpGame
         Assimp.PostProcessSteps.OptimizeMeshes |
         Assimp.PostProcessSteps.Debone |
         Assimp.PostProcessSteps.ValidateDataStructure;
+
+        // Generate vertex buffer from ASSIMP scene data
+        public float scale = 1.0f;
+
         public VertexComponent[] vertexComponents;
         public AssimpModelReader() : base("")
         {
@@ -42,9 +46,6 @@ namespace SharpGame
 
             //Assimp.Scene scene = ctx.ImportFileFromStream(stream, assimpFlags, ext);
             Assimp.Scene scene = ctx.ImportFile(stream.Name, assimpFlags);
-
-            // Generate vertex buffer from ASSIMP scene data
-            float scale = 1.0f;
 
             BoundingBox boundingBox = new BoundingBox();
 
@@ -242,6 +243,7 @@ namespace SharpGame
                     indexBuffer.Add((uint)mesh.Faces[f].Indices[i]);
                 }
             }
+
             vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(float), vertexBuffer.Count, vertexBuffer.Data);
             ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
 
@@ -471,7 +473,6 @@ namespace SharpGame
                 }
 
             }
-
 
             return material;
         }

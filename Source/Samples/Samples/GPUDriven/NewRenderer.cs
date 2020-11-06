@@ -17,7 +17,6 @@ namespace SharpGame.Samples
 
         public override void Init()
         {
-
             scene = new Scene()
             {
                 new Octree { },
@@ -41,19 +40,20 @@ namespace SharpGame.Samples
             };
 
             camera = scene.GetComponent<Camera>(true);
-            
+
+            var importer = new AssimpModelReader
+            {
+                vertexComponents = new []
+                {
+                    VertexComponent.Position,
+                    VertexComponent.Texcoord
+                }
+            };
+
             {
                 var node = scene.CreateChild("Sky");
                 var staticModel = node.AddComponent<StaticModel>();
-
-                var importer = new AssimpModelReader 
-                { 
-                    vertexComponents = new[] 
-                    { 
-                        VertexComponent.Position, 
-                        VertexComponent.Texcoord
-                    }
-                };
+                importer.scale = 50;
                 var model = importer.Load("models/vegetation/skysphere.dae");
                 staticModel.SetModel(model);
                 staticModel.SetBoundingBox(new BoundingBox(-10000, 10000));
@@ -68,6 +68,22 @@ namespace SharpGame.Samples
                 staticModel.SetModel(model);
                 var mat = Resources.Load<Material>("materials/Grass.material");
                 mat.SetTexture("NormalMap", Texture.Blue);
+                staticModel.SetMaterial(mat);
+            }
+
+
+            {
+                var node = scene.CreateChild("vegetation");
+                var staticModel = node.AddComponent<StaticModelGroup>();
+
+                importer.scale = 0.0025f;
+                importer.vertexComponents = null;
+                var model = importer.Load("models/vegetation/plants.dae");
+                staticModel.SetModel(model);
+
+                var mat = new Material("shaders/LitSolid.shader");
+                Texture tex = Resources.Load<Texture>("models/vegetation/textures/texturearray_plants_bc3_unorm.ktx");
+                mat.SetTexture("DiffMap", tex);
                 staticModel.SetMaterial(mat);
             }
 

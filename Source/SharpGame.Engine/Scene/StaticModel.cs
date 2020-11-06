@@ -56,7 +56,7 @@ namespace SharpGame
             ResetLodLevels();
         }
 
-        public StaticModel SetModel(Model model)
+        public virtual StaticModel SetModel(Model model)
         {
             if (model == model_)
                 return this;

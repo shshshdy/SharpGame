@@ -140,7 +140,26 @@ namespace SharpGame
         protected override bool OnLoad(Texture tex, File stream)
         {
             KtxFile texFile = KtxFile.Load(stream, false);
-            tex.format = Format;
+
+            Format fmt = Format;
+            if(stream.Name.IndexOf("bc3_unorm", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                fmt = Format.Bc3UnormBlock;
+            }
+            else if(stream.Name.IndexOf("etc2_unorm", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                fmt = Format.Etc2R8g8b8a8UnormBlock;
+            }
+            else if (stream.Name.IndexOf("astc_8x8_unorm", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                fmt = Format.Astc8x8UnormBlock;
+            }
+            else if (stream.Name.IndexOf("rgba", StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                fmt = Format.R8g8b8a8Unorm;
+            }
+
+            tex.format = fmt;
             tex.samplerAddressMode = SamplerAddressMode;
 
             if(texFile.Faces.Length == 6)
