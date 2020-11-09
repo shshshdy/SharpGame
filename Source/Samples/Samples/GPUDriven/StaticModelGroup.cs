@@ -30,6 +30,59 @@ namespace SharpGame
 
         uint objectCount = 0;
         uint indirectDrawCount = 0;
+
+
+        public override StaticModel SetModel(Model model)
+        {
+            if (model == model_)
+                return this;
+
+            model_ = model;
+
+            if (model_ != null)
+            {
+                SetNumGeometries(model.Geometries.Count);
+
+                List<Geometry[]> geometries = model.Geometries;
+                List<vec3> geometryCenters = model.GeometryCenters;
+
+                for (int i = 0; i < geometries_.Length; ++i)
+                {
+                    geometries_[i] = (Geometry[])geometries[i].Clone();
+                    geometryData_[i].center_ = geometryCenters[i];
+
+                    batches[i].geometry = geometries_[i][0];
+                    if (node_)
+                    {
+                        batches[i].worldTransform = node_.worldTransform_;
+                    }
+                    batches[i].numWorldTransforms = 1;
+
+                    var m = GetMaterial(i);
+                    if (m == null)
+                    {
+                        Material mat = model.GetMaterial(i);
+                        if (mat)
+                        {
+                            SetMaterial(i, mat);
+                        }
+                    }
+
+                }
+
+                SetBoundingBox(model.BoundingBox);
+                ResetLodLevels();
+            }
+            else
+            {
+                SetNumGeometries(0);
+                SetBoundingBox(BoundingBox.Empty);
+            }
+
+            return this;
+        }
+
+
         // Prepare (and stage) a buffer containing the indirect draw commands
         void prepareIndirectData()
         {

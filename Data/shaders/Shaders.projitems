@@ -48,6 +48,7 @@
     <None Include="$(MSBuildThisFileDirectory)Common\shadow.frag" />
     <None Include="$(MSBuildThisFileDirectory)Common\shadow.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\merge.frag" />
+    <None Include="$(MSBuildThisFileDirectory)IndirectDraw.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitAlphaTest.shader" />
     <None Include="$(MSBuildThisFileDirectory)post\blur.frag" />
     <None Include="$(MSBuildThisFileDirectory)post\brightness_mask.frag" />

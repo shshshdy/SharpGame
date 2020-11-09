@@ -107,8 +107,7 @@ namespace SharpGame
         public void DrawScene(CommandBuffer cmd, BlendFlags blendFlags)
         {
             var set0 = Set0 ?? View.Set0;
-            Span<ResourceSet> set1 =  new []{ Set1 ?? View.Set1 };
-            //var set2 = Set2;
+            Span<ResourceSet> set1 =  new [] { Set1 ?? View.Set1 };
 
             cmd.SetViewport(View.Viewport);
             cmd.SetScissor(View.ViewRect);
@@ -147,6 +146,7 @@ namespace SharpGame
 
         }
 
+        ResourceSet[] tempSets = new ResourceSet[8];
         public void DrawBatchesMT(CommandBuffer cmd, FastList<SourceBatch> batches, ResourceSet set0, Span<ResourceSet> set1)
         {
             renderTasks.Clear();
@@ -156,6 +156,13 @@ namespace SharpGame
             {
                 dpPerBatch = 200;
             }
+            
+            for(int i = 0; i < set1.Length; i++)
+            {
+                tempSets[i] = set1[i];
+            }
+
+            ArraySegment<ResourceSet> setSegment = new ArraySegment<ResourceSet>(tempSets, 0, set1.Length);
 
             int idx = 0;
             for (int i = 0; i < batches.Count; i += dpPerBatch)
@@ -168,7 +175,7 @@ namespace SharpGame
                 {
                     cb.SetViewport(View.Viewport);
                     cb.SetScissor(View.ViewRect);
-                    //Draw(cb, batches.AsSpan(from, to - from), set0, set1);
+                    Draw(cb, batches.AsSpan(from, to - from), set0, setSegment);
                     cb.End();
                 });
                 renderTasks.Add(t);
@@ -182,8 +189,9 @@ namespace SharpGame
             {
                 cmd.ExecuteCommand(c);
             }
-            secondCmdBuffers.Clear();
 
+            secondCmdBuffers.Clear();
+            tempSets.Clear();
         }
 
         protected void Draw(CommandBuffer commandBuffer, Span<SourceBatch> sourceBatches, ResourceSet set0, Span<ResourceSet> set1)

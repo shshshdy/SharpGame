@@ -78,7 +78,7 @@ namespace SharpGame
                                 aspectMask = ImageAspectFlags.Color,
                                 mipLevel = level,
                                 baseArrayLayer = (uint)(layer * faceCount + face),
-                                layerCount = 1// (uint)mipLevel.ArrayElementSize
+                                layerCount = 1
                             },
 
                             imageExtent = new Extent3D(mipLevel.Width, mipLevel.Height, mipLevel.Depth),
@@ -89,16 +89,9 @@ namespace SharpGame
                         offset += (uint)faceElement.Data.Length;
 
                     }
-                    //offset1 += (uint)faceElement.Data.Length;
-                    // offset2 += faceSize;
-
-
-                    //offset += mipLevel.TotalSize;
-
 
                 }
 
-                //offset1 += layerSize;
             }
 
 

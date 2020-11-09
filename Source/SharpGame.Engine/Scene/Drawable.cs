@@ -55,6 +55,13 @@ namespace SharpGame
         public int frameNum;
         /// %Geometry type.
         public GeometryType geometryType;
+
+        public void Draw()
+        {
+
+        }
+
+
     };
 
     public class Drawable : Component

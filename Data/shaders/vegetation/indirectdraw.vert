@@ -2,6 +2,8 @@
 
 #include "UniformsVS.glsl"
 
+#define INSTANCED
+
 // Vertex attributes
 layout (location = 0) in vec4 inPos;
 layout (location = 1) in vec3 inNormal;
@@ -13,6 +15,7 @@ layout (location = 4) in vec3 instancePos;
 layout (location = 5) in vec3 instanceRot;
 layout (location = 6) in float instanceScale;
 layout (location = 7) in int instanceTexIndex;
+
 
 layout (location = 0) out vec3 outNormal;
 layout (location = 1) out vec3 outColor;
