@@ -62,6 +62,7 @@ namespace SharpGame
         Int2,
         Int3,
         Int4,
+
         Float1,
         Float2,
         Float3,
@@ -70,8 +71,9 @@ namespace SharpGame
 
     public class VertexLayout : IEnumerable<VertexAttribute>
     {
-        public VertexBinding[] bindings;
-        public FastList<VertexAttribute> attributes;
+        public VertexBinding[] Bindings { get; private set; }
+        public FastList<VertexAttribute> attributes { get; private set; }
+
         bool needUpdate = true;
         public VertexLayout()
         {
@@ -101,7 +103,7 @@ namespace SharpGame
         public VertexLayout(VertexAttribute[] attributes, VertexBinding[] bindings = null)
         {
             this.attributes = new FastList<VertexAttribute>(attributes);
-            this.bindings = bindings;
+            this.Bindings = bindings;
             needUpdate = (bindings== null);
         }
 
@@ -123,7 +125,7 @@ namespace SharpGame
                 }
             }
 
-            bindings = new[] { new VertexBinding(0, offset + size, VertexInputRate.Vertex) };
+            Bindings = new[] { new VertexBinding(0, offset + size, VertexInputRate.Vertex) };
         }
 
         Format GetFormat(VertexComponent vc)
@@ -141,6 +143,28 @@ namespace SharpGame
                     return Format.R32g32b32Sfloat;
                 case VertexComponent.Color:
                     return Format.R8g8b8a8Unorm;
+                case VertexComponent.BlendIndices:
+                    return Format.R8g8b8a8Uint;
+                case VertexComponent.BlendWeights:
+                    return Format.R32g32b32a32Sfloat;
+
+                case VertexComponent.Int1:
+                    return Format.R32Sint;
+                case VertexComponent.Int2:
+                    return Format.R32g32Sint;
+                case VertexComponent.Int3:
+                    return Format.R32g32b32Sint;
+                case VertexComponent.Int4:
+                    return Format.R32g32b32a32Sint;
+
+                case VertexComponent.Float1:
+                    return Format.R32Sfloat;
+                case VertexComponent.Float2:
+                    return Format.R32g32Sfloat;
+                case VertexComponent.Float3:
+                    return Format.R32g32b32Sfloat;
+                case VertexComponent.Float4:
+                    return Format.R32g32b32a32Sfloat;
             }
 
             return Format.Undefined;
@@ -192,8 +216,8 @@ namespace SharpGame
             }
 
             native = VkPipelineVertexInputStateCreateInfo.New();
-            native.vertexBindingDescriptionCount = (uint)bindings.Length;
-            native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AsPointer(ref bindings[0]);
+            native.vertexBindingDescriptionCount = (uint)Bindings.Length;
+            native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AsPointer(ref Bindings[0]);
             native.vertexAttributeDescriptionCount = (uint)attributes.Count;
             native.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)Utilities.AsPointer(ref attributes.Front());           
         }

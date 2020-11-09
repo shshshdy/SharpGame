@@ -336,7 +336,7 @@ namespace SharpGame
                     geometry.VertexBuffers = new[] { vertexBuffers_[desc.vbRef] };
                     geometry.VertexLayout = loadVBData_[desc.vbRef].layout;
                     geometry.IndexBuffer = indexBuffers_[desc.ibRef];
-                    geometry.SetDrawRange(desc.primitiveTopology, (uint)desc.indexStart, (uint)desc.indexCount);
+                    geometry.SetDrawRange(desc.primitiveTopology, (uint)desc.indexStart, (uint)desc.indexCount, 0);
                 }
             }
 

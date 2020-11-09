@@ -50,39 +50,16 @@ namespace SharpGame
         {
         }
 
-        public bool SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount)
+        public void SetDrawRange(PrimitiveTopology type, uint vertexStart, uint vertexCount)
         {
-            if (IndexBuffer == null)
-            {
-                return false;
-            }
-
-            if (IndexBuffer != null && indexStart + indexCount > IndexBuffer.Count)
-            {
-                return false;
-            }
-
             PrimitiveTopology = type;
-
-            IndexStart = indexStart;
-            IndexCount = indexCount;
-
-            // Get min.vertex index and num of vertices from index buffer. If it fails, use full range as fallback
-            if (indexCount > 0)
-            {
-                VertexStart = 0;
-                VertexCount = VertexBuffers[0] != null ? (uint)VertexBuffers[0].Count : 0;                
-            }
-            else
-            {
-                VertexStart = 0;
-                VertexCount = 0;
-            }
-
-            return true;
+            IndexStart = 0;
+            IndexCount = 0;
+            VertexStart = vertexStart;
+            VertexCount = vertexCount;
         }
 
-        public bool SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount, uint vertexStart, uint vertexCount)
+        public bool SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount, uint vertexOffset)
         {
             if (IndexBuffer != null)
             {
@@ -101,8 +78,8 @@ namespace SharpGame
             PrimitiveTopology = type;
             IndexStart = indexStart;
             IndexCount = indexCount;
-            VertexStart = vertexStart;
-            VertexCount = vertexCount;
+            VertexStart = vertexOffset;
+            VertexCount = 0;
 
             return true;
         }

@@ -157,7 +157,7 @@ namespace SharpGame
             }
             else
             {
-                bool hasTangent = mesh.HasTangentBasis /*&& hasNormalMap*/;
+                bool hasTangent = mesh.HasTangentBasis;
                 if (hasTangent)
                 {
                     ConvertGeomNTB(scale, mesh, out meshBoundingBox, out vb, out ib, out vertexLayout);
@@ -177,7 +177,7 @@ namespace SharpGame
                 VertexLayout = vertexLayout
             };
 
-            geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], 0, (uint)ib.Count);
+            geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], 0, (uint)ib.Count, 0);
             
         }
 
