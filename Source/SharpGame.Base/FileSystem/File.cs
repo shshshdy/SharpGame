@@ -106,6 +106,11 @@ namespace SharpGame
             return result;
         }
 
+        public byte[] ReadBytes(int count)
+        {
+            return ReadArray<byte>(count);
+        }
+
         public unsafe void Write<T>(ref T v) where T : struct
         {
             var temporaryBuffer = nativeStreamBuffer;

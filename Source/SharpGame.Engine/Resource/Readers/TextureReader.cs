@@ -110,7 +110,6 @@ namespace SharpGame
                         break;
                 }
 
-                ImageData face = new ImageData((uint)image.Width, (uint)image.Height, (uint)mipmaps.Length, mipmaps);
                 Texture tex = new Texture
                 {
                     width = (uint)image.Width,
@@ -122,7 +121,7 @@ namespace SharpGame
                     imageLayout = ImageLayout.ShaderReadOnlyOptimal,
                 };
 
-                tex.SetImageData(face);
+                tex.SetImageData(mipmaps);
                 return tex;
             }
         }
@@ -141,6 +140,7 @@ namespace SharpGame
         protected override bool OnLoad(Texture tex, File stream)
         {
             KtxFile texFile = KtxFile.Load(stream, false);
+            Debug.Assert(!texFile.Header.SwapEndian);
 
             Format fmt = Format;
             if(stream.Name.IndexOf("bc3_unorm", StringComparison.OrdinalIgnoreCase) != -1)
@@ -163,12 +163,12 @@ namespace SharpGame
             tex.format = fmt;
             tex.samplerAddressMode = SamplerAddressMode;
 
-//             if(texFile.Faces.Length == 6)
-//             {
-//                 tex.imageCreateFlags = ImageCreateFlags.CubeCompatible;
-//             }
+            if(texFile.Header.IsCubeMap)
+            {
+                tex.imageCreateFlags = ImageCreateFlags.CubeCompatible;
+            }
 
-            //tex.SetImageData(texFile.Faces);
+            tex.SetImageData(texFile.Mipmaps);
 
             return tex;
         }

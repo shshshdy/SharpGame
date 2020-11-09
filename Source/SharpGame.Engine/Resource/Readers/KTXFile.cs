@@ -23,65 +23,69 @@ namespace SharpGame
             Mipmaps = mipmaps;
         }
 
-        public static KtxFile Load(byte[] bytes, bool readKeyValuePairs)
+//         public static KtxFile Load(byte[] bytes, bool readKeyValuePairs)
+//         {
+//             using (MemoryStream ms = new MemoryStream(bytes))
+//             {
+//                 return Load(ms, readKeyValuePairs);
+//             }
+//         }
+
+        public static KtxFile Load(File file, bool readKeyValuePairs)
         {
-            using (MemoryStream ms = new MemoryStream(bytes))
+            KtxHeader header = ReadStruct<KtxHeader>(file);
+
+            KtxKeyValuePair[] kvps = null;
+            if (readKeyValuePairs)
             {
-                return Load(ms, readKeyValuePairs);
+                int keyValuePairBytesRead = 0;
+                List<KtxKeyValuePair> keyValuePairs = new List<KtxKeyValuePair>();
+                while (keyValuePairBytesRead < header.BytesOfKeyValueData)
+                {
+                    int bytesRemaining = (int)(header.BytesOfKeyValueData - keyValuePairBytesRead);
+                    KtxKeyValuePair kvp = ReadNextKeyValuePair(file, out int read);
+                    keyValuePairBytesRead += read;
+                    keyValuePairs.Add(kvp);
+                }
+
+                kvps = keyValuePairs.ToArray();
             }
-        }
-
-        public static KtxFile Load(Stream s, bool readKeyValuePairs)
-        {
-            using (BinaryReader br = new BinaryReader(s))
+            else
             {
-                KtxHeader header = ReadStruct<KtxHeader>(br);
+                file.Skip((int)header.BytesOfKeyValueData); // Skip over header data.
+            }
 
-                KtxKeyValuePair[] kvps = null;
-                if (readKeyValuePairs)
+            uint numberOfMipmapLevels = Math.Max(1, header.NumberOfMipmapLevels);
+            uint numberOfArrayElements = Math.Max(1, header.NumberOfArrayElements);
+            uint numberOfFaces = Math.Max(1, header.NumberOfFaces);
+
+            uint baseWidth = Math.Max(1, header.PixelWidth);
+            uint baseHeight = Math.Max(1, header.PixelHeight);
+            uint baseDepth = Math.Max(1, header.PixelDepth);
+
+            MipmapLevel[] images = new MipmapLevel[numberOfMipmapLevels];
+            for (int mip = 0; mip < numberOfMipmapLevels; mip++)
+            {
+                uint mipWidth = Math.Max(1, baseWidth / (uint)(Math.Pow(2, mip)));
+                uint mipHeight = Math.Max(1, baseHeight / (uint)(Math.Pow(2, mip)));
+                uint mipDepth = Math.Max(1, baseDepth / (uint)(Math.Pow(2, mip)));
+
+                uint imageSize = file.Read<uint>();
+
+                ArrayElement[] arrayElements = new ArrayElement[numberOfArrayElements];
+                bool isCubemap = header.NumberOfFaces == 6 && header.NumberOfArrayElements == 0;
+
+                if (numberOfArrayElements > 1)
                 {
-                    int keyValuePairBytesRead = 0;
-                    List<KtxKeyValuePair> keyValuePairs = new List<KtxKeyValuePair>();
-                    while (keyValuePairBytesRead < header.BytesOfKeyValueData)
-                    {
-                        int bytesRemaining = (int)(header.BytesOfKeyValueData - keyValuePairBytesRead);
-                        KtxKeyValuePair kvp = ReadNextKeyValuePair(br, out int read);
-                        keyValuePairBytesRead += read;
-                        keyValuePairs.Add(kvp);
-                    }
-
-                    kvps = keyValuePairs.ToArray();
-                }
-                else
-                {
-                    br.BaseStream.Seek(header.BytesOfKeyValueData, SeekOrigin.Current); // Skip over header data.
-                }
-
-                uint numberOfMipmapLevels = Math.Max(1, header.NumberOfMipmapLevels);
-                uint numberOfArrayElements = Math.Max(1, header.NumberOfArrayElements);
-                uint numberOfFaces = Math.Max(1, header.NumberOfFaces);
-
-                uint baseWidth = Math.Max(1, header.PixelWidth);
-                uint baseHeight = Math.Max(1, header.PixelHeight);
-                uint baseDepth = Math.Max(1, header.PixelDepth);
-
-                MipmapLevel[] images = new MipmapLevel[numberOfMipmapLevels];
-                for (int mip = 0; mip < numberOfMipmapLevels; mip++)
-                {
-                    uint mipWidth = Math.Max(1, baseWidth / (uint)(Math.Pow(2, mip)));
-                    uint mipHeight = Math.Max(1, baseHeight / (uint)(Math.Pow(2, mip)));
-                    uint mipDepth = Math.Max(1, baseDepth / (uint)(Math.Pow(2, mip)));
-
-                    uint imageSize = br.ReadUInt32();
                     uint arrayElementSize = imageSize / numberOfArrayElements;
-                    ArrayElement[] arrayElements = new ArrayElement[numberOfArrayElements];
+
                     for (int arr = 0; arr < numberOfArrayElements; arr++)
                     {
                         uint faceSize = arrayElementSize / numberOfFaces;
                         ImageFace[] faces = new ImageFace[numberOfFaces];
                         for (int face = 0; face < numberOfFaces; face++)
                         {
-                            faces[face] = new ImageFace(br.ReadBytes((int)faceSize));
+                            faces[face] = new ImageFace(file.ReadBytes((int)faceSize));
                         }
 
                         arrayElements[arr] = new ArrayElement(faces);
@@ -92,24 +96,58 @@ namespace SharpGame
                         mipHeight,
                         mipDepth,
                         imageSize,
-                        arrayElementSize,
                         arrayElements);
+                }
+                else
+                {
+                    if (mip == 11/*header.NumberOfMipmapLevels - 1*/)
+                    {
+                        //bug?
+                        imageSize = 1;
+                    }
 
-                    uint mipPaddingBytes = 3 - ((imageSize + 3) % 4);
-                    br.BaseStream.Seek(mipPaddingBytes, SeekOrigin.Current);
+                    ImageFace[] faces = new ImageFace[numberOfFaces];
+                    for (uint face = 0; face < numberOfFaces; face++)
+                    {
+                        byte[] faceData = file.ReadBytes((int)imageSize);
+
+                        faces[(int)face] = new ImageFace(faceData);
+                        uint cubePadding = 0u;
+                        if (isCubemap)
+                        {
+                            cubePadding = 3 - ((imageSize + 3) % 4);
+                        }
+
+                        file.Skip((int)cubePadding);
+                    }
+                    arrayElements[0] = new ArrayElement(faces);
+
+                    images[mip] = new MipmapLevel(
+                        mipWidth,
+                        mipHeight,
+                        mipDepth,
+                        imageSize * numberOfFaces,
+                        arrayElements);
                 }
 
-                return new KtxFile(header, kvps, images);
+
+
+
+                uint mipPaddingBytes = 3 - ((imageSize + 3) % 4);
+                file.Skip((int)mipPaddingBytes);
             }
+
+            return new KtxFile(header, kvps, images);
+            
         }
 
-        private static unsafe KtxKeyValuePair ReadNextKeyValuePair(BinaryReader br, out int bytesRead)
+        private static unsafe KtxKeyValuePair ReadNextKeyValuePair(File stream, out int bytesRead)
         {
-            uint keyAndValueByteSize = br.ReadUInt32();
+            uint keyAndValueByteSize = stream.Read<uint>();
             byte* keyAndValueBytes = stackalloc byte[(int)keyAndValueByteSize];
-            ReadBytes(br, keyAndValueBytes, (int)keyAndValueByteSize);
+            ReadBytes(stream, keyAndValueBytes, (int)keyAndValueByteSize);
             int paddingByteCount = (int)(3 - ((keyAndValueByteSize + 3) % 4));
-            br.BaseStream.Seek(paddingByteCount, SeekOrigin.Current); // Skip padding bytes
+            stream.Skip(paddingByteCount); // Skip padding bytes
 
             // Find the key's null terminator
             int i;
@@ -137,23 +175,19 @@ namespace SharpGame
             return new KtxKeyValuePair(key, value);
         }
 
-        private static unsafe T ReadStruct<T>(BinaryReader br)
+        private static unsafe T ReadStruct<T>(Stream stream)
         {
             int size = Unsafe.SizeOf<T>();
             byte* bytes = stackalloc byte[size];
-            for (int i = 0; i < size; i++)
-            {
-                bytes[i] = br.ReadByte();
-            }
-
+            ReadBytes(stream, bytes, size);
             return Unsafe.Read<T>(bytes);
         }
 
-        private static unsafe void ReadBytes(BinaryReader br, byte* destination, int count)
+        private static unsafe void ReadBytes(Stream stream, byte* destination, int count)
         {
             for (int i = 0; i < count; i++)
             {
-                destination[i] = br.ReadByte();
+                destination[i] = (byte)stream.ReadByte();
             }
         }
         
@@ -182,12 +216,16 @@ namespace SharpGame
         public readonly uint GlBaseInternalFormat;
         public readonly uint PixelWidth;
         private readonly uint _pixelHeight;
-        public uint PixelHeight => Math.Max(1, _pixelHeight);
         public readonly uint PixelDepth;
         public readonly uint NumberOfArrayElements;
         public readonly uint NumberOfFaces;
         public readonly uint NumberOfMipmapLevels;
         public readonly uint BytesOfKeyValueData;
+
+        public uint PixelHeight => Math.Max(1, _pixelHeight);
+        public bool IsCubeMap => NumberOfFaces == 6;
+        public bool IsArray => NumberOfArrayElements > 1;
+        public bool SwapEndian => Endianness == 0x01020304;
     }
 
 }

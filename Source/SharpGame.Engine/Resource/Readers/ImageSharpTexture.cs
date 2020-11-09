@@ -78,7 +78,6 @@ namespace SharpGame.ImageSharp
                     (uint)image.Width, (uint)image.Height, 1);
             }
 
-            ImageData face = new ImageData((uint)Width, (uint)Height, (uint)Images.Length, mipmaps);
             Texture tex = new Texture
             {
                 width = (uint)Width,
@@ -90,7 +89,7 @@ namespace SharpGame.ImageSharp
                 imageLayout = ImageLayout.ShaderReadOnlyOptimal,
             };
 
-            tex.SetImageData(face);
+            tex.SetImageData(mipmaps);
 
             return tex;
 

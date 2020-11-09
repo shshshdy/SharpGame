@@ -15,13 +15,7 @@ layout(location = 2) in vec3 iNearRay;
 layout(location = 0) out vec4 outFragcolor;
 
 //precision highp float;
-//#define DEPTH_RECONSTRUCT
 
-float ReconstructDepth(float hwDepth)
-{
-    return dot(vec2(hwDepth, ubo_in.depth_reconstruct.y / (hwDepth - ubo_in.depth_reconstruct.x)),
-            ubo_in.depth_reconstruct.zw);
-}
 /*
 vec3 ReconstructWSPosFromDepth(vec2 uv, float depth)
 {

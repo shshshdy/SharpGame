@@ -71,7 +71,6 @@ namespace SharpGame.Samples
                 staticModel.SetMaterial(mat);
             }
 
-            /*
             {
                 var node = scene.CreateChild("vegetation");
                 var staticModel = node.AddComponent<StaticModelGroup>();
@@ -85,7 +84,7 @@ namespace SharpGame.Samples
                 Texture tex = Resources.Load<Texture>("models/vegetation/textures/texturearray_plants_bc3_unorm.ktx");
                 mat.SetTexture("DiffMap", tex);
                 staticModel.SetMaterial(mat);
-            }*/
+            }
 
             MainView.Attach(camera, scene);
 
