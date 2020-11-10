@@ -23,14 +23,6 @@ namespace SharpGame
             Mipmaps = mipmaps;
         }
 
-//         public static KtxFile Load(byte[] bytes, bool readKeyValuePairs)
-//         {
-//             using (MemoryStream ms = new MemoryStream(bytes))
-//             {
-//                 return Load(ms, readKeyValuePairs);
-//             }
-//         }
-
         public static KtxFile Load(File file, bool readKeyValuePairs)
         {
             KtxHeader header = ReadStruct<KtxHeader>(file);
@@ -62,8 +54,11 @@ namespace SharpGame
             uint baseWidth = Math.Max(1, header.PixelWidth);
             uint baseHeight = Math.Max(1, header.PixelHeight);
             uint baseDepth = Math.Max(1, header.PixelDepth);
-
+            List<uint> imageSizes = new List<uint>();
             MipmapLevel[] images = new MipmapLevel[numberOfMipmapLevels];
+
+            long dataSize = file.Length - file.Position;
+            uint totalSize = 0;
             for (int mip = 0; mip < numberOfMipmapLevels; mip++)
             {
                 uint mipWidth = Math.Max(1, baseWidth / (uint)(Math.Pow(2, mip)));
@@ -72,46 +67,26 @@ namespace SharpGame
 
                 uint imageSize = file.Read<uint>();
 
+                if (mip == 11)
+                {
+                    //bug?
+                    imageSize = Math.Min(imageSizes.Back() >> 2, imageSize);
+                    //imageSize = 1;
+                }
+
+                imageSizes.Add(imageSize);
                 ArrayElement[] arrayElements = new ArrayElement[numberOfArrayElements];
                 bool isCubemap = header.NumberOfFaces == 6 && header.NumberOfArrayElements == 0;
 
-                if (numberOfArrayElements > 1)
+                uint arrayElementSize = imageSize / numberOfArrayElements;
+
+                for (int arr = 0; arr < numberOfArrayElements; arr++)
                 {
-                    uint arrayElementSize = imageSize / numberOfArrayElements;
-
-                    for (int arr = 0; arr < numberOfArrayElements; arr++)
-                    {
-                        uint faceSize = arrayElementSize / numberOfFaces;
-                        ImageFace[] faces = new ImageFace[numberOfFaces];
-                        for (int face = 0; face < numberOfFaces; face++)
-                        {
-                            faces[face] = new ImageFace(file.ReadBytes((int)faceSize));
-                        }
-
-                        arrayElements[arr] = new ArrayElement(faces);
-                    }
-
-                    images[mip] = new MipmapLevel(
-                        mipWidth,
-                        mipHeight,
-                        mipDepth,
-                        imageSize,
-                        arrayElements);
-                }
-                else
-                {
-                    if (mip == 11/*header.NumberOfMipmapLevels - 1*/)
-                    {
-                        //bug?
-                        imageSize = 1;
-                    }
-
+                    uint faceSize = arrayElementSize;
                     ImageFace[] faces = new ImageFace[numberOfFaces];
-                    for (uint face = 0; face < numberOfFaces; face++)
+                    for (int face = 0; face < numberOfFaces; face++)
                     {
-                        byte[] faceData = file.ReadBytes((int)imageSize);
-
-                        faces[(int)face] = new ImageFace(faceData);
+                        faces[face] = new ImageFace(file.ReadBytes((int)faceSize));
                         uint cubePadding = 0u;
                         if (isCubemap)
                         {
@@ -119,23 +94,25 @@ namespace SharpGame
                         }
 
                         file.Skip((int)cubePadding);
+                        totalSize += faceSize;
                     }
-                    arrayElements[0] = new ArrayElement(faces);
 
-                    images[mip] = new MipmapLevel(
-                        mipWidth,
-                        mipHeight,
-                        mipDepth,
-                        imageSize * numberOfFaces,
-                        arrayElements);
+                    arrayElements[arr] = new ArrayElement(faces);
                 }
 
-
-
-
+                images[mip] = new MipmapLevel(
+                    mipWidth,
+                    mipHeight,
+                    mipDepth,
+                    imageSize,
+                    arrayElements);
+               
                 uint mipPaddingBytes = 3 - ((imageSize + 3) % 4);
+                //Debug.Assert(mipPaddingBytes == 0);
                 file.Skip((int)mipPaddingBytes);
             }
+
+            //Debug.Assert(dataSize == numberOfMipmapLevels * 4 + totalSize);
 
             return new KtxFile(header, kvps, images);
             

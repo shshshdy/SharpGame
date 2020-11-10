@@ -37,28 +37,26 @@ namespace SharpGame
             height = imageData[0].Height;
             mipLevels = (uint)imageData.Length;
             layers = (uint)imageData[0].ArrayElements.Length;
+            uint faceCount = (uint)imageData[0].ArrayElements[0].Faces.Length;
 
             ulong totalSize = 0;
             foreach (var mip in imageData)
             {
-                totalSize += mip.TotalSize;
+                totalSize += (ulong)(mip.TotalSize* layers * faceCount);
             }
 
             Buffer stagingBuffer = Buffer.CreateStagingBuffer(totalSize, IntPtr.Zero);
 
-            image = Image.Create(width, height, imageCreateFlags, layers, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
+            image = Image.Create(width, height, imageCreateFlags, layers * faceCount, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
 
             IntPtr mapped = stagingBuffer.Map();
 
-            int layerCount = imageData[0].ArrayElementSize;
-            int faceCount = imageData[0].ArrayElements[0].Faces.Length;
-
             // Setup buffer copy regions for each face including all of it's miplevels
-            Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(mipLevels* layerCount* faceCount)];
+            Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(mipLevels* layers * faceCount)];
             uint offset = 0;
             int index = 0;
 
-            for (int layer = 0; layer < layerCount; layer++)
+            for (int layer = 0; layer < layers; layer++)
             {
                 for (int face = 0; face < faceCount; face++)
                 {
@@ -67,7 +65,6 @@ namespace SharpGame
                         var mipLevel = imageData[level];
                         var layerElement = mipLevel.ArrayElements[layer];
                         var faceElement = layerElement.Faces[face];
-
 
                         Unsafe.CopyBlock((void*)(mapped + (int)offset), Unsafe.AsPointer(ref faceElement.Data[0]), (uint)faceElement.Data.Length);
 
@@ -109,7 +106,7 @@ namespace SharpGame
 
             stagingBuffer.Dispose();
 
-            imageView = ImageView.Create(image, layers == 6 ? ImageViewType.ImageCube : ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, mipLevels, 0, layers);
+            imageView = ImageView.Create(image, faceCount == 6 ? ImageViewType.ImageCube : ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, mipLevels, 0, layers);
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == 1);
 
             UpdateDescriptor();

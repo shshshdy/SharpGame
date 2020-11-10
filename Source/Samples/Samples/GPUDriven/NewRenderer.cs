@@ -9,7 +9,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -6)]
+    [SampleDesc(sortOrder = 6)]
     public class NewRenderer : Sample
     {
         RenderPipeline renderer = new RenderPipeline();
