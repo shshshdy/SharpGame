@@ -23,7 +23,8 @@ namespace SharpGame
         // Generate vertex buffer from ASSIMP scene data
         public float scale = 1.0f;
 
-        public VertexComponent[] vertexComponents;
+        public VertexComponent[] vertexComponents = new[] {VertexComponent.Position, VertexComponent.Texcoord,
+            VertexComponent.Normal, VertexComponent.Tangent, VertexComponent.Bitangent };
         public AssimpModelReader() : base("")
         {
         }
@@ -58,10 +59,8 @@ namespace SharpGame
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 Assimp.Mesh mesh = scene.Meshes[m];
-                bool hasNormalMap = false;
                 if (mesh.MaterialIndex >= 0 && mesh.MaterialIndex < scene.MaterialCount)
                 {
-                    hasNormalMap = scene.Materials[mesh.MaterialIndex].HasTextureNormal;
                     Material mat = ConvertMaterial(path, scene.Materials[mesh.MaterialIndex], mesh.HasTangentBasis);
                     if(mat == null)
                     {
@@ -75,7 +74,7 @@ namespace SharpGame
                     Log.Error("No material : " + mesh.Name);
                 }
 
-                ConvertGeometry(mesh, scale, hasNormalMap, vertexComponents, out Geometry geometry, out var meshBoundingBox);
+                ConvertGeometry(mesh, scale, vertexComponents, out Geometry geometry, out var meshBoundingBox);
 
                 model.VertexBuffers.Add(geometry.VertexBuffers[0]);
                 model.IndexBuffers.Add(geometry.IndexBuffer);
@@ -127,7 +126,7 @@ namespace SharpGame
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 Assimp.Mesh mesh = scene.Meshes[m];
-                ConvertGeometry(mesh, scale, true, vertexComponents, out Geometry geometry, out var meshBoundingBox);
+                ConvertGeometry(mesh, scale, vertexComponents, out Geometry geometry, out var meshBoundingBox);
                 geoList.Add(geometry);
                 bboxList.Add(meshBoundingBox);
             }
@@ -136,9 +135,8 @@ namespace SharpGame
             return true;
         }
 
-        private static void ConvertGeometry(Assimp.Mesh mesh, float scale, bool hasNormalMap, VertexComponent[] vertexComponents, out Geometry geometry, out BoundingBox meshBoundingBox)
+        private static void ConvertGeometry(Assimp.Mesh mesh, float scale, VertexComponent[] vertexComponents, out Geometry geometry, out BoundingBox meshBoundingBox)
         {
-            VertexLayout vertexLayout = null;
             Buffer vb;
             Buffer ib;
             PrimitiveTopology[] primitiveTopology =
@@ -150,25 +148,9 @@ namespace SharpGame
                 PrimitiveTopology.TriangleList,
             };
 
-            if(vertexComponents != null)
-            {
-                ConvertGeom(scale, mesh, out meshBoundingBox, out vb, out ib, vertexComponents);
-                vertexLayout = new VertexLayout(vertexComponents);
-            }
-            else
-            {
-                bool hasTangent = mesh.HasTangentBasis;
-                if (hasTangent)
-                {
-                    ConvertGeomNTB(scale, mesh, out meshBoundingBox, out vb, out ib, out vertexLayout);
-                }
-                else
-                {
-                    ConvertGeom(scale, mesh, out meshBoundingBox, out vb, out ib, out vertexLayout);
-                }
-            }
-
-
+            ConvertGeom(scale, mesh, out meshBoundingBox, out vb, out ib, vertexComponents);
+            VertexLayout vertexLayout = new VertexLayout(vertexComponents);
+            
             geometry = new Geometry
             {
                 Name = mesh.Name,
@@ -181,8 +163,7 @@ namespace SharpGame
             
         }
 
-        static unsafe void ConvertGeom(float scale, Assimp.Mesh mesh,
-            out BoundingBox meshBoundingBox, out Buffer vb, out Buffer ib, VertexComponent[] vertexComponents)
+        static unsafe void ConvertGeom(float scale, Assimp.Mesh mesh, out BoundingBox meshBoundingBox, out Buffer vb, out Buffer ib, VertexComponent[] vertexComponents)
         {
             NativeList<float> vertexBuffer = new NativeList<float>();
             NativeList<uint> indexBuffer = new NativeList<uint>();
@@ -251,104 +232,6 @@ namespace SharpGame
             indexBuffer.Dispose();
         }
 
-        private static unsafe void ConvertGeom(float scale, Assimp.Mesh mesh,
-            out BoundingBox meshBoundingBox, out Buffer vb, out Buffer ib, out VertexLayout vertexLayout)
-        {
-            NativeList<VertexPosTexNorm> vertexBuffer = new NativeList<VertexPosTexNorm>();
-            NativeList<uint> indexBuffer = new NativeList<uint>();
-            
-            meshBoundingBox = new BoundingBox();
-
-            vertexLayout = VertexPosTexNorm.Layout;
-
-            for (int v = 0; v < mesh.VertexCount; v++)
-            {
-                VertexPosTexNorm vertex;
-
-                vertex.position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
-                vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
-                // Texture coordinates and colors may have multiple channels, we only use the first [0] one
-                if(mesh.HasTextureCoords(0))
-                {
-                    vertex.texcoord = new vec2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
-                }
-                else
-                {
-                    vertex.texcoord = vec2.Zero;
-                }
-
-                vertexBuffer.Add(vertex);
-
-                meshBoundingBox.Merge(vertex.position);
-            }
-
-            for (int f = 0; f < mesh.FaceCount; f++)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    indexBuffer.Add((uint)mesh.Faces[f].Indices[i]);
-                }
-            }
-
-            //vertexLayout.Print();
-                
-            vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNorm), vertexBuffer.Count, vertexBuffer.Data);
-            ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
-
-            vertexBuffer.Dispose();
-            indexBuffer.Dispose();
-        }
-
-        private static unsafe void ConvertGeomNTB(float scale, Assimp.Mesh mesh,
-            out BoundingBox meshBoundingBox, out Buffer vb, out Buffer ib, out VertexLayout vertexLayout)
-        {
-            NativeList<VertexPosTexNTB> vertexBuffer = new NativeList<VertexPosTexNTB>();
-            NativeList<uint> indexBuffer = new NativeList<uint>();
-
-            meshBoundingBox = new BoundingBox();
-
-            vertexLayout = VertexPosTexNTB.Layout;
-
-            for (int v = 0; v < mesh.VertexCount; v++)
-            {
-                VertexPosTexNTB vertex;
-
-                vertex.position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
-                vertex.normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
-                vertex.tangent = new vec3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);//, 1);
-                vertex.bitangent = new vec3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
-
-                // Texture coordinates and colors may have multiple channels, we only use the first [0] one
-                if (mesh.HasTextureCoords(0))
-                {
-                    vertex.texcoord = new vec2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
-                }
-                else
-                {
-                    vertex.texcoord = vec2.Zero;
-                }
-
-                vertexBuffer.Add(vertex);
-                meshBoundingBox.Merge(vertex.position);
-            }
-
-            for (int f = 0; f < mesh.FaceCount; f++)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    indexBuffer.Add((uint)mesh.Faces[f].Indices[i]);
-                }
-            }
-
-            //vertexLayout.Print();
-
-            vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, (uint)sizeof(VertexPosTexNTB), vertexBuffer.Count, vertexBuffer.Data);
-            ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
-
-            vertexBuffer.Dispose();
-            indexBuffer.Dispose();
-        }
-
         Material ConvertMaterial(string path, Assimp.Material aiMaterial, bool hasTangent)
         {
             Shader shader = null;
@@ -405,10 +288,9 @@ namespace SharpGame
             {
                 if(aiMaterial.HasColorDiffuse)
                 {
-                    Color c = new Color(aiMaterial.ColorDiffuse[0], aiMaterial.ColorDiffuse[1],
+                    Color c = new Color(aiMaterial.ColorDiffuse[0], aiMaterial.ColorDiffuse[1], 
                         aiMaterial.ColorDiffuse[2], aiMaterial.ColorDiffuse[3]* aiMaterial.Opacity);
                     material.SetTexture("DiffMap", Texture.CreateByColor(c));
-
                     material.SetShaderParameter("diffuse", c);
                 }
                 else
