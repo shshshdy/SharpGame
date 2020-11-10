@@ -7,37 +7,15 @@ namespace SharpGame
 {
     public class ClusterForwardRenderer : ClusterRenderer
     {
-        protected Framebuffer clusterFB;
-
         protected FrameGraphPass clustering;
         protected FrameGraphPass mainPass;
 
-        public ClusterForwardRenderer()
+
+        protected override void OnInit()
         {
-        }
+            base.OnInit();
 
-        protected override void CreateResources()
-        {
-            base.CreateResources();
-
-
-        }
-
-        Framebuffer[] OnCreateFramebuffers(RenderPass rp)
-        {
-            uint width = (uint)Graphics.Width;
-            uint height = (uint)Graphics.Height;
-
-            var depthRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
-            clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.imageView });
-
-            //FrameGraph.AddDebugImage(depthRT.view);
-            return new Framebuffer[] { clusterFB, clusterFB, clusterFB };
-        }
-
-        protected override IEnumerator<FrameGraphPass> CreateRenderPass()
-        {
-            yield return new ShadowPass();
+            Add(new ShadowPass());
 
             clustering = new FrameGraphPass
             {
@@ -55,17 +33,14 @@ namespace SharpGame
                 }
             };
 
-            yield return clustering;
+            Add(clustering);
 
             lightCull = new ComputePass(ComputeLight);
-            yield return lightCull;
+
+            Add(lightCull);
 
             mainPass = new FrameGraphPass
             {
-            //#if NO_DEPTHWRITE
-                //RenderPass = Graphics.RenderPass,// Graphics.CreateRenderPass(false, false),
-                //#endif
-
                 renderPassCreator = () => Graphics.RenderPass,
                 frameBufferCreator = (rp) => Graphics.Framebuffers,
 
@@ -79,7 +54,24 @@ namespace SharpGame
                 }
             };
 
-            yield return mainPass;
+            Add(mainPass);
+        }
+
+        protected override void CreateResources()
+        {
+            base.CreateResources();
+        }
+
+        Framebuffer[] OnCreateFramebuffers(RenderPass rp)
+        {
+            uint width = (uint)Graphics.Width;
+            uint height = (uint)Graphics.Height;
+
+            var depthRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
+            var clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.imageView });
+
+            //FrameGraph.AddDebugImage(depthRT.view);
+            return new Framebuffer[] { clusterFB, clusterFB, clusterFB };
         }
 
         protected override void OnBeginPass(FrameGraphPass renderPass, CommandBuffer cmd)

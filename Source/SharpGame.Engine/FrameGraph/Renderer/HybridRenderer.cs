@@ -9,20 +9,16 @@ namespace SharpGame
 {
     public class HybridRenderer : ClusterRenderer
     {
+        protected FrameGraphPass geometryPass;
+        protected FrameGraphPass translucentClustering;
+        protected FrameGraphPass compositePass;
+        protected FrameGraphPass onscreenPass;
+
         private RenderTexture albedoRT;
         private RenderTexture normalRT;
         private RenderTexture depthRT;
         private RenderTexture depthHWRT;
 
-        private Framebuffer geometryFB;
-        private RenderPass geometryRP;
-
-        protected Framebuffer clusterFB;
-
-        protected FrameGraphPass geometryPass;
-        protected FrameGraphPass translucentClustering;
-        protected FrameGraphPass compositePass;
-        protected FrameGraphPass translucentPass;
         protected Shader clusterDeferred;
 
         Geometry quad;
@@ -33,8 +29,83 @@ namespace SharpGame
         ResourceSet deferredSet0;
         ResourceSet deferredSet1;
 
-        public HybridRenderer()
+        protected override void OnInit()
         {
+            base.OnInit();
+
+            this.Add(new ShadowPass());
+
+            geometryPass = new FrameGraphPass
+            {
+                Queue = SubmitQueue.EarlyGraphics,
+
+                renderPassCreator = OnCreateRenderPass,
+                frameBufferCreator = OnCreateFramebuffer,
+
+                ClearColorValue = new[] 
+                { 
+                    new ClearColorValue(0.25f, 0.25f, 0.25f, 1),
+                    new ClearColorValue(0, 0, 0, 1),
+                    new ClearColorValue(0, 0, 0, 0)
+                },
+
+                Subpasses = new[]
+                {
+                    new SceneSubpass("gbuffer")
+                    {
+                        Set1 = clusterSet1
+                    }
+                }
+            };
+
+            this.Add(geometryPass);
+
+            uint width = (uint)Graphics.Width;
+            uint height = (uint)Graphics.Height;
+            translucentClustering = new FrameGraphPass
+            {
+                Queue = SubmitQueue.EarlyGraphics,
+
+                renderPassCreator = OnCreateClusterRenderPass,
+
+                frameBufferCreator = (rp) => {
+                    var clusterFB = Framebuffer.Create(rp, width, height, 1, new[] { depthHWRT.imageView });
+                    return new Framebuffer[3] { clusterFB, clusterFB, clusterFB };
+                },
+
+                Subpasses = new[]
+                {
+                    new SceneSubpass("clustering")
+                    {
+                        Set1 = clusterSet1
+                    }
+                }
+            };
+
+            this.Add(translucentClustering);
+
+            lightCull = new ComputePass(ComputeLight);
+            this.Add(lightCull);
+            
+            onscreenPass = new FrameGraphPass
+            {
+                renderPassCreator = () => Graphics.CreateRenderPass(false, false),
+                frameBufferCreator = (rp) => Graphics.CreateSwapChainFramebuffers(rp),
+
+                Subpasses = new[]
+                {
+                    new SceneSubpass("cluster_forward")
+                    {
+                        OnDraw = Composite,
+
+                        Set1 = resourceSet0,
+                        Set2 = resourceSet1,
+                        BlendFlags = BlendFlags.AlphaBlend
+                    }
+                }
+            };
+
+            this.Add(onscreenPass);
         }
 
         protected override void CreateResources()
@@ -45,8 +116,6 @@ namespace SharpGame
             //FrameGraph.AddDebugImage(normalRT.view);
             //FrameGraph.AddDebugImage(depthHWRT.view);
 
-            //clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthHWRT.view });
-
             clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
             quad = GeometryUtil.CreateUnitQuad();
 
@@ -56,8 +125,6 @@ namespace SharpGame
             };
 
             deferredSet0 =  new ResourceSet(deferredLayout0, View.ubCameraVS);
-            deferredSet0 = new ResourceSet(deferredLayout0, View.ubCameraVS);
-            deferredSet0 = new ResourceSet(deferredLayout0, View.ubCameraVS);
 
             deferredLayout1 = new ResourceLayout
             {
@@ -70,7 +137,6 @@ namespace SharpGame
 
         RenderPass OnCreateRenderPass()
         {
-
             Format depthFormat = Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
@@ -131,13 +197,12 @@ namespace SharpGame
             };
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            geometryRP = new RenderPass(ref renderPassInfo);
-            return geometryRP;
+            return new RenderPass(ref renderPassInfo);
+        
         }
 
         Framebuffer[] OnCreateFramebuffer(RenderPass rp)
         {
-
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
             Format depthFormat = Device.GetSupportedDepthFormat();
@@ -154,13 +219,12 @@ namespace SharpGame
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled,
                         SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
 
-
             depthHWRT =/* Graphics.DepthRT; */new RenderTexture(width, height, 1, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, /*ImageAspectFlags.Depth | ImageAspectFlags.Stencil,*/
                         SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal
                         );
 
-            geometryFB = Framebuffer.Create(geometryRP, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, depthRT.imageView, depthHWRT.imageView });
+            var geometryFB = Framebuffer.Create(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, depthRT.imageView, depthHWRT.imageView });
 
 #if HWDEPTH
             deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
@@ -169,88 +233,6 @@ namespace SharpGame
 #endif
             return new Framebuffer[] { geometryFB, geometryFB, geometryFB };
 
-        }
-        protected override IEnumerator<FrameGraphPass> CreateRenderPass()
-        {
-            yield return new ShadowPass();
-
-            geometryPass = new FrameGraphPass
-            {
-                Queue = SubmitQueue.EarlyGraphics,
-
-                //RenderPass = geometryRP,
-                //Framebuffer = geometryFB,
-                renderPassCreator = OnCreateRenderPass,
-                frameBufferCreator = OnCreateFramebuffer,
-
-
-                ClearColorValue = new[] { new ClearColorValue(0.25f, 0.25f, 0.25f, 1), new ClearColorValue(0, 0, 0, 1), new ClearColorValue(0, 0, 0, 0) },
-                Subpasses = new []
-                {
-                    new SceneSubpass("gbuffer")
-                    { 
-                        Set1 = clusterSet1
-                    }
-                }
-            };
-
-            yield return geometryPass;
-
-            uint width = (uint)Graphics.Width;
-            uint height = (uint)Graphics.Height;
-            translucentClustering = new FrameGraphPass
-            {
-                Queue = SubmitQueue.EarlyGraphics,
-
-                renderPassCreator = OnCreateClusterRenderPass,
-
-                frameBufferCreator = (rp) => {
-                    clusterFB = Framebuffer.Create(rp, width, height, 1, new[] { depthHWRT.imageView });
-                    return new Framebuffer[3] { clusterFB, clusterFB, clusterFB };
-                },
-
-                Subpasses = new[]
-                {
-                    new SceneSubpass("clustering")
-                    {
-                        Set1 = clusterSet1
-                    }
-                }
-            };
-
-            yield return translucentClustering;
-
-            lightCull = new ComputePass(ComputeLight);
-            yield return lightCull;
-            /*
-             compositePass = new GraphicsSubpass("composite")
-             {
-                 RenderPass = Graphics.RenderPass,
-                 Framebuffers = Graphics.Framebuffers,
-                 OnDraw = Composite
-             };
-             yield return compositePass;*/
-
-            var renderPass = Graphics.CreateRenderPass(false, false);
-            translucentPass = new FrameGraphPass
-            {
-                renderPassCreator = () => Graphics.CreateRenderPass(false, false),
-                frameBufferCreator = (rp) => Graphics.CreateSwapChainFramebuffers(rp),
-
-                Subpasses = new[]
-                {
-                    new SceneSubpass("cluster_forward")
-                    {
-                        OnDraw = Composite,
-
-                        Set1 = resourceSet0,
-                        Set2 = resourceSet1,
-                        BlendFlags = BlendFlags.AlphaBlend
-                    }
-                }
-            };
-
-            yield return translucentPass;
         }
 
         void Composite(GraphicsSubpass graphicsPass, RenderContext rc, CommandBuffer cmd)
@@ -281,7 +263,7 @@ namespace SharpGame
                 //cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
 
             }
-            else if (renderPass == translucentPass)
+            else if (renderPass == onscreenPass)
             {
                 var queryPool = query_pool[workContext];
                 //cb.ResetQueryPool(queryPool, 10, 4);
@@ -299,7 +281,7 @@ namespace SharpGame
                 var queryPool = query_pool[workContext];
                 //cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);
             }
-            else if (renderPass == translucentPass)
+            else if (renderPass == onscreenPass)
             {
                 var queryPool = query_pool[workContext];
 

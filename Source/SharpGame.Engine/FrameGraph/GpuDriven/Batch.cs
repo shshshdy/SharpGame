@@ -4,19 +4,19 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Batch
+    public struct Batch
+    {
+        public SourceBatch sourceBatch;
+
+    }
+
+    public class BatchGroup
     {
         public Pass pass;
-
         public Buffer materials;
 
         public NativeList<Vulkan.VkDescriptorBufferInfo> buffers;
-
-        public NativeList<DescriptorImageInfo> diffMaps = new NativeList<DescriptorImageInfo>();
-        public NativeList<DescriptorImageInfo> normMaps = new NativeList<DescriptorImageInfo>();
-        public NativeList<DescriptorImageInfo> specMaps = new NativeList<DescriptorImageInfo>();
-
-        public List<Geometry> geometries = new List<Geometry>();
+        public FastList<Batch> geometries = new FastList<Batch>();
 
     }
 }

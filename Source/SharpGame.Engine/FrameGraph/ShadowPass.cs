@@ -47,7 +47,7 @@ namespace SharpGame
 
         Shader depthShader;
 
-        ResourceSet[] vsSet = new ResourceSet[3];
+        ResourceSet vsSet;
 
         FastList<SourceBatch>[] casters = new FastList<SourceBatch>[]
         {
@@ -55,13 +55,28 @@ namespace SharpGame
         };
         FrustumOctreeQuery shadowCasterQuery = new FrustumOctreeQuery();
 
-        ResourceSet VSSet => vsSet[Graphics.WorkContext];
-
         ulong passID = Pass.GetID(Pass.Shadow);
         public ShadowPass()
         {
             Queue = SubmitQueue.EarlyGraphics;
 
+            var depthFormat = Device.GetSupportedDepthFormat();
+
+            for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
+            {
+                cascades[i].view = ImageView.Create(DepthRT.image, ImageViewType.Image2D, depthFormat, ImageAspectFlags.Depth, 0, 1, i, 1);
+            }
+
+            ubShadow = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));
+
+            depthShader = Resources.Instance.Load<Shader>("shaders/shadow.shader");
+
+            vsSet = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow, FrameGraph.TransformBuffer);
+
+        }
+
+        protected override void CreateRenderPass()
+        {
             var depthFormat = Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
@@ -74,7 +89,7 @@ namespace SharpGame
                 new SubpassDescription
                 {
                     pipelineBindPoint = PipelineBindPoint.Graphics,
-                    
+
                     pDepthStencilAttachment = new []
                     {
                         new AttachmentReference(0, ImageLayout.DepthStencilAttachmentOptimal)
@@ -110,21 +125,14 @@ namespace SharpGame
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
             RenderPass = new RenderPass(ref renderPassInfo);
+        }
 
+        protected override void CreateRenderTargets()
+        {
             for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                cascades[i].view = ImageView.Create(DepthRT.image, ImageViewType.Image2D, depthFormat, ImageAspectFlags.Depth, 0, 1, i, 1);
                 cascades[i].frameBuffer = SharpGame.Framebuffer.Create(RenderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
-                //Renderer.Instance.AddDebugImage(cascades[i].view);
             }
-
-            ubShadow = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));
-
-            depthShader = Resources.Instance.Load<Shader>("shaders/shadow.shader");
-
-            vsSet[0] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[0], FrameGraph.TransformBuffer[0]);
-            vsSet[1] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[1], FrameGraph.TransformBuffer[1]);
-            vsSet[2] = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow[2], FrameGraph.TransformBuffer[2]);
 
         }
 
@@ -164,6 +172,13 @@ namespace SharpGame
 
             ClearValue[] clearDepth = { (ClearValue)ClearDepthStencilValue };
 
+            if (RenderPass == null)
+            {
+                CreateRenderPass();
+                CreateRenderTargets();
+
+            }
+
             //todo:multi thread
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
@@ -184,7 +199,7 @@ namespace SharpGame
 
                 foreach (var batch in casters[0])
                 {
-                    DrawBatch(cmd, passID, batch, consts, VSSet, null);
+                    DrawBatch(cmd, passID, batch, consts, vsSet);
                 }
 
                 EndRenderPass(cmd);
@@ -193,7 +208,7 @@ namespace SharpGame
         }
 
         void DrawBatch(CommandBuffer cb, ulong passID, SourceBatch batch, Span<ConstBlock> pushConsts,
-            ResourceSet resourceSet, ResourceSet resourceSet1, ResourceSet resourceSet2 = null)
+            ResourceSet resourceSet)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)
@@ -206,16 +221,6 @@ namespace SharpGame
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
-
-            if (resourceSet1 != null)
-            {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, resourceSet1, -1);
-            }
-
-            if (resourceSet2 != null)
-            {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, 2, resourceSet2, -1);
-            }
 
             foreach (ConstBlock constBlock in pushConsts)
             {

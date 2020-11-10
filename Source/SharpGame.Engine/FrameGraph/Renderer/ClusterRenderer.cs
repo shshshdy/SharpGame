@@ -122,14 +122,14 @@ namespace SharpGame
 
             InitLightCompute();
 
-            var it = CreateRenderPass();
-            while (it.MoveNext())
-            {
-                if(it.Current != null)
-                {
-                    Add(it.Current);
-                }
-            }
+//             var it = CreateRenderPass();
+//             while (it.MoveNext())
+//             {
+//                 if(it.Current != null)
+//                 {
+//                     Add(it.Current);
+//                 }
+//             }
 
         }
 
