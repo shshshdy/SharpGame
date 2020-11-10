@@ -72,7 +72,7 @@ namespace SharpGame
     public class VertexLayout : IEnumerable<VertexAttribute>
     {
         public VertexBinding[] Bindings { get; private set; }
-        public FastList<VertexAttribute> attributes { get; private set; }
+        public FastList<VertexAttribute> Attributes { get; private set; }
 
         bool needUpdate = true;
         public VertexLayout()
@@ -81,12 +81,12 @@ namespace SharpGame
 
         public VertexLayout(VertexComponent[] vertexComponents)
         {
-            attributes = new FastList<VertexAttribute>(vertexComponents.Length);
+            Attributes = new FastList<VertexAttribute>(vertexComponents.Length);
             uint offset = 0;
             for(uint i = 0; i < vertexComponents.Length; i++)
             {
                 var fmt = GetFormat(vertexComponents[i]);
-                attributes.Add(new VertexAttribute
+                Attributes.Add(new VertexAttribute
                 {
                     location = i,
                     binding = 0,
@@ -102,7 +102,7 @@ namespace SharpGame
 
         public VertexLayout(VertexAttribute[] attributes, VertexBinding[] bindings = null)
         {
-            this.attributes = new FastList<VertexAttribute>(attributes);
+            this.Attributes = new FastList<VertexAttribute>(attributes);
             this.Bindings = bindings;
             needUpdate = (bindings== null);
         }
@@ -111,7 +111,7 @@ namespace SharpGame
         {
             uint offset = 0;
             uint size = 0;
-            foreach(var attr in attributes)
+            foreach(var attr in Attributes)
             {
                 if(attr.binding != 0)
                 {
@@ -218,15 +218,15 @@ namespace SharpGame
             native = VkPipelineVertexInputStateCreateInfo.New();
             native.vertexBindingDescriptionCount = (uint)Bindings.Length;
             native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AsPointer(ref Bindings[0]);
-            native.vertexAttributeDescriptionCount = (uint)attributes.Count;
-            native.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)Utilities.AsPointer(ref attributes.Front());           
+            native.vertexAttributeDescriptionCount = (uint)Attributes.Count;
+            native.pVertexAttributeDescriptions = (VkVertexInputAttributeDescription*)Utilities.AsPointer(ref Attributes.Front());           
         }
 
         public void Print()
         {
             Log.Info("vertex attribute : ");
 
-            foreach (var attr in attributes)
+            foreach (var attr in Attributes)
             {
                 Log.Info("{{{0}, {1}, {2}}}", attr.location, attr.format, attr.offset);
             }
@@ -234,23 +234,23 @@ namespace SharpGame
 
         public void Add(VertexAttribute binding)
         {
-            if(attributes == null)
+            if(Attributes == null)
             {
-                attributes = new FastList<VertexAttribute>();
+                Attributes = new FastList<VertexAttribute>();
             }
 
-            attributes.Add(binding);
+            Attributes.Add(binding);
             needUpdate = true;
         }
 
         public IEnumerator<VertexAttribute> GetEnumerator()
         {
-            return ((IEnumerable<VertexAttribute>)attributes).GetEnumerator();
+            return ((IEnumerable<VertexAttribute>)Attributes).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<VertexAttribute>)attributes).GetEnumerator();
+            return ((IEnumerable<VertexAttribute>)Attributes).GetEnumerator();
         }
     }
 
