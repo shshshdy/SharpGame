@@ -102,8 +102,6 @@ namespace SharpGame
 
         protected ComputePass lightCull;
 
-        protected RenderPass clusterRP;
-
         public ClusterRenderer()
         {
             FrameGraph.OnSubmit += Renderer_OnSubmit;
@@ -122,15 +120,7 @@ namespace SharpGame
 
             InitLightCompute();
 
-//             var it = CreateRenderPass();
-//             while (it.MoveNext())
-//             {
-//                 if(it.Current != null)
-//                 {
-//                     Add(it.Current);
-//                 }
-//             }
-
+            CreateRenderPath();
         }
 
         protected virtual void CreateResources()
@@ -143,14 +133,13 @@ namespace SharpGame
             }
 
             uint[] queue_families = null;
-            uint size = 0;
+
             SharingMode sharingMode = SharingMode.Exclusive;
 
             if (Device.QFGraphics != Device.QFCompute)
             {
                 sharingMode = SharingMode.Concurrent;
-                queue_families = new[] { Device.QFGraphics, Device.QFCompute };
-                size = (uint)queue_families.Length;
+                queue_families = new[] { Device.QFGraphics, Device.QFCompute };               
             }
 
             uboCluster = new SharedBuffer(BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent,
@@ -255,13 +244,12 @@ namespace SharpGame
             };
 
             var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            clusterRP = new RenderPass(ref renderPassInfo);
-            return clusterRP;
+            return new RenderPass(ref renderPassInfo);
+           
         }
 
-        protected virtual IEnumerator<FrameGraphPass> CreateRenderPass()
+        protected virtual void CreateRenderPath()
         {
-            return null;
         }
 
         protected override void OnUpdate()
@@ -284,12 +272,6 @@ namespace SharpGame
             clusterUniforms.tile_size[1] = (float)(TILE_HEIGHT);
             clusterUniforms.grid_dim[0] = tile_count_x;
             clusterUniforms.grid_dim[1] = tile_count_y;
-
-// 
-//             vec4 depthReconstruct = new vec4(camera.FarClip / (camera.FarClip - camera.NearClip),
-//                 -camera.NearClip / (camera.FarClip - camera.NearClip),
-//                 camera.Orthographic ? 1.0f : 0.0f, camera.Orthographic ? 0.0f : 1.0f);
-//             clusterUniforms.depth_reconstruct = depthReconstruct;
 
             clusterUniforms.cam_pos = camera.Node.WorldPosition;
             clusterUniforms.cam_near = camera.NearClip;

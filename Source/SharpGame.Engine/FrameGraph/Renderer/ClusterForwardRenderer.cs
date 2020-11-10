@@ -10,11 +10,12 @@ namespace SharpGame
         protected FrameGraphPass clustering;
         protected FrameGraphPass mainPass;
 
-
-        protected override void OnInit()
+        public ClusterForwardRenderer()
         {
-            base.OnInit();
+        }
 
+        protected override void CreateRenderPath()
+        {
             Add(new ShadowPass());
 
             clustering = new FrameGraphPass
@@ -57,18 +58,13 @@ namespace SharpGame
             Add(mainPass);
         }
 
-        protected override void CreateResources()
-        {
-            base.CreateResources();
-        }
-
         Framebuffer[] OnCreateFramebuffers(RenderPass rp)
         {
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
 
             var depthRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
-            var clusterFB = Framebuffer.Create(clusterRP, width, height, 1, new[] { depthRT.imageView });
+            var clusterFB = Framebuffer.Create(rp, width, height, 1, new[] { depthRT.imageView });
 
             //FrameGraph.AddDebugImage(depthRT.view);
             return new Framebuffer[] { clusterFB, clusterFB, clusterFB };

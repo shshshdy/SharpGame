@@ -29,10 +29,39 @@ namespace SharpGame
         ResourceSet deferredSet0;
         ResourceSet deferredSet1;
 
-        protected override void OnInit()
+        public HybridRenderer()
         {
-            base.OnInit();
+        }
 
+        protected override void CreateResources()
+        {
+            base.CreateResources();
+
+            //FrameGraph.AddDebugImage(albedoRT.view);
+            //FrameGraph.AddDebugImage(normalRT.view);
+            //FrameGraph.AddDebugImage(depthHWRT.view);
+
+            clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
+            quad = GeometryUtil.CreateUnitQuad();
+
+            deferredLayout0 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+            };
+
+            deferredSet0 = new ResourceSet(deferredLayout0, View.ubCameraVS);
+
+            deferredLayout1 = new ResourceLayout
+            {
+                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+            };
+
+        }
+
+        protected override void CreateRenderPath()
+        {
             this.Add(new ShadowPass());
 
             geometryPass = new FrameGraphPass
@@ -106,33 +135,6 @@ namespace SharpGame
             };
 
             this.Add(onscreenPass);
-        }
-
-        protected override void CreateResources()
-        {
-            base.CreateResources();
-
-            //FrameGraph.AddDebugImage(albedoRT.view);
-            //FrameGraph.AddDebugImage(normalRT.view);
-            //FrameGraph.AddDebugImage(depthHWRT.view);
-
-            clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
-            quad = GeometryUtil.CreateUnitQuad();
-
-            deferredLayout0 = new ResourceLayout
-            {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-            };
-
-            deferredSet0 =  new ResourceSet(deferredLayout0, View.ubCameraVS);
-
-            deferredLayout1 = new ResourceLayout
-            {
-                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-                new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-            };
-
         }
 
         RenderPass OnCreateRenderPass()
