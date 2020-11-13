@@ -23,14 +23,15 @@ namespace SharpGame
         // Generate vertex buffer from ASSIMP scene data
         public float scale = 1.0f;
         public bool combineVB = true;
+        public bool combineIB = true;
 
-        public VertexComponent[] vertexComponents = new[] {VertexComponent.Position, VertexComponent.Texcoord,
+        public VertexComponent[] vertexComponents = new[] { VertexComponent.Position, VertexComponent.Texcoord,
             VertexComponent.Normal, VertexComponent.Tangent, VertexComponent.Bitangent };
 
         static NativeList<float> vertexBuffer = new NativeList<float>(1024 * 1024);  
         static NativeList<uint> indexBuffer = new NativeList<uint>(1024 * 1024);     
         static int vertexOffset = 0;
-
+        static uint indexOffset = 0;
         public AssimpModelReader() : base("")
         {
         }
@@ -63,7 +64,7 @@ namespace SharpGame
             vertexBuffer.Clear();
             indexBuffer.Clear(); 
             vertexOffset = 0;
-
+            indexOffset = 0;
             List<Geometry> geoList = new List<Geometry>();
 
             // Iterate through all meshes in the file and extract the vertex components
@@ -85,7 +86,7 @@ namespace SharpGame
                     Log.Error("No material : " + mesh.Name);
                 }
 
-                var geometry = ConvertGeometry(mesh, scale, vertexComponents, combineVB, out var meshBoundingBox);
+                var geometry = ConvertGeometry(mesh, scale, vertexComponents, combineVB, combineIB, out var meshBoundingBox);
                 geoList.Add(geometry);
 
                 if (geometry.VertexBuffers != null)
@@ -93,7 +94,11 @@ namespace SharpGame
                     model.VertexBuffers.Add(geometry.VertexBuffers[0]);
                 }
 
-                model.IndexBuffers.Add(geometry.IndexBuffer);
+                if (geometry.VertexBuffers != null)
+                {
+                    model.IndexBuffers.Add(geometry.IndexBuffer);
+                }
+
                 model.Geometries.Add(new [] { geometry });
                 model.GeometryCenters.Add(meshBoundingBox.Center);
 
@@ -112,6 +117,16 @@ namespace SharpGame
                 }
             }
 
+            if (combineIB)
+            {
+                var ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
+                model.IndexBuffers.Add(ib);
+                foreach (var geo in geoList)
+                {
+                    geo.IndexBuffer = ib;
+                }
+            }
+
             model.BoundingBox = boundingBox;
           
             ctx.Dispose();
@@ -121,7 +136,8 @@ namespace SharpGame
             return true;
         }
 
-        public static bool Import(string file, List<Geometry> geoList, List<BoundingBox> bboxList, VertexComponent[] vertexComponents = null, bool combineVB = false)
+        public static bool Import(string file, List<Geometry> geoList, List<BoundingBox> bboxList, 
+            VertexComponent[] vertexComponents = null, bool combineVB = false, bool combineIB = false)
         {
             Assimp.PostProcessSteps assimpFlags =
             Assimp.PostProcessSteps.FlipWindingOrder |
@@ -152,12 +168,13 @@ namespace SharpGame
 
             vertexBuffer.Clear();
             indexBuffer.Clear();
-            vertexOffset = 0;
+            vertexOffset = 0; 
+            indexOffset = 0;
             // Iterate through all meshes in the file and extract the vertex components
             for (int m = 0; m < scene.MeshCount; m++)
             {
                 Assimp.Mesh mesh = scene.Meshes[m];
-                var geometry = ConvertGeometry(mesh, scale, vertexComponents, combineVB, out var meshBoundingBox);
+                var geometry = ConvertGeometry(mesh, scale, vertexComponents, combineVB, combineIB, out var meshBoundingBox);
                 geoList.Add(geometry);
                 bboxList.Add(meshBoundingBox);
             }
@@ -171,11 +188,19 @@ namespace SharpGame
                 }
             }
 
+            if (combineIB)
+            {
+                var ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
+                foreach (var geo in geoList)
+                {
+                    geo.IndexBuffer = ib;
+                }
+            }
             ctx.Dispose();
             return true;
         }
 
-        private static Geometry ConvertGeometry(Assimp.Mesh mesh, float scale, VertexComponent[] vertexComponents, bool combineVB, out BoundingBox meshBoundingBox)
+        private static Geometry ConvertGeometry(Assimp.Mesh mesh, float scale, VertexComponent[] vertexComponents, bool combineVB, bool combineIB, out BoundingBox meshBoundingBox)
         {
             Buffer vb = null;
             Buffer ib = null;
@@ -187,40 +212,50 @@ namespace SharpGame
                 PrimitiveTopology.LineList,
                 PrimitiveTopology.TriangleList,
             };
+
+            if (!combineVB)
+                vertexBuffer.Clear();
             
-            indexBuffer.Clear();
+            if(!combineIB)
+                indexBuffer.Clear();
 
-            ConvertGeom(scale, mesh, out meshBoundingBox, vertexComponents);
-
-            if(!combineVB)
-            {
-                vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, sizeof(float), vertexBuffer.Count, vertexBuffer.Data);               
-            }
-
-            ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
+            ConvertGeom(scale, (uint)vertexOffset, mesh, out meshBoundingBox, vertexComponents);
 
             var geometry = new Geometry
             {
                 Name = mesh.Name,
-                IndexBuffer = ib,
                 VertexLayout = new VertexLayout(vertexComponents)
             };
 
             if (!combineVB)
             {
+                vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, sizeof(float), vertexBuffer.Count, vertexBuffer.Data);
                 geometry.VertexBuffers = new[] { vb };
             }
 
-            geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], 0, (uint)ib.Count, vertexOffset);
+            if (!combineIB)
+            {
+                ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
+                geometry.IndexBuffer = ib;
+            }
+
+            //
+            geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], indexOffset, (uint)mesh.FaceCount*3, 0/*vertexOffset*/);
 
             if (combineVB)
             {
                 vertexOffset += mesh.VertexCount;
             }
+
+            if (combineIB)
+            {
+                indexOffset += (uint)mesh.FaceCount * 3;
+            }
+
             return geometry;
         }
 
-        static unsafe void ConvertGeom(float scale, Assimp.Mesh mesh, out BoundingBox meshBoundingBox, VertexComponent[] vertexComponents)
+        static unsafe void ConvertGeom(float scale, uint offset, Assimp.Mesh mesh, out BoundingBox meshBoundingBox, VertexComponent[] vertexComponents)
         {
             meshBoundingBox = new BoundingBox();
 
@@ -275,7 +310,7 @@ namespace SharpGame
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    indexBuffer.Add((uint)mesh.Faces[f].Indices[i]);
+                    indexBuffer.Add((uint)(offset + mesh.Faces[f].Indices[i]));
                 }
             }
 

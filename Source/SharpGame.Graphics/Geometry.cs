@@ -60,27 +60,12 @@ namespace SharpGame
             VertexCount = vertexCount;
         }
 
-        public bool SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount, int vertexOffset)
+        public void SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount, int vertexOffset)
         {
-            if (IndexBuffer != null)
-            {
-                // We can allow setting an illegal draw range now if the caller guarantees to resize / fill the buffer later
-                if (indexStart + indexCount > IndexBuffer.Count)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                indexStart = 0;
-                indexCount = 0;
-            }
-
             PrimitiveTopology = type;
             IndexStart = indexStart;
             IndexCount = indexCount;
             VertexOffset = vertexOffset;
-            return true;
         }
         
         [MethodImpl((MethodImplOptions)0x100)]
