@@ -42,7 +42,7 @@ namespace SharpGame
             int firstSet = 1;
             foreach (var rs in resourceSet1)
             {
-                if (firstSet < pass.PipelineLayout.ResourceLayout.Length)
+                if (firstSet < pass.PipelineLayout.ResourceLayout.Length && rs != null)
                 {
                     cb.BindGraphicsResourceSet(pass.PipelineLayout, firstSet, rs, -1);
                 }

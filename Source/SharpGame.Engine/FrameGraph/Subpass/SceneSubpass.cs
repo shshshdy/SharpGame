@@ -107,8 +107,8 @@ namespace SharpGame
         public void DrawScene(CommandBuffer cmd, BlendFlags blendFlags)
         {
             var set0 = Set0 ?? View.Set0;
-            Span<ResourceSet> set1 =  new [] { Set1 ?? View.Set1 };
-
+            Span<ResourceSet> set1 =  new [] { Set1 ?? View.Set1, Set2 };
+             
             cmd.SetViewport(View.Viewport);
             cmd.SetScissor(View.ViewRect);
 
