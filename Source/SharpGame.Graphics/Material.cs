@@ -323,12 +323,15 @@ namespace SharpGame
 
         protected override void Destroy(bool disposing)
         {
-            foreach (var prs in pipelineResourceSet)
+            if(pipelineResourceSet != null)
             {
-                prs.Dispose();
-            }
+                foreach (var prs in pipelineResourceSet)
+                {
+                    prs.Dispose();
+                }
 
-            pipelineResourceSet.Clear();
+                pipelineResourceSet.Clear();
+            }
 
             base.Destroy(disposing);
 

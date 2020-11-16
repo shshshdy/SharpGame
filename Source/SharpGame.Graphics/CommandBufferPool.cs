@@ -65,7 +65,7 @@ namespace SharpGame
             }
 
             cmdBuffers.Resize(count);
-            cmdBuffers.Count = count;
+            //cmdBuffers.Count = count;
             Device.AllocateCommandBuffers(cmdPool, (VkCommandBufferLevel)commandBufferLevel, count, (VkCommandBuffer*)cmdBuffers.Data);
 
             CommandBuffers = new CommandBuffer[count];

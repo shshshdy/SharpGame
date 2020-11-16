@@ -335,7 +335,7 @@ namespace SharpGame
 
                 Device.GetSwapchainImagesKHR(swapchain, &imageCount, (VkImage*)Images.Data.ToPointer());
 
-                Images.Count = imageCount;                
+                //Images.Count = imageCount;                
                 // Get the swap chain Buffers containing the image and imageview
                 Buffers = new SwapChainBuffer[(int)imageCount];
                 for (int i = 0; i < imageCount; i++)

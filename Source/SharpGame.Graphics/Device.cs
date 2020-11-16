@@ -120,7 +120,7 @@ namespace SharpGame
             Debug.Assert(queueFamilyCount > 0);
             QueueFamilyProperties.Resize(queueFamilyCount);
             vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, (VkQueueFamilyProperties*)QueueFamilyProperties.Data.ToPointer());
-            QueueFamilyProperties.Count = queueFamilyCount;
+            //QueueFamilyProperties.Count = queueFamilyCount;
 
             // Get list of supported extensions
             uint extCount = 0;

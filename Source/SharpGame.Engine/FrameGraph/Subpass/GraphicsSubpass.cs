@@ -53,9 +53,11 @@ namespace SharpGame
             {
                 cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
             }
+            
+            batch.Draw(cb, pass.passIndex);
 
-            batch.material.Bind(pass.passIndex, cb);
-            batch.geometry.Draw(cb);
+            //batch.material.Bind(pass.passIndex, cb);
+            //batch.geometry.Draw(cb);
         }
 
 

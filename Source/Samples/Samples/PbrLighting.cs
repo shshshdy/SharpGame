@@ -59,10 +59,6 @@ namespace SharpGame.Samples
             camera = scene.GetComponent<Camera>(true);
             camera.Node.LookAt(new vec3(0.0f, 5.0f, -50), TransformSpace.WORLD);
 
-            yaw = camera.Node.EulerAngles.y;
-            pitch = camera.Node.EulerAngles.x;
-            roll = camera.Node.EulerAngles.z;
-
             envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0,
                 ImageUsageFlags.Storage | ImageUsageFlags.TransferSrc);
             irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);

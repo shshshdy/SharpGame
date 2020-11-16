@@ -22,14 +22,10 @@ namespace SharpGame.Samples
         protected vec2 mousePos = vec2.Zero;
 
         protected bool firstMode = true;
-        protected float yaw;
-        protected float pitch;
-        protected float roll;
         protected float rotSpeed = 0.5f;
-        protected float wheelSpeed = 10.0f;
-        protected float moveSpeed = 10.0f;
-        protected vec3 offset;
-
+        protected float wheelSpeed = 1000.0f;
+        protected float moveSpeed = 100.0f;
+     
         public FileSystem FileSystem => FileSystem.Instance;
         public Resources Resources => Resources.Instance;
         public Graphics Graphics => Graphics.Instance;
@@ -60,55 +56,57 @@ namespace SharpGame.Samples
             if (mousePos == vec2.Zero)
                 mousePos = input.MousePosition;
 
-            offset = vec3.Zero;
-
+            vec2 delta_rotation = new(0);
+            vec3 delta_translation = new(0.0f, 0.0f, 0.0f);
             if (firstMode)
             {
+                vec2 delta = input.MousePosition - mousePos;
                 if (input.IsMouseDown(MouseButton.Right))
                 {
-                    vec2 delta = (input.MousePosition - mousePos) * (Time.Delta * rotSpeed * new vec2(camera.AspectRatio, 1.0f));
-
-                    if (yaw == 0 )
-                    {
-                        var rot = camera.Node.Rotation.EulerAngles;
-                        yaw = rot.Y;
-                        pitch = rot.X;
-                    }
-
-                    yaw += delta.X;
-                    pitch += delta.Y;
-                    pitch = glm.clamp(pitch, -glm.half_pi, glm.half_pi);
-                    camera.Node.Rotation = glm.quatYawPitchRoll(yaw, pitch, 0);
+                    delta_rotation = delta * (Time.Delta * rotSpeed * new vec2(camera.AspectRatio, 1.0f));
 
                     if (input.IsKeyPressed(Key.W))
                     {
-                        offset.Z += 1.0f;
+                        delta_translation.Z += 1.0f;
                     }
 
                     if (input.IsKeyPressed(Key.S))
                     {
-                        offset.Z -= 1.0f;
+                        delta_translation.Z -= 1.0f;
                     }
 
                     if (input.IsKeyPressed(Key.A))
                     {
-                        offset.X -= 1.0f;
+                        delta_translation.X -= 1.0f;
                     }
 
                     if (input.IsKeyPressed(Key.D))
                     {
-                        offset.X += 1.0f;
+                        delta_translation.X += 1.0f;
                     }
                 }
 
+
                 if (input.IsMouseDown(MouseButton.Middle))
                 {
-                    vec2 delta = input.MousePosition - mousePos;
-                    offset.X = -delta.X * camera.AspectRatio;
-                    offset.Y = delta.Y;
+                    delta_translation.X = -delta.X * camera.AspectRatio;
+                    delta_translation.Y = delta.Y;
                 }
 
-                camera.Node.Translate(offset * (Time.Delta * moveSpeed) + new vec3(0, 0, input.WheelDelta * wheelSpeed), TransformSpace.LOCAL);
+                delta_translation *= (Time.Delta * moveSpeed);
+                delta_translation.z += input.WheelDelta * wheelSpeed * Time.Delta;
+
+                if (delta_rotation != glm.vec2(0.0f, 0.0f) || delta_translation != glm.vec3(0.0f, 0.0f, 0.0f))
+                {
+                    quat qx = glm.angleAxis(delta_rotation.y, glm.vec3(1.0f, 0.0f, 0.0f));
+                    quat qy = glm.angleAxis(delta_rotation.x, glm.vec3(0.0f, 1.0f, 0.0f));
+
+                    quat orientation = glm.normalize(qy * camera.Node.Rotation * qx);
+
+                    camera.Node.Translate(delta_translation * glm.conjugate(orientation), TransformSpace.PARENT);
+                    camera.Node.Rotation = orientation;
+                }
+
             }
             else
             {

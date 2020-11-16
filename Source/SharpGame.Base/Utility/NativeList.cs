@@ -254,11 +254,13 @@ namespace SharpGame
         public void Resize(uint elementCount)
         {
             ThrowIfDisposed();
-            CoreResize(elementCount);
-            if (capacity < count)
+
+            if (elementCount > capacity)
             {
-                count = capacity;
+                CoreResize(elementCount);
             }
+
+            count = elementCount;
         }
 
         private static uint InitializeTypeSize()

@@ -153,31 +153,23 @@ namespace SharpGame
                 instanceData[i].texIndex = i / OBJECT_INSTANCE_COUNT;
             }
 
-            instanceBuffer = Buffer.Create<InstanceData>(BufferUsageFlags.VertexBuffer, false, instanceBuffer.Count, instanceData.Data);
+            instanceBuffer = Buffer.Create<InstanceData>(BufferUsageFlags.VertexBuffer, false, instanceData.Count, instanceData.Data);
 
         }
 
         public override void UpdateBatches(in FrameInfo frame)
         {
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
-
             distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
 
-            if (batches.Length == 1)
-                batches[0].distance = distance_;
-            else
-            {
-                ref mat4 worldTransform = ref node_.WorldTransform;
-                for (int i = 0; i < batches.Length; ++i)
-                {
-                    var batch = (GroupBatch)batches[i];
-                    batch.worldTransform = node_.worldTransform_;
-                    //batch.distance = frame.camera.GetDistance(worldCenter);
-                    batch.instanceBuffer = instanceBuffer;
-                    batch.indirectCommandsBuffer = indirectCommandsBuffer;
-                    batch.indirectDrawCount = indirectDrawCount;
-                }
-            }
+            batch.distance = distance_;
+
+            ref mat4 worldTransform = ref node_.WorldTransform;
+
+            batch.worldTransform = node_.worldTransform_;
+            batch.instanceBuffer = instanceBuffer;
+            batch.indirectCommandsBuffer = indirectCommandsBuffer;
+            batch.indirectDrawCount = indirectDrawCount;
 
         }
 
