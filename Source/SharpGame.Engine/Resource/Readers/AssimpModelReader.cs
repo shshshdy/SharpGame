@@ -245,7 +245,6 @@ namespace SharpGame
                 geometry.IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
             }
 
-            //
             geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], indexOffset, (uint)mesh.FaceCount*3, 0/*vertexOffset*/);
 
             if (combineVB)

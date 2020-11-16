@@ -11,14 +11,14 @@ namespace SharpGame
         public string Name { get; set; }
         public Buffer VertexBuffer { get; set; }  
         public Buffer IndexBuffer { get; set; }
-        //public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
+        public VertexLayout VertexLayout { get; set; }
+        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
         public uint VertexStart { get; set; }
         public uint VertexCount { get; set; }
         public uint IndexStart { get; set; }
         public uint IndexCount { get; set; }
         public int VertexOffset { get; set; }
         public float LodDistance { get; set; }
-        public VertexLayout VertexLayout { get; set; }
 
         public Geometry()
         {
@@ -26,7 +26,7 @@ namespace SharpGame
 
         public void SetDrawRange(PrimitiveTopology type, uint vertexStart, uint vertexCount)
         {
-            //PrimitiveTopology = type;
+            PrimitiveTopology = type;
             IndexStart = 0;
             IndexCount = 0;
             VertexStart = vertexStart;
@@ -35,7 +35,7 @@ namespace SharpGame
 
         public void SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount, int vertexOffset)
         {
-            //PrimitiveTopology = type;
+            PrimitiveTopology = type;
             IndexStart = indexStart;
             IndexCount = indexCount;
             VertexOffset = vertexOffset;
