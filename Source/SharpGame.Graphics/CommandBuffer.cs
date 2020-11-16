@@ -196,9 +196,8 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindVertexBuffer(uint firstBinding, Buffer buffer)
+        public void BindVertexBuffer(uint firstBinding, Buffer buffer, ulong pOffsets = 0)
         {
-            ulong pOffsets = 0;
             vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, ref buffer.buffer, ref pOffsets);
         }
 

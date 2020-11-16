@@ -41,6 +41,8 @@ namespace SharpGame
     /// Source data for a 3D geometry draw call.
     public class SourceBatch
     {
+        /// %Geometry type.
+        public GeometryType geometryType;
         /// Distance from camera.
         public float distance;
         /// Geometry.
@@ -53,12 +55,11 @@ namespace SharpGame
         public int numWorldTransforms;
         public int offset;
         public int frameNum;
-        /// %Geometry type.
-        public GeometryType geometryType;
 
-        public void Draw()
+        public virtual void Draw(CommandBuffer cb,  int passIndex)
         {
-
+            material.Bind(passIndex, cb);
+            geometry.Draw(cb);
         }
 
 

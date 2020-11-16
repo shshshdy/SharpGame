@@ -61,7 +61,7 @@ namespace SharpGame.Samples
 
             geometry = new Geometry
             {
-                VertexBuffers = new [] { storageBuffer },
+                VertexBuffer = storageBuffer,
 
                 VertexLayout = new VertexLayout
                 {

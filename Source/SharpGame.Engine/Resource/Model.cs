@@ -46,9 +46,9 @@ namespace SharpGame
         public BoundingBox BoundingBox { get; set; }
 
         /// Bounding box.
-        [DataMember]
-        public FastList<GeometryDesc> GeometryDesc { get => geometryDesc; set => geometryDesc = value; }
-        private FastList<GeometryDesc> geometryDesc = new FastList<GeometryDesc>();
+//         [DataMember]
+//         public FastList<GeometryDesc> GeometryDesc { get => geometryDesc; set => geometryDesc = value; }
+//         private FastList<GeometryDesc> geometryDesc = new FastList<GeometryDesc>();
 
         /// Skeleton.
         [DataMember]
@@ -75,7 +75,7 @@ namespace SharpGame
         public void SetNumGeometry(int count)
         {            
             geometries.Resize(count);
-            geometryDesc.Resize(count);
+            //geometryDesc.Resize(count);
             GeometryCenters.Resize(count);
         }
         
@@ -146,15 +146,15 @@ namespace SharpGame
             for (int i = 0; i < geometries.Count; i++)
             {
                 model.geometries[i] = new[] { geometries[i] };
-                model.vertexBuffers[i] = geometries[i].VertexBuffers[0];
+                model.vertexBuffers[i] = geometries[i].VertexBuffer;
                 model.IndexBuffers[i] = geometries[i].IndexBuffer;
 
-                ref GeometryDesc desc = ref model.geometryDesc.At(i);
-                desc.primitiveTopology = geometries[i].PrimitiveTopology;
-                desc.vbRef = i;
-                desc.ibRef = i;
-                desc.indexStart = (int)geometries[i].IndexStart;
-                desc.indexCount = (int)geometries[i].IndexCount;
+                //ref GeometryDesc desc = ref model.geometryDesc.At(i);
+                //desc.primitiveTopology = geometries[i].PrimitiveTopology;
+//                 desc.vbRef = i;
+//                 desc.ibRef = i;
+//                 desc.indexStart = (int)geometries[i].IndexStart;
+//                 desc.indexCount = (int)geometries[i].IndexCount;
 
                 if(bboxList != null)
                 {

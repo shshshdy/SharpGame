@@ -6,46 +6,19 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public class Geometry : Object
+    public class Geometry
     {
         public string Name { get; set; }
-
-        private Buffer[] vertexBuffers_;
-        public Buffer[] VertexBuffers
-        {
-            get => vertexBuffers_;
-            set
-            {
-                vertexBuffers_ = value;
-                numVertexBuffer = (uint)vertexBuffers_.Length;
-                if (numVertexBuffer > 4)
-                {
-                    numVertexBuffer = 4;
-                    System.Diagnostics.Debug.Assert(false);
-                }
-
-                for (int i = 0; i < numVertexBuffer; i++)
-                {
-                    buffers_[i] = vertexBuffers_[i].buffer;
-                    offsets_[i] = 0;
-                }
-            }
-        }
-
+        public Buffer VertexBuffer { get; set; }  
         public Buffer IndexBuffer { get; set; }
-        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
+        //public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
         public uint VertexStart { get; set; }
         public uint VertexCount { get; set; }
         public uint IndexStart { get; set; }
         public uint IndexCount { get; set; }
         public int VertexOffset { get; set; }
         public float LodDistance { get; set; }
-
         public VertexLayout VertexLayout { get; set; }
-
-        uint numVertexBuffer;
-        FixedArray4<VkBuffer> buffers_ = new FixedArray4<VkBuffer>();
-        FixedArray4<ulong> offsets_ = new FixedArray4<ulong>();
 
         public Geometry()
         {
@@ -53,7 +26,7 @@ namespace SharpGame
 
         public void SetDrawRange(PrimitiveTopology type, uint vertexStart, uint vertexCount)
         {
-            PrimitiveTopology = type;
+            //PrimitiveTopology = type;
             IndexStart = 0;
             IndexCount = 0;
             VertexStart = vertexStart;
@@ -62,7 +35,7 @@ namespace SharpGame
 
         public void SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount, int vertexOffset)
         {
-            PrimitiveTopology = type;
+            //PrimitiveTopology = type;
             IndexStart = indexStart;
             IndexCount = indexCount;
             VertexOffset = vertexOffset;
@@ -71,7 +44,7 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public void Draw(CommandBuffer cmdBuffer)
         {
-            cmdBuffer.BindVertexBuffers(0, numVertexBuffer, buffers_.Data, ref offsets_.item1);
+            cmdBuffer.BindVertexBuffer(0, VertexBuffer);
 
             if(IndexBuffer != null && IndexCount > 0)
             {
@@ -84,17 +57,6 @@ namespace SharpGame
             }
         }
 
-        protected override void Destroy(bool disposing)
-        {
-            foreach (var vb in VertexBuffers)
-            {
-                vb.Dispose();
-            }
-
-            IndexBuffer?.Dispose();
-
-            base.Destroy(disposing);
-        }
 
     }
 }

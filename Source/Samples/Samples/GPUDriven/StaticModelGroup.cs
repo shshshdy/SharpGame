@@ -4,7 +4,7 @@ using System.Text;
 using Vulkan;
 
 namespace SharpGame
-{  
+{
     // Per-instance data block
     public struct InstanceData
     {
@@ -14,8 +14,31 @@ namespace SharpGame
         public uint texIndex;
     }
 
+    public class GroupBatch : SourceBatch
+    {
 
-    public class StaticModelGroup : StaticModel
+        // Contains the instanced data
+        public Buffer instanceBuffer;
+        // Contains the indirect drawing commands
+        public Buffer indirectCommandsBuffer;
+
+        public uint indirectDrawCount;
+
+        public override void Draw(CommandBuffer cb, int passIndex)
+        {
+            material.Bind(passIndex, cb);
+
+            cb.BindVertexBuffer(0, geometry.VertexBuffer);
+            cb.BindVertexBuffer(1, instanceBuffer);
+            cb.BindIndexBuffer(geometry.IndexBuffer, 0, IndexType.Uint32);
+
+            cb.DrawIndexedIndirect(indirectCommandsBuffer, 0, indirectDrawCount, 20/*(uint)sizeof(VkDrawIndexedIndirectCommand)*/);
+        }
+
+    }
+
+
+    public class StaticModelGroup : Drawable
     {
         const int OBJECT_INSTANCE_COUNT = 2048;
         // Circular range of plant distribution
@@ -31,55 +54,51 @@ namespace SharpGame
         uint objectCount = 0;
         uint indirectDrawCount = 0;
 
+        GroupBatch batch;
+        Model model_;
 
-        public override StaticModel SetModel(Model model)
+        public StaticModelGroup()
+        {
+            batch = new GroupBatch
+            {
+                geometryType = GeometryType,
+                geometry = new Geometry(),
+            };
+
+            batches = new[] { batch };
+        }
+
+        public void SetModel(Model model)
         {
             if (model == model_)
-                return this;
+                return;
 
             model_ = model;
 
             if (model_ != null)
             {
-                SetNumGeometries(model.Geometries.Count);
-
-                List<Geometry[]> geometries = model.Geometries;
-                List<vec3> geometryCenters = model.GeometryCenters;
-
-                for (int i = 0; i < geometries_.Length; ++i)
+                batch.geometry.VertexBuffer = model.VertexBuffers[0];
+                batch.geometry.IndexBuffer = model.IndexBuffers[0];
+                if (node_)
                 {
-                    geometries_[i] = (Geometry[])geometries[i].Clone();
-                    geometryData_[i].center_ = geometryCenters[i];
-
-                    batches[i].geometry = geometries_[i][0];
-                    if (node_)
-                    {
-                        batches[i].worldTransform = node_.worldTransform_;
-                    }
-                    batches[i].numWorldTransforms = 1;
-
-                    var m = GetMaterial(i);
-                    if (m == null)
-                    {
-                        Material mat = model.GetMaterial(i);
-                        if (mat)
-                        {
-                            SetMaterial(i, mat);
-                        }
-                    }
-
+                    batch.worldTransform = node_.worldTransform_;
                 }
+                batch.numWorldTransforms = 1;
 
-                SetBoundingBox(model.BoundingBox);
-                ResetLodLevels();
+                Material mat = new();// model.GetMaterial(i);
+                if (mat)
+                {
+                    SetMaterial(0, mat);
+                }
+          
             }
             else
             {
-                SetNumGeometries(0);
-                SetBoundingBox(BoundingBox.Empty);
             }
 
-            return this;
+            prepareIndirectData();
+
+            prepareInstanceData();
         }
 
 
@@ -87,7 +106,7 @@ namespace SharpGame
         void prepareIndirectData()
         {
             indirectCommands.Clear();
-         
+
             // Create on indirect command for node in the scene with a mesh attached to it
             uint m = 0;
             foreach (var geo in model_.Geometries)
@@ -103,11 +122,11 @@ namespace SharpGame
                 indirectCommands.Add(indirectCmd);
 
                 m++;
-                
+
             }
 
             indirectDrawCount = indirectCommands.Count;
- 
+
             objectCount = 0;
             foreach (var indirectCmd in indirectCommands)
             {
@@ -137,5 +156,32 @@ namespace SharpGame
             instanceBuffer = Buffer.Create<InstanceData>(BufferUsageFlags.VertexBuffer, false, instanceBuffer.Count, instanceData.Data);
 
         }
+
+        public override void UpdateBatches(in FrameInfo frame)
+        {
+            ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
+
+            distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
+
+            if (batches.Length == 1)
+                batches[0].distance = distance_;
+            else
+            {
+                ref mat4 worldTransform = ref node_.WorldTransform;
+                for (int i = 0; i < batches.Length; ++i)
+                {
+                    var batch = (GroupBatch)batches[i];
+                    batch.worldTransform = node_.worldTransform_;
+                    //batch.distance = frame.camera.GetDistance(worldCenter);
+                    batch.instanceBuffer = instanceBuffer;
+                    batch.indirectCommandsBuffer = indirectCommandsBuffer;
+                    batch.indirectDrawCount = indirectDrawCount;
+                }
+            }
+
+        }
+
+
+
     }
 }

@@ -111,7 +111,7 @@ namespace SharpGame
                 var geom = new Geometry
                 {
                     Name = meshGroups[i].Name,
-                    VertexBuffers = new Buffer[] { vb },
+                    VertexBuffer = vb,
                     IndexBuffer = ibs[i]
                 };
 

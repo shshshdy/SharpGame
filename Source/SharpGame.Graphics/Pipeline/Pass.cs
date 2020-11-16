@@ -384,8 +384,8 @@ namespace SharpGame
 
         public Pipeline GetGraphicsPipeline(RenderPass renderPass, uint subPass, Geometry geometry)
         {
-            var vertexInput = VertexLayout?? (geometry ? geometry.VertexLayout : null);
-            var primitiveTopology = (geometry ? geometry.PrimitiveTopology : PrimitiveTopology);
+            var vertexInput = VertexLayout?? (geometry != null ? geometry.VertexLayout : null);
+            var primitiveTopology = /*(geometry != null ? geometry.PrimitiveTopology :*/ PrimitiveTopology;
 
             if (pipelines.TryGetValue(vertexInput?.GetHashCode() ?? 0, out var pipe))
             {

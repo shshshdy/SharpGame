@@ -82,7 +82,7 @@ namespace SharpGame.Samples
 
             geometry = new Geometry
             {
-                VertexBuffers = new[] { Buffer.Create(BufferUsageFlags.VertexBuffer, vertices) },
+                VertexBuffer = Buffer.Create(BufferUsageFlags.VertexBuffer, vertices),
                 IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTex.Layout
             };
