@@ -79,7 +79,7 @@ namespace SharpGame
         {
         }
 
-        public VertexLayout(VertexComponent[] vertexComponents)
+        public VertexLayout(VertexComponent[] vertexComponents, VertexComponent[] instanceComponents = null)
         {
             Attributes = new FastList<VertexAttribute>(vertexComponents.Length);
             uint offset = 0;
@@ -97,7 +97,36 @@ namespace SharpGame
                 offset += GetFormatSize(fmt);
             }
 
-            needUpdate = true;
+            var vertexBinding = new VertexBinding(0, offset, VertexInputRate.Vertex);
+
+            if(instanceComponents != null)
+            {
+                offset = 0;
+                for (uint i = 0; i < instanceComponents.Length; i++)
+                {
+                    var fmt = GetFormat(instanceComponents[i]);
+                    Attributes.Add(new VertexAttribute
+                    {
+                        location = (uint)vertexComponents.Length + i,
+                        binding = 1,
+                        format = fmt,
+                        offset = offset
+                    });
+
+                    offset += GetFormatSize(fmt);
+                }
+
+                var instanceBinding = new VertexBinding(1, offset, VertexInputRate.Instance);
+
+                Bindings = new[] { vertexBinding, instanceBinding };
+            }
+            else
+            {
+
+                Bindings = new[] { vertexBinding };
+            }
+
+            needUpdate = false;
         }
 
         public VertexLayout(VertexAttribute[] attributes, VertexBinding[] bindings = null)

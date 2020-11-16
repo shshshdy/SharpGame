@@ -1,6 +1,6 @@
 #version 450
 
-layout (binding = 1) uniform sampler2DArray samplerArray;
+layout (set = 1, binding = 0) uniform sampler2DArray DiffMap;
 
 layout (location = 0) in vec3 inNormal;
 layout (location = 1) in vec3 inColor;
@@ -12,7 +12,7 @@ layout (location = 0) out vec4 outFragColor;
 
 void main()
 {
-	vec4 color = texture(samplerArray, inUV);
+	vec4 color = texture(DiffMap, inUV);
 
 	if (color.a < 0.5)
 	{

@@ -50,6 +50,7 @@ namespace SharpGame
         Buffer indirectCommandsBuffer;
 
         NativeList<VkDrawIndexedIndirectCommand> indirectCommands = new NativeList<VkDrawIndexedIndirectCommand>();
+        NativeList<InstanceData> instanceData = new NativeList<InstanceData>();
 
         uint objectCount = 0;
         uint indirectDrawCount = 0;
@@ -83,9 +84,10 @@ namespace SharpGame
                 {
                     batch.worldTransform = node_.worldTransform_;
                 }
+
                 batch.numWorldTransforms = 1;
 
-                Material mat = new();// model.GetMaterial(i);
+                Material mat = model.GetMaterial(0);
                 if (mat)
                 {
                     SetMaterial(0, mat);
@@ -137,7 +139,6 @@ namespace SharpGame
 
         }
 
-        NativeList<InstanceData> instanceData = new NativeList<InstanceData>();
         // Prepare (and stage) a buffer containing instanced data for the mesh draws
         void prepareInstanceData()
         {
@@ -154,7 +155,7 @@ namespace SharpGame
             }
 
             instanceBuffer = Buffer.Create<InstanceData>(BufferUsageFlags.VertexBuffer, false, instanceData.Count, instanceData.Data);
-
+            this.boundingBox_ = new BoundingBox(-PLANT_RADIUS, PLANT_RADIUS);
         }
 
         public override void UpdateBatches(in FrameInfo frame)

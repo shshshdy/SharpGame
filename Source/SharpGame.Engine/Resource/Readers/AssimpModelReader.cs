@@ -7,6 +7,9 @@ namespace SharpGame
 {
     public class AssimpModelReader : ResourceReader<Model>
     {
+        public static readonly VertexComponent[] defaultVertexComponents = new[] { VertexComponent.Position, VertexComponent.Texcoord,
+            VertexComponent.Normal, VertexComponent.Tangent, VertexComponent.Bitangent };
+
         public Assimp.PostProcessSteps assimpFlags =
         Assimp.PostProcessSteps.CalculateTangentSpace |
         Assimp.PostProcessSteps.Triangulate |
@@ -25,8 +28,7 @@ namespace SharpGame
         public bool combineVB = true;
         public bool combineIB = true;
 
-        public VertexComponent[] vertexComponents = new[] { VertexComponent.Position, VertexComponent.Texcoord,
-            VertexComponent.Normal, VertexComponent.Tangent, VertexComponent.Bitangent };
+        public VertexComponent[] vertexComponents = defaultVertexComponents;
 
         static NativeList<float> vertexBuffer = new NativeList<float>(1024 * 1024);  
         static NativeList<uint> indexBuffer = new NativeList<uint>(1024 * 1024);     
@@ -171,6 +173,11 @@ namespace SharpGame
             indexBuffer.Clear();
             vertexOffset = 0; 
             indexOffset = 0;
+
+            if(vertexComponents == null)
+            {
+                vertexComponents = defaultVertexComponents;
+            }
 
             VertexLayout vertexLayout = new VertexLayout(vertexComponents);
             // Iterate through all meshes in the file and extract the vertex components

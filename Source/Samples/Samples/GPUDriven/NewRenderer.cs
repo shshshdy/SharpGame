@@ -9,11 +9,10 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 6)]
+    [SampleDesc(sortOrder = -6)]
     public class NewRenderer : Sample
     {
         RenderPipeline renderer = new RenderPipeline();
-
 
         public override void Init()
         {
@@ -49,7 +48,7 @@ namespace SharpGame.Samples
                     VertexComponent.Texcoord
                 }
             };
-
+            
             {
                 var node = scene.CreateChild("Sky");
                 var staticModel = node.AddComponent<StaticModel>();
@@ -76,11 +75,15 @@ namespace SharpGame.Samples
                 var staticModel = node.AddComponent<StaticModelGroup>();
 
                 importer.scale = 0.0025f;
-                importer.vertexComponents = null;
+                importer.vertexComponents = new[] 
+                { VertexComponent.Position, VertexComponent.Normal, VertexComponent.Texcoord, VertexComponent.Color };
                 var model = importer.Load("models/vegetation/plants.dae");
                 staticModel.SetModel(model);
 
-                var mat = new Material("shaders/LitSolid.shader");
+                //var shader = new Shader("shaders/LitSolid.shader");
+                var mat = new Material("shaders/IndirectDraw.shader");
+                mat.Shader.Main.VertexLayout = new VertexLayout(importer.vertexComponents, 
+                    new[]{ VertexComponent.Float3, VertexComponent.Float3, VertexComponent.Float1, VertexComponent.Int1 });
                 Texture tex = Resources.Load<Texture>("models/vegetation/textures/texturearray_plants_bc3_unorm.ktx");
                 mat.SetTexture("DiffMap", tex);
                 staticModel.SetMaterial(mat);

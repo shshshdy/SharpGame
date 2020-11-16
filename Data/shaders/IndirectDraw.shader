@@ -1,4 +1,4 @@
-Shader "Basic"
+Shader "IndirectDraw"
 {
 	Pass "main"
 	{
@@ -7,12 +7,12 @@ Shader "Basic"
 
 		@VertexShader
 		{
-            #include "indirectdraw.vert"
+            #include "vegetation/indirectdraw.vert"
 		}
 		
 		@PixelShader
 		{
-            #include "indirectdraw.frag"
+            #include "vegetation/indirectdraw.frag"
 		}
 
 	}
