@@ -120,28 +120,18 @@ namespace SharpGame
                 }
                 else
                 {
-                    DrawBatches(cmd, View.opaqueBatches, set0, set1);
+                    DrawBatches(cmd, View.opaqueBatches.AsSpan(), set0, set1);
                 }
             }
 
             if ((blendFlags & BlendFlags.AlphaTest) != 0 && View.alphaTestBatches.Count > 0)
             {
-                DrawBatches(cmd, View.alphaTestBatches, set0, set1);
+                DrawBatches(cmd, View.alphaTestBatches.AsSpan(), set0, set1);
             }
 
             if ((blendFlags & BlendFlags.AlphaBlend) != 0 && View.translucentBatches.Count > 0)
             {
-                DrawBatches(cmd, View.translucentBatches, set0, set1);
-            }
-
-        }
-
-
-        public void DrawBatches(CommandBuffer cmd, FastList<SourceBatch> batches, DescriptorSet set0, Span<DescriptorSet> set1)
-        {
-            foreach (var batch in batches)
-            {
-                DrawBatch(cmd, passID, batch, default, set0, set1);
+                DrawBatches(cmd, View.translucentBatches.AsSpan(), set0, set1);
             }
 
         }
@@ -175,7 +165,7 @@ namespace SharpGame
                 {
                     cb.SetViewport(View.Viewport);
                     cb.SetScissor(View.ViewRect);
-                    Draw(cb, batches.AsSpan(from, to - from), set0, setSegment);
+                    DrawBatches(cb, batches.AsSpan(from, to - from), set0, setSegment);
                     cb.End();
                 });
                 renderTasks.Add(t);
@@ -194,13 +184,6 @@ namespace SharpGame
             tempSets.Clear();
         }
 
-        protected void Draw(CommandBuffer commandBuffer, Span<SourceBatch> sourceBatches, DescriptorSet set0, Span<DescriptorSet> set1)
-        {
-            foreach (var batch in sourceBatches)
-            {
-                DrawBatch(commandBuffer, passID, batch, default, set0, set1);
-            }
-        }
 
     }
 }

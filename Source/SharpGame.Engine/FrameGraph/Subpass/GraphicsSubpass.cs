@@ -55,11 +55,15 @@ namespace SharpGame
             }
             
             batch.Draw(cb, pass.passIndex);
-
-            //batch.material.Bind(pass.passIndex, cb);
-            //batch.geometry.Draw(cb);
         }
 
+        public void DrawBatches(CommandBuffer commandBuffer, Span<SourceBatch> sourceBatches, DescriptorSet set0, Span<DescriptorSet> set1)
+        {
+            foreach (var batch in sourceBatches)
+            {
+                DrawBatch(commandBuffer, passID, batch, default, set0, set1);
+            }
+        }
 
     }
 
