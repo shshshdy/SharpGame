@@ -123,8 +123,7 @@ namespace SharpGame
                 },
             };
 
-            var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            RenderPass = new RenderPass(ref renderPassInfo);
+            RenderPass = new RenderPass(attachments, subpassDescription, dependencies);
         }
 
         protected override void CreateRenderTargets()

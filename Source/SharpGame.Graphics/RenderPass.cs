@@ -8,16 +8,47 @@ namespace SharpGame
 {
     public class RenderPass : DisposeBase
     {
-        public uint ColorAttachmentCount { get; }
+        public AttachmentDescription[] attachments;
+        public SubpassDescription[] subpasses;
+        public SubpassDependency[] dependencies;
+
+        public uint GetColorAttachmentCount(uint subpass)
+        {
+            var pColorAttachments = subpasses[subpass].pColorAttachments;
+            return (uint)(pColorAttachments != null ? pColorAttachments.Length : 1);
+        }
 
         internal VkRenderPass handle;
 
-        public RenderPass(ref RenderPassCreateInfo renderPassCreateInfo)
+        public RenderPass(AttachmentDescription[] attachments,
+            SubpassDescription[] subpasses, SubpassDependency[] dependencies, uint flags = 0)
         {
-            renderPassCreateInfo.ToNative(out VkRenderPassCreateInfo vkRenderPassCreateInfo);
-            handle = Device.CreateRenderPass(ref vkRenderPassCreateInfo);
-            var pColorAttach = renderPassCreateInfo.pSubpasses[0].pColorAttachments;
-            ColorAttachmentCount = (uint)(pColorAttach?.Length ?? 1);
+            this.attachments = attachments;
+            this.subpasses = subpasses;
+            this.dependencies = dependencies;
+
+            unsafe
+            {
+                var renderPassCreateInfo = VkRenderPassCreateInfo.New();
+
+                using NativeList<VkSubpassDescription> subPasses = new NativeList<VkSubpassDescription>((uint)subpasses.Length, (uint)subpasses.Length);
+
+                renderPassCreateInfo.flags = flags;
+                renderPassCreateInfo.attachmentCount = (uint)attachments.Length;
+                renderPassCreateInfo.pAttachments = (VkAttachmentDescription*)Unsafe.AsPointer(ref attachments[0]);
+                renderPassCreateInfo.subpassCount = (uint)subpasses.Length;
+
+                for (uint i = 0; i < subpasses.Length; i++)
+                {
+                    subpasses[i].ToNative((VkSubpassDescription*)subPasses.GetAddress(i));
+                }
+
+                renderPassCreateInfo.pSubpasses = (VkSubpassDescription*)subPasses.Data;
+                renderPassCreateInfo.dependencyCount = (uint)dependencies.Length;
+                renderPassCreateInfo.pDependencies = (VkSubpassDependency*)Unsafe.AsPointer(ref dependencies[0]);
+
+                handle = Device.CreateRenderPass(ref renderPassCreateInfo);
+            }
         }
 
         protected override void Destroy(bool disposing)
@@ -240,41 +271,4 @@ namespace SharpGame
         ColorAttachmentReadNoncoherentEXT = 524288
     }
 
-    public struct RenderPassCreateInfo
-    {
-        public uint flags;
-        public AttachmentDescription[] pAttachments;
-        public SubpassDescription[] pSubpasses;
-        public SubpassDependency[] pDependencies;
-
-        public RenderPassCreateInfo(AttachmentDescription[] pAttachments,
-            SubpassDescription[] pSubpasses, SubpassDependency[] pDependencies, uint flags = 0)
-        {
-            this.pAttachments = pAttachments;
-            this.pSubpasses = pSubpasses;
-            this.pDependencies = pDependencies;
-            this.flags = flags;
-            subPasses = null;
-        }
-
-        NativeList<VkSubpassDescription> subPasses;
-        public unsafe void ToNative(out VkRenderPassCreateInfo native)
-        {
-            native = VkRenderPassCreateInfo.New();
-            native.flags = flags;
-            native.attachmentCount = (uint)pAttachments.Length;
-            native.pAttachments = (VkAttachmentDescription*)Unsafe.AsPointer(ref pAttachments[0]);
-            native.subpassCount = (uint)pSubpasses.Length;
-
-            subPasses = new NativeList<VkSubpassDescription>((uint)pSubpasses.Length, (uint)pSubpasses.Length);
-            for (uint i = 0; i < pSubpasses.Length; i++)
-            {
-                pSubpasses[i].ToNative((VkSubpassDescription*)subPasses.GetAddress(i));
-            }
-
-            native.pSubpasses = (VkSubpassDescription*)subPasses.Data;
-            native.dependencyCount = (uint)pDependencies.Length;
-            native.pDependencies = (VkSubpassDependency*)Unsafe.AsPointer(ref pDependencies[0]);
-        }
-    }
 }

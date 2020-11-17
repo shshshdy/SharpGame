@@ -228,8 +228,7 @@ namespace SharpGame
                 },
             };
 
-            RenderPassCreateInfo renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            renderPass = new RenderPass(ref renderPassInfo);
+            renderPass = new RenderPass(attachments, subpassDescription, dependencies);
         }
 
         public RenderPass CreateRenderPass(bool clearColor = false, bool clearDepth = false)
@@ -297,8 +296,7 @@ namespace SharpGame
                 },
             };
 
-            var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            renderPass = new RenderPass(ref renderPassInfo);
+            renderPass = new RenderPass(attachments, subpassDescription, dependencies);
             return renderPass;
         }
 

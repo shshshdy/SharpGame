@@ -102,18 +102,21 @@ namespace SharpGame
             }
             else
             {
-                renderTarget = new RenderTarget();
-
-                foreach(var rtInfo in renderTextureInfos)
+                if(renderTextureInfos.Count > 0)
                 {
-                    renderTarget.Add(rtInfo);
-                }
+                    renderTarget = new RenderTarget();
 
-                framebuffers = new Framebuffer[Swapchain.IMAGE_COUNT];
-                for (int i = 0; i < framebuffers.Length; i++)
-                {
-                    var attachments = renderTarget.GetViews(i);
-                    framebuffers[i] = new Framebuffer(RenderPass, renderTarget.extent.width, renderTarget.extent.height, 1, attachments);
+                    foreach (var rtInfo in renderTextureInfos)
+                    {
+                        renderTarget.Add(rtInfo);
+                    }
+
+                    framebuffers = new Framebuffer[Swapchain.IMAGE_COUNT];
+                    for (int i = 0; i < framebuffers.Length; i++)
+                    {
+                        var attachments = renderTarget.GetViews(i);
+                        framebuffers[i] = new Framebuffer(RenderPass, renderTarget.extent.width, renderTarget.extent.height, 1, attachments);
+                    }
                 }
 
             }
@@ -130,10 +133,15 @@ namespace SharpGame
             {
                 RenderPass = renderPassCreator.Invoke();
             }
-            else
+
+
+
+
+            if(RenderPass == null)
             {
                 RenderPass = Graphics.RenderPass;
-            }
+            }            
+
         }
 
         public virtual void Update()

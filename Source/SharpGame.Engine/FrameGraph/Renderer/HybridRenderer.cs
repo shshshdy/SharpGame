@@ -198,8 +198,7 @@ namespace SharpGame
                 },
             };
 
-            var renderPassInfo = new RenderPassCreateInfo(attachments, subpassDescription, dependencies);
-            return new RenderPass(ref renderPassInfo);
+            return new RenderPass(attachments, subpassDescription, dependencies);
         
         }
 
