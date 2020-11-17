@@ -105,7 +105,7 @@ namespace SharpGame
                     mipHeight,
                     mipDepth,
                     imageSize,
-                    arrayElements);
+                    arrayElements, header.NumberOfArrayElements);
                
                 uint mipPaddingBytes = 3 - ((imageSize + 3) % 4);
                 //Debug.Assert(mipPaddingBytes == 0);

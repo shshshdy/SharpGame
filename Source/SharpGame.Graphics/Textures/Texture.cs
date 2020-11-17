@@ -18,6 +18,7 @@ namespace SharpGame
         public uint height;
         public uint depth;
         public uint layers;
+        public uint faceCount;
         public uint mipLevels;
         public Format format;
         public ImageCreateFlags imageCreateFlags = ImageCreateFlags.None;
@@ -37,7 +38,7 @@ namespace SharpGame
             height = imageData[0].Height;
             mipLevels = (uint)imageData.Length;
             layers = (uint)imageData[0].ArrayElements.Length;
-            uint faceCount = (uint)imageData[0].ArrayElements[0].Faces.Length;
+            faceCount = (uint)imageData[0].ArrayElements[0].Faces.Length;
 
             ulong totalSize = 0;
             foreach (var mip in imageData)
@@ -106,11 +107,51 @@ namespace SharpGame
 
             stagingBuffer.Dispose();
 
-            imageView = ImageView.Create(image, faceCount == 6 ? ImageViewType.ImageCube : ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, mipLevels, 0, layers);
+            imageView = ImageView.Create(image, ImageViewType, format, ImageAspectFlags.Color, 0, mipLevels, 0, layers);
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == 1);
 
             UpdateDescriptor();
 
+        }
+
+        public ImageViewType ImageViewType
+        {
+            get
+            {
+                if (layers > 1)
+                {
+                    if (height == 1)
+                        return ImageViewType.Image1DArray;
+                    else
+                    {
+                        if (faceCount == 6)
+                        {
+                            return ImageViewType.ImageCubeArray;
+                        }
+                        else
+                        {
+                            return ImageViewType.Image2DArray;
+                        }
+                    }
+                }
+                else
+                {
+                    if (height == 1)
+                        return ImageViewType.Image1D;
+                    else
+                    {
+                        if (faceCount == 6)
+                            return ImageViewType.ImageCube;
+
+                        if(depth > 1)
+                        {
+                            return ImageViewType.Image3D;
+                        }
+                        return ImageViewType.Image2D;
+                    }
+                }
+
+            }
         }
 
         static int NumMipmapLevels(uint width, uint height)
@@ -326,7 +367,7 @@ namespace SharpGame
         public uint Height { get; }
         public uint Depth { get; }
         public uint TotalSize { get; }
-        public int ArrayElementSize => ArrayElements.Length;
+        public uint LayerCount { get; }
         public ArrayElement[] ArrayElements { get; }
 
         public MipmapLevel(uint totalSize, byte[] data, uint width, uint height, uint depth)
@@ -335,20 +376,23 @@ namespace SharpGame
             Height = height;
             Depth = depth;
             TotalSize = totalSize;
+
             ArrayElements = new[]
             {
                 new ArrayElement(new[] { new ImageFace(data) })
             };
 
+            LayerCount = 0;
         }
 
-        public MipmapLevel(uint width, uint height, uint depth, uint totalSize, ArrayElement[] slices)
+        public MipmapLevel(uint width, uint height, uint depth, uint totalSize, ArrayElement[] slices, uint numberOfArrayElements)
         {
             Width = width;
             Height = height;
             Depth = depth;
             TotalSize = totalSize;
             ArrayElements = slices;
+            LayerCount = numberOfArrayElements;
         }
 
     }
