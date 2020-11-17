@@ -23,6 +23,7 @@ namespace SharpGame
         public Buffer indirectCommandsBuffer;
 
         public uint indirectDrawCount;
+        public long triangleCount = 0;
 
         public override void Draw(CommandBuffer cb, int passIndex)
         {
@@ -33,6 +34,8 @@ namespace SharpGame
             cb.BindIndexBuffer(geometry.IndexBuffer, 0, IndexType.Uint32);
 
             cb.DrawIndexedIndirect(indirectCommandsBuffer, 0, indirectDrawCount, 20/*(uint)sizeof(VkDrawIndexedIndirectCommand)*/);
+
+            Stats.indirectTriCount += triangleCount;
         }
 
     }
@@ -54,7 +57,6 @@ namespace SharpGame
 
         uint objectCount = 0;
         uint indirectDrawCount = 0;
-
         GroupBatch batch;
         Model model_;
 
@@ -99,7 +101,6 @@ namespace SharpGame
             }
 
             prepareIndirectData();
-
             prepareInstanceData();
         }
 
@@ -108,7 +109,7 @@ namespace SharpGame
         void prepareIndirectData()
         {
             indirectCommands.Clear();
-
+            batch.triangleCount = 0;
             // Create on indirect command for node in the scene with a mesh attached to it
             uint m = 0;
             foreach (var geo in model_.Geometries)
@@ -124,7 +125,7 @@ namespace SharpGame
                 indirectCommands.Add(indirectCmd);
 
                 m++;
-
+                batch.triangleCount += indirectCmd.indexCount * indirectCmd.instanceCount;
             }
 
             indirectDrawCount = indirectCommands.Count;

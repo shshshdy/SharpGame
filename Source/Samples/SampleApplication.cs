@@ -139,7 +139,9 @@ namespace SharpGame.Samples
                 ImGui.Value("Msec", Msec); 
 
                 ImGui.Value("Draw Call", Stats.drawCall);
-                ImGui.Value("Triangle Count", Stats.triCount);
+                ImGui.Value("Triangle Count", (uint)Stats.triCount);
+                ImGui.Value("Draw Indirect", Stats.drawIndirect);
+                ImGui.Value("Indirect Triangle Count", (uint)Stats.indirectTriCount);
 
                 ImGui.Text(string.Format("Logic Wait : {0:F3}", Stats.logicWait * Timer.MilliSecsPerTick));
                 ImGui.Text(string.Format("Render Wait : {0:F3}", Stats.renderWait * Timer.MilliSecsPerTick));

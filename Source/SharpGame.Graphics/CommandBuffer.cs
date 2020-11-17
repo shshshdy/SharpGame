@@ -261,22 +261,26 @@ namespace SharpGame
 
         public void DrawIndirect(Buffer buffer, ulong offset, uint drawCount, uint stride)
         {
-            vkCmdDrawIndirect(commandBuffer, buffer.buffer, offset, drawCount, stride);
+            vkCmdDrawIndirect(commandBuffer, buffer.buffer, offset, drawCount, stride); 
+            Interlocked.Increment(ref Stats.drawIndirect);
         }
 
         public void DrawIndexedIndirect(Buffer buffer, ulong offset, uint drawCount, uint stride)
         {
             vkCmdDrawIndexedIndirect(commandBuffer, buffer.buffer, offset, drawCount, stride);
+            Interlocked.Increment(ref Stats.drawIndirect);
         }
 
         public void DispatchIndirect(Buffer buffer, ulong offset)
         {
-            vkCmdDispatchIndirect(commandBuffer, buffer.buffer, offset);
+            vkCmdDispatchIndirect(commandBuffer, buffer.buffer, offset); 
+            Interlocked.Increment(ref Stats.dispatchIndirect);
         }
 
         public void Dispatch(uint groupCountX, uint groupCountY, uint groupCountZ)
         {
             vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
+            Interlocked.Increment(ref Stats.dispatch);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]

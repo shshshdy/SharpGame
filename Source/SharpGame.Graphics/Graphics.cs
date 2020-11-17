@@ -510,13 +510,22 @@ namespace SharpGame
     {
         public long logicWait;
         public long renderWait;
+
+        public static long triCount;
+        public static long indirectTriCount;
         public static int drawCall;
-        public static int triCount;
+        public static int drawIndirect;
+        public static int dispatch;
+        public static int dispatchIndirect;
 
         public static void Tick(float timeStep)
         {
+            triCount = 0; 
+            indirectTriCount = 0;
             drawCall = 0;
-            triCount = 0;
+            drawIndirect = 0;
+            dispatch = 0;
+            dispatchIndirect = 0;
         }
     }
 }
