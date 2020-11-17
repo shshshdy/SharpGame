@@ -56,6 +56,7 @@ namespace SharpGame
 
         private long elapsedTime;
         private int frameNum;
+
         private List<float> lastTimeSteps = new List<float>();
         private float timeStep;
         private int timeStepSmoothing = 2;
@@ -214,11 +215,11 @@ namespace SharpGame
         {        
             while (!shouldQuit)
             {
-                graphics.WaitRender();
-
+                Profiler.Begin();
                 timer.Restart();
 
-                Profiler.Begin();
+                graphics.WaitRender();
+
 
                 Time.Tick(timeStep);
 
@@ -232,9 +233,10 @@ namespace SharpGame
 
                 UpdateFrame();
 
-                ApplyFrameLimit();
 
                 graphics.MainSemPost();
+
+                ApplyFrameLimit();
                 Profiler.End();
             }
 

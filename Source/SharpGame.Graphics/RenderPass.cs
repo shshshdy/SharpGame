@@ -12,12 +12,6 @@ namespace SharpGame
         public SubpassDescription[] subpasses;
         public SubpassDependency[] dependencies;
 
-        public uint GetColorAttachmentCount(uint subpass)
-        {
-            var pColorAttachments = subpasses[subpass].pColorAttachments;
-            return (uint)(pColorAttachments != null ? pColorAttachments.Length : 1);
-        }
-
         internal VkRenderPass handle;
 
         public RenderPass(AttachmentDescription[] attachments,
@@ -29,10 +23,9 @@ namespace SharpGame
 
             unsafe
             {
-                var renderPassCreateInfo = VkRenderPassCreateInfo.New();
-
                 using NativeList<VkSubpassDescription> subPasses = new NativeList<VkSubpassDescription>((uint)subpasses.Length, (uint)subpasses.Length);
 
+                var renderPassCreateInfo = VkRenderPassCreateInfo.New();
                 renderPassCreateInfo.flags = flags;
                 renderPassCreateInfo.attachmentCount = (uint)attachments.Length;
                 renderPassCreateInfo.pAttachments = (VkAttachmentDescription*)Unsafe.AsPointer(ref attachments[0]);
@@ -49,6 +42,12 @@ namespace SharpGame
 
                 handle = Device.CreateRenderPass(ref renderPassCreateInfo);
             }
+        }
+
+        public uint GetColorAttachmentCount(uint subpass)
+        {
+            var pColorAttachments = subpasses[subpass].pColorAttachments;
+            return (uint)(pColorAttachments != null ? pColorAttachments.Length : 1);
         }
 
         protected override void Destroy(bool disposing)
@@ -133,7 +132,7 @@ namespace SharpGame
         PerViewPositionXOnlyNVX = 2
     }
 
-    public unsafe struct SubpassDescription
+    public struct SubpassDescription
     {
         public SubpassDescriptionFlags flags;
         public PipelineBindPoint pipelineBindPoint;
@@ -141,7 +140,7 @@ namespace SharpGame
         public AttachmentReference[] pColorAttachments;
         public AttachmentReference[] pResolveAttachments;
         public AttachmentReference[] pDepthStencilAttachment;
-        public uint[]pPreserveAttachments;
+        public uint[] pPreserveAttachments;
 
         public unsafe void ToNative(VkSubpassDescription* native)
         {

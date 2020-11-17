@@ -30,6 +30,7 @@ namespace SharpGame
         protected ClearValue[] clearValues = new ClearValue[5];
 
         List<Subpass> subpasses = new List<Subpass>();
+
         public Subpass[] Subpasses
         {
             set
@@ -44,7 +45,7 @@ namespace SharpGame
         public Func<RenderPass> renderPassCreator { get; set; }
         public Func<RenderPass, Framebuffer[]> frameBufferCreator { get; set; }
 
-        AttachmentDescription[] attachmentDescription;
+        List<AttachmentDescription> attachmentDescription = new List<AttachmentDescription>();
 
         public FrameGraphPass()
         {
@@ -133,11 +134,20 @@ namespace SharpGame
             {
                 RenderPass = renderPassCreator.Invoke();
             }
+            /*
+            var attachmentDescriptions = attachmentDescription.ToArray();
+            var subpassDescriptions = new SubpassDescription[subpasses.Count];
+            var dependencies = new SubpassDependency[subpasses.Count + 1];
 
+            for(int i = 0; i < subpasses.Count; i++)
+            {
+                subpasses[i].GetDescription(ref subpassDescriptions[i]);
 
+            }
 
-
-            if(RenderPass == null)
+            RenderPass = new RenderPass(attachmentDescriptions, subpassDescriptions, dependencies);
+            */
+            if (RenderPass == null)
             {
                 RenderPass = Graphics.RenderPass;
             }            

@@ -136,7 +136,8 @@ namespace SharpGame.Samples
             {
                 ImGui.Value("Single Loop", singleLoop);
                 ImGui.Value("Fps", Fps);
-                ImGui.Value("Msec", Msec);
+                ImGui.Value("Msec", Msec); 
+
                 ImGui.Value("Draw Call", Stats.drawCall);
                 ImGui.Value("Triangle Count", Stats.triCount);
 

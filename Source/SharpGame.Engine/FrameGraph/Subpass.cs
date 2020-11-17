@@ -26,12 +26,19 @@ namespace SharpGame
 
         public uint subpassIndex = 0;
 
-        uint[] inputAttachments = new uint[0];
-        uint[] outputAttachments = new uint[2];
+        public uint[] InputAttachments { get; set; } = new uint[0];
+        public uint[] OutputAttachments { get; set; } = new uint[1] { 0 };
+
+        public void GetDescription(ref SubpassDescription subpassDescription)
+        {
+            //todo:
+        }
+
 
         public virtual void Init()
         {
         }
+
 
         public virtual void DeviceLost()
         {
