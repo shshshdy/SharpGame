@@ -30,7 +30,7 @@ namespace SharpGame.Samples
         private Geometry geometry;
         private Material material;
         private Pass computePipeline;
-        private ResourceSet computeResourceSet;
+        private DescriptorSet computeResourceSet;
 
         UboCompute ubo = new UboCompute
         {
@@ -54,7 +54,7 @@ namespace SharpGame.Samples
             material.SetTexture("samplerColor", storageTex);
 
             computePipeline = shader.GetPass("Compute");
-            computeResourceSet = new ResourceSet(computePipeline.PipelineLayout.ResourceLayout[0], storageTex, uniformBuffer);
+            computeResourceSet = new DescriptorSet(computePipeline.PipelineLayout.ResourceLayout[0], storageTex, uniformBuffer);
 
             renderer.AddComputePass(Docompute);
             renderer.AddGraphicsPass(DrawQuad);

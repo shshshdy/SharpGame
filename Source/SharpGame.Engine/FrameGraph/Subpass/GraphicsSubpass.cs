@@ -25,7 +25,7 @@ namespace SharpGame
         }
 
         public void DrawBatch(CommandBuffer cb, ulong passID, SourceBatch batch, Span<ConstBlock> pushConsts,
-            ResourceSet resourceSet, Span<ResourceSet> resourceSet1)
+            DescriptorSet resourceSet, Span<DescriptorSet> resourceSet1)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)

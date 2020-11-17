@@ -22,10 +22,10 @@ namespace SharpGame
         Shader uiShader;
         Pass pass;
         Pipeline pipeline;
-        ResourceLayout resourceLayout;
-        ResourceSet resourceSet;
-        ResourceLayout resourceLayoutTex;
-        ResourceSet resourceSetTex;
+        DescriptorSetLayout resourceLayout;
+        DescriptorSet resourceSet;
+        DescriptorSetLayout resourceLayoutTex;
+        DescriptorSet resourceSetTex;
         private IntPtr fontAtlasID = (IntPtr)1;
 
         FrameGraphPass guiPass;
@@ -33,9 +33,9 @@ namespace SharpGame
         private struct ResourceSetInfo
         {
             public readonly IntPtr ImGuiBinding;
-            public readonly ResourceSet ResourceSet;
+            public readonly DescriptorSet ResourceSet;
 
-            public ResourceSetInfo(IntPtr imGuiBinding, ResourceSet resourceSet)
+            public ResourceSetInfo(IntPtr imGuiBinding, DescriptorSet resourceSet)
             {
                 ImGuiBinding = imGuiBinding;
                 ResourceSet = resourceSet;
@@ -62,8 +62,8 @@ namespace SharpGame
             CreateGraphicsResources();
             RecreateFontDeviceTexture();
 
-            resourceSet = new ResourceSet(resourceLayout, uniformBufferVS);
-            resourceSetTex = new ResourceSet(resourceLayoutTex, texture);
+            resourceSet = new DescriptorSet(resourceLayout, uniformBufferVS);
+            resourceSetTex = new DescriptorSet(resourceLayoutTex, texture);
 
             ImGuiStylePtr style = ImGui.GetStyle();
             style.WindowRounding = 2;
@@ -127,14 +127,14 @@ namespace SharpGame
         {
             uniformBufferVS = Buffer.CreateUniformBuffer<Matrix4x4>();
 
-            resourceLayout = new ResourceLayout(0)
+            resourceLayout = new DescriptorSetLayout(0)
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex)
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex)
             };
 
-            resourceLayoutTex = new ResourceLayout(1)
+            resourceLayoutTex = new DescriptorSetLayout(1)
             {
-                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
+                new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
             };
 
             uiShader = Resources.Instance.Load<Shader>("Shaders/ImGui.shader");           
@@ -171,7 +171,7 @@ namespace SharpGame
         {
             if (!_setsByTexture.TryGetValue(texture, out ResourceSetInfo rsi))
             {
-                ResourceSet resourceSet = new ResourceSet(resourceLayoutTex, texture);
+                DescriptorSet resourceSet = new DescriptorSet(resourceLayoutTex, texture);
                 rsi = new ResourceSetInfo(GetNextImGuiBindingID(), resourceSet);
 
                 _setsByTexture.Add(texture, rsi);
@@ -197,7 +197,7 @@ namespace SharpGame
         {
             if (!_setsByView.TryGetValue(textureView, out ResourceSetInfo rsi))
             {
-                ResourceSet resourceSet = new ResourceSet(resourceLayoutTex, textureView);
+                DescriptorSet resourceSet = new DescriptorSet(resourceLayoutTex, textureView);
                 rsi = new ResourceSetInfo(GetNextImGuiBindingID(), resourceSet);
 
                 _setsByView.Add(textureView, rsi);
@@ -225,7 +225,7 @@ namespace SharpGame
             return (IntPtr)newID;
         }
 
-        public ResourceSet GetImageResourceSet(IntPtr imGuiBinding)
+        public DescriptorSet GetImageResourceSet(IntPtr imGuiBinding)
         {
             if (!_viewsById.TryGetValue(imGuiBinding, out ResourceSetInfo rsi))
             {

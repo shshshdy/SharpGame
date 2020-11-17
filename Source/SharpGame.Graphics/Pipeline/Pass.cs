@@ -230,7 +230,7 @@ namespace SharpGame
             builded_ = true;
             passID = GetID(Name);
 
-            List<ResourceLayout> reslayouts = new List<ResourceLayout>();
+            List<DescriptorSetLayout> reslayouts = new List<DescriptorSetLayout>();
             foreach(var sm in ShaderModels)
             {
                 if(sm != null)
@@ -240,19 +240,19 @@ namespace SharpGame
                     if(sm.ShaderReflection != null && sm.ShaderReflection.descriptorSets != null)
                     {
                         var descriptors = sm.ShaderReflection.descriptorSets;
-                        ResourceLayout currentLayout = null;
+                        DescriptorSetLayout currentLayout = null;
                         foreach (var des in descriptors)
                         {
                             currentLayout = reslayouts.Find((i) => i.Set == des.set);
                             if (currentLayout == null)
                             {
-                                currentLayout = new ResourceLayout(des.set);
+                                currentLayout = new DescriptorSetLayout(des.set);
                                 reslayouts.Add(currentLayout);
                             }
-                            ResourceLayoutBinding resBinding = currentLayout.Bindings.Find((i) => i.binding == des.binding);
+                            DescriptorSetLayoutBinding resBinding = currentLayout.Bindings.Find((i) => i.binding == des.binding);
                             if (resBinding == null)
                             {
-                                resBinding = new ResourceLayoutBinding
+                                resBinding = new DescriptorSetLayoutBinding
                                 {
                                     name = des.name,
                                     binding = des.binding,
@@ -316,7 +316,7 @@ namespace SharpGame
             }
         }
 
-        public ResourceLayout GetResourceLayout(int index)
+        public DescriptorSetLayout GetResourceLayout(int index)
         {
             if(index >= PipelineLayout.ResourceLayout.Length)
             {

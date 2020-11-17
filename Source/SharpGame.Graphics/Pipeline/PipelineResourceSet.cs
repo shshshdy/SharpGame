@@ -20,7 +20,7 @@ namespace SharpGame
     public class PipelineResourceSet : DisposeBase
     {
         [IgnoreDataMember]
-        public ResourceSet[] ResourceSet { get; private set; }
+        public DescriptorSet[] ResourceSet { get; private set; }
 
         public IntPtr pushConstBuffer;
         public int minPushConstRange = 1000;
@@ -37,10 +37,10 @@ namespace SharpGame
         {
             this.pipelineLayout = pipelineLayout;
 
-            ResourceSet = new ResourceSet[pipelineLayout.ResourceLayout.Length];
+            ResourceSet = new DescriptorSet[pipelineLayout.ResourceLayout.Length];
             for(int i = 0; i < pipelineLayout.ResourceLayout.Length; i++)
             {                  
-                ResourceSet[i] = new ResourceSet(pipelineLayout.ResourceLayout[i]);
+                ResourceSet[i] = new DescriptorSet(pipelineLayout.ResourceLayout[i]);
             }
 
             if (pipelineLayout.PushConstantNames != null)
@@ -114,7 +114,7 @@ namespace SharpGame
                     if (binding.name == name)
                     {
                         rs.Bind(binding.binding, tex);
-                        rs.UpdateSets();
+                        rs.UpdateSets(/*binding.binding*/);
                         return;
                     }
                 }

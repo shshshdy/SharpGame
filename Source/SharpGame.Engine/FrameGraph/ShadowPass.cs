@@ -9,7 +9,7 @@ namespace SharpGame
     public struct Cascade
     {
         public Framebuffer frameBuffer;
-        public ResourceSet descriptorSet;
+        public DescriptorSet descriptorSet;
         public ImageView view;
 
         public float splitDepth;
@@ -47,7 +47,7 @@ namespace SharpGame
 
         Shader depthShader;
 
-        ResourceSet vsSet;
+        DescriptorSet vsSet;
 
         FastList<SourceBatch>[] casters = new FastList<SourceBatch>[]
         {
@@ -71,7 +71,7 @@ namespace SharpGame
 
             depthShader = Resources.Instance.Load<Shader>("shaders/shadow.shader");
 
-            vsSet = new ResourceSet(depthShader.Main.GetResourceLayout(0), ubShadow, FrameGraph.TransformBuffer);
+            vsSet = new DescriptorSet(depthShader.Main.GetResourceLayout(0), ubShadow, FrameGraph.TransformBuffer);
 
         }
 
@@ -208,7 +208,7 @@ namespace SharpGame
         }
 
         void DrawBatch(CommandBuffer cb, ulong passID, SourceBatch batch, Span<ConstBlock> pushConsts,
-            ResourceSet resourceSet)
+            DescriptorSet resourceSet)
         {
             var shader = batch.material.Shader;
             if ((passID & shader.passFlags) == 0)

@@ -23,7 +23,7 @@ namespace SharpGame
 
     public class PipelineLayout : DisposeBase
     {
-        public ResourceLayout[] ResourceLayout { get; set; }
+        public DescriptorSetLayout[] ResourceLayout { get; set; }
 
         public PushConstantRange[] PushConstant { get => pushConstant; set { SetPushConstants(value); } }
         private PushConstantRange[] pushConstant;
@@ -39,7 +39,7 @@ namespace SharpGame
         {
         }
 
-        public PipelineLayout(params ResourceLayout[] resourceLayouts)
+        public PipelineLayout(params DescriptorSetLayout[] resourceLayouts)
         {
             ResourceLayout = resourceLayouts;
 
@@ -47,7 +47,7 @@ namespace SharpGame
         }
 
 
-        public ResourceLayoutBinding GetBinding(string name)
+        public DescriptorSetLayoutBinding GetBinding(string name)
         {
             foreach(var layout in ResourceLayout)
             {
@@ -108,7 +108,7 @@ namespace SharpGame
 
                 for (int i = 0; i < ResourceLayout.Length; i++)
                 {
-                    pSetLayouts[i] = ResourceLayout[i].DescriptorSetLayout;
+                    pSetLayouts[i] = ResourceLayout[i].Handle;
                 }
 
                 pipelineLayoutCreateInfo.setLayoutCount = (uint)ResourceLayout.Length;

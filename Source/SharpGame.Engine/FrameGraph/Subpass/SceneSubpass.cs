@@ -12,9 +12,9 @@ namespace SharpGame
     {
         public BlendFlags BlendFlags { get; set; } = BlendFlags.All;
 
-        public ResourceSet Set0 { get; set; }
-        public ResourceSet Set1 { get; set; }
-        public ResourceSet Set2 { get; set; }
+        public DescriptorSet Set0 { get; set; }
+        public DescriptorSet Set1 { get; set; }
+        public DescriptorSet Set2 { get; set; }
 
         public static bool MultiThreaded = false;
 
@@ -107,7 +107,7 @@ namespace SharpGame
         public void DrawScene(CommandBuffer cmd, BlendFlags blendFlags)
         {
             var set0 = Set0 ?? View.Set0;
-            Span<ResourceSet> set1 =  new [] { Set1 ?? View.Set1, Set2 };
+            Span<DescriptorSet> set1 =  new [] { Set1 ?? View.Set1, Set2 };
              
             cmd.SetViewport(View.Viewport);
             cmd.SetScissor(View.ViewRect);
@@ -137,7 +137,7 @@ namespace SharpGame
         }
 
 
-        public void DrawBatches(CommandBuffer cmd, FastList<SourceBatch> batches, ResourceSet set0, Span<ResourceSet> set1)
+        public void DrawBatches(CommandBuffer cmd, FastList<SourceBatch> batches, DescriptorSet set0, Span<DescriptorSet> set1)
         {
             foreach (var batch in batches)
             {
@@ -146,8 +146,8 @@ namespace SharpGame
 
         }
 
-        ResourceSet[] tempSets = new ResourceSet[8];
-        public void DrawBatchesMT(CommandBuffer cmd, FastList<SourceBatch> batches, ResourceSet set0, Span<ResourceSet> set1)
+        DescriptorSet[] tempSets = new DescriptorSet[8];
+        public void DrawBatchesMT(CommandBuffer cmd, FastList<SourceBatch> batches, DescriptorSet set0, Span<DescriptorSet> set1)
         {
             renderTasks.Clear();
 
@@ -162,7 +162,7 @@ namespace SharpGame
                 tempSets[i] = set1[i];
             }
 
-            ArraySegment<ResourceSet> setSegment = new ArraySegment<ResourceSet>(tempSets, 0, set1.Length);
+            ArraySegment<DescriptorSet> setSegment = new ArraySegment<DescriptorSet>(tempSets, 0, set1.Length);
 
             int idx = 0;
             for (int i = 0; i < batches.Count; i += dpPerBatch)
@@ -194,7 +194,7 @@ namespace SharpGame
             tempSets.Clear();
         }
 
-        protected void Draw(CommandBuffer commandBuffer, Span<SourceBatch> sourceBatches, ResourceSet set0, Span<ResourceSet> set1)
+        protected void Draw(CommandBuffer commandBuffer, Span<SourceBatch> sourceBatches, DescriptorSet set0, Span<DescriptorSet> set1)
         {
             foreach (var batch in sourceBatches)
             {

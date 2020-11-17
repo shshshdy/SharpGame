@@ -23,11 +23,11 @@ namespace SharpGame
 
         Geometry quad;
 
-        ResourceLayout deferredLayout0;
-        ResourceLayout deferredLayout1;
+        DescriptorSetLayout deferredLayout0;
+        DescriptorSetLayout deferredLayout1;
 
-        ResourceSet deferredSet0;
-        ResourceSet deferredSet1;
+        DescriptorSet deferredSet0;
+        DescriptorSet deferredSet1;
 
         public HybridRenderer()
         {
@@ -44,18 +44,18 @@ namespace SharpGame
             clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
             quad = GeometryUtil.CreateUnitQuad();
 
-            deferredLayout0 = new ResourceLayout
+            deferredLayout0 = new DescriptorSetLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
             };
 
-            deferredSet0 = new ResourceSet(deferredLayout0, View.ubCameraVS);
+            deferredSet0 = new DescriptorSet(deferredLayout0, View.ubCameraVS);
 
-            deferredLayout1 = new ResourceLayout
+            deferredLayout1 = new DescriptorSetLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-                new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
 
         }
@@ -231,7 +231,7 @@ namespace SharpGame
 #if HWDEPTH
             deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
 #else
-            deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthRT);
+            deferredSet1 = new DescriptorSet(deferredLayout1, albedoRT, normalRT, depthRT);
 #endif
             return new Framebuffer[] { geometryFB, geometryFB, geometryFB };
 
@@ -242,7 +242,7 @@ namespace SharpGame
             var scenePass = graphicsPass as SceneSubpass;
             var pass = clusterDeferred.Main;
 
-            Span<ResourceSet> sets = new []
+            Span<DescriptorSet> sets = new []
             {
                 deferredSet0,
                 resourceSet0,

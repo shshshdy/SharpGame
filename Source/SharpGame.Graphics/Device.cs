@@ -786,7 +786,6 @@ namespace SharpGame
             vkFreeMemory(device, memory, null);
         }
 
-
         public static VkDescriptorPool CreateDescriptorPool(ref VkDescriptorPoolCreateInfo pCreateInfo)
         {
             VulkanUtil.CheckResult(vkCreateDescriptorPool(device, ref pCreateInfo, null, out VkDescriptorPool pDescriptorPool));

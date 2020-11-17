@@ -21,9 +21,9 @@ namespace SharpGame.Samples
         Texture envMap;
         Texture irMap;
 
-        ResourceSet spSet;
-        ResourceSet irSet;
-        ResourceSet brdfLUTSet;
+        DescriptorSet spSet;
+        DescriptorSet irSet;
+        DescriptorSet brdfLUTSet;
 
         Material skyMaterial;
         Material pbrMaterial;
@@ -159,9 +159,9 @@ namespace SharpGame.Samples
                 var specializationInfo = new SpecializationInfo(new SpecializationMapEntry(0, 0, sizeof(uint)));
                 specializationInfo.Write(0, numMipTailLevels);
                 pass.ComputeShader.SpecializationInfo = specializationInfo;
-                ResourceLayout resLayout = pass.GetResourceLayout(0);
+                DescriptorSetLayout resLayout = pass.GetResourceLayout(0);
 
-                spSet = new ResourceSet(resLayout);
+                spSet = new DescriptorSet(resLayout);
 
                 CommandBuffer commandBuffer = Graphics.BeginPrimaryCmd();
 
@@ -235,8 +235,8 @@ namespace SharpGame.Samples
             // Compute diffuse irradiance cubemap
             {
                 Pass pass = shader.GetPass("IrMap");
-                ResourceLayout resLayout = pass.GetResourceLayout(0);
-                irSet = new ResourceSet(resLayout, cubeMap, irMap);
+                DescriptorSetLayout resLayout = pass.GetResourceLayout(0);
+                irSet = new DescriptorSet(resLayout, cubeMap, irMap);
 
                 CommandBuffer commandBuffer = Graphics.BeginPrimaryCmd();
                 {
@@ -257,8 +257,8 @@ namespace SharpGame.Samples
             // Compute Cook-Torrance BRDF 2D LUT for split-sum approximation.
             {
                 var pass = shader.GetPass("BrdfLUT");
-                ResourceLayout resLayout = pass.GetResourceLayout(0);
-                brdfLUTSet = new ResourceSet(resLayout, brdfLUT);
+                DescriptorSetLayout resLayout = pass.GetResourceLayout(0);
+                brdfLUTSet = new DescriptorSet(resLayout, brdfLUT);
 
                 CommandBuffer commandBuffer = Graphics.BeginPrimaryCmd();
                 {

@@ -31,7 +31,7 @@ namespace SharpGame.Samples
 
         private UBO ubo = new UBO();
         private Pass computePipeline;
-        private ResourceSet computeResourceSet;
+        private DescriptorSet computeResourceSet;
 
         private float timer = 0.0f;
         private float animStart = 20.0f;
@@ -91,7 +91,7 @@ namespace SharpGame.Samples
             material.PipelineResourceSet[0].ResourceSet[0].Bind(tex, tex1);
 
             computePipeline = shader.GetPass("compute");
-            computeResourceSet = new ResourceSet(computePipeline.PipelineLayout.ResourceLayout[0], storageBuffer, uniformBuffer);
+            computeResourceSet = new DescriptorSet(computePipeline.PipelineLayout.ResourceLayout[0], storageBuffer, uniformBuffer);
 
             renderer.AddComputePass(Docompute);
             renderer.AddGraphicsPass(DrawQuad);

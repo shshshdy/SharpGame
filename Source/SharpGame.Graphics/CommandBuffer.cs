@@ -110,7 +110,7 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindGraphicsResourceSet(PipelineLayout pipelineLayout, int firstSet, ResourceSet resourceSet, int dynamicOffset = -1)
+        public unsafe void BindGraphicsResourceSet(PipelineLayout pipelineLayout, int firstSet, DescriptorSet resourceSet, int dynamicOffset = -1)
         {
             uint dynamicOffsetCount = 0;
             uint val;
@@ -126,7 +126,7 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindComputeResourceSet(PipelineLayout pipelineLayout, int firstSet, ResourceSet resourceSet, int dynamicOffset = -1)
+        public unsafe void BindComputeResourceSet(PipelineLayout pipelineLayout, int firstSet, DescriptorSet resourceSet, int dynamicOffset = -1)
         {
             uint dynamicOffsetCount = 0;
             uint val;
@@ -143,7 +143,7 @@ namespace SharpGame
 
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindResourceSet(PipelineBindPoint pipelineBindPoint,
-            PipelineLayout pipelineLayout, int set, ResourceSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
+            PipelineLayout pipelineLayout, int set, DescriptorSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
         {
             if(descriptorSets[set] != pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext]
                 || dynamicOffsetCounts[set] != dynamicOffsetCount
@@ -248,7 +248,7 @@ namespace SharpGame
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void DrawGeometry(Geometry geometry, Pass pass, uint subPass, Span<ResourceSet> resourceSet)
+        public unsafe void DrawGeometry(Geometry geometry, Pass pass, uint subPass, Span<DescriptorSet> resourceSet)
         {
             var pipe = pass.GetGraphicsPipeline(renderPass, subPass, geometry);
             BindPipeline(PipelineBindPoint.Graphics, pipe);

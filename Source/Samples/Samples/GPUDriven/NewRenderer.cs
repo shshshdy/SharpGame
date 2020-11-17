@@ -62,8 +62,11 @@ namespace SharpGame.Samples
             
             {
                 var node = scene.CreateChild("Plane");
-                var staticModel = node.AddComponent<StaticModel>();
-                var model = GeometryUtil.CreatePlaneModel(100, 100, 32, 32, true);
+                var staticModel = node.AddComponent<StaticModel>(); 
+                //importer.scale = 25;
+                var model = 
+                    //importer.Load("models/vegetation/plane_circle.dae");
+                GeometryUtil.CreatePlaneModel(100, 100, 32, 32, true);
                 staticModel.SetModel(model);
                 var mat = Resources.Load<Material>("materials/Grass.material");
                 mat.SetTexture("NormalMap", Texture.Blue);

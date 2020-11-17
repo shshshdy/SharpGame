@@ -6,11 +6,11 @@ namespace SharpGame
 {
     public partial class ClusterRenderer : RenderPipeline
     {
-        private ResourceLayout computeLayout0;
-        private ResourceLayout computeLayout1;
+        private DescriptorSetLayout computeLayout0;
+        private DescriptorSetLayout computeLayout1;
 
-        private ResourceSet computeSet0;
-        private ResourceSet computeSet1;
+        private DescriptorSet computeSet0;
+        private DescriptorSet computeSet1;
         PipelineLayout pipelineLayout;
 
         protected Shader clusterLight;
@@ -18,28 +18,28 @@ namespace SharpGame
         {
             clusterLight = Resources.Instance.Load<Shader>("Shaders/ClusterLight.shader");
 
-            computeLayout0 = new ResourceLayout
+            computeLayout0 = new DescriptorSetLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
             };
 
-            computeLayout1 = new ResourceLayout
+            computeLayout1 = new DescriptorSetLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new ResourceLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
             };
 
-            computeSet0 = new ResourceSet(computeLayout0, uboCluster, light_pos_ranges);
+            computeSet0 = new DescriptorSet(computeLayout0, uboCluster, light_pos_ranges);
 
             pipelineLayout = new PipelineLayout(computeLayout0, computeLayout1);
 
-            computeSet1 = new ResourceSet(computeLayout1,
+            computeSet1 = new DescriptorSet(computeLayout1,
                 gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
                 gridLightCountOffsets, lightList, gridLightCountsCompare);
         }

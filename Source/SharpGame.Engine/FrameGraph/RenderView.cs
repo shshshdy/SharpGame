@@ -63,14 +63,14 @@ namespace SharpGame
         internal SharedBuffer ubCameraPS;
         internal Buffer ubLight;
 
-        private ResourceLayout vsResLayout;
+        private DescriptorSetLayout vsResLayout;
 
-        public ResourceSet Set0 => vsResourceSet;
-        ResourceSet vsResourceSet;
+        public DescriptorSet Set0 => vsResourceSet;
+        DescriptorSet vsResourceSet;
 
-        private ResourceLayout psResLayout;
-        public ResourceSet Set1 => psResourceSet;
-        ResourceSet psResourceSet;
+        private DescriptorSetLayout psResLayout;
+        public DescriptorSet Set1 => psResourceSet;
+        DescriptorSet psResourceSet;
 
         Graphics Graphics => Graphics.Instance;
         FrameGraph FrameGraph => FrameGraph.Instance;
@@ -134,22 +134,22 @@ namespace SharpGame
             ubCameraPS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraPS>());
             ubLight = Buffer.CreateUniformBuffer<LightParameter>();
 
-            vsResLayout = new ResourceLayout
+            vsResLayout = new DescriptorSetLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-                new ResourceLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                new DescriptorSetLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
             };
 
-            vsResourceSet = new ResourceSet(vsResLayout, ubCameraVS, FrameGraph.TransformBuffer);
+            vsResourceSet = new DescriptorSet(vsResLayout, ubCameraVS, FrameGraph.TransformBuffer);
 
-            psResLayout = new ResourceLayout(1)
+            psResLayout = new DescriptorSetLayout(1)
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
             };
 
-            psResourceSet = new ResourceSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);
+            psResourceSet = new DescriptorSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);
 
         }
 

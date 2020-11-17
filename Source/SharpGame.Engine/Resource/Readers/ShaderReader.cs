@@ -222,9 +222,9 @@ namespace SharpGame
             return pass;
         }
 
-        ResourceLayout[] ReadResourceLayout(List<AstNode> layout)
+        DescriptorSetLayout[] ReadResourceLayout(List<AstNode> layout)
         {
-            List<ResourceLayout> layouts = new List<ResourceLayout>();
+            List<DescriptorSetLayout> layouts = new List<DescriptorSetLayout>();
             foreach(var node in layout)
             {
                 var resLayout = ReadResourceLayout(node);
@@ -234,14 +234,14 @@ namespace SharpGame
             return layouts.ToArray(); ;
         }
 
-        ResourceLayout ReadResourceLayout(AstNode node)
+        DescriptorSetLayout ReadResourceLayout(AstNode node)
         {
-            ResourceLayout layout = new ResourceLayout();            
+            DescriptorSetLayout layout = new DescriptorSetLayout();            
             node.GetChild("ResourceLayoutBinding", out var resourceLayoutBinding);
 
             foreach(var c in resourceLayoutBinding)
             {
-                ResourceLayoutBinding binding = new ResourceLayoutBinding
+                DescriptorSetLayoutBinding binding = new DescriptorSetLayoutBinding
                 {
                     binding = (uint)layout.Bindings.Count
                 };

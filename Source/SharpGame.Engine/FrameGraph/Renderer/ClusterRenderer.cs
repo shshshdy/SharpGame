@@ -86,13 +86,13 @@ namespace SharpGame
         private Buffer lightList;
         private Buffer gridLightCountsCompare;
 
-        protected ResourceLayout resourceLayout0;
-        protected ResourceLayout resourceLayout1;
-        protected ResourceLayout clusterLayout1;
+        protected DescriptorSetLayout resourceLayout0;
+        protected DescriptorSetLayout resourceLayout1;
+        protected DescriptorSetLayout clusterLayout1;
 
-        protected ResourceSet resourceSet0;
-        protected ResourceSet resourceSet1;
-        protected ResourceSet clusterSet1;
+        protected DescriptorSet resourceSet0;
+        protected DescriptorSet resourceSet1;
+        protected DescriptorSet clusterSet1;
 
         protected QueryPool[] query_pool = new QueryPool[3];
         protected QueryData[] queryData = new QueryData[3];
@@ -162,36 +162,36 @@ namespace SharpGame
             lightList = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light idx
             gridLightCountsCompare = Buffer.CreateTexelBuffer(BufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
 
-            resourceLayout0 = new ResourceLayout
+            resourceLayout0 = new DescriptorSetLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
             };
 
-            resourceLayout1 = new ResourceLayout
+            resourceLayout1 = new DescriptorSetLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
             };
 
-            resourceSet0 = new ResourceSet(resourceLayout0, uboCluster, light_pos_ranges, light_colors);
-            resourceSet1 = new ResourceSet(resourceLayout1,
+            resourceSet0 = new DescriptorSet(resourceLayout0, uboCluster, light_pos_ranges, light_colors);
+            resourceSet1 = new DescriptorSet(resourceLayout1,
                 gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
                 gridLightCountOffsets, lightList, gridLightCountsCompare);
 
-            clusterLayout1 = new ResourceLayout
+            clusterLayout1 = new DescriptorSetLayout
             {
-                new ResourceLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new ResourceLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
             };
 
-            clusterSet1 = new ResourceSet(clusterLayout1, uboCluster, gridFlags);
+            clusterSet1 = new DescriptorSet(clusterLayout1, uboCluster, gridFlags);
         }
 
         protected RenderPass OnCreateClusterRenderPass()

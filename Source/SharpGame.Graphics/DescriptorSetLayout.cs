@@ -23,7 +23,7 @@ namespace SharpGame
         InlineUniformBlockExt = 1000138000,
     }
 
-    public class ResourceLayoutBinding
+    public class DescriptorSetLayoutBinding
     {
         public string name;
         public uint binding;
@@ -34,11 +34,11 @@ namespace SharpGame
 
         public bool IsTexture => descriptorType == DescriptorType.CombinedImageSampler;
 
-        public ResourceLayoutBinding()
+        public DescriptorSetLayoutBinding()
         {
         }
 
-        public ResourceLayoutBinding(uint binding, DescriptorType type, ShaderStage stageFlags, uint descriptorCount = 1)
+        public DescriptorSetLayoutBinding(uint binding, DescriptorType type, ShaderStage stageFlags, uint descriptorCount = 1)
         {
             descriptorType = type;
             this.binding = binding;
@@ -57,15 +57,15 @@ namespace SharpGame
         PBR = 4,
     }
 
-    public class ResourceLayout : DisposeBase, IEnumerable<ResourceLayoutBinding>
+    public class DescriptorSetLayout : DisposeBase, IEnumerable<DescriptorSetLayoutBinding>
     {
         public int Set { get; set; }
-        public List<ResourceLayoutBinding> Bindings { get; set; } = new List<ResourceLayoutBinding>();
+        public List<DescriptorSetLayoutBinding> Bindings { get; set; } = new List<DescriptorSetLayoutBinding>();
 
         private VkDescriptorSetLayoutBinding[] bindings;
 
         private VkDescriptorSetLayout descriptorSetLayout;
-        internal ref VkDescriptorSetLayout DescriptorSetLayout
+        internal ref VkDescriptorSetLayout Handle
         {
             get
             {
@@ -78,18 +78,18 @@ namespace SharpGame
         internal int NumBindings => Bindings.Count;
         private bool needRebuild = true;
 
-        public ResourceLayout(int set = 0)
+        public DescriptorSetLayout(int set = 0)
         {
             Set = set;
         }
 
-        public ResourceLayout(params ResourceLayoutBinding[] bindings)
+        public DescriptorSetLayout(params DescriptorSetLayoutBinding[] bindings)
         {
-            Bindings = new List<ResourceLayoutBinding>(bindings);
+            Bindings = new List<DescriptorSetLayoutBinding>(bindings);
             Build();
         }
         
-        public unsafe ResourceLayout Build()
+        public unsafe DescriptorSetLayout Build()
         {
             if(!needRebuild)
             {
@@ -127,7 +127,7 @@ namespace SharpGame
             return this;
         }
 
-        public IEnumerator<ResourceLayoutBinding> GetEnumerator()
+        public IEnumerator<DescriptorSetLayoutBinding> GetEnumerator()
         {
             return Bindings.GetEnumerator();
         }
@@ -150,18 +150,18 @@ namespace SharpGame
             return false;
         }
 
-        public void Add(ResourceLayoutBinding binding)
+        public void Add(DescriptorSetLayoutBinding binding)
         {
             if(Bindings == null)
             {
-                Bindings = new List<ResourceLayoutBinding>();
+                Bindings = new List<DescriptorSetLayoutBinding>();
             }
 
             Bindings.Add(binding);
             needRebuild = true;
         }
 
-        public ResourceLayoutBinding GetBinding(string name)
+        public DescriptorSetLayoutBinding GetBinding(string name)
         {
             foreach(var binding in Bindings)
             {
