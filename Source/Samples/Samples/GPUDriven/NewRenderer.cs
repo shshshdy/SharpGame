@@ -83,7 +83,6 @@ namespace SharpGame.Samples
                 var model = importer.Load("models/vegetation/plants.dae");
                 staticModel.SetModel(model);
 
-                //var shader = new Shader("shaders/LitSolid.shader");
                 var mat = new Material("shaders/IndirectDraw.shader");
                 mat.Shader.Main.VertexLayout = new VertexLayout(importer.vertexComponents, 
                     new[]{ VertexComponent.Float3, VertexComponent.Float3, VertexComponent.Float1, VertexComponent.Int1 });
@@ -92,7 +91,7 @@ namespace SharpGame.Samples
                 staticModel.SetMaterial(mat);
             }
 
-            MainView.Attach(camera, scene/*, renderer*/);
+            MainView.Attach(camera, scene, renderer);
 
         }
 

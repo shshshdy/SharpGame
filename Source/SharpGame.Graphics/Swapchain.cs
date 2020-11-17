@@ -12,7 +12,7 @@ namespace SharpGame
     {
         public VkSurfaceKHR Surface { get; private set; }
         public uint QueueNodeIndex { get; private set; } = uint.MaxValue;
-        public Extent3D swapchainExtent;
+        public Extent3D extent;
         public Format ColorFormat { get; private set; }
         public VkColorSpaceKHR ColorSpace { get; private set; }
         public VkSwapchainKHR swapchain;
@@ -219,22 +219,22 @@ namespace SharpGame
                 Debug.Assert(err == VkResult.Success);
                 presentModes.Count = presentModeCount;
 
-                swapchainExtent.depth = 1;
+                extent.depth = 1;
                 // If width (and height) equals the special value 0xFFFFFFFF, the size of the Surface will be set by the swapchain
                 if (surfCaps.currentExtent.width == unchecked((uint)-1))
                 {
                     // If the Surface size is undefined, the size is set to
                     // the size of the Images requested.
-                    swapchainExtent.width = width;
-                    swapchainExtent.height = height;
+                    extent.width = width;
+                    extent.height = height;
                 }
                 else
                 {
                     width = surfCaps.currentExtent.width;
                     height = surfCaps.currentExtent.height;
                     // If the Surface size is defined, the swap chain size must match
-                    swapchainExtent.width = width;
-                    swapchainExtent.height = height;
+                    extent.width = width;
+                    extent.height = height;
                 }
 
 
@@ -288,7 +288,7 @@ namespace SharpGame
                 swapchainCI.minImageCount = desiredNumberOfSwapchainImages;
                 swapchainCI.imageFormat = (VkFormat)ColorFormat;
                 swapchainCI.imageColorSpace = ColorSpace;
-                swapchainCI.imageExtent = new VkExtent2D() { width = swapchainExtent.width, height = swapchainExtent.height };
+                swapchainCI.imageExtent = new VkExtent2D() { width = extent.width, height = extent.height };
                 swapchainCI.imageUsage = VkImageUsageFlags.ColorAttachment;
                 swapchainCI.preTransform = preTransform;
                 swapchainCI.imageArrayLayers = 1;
@@ -340,7 +340,7 @@ namespace SharpGame
                     Images[i] = new Image(VkImages[i])
                     {
                         imageType = ImageType.Image2D,
-                        extent = swapchainExtent
+                        extent = extent
                     };
                     ImageViews[i] = ImageView.Create(Images[i], ImageViewType.Image2D, ColorFormat, ImageAspectFlags.Color, 0, 1);
                 }

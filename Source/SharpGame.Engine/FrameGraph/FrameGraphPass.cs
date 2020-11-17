@@ -96,13 +96,12 @@ namespace SharpGame
 
         protected virtual void CreateRenderTargets()
         {
-
             if (frameBufferCreator != null)
             {
                 framebuffers = frameBufferCreator.Invoke(RenderPass);
             }
             else
-            {/*
+            {
                 renderTarget = new RenderTarget();
 
                 foreach(var rtInfo in renderTextureInfos)
@@ -115,11 +114,14 @@ namespace SharpGame
                 {
                     var attachments = renderTarget.GetViews(i);
                     framebuffers[i] = new Framebuffer(RenderPass, renderTarget.extent.width, renderTarget.extent.height, 1, attachments);
-                }*/
+                }
 
-                framebuffers = Graphics.Framebuffers;
             }
 
+            if (framebuffers == null)
+            {
+                framebuffers = Graphics.Framebuffers;
+            }
         }
 
         protected virtual void CreateRenderPass()

@@ -6,13 +6,22 @@ using Vulkan;
 
 namespace SharpGame
 {
+    public struct Primitive
+    {
+        public Buffer vertexBuffer;
+        public Buffer IndexBuffer;
+        public uint start;
+        public uint count;
+        public int vertexOffset;
+    }
+
     public class Geometry
     {
         public string Name { get; set; }
-        public Buffer VertexBuffer { get; set; }  
-        public Buffer IndexBuffer { get; set; }
         public VertexLayout VertexLayout { get; set; }
         public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
+        public Buffer VertexBuffer { get; set; }
+        public Buffer IndexBuffer { get; set; }
         public uint VertexStart { get; set; }
         public uint VertexCount { get; set; }
         public uint IndexStart { get; set; }
