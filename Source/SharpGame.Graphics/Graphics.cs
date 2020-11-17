@@ -99,10 +99,8 @@ namespace SharpGame
             Swapchain = new Swapchain(wnd);
 
             CreateSwapChain();
-            CreateDepthStencil();
-            CreateDefaultRenderPass();
-            CreateFrameBuffer();
-            CreateCommandPool();
+
+            primaryCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
 
             Texture.Init();
             Sampler.Init();
@@ -131,7 +129,6 @@ namespace SharpGame
             Width = (uint)w;
             Height = (uint)h;
 
-            // Ensure all operations on the device have been finished before destroying resources
             WaitIdle();
 
             foreach(var rf in renderFrames)
@@ -140,17 +137,11 @@ namespace SharpGame
             }
 
             CreateSwapChain();
-            // Recreate the frame buffers
-            CreateDepthStencil();
-
-            CreateDefaultRenderPass();
-            CreateFrameBuffer();
 
             foreach (var rf in renderFrames)
             {
                 rf.DeviceReset();
             }
-
 
         }
 
@@ -174,6 +165,10 @@ namespace SharpGame
 
             Width = width;
             Height = height;
+
+            CreateDepthStencil();
+            CreateDefaultRenderPass();
+            CreateFrameBuffer();
         }
 
         public void CreateDefaultRenderPass()
@@ -326,7 +321,7 @@ namespace SharpGame
             var framebuffers = new Framebuffer[Swapchain.ImageCount];
             for (uint i = 0; i < framebuffers.Length; i++)
             {
-                attachments[0] = Swapchain.Buffers[i].View.handle;
+                attachments[0] = Swapchain.ImageViews[i].handle;
                 framebuffers[i] = new Framebuffer(ref frameBufferCreateInfo);
             }
 
@@ -340,11 +335,6 @@ namespace SharpGame
                 /*,ImageAspectFlags.Depth | ImageAspectFlags.Stencil*/);
         }
 
-        private void CreateCommandPool()
-        {
-            primaryCmdPool = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
-        }
-        
         public static void WithCommandBuffer(Action<CommandBuffer> action)
         {
             var cmdBuffer = BeginPrimaryCmd();

@@ -13,10 +13,7 @@ namespace SharpGame
         public Image image;
         public ImageView imageView;
         public Sampler sampler;
-
-        public uint width;
-        public uint height;
-        public uint depth;
+        public Extent3D extent;
         public uint layers;
         public uint faceCount;
         public uint mipLevels;
@@ -31,6 +28,10 @@ namespace SharpGame
         public Texture()
         {
         }
+
+        public ref uint width => ref extent.width;
+        public ref uint height => ref extent.height;
+        public ref uint depth => ref extent.depth;
 
         public unsafe void SetImageData(MipmapLevel[] imageData)
         {

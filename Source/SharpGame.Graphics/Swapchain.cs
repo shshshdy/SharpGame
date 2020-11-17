@@ -8,23 +8,19 @@ using static SharpGame.Sdl2.Sdl2Native;
 
 namespace SharpGame
 {
-    public struct SwapChainBuffer
-    {
-        public Image Image;
-        public ImageView View;
-    }
-
     public class Swapchain
     {
         public VkSurfaceKHR Surface { get; private set; }
         public uint QueueNodeIndex { get; private set; } = uint.MaxValue;
+        public Extent3D swapchainExtent;
         public Format ColorFormat { get; private set; }
         public VkColorSpaceKHR ColorSpace { get; private set; }
         public VkSwapchainKHR swapchain;
         public uint ImageCount { get; private set; }
-        public NativeList<VkImage> Images { get; set; } = new NativeList<VkImage>();
-        public SwapChainBuffer[] Buffers { get; set; }
-        
+        public NativeList<VkImage> VkImages { get; private set; } = new NativeList<VkImage>();
+        public Image[] Images { get; private set; }
+        public ImageView[] ImageViews { get; private set; }
+
         public const uint IMAGE_COUNT = 3;
 
         public unsafe Swapchain(IntPtr sdlWindow)
@@ -223,7 +219,7 @@ namespace SharpGame
                 Debug.Assert(err == VkResult.Success);
                 presentModes.Count = presentModeCount;
 
-                VkExtent2D swapchainExtent;
+                swapchainExtent.depth = 1;
                 // If width (and height) equals the special value 0xFFFFFFFF, the size of the Surface will be set by the swapchain
                 if (surfCaps.currentExtent.width == unchecked((uint)-1))
                 {
@@ -234,10 +230,11 @@ namespace SharpGame
                 }
                 else
                 {
-                    // If the Surface size is defined, the swap chain size must match
-                    swapchainExtent = surfCaps.currentExtent;
                     width = surfCaps.currentExtent.width;
                     height = surfCaps.currentExtent.height;
+                    // If the Surface size is defined, the swap chain size must match
+                    swapchainExtent.width = width;
+                    swapchainExtent.height = height;
                 }
 
 
@@ -320,7 +317,7 @@ namespace SharpGame
                 {
                     for (uint i = 0; i < ImageCount; i++)
                     {
-                        Buffers[i].View.Dispose();
+                        ImageViews[i].Dispose();
                     }
 
                     Device.DestroySwapchainKHR(oldSwapchain);
@@ -331,17 +328,21 @@ namespace SharpGame
 
                 ImageCount = imageCount;
                 // Get the swap chain Images
-                Images.Resize(imageCount);
+                VkImages.Resize(imageCount);
 
-                Device.GetSwapchainImagesKHR(swapchain, &imageCount, (VkImage*)Images.Data.ToPointer());
+                Device.GetSwapchainImagesKHR(swapchain, &imageCount, (VkImage*)VkImages.Data.ToPointer());
               
                 // Get the swap chain Buffers containing the image and imageview
-                Buffers = new SwapChainBuffer[(int)imageCount];
+                Images = new Image[(int)imageCount];
+                ImageViews = new ImageView[(int)imageCount];
                 for (int i = 0; i < imageCount; i++)
-                {                  
-                    var img = new Image(Images[i]);
-                    Buffers[i].Image = img;
-                    Buffers[i].View = ImageView.Create(img, ImageViewType.Image2D, ColorFormat, ImageAspectFlags.Color, 0, 1);
+                {                 
+                    Images[i] = new Image(VkImages[i])
+                    {
+                        imageType = ImageType.Image2D,
+                        extent = swapchainExtent
+                    };
+                    ImageViews[i] = ImageView.Create(Images[i], ImageViewType.Image2D, ColorFormat, ImageAspectFlags.Color, 0, 1);
                 }
             }
         }

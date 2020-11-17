@@ -36,6 +36,25 @@ namespace SharpGame
 
         internal VkFramebuffer handle;
 
+        public Framebuffer(RenderPass renderPass, uint width, uint height, uint layers, VkImageView[] attachments, uint flags = 0)
+        {
+            this.renderPass = renderPass;
+            Width = width;
+            Height = height;
+            unsafe
+            {
+                var framebufferCreateInfo = VkFramebufferCreateInfo.New();
+                framebufferCreateInfo.flags = flags;
+                framebufferCreateInfo.renderPass = renderPass.handle;
+                framebufferCreateInfo.attachmentCount = (uint)attachments.Length;
+                framebufferCreateInfo.pAttachments = (VkImageView*)Unsafe.AsPointer(ref attachments[0]);
+                framebufferCreateInfo.width = width;
+                framebufferCreateInfo.height = height;
+                framebufferCreateInfo.layers = layers;
+                handle = Device.CreateFramebuffer(ref framebufferCreateInfo);
+            }
+        }
+
         public Framebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
         {
             renderPass = framebufferCreateInfo.renderPass;

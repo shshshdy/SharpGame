@@ -15,22 +15,14 @@ namespace SharpGame
 
         public VkImageView handle;
 
-        DescriptorImageInfo descriptor;
-
-        internal ref DescriptorImageInfo Descriptor
-        {
-            get
-            {
-                descriptor = new DescriptorImageInfo(Sampler.ClampToEdge, this, ImageLayout.ShaderReadOnlyOptimal);
-                return ref descriptor;
-            }
-        }
+        public DescriptorImageInfo descriptor;
 
         public ImageView(ref ImageViewCreateInfo imageViewCreateInfo)
         {
             imageViewCreateInfo.ToNative(out VkImageViewCreateInfo native);
             handle = Device.CreateImageView(ref native);
             Image = imageViewCreateInfo.image;
+            descriptor = new DescriptorImageInfo(Sampler.ClampToEdge, this, ImageLayout.ShaderReadOnlyOptimal);
         }
 
         protected override void Destroy(bool disposing)

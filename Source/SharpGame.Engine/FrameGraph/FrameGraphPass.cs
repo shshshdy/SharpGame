@@ -14,7 +14,9 @@ namespace SharpGame
         public FrameGraph FrameGraph => FrameGraph.Instance;
         public string Name { get; }
         public SubmitQueue Queue { get; set; } = SubmitQueue.Graphics;
-        public RenderTextureInfo[] Attachments { get; set; }
+        
+        public List<RenderTextureInfo> renderTextureInfos = new List<RenderTextureInfo>();
+
         public RenderTarget renderTarget;
         public RenderPass RenderPass { get; set; }
         public bool UseSecondCmdBuffer { get; set; } = false;
@@ -41,6 +43,8 @@ namespace SharpGame
 
         public Func<RenderPass> renderPassCreator { get; set; }
         public Func<RenderPass, Framebuffer[]> frameBufferCreator { get; set; }
+
+        AttachmentDescription[] attachmentDescription;
 
         public FrameGraphPass()
         {
@@ -92,12 +96,27 @@ namespace SharpGame
 
         protected virtual void CreateRenderTargets()
         {
+
             if (frameBufferCreator != null)
             {
                 framebuffers = frameBufferCreator.Invoke(RenderPass);
             }
             else
-            {
+            {/*
+                renderTarget = new RenderTarget();
+
+                foreach(var rtInfo in renderTextureInfos)
+                {
+                    renderTarget.Add(rtInfo);
+                }
+
+                framebuffers = new Framebuffer[Swapchain.IMAGE_COUNT];
+                for (int i = 0; i < framebuffers.Length; i++)
+                {
+                    var attachments = renderTarget.GetViews(i);
+                    framebuffers[i] = new Framebuffer(RenderPass, renderTarget.extent.width, renderTarget.extent.height, 1, attachments);
+                }*/
+
                 framebuffers = Graphics.Framebuffers;
             }
 
@@ -233,6 +252,18 @@ namespace SharpGame
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable<Subpass>)subpasses).GetEnumerator();
+        }
+
+        public void Add(object obj)
+        {
+            if(obj is RenderTextureInfo rt)
+            {
+                renderTextureInfos.Add(rt);
+            }
+            else if(obj is Subpass subpass)
+            {
+                Add(subpass);
+            }
         }
 
     }

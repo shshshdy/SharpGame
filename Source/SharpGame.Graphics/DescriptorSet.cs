@@ -149,6 +149,19 @@ namespace SharpGame
             return this;
         }
 
+        public DescriptorSet Bind(uint dstBinding, RenderTexture rt)
+        {
+            var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
+            for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
+            {
+                writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
+                               descriptorType, ref rt.attachmentViews[img].descriptor, 1);
+                updated[img][dstBinding] = false;
+            }
+
+            return this;
+        }
+
         public DescriptorSet Bind(uint dstBinding, ref VkDescriptorBufferInfo bufferInfo)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
@@ -213,13 +226,17 @@ namespace SharpGame
                 case DescriptorType.InputAttachment:
                 case DescriptorType.CombinedImageSampler:
                     {
-                        if(bindable is Texture texture)
+                        if (bindable is RenderTexture rt)
+                        {
+                            Bind(dstBinding, rt);
+                        }
+                        else if (bindable is Texture texture)
                         {
                             Bind(dstBinding, ref texture.descriptor);
                         }
                         else if(bindable is ImageView textureView)
                         {
-                            Bind(dstBinding, ref textureView.Descriptor);
+                            Bind(dstBinding, ref textureView.descriptor);
                         }
                         else
                         {

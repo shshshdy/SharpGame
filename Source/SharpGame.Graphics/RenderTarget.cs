@@ -5,7 +5,7 @@ using Vulkan;
 
 namespace SharpGame
 {
-    public struct RenderTextureInfo
+    public class RenderTextureInfo
     {
         public uint width;
         public uint height;
@@ -15,31 +15,38 @@ namespace SharpGame
         public ImageAspectFlags aspectMask;
         public SampleCountFlags samples;
         public ImageLayout imageLayout;
-        public bool isSwapchain;
+        public Swapchain swapchain;
+
+        public RenderTextureInfo(Swapchain swapchain)
+        {
+            this.swapchain = swapchain;
+        }
+
+        public RenderTextureInfo(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, //ImageAspectFlags aspectMask,
+            SampleCountFlags samples = SampleCountFlags.Count1, ImageLayout imageLayout = ImageLayout.Undefined)
+        {
+            this.width = width;
+            this.height = height;
+            this.layers = layers;
+            this.format = format;
+            this.usage = usage;
+            this.aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;// aspectMask;
+            this.samples = samples;
+            this.imageLayout = imageLayout;
+        }
     }
 
     public class RenderTexture : Texture
     {
         public ImageAspectFlags aspectMask;
         public SampleCountFlags samples;
-        public bool isSwapchain;
+        Swapchain swapchain;
+        public ImageView[] attachmentViews;
+        public bool IsSwapchain => swapchain != null;
 
-        public RenderTexture(Image swapchainImage)
+        public RenderTexture(Swapchain swapchain)
         {
-            this.width = swapchainImage.extent.width;
-            this.height = swapchainImage.extent.height;
-            this.layers = 1;
-            this.format = swapchainImage.format;
-            this.imageUsageFlags = ImageUsageFlags.ColorAttachment;
-            this.aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;
-            this.samples = SampleCountFlags.Count1;
-            this.imageLayout = ImageLayout.ColorAttachmentOptimal;
-            this.isSwapchain = true;
-            this.image = swapchainImage;
-
-            imageView = ImageView.Create(image, layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
-            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
-            descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
+            Create(swapchain);
         }
         
         public RenderTexture(uint width, uint height, uint layers, Format format, ImageUsageFlags usage, //ImageAspectFlags aspectMask,
@@ -53,7 +60,6 @@ namespace SharpGame
             this.aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;// aspectMask;
             this.samples = samples;
             this.imageLayout = imageLayout;
-            this.isSwapchain = false;
 
             Create();
         }
@@ -63,20 +69,52 @@ namespace SharpGame
             Create(info);
         }
 
-        void Create(in RenderTextureInfo info)
+        protected override void Destroy(bool disposing)
         {
-            this.width = info.width;
-            this.height = info.height;
-            this.layers = info.layers;
-            this.format = info.format;
-            this.imageUsageFlags = info.usage;
-            this.aspectMask = info.aspectMask;
-            this.samples = info.samples;
-            this.imageLayout = info.imageLayout;
-            this.isSwapchain = info.isSwapchain;
+            base.Destroy(disposing);
+            
+            swapchain = null;
 
-            Create();
+            Array.Clear(attachmentViews, 0, attachmentViews.Length);
         }
+
+        public void Create(in RenderTextureInfo info)
+        {
+            if (info.swapchain != null)
+                Create(info.swapchain);
+            else
+            {
+                this.width = info.width;
+                this.height = info.height;
+                this.layers = info.layers;
+                this.format = info.format;
+                this.imageUsageFlags = info.usage;
+                this.aspectMask = info.aspectMask;
+                this.samples = info.samples;
+                this.imageLayout = info.imageLayout;
+
+                Create();
+            }
+        }
+
+        void Create(Swapchain swapchain)
+        {
+            this.swapchain = swapchain;
+            var swapchainImage = swapchain.Images;
+            this.extent = swapchain.swapchainExtent;
+            this.layers = 1;
+            this.format = swapchainImage[0].format;
+            this.imageUsageFlags = ImageUsageFlags.ColorAttachment;
+            this.aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;
+            this.samples = SampleCountFlags.Count1;
+            this.imageLayout = ImageLayout.ColorAttachmentOptimal;
+
+            attachmentViews = swapchain.ImageViews;
+
+            //sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+            //descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
+        }
+
 
         protected void Create()
         {
@@ -84,12 +122,61 @@ namespace SharpGame
             imageView = ImageView.Create(image, layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
             descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
+            attachmentViews = new ImageView[Swapchain.IMAGE_COUNT];
+            Array.Fill(attachmentViews, imageView);
         }
     }
 
     public class RenderTarget
     {
-        public List<RenderTexture> attachments;
+        public Extent3D extent;
+        public List<RenderTexture> attachments = new List<RenderTexture>();
+        public RenderTarget()
+        {
+        }
+
+        public RenderTexture this[int index] => attachments[index];
+        public uint AttachmentCount => (uint)attachments.Count;
+
+        public void Add(in RenderTextureInfo info)
+        {
+            Add(new RenderTexture(info));
+        }
+
+        public void Add(RenderTexture rt)
+        {
+            if (extent.width == 0 || extent.height == 0)
+            {
+                extent = rt.extent;
+            }
+            else
+            {
+                Debug.Assert(extent == rt.extent);
+            }
+
+            attachments.Add(rt);
+
+        }
+
+        public VkImageView[] GetViews(int imageIndex)
+        {
+            var views = new VkImageView[Swapchain.IMAGE_COUNT];
+            for(int i = 0; i < AttachmentCount; i++)
+            {
+                views[i] = this[i].attachmentViews[imageIndex].handle;
+            }
+
+            return views;
+        }
+
+        public void Clear()
+        {
+            foreach(var attachment in attachments)
+            {
+                attachment?.Dispose();
+            }
+        }
+
     }
 
 }

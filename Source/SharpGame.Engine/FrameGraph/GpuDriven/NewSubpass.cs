@@ -20,9 +20,9 @@ namespace SharpGame
         {
             var set0 = Set0 ?? View.Set0;
             Span<DescriptorSet> set1 = new[] { Set1 ?? View.Set1, Set2 };
-
-            cmd.SetViewport(View.Viewport);
-            cmd.SetScissor(View.ViewRect);
+// 
+//             cmd.SetViewport(View.Viewport);
+//             cmd.SetScissor(View.ViewRect);
 
             DrawBatches(cmd, View.opaqueBatches.AsSpan(), set0, set1);
    

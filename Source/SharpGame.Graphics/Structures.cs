@@ -98,6 +98,33 @@ namespace SharpGame
             this.height = h;
             this.depth = depth;
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Extent3D d &&
+                   width == d.width &&
+                   height == d.height &&
+                   depth == d.depth;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 1868473867;
+            hashCode = hashCode * -1521134295 + width.GetHashCode();
+            hashCode = hashCode * -1521134295 + height.GetHashCode();
+            hashCode = hashCode * -1521134295 + depth.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator==(in Extent3D left, in Extent3D right)
+        {
+            return left.width == right.width && left.height == right.height && left.depth == right.depth;
+        }
+
+        public static bool operator !=(in Extent3D left, in Extent3D right)
+        {
+            return !(left == right);
+        }
     }
 
     public struct Offset3D
@@ -111,6 +138,33 @@ namespace SharpGame
             this.x = x;
             this.y = y;
             this.z = z;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Offset3D d &&
+                   x == d.x &&
+                   y == d.y &&
+                   z == d.z;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 373119288;
+            hashCode = hashCode * -1521134295 + x.GetHashCode();
+            hashCode = hashCode * -1521134295 + y.GetHashCode();
+            hashCode = hashCode * -1521134295 + z.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator ==(in Offset3D left, in Offset3D right)
+        {
+            return left.x == right.x && left.y == right.y && left.z == right.z;
+        }
+
+        public static bool operator !=(in Offset3D left, in Offset3D right)
+        {
+            return !(left == right);
         }
     }
 }

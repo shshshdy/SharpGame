@@ -12,7 +12,7 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = -6)]
     public class NewRenderer : Sample
     {
-        RenderPipeline renderer = new RenderPipeline();
+        RenderPipeline renderer = new NewRenderPipeline();
 
         public override void Init()
         {
@@ -92,7 +92,7 @@ namespace SharpGame.Samples
                 staticModel.SetMaterial(mat);
             }
 
-            MainView.Attach(camera, scene);
+            MainView.Attach(camera, scene/*, renderer*/);
 
         }
 
