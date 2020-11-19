@@ -32,7 +32,7 @@ namespace SharpGame
                     var depthFormat = Device.GetSupportedDepthFormat();
                     depthRT = new RenderTexture(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, //ImageAspectFlags.Depth,
-                        SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal);
+                        SampleCountFlags.Count1/*, ImageLayout.DepthStencilReadOnlyOptimal*/);
                 }
 
                 return depthRT;

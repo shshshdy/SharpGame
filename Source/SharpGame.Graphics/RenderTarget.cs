@@ -10,37 +10,43 @@ namespace SharpGame
         public uint width;
         public uint height;
         public uint layers;
-        public Format format;
-        public SampleCountFlags samples;
+
+        public AttachmentDescription attachmentDescription;
+
         public ImageUsageFlags usage;
-        public ImageAspectFlags aspectMask;
-        public ImageLayout imageLayout;
         public Swapchain swapchain;
+
+        public ref Format format => ref attachmentDescription.format;
+        public ref SampleCountFlags samples => ref attachmentDescription.samples;
+        public ref AttachmentLoadOp loadOp => ref attachmentDescription.loadOp;
+        public ref AttachmentStoreOp storeOp => ref attachmentDescription.storeOp;
+        public ref AttachmentLoadOp stencilLoadOp => ref attachmentDescription.stencilLoadOp;
+        public ref AttachmentStoreOp stencilStoreOp => ref attachmentDescription.stencilStoreOp;
+        public ref ImageLayout initialLayout => ref attachmentDescription.initialLayout;
+        public ref ImageLayout finalLayout => ref attachmentDescription.finalLayout;
 
         public RenderTextureInfo(Swapchain swapchain)
         {
             this.swapchain = swapchain;
+            attachmentDescription = new AttachmentDescription(swapchain.ColorFormat, SampleCountFlags.Count1);
+                
         }
 
         public RenderTextureInfo(uint width, uint height, uint layers, Format format, ImageUsageFlags usage,
-            SampleCountFlags samples = SampleCountFlags.Count1, ImageLayout imageLayout = ImageLayout.Undefined)
+            SampleCountFlags samples = SampleCountFlags.Count1)
         {
             this.width = width;
             this.height = height;
             this.layers = layers;
-            this.format = format;
             this.usage = usage;
-            this.aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;
-            this.samples = samples;
-            this.imageLayout = imageLayout;
+            attachmentDescription = new AttachmentDescription(format, samples);          
         }
     }
 
     public class RenderTexture : Texture
     {
-        public ImageAspectFlags aspectMask;
         public SampleCountFlags samples;
-        Swapchain swapchain;
+        private Swapchain swapchain;
         public ImageView[] attachmentViews;
         public bool IsSwapchain => swapchain != null;
 
@@ -50,7 +56,7 @@ namespace SharpGame
         }
         
         public RenderTexture(uint width, uint height, uint layers, Format format, ImageUsageFlags usage,
-            SampleCountFlags samples = SampleCountFlags.Count1, ImageLayout imageLayout = ImageLayout.Undefined)
+            SampleCountFlags samples = SampleCountFlags.Count1)
         {
             this.width = width;
             this.height = height;
@@ -58,9 +64,7 @@ namespace SharpGame
             this.layers = layers;
             this.format = format;
             this.imageUsageFlags = usage;
-            this.aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;
             this.samples = samples;
-            this.imageLayout = imageLayout;
 
             Create();
         }
@@ -91,9 +95,7 @@ namespace SharpGame
                 this.layers = info.layers;
                 this.format = info.format;
                 this.imageUsageFlags = info.usage;
-                this.aspectMask = info.aspectMask;
                 this.samples = info.samples;
-                this.imageLayout = info.imageLayout;
 
                 Create();
             }
@@ -106,9 +108,7 @@ namespace SharpGame
             this.layers = 1;
             this.format = swapchain.ColorFormat;
             this.imageUsageFlags = ImageUsageFlags.ColorAttachment;
-            this.aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;
             this.samples = SampleCountFlags.Count1;
-            this.imageLayout = ImageLayout.ColorAttachmentOptimal;
 
             attachmentViews = (ImageView[])swapchain.ImageViews.Clone();
         }
@@ -116,9 +116,12 @@ namespace SharpGame
 
         protected void Create()
         {
+            var aspectMask = Device.IsDepthFormat(format) ? ImageAspectFlags.Depth : ImageAspectFlags.Color;
             image = Image.Create(width, height, ImageCreateFlags.None, layers, 1, format, this.samples, imageUsageFlags);
             imageView = ImageView.Create(image, layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
             sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+
+            this.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
             descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
             attachmentViews = new ImageView[Swapchain.IMAGE_COUNT];
             Array.Fill(attachmentViews, imageView);

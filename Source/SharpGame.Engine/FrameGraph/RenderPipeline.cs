@@ -74,14 +74,14 @@ namespace SharpGame
         }
 
         public void AddRenderTexture(string name, uint width, uint height, uint layers, Format format, ImageUsageFlags usage,
-            SampleCountFlags samples = SampleCountFlags.Count1, ImageLayout imageLayout = ImageLayout.Undefined)
+            SampleCountFlags samples = SampleCountFlags.Count1/*, ImageLayout imageLayout = ImageLayout.Undefined*/)
         {
             if(renderTextures.ContainsKey(name))
             {
                 return;
             }
 
-            renderTextures[name] = new RenderTexture(width, height, layers, format, usage, samples, imageLayout);
+            renderTextures[name] = new RenderTexture(width, height, layers, format, usage, samples/*, imageLayout*/);
         }
 
         public RenderTexture GetRenderTexture(string name)

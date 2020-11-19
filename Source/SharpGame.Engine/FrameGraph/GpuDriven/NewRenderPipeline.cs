@@ -19,7 +19,10 @@ namespace SharpGame
                 new RenderTextureInfo(Graphics.Swapchain),
                 new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment),
 
-                new SceneSubpass()
+                new SceneSubpass
+                {
+                    DisableDepthStencilAttachment = false
+                }
                 
             });
         }

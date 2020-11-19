@@ -44,7 +44,6 @@ namespace SharpGame
         protected RenderTarget renderTarget;
 
         private List<RenderTextureInfo> renderTextureInfos = new List<RenderTextureInfo>();
-        private FastList<AttachmentDescription> attachmentDescription = new FastList<AttachmentDescription>();
         
         public FrameGraphPass(SubmitQueue queue = SubmitQueue.Graphics)
         {
@@ -54,7 +53,6 @@ namespace SharpGame
         public void AddAttachment(RenderTextureInfo attachment)
         {
             renderTextureInfos.Add(attachment);
-            attachmentDescription.Add(new AttachmentDescription(attachment.format, attachment.samples, AttachmentLoadOp.DontCare, AttachmentStoreOp.DontCare));
         }
 
         public void AddSubpass(Subpass subpass)
@@ -68,7 +66,7 @@ namespace SharpGame
         {
             for(int i = 0; i < attachmentLoadOp.Length; i++)
             {
-                attachmentDescription[i].loadOp = attachmentLoadOp[i];
+                renderTextureInfos[i].loadOp = attachmentLoadOp[i];
             }
         }
 
@@ -76,7 +74,7 @@ namespace SharpGame
         {
             for (int i = 0; i < attachmentStoreOp.Length; i++)
             {
-                attachmentDescription[i].storeOp = attachmentStoreOp[i];
+                renderTextureInfos[i].storeOp = attachmentStoreOp[i];
             }
         }
 
@@ -84,7 +82,7 @@ namespace SharpGame
         {
             for (int i = 0; i < attachmentLoadOp.Length; i++)
             {
-                attachmentDescription[i].stencilLoadOp = attachmentLoadOp[i];
+                renderTextureInfos[i].stencilLoadOp = attachmentLoadOp[i];
             }
         }
 
@@ -92,7 +90,7 @@ namespace SharpGame
         {
             for (int i = 0; i < attachmentStoreOp.Length; i++)
             {
-                attachmentDescription[i].stencilStoreOp = attachmentStoreOp[i];
+                renderTextureInfos[i].stencilStoreOp = attachmentStoreOp[i];
             }
         }
 
@@ -100,7 +98,7 @@ namespace SharpGame
         {
             for (int i = 0; i < imageLayouts.Length; i++)
             {
-                attachmentDescription[i].initialLayout = imageLayouts[i];
+                renderTextureInfos[i].initialLayout = imageLayouts[i];
             }
         }
 
@@ -108,7 +106,7 @@ namespace SharpGame
         {
             for (int i = 0; i < imageLayouts.Length; i++)
             {
-                attachmentDescription[i].finalLayout = imageLayouts[i];
+                renderTextureInfos[i].finalLayout = imageLayouts[i];
             }
         }
 
@@ -183,28 +181,57 @@ namespace SharpGame
             {
                 RenderPass = renderPassCreator.Invoke();
             }
-            else if(!attachmentDescription.IsEmpty)
-            {
-                /*
-                var attachmentDescriptions = attachmentDescription.ToArray();
+            else if(!renderTextureInfos.Empty())
+            {   
+                var attachmentDescriptions = new AttachmentDescription[renderTextureInfos.Count];
                 var subpassDescriptions = new SubpassDescription[subpasses.Count];
                 var dependencies = new SubpassDependency[subpasses.Count + 1];
+
+                for(int i = 0; i < renderTextureInfos.Count; i++)
+                {
+                    attachmentDescriptions[i] = renderTextureInfos[i].attachmentDescription;
+                }
+            
+                dependencies[0] = new SubpassDependency
+                {
+                    srcSubpass = Vulkan.VulkanNative.SubpassExternal,
+                    dstSubpass = 0,
+                    srcStageMask = PipelineStageFlags.BottomOfPipe,
+                    dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
+                    srcAccessMask = AccessFlags.MemoryRead,
+                    dstAccessMask = (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
+                    dependencyFlags = DependencyFlags.ByRegion
+                };
 
                 for (int i = 0; i < subpasses.Count; i++)
                 {
                     subpasses[i].GetDescription(attachmentDescriptions, ref subpassDescriptions[i]);
-                    dependencies[i] = subpasses[i].Dependency;
-                    dependencies[i].srcSubpass = i == 0 ? Vulkan.VulkanNative.SubpassExternal : (uint)(i - 1);
-                    dependencies[i].dstSubpass = (uint)i;
+
+                    if(i > 0)
+                    {
+                        dependencies[i] = subpasses[i].Dependency;
+                        dependencies[i].srcSubpass = (uint)(i - 1);
+                        dependencies[i].dstSubpass = (uint)i;
+                        dependencies[i].srcStageMask = PipelineStageFlags.ColorAttachmentOutput;
+                        dependencies[i].dstStageMask = PipelineStageFlags.FragmentShader;
+                        dependencies[i].srcAccessMask = AccessFlags.ColorAttachmentWrite;
+                        dependencies[i].dstAccessMask = AccessFlags.InputAttachmentRead;
+                        dependencies[i].dependencyFlags = DependencyFlags.ByRegion;
+                    }
                 }
 
                 dependencies[subpasses.Count] = new SubpassDependency
                 {
                     srcSubpass = (uint)(subpasses.Count - 1),
                     dstSubpass = Vulkan.VulkanNative.SubpassExternal,
+                    srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
+                    dstStageMask = PipelineStageFlags.BottomOfPipe,
+                    srcAccessMask = AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite,
+                    dstAccessMask = AccessFlags.MemoryRead,
+                    dependencyFlags = DependencyFlags.ByRegion
                 };
 
-                RenderPass = new RenderPass(attachmentDescriptions, subpassDescriptions, dependencies);*/
+                RenderPass = new RenderPass(attachmentDescriptions, subpassDescriptions, dependencies);
             }
             
             

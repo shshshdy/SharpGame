@@ -206,19 +206,19 @@ namespace SharpGame
 
             albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, 
-                        SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
+                        SampleCountFlags.Count1/*, ImageLayout.ColorAttachmentOptimal*/);
 
             normalRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled,
-                        SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
+                        SampleCountFlags.Count1/*, ImageLayout.ColorAttachmentOptimal*/);
 
             depthRT = new RenderTexture(width, height, 1, Format.R32g32b32a32Sfloat,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled,
-                        SampleCountFlags.Count1, ImageLayout.ColorAttachmentOptimal);
+                        SampleCountFlags.Count1/*, ImageLayout.ColorAttachmentOptimal*/);
 
             depthHWRT =/* Graphics.DepthRT; */new RenderTexture(width, height, 1, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, /*ImageAspectFlags.Depth | ImageAspectFlags.Stencil,*/
-                        SampleCountFlags.Count1, ImageLayout.DepthStencilReadOnlyOptimal
+                        SampleCountFlags.Count1/*, ImageLayout.DepthStencilReadOnlyOptimal*/
                         );
 
             var geometryFB = Framebuffer.Create(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, depthRT.imageView, depthHWRT.imageView });
