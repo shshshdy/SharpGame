@@ -23,7 +23,11 @@ namespace SharpGame
         public ClearColorValue[] ClearColorValue { get; set; } = { new ClearColorValue(0.25f, 0.25f, 0.25f, 1) };
         public ClearDepthStencilValue? ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
 
-        protected ClearValue[] clearValues = new ClearValue[5];
+        public ClearValue[] clearValues = new ClearValue[2]
+        { 
+            new ClearColorValue(0.25f, 0.25f, 0.25f, 1),
+            new ClearDepthStencilValue(1.0f, 0)
+        };
 
         List<Subpass> subpasses = new List<Subpass>();
 
@@ -154,9 +158,11 @@ namespace SharpGame
                 {
                     renderTarget = new RenderTarget();
 
-                    foreach (var rtInfo in renderTextureInfos)
+                    Array.Resize(ref clearValues, renderTextureInfos.Count);
+                    for(int i = 0; i < renderTextureInfos.Count; i++)
                     {
-                        renderTarget.Add(rtInfo);
+                        renderTarget.Add(renderTextureInfos[i]);
+                        clearValues[i] = renderTextureInfos[i].clearValue;
                     }
 
                     framebuffers = new Framebuffer[Swapchain.IMAGE_COUNT];
@@ -186,10 +192,11 @@ namespace SharpGame
                 var attachmentDescriptions = new AttachmentDescription[renderTextureInfos.Count];
                 var subpassDescriptions = new SubpassDescription[subpasses.Count];
                 var dependencies = new SubpassDependency[subpasses.Count + 1];
+                
 
                 for(int i = 0; i < renderTextureInfos.Count; i++)
                 {
-                    attachmentDescriptions[i] = renderTextureInfos[i].attachmentDescription;
+                    attachmentDescriptions[i] = renderTextureInfos[i].attachmentDescription;       
                 }
             
                 dependencies[0] = new SubpassDependency
@@ -299,7 +306,7 @@ namespace SharpGame
                 viewport = new Viewport(0, 0, Graphics.Width, Graphics.Height);
                 renderArea = new Rect2D(0, 0, Graphics.Width, Graphics.Height);
             }
-
+            /*
             int clearValuesCount = 0;
             if (ClearColorValue != null)
             {
@@ -327,7 +334,7 @@ namespace SharpGame
             if (ClearDepthStencilValue.HasValue)
             {
                 clearValues[clearValues.Length - 1] = ClearDepthStencilValue.Value;
-            }
+            }*/
 
             BeginRenderPass(cb, framebuffer, renderArea, clearValues);
 

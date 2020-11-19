@@ -33,6 +33,8 @@ namespace SharpGame
                     depthRT = new RenderTexture(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, //ImageAspectFlags.Depth,
                         SampleCountFlags.Count1/*, ImageLayout.DepthStencilReadOnlyOptimal*/);
+                    depthRT.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
+                    depthRT.UpdateDescriptor();
                 }
 
                 return depthRT;
@@ -79,7 +81,7 @@ namespace SharpGame
 
             AttachmentDescription[] attachments =
             {
-                new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)
+                new AttachmentDescription(depthFormat, finalLayout :ImageLayout.ShaderReadOnlyOptimal /*ImageLayout.DepthStencilReadOnlyOptimal*/)
             };
 
             SubpassDescription[] subpassDescription =
@@ -167,7 +169,7 @@ namespace SharpGame
                 }
             });
 
-            ClearValue[] clearDepth = { (ClearValue)ClearDepthStencilValue };
+            ClearValue[] clearDepth = { new ClearDepthStencilValue(1.0f, 0) };
 
             if (RenderPass == null)
             {

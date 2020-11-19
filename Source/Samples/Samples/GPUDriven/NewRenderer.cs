@@ -9,7 +9,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -6)]
+    [SampleDesc(sortOrder = 6)]
     public class NewRenderer : Sample
     {
         RenderPipeline renderer = new NewRenderPipeline();
@@ -59,7 +59,7 @@ namespace SharpGame.Samples
                 var mat = new Material("shaders/SkySphere.shader");
                 staticModel.SetMaterial(mat);
             }
-            
+           
             {
                 var node = scene.CreateChild("Plane");
                 var staticModel = node.AddComponent<StaticModel>(); 
@@ -70,9 +70,10 @@ namespace SharpGame.Samples
                 staticModel.SetModel(model);
                 var mat = Resources.Load<Material>("materials/Grass.material");
                 mat.SetTexture("NormalMap", Texture.Blue);
+                mat.SetTexture("SpecMap", Texture.Black);
                 staticModel.SetMaterial(mat);
             }
-
+ 
             {
                 var node = scene.CreateChild("vegetation");
                 var staticModel = node.AddComponent<StaticModelGroup>();

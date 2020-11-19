@@ -15,6 +15,7 @@ namespace SharpGame
 
         public ImageUsageFlags usage;
         public Swapchain swapchain;
+        public ClearValue clearValue = new ClearColorValue(0, 0, 0, 1);
 
         public ref Format format => ref attachmentDescription.format;
         public ref SampleCountFlags samples => ref attachmentDescription.samples;
@@ -29,7 +30,7 @@ namespace SharpGame
         {
             this.swapchain = swapchain;
             attachmentDescription = new AttachmentDescription(swapchain.ColorFormat, SampleCountFlags.Count1);
-                
+            clearValue = new ClearColorValue(0, 0, 0, 1);
         }
 
         public RenderTextureInfo(uint width, uint height, uint layers, Format format, ImageUsageFlags usage,
@@ -39,7 +40,16 @@ namespace SharpGame
             this.height = height;
             this.layers = layers;
             this.usage = usage;
-            attachmentDescription = new AttachmentDescription(format, samples);          
+            attachmentDescription = new AttachmentDescription(format, samples); 
+
+            if(Device.IsDepthFormat(format))
+            {
+                clearValue = new ClearDepthStencilValue(1, 0);
+            }
+            else
+            {
+                clearValue = new ClearColorValue(0, 0, 0, 1);
+            }
         }
     }
 
@@ -112,7 +122,6 @@ namespace SharpGame
 
             attachmentViews = (ImageView[])swapchain.ImageViews.Clone();
         }
-
 
         protected void Create()
         {

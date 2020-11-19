@@ -64,48 +64,49 @@ namespace SharpGame
         {
             this.Add(new ShadowPass());
 
+            var depthFormat = Graphics.DepthFormat;
+            uint width = (uint)Graphics.Width;
+            uint height = (uint)Graphics.Height;
+
             geometryPass = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                renderPassCreator = OnCreateRenderPass,
-                frameBufferCreator = OnCreateFramebuffer,
+                //new RenderTextureInfo(width, height, 1, Format.R8g8b8a8Unorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
+                //new RenderTextureInfo(width, height, 1, Format.R8g8b8a8Unorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
+                //new RenderTextureInfo(width, height, 1, Format.R32g32b32a32Sfloat, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
+                //new RenderTextureInfo(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled),
 
-                ClearColorValue = new[] 
-                { 
-                    new ClearColorValue(0.25f, 0.25f, 0.25f, 1),
-                    new ClearColorValue(0, 0, 0, 1),
-                    new ClearColorValue(0, 0, 0, 0)
-                },
-
-                Subpasses = new[]
+                new SceneSubpass("gbuffer")
                 {
-                    new SceneSubpass("gbuffer")
-                    {
-                        Set1 = clusterSet1
-                    }
+                    Set1 = clusterSet1
                 }
+
             };
+
+            geometryPass.clearValues = new ClearValue[]
+            {
+                new ClearColorValue(0.25f, 0.25f, 0.25f, 1),
+                new ClearColorValue(0, 0, 0, 1),
+                new ClearColorValue(0, 0, 0, 0),
+                new ClearDepthStencilValue(1, 0)
+            };
+
+            geometryPass.frameBufferCreator = OnCreateFramebuffer;
+            geometryPass.renderPassCreator = OnCreateRenderPass;
 
             this.Add(geometryPass);
 
-            uint width = (uint)Graphics.Width;
-            uint height = (uint)Graphics.Height;
             translucentClustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                renderPassCreator = OnCreateClusterRenderPass,
+                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment),
 
-                frameBufferCreator = (rp) => {
-                    var clusterFB = Framebuffer.Create(rp, width, height, 1, new[] { depthHWRT.imageView });
-                    return new Framebuffer[3] { clusterFB, clusterFB, clusterFB };
-                },
-
-                Subpasses = new[]
+                new SceneSubpass("clustering")
                 {
-                    new SceneSubpass("clustering")
-                    {
-                        Set1 = clusterSet1
-                    }
+                    Set1 = clusterSet1
                 }
+
             };
+
+            translucentClustering.renderPassCreator = OnCreateClusterRenderPass;
 
             this.Add(translucentClustering);
 
@@ -206,19 +207,19 @@ namespace SharpGame
 
             albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, 
-                        SampleCountFlags.Count1/*, ImageLayout.ColorAttachmentOptimal*/);
+                        SampleCountFlags.Count1);
 
             normalRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled,
-                        SampleCountFlags.Count1/*, ImageLayout.ColorAttachmentOptimal*/);
+                        SampleCountFlags.Count1);
 
             depthRT = new RenderTexture(width, height, 1, Format.R32g32b32a32Sfloat,
                         ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled,
-                        SampleCountFlags.Count1/*, ImageLayout.ColorAttachmentOptimal*/);
+                        SampleCountFlags.Count1);
 
-            depthHWRT =/* Graphics.DepthRT; */new RenderTexture(width, height, 1, depthFormat,
+            depthHWRT = new RenderTexture(width, height, 1, depthFormat,
                         ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, /*ImageAspectFlags.Depth | ImageAspectFlags.Stencil,*/
-                        SampleCountFlags.Count1/*, ImageLayout.DepthStencilReadOnlyOptimal*/
+                        SampleCountFlags.Count1
                         );
 
             var geometryFB = Framebuffer.Create(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, depthRT.imageView, depthHWRT.imageView });

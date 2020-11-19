@@ -9,7 +9,7 @@ namespace SharpGame.Samples
         public vec4 gradientPos;                      // Texture coordiantes for the gradient ramp map
     };
 
-    [SampleDesc(sortOrder = -8)]
+    [SampleDesc(sortOrder = 8)]
     public class ComputeShader : Sample
     {
         const int PARTICLE_COUNT = 256 * 1024;
@@ -68,7 +68,6 @@ namespace SharpGame.Samples
                     new VertexAttribute(0, 0, Format.R32g32Sfloat, 0),
                     //new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
                     new VertexAttribute(0, 1, Format.R32g32b32a32Sfloat, 16)
-
                 }
 
             };

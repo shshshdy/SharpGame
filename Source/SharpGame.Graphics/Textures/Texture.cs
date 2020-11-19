@@ -212,7 +212,7 @@ namespace SharpGame
             Graphics.EndPrimaryCmd(commandBuffer);
         }
 
-        internal void UpdateDescriptor()
+        public void UpdateDescriptor()
         {
             descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
         }
