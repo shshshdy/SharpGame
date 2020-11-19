@@ -21,6 +21,13 @@ namespace SharpGame
         {
             OnDraw?.Invoke(this, rc, cmd);
         }
-        
+
+        protected override void CreateRenderTargets()
+        {
+        }
+
+        protected override void CreateRenderPass()
+        {
+        }
     }
 }

@@ -18,19 +18,22 @@ namespace SharpGame
         {
             Add(new ShadowPass());
 
+            var depthFormat = Graphics.DepthFormat;
+            uint width = Graphics.Width;
+            uint height = Graphics.Height;
+
             clustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                renderPassCreator = OnCreateClusterRenderPass,
-                frameBufferCreator = OnCreateFramebuffers,
-
-                Subpasses = new[]
+                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment),
+                new SceneSubpass("clustering")
                 {
-                    new SceneSubpass("clustering")
-                    {
-                        Set1 = clusterSet1
-                    }
+                    Set1 = clusterSet1
                 }
+
             };
+
+            clustering.renderPassCreator = OnCreateClusterRenderPass;
+            //clustering.frameBufferCreator = OnCreateFramebuffers;
 
             Add(clustering);
 
@@ -40,18 +43,16 @@ namespace SharpGame
 
             mainPass = new FrameGraphPass
             {
-                renderPassCreator = () => Graphics.RenderPass,
-                frameBufferCreator = (rp) => Graphics.Framebuffers,
-
-                Subpasses = new[]
+                new SceneSubpass("cluster_forward")
                 {
-                    new SceneSubpass("cluster_forward")
-                    {
-                        Set1 = resourceSet0,
-                        Set2 = resourceSet1,
-                    }
+                    Set1 = resourceSet0,
+                    Set2 = resourceSet1,
                 }
+
             };
+
+            mainPass.renderPassCreator = () => Graphics.RenderPass;
+            mainPass.frameBufferCreator = (rp) => Graphics.Framebuffers;
 
             Add(mainPass);
         }

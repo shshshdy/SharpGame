@@ -232,8 +232,7 @@ namespace SharpGame
                 };
 
                 RenderPass = new RenderPass(attachmentDescriptions, subpassDescriptions, dependencies);
-            }
-            
+            }            
             
             if (RenderPass == null)
             {
@@ -282,7 +281,6 @@ namespace SharpGame
             {
                 CreateRenderTargets();
             }
-
 
             ref Framebuffer framebuffer = ref framebuffers[Graphics.WorkImage];
 
