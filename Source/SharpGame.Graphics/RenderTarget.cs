@@ -11,9 +11,9 @@ namespace SharpGame
         public uint height;
         public uint layers;
         public Format format;
+        public SampleCountFlags samples;
         public ImageUsageFlags usage;
         public ImageAspectFlags aspectMask;
-        public SampleCountFlags samples;
         public ImageLayout imageLayout;
         public Swapchain swapchain;
 

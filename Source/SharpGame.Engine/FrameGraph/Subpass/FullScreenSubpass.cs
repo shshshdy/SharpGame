@@ -28,7 +28,7 @@ namespace SharpGame
 
         public void DrawFullScreenQuad(CommandBuffer cb, RenderPass renderPass, uint subpass, Pass pass, Span<DescriptorSet> resourceSet)
         {
-            var pipe = pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, subpass, null);
+            var pipe = pass.GetGraphicsPipeline(renderPass, subpass, null);
 
             cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
 

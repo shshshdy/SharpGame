@@ -9,18 +9,15 @@ using System.Runtime.InteropServices;
 namespace SharpGame
 {
     [DebuggerDisplay("Count = {Count}")]
-    public class FastList<T> : IList<T>, IReadOnlyList<T>, ICollection<T>, IEnumerable<T>, IEnumerable
+    public class FastList<T> : /*IList<T>, IReadOnlyList<T>,*/ ICollection<T>, IEnumerable<T>, IEnumerable
     {
-        // Fields
-        private const int defaultCapacity = 4;
-
-        /// <summary>
-        /// Gets the items.
-        /// </summary>
         public T[] Items { get=>items; private set => items = value; }
         private T[] items;
         private int size;
-        public static readonly T[] Empty = new T[0];
+
+        private const int defaultCapacity = 4;
+        private static readonly T[] Empty = new T[0];
+
         public FastList()
         {
             Items = Empty;
@@ -215,18 +212,18 @@ namespace SharpGame
             get { return size; }
         }
 
-        public T this[int index]
+        public ref T this[int index]
         {
             get
             {
                 if (index < 0 || index >= size) throw new ArgumentOutOfRangeException(nameof(index));
-                return Items[index];
+                return ref Items[index];
             }
-            set
-            {
-                if (index < 0 || index >= size) throw new ArgumentOutOfRangeException(nameof(index));
-                Items[index] = value;
-            }
+//             set
+//             {
+//                 if (index < 0 || index >= size) throw new ArgumentOutOfRangeException(nameof(index));
+//                 Items[index] = value;
+//             }
         }
 
         bool ICollection<T>.IsReadOnly
@@ -236,6 +233,8 @@ namespace SharpGame
 
         #endregion
 
+        public bool IsEmpty => Count == 0;
+     
         public ref T At(int index)
         {
             return ref items[index];
@@ -269,10 +268,10 @@ namespace SharpGame
             InsertRange(size, collection);
         }
 
-        public ReadOnlyCollection<T> AsReadOnly()
-        {
-            return new ReadOnlyCollection<T>(this);
-        }
+//         public ReadOnlyCollection<T> AsReadOnly()
+//         {
+//             return new ReadOnlyCollection<T>(this);
+//         }
 
         public int BinarySearch(T item)
         {

@@ -8,17 +8,13 @@ namespace SharpGame
 {
     public class FrameGraphPass : Object, IEnumerable<Subpass>
     {
-        public RenderPipeline Renderer { get; set; }
+        public RenderPipeline Renderer { get; internal set; }
         public RenderView View => Renderer?.View;
         public Graphics Graphics => Graphics.Instance;
         public FrameGraph FrameGraph => FrameGraph.Instance;
-        public string Name { get; }
-        public SubmitQueue Queue { get; set; } = SubmitQueue.Graphics;
-        
-        public List<RenderTextureInfo> renderTextureInfos = new List<RenderTextureInfo>();
+        public SubmitQueue Queue { get; } = SubmitQueue.Graphics;
 
-        public RenderTarget renderTarget;
-        public RenderPass RenderPass { get; set; }
+        public RenderPass RenderPass { get; protected set; }
         public bool UseSecondCmdBuffer { get; set; } = false;
 
         protected Framebuffer[] framebuffers;
@@ -37,7 +33,7 @@ namespace SharpGame
             {
                 foreach(var subpass in value)
                 {
-                    Add(subpass);
+                    AddSubpass(subpass);
                 }
             }
         }
@@ -45,22 +41,75 @@ namespace SharpGame
         public Func<RenderPass> renderPassCreator { get; set; }
         public Func<RenderPass, Framebuffer[]> frameBufferCreator { get; set; }
 
-        List<AttachmentDescription> attachmentDescription = new List<AttachmentDescription>();
+        protected RenderTarget renderTarget;
 
-        public FrameGraphPass()
+        private List<RenderTextureInfo> renderTextureInfos = new List<RenderTextureInfo>();
+        private FastList<AttachmentDescription> attachmentDescription = new FastList<AttachmentDescription>();
+        
+        public FrameGraphPass(SubmitQueue queue = SubmitQueue.Graphics)
         {
+            Queue = queue;
         }
 
-        public FrameGraphPass(string name)
+        public void AddAttachment(RenderTextureInfo attachment)
         {
-            Name = name;
+            renderTextureInfos.Add(attachment);
+            attachmentDescription.Add(new AttachmentDescription(attachment.format, attachment.samples, AttachmentLoadOp.DontCare, AttachmentStoreOp.DontCare));
         }
 
-        public void Add(Subpass subpass)
+        public void AddSubpass(Subpass subpass)
         {
             subpass.FrameGraphPass = this;
             subpass.subpassIndex = (uint)subpasses.Count;
             subpasses.Add(subpass);
+        }
+
+        public void SetLoadOp(params AttachmentLoadOp[] attachmentLoadOp)
+        {
+            for(int i = 0; i < attachmentLoadOp.Length; i++)
+            {
+                attachmentDescription[i].loadOp = attachmentLoadOp[i];
+            }
+        }
+
+        public void SetStoreOp(params AttachmentStoreOp[] attachmentStoreOp)
+        {
+            for (int i = 0; i < attachmentStoreOp.Length; i++)
+            {
+                attachmentDescription[i].storeOp = attachmentStoreOp[i];
+            }
+        }
+
+        public void SetStencilLoadOp(params AttachmentLoadOp[] attachmentLoadOp)
+        {
+            for (int i = 0; i < attachmentLoadOp.Length; i++)
+            {
+                attachmentDescription[i].stencilLoadOp = attachmentLoadOp[i];
+            }
+        }
+
+        public void SetStencilStoreOp(params AttachmentStoreOp[] attachmentStoreOp)
+        {
+            for (int i = 0; i < attachmentStoreOp.Length; i++)
+            {
+                attachmentDescription[i].stencilStoreOp = attachmentStoreOp[i];
+            }
+        }
+
+        public void SetInitialLayout(params ImageLayout[] imageLayouts)
+        {
+            for (int i = 0; i < imageLayouts.Length; i++)
+            {
+                attachmentDescription[i].initialLayout = imageLayouts[i];
+            }
+        }
+
+        public void SetFinalLayout(params ImageLayout[] imageLayouts)
+        {
+            for (int i = 0; i < imageLayouts.Length; i++)
+            {
+                attachmentDescription[i].finalLayout = imageLayouts[i];
+            }
         }
 
         public virtual void Init()
@@ -130,23 +179,35 @@ namespace SharpGame
 
         protected virtual void CreateRenderPass()
         {
-            if(renderPassCreator != null)
+            if (renderPassCreator != null)
             {
                 RenderPass = renderPassCreator.Invoke();
             }
-            /*
-            var attachmentDescriptions = attachmentDescription.ToArray();
-            var subpassDescriptions = new SubpassDescription[subpasses.Count];
-            var dependencies = new SubpassDependency[subpasses.Count + 1];
-
-            for(int i = 0; i < subpasses.Count; i++)
+            else if(!attachmentDescription.IsEmpty)
             {
-                subpasses[i].GetDescription(ref subpassDescriptions[i]);
+                /*
+                var attachmentDescriptions = attachmentDescription.ToArray();
+                var subpassDescriptions = new SubpassDescription[subpasses.Count];
+                var dependencies = new SubpassDependency[subpasses.Count + 1];
 
+                for (int i = 0; i < subpasses.Count; i++)
+                {
+                    subpasses[i].GetDescription(attachmentDescriptions, ref subpassDescriptions[i]);
+                    dependencies[i] = subpasses[i].Dependency;
+                    dependencies[i].srcSubpass = i == 0 ? Vulkan.VulkanNative.SubpassExternal : (uint)(i - 1);
+                    dependencies[i].dstSubpass = (uint)i;
+                }
+
+                dependencies[subpasses.Count] = new SubpassDependency
+                {
+                    srcSubpass = (uint)(subpasses.Count - 1),
+                    dstSubpass = Vulkan.VulkanNative.SubpassExternal,
+                };
+
+                RenderPass = new RenderPass(attachmentDescriptions, subpassDescriptions, dependencies);*/
             }
-
-            RenderPass = new RenderPass(attachmentDescriptions, subpassDescriptions, dependencies);
-            */
+            
+            
             if (RenderPass == null)
             {
                 RenderPass = Graphics.RenderPass;
@@ -278,11 +339,11 @@ namespace SharpGame
         {
             if(obj is RenderTextureInfo rt)
             {
-                renderTextureInfos.Add(rt);
+                AddAttachment(rt);
             }
             else if(obj is Subpass subpass)
             {
-                Add(subpass);
+                AddSubpass(subpass);
             }
         }
 

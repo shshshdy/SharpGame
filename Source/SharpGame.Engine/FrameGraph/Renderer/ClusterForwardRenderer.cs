@@ -18,10 +18,8 @@ namespace SharpGame
         {
             Add(new ShadowPass());
 
-            clustering = new FrameGraphPass
+            clustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                Queue = SubmitQueue.EarlyGraphics,
-
                 renderPassCreator = OnCreateClusterRenderPass,
                 frameBufferCreator = OnCreateFramebuffers,
 

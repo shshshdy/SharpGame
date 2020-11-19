@@ -102,7 +102,7 @@ namespace SharpGame
         {
             Scene scene = Scene;
             // Let drawables update themselves before reinsertion. This can be used for animation
-            if (!drawableUpdates_.Empty())
+            if (!drawableUpdates_.IsEmpty)
             {
 
                 // Perform updates in worker threads. Notify the scene that a threaded update is going on and components
@@ -114,7 +114,7 @@ namespace SharpGame
             }
 
             // If any drawables were inserted during threaded update, update them now from the main thread
-            if (!threadedDrawableUpdates_.Empty())
+            if (!threadedDrawableUpdates_.IsEmpty)
             {
 
                 foreach (Drawable drawable in threadedDrawableUpdates_)
@@ -135,7 +135,7 @@ namespace SharpGame
 
             // Reinsert drawables that have been moved or resized, or that have been newly added to the octree and do not sit inside
             // the proper octant yet
-            if (!drawableUpdates_.Empty())
+            if (!drawableUpdates_.IsEmpty)
             {
                 foreach (Drawable drawable in drawableUpdates_)
                 {

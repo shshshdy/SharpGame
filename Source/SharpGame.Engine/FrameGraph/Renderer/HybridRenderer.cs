@@ -64,10 +64,8 @@ namespace SharpGame
         {
             this.Add(new ShadowPass());
 
-            geometryPass = new FrameGraphPass
+            geometryPass = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                Queue = SubmitQueue.EarlyGraphics,
-
                 renderPassCreator = OnCreateRenderPass,
                 frameBufferCreator = OnCreateFramebuffer,
 
@@ -91,10 +89,8 @@ namespace SharpGame
 
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
-            translucentClustering = new FrameGraphPass
+            translucentClustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                Queue = SubmitQueue.EarlyGraphics,
-
                 renderPassCreator = OnCreateClusterRenderPass,
 
                 frameBufferCreator = (rp) => {

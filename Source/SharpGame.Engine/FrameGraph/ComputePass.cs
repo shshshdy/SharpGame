@@ -8,14 +8,12 @@ namespace SharpGame
     {
         public Action<ComputePass, RenderContext, CommandBuffer> OnDraw { get; set; }
 
-        public ComputePass()
+        public ComputePass() : base(SubmitQueue.Compute)
         {
-            Queue = SubmitQueue.Compute;
         }
 
-        public ComputePass(Action<ComputePass, RenderContext, CommandBuffer> onDraw)
+        public ComputePass(Action<ComputePass, RenderContext, CommandBuffer> onDraw) : base(SubmitQueue.Compute)
         {
-            Queue = SubmitQueue.Compute;
             OnDraw = onDraw;
         }
 

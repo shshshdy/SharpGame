@@ -56,10 +56,8 @@ namespace SharpGame
         FrustumOctreeQuery shadowCasterQuery = new FrustumOctreeQuery();
 
         ulong passID = Pass.GetID(Pass.Shadow);
-        public ShadowPass()
+        public ShadowPass() : base(SubmitQueue.EarlyGraphics)
         {
-            Queue = SubmitQueue.EarlyGraphics;
-
             var depthFormat = Device.GetSupportedDepthFormat();
 
             for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
