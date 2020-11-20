@@ -82,7 +82,7 @@ namespace SharpGame
 
         }
 
-        public static Buffer CreateUniformBuffer<T>(ulong count = 1) where T : struct
+        public static Buffer CreateUniformBuffer<T>(ulong count = 1) where T : unmanaged
         {
             return Create<T>(BufferUsageFlags.UniformBuffer, true, count);
         }
@@ -104,7 +104,7 @@ namespace SharpGame
             return Create(bufferUsages, dynamic, (ulong)Unsafe.SizeOf<T>(), (ulong)data.Length, Utilities.AsPointer(ref data[0]));
         }
 
-        public static Buffer Create<T>(BufferUsageFlags bufferUsages, bool dynamic, ulong count = 1, IntPtr data = default) where T : struct
+        public static Buffer Create<T>(BufferUsageFlags bufferUsages, bool dynamic, ulong count = 1, IntPtr data = default) where T : unmanaged
         {
             return Create(bufferUsages, dynamic, (ulong)Unsafe.SizeOf<T>(), count, data);
         }

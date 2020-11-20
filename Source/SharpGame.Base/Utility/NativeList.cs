@@ -42,9 +42,11 @@ namespace SharpGame
             get
             {
                 ThrowIfDisposed();
-                return new IntPtr(dataPtr);
+                return (IntPtr)dataPtr;
             }
         }
+
+        public T* DataPtr => dataPtr;
 
         public uint Count
         {
@@ -99,6 +101,16 @@ namespace SharpGame
 #endif
                 return ref Unsafe.AsRef<T>(dataPtr + index/* * s_elementByteSize*/);
             }
+        }
+
+        public ref T Front()
+        {
+            return ref dataPtr[0];
+        }
+
+        public ref T Back()
+        {
+            return ref dataPtr[Count - 1];
         }
 
         public ReadOnlyNativeListView<T> GetReadOnlyView()

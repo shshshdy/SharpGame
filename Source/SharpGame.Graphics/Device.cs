@@ -102,6 +102,8 @@ namespace SharpGame
 
             if (features.sparseBinding && features.sparseResidencyImage2D)
             {
+                enabledFeatures.shaderResourceResidency = true;
+                enabledFeatures.shaderResourceMinLod = true;
                 enabledFeatures.sparseBinding = true;
                 enabledFeatures.sparseResidencyImage2D = true;
             }
@@ -109,6 +111,7 @@ namespace SharpGame
             {
                 Log.Warn("Sparse binding not supported");
             }
+
 
             // Memory properties are used regularly for creating all kinds of buffers
             VkPhysicalDeviceMemoryProperties memoryProperties;
@@ -119,8 +122,7 @@ namespace SharpGame
             vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, ref queueFamilyCount, null);
             Debug.Assert(queueFamilyCount > 0);
             QueueFamilyProperties.Resize(queueFamilyCount);
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, (VkQueueFamilyProperties*)QueueFamilyProperties.Data.ToPointer());
-            //QueueFamilyProperties.Count = queueFamilyCount;
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, QueueFamilyProperties.DataPtr);
 
             // Get list of supported extensions
             uint extCount = 0;
@@ -293,13 +295,13 @@ namespace SharpGame
 
                     VkDeviceCreateInfo deviceCreateInfo = VkDeviceCreateInfo.New();
                     deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.Count;
-                    deviceCreateInfo.pQueueCreateInfos = (VkDeviceQueueCreateInfo*)queueCreateInfos.Data.ToPointer();
+                    deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.DataPtr;
                     deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
 
                     if (deviceExtensions.Count > 0)
                     {
                         deviceCreateInfo.enabledExtensionCount = deviceExtensions.Count;
-                        deviceCreateInfo.ppEnabledExtensionNames = (byte**)deviceExtensions.Data.ToPointer();
+                        deviceCreateInfo.ppEnabledExtensionNames = (byte**)deviceExtensions.Data;
                     }
 
                     VkResult result = vkCreateDevice(PhysicalDevice, &deviceCreateInfo, null, out device);

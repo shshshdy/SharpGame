@@ -166,6 +166,13 @@ namespace SharpGame
             native.bindCount = (uint)(binds?.Length ?? 0);
             native.pBinds = (VkSparseMemoryBind*)Unsafe.AsPointer(ref binds[0]);
         }
+
+        public SparseImageOpaqueMemoryBindInfo(Image image, NativeList<VkSparseMemoryBind> binds)
+        {
+            native.image = image.handle;
+            native.bindCount = binds.Count;
+            native.pBinds = binds.DataPtr;
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -179,6 +186,12 @@ namespace SharpGame
             native.pBinds = (VkSparseImageMemoryBind*)Unsafe.AsPointer(ref binds[0]);
         }
 
+        public SparseImageMemoryBindInfo(Image image, NativeList<VkSparseImageMemoryBind> binds)
+        {
+            native.image = image.handle;
+            native.bindCount = binds.Count;
+            native.pBinds = binds.DataPtr;
+        }
     }
 
 }

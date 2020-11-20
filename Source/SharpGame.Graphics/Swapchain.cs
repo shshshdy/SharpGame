@@ -80,7 +80,7 @@ namespace SharpGame
 
             using (NativeList<VkQueueFamilyProperties> queueProps = new NativeList<VkQueueFamilyProperties>(queueCount))
             {
-                vkGetPhysicalDeviceQueueFamilyProperties(Device.PhysicalDevice, &queueCount, (VkQueueFamilyProperties*)queueProps.Data.ToPointer());
+                vkGetPhysicalDeviceQueueFamilyProperties(Device.PhysicalDevice, &queueCount, queueProps.DataPtr);
                 queueProps.Count = queueCount;
 
                 // Iterate over each queue to learn whether it supports presenting:
@@ -151,7 +151,7 @@ namespace SharpGame
 
                 using (NativeList<VkSurfaceFormatKHR> surfaceFormats = new NativeList<VkSurfaceFormatKHR>(formatCount))
                 {
-                    err = vkGetPhysicalDeviceSurfaceFormatsKHR(Device.PhysicalDevice, Surface, &formatCount, (VkSurfaceFormatKHR*)surfaceFormats.Data.ToPointer());
+                    err = vkGetPhysicalDeviceSurfaceFormatsKHR(Device.PhysicalDevice, Surface, &formatCount, surfaceFormats.DataPtr);
                     surfaceFormats.Count = formatCount;
                     Debug.Assert(err == VkResult.Success);
 
@@ -330,7 +330,7 @@ namespace SharpGame
                 // Get the swap chain Images
                 VkImages.Resize(imageCount);
 
-                Device.GetSwapchainImagesKHR(swapchain, &imageCount, (VkImage*)VkImages.Data.ToPointer());
+                Device.GetSwapchainImagesKHR(swapchain, &imageCount, VkImages.DataPtr);
               
                 // Get the swap chain Buffers containing the image and imageview
                 Images = new Image[(int)imageCount];

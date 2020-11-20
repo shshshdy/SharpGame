@@ -59,8 +59,7 @@ namespace SharpGame.Samples
             camera = scene.GetComponent<Camera>(true);
             camera.Node.LookAt(new vec3(0.0f, 5.0f, -50), TransformSpace.WORLD);
 
-            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0,
-                ImageUsageFlags.Storage | ImageUsageFlags.TransferSrc);
+            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0, ImageUsageFlags.Storage | ImageUsageFlags.TransferSrc);
             irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);
             brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, ImageViewType.Image2D, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
 
