@@ -15,7 +15,7 @@ namespace SharpGame
         public Pass pass;
         public Buffer materials;
 
-        public NativeList<Vulkan.VkDescriptorBufferInfo> buffers;
+        public Vector<Vulkan.VkDescriptorBufferInfo> buffers;
         public FastList<Batch> geometries = new FastList<Batch>();
 
     }

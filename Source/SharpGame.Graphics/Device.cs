@@ -17,7 +17,7 @@ namespace SharpGame
         public static VkPhysicalDeviceProperties Properties { get; private set; }
         public static VkPhysicalDeviceFeatures Features { get; private set; }
         public static VkPhysicalDeviceMemoryProperties MemoryProperties { get; private set; }
-        public static NativeList<VkQueueFamilyProperties> QueueFamilyProperties { get; } = new NativeList<VkQueueFamilyProperties>();
+        public static Vector<VkQueueFamilyProperties> QueueFamilyProperties { get; } = new Vector<VkQueueFamilyProperties>();
         public static List<string> SuppertedExcentions { get; } = new List<string>();
         public static bool EnableDebugMarkers { get; internal set; }
         public static uint QFGraphics { get; private set; }
@@ -34,9 +34,9 @@ namespace SharpGame
         private static UTF8String engineName = "SharpGame";
         private static List<string> supportedExtensions = new List<string>();
 
-        private static NativeList<IntPtr> instanceExtensions = new NativeList<IntPtr>(8);
+        private static Vector<IntPtr> instanceExtensions = new Vector<IntPtr>(8);
 
-        public static VkDevice Create(Settings settings, VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
+        public static VkDevice Create(Settings settings, VkPhysicalDeviceFeatures enabledFeatures, Vector<IntPtr> enabledExtensions,
             bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
         {
             instanceExtensions.Add(Strings.VK_KHR_SURFACE_EXTENSION_NAME);
@@ -189,7 +189,7 @@ namespace SharpGame
                 instanceCreateInfo.ppEnabledExtensionNames = (byte**)instanceExtensions.Data;
             }
 
-            using NativeList<IntPtr> enabledLayerNames = new NativeList<IntPtr> { Strings.StandardValidationLayeName };
+            using Vector<IntPtr> enabledLayerNames = new Vector<IntPtr> { Strings.StandardValidationLayeName };
 
             if (enableValidation)
             {
@@ -209,14 +209,14 @@ namespace SharpGame
             return instance;
         }
 
-        static VkResult CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, NativeList<IntPtr> enabledExtensions,
+        static VkResult CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, Vector<IntPtr> enabledExtensions,
             bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
         {
             // Desired queues need to be requested upon logical device creation
             // Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if the application
             // requests different queue types
 
-            using (NativeList<VkDeviceQueueCreateInfo> queueCreateInfos = new NativeList<VkDeviceQueueCreateInfo>())
+            using (Vector<VkDeviceQueueCreateInfo> queueCreateInfos = new Vector<VkDeviceQueueCreateInfo>())
             {
                 float defaultQueuePriority = 0.0f;
 
@@ -285,7 +285,7 @@ namespace SharpGame
                 }
 
                 // Create the logical device representation
-                using (NativeList<IntPtr> deviceExtensions = new NativeList<IntPtr>(enabledExtensions))
+                using (Vector<IntPtr> deviceExtensions = new Vector<IntPtr>(enabledExtensions))
                 {
                     if (useSwapChain)
                     {

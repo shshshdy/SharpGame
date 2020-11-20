@@ -21,7 +21,7 @@ namespace SharpGame
         public string Name {get; set;}
 
         private VkCommandPool cmdPool;
-        private NativeList<VkCommandBuffer> cmdBuffers = new NativeList<VkCommandBuffer>();
+        private Vector<VkCommandBuffer> cmdBuffers = new Vector<VkCommandBuffer>();
 
         int currentIndex = 0;
         public int CurrentIndex => currentIndex;

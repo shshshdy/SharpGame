@@ -26,61 +26,53 @@ using System.Runtime.InteropServices;
 namespace SharpGame
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Int2 : IEquatable<Int2>
+    public struct Uint2 : IEquatable<Uint2>
     {
-        public int x;
+        public uint x;
 
-        public int y;
+        public uint y;
 
-        public static readonly Int2 Zero = new Int2(0, 0);
+        public static readonly Uint2 Zero = new Uint2(0, 0);
 
-        public Int2(int x, int y)
+        public Uint2(uint x, uint y)
         {
             this.x = x;
             this.y = y;
         }
 
-        public int X => x;
+        public uint X => x;
 
-        public int Y => y;
+        public uint Y => y;
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(ref Int2 other)
+        public bool Equals(ref Uint2 other)
         {
             return other.X == X && other.Y == Y;
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(Int2 other)
+        public bool Equals(Uint2 other)
         {
             return Equals(ref other);
         }
 
         public override bool Equals(object obj)
         {
-            if(!(obj is Int2))
+            if(!(obj is Uint2))
                 return false;
 
-            var strongValue = (Int2)obj;
+            var strongValue = (Uint2)obj;
             return Equals(ref strongValue);
         }
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (X * 397) ^ Y;
-            }
-        }
-
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator ==(Int2 left, Int2 right)
+        public static bool operator ==(Uint2 left, Uint2 right)
         {
             return left.Equals(ref right);
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator !=(Int2 left, Int2 right)
+        public static bool operator !=(Uint2 left, Uint2 right)
         {
             return !left.Equals(ref right);
         }
@@ -90,12 +82,20 @@ namespace SharpGame
             return string.Format("({0},{1})", X, Y);
         }
 
-        public static explicit operator Int2(vec2 value)
+        public override int GetHashCode()
         {
-            return new Int2((int)value.X, (int)value.Y);
+            int hashCode = 1502939027;
+            hashCode = hashCode * -1521134295 + x.GetHashCode();
+            hashCode = hashCode * -1521134295 + y.GetHashCode();
+            return hashCode;
         }
 
-        public static implicit operator vec2(Int2 value)
+        public static explicit operator Uint2(vec2 value)
+        {
+            return new Uint2((uint)value.X, (uint)value.Y);
+        }
+
+        public static implicit operator vec2(Uint2 value)
         {
             return new vec2(value.X, value.Y);
         }

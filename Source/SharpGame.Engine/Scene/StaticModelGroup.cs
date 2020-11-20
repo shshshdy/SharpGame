@@ -52,8 +52,8 @@ namespace SharpGame
         // Contains the indirect drawing commands
         Buffer indirectCommandsBuffer;
 
-        NativeList<VkDrawIndexedIndirectCommand> indirectCommands = new NativeList<VkDrawIndexedIndirectCommand>();
-        NativeList<InstanceData> instanceData = new NativeList<InstanceData>();
+        Vector<VkDrawIndexedIndirectCommand> indirectCommands = new Vector<VkDrawIndexedIndirectCommand>();
+        Vector<InstanceData> instanceData = new Vector<InstanceData>();
 
         uint objectCount = 0;
         uint indirectDrawCount = 0;

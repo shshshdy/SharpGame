@@ -30,8 +30,8 @@ namespace SharpGame
 
         public VertexComponent[] vertexComponents = defaultVertexComponents;
 
-        static NativeList<float> vertexBuffer = new NativeList<float>(1024 * 1024);  
-        static NativeList<uint> indexBuffer = new NativeList<uint>(1024 * 1024);     
+        static Vector<float> vertexBuffer = new Vector<float>(1024 * 1024);  
+        static Vector<uint> indexBuffer = new Vector<uint>(1024 * 1024);     
         static int vertexOffset = 0;
         static uint indexOffset = 0;
         public AssimpModelReader() : base("")

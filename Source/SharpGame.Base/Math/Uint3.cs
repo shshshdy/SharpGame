@@ -26,78 +26,83 @@ using System.Runtime.InteropServices;
 namespace SharpGame
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Int2 : IEquatable<Int2>
+    public struct Uint3 : IEquatable<Uint3>
     {
-        public int x;
+        public uint x;
 
-        public int y;
+        public uint y;
 
-        public static readonly Int2 Zero = new Int2(0, 0);
+        public uint z;
 
-        public Int2(int x, int y)
+        public static readonly Uint3 Zero = new Uint3(0, 0, 0);
+
+        public Uint3(uint x, uint y, uint z)
         {
             this.x = x;
             this.y = y;
+            this.z = z;
         }
 
-        public int X => x;
-
-        public int Y => y;
+        public uint X => x;
+        public uint Y => y;
+        public uint Z => z;
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(ref Int2 other)
+        public bool Equals(ref Uint3 other)
         {
-            return other.X == X && other.Y == Y;
+            return other.x == x && other.y == y && other.z == z;
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public bool Equals(Int2 other)
+        public bool Equals(Uint3 other)
         {
             return Equals(ref other);
         }
 
         public override bool Equals(object obj)
         {
-            if(!(obj is Int2))
+            if(!(obj is Uint3))
                 return false;
 
-            var strongValue = (Int2)obj;
+            var strongValue = (Uint3)obj;
             return Equals(ref strongValue);
         }
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (X * 397) ^ Y;
-            }
-        }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator ==(Int2 left, Int2 right)
+        public static bool operator ==(Uint3 left, Uint3 right)
         {
             return left.Equals(ref right);
         }
 
         [MethodImpl((MethodImplOptions)0x100)] // MethodImplOptions.AggressiveInlining
-        public static bool operator !=(Int2 left, Int2 right)
+        public static bool operator !=(Uint3 left, Uint3 right)
         {
             return !left.Equals(ref right);
         }
 
         public override string ToString()
         {
-            return string.Format("({0},{1})", X, Y);
+            return string.Format("({0},{1},{2})", x, y, z);
         }
 
-        public static explicit operator Int2(vec2 value)
+        public override int GetHashCode()
         {
-            return new Int2((int)value.X, (int)value.Y);
+            int hashCode = 373119288;
+            hashCode = hashCode * -1521134295 + x.GetHashCode();
+            hashCode = hashCode * -1521134295 + y.GetHashCode();
+            hashCode = hashCode * -1521134295 + z.GetHashCode();
+            return hashCode;
         }
 
-        public static implicit operator vec2(Int2 value)
+        public static explicit operator Uint3(vec3 value)
         {
-            return new vec2(value.X, value.Y);
+            return new Uint3((uint)value.x, (uint)value.y, (uint)value.z);
+        }
+
+        public static implicit operator vec3(Uint3 value)
+        {
+            return new vec3(value.x, value.y, value.z);
         }
         
     }

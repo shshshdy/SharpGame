@@ -28,7 +28,7 @@ namespace SharpGame
         public PushConstantRange[] PushConstant { get => pushConstant; set { SetPushConstants(value); } }
         private PushConstantRange[] pushConstant;
 
-        private NativeList<PushConstantRange> combindePushConstant = new NativeList<PushConstantRange>();
+        private Vector<PushConstantRange> combindePushConstant = new Vector<PushConstantRange>();
         public List<string> PushConstantNames { get; set; }
 
         public DefaultResourcSet DefaultResourcSet { get; set;}

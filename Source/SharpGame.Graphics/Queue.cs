@@ -167,7 +167,7 @@ namespace SharpGame
             native.pBinds = (VkSparseMemoryBind*)Unsafe.AsPointer(ref binds[0]);
         }
 
-        public SparseImageOpaqueMemoryBindInfo(Image image, NativeList<VkSparseMemoryBind> binds)
+        public SparseImageOpaqueMemoryBindInfo(Image image, Vector<VkSparseMemoryBind> binds)
         {
             native.image = image.handle;
             native.bindCount = binds.Count;
@@ -186,7 +186,7 @@ namespace SharpGame
             native.pBinds = (VkSparseImageMemoryBind*)Unsafe.AsPointer(ref binds[0]);
         }
 
-        public SparseImageMemoryBindInfo(Image image, NativeList<VkSparseImageMemoryBind> binds)
+        public SparseImageMemoryBindInfo(Image image, Vector<VkSparseImageMemoryBind> binds)
         {
             native.image = image.handle;
             native.bindCount = binds.Count;

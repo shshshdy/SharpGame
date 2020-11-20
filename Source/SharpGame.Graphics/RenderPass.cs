@@ -23,7 +23,7 @@ namespace SharpGame
 
             unsafe
             {
-                using NativeList<VkSubpassDescription> subPasses = new NativeList<VkSubpassDescription>((uint)subpasses.Length, (uint)subpasses.Length);
+                using Vector<VkSubpassDescription> subPasses = new Vector<VkSubpassDescription>((uint)subpasses.Length, (uint)subpasses.Length);
 
                 var renderPassCreateInfo = VkRenderPassCreateInfo.New();
                 renderPassCreateInfo.flags = flags;

@@ -17,7 +17,7 @@ namespace SharpGame
         public VkColorSpaceKHR ColorSpace { get; private set; }
         public VkSwapchainKHR swapchain;
         public uint ImageCount { get; private set; }
-        public NativeList<VkImage> VkImages { get; private set; } = new NativeList<VkImage>();
+        public Vector<VkImage> VkImages { get; private set; } = new Vector<VkImage>();
         public Image[] Images { get; private set; }
         public ImageView[] ImageViews { get; private set; }
 
@@ -78,7 +78,7 @@ namespace SharpGame
             vkGetPhysicalDeviceQueueFamilyProperties(Device.PhysicalDevice, &queueCount, null);
             Debug.Assert(queueCount >= 1);
 
-            using (NativeList<VkQueueFamilyProperties> queueProps = new NativeList<VkQueueFamilyProperties>(queueCount))
+            using (Vector<VkQueueFamilyProperties> queueProps = new Vector<VkQueueFamilyProperties>(queueCount))
             {
                 vkGetPhysicalDeviceQueueFamilyProperties(Device.PhysicalDevice, &queueCount, queueProps.DataPtr);
                 queueProps.Count = queueCount;
@@ -149,7 +149,7 @@ namespace SharpGame
                 Debug.Assert(err == VkResult.Success);
                 Debug.Assert(formatCount > 0);
 
-                using (NativeList<VkSurfaceFormatKHR> surfaceFormats = new NativeList<VkSurfaceFormatKHR>(formatCount))
+                using (Vector<VkSurfaceFormatKHR> surfaceFormats = new Vector<VkSurfaceFormatKHR>(formatCount))
                 {
                     err = vkGetPhysicalDeviceSurfaceFormatsKHR(Device.PhysicalDevice, Surface, &formatCount, surfaceFormats.DataPtr);
                     surfaceFormats.Count = formatCount;
@@ -213,7 +213,7 @@ namespace SharpGame
             Debug.Assert(err == VkResult.Success);
             Debug.Assert(presentModeCount > 0);
 
-            using (NativeList<VkPresentModeKHR> presentModes = new NativeList<VkPresentModeKHR>(presentModeCount))
+            using (Vector<VkPresentModeKHR> presentModes = new Vector<VkPresentModeKHR>(presentModeCount))
             {
                 err = vkGetPhysicalDeviceSurfacePresentModesKHR(Device.PhysicalDevice, Surface, &presentModeCount, (VkPresentModeKHR*)presentModes.Data);
                 Debug.Assert(err == VkResult.Success);

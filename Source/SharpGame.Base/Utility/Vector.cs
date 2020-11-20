@@ -8,7 +8,7 @@ using System.Diagnostics;
 #endif
 namespace SharpGame
 {
-    public unsafe class NativeList<T> : IEnumerable<T>, IDisposable where T : unmanaged
+    public unsafe class Vector<T> : IEnumerable<T>, IDisposable where T : unmanaged
     {
         private T* dataPtr;
         private uint capacity;
@@ -18,19 +18,19 @@ namespace SharpGame
         private const float GrowthFactor = 2f;
         private static readonly uint s_elementByteSize = InitializeTypeSize();
 
-        public NativeList() : this(DefaultCapacity) { }
-        public NativeList(uint capacity)
+        public Vector() : this(DefaultCapacity) { }
+        public Vector(uint capacity)
         {
             Allocate(capacity);
         }
 
-        public NativeList(uint capacity, uint count)
+        public Vector(uint capacity, uint count)
         {
             Allocate(capacity);
             Count = count;
         }
 
-        public NativeList(NativeList<T> existingList)
+        public Vector(Vector<T> existingList)
         {
             Allocate(existingList.capacity);
             Unsafe.CopyBlock(dataPtr, existingList.dataPtr, existingList.count * s_elementByteSize);
@@ -340,7 +340,7 @@ namespace SharpGame
         }
         
 #if DEBUG
-        ~NativeList()
+        ~Vector()
         {
             if (dataPtr != null)
             {
@@ -402,9 +402,9 @@ namespace SharpGame
         public struct View<ViewType> : IEnumerable<ViewType> where ViewType : struct
         {
             private static readonly uint s_elementByteSize = (uint)Unsafe.SizeOf<ViewType>();
-            private readonly NativeList<T> _parent;
+            private readonly Vector<T> _parent;
 
-            public View(NativeList<T> parent)
+            public View(Vector<T> parent)
             {
                 _parent = parent;
             }
@@ -474,11 +474,11 @@ namespace SharpGame
 
     public struct ReadOnlyNativeListView<T> : IEnumerable<T> where T : unmanaged
     {
-        private readonly NativeList<T> _list;
+        private readonly Vector<T> _list;
         private readonly uint _start;
         public readonly uint Count;
 
-        public ReadOnlyNativeListView(NativeList<T> list, uint start, uint count)
+        public ReadOnlyNativeListView(Vector<T> list, uint start, uint count)
         {
             _list = list;
             _start = start;

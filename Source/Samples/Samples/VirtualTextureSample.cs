@@ -65,9 +65,9 @@ namespace SharpGame.Samples
     {
         Image image;                                                      // Texture image handle
         BindSparseInfo bindSparseInfo;                                    // Sparse queue binding information
-        NativeList<VirtualTexturePage> pages = new NativeList<VirtualTexturePage>();                              // Contains all virtual pages of the texture
-        NativeList<VkSparseImageMemoryBind> sparseImageMemoryBinds = new NativeList<VkSparseImageMemoryBind>();   // Sparse image memory bindings of all memory-backed virtual tables
-        NativeList<VkSparseMemoryBind> opaqueMemoryBinds = new NativeList<VkSparseMemoryBind>();                  // Sparse ópaque memory bindings for the mip tail (if present)
+        Vector<VirtualTexturePage> pages = new Vector<VirtualTexturePage>();                              // Contains all virtual pages of the texture
+        Vector<VkSparseImageMemoryBind> sparseImageMemoryBinds = new Vector<VkSparseImageMemoryBind>();   // Sparse image memory bindings of all memory-backed virtual tables
+        Vector<VkSparseMemoryBind> opaqueMemoryBinds = new Vector<VkSparseMemoryBind>();                  // Sparse ópaque memory bindings for the mip tail (if present)
         SparseImageMemoryBindInfo[] imageMemoryBindInfo;                    // Sparse image memory bind info
         SparseImageOpaqueMemoryBindInfo[] opaqueMemoryBindInfo;             // Sparse image opaque memory bind info (mip tail)
         uint mipTailStart;                                              // First mip level in mip tail
@@ -132,8 +132,68 @@ namespace SharpGame.Samples
         }
     }
 
-    [SampleDesc(sortOrder = 6)]
+    [SampleDesc(sortOrder = 10)]
     public class VirtualTextureSample : Sample
     {
+        public override void Init()
+        {
+            scene = new Scene()
+            {
+                new Octree { },
+                new DebugRenderer { },
+
+                new Environment
+                {
+                    SunlightDir = glm.normalize(new vec3(-1.0f, -1.0f, 0.0f))
+                },
+
+                new Node("Camera", new vec3(0, 2, -10), glm.radians(10, 0, 0) )
+                {
+                    new Camera
+                    {
+                        NearClip = 0.5f,
+                        FarClip = 100,
+                    },
+
+                },
+
+            };
+
+            camera = scene.GetComponent<Camera>(true);
+
+            var importer = new AssimpModelReader
+            {
+                vertexComponents = new[]
+                {
+                    VertexComponent.Position,
+                    VertexComponent.Texcoord
+                }
+            };
+
+            {
+                var node = scene.CreateChild("Plane");
+                var staticModel = node.AddComponent<StaticModel>();
+                var model = GeometryUtil.CreatePlaneModel(100, 100, 32, 32, true);
+                staticModel.SetModel(model);
+                var mat = Resources.Load<Material>("materials/Grass.material");
+                mat.SetTexture("NormalMap", Texture.Blue);
+                mat.SetTexture("SpecMap", Texture.Black);
+                staticModel.SetMaterial(mat);
+            }
+
+            MainView.Attach(camera, scene);
+
+        }
+
+
+        Uint3 alignedDivision(in VkExtent3D extent, in VkExtent3D granularity)
+        {
+            Uint3 res = new Uint3();
+            res.x = extent.width / granularity.width + ((extent.width % granularity.width != 0) ? 1u : 0u);
+            res.y = extent.height / granularity.height + ((extent.height % granularity.height != 0) ? 1u : 0u);
+            res.z = extent.depth / granularity.depth + ((extent.depth % granularity.depth != 0) ? 1u : 0u);
+            return res;
+        }
+
     }
 }
