@@ -43,7 +43,7 @@ namespace SharpGame
 
             initialized = true;
         }
-        public void DeviceLost()
+        public virtual void DeviceLost()
         {
             foreach (var rp in RenderPassList)
             {
@@ -51,7 +51,7 @@ namespace SharpGame
             }
         }
           
-        public void DeviceReset()
+        public virtual void DeviceReset()
         {
             OnReset();
 

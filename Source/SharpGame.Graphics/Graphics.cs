@@ -90,7 +90,7 @@ namespace SharpGame
 
             DescriptorPoolManager = new DescriptorPoolManager();
 
-            acquireSemaphore = new Semaphore();
+            acquireSemaphore = new Semaphore(0);
 
         }
 
@@ -351,7 +351,7 @@ namespace SharpGame
         {
             cmdBuffer.End();
 
-            WorkQueue.Submit(null, PipelineStageFlags.None, cmdBuffer, null);
+            WorkQueue.Submit(Semaphore.Null, PipelineStageFlags.None, cmdBuffer, Semaphore.Null);
             WorkQueue.WaitIdle();
 
             primaryCmdPool.FreeCommandBuffer(cmdBuffer);

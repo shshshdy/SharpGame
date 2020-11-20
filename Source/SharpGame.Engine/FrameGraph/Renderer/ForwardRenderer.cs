@@ -13,6 +13,7 @@ namespace SharpGame
             uint height = Graphics.Height;
 
             Add(new ShadowPass());
+
             Add(new FrameGraphPass
             {
                 new RenderTextureInfo(Graphics.Swapchain),

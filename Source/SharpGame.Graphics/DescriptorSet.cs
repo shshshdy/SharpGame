@@ -25,7 +25,7 @@ namespace SharpGame
         internal FixedArray3<VkDescriptorSet> descriptorSet;
    
         internal WriteDescriptorSet[][] writeDescriptorSets = new WriteDescriptorSet[Swapchain.IMAGE_COUNT][];
-        internal bool[][] updated = new bool[Swapchain.IMAGE_COUNT][];
+        internal bool[][] needUpdated = new bool[Swapchain.IMAGE_COUNT][];
 
         public DescriptorSet(DescriptorSetLayout resLayout)
         {
@@ -49,7 +49,7 @@ namespace SharpGame
             for (int i = 0; i < Swapchain.IMAGE_COUNT; i++)
             {
                 writeDescriptorSets[i] = new WriteDescriptorSet[resLayout.NumBindings];
-                updated[i] = new bool[resLayout.NumBindings];
+                needUpdated[i] = new bool[resLayout.NumBindings];
             }
         }
 
@@ -76,7 +76,7 @@ namespace SharpGame
             for (int i = 0; i < Swapchain.IMAGE_COUNT; i++)
             {
                 writeDescriptorSets[i] = new WriteDescriptorSet[resLayout.NumBindings];
-                updated[i] = new bool[resLayout.NumBindings];
+                needUpdated[i] = new bool[resLayout.NumBindings];
             }
 
             for(uint i = 0; i < resLayout.NumBindings; i++)
@@ -118,7 +118,7 @@ namespace SharpGame
             {
                 writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
                                descriptorType, ref imageInfo, 1);
-                updated[img][dstBinding] = false;
+                needUpdated[img][dstBinding] = true;
             }
             return this;
         }
@@ -130,7 +130,7 @@ namespace SharpGame
             {
                 writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
                                descriptorType, ref imageInfo[0], (uint)imageInfo.Length); 
-                updated[img][dstBinding] = false;
+                needUpdated[img][dstBinding] = true;
             }
 
             return this;
@@ -143,7 +143,7 @@ namespace SharpGame
             {
                 writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
                                descriptorType, ref buffer[img].descriptor, 1);
-                updated[img][dstBinding] = false;
+                needUpdated[img][dstBinding] = true;
             }
 
             return this;
@@ -156,7 +156,7 @@ namespace SharpGame
             {
                 writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
                                descriptorType, ref rt.attachmentViews[img].descriptor, 1);
-                updated[img][dstBinding] = false;
+                needUpdated[img][dstBinding] = true;
             }
 
             return this;
@@ -169,7 +169,7 @@ namespace SharpGame
             {
                 writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
                                descriptorType, ref bufferInfo, 1);
-                updated[img][dstBinding] = false;
+                needUpdated[img][dstBinding] = true;
             }
 
             return this;
@@ -182,7 +182,7 @@ namespace SharpGame
             {
                 writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
                                descriptorType, ref bufferInfo[0], (uint)bufferInfo.Length);
-                updated[img][dstBinding] = false;
+                needUpdated[img][dstBinding] = true;
             }
 
             return this;
@@ -196,7 +196,7 @@ namespace SharpGame
             {
                 writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
                                descriptorType, ref bufferInfo, bufferView);
-                updated[img][dstBinding] = false;
+                needUpdated[img][dstBinding] = true;
             }
 
             return this;
@@ -210,7 +210,7 @@ namespace SharpGame
             {
                 writeDescriptorSets[img][dstBinding] = new WriteDescriptorSet(dstBinding, descriptorSet[img],
                                descriptorType, ref buffer.Buffer.descriptor, buffer.Buffer.view);
-                updated[img][dstBinding] = false;
+                needUpdated[img][dstBinding] = true;
             }
 
             return this;
@@ -314,10 +314,10 @@ namespace SharpGame
                
             for (uint i = 0; i < writeDescriptorSets[img].Length; i++)
             {
-                if (!updated[img][i])
+                if (needUpdated[img][i])
                 {
                     count++;
-                    updated[img][i] = true;
+                    needUpdated[img][i] = false;
                 }
                 else{
 

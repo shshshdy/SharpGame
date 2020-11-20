@@ -6,9 +6,9 @@
 #define AMBIENT_GLOBAL 0.2f
 
 layout(set = 3, binding = 0) uniform sampler2D DiffMap;
-layout(set = 4, binding = 0) uniform sampler2D NormalMap;
-layout(set = 5, binding = 0) uniform sampler2D SpecMap;
-layout(set = 6, binding = 0) uniform sampler2D AlphaMap;
+layout(set = 3, binding = 1) uniform sampler2D NormalMap;
+layout(set = 3, binding = 2) uniform sampler2D SpecMap;
+layout(set = 3, binding = 3) uniform sampler2D AlphaMap;
 
 layout(location = 0) in vec4 inWorldPos;
 layout(location = 1) in vec2 inUV;

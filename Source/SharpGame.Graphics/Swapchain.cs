@@ -378,7 +378,7 @@ namespace SharpGame
 
         }
 
-        public unsafe void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = null)
+        public unsafe void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = default)
         {
             var presentInfo = VkPresentInfoKHR.New();
             presentInfo.pNext = null;
@@ -387,7 +387,7 @@ namespace SharpGame
             presentInfo.pSwapchains = &sc;
             presentInfo.pImageIndices = &imageIndex;
             // Check if a wait semaphore has been specified to wait for before presenting the image
-            if (waitSemaphore != null)
+            if (waitSemaphore != default)
             {
                 presentInfo.pWaitSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphore.native);
                 presentInfo.waitSemaphoreCount = 1;

@@ -16,7 +16,7 @@ namespace SharpGame
 
         private RenderTexture albedoRT;
         private RenderTexture normalRT;
-        private RenderTexture depthRT;
+        private RenderTexture positionRT;
         private RenderTexture depthHWRT;
 
         protected Shader clusterDeferred;
@@ -205,29 +205,16 @@ namespace SharpGame
             uint height = (uint)Graphics.Height;
             Format depthFormat = Device.GetSupportedDepthFormat();
 
-            albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
-                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled, 
-                        SampleCountFlags.Count1);
+            albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled);
+            normalRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled);
+            positionRT = new RenderTexture(width, height, 1, Format.R32g32b32a32Sfloat, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled);
+            depthHWRT = new RenderTexture(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled);
 
-            normalRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm,
-                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled,
-                        SampleCountFlags.Count1);
-
-            depthRT = new RenderTexture(width, height, 1, Format.R32g32b32a32Sfloat,
-                        ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled,
-                        SampleCountFlags.Count1);
-
-            depthHWRT = new RenderTexture(width, height, 1, depthFormat,
-                        ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, /*ImageAspectFlags.Depth | ImageAspectFlags.Stencil,*/
-                        SampleCountFlags.Count1
-                        );
-
-            var geometryFB = Framebuffer.Create(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, depthRT.imageView, depthHWRT.imageView });
-
+            var geometryFB = Framebuffer.Create(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, positionRT.imageView, depthHWRT.imageView });
 #if HWDEPTH
             deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
 #else
-            deferredSet1 = new DescriptorSet(deferredLayout1, albedoRT, normalRT, depthRT);
+            deferredSet1 = new DescriptorSet(deferredLayout1, albedoRT, normalRT, positionRT);
 #endif
             return new Framebuffer[] { geometryFB, geometryFB, geometryFB };
 

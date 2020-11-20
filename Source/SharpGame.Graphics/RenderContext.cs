@@ -53,7 +53,7 @@ namespace SharpGame
         {
             this.id = id;
 
-            acquireSemaphore = new Semaphore();
+            acquireSemaphore = new Semaphore(0);
 
             for(int i = 0; i < (int)SubmitQueue.MaxCount; i++)
             {
@@ -61,7 +61,7 @@ namespace SharpGame
                 {
                     cmdBuffer = pools[i].AllocateCommandBuffer(CommandBufferLevel.Primary),
                     submitFence = new Fence(FenceCreateFlags.Signaled),
-                    semaphore = new Semaphore(),
+                    semaphore = new Semaphore(0),
                     pipelineStageFlags = (i == (int)SubmitQueue.Compute ? PipelineStageFlags.ComputeShader : PipelineStageFlags.FragmentShader)
                 };
             }

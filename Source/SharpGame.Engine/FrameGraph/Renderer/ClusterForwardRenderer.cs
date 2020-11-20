@@ -25,6 +25,7 @@ namespace SharpGame
             clustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
                 new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment),
+
                 new SceneSubpass("clustering")
                 {
                     Set1 = clusterSet1
@@ -55,18 +56,6 @@ namespace SharpGame
             mainPass.frameBufferCreator = (rp) => Graphics.Framebuffers;
 
             Add(mainPass);
-        }
-
-        Framebuffer[] OnCreateFramebuffers(RenderPass rp)
-        {
-            uint width = (uint)Graphics.Width;
-            uint height = (uint)Graphics.Height;
-
-            var depthRT = Graphics.DepthRT;// new RenderTarget(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled, ImageAspectFlags.Depth, SampleCountFlags.Count1, ImageLayout.ShaderReadOnlyOptimal);
-            var clusterFB = Framebuffer.Create(rp, width, height, 1, new[] { depthRT.imageView });
-
-            //FrameGraph.AddDebugImage(depthRT.view);
-            return new Framebuffer[] { clusterFB, clusterFB, clusterFB };
         }
 
         protected override void OnBeginPass(FrameGraphPass renderPass, CommandBuffer cmd)

@@ -8,11 +8,10 @@
 #include "Shadow.glsl"
 
 layout(set = 2, binding = 0) uniform sampler2D DiffMap;
-layout(set = 3, binding = 0) uniform sampler2D NormalMap;
-layout(set = 4, binding = 0) uniform sampler2D SpecMap;
-//layout(set = 5, binding = 0) uniform sampler2D EmissiveMap;
+layout(set = 2, binding = 1) uniform sampler2D NormalMap;
+layout(set = 2, binding = 2) uniform sampler2D SpecMap;
 #ifdef ALPHA_MAP
-layout(set = 5, binding = 0) uniform sampler2D AlphaMap;
+layout(set = 2, binding = 3) uniform sampler2D AlphaMap;
 #endif
 layout (location = 0) in vec4 inWorldPos;
 layout (location = 1) in vec2 inUV;

@@ -4,20 +4,30 @@ using System.Text;
 
 namespace SharpGame
 {
+    using System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
     using Vulkan;
 
-    public class Semaphore : DisposeBase
+    public struct Semaphore : IDisposable
     {
         internal VkSemaphore native;
-        internal Semaphore()
+
+        public static readonly Semaphore Null;
+
+        public Semaphore(uint flags)
         {
-            native = Device.CreateSemaphore();
+            native = Device.CreateSemaphore(flags);
         }
 
-        protected override void Destroy(bool disposing)
+        public void Dispose()
         {
             Device.Destroy(native);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator bool(in Semaphore sem)
+        {
+            return sem.native != 0;
         }
 
     }

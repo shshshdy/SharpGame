@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Vulkan;
 using static Vulkan.VulkanNative;
@@ -37,75 +38,38 @@ namespace SharpGame
         public void Submit(SubmitInfo[] submits, Fence fence = null)
         {
             int count = submits?.Length ?? 0;
-            var nativeSubmits = stackalloc VkSubmitInfo[count];
-            for (int i = 0; i < count; i++)
-                submits[i].ToNative(out nativeSubmits[i]);
-
-            VulkanUtil.CheckResult(vkQueueSubmit(native, (uint)count, nativeSubmits,
-                fence?.native ?? VkFence.Null));           
+            VulkanUtil.CheckResult(vkQueueSubmit(native, (uint)count, submits != null ? (VkSubmitInfo*)Unsafe.AsPointer(ref submits[0].native) : null, fence?.native ?? VkFence.Null));           
         }
 
-        /// <summary>
-        /// Submits a sequence of semaphores or command buffers to a queue.
-        /// </summary>
-        /// <param name="submit">Specifies a command buffer submission batch.</param>
-        /// <param name="fence">
-        /// An optional handle to a fence to be signaled. If fence is not <c>null</c>, it defines a
-        /// fence signal operation.
-        /// </param>
-        /// <exception cref="VulkanException">Vulkan returns an error code.</exception>
         public void Submit(SubmitInfo submit, Fence fence = null)
         {
-            submit.ToNative(out var nativeSubmit);
-            VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &nativeSubmit,
-                fence?.native ?? VkFence.Null));
+            VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &submit.native, fence?.native ?? VkFence.Null));
         }
 
-        /// <summary>
-        /// Submits semaphores or a command buffer to a queue.
-        /// </summary>
-        /// <param name="fence">
-        /// An optional handle to a fence to be signaled. If fence is not <c>null</c>, it defines a
-        /// fence signal operation.
-        /// </param>
-        /// <param name="waitSemaphore">
-        /// Semaphore upon which to wait before the command buffer for this batch begins execution.
-        /// If semaphore to wait on is provided, it defines a semaphore wait operation.
-        /// </param>
-        /// <param name="waitDstStageMask">Pipeline stages at which semaphore wait will occur.</param>
-        /// <param name="commandBuffer">Command buffer to execute in the batch.</param>
-        /// <param name="signalSemaphore">
-        /// Semaphore which will be signaled when the command buffer for this batch has completed
-        /// execution. If semaphore to be signaled is provided, it defines a semaphore signal operation.
-        /// </param>
-        /// <exception cref="VulkanException">Vulkan returns an error code.</exception>
         public void Submit(Semaphore waitSemaphore, PipelineStageFlags waitDstStageMask,
             CommandBuffer commandBuffer, Semaphore signalSemaphore, Fence fence = null)
         {
-            VkSemaphore waitSemaphoreHandle = waitSemaphore?.native ?? VkSemaphore.Null;
             VkCommandBuffer commandBufferHandle = commandBuffer?.commandBuffer ?? VkCommandBuffer.Null;
-            VkSemaphore signalSemaphoreHandle = signalSemaphore?.native ?? VkSemaphore.Null;
 
             var nativeSubmit = VkSubmitInfo.New();
 
-            if (waitSemaphore != null)
+            if (waitSemaphore != default)
             {
-                waitSemaphoreHandle = waitSemaphore.native;
                 nativeSubmit.waitSemaphoreCount = 1;
-                nativeSubmit.pWaitSemaphores = &waitSemaphoreHandle;
+                nativeSubmit.pWaitSemaphores = &waitSemaphore.native;
                 nativeSubmit.pWaitDstStageMask = (VkPipelineStageFlags*)&waitDstStageMask;
             }
 
-            if (commandBufferHandle != IntPtr.Zero)
+            if (commandBuffer != null)
             {
                 nativeSubmit.commandBufferCount = 1;
                 nativeSubmit.pCommandBuffers = &commandBufferHandle;
             }
 
-            if (signalSemaphore != null)
+            if (signalSemaphore != default)
             {
                 nativeSubmit.signalSemaphoreCount = 1;
-                nativeSubmit.pSignalSemaphores = &signalSemaphoreHandle;
+                nativeSubmit.pSignalSemaphores = &signalSemaphore.native;
             }
             
             VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &nativeSubmit, fence != null ? fence.native : VkFence.Null));
@@ -116,14 +80,6 @@ namespace SharpGame
             }
         }
 
-        /// <summary>
-        /// Wait for a queue to become idle.
-        /// <para>
-        /// Equivalent to submitting a fence to a queue and waiting with an infinite timeout for that
-        /// fence to signal.
-        /// </para>
-        /// </summary>
-        /// <exception cref="VulkanException">Vulkan returns an error code.</exception>
         public void WaitIdle()
         {
             VulkanUtil.CheckResult(vkQueueWaitIdle(native));
@@ -181,64 +137,23 @@ namespace SharpGame
     /// </summary>
     public struct SubmitInfo
     {
-        /// <summary>
-        /// Semaphores upon which to wait before the command buffers for this batch begin execution.
-        /// If semaphores to wait on are provided, they define a semaphore wait operation.
-        /// </summary>
-        public long[] waitSemaphores;
-        /// <summary>
-        /// Pipeline stages at which each corresponding semaphore wait will occur.
-        /// </summary>
-        public PipelineStageFlags[] waitDstStageMask;
-        /// <summary>
-        /// Command buffers to execute in the batch.
-        /// </summary>
-        public IntPtr[] commandBuffers;
-        /// <summary>
-        /// Semaphores which will be signaled when the command buffers for this batch have completed
-        /// execution. If semaphores to be signaled are provided, they define a semaphore signal operation.
-        /// </summary>
-        public long[] signalSemaphores;
-        /*
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SubmitInfo"/> structure.
-        /// </summary>
-        /// <param name="waitSemaphores">
-        /// Semaphores upon which to wait before the command buffers for this batch begin execution.
-        /// If semaphores to wait on are provided, they define a semaphore wait operation.
-        /// </param>
-        /// <param name="waitDstStageMask">
-        /// Pipeline stages at which each corresponding semaphore wait will occur.
-        /// </param>
-        /// <param name="commandBuffers">
-        /// Command buffers to execute in the batch. The command buffers submitted in a batch begin
-        /// execution in the order they appear in <paramref name="commandBuffers"/>, but may complete
-        /// out of order.
-        /// </param>
-        /// <param name="signalSemaphores">
-        /// Semaphores which will be signaled when the command buffers for this batch have completed
-        /// execution. If semaphores to be signaled are provided, they define a semaphore signal operation.
-        /// </param>
+        internal VkSubmitInfo native;        
         public SubmitInfo(Semaphore[] waitSemaphores = null, PipelineStageFlags[] waitDstStageMask = null,
             CommandBuffer[] commandBuffers = null, Semaphore[] signalSemaphores = null)
         {
-            WaitSemaphores = waitSemaphores?.ToHandleArray();
-            WaitDstStageMask = waitDstStageMask;
-            CommandBuffers = commandBuffers?.ToHandleArray();
-            SignalSemaphores = signalSemaphores?.ToHandleArray();
-        }*/
-        
-        internal void ToNative(out VkSubmitInfo native)
-        {
             native = VkSubmitInfo.New();
-            native.waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0);
-            //native.pWaitSemaphores = Interop.Struct.AllocToPointer(WaitSemaphores);
-            //native.pWaitDstStageMask = Interop.Struct.AllocToPointer(WaitDstStageMask);
-            native.commandBufferCount = (uint)(commandBuffers?.Length ?? 0);
-            //native.pCommandBuffers = Interop.Struct.AllocToPointer(CommandBuffers);
-            native.signalSemaphoreCount = (uint)(signalSemaphores?.Length ?? 0);
-            //native.pSignalSemaphores = Interop.Struct.AllocToPointer(SignalSemaphores);
+            unsafe
+            {
+                native.waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0);
+                native.pWaitSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphores[0]);
+                native.pWaitDstStageMask = (VkPipelineStageFlags*)Unsafe.AsPointer(ref waitDstStageMask[0]);
+                native.commandBufferCount = (uint)(commandBuffers?.Length ?? 0);
+                //native.pCommandBuffers = Interop.Struct.AllocToPointer(CommandBuffers);
+                native.signalSemaphoreCount = (uint)(signalSemaphores?.Length ?? 0);
+                native.pSignalSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphores[0]);
+            }
         }
+
     }
 
     /// <summary>
@@ -336,7 +251,7 @@ namespace SharpGame
             }
         }
 
-        internal void ToNative(out Native native)
+        internal void ToNative(out VkBindSparseInfo native)
         {
             int bufferBindCount = BufferBinds?.Length ?? 0;
             int imageOpaqueBindCount = ImageOpaqueBinds?.Length ?? 0;
@@ -370,253 +285,46 @@ namespace SharpGame
         }*/
     }
 
-    /// <summary>
-    /// Structure specifying a sparse buffer memory bind operation.
-    /// </summary>
     public unsafe struct SparseBufferMemoryBindInfo
     {
-        /// <summary>
-        /// The <see cref="VulkanCore.Buffer"/> object to be bound.
-        /// </summary>
-        public long Buffer;
-        /// <summary>
-        /// An array of <see cref="SparseMemoryBind"/> structures.
-        /// </summary>
-        public SparseMemoryBind[] Binds;
-        /*
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SparseBufferMemoryBindInfo"/> structure.
-        /// </summary>
-        /// <param name="buffer">The <see cref="VulkanCore.Buffer"/> object to be bound.</param>
-        /// <param name="binds">An array of <see cref="SparseMemoryBind"/> structures.</param>
-        public SparseBufferMemoryBindInfo(Buffer buffer, params SparseMemoryBind[] binds)
+        VkSparseBufferMemoryBindInfo native;
+        public SparseBufferMemoryBindInfo(Buffer buffer, params VkSparseMemoryBind[] binds)
         {
-            Buffer = buffer;
-            Binds = binds;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public long Buffer;
-            public int BindCount;
-            public IntPtr Binds;
-
-            public void Free()
-            {
-                Interop.Free(Binds);
-            }
-        }
-
-        internal void ToNative(Native* native)
-        {
-            native->Buffer = Buffer;
-            native->BindCount = Binds?.Length ?? 0;
-            native->Binds = Interop.Struct.AllocToPointer(Binds);
-        }*/
-    }
-
-    /// <summary>
-    /// Structure specifying a sparse memory bind operation.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct SparseMemoryBind
-    {
-        /// <summary>
-        /// The offset into the resource.
-        /// </summary>
-        public long ResourceOffset;
-        /// <summary>
-        /// The size of the memory region to be bound.
-        /// </summary>
-        public long Size;
-        /// <summary>
-        /// The <see cref="DeviceMemory"/> object that the range of the resource is bound to. If
-        /// memory 0, the range is unbound.
-        /// </summary>
-        public VkDeviceMemory Memory;
-        /// <summary>
-        /// The offset into the <see cref="DeviceMemory"/> object to bind the resource range to. If
-        /// memory is 0, this value is ignored.
-        /// </summary>
-        public long MemoryOffset;
-        /// <summary>
-        /// A bitmask specifying usage of the binding operation.
-        /// </summary>
-        public SparseMemoryBindFlags Flags;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SparseMemoryBind"/> structure.
-        /// </summary>
-        /// <param name="resourceOffset">The offset into the resource.</param>
-        /// <param name="size">The size of the memory region to be bound.</param>
-        /// <param name="memory">
-        /// The <see cref="DeviceMemory"/> object that the range of the resource is bound to. If
-        /// memory 0, the range is unbound.
-        /// </param>
-        /// <param name="memoryOffset">
-        /// The offset into the <see cref="DeviceMemory"/> object to bind the resource range to. If
-        /// memory is 0, this value is ignored.
-        /// </param>
-        /// <param name="flags">A bitmask specifying usage of the binding operation.</param>
-        public SparseMemoryBind(long resourceOffset, long size, VkDeviceMemory memory,
-            long memoryOffset = 0, SparseMemoryBindFlags flags = 0)
-        {
-            ResourceOffset = resourceOffset;
-            Size = size;
-            Memory = memory;
-            MemoryOffset = memoryOffset;
-            Flags = flags;
+            native.buffer = buffer.buffer;
+            native.bindCount = (uint)(binds?.Length ?? 0);
+            native.pBinds = (VkSparseMemoryBind*)Unsafe.AsPointer(ref binds[0]);
         }
     }
 
-    /// <summary>
-    /// Bitmask specifying usage of a sparse memory binding operation.
-    /// </summary>
     [Flags]
     public enum SparseMemoryBindFlags
     {
-        /// <summary>
-        /// No flags.
-        /// </summary>
         None = 0,
-        /// <summary>
-        /// Specifies that the memory being bound is only for the metadata aspect.
-        /// </summary>
         Metadata = 1 << 0
     }
 
-    /// <summary>
-    /// Structure specifying sparse image opaque memory bind info.
-    /// </summary>
     public unsafe struct SparseImageOpaqueMemoryBindInfo
     {
-        /// <summary>
-        /// The <see cref="VulkanCore.Image"/> object to be bound.
-        /// </summary>
-        public long Image;
-        /// <summary>
-        /// An array of <see cref="SparseMemoryBind"/> structures.
-        /// <para>Length must be greater than 0.</para>
-        /// </summary>
-        public SparseMemoryBind[] Binds;
-        /*
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SparseImageOpaqueMemoryBindInfo"/> structure.
-        /// </summary>
-        /// <param name="image">The <see cref="VulkanCore.Image"/> object to be bound.</param>
-        /// <param name="binds">An array of <see cref="SparseMemoryBind"/> structures.</param>
-        public SparseImageOpaqueMemoryBindInfo(Image image, params SparseMemoryBind[] binds)
+        VkSparseImageOpaqueMemoryBindInfo native;
+        public SparseImageOpaqueMemoryBindInfo(Image image, params VkSparseMemoryBind[] binds)
         {
-            Image = image;
-            Binds = binds;
+            native.image = image.handle;
+            native.bindCount = (uint)(binds?.Length ?? 0);
+            native.pBinds = (VkSparseMemoryBind*)Unsafe.AsPointer(ref binds[0]);
         }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public long Image;
-            public int BindCount;
-            public IntPtr Binds;
-
-            public void Free()
-            {
-                Interop.Free(Binds);
-            }
-        }
-
-        internal void ToNative(Native* native)
-        {
-            native->Image = Image;
-            native->BindCount = Binds?.Length ?? 0;
-            native->Binds = Interop.Struct.AllocToPointer(Binds);
-        }*/
     }
 
-    /// <summary>
-    /// Structure specifying sparse image memory bind info.
-    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct SparseImageMemoryBindInfo
     {
-        /// <summary>
-        /// The <see cref="VulkanCore.Image"/> object to be bound.
-        /// </summary>
-        public long Image;
-        /// <summary>
-        /// An array of <see cref="SparseImageMemoryBind"/> structures.
-        /// <para>Length must be greater than 0.</para>
-        /// </summary>
-        public SparseImageMemoryBind[] Binds;
-        /*
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SparseImageMemoryBind"/> structure.
-        /// </summary>
-        /// <param name="image">The <see cref="VulkanCore.Image"/> object to be bound.</param>
-        /// <param name="binds">An array of <see cref="SparseImageMemoryBind"/> structures.</param>
-        public SparseImageMemoryBindInfo(Image image, params SparseImageMemoryBind[] binds)
+        VkSparseImageMemoryBindInfo native;
+        public SparseImageMemoryBindInfo(Image image, params VkSparseImageMemoryBind[] binds)
         {
-            Image = image;
-            Binds = binds;
+            native.image = image.handle;
+            native.bindCount = (uint)(binds?.Length ?? 0);
+            native.pBinds = (VkSparseImageMemoryBind*)Unsafe.AsPointer(ref binds[0]);
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public long Image;
-            public int BindCount;
-            public IntPtr Binds;
-
-            public void Free()
-            {
-                Interop.Free(Binds);
-            }
-        }
-
-        internal void ToNative(Native* native)
-        {
-            native->Image = Image;
-            native->BindCount = Binds?.Length ?? 0;
-            native->Binds = Interop.Struct.AllocToPointer(Binds);
-        }*/
     }
 
-    /// <summary>
-    /// Structure specifying sparse image memory bind.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct SparseImageMemoryBind
-    {
-        /// <summary>
-        /// The aspect mask and region of interest in the image.
-        /// <para>Must be a valid subresource for <see cref="Image"/>.</para>
-        /// </summary>
-        //public ImageSubresource Subresource;
-        /// <summary>
-        /// The coordinates of the first texel within the image subresource to bind.
-        /// </summary>
-        public Offset3D Offset;
-        /// <summary>
-        /// The size in texels of the region within the image subresource to bind. The extent must be
-        /// a multiple of the sparse image block dimensions, except when binding sparse image blocks
-        /// along the edge of an image subresource it can instead be such that any coordinate of <see
-        /// cref="Offset"/> + <see cref="Extent"/> equals the corresponding dimensions of the image subresource.
-        /// </summary>
-        public Extent3D Extent;
-        /// <summary>
-        /// The <see cref="DeviceMemory"/> object that the sparse image blocks of the image are bound
-        /// to. If memory is 0, the sparse image blocks are unbound.
-        /// <para>Must match the memory requirements of the calling command's <see cref="Image"/>.</para>
-        /// </summary>
-        public long Memory;
-        /// <summary>
-        /// An offset into <see cref="DeviceMemory"/> object. If memory is 0, this value is ignored.
-        /// <para>Must match the memory requirements of the calling command's <see cref="Image"/>.</para>
-        /// </summary>
-        public long MemoryOffset;
-        /// <summary>
-        /// Sparse memory binding flags.
-        /// </summary>
-        public SparseMemoryBindFlags Flags;
-    }
 }
