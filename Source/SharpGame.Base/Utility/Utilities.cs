@@ -20,12 +20,6 @@ namespace SharpGame
             return ref Unsafe.AsRef<T>((void*)ptr);
         }
 
-        /// <summary>
-        /// Return the sizeof an array of struct. Equivalent to sizeof operator but works on generics too.
-        /// </summary>
-        /// <typeparam name="T">a struct</typeparam>
-        /// <param name="array">The array of struct to evaluate.</param>
-        /// <returns>sizeof in bytes of this array of struct</returns>
         public static int SizeOf<T>(T[] array) where T : struct
         {
             return array == null ? 0 : array.Length * Unsafe.SizeOf<T>();
@@ -33,33 +27,31 @@ namespace SharpGame
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IntPtr AsPointer<T>(ref T source)
+        {                
+            return (IntPtr)Unsafe.AsPointer(ref source);           
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T* AsPtr<T>(ref T source)  where T : unmanaged
+        {               
+            return (T*)Unsafe.AsPointer(ref source);            
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static K* AsPtr<K, T>(ref T source) where T : unmanaged where K : unmanaged
         {
-            unsafe
-            {
-                return (IntPtr)Unsafe.AsPointer(ref source);
-            }
+            return (K*)Unsafe.AsPointer(ref source);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IntPtr AsIntPtr<T>(in T source)
-        {
-            unsafe
-            {
-                return (IntPtr)Unsafe.AsPointer( ref Unsafe.AsRef(in source));
-            }
+        {               
+            return (IntPtr)Unsafe.AsPointer( ref Unsafe.AsRef(in source));            
         }
-        /// <summary>
-        /// Pins the specified source and call an action with the pinned pointer.
-        /// </summary>
-        /// <typeparam name="T">The type of the structure to pin</typeparam>
-        /// <param name="source">The source.</param>
-        /// <param name="pinAction">The pin action to perform on the pinned pointer.</param>
+
         public static void Pin<T>(ref T source, Action<IntPtr> pinAction) where T : struct
-        {
-            unsafe
-            {
-                pinAction((IntPtr)Unsafe.AsPointer(ref source));
-            }
+        {                
+            pinAction((IntPtr)Unsafe.AsPointer(ref source));            
         }
 
         /// <summary>

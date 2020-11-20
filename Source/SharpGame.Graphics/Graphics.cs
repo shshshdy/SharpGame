@@ -387,7 +387,7 @@ namespace SharpGame
             }
 
             var frame = renderFrames[renderContext];
-            if (frame.presentFence == null)
+            if (!frame.presentFence)
             {
                 frame.presentFence = new Fence(FenceCreateFlags.None);
             }

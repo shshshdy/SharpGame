@@ -32,37 +32,43 @@ namespace SharpGame
 
     }
 
-    public class Fence : DisposeBase
+    [Flags]
+    public enum FenceCreateFlags
     {
-        internal VkFence native;
+        None = 0,
+        Signaled = 1 << 0
+    }
+
+    public struct Fence : IDisposable
+    {
+        internal VkFence handle;
         public Fence(FenceCreateFlags flags)
         {
             VkFenceCreateInfo createInfo = VkFenceCreateInfo.New();
             createInfo.flags = (VkFenceCreateFlags)flags;
-            native = Device.CreateFence(ref createInfo);
+            handle = Device.CreateFence(ref createInfo);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator bool(in Fence sem)
+        {
+            return sem.handle != 0;
         }
 
         public VkResult GetStatus()
         {
-            VkResult result = Device.GetFenceStatus(native);
+            VkResult result = Device.GetFenceStatus(handle);
             return result;
         }
 
         public void Reset()
         {
-            Device.ResetFences(1, ref native);
+            Device.ResetFences(1, ref handle);
         }
 
         public void Wait(ulong timeout = ~0ul)
         {
-            Device.WaitForFences(1, ref native, false, timeout);
-        }
-
-        protected override void Destroy(bool disposing)
-        {
-            Device.Destroy(native);
-
-            base.Destroy(disposing);
+            Device.WaitForFences(1, ref handle, false, timeout);
         }
 
         internal unsafe static void Reset(Fence[] fences)
@@ -70,7 +76,7 @@ namespace SharpGame
             int count = fences?.Length ?? 0;
             Span<VkFence> handles = stackalloc VkFence[count];
             for (int i = 0; i < count; i++)
-                handles[i] = fences[i].native;
+                handles[i] = fences[i].handle;
 
             Device.ResetFences((uint)count, ref handles[0]);
         }
@@ -80,38 +86,32 @@ namespace SharpGame
             int count = fences?.Length ?? 0;
             Span<VkFence> handles = stackalloc VkFence[count];
             for (int i = 0; i < count; i++)
-                handles[i] = fences[i].native;
+                handles[i] = fences[i].handle;
 
             Device.WaitForFences((uint)count, ref handles[0], waitAll, timeout);
 
         }
 
-    }
-
-    /// <summary>
-    /// Bitmask specifying initial state and behavior of a fence.
-    /// </summary>
-    [Flags]
-    public enum FenceCreateFlags
-    {
-        /// <summary>
-        /// Specifies that the fence object is created in the unsignaled state.
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Specifies that the fence object is created in the signaled state. Otherwise, it is
-        /// created in the unsignaled state.
-        /// </summary>
-        Signaled = 1 << 0
-    }
-
-    public unsafe class Event : DisposeBase
-    {
-        VkEvent handle;
-        internal Event()
+        public void Dispose()
         {
-            var createInfo = new EventCreateInfo();
-            handle = Device.CreateEvent(ref createInfo.native);            
+            Device.Destroy(handle);
+        }
+    }
+
+    [Flags]
+    public enum EventCreateFlags
+    {
+        None = 0
+    }
+
+    public struct Event : IDisposable
+    {
+        internal VkEvent handle;
+        internal Event(EventCreateFlags flags)
+        {
+            var createInfo = VkEventCreateInfo.New();
+            createInfo.flags = (uint)flags;
+            handle = Device.CreateEvent(ref createInfo);            
         }
 
         public VkResult GetStatus()
@@ -132,31 +132,10 @@ namespace SharpGame
             Device.ResetEvent(handle);
         }
 
-        protected override void Destroy(bool disposing)
+        public void Dispose()
         {
             Device.Destroy(handle);
-
-            base.Destroy(disposing);
         }
-
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    internal ref struct EventCreateInfo
-    {
-        internal VkEventCreateInfo native;
-        public EventCreateInfo(EventCreateFlags flags)
-        {
-            native = VkEventCreateInfo.New();
-            native.flags = (uint)flags;
-        }
-        
-    }
-
-    // Is reserved for future use.
-    [Flags]
-    internal enum EventCreateFlags
-    {
-        None = 0
-    }
 }
