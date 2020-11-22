@@ -13,6 +13,7 @@ namespace SharpGame
     {
         public const ulong DEFAULT_FENCE_TIMEOUT = 100000000000;
         public static VkInstance VkInstance { get; private set; }
+        public static VkDevice Handle => device;
         public static VkPhysicalDevice PhysicalDevice { get; private set; }
         public static VkPhysicalDeviceProperties Properties { get; private set; }
         public static VkPhysicalDeviceFeatures Features { get; private set; }
@@ -439,9 +440,9 @@ namespace SharpGame
             return false;
         }
 
-        public static void GetPhysicalDeviceFormatProperties(VkFormat format, out VkFormatProperties pFeatures)
+        public static void GetPhysicalDeviceFormatProperties(Format format, out VkFormatProperties pFeatures)
         {
-            vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, out pFeatures);
+            vkGetPhysicalDeviceFormatProperties(PhysicalDevice, (VkFormat)format, out pFeatures);
         }
 
         public delegate VkResult vkCmdPushDescriptorSetKHRDelegate(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint set, uint descriptorWriteCount, VkWriteDescriptorSet* pDescriptorWrites);
@@ -668,9 +669,9 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkInvalidateMappedMemoryRanges(device, memoryRangeCount, ref pMemoryRanges));
         }
 
-        public static void GetImageMemoryRequirements(VkImage image, out VkMemoryRequirements pMemoryRequirements)
+        public static void GetImageMemoryRequirements(Image image, out VkMemoryRequirements pMemoryRequirements)
         {
-            vkGetImageMemoryRequirements(device, image, out pMemoryRequirements);
+            vkGetImageMemoryRequirements(device, image.handle, out pMemoryRequirements);
         }
 
         public static void BindImageMemory(VkImage image, VkDeviceMemory memory, ulong offset)

@@ -16,7 +16,7 @@ namespace SharpGame
 
         public const int DefaultCapacity = 4;
         private const float GrowthFactor = 2f;
-        private static readonly uint s_elementByteSize = InitializeTypeSize();
+        private static readonly uint s_elementByteSize = (uint)Unsafe.SizeOf<T>();
 
         public Vector() : this(DefaultCapacity) { }
         public Vector(uint capacity)
@@ -260,7 +260,7 @@ namespace SharpGame
 #else
             Debug.Assert(index < count);
 #endif
-            return new IntPtr(dataPtr + (index/* * s_elementByteSize*/));
+            return new IntPtr(dataPtr + index);
         }
 
         public void Resize(uint elementCount)
@@ -273,15 +273,6 @@ namespace SharpGame
             }
 
             count = elementCount;
-        }
-
-        private static uint InitializeTypeSize()
-        {
-#if VALIDATE
-            // TODO: DHetermine if the structure type contains references and throw if it does.
-            // https://github.com/dotnet/corefx/issues/14047
-#endif
-            return (uint)Unsafe.SizeOf<T>();
         }
 
         private void CoreResize(uint elementCount)
@@ -312,7 +303,7 @@ namespace SharpGame
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CoreRemoveAt(uint index)
         {
-            Unsafe.CopyBlock(dataPtr + index /** s_elementByteSize*/, dataPtr + (count - 1) /** s_elementByteSize*/, s_elementByteSize);
+            Unsafe.CopyBlock(dataPtr + index, dataPtr + count - 1, s_elementByteSize);
             count -= 1;
         }
 

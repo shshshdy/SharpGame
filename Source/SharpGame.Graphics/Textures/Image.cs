@@ -8,7 +8,7 @@ namespace SharpGame
 {
     public class Image : DisposeBase
     {
-        internal VkImage handle;
+        public VkImage handle;
         internal VkDeviceMemory memory;
         internal ulong allocationSize;
         internal uint memoryTypeIndex;
@@ -28,7 +28,7 @@ namespace SharpGame
             imageCreateInfo.ToNative(out VkImageCreateInfo native);
             handle = Device.CreateImage(ref native);
 
-            Device.GetImageMemoryRequirements(handle, out var memReqs);
+            Device.GetImageMemoryRequirements(this, out var memReqs);
 
             VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
             memAllocInfo.allocationSize = memReqs.size;

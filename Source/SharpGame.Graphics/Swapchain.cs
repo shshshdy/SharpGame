@@ -303,7 +303,7 @@ namespace SharpGame
 
                 // Set additional usage flag for blitting from the swapchain Images if supported
                 VkFormatProperties formatProps;
-                Device.GetPhysicalDeviceFormatProperties((VkFormat)ColorFormat, out formatProps);
+                Device.GetPhysicalDeviceFormatProperties(ColorFormat, out formatProps);
                 if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.BlitDst) != 0)
                 {
                     swapchainCI.imageUsage |= VkImageUsageFlags.TransferSrc;
