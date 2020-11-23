@@ -71,8 +71,8 @@ namespace SharpGame.Samples
         SparseImageMemoryBindInfo[] imageMemoryBindInfo;                    // Sparse image memory bind info
         SparseImageOpaqueMemoryBindInfo[] opaqueMemoryBindInfo;             // Sparse image opaque memory bind info (mip tail)
         public uint mipTailStart;                                              // First mip level in mip tail
-        VkSparseImageMemoryRequirements sparseImageMemoryRequirements; 
-        uint memoryTypeIndex;                                           
+        public VkSparseImageMemoryRequirements sparseImageMemoryRequirements; 
+        public uint memoryTypeIndex;                                           
 
         // @todo: comment
         public struct MipTailInfo
@@ -169,14 +169,7 @@ namespace SharpGame.Samples
 
             camera = scene.GetComponent<Camera>(true);
 
-            var importer = new AssimpModelReader
-            {
-                vertexComponents = new[]
-                {
-                    VertexComponent.Position,
-                    VertexComponent.Texcoord
-                }
-            };
+            prepareSparseTexture(4096, 4096, 1, Format.R8g8b8a8Unorm);
 
             {
                 var node = scene.CreateChild("Plane");
@@ -203,8 +196,6 @@ namespace SharpGame.Samples
             return res;
         }
 
-        uint memoryTypeIndex;
-        int lastFilledMip = 0;
         unsafe void prepareSparseTexture(uint width, uint height, uint layerCount, Format format)
         {
             texture = new VirtualTexture();
@@ -274,6 +265,11 @@ namespace SharpGame.Samples
             sparseImageCreateInfo.flags = ImageCreateFlags.SparseBinding | ImageCreateFlags.SparseResidency;
             texture.image = new Image(ref sparseImageCreateInfo);
 
+            Graphics.WithCommandBuffer((cmd) =>
+            {
+                cmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.ShaderReadOnlyOptimal);
+            });
+
             // Get memory requirements
             VkMemoryRequirements sparseImageMemoryReqs;
             // Sparse image memory requirement counts
@@ -316,8 +312,6 @@ namespace SharpGame.Samples
                 texture.mipTailStart = reqs.imageMipTailFirstLod;
             }
 
-            lastFilledMip = (int)texture.mipTailStart - 1;
-
             // Get sparse image requirements for the color aspect
             VkSparseImageMemoryRequirements sparseMemoryReq = new VkSparseImageMemoryRequirements();
             bool colorAspectFound = false;
@@ -339,15 +333,19 @@ namespace SharpGame.Samples
             // todo:
             // Calculate number of required sparse memory bindings by alignment
             Debug.Assert((sparseImageMemoryReqs.size % sparseImageMemoryReqs.alignment) == 0);
-            memoryTypeIndex = Device.GetMemoryType(sparseImageMemoryReqs.memoryTypeBits, MemoryPropertyFlags.DeviceLocal);
+            texture.memoryTypeIndex = Device.GetMemoryType(sparseImageMemoryReqs.memoryTypeBits, MemoryPropertyFlags.DeviceLocal);
 
             // Get sparse bindings
             uint sparseBindsCount = (uint)(sparseImageMemoryReqs.size / sparseImageMemoryReqs.alignment);
             Vector<VkSparseMemoryBind> sparseMemoryBinds = new Vector<VkSparseMemoryBind>(sparseBindsCount, sparseBindsCount);
 
-            // Check if the format has a single mip tail for all layers or one mip tail for each layer
+            texture.sparseImageMemoryRequirements = sparseMemoryReq;
+
             // The mip tail contains all mip levels > sparseMemoryReq.imageMipTailFirstLod
-            bool singleMipTail = ((sparseMemoryReq.formatProperties.flags & VkSparseImageFormatFlags.SingleMiptail) != 0);
+            // Check if the format has a single mip tail for all layers or one mip tail for each layer
+            // @todo: Comment
+            texture.mipTailInfo.singleMipTail = (sparseMemoryReq.formatProperties.flags & VkSparseImageFormatFlags.SingleMiptail) != 0;
+            texture.mipTailInfo.alingedMipSize = (sparseMemoryReq.formatProperties.flags & VkSparseImageFormatFlags.AlignedMipSize) != 0;
 
             // Sparse bindings for each mip level of all layers outside of the mip tail
             for (uint layer = 0; layer < texture.layers; layer++)
@@ -396,12 +394,6 @@ namespace SharpGame.Samples
                                 ref VirtualTexturePage newPage = ref texture.addPage(offset, extent1, sparseImageMemoryReqs.alignment, mipLevel, layer);
                                 newPage.imageMemoryBind.subresource = subResource;
 
-                                if ((x % 2 == 1) || (y % 2 == 1))
-                                {
-                                    // Allocate memory for this virtual page
-                                    //newPage->allocate(device, memoryTypeIndex);
-                                }
-
                                 index++;
                             }
                         }
@@ -409,12 +401,12 @@ namespace SharpGame.Samples
                 }
 
                 // Check if format has one mip tail per layer
-                if ((!singleMipTail) && (sparseMemoryReq.imageMipTailFirstLod < texture.mipLevels))
+                if ((!texture.mipTailInfo.singleMipTail) && (sparseMemoryReq.imageMipTailFirstLod < texture.mipLevels))
                 {
                     // Allocate memory for the mip tail
                     VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.New();
                     allocInfo.allocationSize = sparseMemoryReq.imageMipTailSize;
-                    allocInfo.memoryTypeIndex = memoryTypeIndex;
+                    allocInfo.memoryTypeIndex = texture.memoryTypeIndex;
 
                     VkDeviceMemory deviceMemory = Device.AllocateMemory(ref allocInfo);
 
@@ -438,7 +430,7 @@ namespace SharpGame.Samples
                 // Allocate memory for the mip tail
                 VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.New();
                 allocInfo.allocationSize = sparseMemoryReq.imageMipTailSize;
-                allocInfo.memoryTypeIndex = memoryTypeIndex;
+                allocInfo.memoryTypeIndex = texture.memoryTypeIndex;
 
                 VkDeviceMemory deviceMemory;
                 deviceMemory = Device.AllocateMemory(ref allocInfo);
@@ -460,59 +452,207 @@ namespace SharpGame.Samples
             // Bind to queue
             // todo: in draw?
             queue.BindSparse(texture.bindSparseInfo);
-                     //todo: use sparse bind semaphore
-                queue.WaitIdle();
-  /*
-                     // Create sampler
-                     VkSamplerCreateInfo sampler = vks::initializers::samplerCreateInfo();
-                     sampler.magFilter = VK_FILTER_LINEAR;
-                     sampler.minFilter = VK_FILTER_LINEAR;
-                     sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-                     sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-                     sampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-                     sampler.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-                     sampler.mipLodBias = 0.0f;
-                     sampler.compareOp = VK_COMPARE_OP_NEVER;
-                     sampler.minLod = 0.0f;
-                     sampler.maxLod = static_cast<float>(texture.mipLevels);
-                     sampler.maxAnisotropy = vulkanDevice->features.samplerAnisotropy ? vulkanDevice->properties.limits.maxSamplerAnisotropy : 1.0f;
-                     sampler.anisotropyEnable = false;
-                     sampler.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-                     VK_CHECK_RESULT(vkCreateSampler(device, &sampler, nullptr, &texture.sampler));
+            //todo: use sparse bind semaphore
+            queue.WaitIdle();
 
-                     // Create image view
-                     VkImageViewCreateInfo view = vks::initializers::imageViewCreateInfo();
-                     view.image = VK_NULL_HANDLE;
-                     view.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                     view.format = format;
-                     view.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
-                     view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                     view.subresourceRange.baseMipLevel = 0;
-                     view.subresourceRange.baseArrayLayer = 0;
-                     view.subresourceRange.layerCount = 1;
-                     view.subresourceRange.levelCount = texture.mipLevels;
-                     view.image = texture.image;
-                     VK_CHECK_RESULT(vkCreateImageView(device, &view, nullptr, &texture.view));
-
-                     // Fill image descriptor image info that can be used during the descriptor set setup
-                     texture.descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                     texture.descriptor.imageView = texture.view;
-                     texture.descriptor.sampler = texture.sampler;
-
-                     // Fill smallest (non-tail) mip map level
-                     fillVirtualTexture(lastFilledMip);*/
+            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, false);
+            texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, texture.mipLevels);
+            texture.UpdateDescriptor();
         }
 
-        // Clear all pages of the virtual texture
-        // todo: just for testing
-        void flushVirtualTexture()
+        unsafe void uploadContent(VirtualTexturePage page, Image image)
+        {
+            // Generate some random image data and upload as a buffer
+            ulong bufferSize = 4 * page.extent.width * page.extent.height;
+
+            Buffer imageBuffer = Buffer.CreateStagingBuffer(bufferSize, IntPtr.Zero);
+            imageBuffer.Map();
+
+            // Fill buffer with random colors
+            byte* data = (byte*)imageBuffer.Mapped;
+            byte[] rndVal = new byte[]{ 0, 0, 0, 0 };
+            while (rndVal[0] + rndVal[1] + rndVal[2] < 10)
+            {
+                rndVal[0] = (byte)glm.random(0, 255);
+                rndVal[1] = (byte)glm.random(0, 255);
+                rndVal[2] = (byte)glm.random(0, 255);
+            }
+            rndVal[3] = 255;
+
+            for (uint y = 0; y < page.extent.height; y++)
+            {
+                for (uint x = 0; x < page.extent.width; x++)
+                {
+                    for (uint c = 0; c < 4; c++, ++data)
+                    {
+                        *data = rndVal[c];
+                    }
+                }
+            }
+
+            var copyCmd = Graphics.BeginPrimaryCmd();
+            copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferDstOptimal, PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer);
+            BufferImageCopy region = new BufferImageCopy();
+            region.imageSubresource.aspectMask = ImageAspectFlags.Color;
+            region.imageSubresource.layerCount = 1;
+            region.imageSubresource.mipLevel = page.mipLevel;
+            region.imageOffset = new Offset3D(page.offset);
+            region.imageExtent = new Extent3D(page.extent);
+            copyCmd.CopyBufferToImage(imageBuffer, image,  ImageLayout.TransferDstOptimal, ref region);
+            copyCmd.SetImageLayout(image, ImageAspectFlags.Color,  ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
+            
+            Graphics.EndPrimaryCmd(copyCmd);
+
+            imageBuffer.Release();
+        }
+
+        Vector<VirtualTexturePage> updatedPages = new Vector<VirtualTexturePage>();
+        void fillRandomPages()
+        {
+            Device.WaitIdle();
+            
+            updatedPages.Clear();
+
+            for (int i = 0; i < texture.pages.Count; i++)
+            {
+                ref var page = ref texture.pages[i];
+                if (glm.random() < 0.5f)
+                {
+                    continue;
+                }
+                page.allocate(texture.memoryTypeIndex);
+                updatedPages.Add(page);
+            }
+
+            // Update sparse queue binding
+            texture.updateSparseBindInfo();
+            
+            Fence fence = new Fence(FenceCreateFlags.None);
+
+            queue.BindSparse(texture.bindSparseInfo, fence);
+            fence.Wait();
+
+            for (int i = 0; i < updatedPages.Count; i++)
+            {
+                var page = updatedPages[i];                
+                uploadContent(page, texture.image);
+            }
+        }
+
+        unsafe void fillMipTail()
+        {
+            //@todo: WIP
+            ulong imageMipTailSize = texture.sparseImageMemoryRequirements.imageMipTailSize;
+            ulong imageMipTailOffset = texture.sparseImageMemoryRequirements.imageMipTailOffset;
+            // Stride between memory bindings for each mip level if not single mip tail (VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT not set)
+            ulong imageMipTailStride = texture.sparseImageMemoryRequirements.imageMipTailStride;
+
+            VkSparseImageMemoryBind mipTailimageMemoryBind = new VkSparseImageMemoryBind();
+
+            VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.New();
+            allocInfo.allocationSize = imageMipTailSize;
+            allocInfo.memoryTypeIndex = texture.memoryTypeIndex;
+            mipTailimageMemoryBind.memory = Device.AllocateMemory(ref allocInfo);
+
+            uint mipLevel = texture.sparseImageMemoryRequirements.imageMipTailFirstLod;
+            uint width = Math.Max(texture.width >> (int)texture.sparseImageMemoryRequirements.imageMipTailFirstLod, 1u);
+            uint height = Math.Max(texture.height >> (int)texture.sparseImageMemoryRequirements.imageMipTailFirstLod, 1u);
+            uint depth = 1;
+
+            byte* rndVal = stackalloc byte[4] { 0, 0, 0, 0 };
+            for (uint i = texture.mipTailStart; i < texture.mipLevels; i++)
+            {
+
+                /*uint*/ width = Math.Max(texture.width >> (int)i, 1u);
+                /*uint*/ height = Math.Max(texture.height >> (int)i, 1u);
+                //uint depth = 1;
+
+                // Generate some random image data and upload as a buffer
+                ulong bufferSize = 4 * width * height;
+
+                Buffer imageBuffer = Buffer.CreateStagingBuffer(bufferSize, IntPtr.Zero);                
+                imageBuffer.Map();
+
+                // Fill buffer with random colors
+                byte* data = (byte*)imageBuffer.Mapped;
+                while (rndVal[0] + rndVal[1] + rndVal[2] < 10)
+                {
+                    rndVal[0] = (byte)glm.random(0, 255);
+                    rndVal[1] = (byte)glm.random(0, 255);
+                    rndVal[2] = (byte)glm.random(0, 255);
+                }
+                rndVal[3] = 255;
+
+                switch (mipLevel)
+                {
+                    case 0:
+                        rndVal[0] = rndVal[1] = rndVal[2] = 255;
+                        break;
+                    case 1:
+                        rndVal[0] = rndVal[1] = rndVal[2] = 200;
+                        break;
+                    case 2:
+                        rndVal[0] = rndVal[1] = rndVal[2] = 150;
+                        break;
+                }
+
+                for (uint y = 0; y < height; y++)
+                {
+                    for (uint x = 0; x < width; x++)
+                    {
+                        for (uint c = 0; c < 4; c++, ++data)
+                        {
+                            *data = rndVal[c];
+                        }
+                    }
+                }
+
+            var copyCmd = Graphics.BeginPrimaryCmd();
+            copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferDstOptimal, PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer);
+            BufferImageCopy region = new BufferImageCopy();
+            region.imageSubresource.aspectMask =  ImageAspectFlags.Color;
+            region.imageSubresource.layerCount = 1;
+            region.imageSubresource.mipLevel = i;
+            region.imageOffset = new Offset3D();
+            region.imageExtent = new Extent3D(width, height, depth);
+            copyCmd.CopyBufferToImage(imageBuffer, texture.image, ImageLayout.TransferDstOptimal, ref region);
+            copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
+
+            Graphics.EndPrimaryCmd(copyCmd);
+
+            imageBuffer.Release();
+        }
+    }
+
+    void flushRandomPages()
+    {
+        Device.WaitIdle();
+
+        for (int i = 0; i < texture.pages.Count; i++)
+        {
+            if(glm.random() < 0.5f)
+            texture.pages[i].Dispose();
+        }
+
+        // Update sparse queue binding
+        texture.updateSparseBindInfo();
+        
+        Fence fence = new Fence(FenceCreateFlags.None);
+        queue.BindSparse(texture.bindSparseInfo, fence);
+        fence.Wait();
+    }
+
+#if false
+    // Clear all pages of the virtual texture
+    // todo: just for testing
+    void flushVirtualTexture()
         {
             Device.WaitIdle();
 
-//             for (ref var page in texture.pages)
-//             {
-//                 page.release(device);
-//             }
+            for (int i = 0; i < texture.pages.Count; i++)
+            {
+                texture.pages[i].Dispose();
+            }
 
             texture.updateSparseBindInfo();
             queue.BindSparse(texture.bindSparseInfo);
@@ -524,6 +664,7 @@ namespace SharpGame.Samples
 
         Texture textures_source;
         Vector<VkImageBlit> imageBlits = new Vector<VkImageBlit>();
+        Timer timer = new Timer();
         // Fill a complete mip level
         void fillVirtualTexture(ref int mipLevel)
         {
@@ -537,7 +678,7 @@ namespace SharpGame.Samples
                 if ((page.mipLevel == mipLevel) && /*(rndDist(rndEngine) < 0.5f) &&*/ (page.imageMemoryBind.memory == VkDeviceMemory.Null))
                 {
                     // Allocate page memory
-                    page.allocate(memoryTypeIndex);
+                    page.allocate(texture.memoryTypeIndex);
 
                     // Current mip level scaling
                     uint scale = texture.width / (texture.width >> (int)page.mipLevel);
@@ -583,6 +724,8 @@ namespace SharpGame.Samples
             if (imageBlits.Count > 0)
             {
                 //var tStart = std::chrono::high_resolution_clock::now();
+                timer.Restart();
+
                 unsafe
                 {
                     Graphics.WithCommandBuffer((copyCmd) =>
@@ -599,16 +742,15 @@ namespace SharpGame.Samples
                     });
                 }
 
-
-//                 auto tEnd = std::chrono::high_resolution_clock::now();
-//                 auto tDiff = std::chrono::duration<double, std::milli>(tEnd - tStart).count();
-//                 std::cout << "Image blits took " << tDiff << " ms" << std::endl;
+                timer.Stop();
+                Log.Info("Image blits took " + timer.ElapsedMilliseconds + " ms");
             }
 
             queue.WaitIdle();
 
             mipLevel--;
         }
+#endif
     }
 
 

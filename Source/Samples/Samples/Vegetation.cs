@@ -40,15 +40,8 @@ namespace SharpGame.Samples
 
             camera = scene.GetComponent<Camera>(true);
 
-            var importer = new AssimpModelReader
-            {
-                vertexComponents = new []
-                {
-                    VertexComponent.Position,
-                    VertexComponent.Texcoord
-                }
-            };
-            
+            var importer = new AssimpModelReader(VertexComponent.Position, VertexComponent.Texcoord);
+
             {
                 var node = scene.CreateChild("Sky");
                 var staticModel = node.AddComponent<StaticModel>();
@@ -59,10 +52,10 @@ namespace SharpGame.Samples
                 var mat = new Material("shaders/SkySphere.shader");
                 staticModel.SetMaterial(mat);
             }
-           
+
             {
                 var node = scene.CreateChild("Plane");
-                var staticModel = node.AddComponent<StaticModel>(); 
+                var staticModel = node.AddComponent<StaticModel>();
                 var model = GeometryUtil.CreatePlaneModel(100, 100, 32, 32, true);
                 staticModel.SetModel(model);
                 var mat = Resources.Load<Material>("materials/Grass.material");
@@ -70,20 +63,22 @@ namespace SharpGame.Samples
                 mat.SetTexture("SpecMap", Texture.Black);
                 staticModel.SetMaterial(mat);
             }
- 
+
             {
                 var node = scene.CreateChild("vegetation");
                 var staticModel = node.AddComponent<StaticModelGroup>();
 
                 importer.scale = 0.0025f;
-                importer.vertexComponents = new[] 
-                { VertexComponent.Position, VertexComponent.Normal, VertexComponent.Texcoord, VertexComponent.Color };
+                importer.SetVertexComponents(VertexComponent.Position, VertexComponent.Normal, VertexComponent.Texcoord, VertexComponent.Color);
+
                 var model = importer.Load("models/vegetation/plants.dae");
                 staticModel.SetModel(model);
 
-                var mat = new Material("shaders/IndirectDraw.shader");
-                mat.Shader.Main.VertexLayout = new VertexLayout(importer.vertexComponents, 
-                    new[]{ VertexComponent.Float3, VertexComponent.Float3, VertexComponent.Float1, VertexComponent.Int1 });
+                var mat = new Material("shaders/vegetation.shader");
+
+                mat.Shader.Main.VertexLayout = new VertexLayout(importer.vertexComponents,
+                    new[] { VertexComponent.Float3, VertexComponent.Float3, VertexComponent.Float1, VertexComponent.Int1 });
+
                 Texture tex = Resources.Load<Texture>("models/vegetation/textures/texturearray_plants_bc3_unorm.ktx");
                 mat.SetTexture("DiffMap", tex);
                 staticModel.SetMaterial(mat);

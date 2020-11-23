@@ -99,6 +99,13 @@ namespace SharpGame
             this.depth = depth;
         }
 
+        public Extent3D(in Vulkan.VkExtent3D vkExtent3D)
+        {
+            this.width = vkExtent3D.width;
+            this.height = vkExtent3D.height;
+            this.depth = vkExtent3D.depth;
+        }
+
         public override bool Equals(object obj)
         {
             return obj is Extent3D d &&
@@ -138,6 +145,13 @@ namespace SharpGame
             this.x = x;
             this.y = y;
             this.z = z;
+        }
+
+        public Offset3D(in Vulkan.VkOffset3D vkOffset3D)
+        {
+            this.x = vkOffset3D.x;
+            this.y = vkOffset3D.y;
+            this.z = vkOffset3D.z;
         }
 
         public override bool Equals(object obj)

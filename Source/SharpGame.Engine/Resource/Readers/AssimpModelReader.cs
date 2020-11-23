@@ -34,8 +34,19 @@ namespace SharpGame
         static Vector<uint> indexBuffer = new Vector<uint>(1024 * 1024);     
         static int vertexOffset = 0;
         static uint indexOffset = 0;
+
         public AssimpModelReader() : base("")
         {
+        }
+
+        public AssimpModelReader(params VertexComponent[] vertexComponents) : base("")
+        {
+            this.vertexComponents = vertexComponents;
+        }
+
+        public void SetVertexComponents(params VertexComponent[] vertexComponents)
+        {
+            this.vertexComponents = vertexComponents;
         }
 
         protected unsafe override bool OnLoad(Model model, File stream)

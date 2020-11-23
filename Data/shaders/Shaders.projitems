@@ -48,7 +48,7 @@
     <None Include="$(MSBuildThisFileDirectory)Common\shadow.frag" />
     <None Include="$(MSBuildThisFileDirectory)Common\shadow.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\merge.frag" />
-    <None Include="$(MSBuildThisFileDirectory)IndirectDraw.shader" />
+    <None Include="$(MSBuildThisFileDirectory)Vegetation.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitAlphaTest.shader" />
     <None Include="$(MSBuildThisFileDirectory)post\blur.frag" />
     <None Include="$(MSBuildThisFileDirectory)post\brightness_mask.frag" />
@@ -77,10 +77,10 @@
     <None Include="$(MSBuildThisFileDirectory)Skybox.shader" />
     <None Include="$(MSBuildThisFileDirectory)SkySphere.shader" />
     <None Include="$(MSBuildThisFileDirectory)UnLit.shader" />
-    <None Include="$(MSBuildThisFileDirectory)vegetation\indirectdraw.frag" />
-    <None Include="$(MSBuildThisFileDirectory)vegetation\indirectdraw.vert" />
-    <None Include="$(MSBuildThisFileDirectory)vegetation\skysphere.frag" />
-    <None Include="$(MSBuildThisFileDirectory)vegetation\skysphere.vert" />
+    <None Include="$(MSBuildThisFileDirectory)Environment\indirectdraw.frag" />
+    <None Include="$(MSBuildThisFileDirectory)Environment\indirectdraw.vert" />
+    <None Include="$(MSBuildThisFileDirectory)Environment\skysphere.frag" />
+    <None Include="$(MSBuildThisFileDirectory)Environment\skysphere.vert" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)LitPbr.shader" />
