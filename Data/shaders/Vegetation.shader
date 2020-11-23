@@ -7,12 +7,12 @@ Shader "IndirectDraw"
 
 		@VertexShader
 		{
-            #include "Environment/indirectdraw.vert"
+            #include "Natural/Vegetation.vert"
 		}
 		
 		@PixelShader
 		{
-            #include "Environment/indirectdraw.frag"
+            #include "Natural/Vegetation.frag"
 		}
 
 	}

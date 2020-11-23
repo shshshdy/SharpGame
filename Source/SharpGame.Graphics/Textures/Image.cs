@@ -18,7 +18,7 @@ namespace SharpGame
         public uint mipLevels;
         public uint arrayLayers;
 
-        internal Image(VkImage handle)
+        public Image(VkImage handle)
         {
             this.handle = handle;
         }

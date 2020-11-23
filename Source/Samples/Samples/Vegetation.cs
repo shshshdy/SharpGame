@@ -74,7 +74,7 @@ namespace SharpGame.Samples
                 var model = importer.Load("models/vegetation/plants.dae");
                 staticModel.SetModel(model);
 
-                var mat = new Material("shaders/vegetation.shader");
+                var mat = new Material("shaders/Natural.shader");
 
                 mat.Shader.Main.VertexLayout = new VertexLayout(importer.vertexComponents,
                     new[] { VertexComponent.Float3, VertexComponent.Float3, VertexComponent.Float1, VertexComponent.Int1 });

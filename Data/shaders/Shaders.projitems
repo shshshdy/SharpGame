@@ -26,6 +26,8 @@
     <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ClusterLight.shader" />
     <None Include="$(MSBuildThisFileDirectory)Debug.shader" />
+    <None Include="$(MSBuildThisFileDirectory)Natural\sparseresidency.frag" />
+    <None Include="$(MSBuildThisFileDirectory)Natural\sparseresidency.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\brightness_mask.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\calc_grid_offsets.comp" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\calc_light_grids.comp" />
@@ -77,10 +79,11 @@
     <None Include="$(MSBuildThisFileDirectory)Skybox.shader" />
     <None Include="$(MSBuildThisFileDirectory)SkySphere.shader" />
     <None Include="$(MSBuildThisFileDirectory)UnLit.shader" />
-    <None Include="$(MSBuildThisFileDirectory)Environment\indirectdraw.frag" />
-    <None Include="$(MSBuildThisFileDirectory)Environment\indirectdraw.vert" />
-    <None Include="$(MSBuildThisFileDirectory)Environment\skysphere.frag" />
-    <None Include="$(MSBuildThisFileDirectory)Environment\skysphere.vert" />
+    <None Include="$(MSBuildThisFileDirectory)Natural\vegetation.frag" />
+    <None Include="$(MSBuildThisFileDirectory)Natural\vegetation.vert" />
+    <None Include="$(MSBuildThisFileDirectory)Natural\skysphere.frag" />
+    <None Include="$(MSBuildThisFileDirectory)Natural\skysphere.vert" />
+    <None Include="$(MSBuildThisFileDirectory)VirtualTexture.shader" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)LitPbr.shader" />

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -174,11 +175,11 @@ namespace SharpGame.Samples
             {
                 var node = scene.CreateChild("Plane");
                 var staticModel = node.AddComponent<StaticModel>();
-                var model = GeometryUtil.CreatePlaneModel(100, 100, 32, 32, true);
+                var model = GeometryUtil.CreatePlaneModel(100, 100, 1, 1);
                 staticModel.SetModel(model);
-                var mat = Resources.Load<Material>("materials/Grass.material");
-                mat.SetTexture("NormalMap", Texture.Blue);
-                mat.SetTexture("SpecMap", Texture.Black);
+
+                var mat = new Material("shaders/VirtualTexture.shader");
+                mat.SetTexture("samplerColor", texture);               
                 staticModel.SetMaterial(mat);
             }
 
@@ -251,19 +252,21 @@ namespace SharpGame.Samples
             }
 
             // Create sparse image
-            ImageCreateInfo sparseImageCreateInfo = new ImageCreateInfo();
-            sparseImageCreateInfo.imageType = ImageType.Image2D;
-            sparseImageCreateInfo.format = texture.format;
+            VkImageCreateInfo sparseImageCreateInfo = VkImageCreateInfo.New();
+            sparseImageCreateInfo.imageType = VkImageType.Image2D;
+            sparseImageCreateInfo.format = (VkFormat)texture.format;
             sparseImageCreateInfo.mipLevels = texture.mipLevels;
             sparseImageCreateInfo.arrayLayers = texture.layers;
-            sparseImageCreateInfo.samples = SampleCountFlags.Count1;
-            sparseImageCreateInfo.tiling = ImageTiling.Optimal;
-            sparseImageCreateInfo.sharingMode = SharingMode.Exclusive;
-            sparseImageCreateInfo.initialLayout = ImageLayout.Undefined;
-            sparseImageCreateInfo.extent = new Extent3D(texture.width, texture.height, 1);
-            sparseImageCreateInfo.usage = ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled;
-            sparseImageCreateInfo.flags = ImageCreateFlags.SparseBinding | ImageCreateFlags.SparseResidency;
-            texture.image = new Image(ref sparseImageCreateInfo);
+            sparseImageCreateInfo.samples = VkSampleCountFlags.Count1;
+            sparseImageCreateInfo.tiling = VkImageTiling.Optimal;
+            sparseImageCreateInfo.sharingMode = VkSharingMode.Exclusive;
+            sparseImageCreateInfo.initialLayout = VkImageLayout.Undefined;
+            sparseImageCreateInfo.extent = new VkExtent3D { width = texture.width, height = texture.height, depth = 1 };
+            sparseImageCreateInfo.usage = VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled;
+            sparseImageCreateInfo.flags = VkImageCreateFlags.SparseBinding | VkImageCreateFlags.SparseResidency;
+
+            var img = Device.CreateImage(ref sparseImageCreateInfo);
+            texture.image = new Image(img);
 
             Graphics.WithCommandBuffer((cmd) =>
             {
@@ -642,6 +645,32 @@ namespace SharpGame.Samples
         fence.Wait();
     }
 
+        public override void OnGUI()
+        {
+            base.OnGUI();
+
+            if (ImGui.Begin("HUD"))
+            {
+
+//                 if (ImGui.DragFloat("LOD bias", &uboVS.lodBias, -(float)texture.mipLevels, (float)texture.mipLevels))
+//                 {
+//                     updateUniformBuffers();
+//                 }
+
+                if (ImGui.Button("Fill random pages"))
+                {
+                    fillRandomPages();
+                }
+                if (ImGui.Button("Flush random pages"))
+                {
+                    flushRandomPages();
+                }
+                if (ImGui.Button("Fill mip tail"))
+                {
+                    fillMipTail();
+                }
+            }
+        }
 #if false
     // Clear all pages of the virtual texture
     // todo: just for testing

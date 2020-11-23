@@ -74,5 +74,5 @@ void main()
 	//vec4 wPos = ubo.modelview * vec4(pos.xyz, 1.0); 
 	vec4 lPos = vec4(0.0, -5.0, 0.0, 1.0);
 	outLightVec = lPos.xyz - pos.xyz;
-	outViewVec = -pos.xyz;	
+	outViewVec = -pos.xyz;
 }

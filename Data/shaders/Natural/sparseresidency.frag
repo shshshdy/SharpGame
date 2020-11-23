@@ -3,7 +3,7 @@
 #extension GL_ARB_sparse_texture2 : enable
 #extension GL_ARB_sparse_texture_clamp : enable
 
-layout (binding = 1) uniform sampler2D samplerColor;
+layout (set = 1, binding = 0) uniform sampler2D samplerColor;
 
 layout (location = 0) in vec2 inUV;
 layout (location = 1) in float inLodBias;

@@ -125,15 +125,15 @@ namespace SharpGame
             unsafe
             {
                 native.waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0);
-                native.pWaitSemaphores = (VkSemaphore*)Utilities.AsPtr(ref waitSemaphores[0]);
+                native.pWaitSemaphores = waitSemaphores != null ?(VkSemaphore*)Utilities.AsPtr(ref waitSemaphores[0]): null;
                 native.bufferBindCount = (uint)(bufferBinds?.Length ?? 0);
-                native.pBufferBinds = (VkSparseBufferMemoryBindInfo*)Utilities.AsPtr(ref bufferBinds[0]);
+                native.pBufferBinds = bufferBinds != null ? (VkSparseBufferMemoryBindInfo*)Utilities.AsPtr(ref bufferBinds[0]) : null;
                 native.imageOpaqueBindCount = (uint)(imageOpaqueBinds?.Length ?? 0);
-                native.pImageOpaqueBinds = (VkSparseImageOpaqueMemoryBindInfo*)Utilities.AsPtr(ref imageOpaqueBinds[0]);
+                native.pImageOpaqueBinds = imageOpaqueBinds != null ? (VkSparseImageOpaqueMemoryBindInfo*)Utilities.AsPtr(ref imageOpaqueBinds[0]) : null;
                 native.imageBindCount = (uint)(imageBinds?.Length ?? 0);
-                native.pImageBinds = (VkSparseImageMemoryBindInfo*)Utilities.AsPtr(ref imageBinds[0]);
+                native.pImageBinds = imageBinds != null ? (VkSparseImageMemoryBindInfo*)Utilities.AsPtr(ref imageBinds[0]) : null;
                 native.signalSemaphoreCount = (uint)(signalSemaphores?.Length ?? 0);
-                native.pSignalSemaphores = (VkSemaphore*)Utilities.AsPtr(ref signalSemaphores[0]);
+                native.pSignalSemaphores = signalSemaphores != null ? (VkSemaphore*)Utilities.AsPtr(ref signalSemaphores[0]) : null;
             }
         }
        
