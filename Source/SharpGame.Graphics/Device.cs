@@ -324,11 +324,11 @@ namespace SharpGame
         {
             // Attach debug callback.
             var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
-                //VkDebugReportFlagsEXT.InformationEXT |
+                //VkDebugReportFlagsEXT.InformationEXT | 
+                //VkDebugReportFlagsEXT.DebugEXT |
                 VkDebugReportFlagsEXT.WarningEXT |
                 VkDebugReportFlagsEXT.PerformanceWarningEXT |
-                VkDebugReportFlagsEXT.ErrorEXT |
-                VkDebugReportFlagsEXT.DebugEXT,
+                VkDebugReportFlagsEXT.ErrorEXT,
                 (args) =>
                 {
                     System.Diagnostics.Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}]");

@@ -64,7 +64,6 @@ namespace SharpGame.Samples
     // Virtual texture object containing all pages
     public class VirtualTexture : Texture
     {
-        //Image image;                                                      // Texture image handle
         public BindSparseInfo bindSparseInfo;                                    // Sparse queue binding information
         public Vector<VirtualTexturePage> pages = new Vector<VirtualTexturePage>();                              // Contains all virtual pages of the texture
         Vector<VkSparseImageMemoryBind> sparseImageMemoryBinds = new Vector<VkSparseImageMemoryBind>();   // Sparse image memory bindings of all memory-backed virtual tables
@@ -72,10 +71,9 @@ namespace SharpGame.Samples
         SparseImageMemoryBindInfo[] imageMemoryBindInfo;                    // Sparse image memory bind info
         SparseImageOpaqueMemoryBindInfo[] opaqueMemoryBindInfo;             // Sparse image opaque memory bind info (mip tail)
         public uint mipTailStart;                                              // First mip level in mip tail
-        public VkSparseImageMemoryRequirements sparseImageMemoryRequirements; 
-        public uint memoryTypeIndex;                                           
+        public VkSparseImageMemoryRequirements sparseImageMemoryRequirements;
+        public uint memoryTypeIndex;
 
-        // @todo: comment
         public struct MipTailInfo
         {
             public bool singleMipTail;
@@ -86,19 +84,24 @@ namespace SharpGame.Samples
 
         public ref VirtualTexturePage addPage(VkOffset3D offset, VkExtent3D extent, ulong size, uint mipLevel, uint layer)
         {
-            VirtualTexturePage newPage = new VirtualTexturePage();
-            newPage.offset = offset;
-            newPage.extent = extent;
-            newPage.size = size;
-            newPage.mipLevel = mipLevel;
-            newPage.layer = layer;
-            newPage.index = (uint)pages.Count;
-            newPage.imageMemoryBind = new VkSparseImageMemoryBind();
-            newPage.imageMemoryBind.offset = offset;
-            newPage.imageMemoryBind.extent = extent;
+            VirtualTexturePage newPage = new VirtualTexturePage
+            {
+                offset = offset,
+                extent = extent,
+                size = size,
+                mipLevel = mipLevel,
+                layer = layer,
+                index = (uint)pages.Count,
+                imageMemoryBind = new VkSparseImageMemoryBind()
+                {
+                    offset = offset,
+                    extent = extent,
+                }
+            };
+
             pages.Add(newPage);
             return ref pages.Back();
-            
+
         }
 
         public void updateSparseBindInfo()
@@ -145,7 +148,7 @@ namespace SharpGame.Samples
         public override void Init()
         {
             queue = Graphics.WorkQueue;
-            
+
             scene = new Scene()
             {
                 new Octree { },
@@ -170,7 +173,7 @@ namespace SharpGame.Samples
 
             camera = scene.GetComponent<Camera>(true);
 
-            prepareSparseTexture(4096, 4096, 1, Format.R8g8b8a8Unorm);
+            prepareSparseTexture(4096, 4096, 1, Format.R8g8b8a8Unorm);           
 
             {
                 var node = scene.CreateChild("Plane");
@@ -179,7 +182,7 @@ namespace SharpGame.Samples
                 staticModel.SetModel(model);
 
                 var mat = new Material("shaders/VirtualTexture.shader");
-                mat.SetTexture("samplerColor", texture);               
+                mat.SetTexture("samplerColor", texture);
                 staticModel.SetMaterial(mat);
             }
 
@@ -190,21 +193,24 @@ namespace SharpGame.Samples
 
         Uint3 alignedDivision(in VkExtent3D extent, in VkExtent3D granularity)
         {
-            Uint3 res = new Uint3();
-            res.x = extent.width / granularity.width + ((extent.width % granularity.width != 0) ? 1u : 0u);
-            res.y = extent.height / granularity.height + ((extent.height % granularity.height != 0) ? 1u : 0u);
-            res.z = extent.depth / granularity.depth + ((extent.depth % granularity.depth != 0) ? 1u : 0u);
-            return res;
+            return new Uint3
+            {
+                x = extent.width / granularity.width + ((extent.width % granularity.width != 0) ? 1u : 0u),
+                y = extent.height / granularity.height + ((extent.height % granularity.height != 0) ? 1u : 0u),
+                z = extent.depth / granularity.depth + ((extent.depth % granularity.depth != 0) ? 1u : 0u)
+            };
         }
 
         unsafe void prepareSparseTexture(uint width, uint height, uint layerCount, Format format)
         {
-            texture = new VirtualTexture();
-            texture.width = width;
-            texture.height = height;
-            texture.mipLevels = (uint)Math.Floor(Math.Log2(Math.Max(width, height))) + 1;
-            texture.layers = layerCount;
-            texture.format = format;
+            texture = new VirtualTexture
+            {
+                width = width,
+                height = height,
+                mipLevels = (uint)Math.Floor(Math.Log2(Math.Max(width, height))) + 1,
+                layers = layerCount,
+                format = format
+            };
 
             var physicalDevice = Device.PhysicalDevice;
             // Get device properites for the requested texture format
@@ -361,10 +367,12 @@ namespace SharpGame.Samples
                     extent.height = Math.Max(sparseImageCreateInfo.extent.height >> (int)mipLevel, 1u);
                     extent.depth = Math.Max(sparseImageCreateInfo.extent.depth >> (int)mipLevel, 1u);
 
-                    VkImageSubresource subResource = new VkImageSubresource();
-                    subResource.aspectMask = VkImageAspectFlags.Color;
-                    subResource.mipLevel = mipLevel;
-                    subResource.arrayLayer = layer;
+                    VkImageSubresource subResource = new VkImageSubresource
+                    {
+                        aspectMask = VkImageAspectFlags.Color,
+                        mipLevel = mipLevel,
+                        arrayLayer = layer
+                    };
 
                     // Aligned sizes by image granularity
                     VkExtent3D imageGranularity = sparseMemoryReq.formatProperties.imageGranularity;
@@ -383,15 +391,19 @@ namespace SharpGame.Samples
                             for (uint x = 0; x < sparseBindCounts.x; x++)
                             {
                                 // Offset 
-                                VkOffset3D offset;
-                                offset.x = (int)(x * imageGranularity.width);
-                                offset.y = (int)(y * imageGranularity.height);
-                                offset.z = (int)(z * imageGranularity.depth);
+                                VkOffset3D offset = new VkOffset3D
+                                {
+                                    x = (int)(x * imageGranularity.width),
+                                    y = (int)(y * imageGranularity.height),
+                                    z = (int)(z * imageGranularity.depth)
+                                };
                                 // Size of the page
-                                VkExtent3D extent1 = new VkExtent3D();
-                                extent1.width = (x == sparseBindCounts.x - 1) ? lastBlockExtent.x : imageGranularity.width;
-                                extent1.height = (y == sparseBindCounts.y - 1) ? lastBlockExtent.y : imageGranularity.height;
-                                extent1.depth = (z == sparseBindCounts.z - 1) ? lastBlockExtent.z : imageGranularity.depth;
+                                VkExtent3D extent1 = new VkExtent3D
+                                {
+                                    width = (x == sparseBindCounts.x - 1) ? lastBlockExtent.x : imageGranularity.width,
+                                    height = (y == sparseBindCounts.y - 1) ? lastBlockExtent.y : imageGranularity.height,
+                                    depth = (z == sparseBindCounts.z - 1) ? lastBlockExtent.z : imageGranularity.depth
+                                };
 
                                 // Add new virtual page
                                 ref VirtualTexturePage newPage = ref texture.addPage(offset, extent1, sparseImageMemoryReqs.alignment, mipLevel, layer);
@@ -414,10 +426,12 @@ namespace SharpGame.Samples
                     VkDeviceMemory deviceMemory = Device.AllocateMemory(ref allocInfo);
 
                     // (Opaque) sparse memory binding
-                    VkSparseMemoryBind sparseMemoryBind = new VkSparseMemoryBind();
-                    sparseMemoryBind.resourceOffset = sparseMemoryReq.imageMipTailOffset + layer * sparseMemoryReq.imageMipTailStride;
-                    sparseMemoryBind.size = sparseMemoryReq.imageMipTailSize;
-                    sparseMemoryBind.memory = deviceMemory;
+                    VkSparseMemoryBind sparseMemoryBind = new VkSparseMemoryBind
+                    {
+                        resourceOffset = sparseMemoryReq.imageMipTailOffset + layer * sparseMemoryReq.imageMipTailStride,
+                        size = sparseMemoryReq.imageMipTailSize,
+                        memory = deviceMemory
+                    };
 
                     texture.opaqueMemoryBinds.Add(sparseMemoryBind);
                 }
@@ -428,27 +442,28 @@ namespace SharpGame.Samples
             Log.Info("\tVirtual pages: " + texture.pages.Count);
 
             // Check if format has one mip tail for all layers
-            if (((sparseMemoryReq.formatProperties.flags & VkSparseImageFormatFlags.SingleMiptail) != 0 ) && (sparseMemoryReq.imageMipTailFirstLod < texture.mipLevels))
+            if (((sparseMemoryReq.formatProperties.flags & VkSparseImageFormatFlags.SingleMiptail) != 0) && (sparseMemoryReq.imageMipTailFirstLod < texture.mipLevels))
             {
                 // Allocate memory for the mip tail
                 VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.New();
                 allocInfo.allocationSize = sparseMemoryReq.imageMipTailSize;
                 allocInfo.memoryTypeIndex = texture.memoryTypeIndex;
 
-                VkDeviceMemory deviceMemory;
-                deviceMemory = Device.AllocateMemory(ref allocInfo);
+                VkDeviceMemory deviceMemory = Device.AllocateMemory(ref allocInfo);
 
                 // (Opaque) sparse memory binding
-                VkSparseMemoryBind sparseMemoryBind = new VkSparseMemoryBind();
-                sparseMemoryBind.resourceOffset = sparseMemoryReq.imageMipTailOffset;
-                sparseMemoryBind.size = sparseMemoryReq.imageMipTailSize;
-                sparseMemoryBind.memory = deviceMemory;
+                VkSparseMemoryBind sparseMemoryBind = new VkSparseMemoryBind
+                {
+                    resourceOffset = sparseMemoryReq.imageMipTailOffset,
+                    size = sparseMemoryReq.imageMipTailSize,
+                    memory = deviceMemory
+                };
 
                 texture.opaqueMemoryBinds.Add(sparseMemoryBind);
             }
 
             bindSparseSemaphore = new Semaphore(0);
-                    
+
             // Prepare bind sparse info for reuse in queue submission
             texture.updateSparseBindInfo();
 
@@ -473,7 +488,7 @@ namespace SharpGame.Samples
 
             // Fill buffer with random colors
             byte* data = (byte*)imageBuffer.Mapped;
-            byte[] rndVal = new byte[]{ 0, 0, 0, 0 };
+            byte[] rndVal = new byte[] { 0, 0, 0, 0 };
             while (rndVal[0] + rndVal[1] + rndVal[2] < 10)
             {
                 rndVal[0] = (byte)glm.random(0, 255);
@@ -501,9 +516,9 @@ namespace SharpGame.Samples
             region.imageSubresource.mipLevel = page.mipLevel;
             region.imageOffset = new Offset3D(page.offset);
             region.imageExtent = new Extent3D(page.extent);
-            copyCmd.CopyBufferToImage(imageBuffer, image,  ImageLayout.TransferDstOptimal, ref region);
-            copyCmd.SetImageLayout(image, ImageAspectFlags.Color,  ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
-            
+            copyCmd.CopyBufferToImage(imageBuffer, image, ImageLayout.TransferDstOptimal, ref region);
+            copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
+
             Graphics.EndPrimaryCmd(copyCmd);
 
             imageBuffer.Release();
@@ -513,7 +528,7 @@ namespace SharpGame.Samples
         void fillRandomPages()
         {
             Device.WaitIdle();
-            
+
             updatedPages.Clear();
 
             for (int i = 0; i < texture.pages.Count; i++)
@@ -529,7 +544,7 @@ namespace SharpGame.Samples
 
             // Update sparse queue binding
             texture.updateSparseBindInfo();
-            
+
             Fence fence = new Fence(FenceCreateFlags.None);
 
             queue.BindSparse(texture.bindSparseInfo, fence);
@@ -537,7 +552,7 @@ namespace SharpGame.Samples
 
             for (int i = 0; i < updatedPages.Count; i++)
             {
-                var page = updatedPages[i];                
+                var page = updatedPages[i];
                 uploadContent(page, texture.image);
             }
         }
@@ -565,15 +580,13 @@ namespace SharpGame.Samples
             byte* rndVal = stackalloc byte[4] { 0, 0, 0, 0 };
             for (uint i = texture.mipTailStart; i < texture.mipLevels; i++)
             {
-
-                /*uint*/ width = Math.Max(texture.width >> (int)i, 1u);
-                /*uint*/ height = Math.Max(texture.height >> (int)i, 1u);
-                //uint depth = 1;
+                width = Math.Max(texture.width >> (int)i, 1u);
+                height = Math.Max(texture.height >> (int)i, 1u);
 
                 // Generate some random image data and upload as a buffer
                 ulong bufferSize = 4 * width * height;
 
-                Buffer imageBuffer = Buffer.CreateStagingBuffer(bufferSize, IntPtr.Zero);                
+                Buffer imageBuffer = Buffer.CreateStagingBuffer(bufferSize, IntPtr.Zero);
                 imageBuffer.Map();
 
                 // Fill buffer with random colors
@@ -610,40 +623,40 @@ namespace SharpGame.Samples
                     }
                 }
 
-            var copyCmd = Graphics.BeginPrimaryCmd();
-            copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferDstOptimal, PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer);
-            BufferImageCopy region = new BufferImageCopy();
-            region.imageSubresource.aspectMask =  ImageAspectFlags.Color;
-            region.imageSubresource.layerCount = 1;
-            region.imageSubresource.mipLevel = i;
-            region.imageOffset = new Offset3D();
-            region.imageExtent = new Extent3D(width, height, depth);
-            copyCmd.CopyBufferToImage(imageBuffer, texture.image, ImageLayout.TransferDstOptimal, ref region);
-            copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
+                var copyCmd = Graphics.BeginPrimaryCmd();
+                copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferDstOptimal, PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer);
+                BufferImageCopy region = new BufferImageCopy();
+                region.imageSubresource.aspectMask = ImageAspectFlags.Color;
+                region.imageSubresource.layerCount = 1;
+                region.imageSubresource.mipLevel = i;
+                region.imageOffset = new Offset3D();
+                region.imageExtent = new Extent3D(width, height, depth);
+                copyCmd.CopyBufferToImage(imageBuffer, texture.image, ImageLayout.TransferDstOptimal, ref region);
+                copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
 
-            Graphics.EndPrimaryCmd(copyCmd);
+                Graphics.EndPrimaryCmd(copyCmd);
 
-            imageBuffer.Release();
+                imageBuffer.Release();
+            }
         }
-    }
 
-    void flushRandomPages()
-    {
-        Device.WaitIdle();
-
-        for (int i = 0; i < texture.pages.Count; i++)
+        void flushRandomPages()
         {
-            if(glm.random() < 0.5f)
-            texture.pages[i].Dispose();
-        }
+            Device.WaitIdle();
 
-        // Update sparse queue binding
-        texture.updateSparseBindInfo();
-        
-        Fence fence = new Fence(FenceCreateFlags.None);
-        queue.BindSparse(texture.bindSparseInfo, fence);
-        fence.Wait();
-    }
+            for (int i = 0; i < texture.pages.Count; i++)
+            {
+                if (glm.random() < 0.5f)
+                    texture.pages[i].Dispose();
+            }
+
+            // Update sparse queue binding
+            texture.updateSparseBindInfo();
+
+            Fence fence = new Fence(FenceCreateFlags.None);
+            queue.BindSparse(texture.bindSparseInfo, fence);
+            fence.Wait();
+        }
 
         public override void OnGUI()
         {
@@ -652,10 +665,10 @@ namespace SharpGame.Samples
             if (ImGui.Begin("HUD"))
             {
 
-//                 if (ImGui.DragFloat("LOD bias", &uboVS.lodBias, -(float)texture.mipLevels, (float)texture.mipLevels))
-//                 {
-//                     updateUniformBuffers();
-//                 }
+                //                 if (ImGui.DragFloat("LOD bias", &uboVS.lodBias, -(float)texture.mipLevels, (float)texture.mipLevels))
+                //                 {
+                //                     updateUniformBuffers();
+                //                 }
 
                 if (ImGui.Button("Fill random pages"))
                 {
