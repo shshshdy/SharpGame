@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
@@ -99,11 +99,12 @@ namespace SharpGame
 
         internal unsafe void ToNative(out VkImageCreateInfo native)
         {
-            native = VkImageCreateInfo.New();
+            native = new VkImageCreateInfo();
+            native.sType = VkStructureType.ImageCreateInfo;
             native.flags = (VkImageCreateFlags)flags;
             native.imageType = (VkImageType)imageType;
             native.format = (VkFormat)format;
-            native.extent = new VkExtent3D { width = (uint)extent.width, height = (uint)extent.height, depth = (uint)extent.depth };
+            native.extent = new VkExtent3D ((uint)extent.width, (uint)extent.height, (uint)extent.depth);
             native.mipLevels = (uint)mipLevels;
             native.arrayLayers = (uint)arrayLayers;
             native.samples = (VkSampleCountFlags)samples;

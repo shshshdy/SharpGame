@@ -6,8 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace SharpGame
 {
-    using Vulkan;
-    using static Vulkan.VulkanNative;
+    using static Vulkan;
 
     public unsafe class Device
     {
@@ -158,7 +157,7 @@ namespace SharpGame
             VkApplicationInfo appInfo = new VkApplicationInfo()
             {
                 sType = VkStructureType.ApplicationInfo,
-                apiVersion = new Version(1, 0, 0),
+                apiVersion = new VkVersion(1, 0, 0),
                 pApplicationName = settings.ApplicationName,
                 pEngineName = engineName,
             };
@@ -236,7 +235,7 @@ namespace SharpGame
                 }
                 else
                 {
-                    QFGraphics = (uint)NullHandle;
+                    QFGraphics = (uint)IntPtr.Zero;
                 }
 
                 // Dedicated compute queue
@@ -312,8 +311,12 @@ namespace SharpGame
                         commandPool = CreateCommandPool(QFGraphics);
                     }
 
-                    VkPipelineCacheCreateInfo pipelineCacheCreateInfo = VkPipelineCacheCreateInfo.New();
-                    VulkanUtil.CheckResult(vkCreatePipelineCache(device, ref pipelineCacheCreateInfo, null, out pipelineCache));
+                    VkPipelineCacheCreateInfo pipelineCacheCreateInfo = new VkPipelineCacheCreateInfo()
+                    {
+                        sType = VkStructureType.PipelineCacheCreateInfo
+                    };
+
+                    VulkanUtil.CheckResult(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, null, out pipelineCache));
                     return result;
                 }
             }
@@ -324,11 +327,11 @@ namespace SharpGame
         {
             // Attach debug callback.
             var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
-                //VkDebugReportFlagsEXT.InformationEXT | 
-                //VkDebugReportFlagsEXT.DebugEXT |
-                VkDebugReportFlagsEXT.WarningEXT |
-                VkDebugReportFlagsEXT.PerformanceWarningEXT |
-                VkDebugReportFlagsEXT.ErrorEXT,
+                //VkDebugReportFlagsEXT.Information | 
+                //VkDebugReportFlagsEXT.Debug |
+                VkDebugReportFlagsEXT.Warning |
+                VkDebugReportFlagsEXT.PerformanceWarning |
+                VkDebugReportFlagsEXT.Error,
                 (args) =>
                 {
                     System.Diagnostics.Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}]");
@@ -404,17 +407,17 @@ namespace SharpGame
             // Start with the highest precision packed format
             List<VkFormat> depthFormats = new List<VkFormat>()
             {
-                VkFormat.D32SfloatS8Uint,
-                VkFormat.D32Sfloat,
-                VkFormat.D24UnormS8Uint,
-                VkFormat.D16UnormS8Uint,
-                VkFormat.D16Unorm,
+                VkFormat.D32SFloatS8UInt,
+                VkFormat.D32SFloat,
+                VkFormat.D24UNormS8UInt,
+                VkFormat.D16UNormS8UInt,
+                VkFormat.D16UNorm,
             };
 
             foreach (VkFormat format in depthFormats)
             {
                 VkFormatProperties formatProps;
-                vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, &formatProps);
+                vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, out formatProps);
                 // Format must support depth stencil attachment for optimal tiling
                 if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.DepthStencilAttachment) != 0)
                 {
@@ -709,7 +712,7 @@ namespace SharpGame
             vkFreeCommandBuffers(device, cmdPool, count, cmdBuffers);
         }
 
-        public static IntPtr MapMemory(VkDeviceMemory memory, ulong offset, ulong size, uint flags)
+        public static IntPtr MapMemory(VkDeviceMemory memory, ulong offset, ulong size, VkMemoryMapFlags flags)
         {
             void* mappedLocal;
             vkMapMemory(device, memory, offset, size, flags, &mappedLocal);
@@ -748,24 +751,26 @@ namespace SharpGame
 
         public static void Destroy(VkShaderModule shaderModule)
         {
-            vkDestroyShaderModule(device, shaderModule, IntPtr.Zero);
+            vkDestroyShaderModule(device, shaderModule, null);
         }
 
         public static VkPipeline CreateGraphicsPipeline(ref VkGraphicsPipelineCreateInfo pCreateInfos)
         {
-            VulkanUtil.CheckResult(vkCreateGraphicsPipelines(device, pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
+            VkPipeline pPipelines;
+            VulkanUtil.CheckResult(vkCreateGraphicsPipelines(device, pipelineCache, 1, Utilities.AsPtr(ref pCreateInfos), null, &pPipelines));
             return pPipelines;
         }
 
         public static VkPipelineLayout CreatePipelineLayout(ref VkPipelineLayoutCreateInfo pCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreatePipelineLayout(device, ref pCreateInfo, null, out VkPipelineLayout pPipelineLayout));
+            VulkanUtil.CheckResult(vkCreatePipelineLayout(device, Utilities.AsPtr(ref pCreateInfo), null, out VkPipelineLayout pPipelineLayout));
             return pPipelineLayout;
         }
 
         public static VkPipeline CreateComputePipeline(ref VkComputePipelineCreateInfo pCreateInfos)
         {
-            VulkanUtil.CheckResult(vkCreateComputePipelines(device, pipelineCache, 1, ref pCreateInfos, IntPtr.Zero, out VkPipeline pPipelines));
+            VkPipeline pPipelines;
+            VulkanUtil.CheckResult(vkCreateComputePipelines(device, pipelineCache, 1, Utilities.AsPtr(ref pCreateInfos), null, &pPipelines));
             return pPipelines;
         }
 
@@ -791,13 +796,13 @@ namespace SharpGame
 
         public static VkDescriptorPool CreateDescriptorPool(ref VkDescriptorPoolCreateInfo pCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateDescriptorPool(device, ref pCreateInfo, null, out VkDescriptorPool pDescriptorPool));
+            VulkanUtil.CheckResult(vkCreateDescriptorPool(device, Utilities.AsPtr(ref pCreateInfo), null, out VkDescriptorPool pDescriptorPool));
             return pDescriptorPool;
         }
 
         public static void DestroyDescriptorPool(VkDescriptorPool descriptorPool)
         {
-            vkDestroyDescriptorPool(device, descriptorPool, IntPtr.Zero);
+            vkDestroyDescriptorPool(device, descriptorPool, null);
         }
 
         public static void DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
@@ -818,23 +823,24 @@ namespace SharpGame
 
         public static VkDescriptorSet AllocateDescriptorSets(ref VkDescriptorSetAllocateInfo pAllocateInfo)
         {
-            VulkanUtil.CheckResult(vkAllocateDescriptorSets(device, ref pAllocateInfo, out VkDescriptorSet pDescriptorSets));
+            VkDescriptorSet pDescriptorSets;
+            VulkanUtil.CheckResult(vkAllocateDescriptorSets(device, Utilities.AsPtr(ref pAllocateInfo), &pDescriptorSets));
             return pDescriptorSets;
         }
 
         public static void AllocateDescriptorSets(ref VkDescriptorSetAllocateInfo pAllocateInfo, VkDescriptorSet* pDescriptorSets)
         {
-            VulkanUtil.CheckResult(vkAllocateDescriptorSets(device, ref pAllocateInfo, pDescriptorSets));
+            VulkanUtil.CheckResult(vkAllocateDescriptorSets(device, Utilities.AsPtr(ref pAllocateInfo), pDescriptorSets));
         }
 
         public static void UpdateDescriptorSets(uint descriptorWriteCount, ref VkWriteDescriptorSet pDescriptorWrites, uint descriptorCopyCount, IntPtr pDescriptorCopies)
         {
-            vkUpdateDescriptorSets(device, descriptorWriteCount, ref pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
+            vkUpdateDescriptorSets(device, descriptorWriteCount, Utilities.AsPtr(ref pDescriptorWrites), descriptorCopyCount, (VkCopyDescriptorSet*)pDescriptorCopies);
         }
 
         public static void FreeDescriptorSets(VkDescriptorPool descriptorPool, uint descriptorSetCount, ref VkDescriptorSet pDescriptorSets)
         {
-            VulkanUtil.CheckResult(vkFreeDescriptorSets(device, descriptorPool, descriptorSetCount, ref pDescriptorSets));
+            VulkanUtil.CheckResult(vkFreeDescriptorSets(device, descriptorPool, descriptorSetCount, Utilities.AsPtr(ref pDescriptorSets)));
         }
 
     }

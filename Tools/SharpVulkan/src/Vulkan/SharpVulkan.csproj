@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <VersionPrefix>1.2.158</VersionPrefix>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>portable</DebugType>
+    <Description>Vulkan low level bindings.</Description>
+    <PackageTags>3D graphics vulkan standard game gamedev</PackageTags>
+    <VersionSuffix Condition="'$(VersionSuffix)' != '' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.1" />
+    <ProjectReference Include="../Patch/Patch.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" GlobalPropertiesToRemove="TargetFramework" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Bcl.HashCode " Version="1.1.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PatcherExecutable>$(BinDir)\$(Configuration)\Patch\netcoreapp3.1\Patch.dll</PatcherExecutable>
+  </PropertyGroup>
+
+  <Target Name="PathDll" AfterTargets="Build">
+    <Message Text="Patch dll." />
+    <Exec Command='dotnet "$(PatcherExecutable)" --input "$(TargetPath)"' />
+  </Target>
+
+</Project>

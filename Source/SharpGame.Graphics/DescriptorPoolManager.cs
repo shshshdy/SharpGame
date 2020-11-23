@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
-    using static Vulkan.VulkanNative;
+    using static Vulkan;
     internal class DescriptorPoolManager
     {
         private readonly List<PoolInfo> _pools = new List<PoolInfo>();

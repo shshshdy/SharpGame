@@ -6,12 +6,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using Vulkan;
-
-using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
+    using static Vulkan;
     public class Settings
     {
         public UTF8String ApplicationName { get; set; }
@@ -72,9 +70,9 @@ namespace SharpGame
 #endif
             Settings = settings;
 
-            enabledFeatures.samplerAnisotropy = True;
-            enabledFeatures.depthClamp = True;
-            enabledFeatures.shaderStorageImageExtendedFormats = True;
+            enabledFeatures.samplerAnisotropy = true;
+            enabledFeatures.depthClamp = true;
+            enabledFeatures.shaderStorageImageExtendedFormats = true;
 
             Device.Create(settings, enabledFeatures, EnabledExtensions);
 
@@ -275,7 +273,7 @@ namespace SharpGame
             {
                 new SubpassDependency
                 {
-                    srcSubpass = VulkanNative.SubpassExternal,
+                    srcSubpass = Vulkan.SubpassExternal,
                     dstSubpass = 0,
                     srcStageMask = PipelineStageFlags.BottomOfPipe,
                     dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
@@ -287,7 +285,7 @@ namespace SharpGame
                 new SubpassDependency
                 {
                     srcSubpass = 0,
-                    dstSubpass = VulkanNative.SubpassExternal,
+                    dstSubpass = Vulkan.SubpassExternal,
                     srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
                     dstStageMask = PipelineStageFlags.BottomOfPipe,
                     srcAccessMask = (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),

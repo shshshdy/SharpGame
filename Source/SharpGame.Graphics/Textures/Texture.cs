@@ -2,11 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
-using Vulkan;
+
 
 namespace SharpGame
 {
-    using static Vulkan.VulkanNative;
+    using static Vulkan;
 
     public partial class Texture : Resource, IBindableResource
     {
@@ -109,7 +109,7 @@ namespace SharpGame
             stagingBuffer.Dispose();
 
             imageView = ImageView.Create(image, ImageViewType, format, ImageAspectFlags.Color, 0, mipLevels, 0, layers);
-            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == 1);
+            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == true);
 
             UpdateDescriptor();
 
@@ -264,8 +264,8 @@ namespace SharpGame
             }
 
             texture.image = Image.Create(width, height, (imageViewType == ImageViewType.ImageCube || imageViewType == ImageViewType.ImageCubeArray) ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None, layers, texture.mipLevels, format, SampleCountFlags.Count1, usage);
-            texture.imageView = ImageView.Create(texture.image, imageViewType, format, ImageAspectFlags.Color, 0, RemainingMipLevels, 0, layers);
-            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, Device.Features.samplerAnisotropy == 1);
+            texture.imageView = ImageView.Create(texture.image, imageViewType, format, ImageAspectFlags.Color, 0, Vulkan.RemainingMipLevels, 0, layers);
+            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, Device.Features.samplerAnisotropy == true);
             texture.UpdateDescriptor();
             return texture;
         }
@@ -314,7 +314,7 @@ namespace SharpGame
             }
 
             texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, texture.mipLevels);
-            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
+            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == true);
             texture.UpdateDescriptor();
             return texture;
         }
@@ -355,7 +355,7 @@ namespace SharpGame
 
             texture.imageLayout = ImageLayout.General;
             texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, ImageAspectFlags.Color, 0, texture.mipLevels);
-            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == 1);
+            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy);
             texture.UpdateDescriptor();
             return texture;
         }

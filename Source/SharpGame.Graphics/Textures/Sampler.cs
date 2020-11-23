@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
@@ -72,12 +72,13 @@ namespace SharpGame
         public SamplerMipmapMode mipmapMode;
         public Filter minFilter;
         public Filter magFilter;
-        public uint flags;
+        public VkSamplerCreateFlags flags;
         public SamplerAddressMode addressModeW;
 
         public void ToNative(out VkSamplerCreateInfo native)
         {
-            native = VkSamplerCreateInfo.New();
+            native = new VkSamplerCreateInfo();
+            native.sType = VkStructureType.SamplerCreateInfo;
             native.maxLod = maxLod;
             native.minLod = minLod;
             native.compareOp = (VkCompareOp)compareOp;

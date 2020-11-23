@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
@@ -86,7 +86,7 @@ namespace SharpGame
 
     public struct ImageViewCreateInfo
     {
-        public uint flags;
+        public VkImageViewCreateFlags flags;
         public Image image;
         public ImageViewType viewType;
         public Format format;
@@ -95,7 +95,10 @@ namespace SharpGame
 
         internal void ToNative(out VkImageViewCreateInfo native)
         {
-            native = VkImageViewCreateInfo.New();
+            native = new VkImageViewCreateInfo
+            {
+                sType = VkStructureType.ImageViewCreateInfo
+            };
             native.flags = flags;
             native.image = image.handle;
             native.viewType = (VkImageViewType)viewType;

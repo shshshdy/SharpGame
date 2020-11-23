@@ -2,12 +2,13 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Vulkan;
-using static Vulkan.VulkanNative;
-using static SharpGame.Sdl2.Sdl2Native;
+
 
 namespace SharpGame
 {
+    using static Vulkan;
+    using static SharpGame.Sdl2.Sdl2Native;
+
     public class Swapchain
     {
         public VkSurfaceKHR Surface { get; private set; }
@@ -106,7 +107,7 @@ namespace SharpGame
                             graphicsQueueNodeIndex = i;
                         }
 
-                        if (supportsPresent[i] == True)
+                        if (supportsPresent[i] == true)
                         {
                             graphicsQueueNodeIndex = i;
                             presentQueueNodeIndex = i;
@@ -121,7 +122,7 @@ namespace SharpGame
                     // try to find a separate present queue
                     for (uint i = 0; i < queueCount; ++i)
                     {
-                        if (supportsPresent[i] == True)
+                        if (supportsPresent[i] == true)
                         {
                             presentQueueNodeIndex = i;
                             break;
@@ -169,7 +170,7 @@ namespace SharpGame
                         bool found_B8G8R8A8_UNORM = false;
                         foreach (var surfaceFormat in surfaceFormats)
                         {
-                            if (surfaceFormat.format == VkFormat.B8g8r8a8Unorm)
+                            if (surfaceFormat.format == VkFormat.B8G8R8A8UNorm)
                             {
                                 ColorFormat = (Format)surfaceFormat.format;
                                 ColorSpace = surfaceFormat.colorSpace;
@@ -242,7 +243,7 @@ namespace SharpGame
 
                 // The VK_PRESENT_MODE_FIFO_KHR mode must always be present as per spec
                 // This mode waits for the vertical blank ("v-sync")
-                VkPresentModeKHR swapchainPresentMode = VkPresentModeKHR.FifoKHR;
+                VkPresentModeKHR swapchainPresentMode = VkPresentModeKHR.Fifo;
 
                 // If v-sync is not requested, try to find a mailbox mode
                 // It's the lowest latency non-tearing present mode available
@@ -250,14 +251,14 @@ namespace SharpGame
                 {
                     for (uint i = 0; i < presentModeCount; i++)
                     {
-                        if (presentModes[i] == VkPresentModeKHR.MailboxKHR)
+                        if (presentModes[i] == VkPresentModeKHR.Mailbox)
                         {
-                            swapchainPresentMode = VkPresentModeKHR.MailboxKHR;
+                            swapchainPresentMode = VkPresentModeKHR.Mailbox;
                             break;
                         }
-                        if ((swapchainPresentMode != VkPresentModeKHR.MailboxKHR) && (presentModes[i] == VkPresentModeKHR.ImmediateKHR))
+                        if ((swapchainPresentMode != VkPresentModeKHR.Mailbox) && (presentModes[i] == VkPresentModeKHR.Immediate))
                         {
-                            swapchainPresentMode = VkPresentModeKHR.ImmediateKHR;
+                            swapchainPresentMode = VkPresentModeKHR.Immediate;
                         }
                     }
                 }
@@ -272,10 +273,10 @@ namespace SharpGame
 
                 // Find the transformation of the Surface
                 VkSurfaceTransformFlagsKHR preTransform;
-                if ((surfCaps.supportedTransforms & VkSurfaceTransformFlagsKHR.IdentityKHR) != 0)
+                if ((surfCaps.supportedTransforms & VkSurfaceTransformFlagsKHR.Identity) != 0)
                 {
                     // We prefer a non-rotated transform
-                    preTransform = VkSurfaceTransformFlagsKHR.IdentityKHR;
+                    preTransform = VkSurfaceTransformFlagsKHR.Identity;
                 }
                 else
                 {
@@ -288,7 +289,7 @@ namespace SharpGame
                 swapchainCI.minImageCount = desiredNumberOfSwapchainImages;
                 swapchainCI.imageFormat = (VkFormat)ColorFormat;
                 swapchainCI.imageColorSpace = ColorSpace;
-                swapchainCI.imageExtent = new VkExtent2D() { width = extent.width, height = extent.height };
+                swapchainCI.imageExtent = new VkExtent2D(extent.width, extent.height);
                 swapchainCI.imageUsage = VkImageUsageFlags.ColorAttachment;
                 swapchainCI.preTransform = preTransform;
                 swapchainCI.imageArrayLayers = 1;
@@ -298,8 +299,8 @@ namespace SharpGame
                 swapchainCI.presentMode = swapchainPresentMode;
                 swapchainCI.oldSwapchain = oldSwapchain;
                 // Setting clipped to VK_TRUE allows the implementation to discard rendering outside of the Surface area
-                swapchainCI.clipped = True;
-                swapchainCI.compositeAlpha = VkCompositeAlphaFlagsKHR.OpaqueKHR;
+                swapchainCI.clipped = true;
+                swapchainCI.compositeAlpha = VkCompositeAlphaFlagsKHR.Opaque;
 
                 // Set additional usage flag for blitting from the swapchain Images if supported
                 VkFormatProperties formatProps;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
-using Vulkan;
 
 namespace SharpGame
 {

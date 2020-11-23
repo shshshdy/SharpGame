@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
@@ -13,11 +13,14 @@ namespace SharpGame
         public uint height;
         public uint layers;
         public Span<VkImageView> attachments;
-        public uint flags;
+        public VkFramebufferCreateFlags flags;
 
         public unsafe void ToNative(out VkFramebufferCreateInfo native)
         {
-            native = VkFramebufferCreateInfo.New();
+            native = new VkFramebufferCreateInfo
+            {
+                sType = VkStructureType.FramebufferCreateInfo
+            };
             native.flags = flags;
             native.renderPass = renderPass.handle;
             native.attachmentCount = (uint)attachments.Length;
@@ -36,14 +39,17 @@ namespace SharpGame
 
         internal VkFramebuffer handle;
 
-        public Framebuffer(RenderPass renderPass, uint width, uint height, uint layers, VkImageView[] attachments, uint flags = 0)
+        public Framebuffer(RenderPass renderPass, uint width, uint height, uint layers, VkImageView[] attachments, VkFramebufferCreateFlags flags = 0)
         {
             this.renderPass = renderPass;
             Width = width;
             Height = height;
             unsafe
             {
-                var framebufferCreateInfo = VkFramebufferCreateInfo.New();
+                var framebufferCreateInfo = new VkFramebufferCreateInfo
+                {
+                    sType = VkStructureType.FramebufferCreateInfo
+                };
                 framebufferCreateInfo.flags = flags;
                 framebufferCreateInfo.renderPass = renderPass.handle;
                 framebufferCreateInfo.attachmentCount = (uint)attachments.Length;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
@@ -47,7 +47,7 @@ namespace SharpGame
 
     public struct MultisampleStateInfo
     {
-        public uint flags;
+        public VkPipelineMultisampleStateCreateFlags flags;
         public SampleCountFlags rasterizationSamples;
         public bool sampleShadingEnable;
         public float minSampleShading;
@@ -63,7 +63,7 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkPipelineMultisampleStateCreateInfo native)
         {
-            native = VkPipelineMultisampleStateCreateInfo.New();
+            native = new VkPipelineMultisampleStateCreateInfo();
             native.flags = flags;
             native.rasterizationSamples = (VkSampleCountFlags)rasterizationSamples;
             native.sampleShadingEnable = sampleShadingEnable;
@@ -92,7 +92,7 @@ namespace SharpGame
 
     public struct DepthStencilStateInfo
     {
-        public uint flags;
+        public VkPipelineDepthStencilStateCreateFlags flags;
         public bool depthTestEnable;
         public bool depthWriteEnable;
         public CompareOp depthCompareOp;
@@ -125,7 +125,10 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkPipelineDepthStencilStateCreateInfo native)
         {
-            native = VkPipelineDepthStencilStateCreateInfo.New();
+            native = new VkPipelineDepthStencilStateCreateInfo
+            {
+                sType = VkStructureType.PipelineDepthStencilStateCreateInfo
+            };
             native.flags = flags;
             native.depthTestEnable = depthTestEnable;
             native.depthWriteEnable = depthWriteEnable;
@@ -252,16 +255,16 @@ namespace SharpGame
 
             native.attachmentCount = (uint)attachments.Length;
             native.pAttachments = (VkPipelineColorBlendAttachmentState*)Utilities.AsPointer(ref attachments[0]);
-            native.blendConstants_0 = blendConstants_0;
-            native.blendConstants_1 = blendConstants_1;
-            native.blendConstants_2 = blendConstants_2;
-            native.blendConstants_3 = blendConstants_3;
+            native.blendConstants[0] = blendConstants_0;
+            native.blendConstants[1] = blendConstants_1;
+            native.blendConstants[2] = blendConstants_2;
+            native.blendConstants[3] = blendConstants_3;
         }
     }
 
     public struct DynamicStateInfo
     {
-        public uint flags;
+        public VkPipelineDynamicStateCreateFlags flags;
         public DynamicState[] dynamicStates;
         public bool HasValue => !dynamicStates.IsNullOrEmpty();
        
@@ -285,7 +288,10 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkPipelineDynamicStateCreateInfo native)
         {
-            native = VkPipelineDynamicStateCreateInfo.New();
+            native = new VkPipelineDynamicStateCreateInfo
+            {
+                sType = VkStructureType.PipelineDynamicStateCreateInfo
+            };
             native.flags = this.flags;
             if(HasValue)
             {

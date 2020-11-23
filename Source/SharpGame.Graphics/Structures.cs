@@ -99,7 +99,7 @@ namespace SharpGame
             this.depth = depth;
         }
 
-        public Extent3D(in Vulkan.VkExtent3D vkExtent3D)
+        public Extent3D(in VkExtent3D vkExtent3D)
         {
             this.width = vkExtent3D.width;
             this.height = vkExtent3D.height;
@@ -147,7 +147,7 @@ namespace SharpGame
             this.z = z;
         }
 
-        public Offset3D(in Vulkan.VkOffset3D vkOffset3D)
+        public Offset3D(in VkOffset3D vkOffset3D)
         {
             this.x = vkOffset3D.x;
             this.y = vkOffset3D.y;

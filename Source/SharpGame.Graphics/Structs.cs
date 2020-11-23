@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
-    using static VulkanNative;
+    using static Vulkan;
 
     /// <summary>
     /// Structure specifying a clear color value.

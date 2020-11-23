@@ -227,7 +227,7 @@ namespace SharpGame.Samples
             Vector<VkSparseImageFormatProperties> sparseProperties = new Vector<VkSparseImageFormatProperties>();
             // Sparse properties count for the desired format
             uint sparsePropertiesCount;
-            VulkanNative.vkGetPhysicalDeviceSparseImageFormatProperties(
+            Vulkan.vkGetPhysicalDeviceSparseImageFormatProperties(
                 physicalDevice,
                 (VkFormat)format,
                 VkImageType.Image2D,
@@ -245,7 +245,7 @@ namespace SharpGame.Samples
 
             // Get actual image format properties
             sparseProperties.Resize(sparsePropertiesCount);
-            VulkanNative.vkGetPhysicalDeviceSparseImageFormatProperties(
+            Vulkan.vkGetPhysicalDeviceSparseImageFormatProperties(
                 physicalDevice,
                 (VkFormat)format,
                 VkImageType.Image2D,
@@ -273,7 +273,7 @@ namespace SharpGame.Samples
             sparseImageCreateInfo.tiling = VkImageTiling.Optimal;
             sparseImageCreateInfo.sharingMode = VkSharingMode.Exclusive;
             sparseImageCreateInfo.initialLayout = VkImageLayout.Undefined;
-            sparseImageCreateInfo.extent = new VkExtent3D { width = texture.width, height = texture.height, depth = 1 };
+            sparseImageCreateInfo.extent = new VkExtent3D(texture.width, texture.height, 1);
             sparseImageCreateInfo.usage = VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled;
             sparseImageCreateInfo.flags = VkImageCreateFlags.SparseBinding | VkImageCreateFlags.SparseResidency;
 
@@ -305,7 +305,7 @@ namespace SharpGame.Samples
             // Count
             uint sparseMemoryReqsCount = 32;
             Vector<VkSparseImageMemoryRequirements> sparseMemoryReqs = new Vector<VkSparseImageMemoryRequirements>(sparseMemoryReqsCount, sparseMemoryReqsCount);
-            VulkanNative.vkGetImageSparseMemoryRequirements(Device.Handle, texture.image.handle, &sparseMemoryReqsCount, sparseMemoryReqs.DataPtr);
+            Vulkan.vkGetImageSparseMemoryRequirements(Device.Handle, texture.image.handle, &sparseMemoryReqsCount, sparseMemoryReqs.DataPtr);
             if (sparseMemoryReqsCount == 0)
             {
                 Log.Error("No memory requirements for the sparse image!");
@@ -313,7 +313,7 @@ namespace SharpGame.Samples
             }
             sparseMemoryReqs.Resize(sparseMemoryReqsCount);
             // Get actual requirements
-            VulkanNative.vkGetImageSparseMemoryRequirements(Device.Handle, texture.image.handle, &sparseMemoryReqsCount, sparseMemoryReqs.DataPtr);
+            Vulkan.vkGetImageSparseMemoryRequirements(Device.Handle, texture.image.handle, &sparseMemoryReqsCount, sparseMemoryReqs.DataPtr);
 
             Log.Info("Sparse image memory requirements: " + sparseMemoryReqsCount);
             foreach (var reqs in sparseMemoryReqs)
@@ -368,10 +368,12 @@ namespace SharpGame.Samples
                 // sparseMemoryReq.imageMipTailFirstLod is the first mip level that's stored inside the mip tail
                 for (uint mipLevel = 0; mipLevel < sparseMemoryReq.imageMipTailFirstLod; mipLevel++)
                 {
-                    VkExtent3D extent;
-                    extent.width = Math.Max(sparseImageCreateInfo.extent.width >> (int)mipLevel, 1u);
-                    extent.height = Math.Max(sparseImageCreateInfo.extent.height >> (int)mipLevel, 1u);
-                    extent.depth = Math.Max(sparseImageCreateInfo.extent.depth >> (int)mipLevel, 1u);
+                    VkExtent3D extent = new VkExtent3D
+                    (
+                        Math.Max(sparseImageCreateInfo.extent.width >> (int)mipLevel, 1u),
+                        Math.Max(sparseImageCreateInfo.extent.height >> (int)mipLevel, 1u),
+                        Math.Max(sparseImageCreateInfo.extent.depth >> (int)mipLevel, 1u)
+                    );
 
                     VkImageSubresource subResource = new VkImageSubresource
                     {
@@ -398,18 +400,18 @@ namespace SharpGame.Samples
                             {
                                 // Offset 
                                 VkOffset3D offset = new VkOffset3D
-                                {
-                                    x = (int)(x * imageGranularity.width),
-                                    y = (int)(y * imageGranularity.height),
-                                    z = (int)(z * imageGranularity.depth)
-                                };
+                                (
+                                    (int)(x * imageGranularity.width),
+                                    (int)(y * imageGranularity.height),
+                                    (int)(z * imageGranularity.depth)
+                                );
                                 // Size of the page
                                 VkExtent3D extent1 = new VkExtent3D
-                                {
-                                    width = (x == sparseBindCounts.x - 1) ? lastBlockExtent.x : imageGranularity.width,
-                                    height = (y == sparseBindCounts.y - 1) ? lastBlockExtent.y : imageGranularity.height,
-                                    depth = (z == sparseBindCounts.z - 1) ? lastBlockExtent.z : imageGranularity.depth
-                                };
+                                (
+                                    (x == sparseBindCounts.x - 1) ? lastBlockExtent.x : imageGranularity.width,
+                                    (y == sparseBindCounts.y - 1) ? lastBlockExtent.y : imageGranularity.height,
+                                    (z == sparseBindCounts.z - 1) ? lastBlockExtent.z : imageGranularity.depth
+                                );
 
                                 // Add new virtual page
                                 ref VirtualTexturePage newPage = ref texture.addPage(offset, extent1, sparseImageMemoryReqs.alignment, mipLevel, layer);

@@ -16,10 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Vk" Version="1.0.22" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\Tools\SharpVulkan\src\Vulkan\SharpVulkan.csproj" />
     <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
     <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />
   </ItemGroup>

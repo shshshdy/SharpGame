@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
@@ -40,7 +40,10 @@ namespace SharpGame
 
         public BufferViewCreateInfo(Buffer buffer, Format format, ulong offset, ulong range)
         {
-            native = VkBufferViewCreateInfo.New();
+            native = new VkBufferViewCreateInfo
+            {
+                sType = VkStructureType.BufferViewCreateInfo
+            };
             this.buffer = buffer;
             this.format = format;
             this.offset = offset;

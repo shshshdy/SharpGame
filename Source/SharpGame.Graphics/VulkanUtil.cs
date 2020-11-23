@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Vulkan;
+
 
 namespace SharpGame
 {
-    using static VulkanNative;
+    using static Vulkan;
 
     public unsafe static class VulkanUtil
     {
@@ -21,17 +21,17 @@ namespace SharpGame
             }
         }
 
-        public static VkMemoryType GetMemoryType(this VkPhysicalDeviceMemoryProperties memoryProperties, uint index)
-        {
-            return (&memoryProperties.memoryTypes_0)[index];
-        }
+//         public static VkMemoryType GetMemoryType(this VkPhysicalDeviceMemoryProperties memoryProperties, uint index)
+//         {
+//             return (&memoryProperties.memoryTypes_0)[index];
+//         }
 
         public static IntPtr GetProcAddr(this VkInstance instance, string name)
         {
             int byteCount = UTF8String.GetMaxByteCount(name);
             var dstPtr = stackalloc byte[byteCount];
             UTF8String.ToPointer(name, dstPtr, byteCount);
-            var addr = VulkanNative.vkGetInstanceProcAddr(instance, dstPtr);
+            var addr = Vulkan.vkGetInstanceProcAddr(instance, dstPtr);
             return addr;
         }
 
@@ -51,7 +51,7 @@ namespace SharpGame
             int byteCount = UTF8String.GetMaxByteCount(name);
             var dstPtr = stackalloc byte[byteCount];
             UTF8String.ToPointer(name, dstPtr, byteCount);
-            var addr = VulkanNative.vkGetDeviceProcAddr(device, dstPtr);
+            var addr = Vulkan.vkGetDeviceProcAddr(device, dstPtr);
             return addr;
         }
 

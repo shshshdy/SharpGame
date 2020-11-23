@@ -1,13 +1,11 @@
-﻿using Vulkan;
-
-namespace SharpGame
+﻿namespace SharpGame
 {
     using global::System;
     using System.Collections.Generic;
     using global::System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
     using System.Threading;
-    using static VulkanNative;
+    using static Vulkan;
 
     public unsafe partial class CommandBuffer : DisposeBase
     {
@@ -30,9 +28,10 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public void Begin(CommandBufferUsageFlags flags = CommandBufferUsageFlags.None)
         {
-            var cmdBufInfo = VkCommandBufferBeginInfo.New();
+            var cmdBufInfo = new VkCommandBufferBeginInfo();
+            cmdBufInfo.sType = VkStructureType.CommandBufferBeginInfo;
             cmdBufInfo.flags = (VkCommandBufferUsageFlags)flags;
-            VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufInfo));
+            VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
             opened = true;
             NeedSubmit = true;
             ClearDescriptorSets();
@@ -42,12 +41,13 @@ namespace SharpGame
         public void Begin(CommandBufferUsageFlags flags, ref CommandBufferInheritanceInfo commandBufferInheritanceInfo)
         {
             commandBufferInheritanceInfo.ToNative(out VkCommandBufferInheritanceInfo cmdBufInfo);
-            var cmdBufBeginInfo = VkCommandBufferBeginInfo.New();
+            var cmdBufBeginInfo = new VkCommandBufferBeginInfo();
+            cmdBufBeginInfo.sType = VkStructureType.CommandBufferBeginInfo;
             cmdBufBeginInfo.flags = (VkCommandBufferUsageFlags)flags;
             unsafe
             {
                 cmdBufBeginInfo.pInheritanceInfo = &cmdBufInfo;
-                VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, ref cmdBufBeginInfo));
+                VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, &cmdBufBeginInfo));
             }
             opened = true;
             NeedSubmit = true;
@@ -65,7 +65,7 @@ namespace SharpGame
         public void BeginRenderPass(in RenderPassBeginInfo renderPassBeginInfo, SubpassContents contents)
         {
             renderPassBeginInfo.ToNative(out VkRenderPassBeginInfo vkRenderPassBeginInfo);
-            vkCmdBeginRenderPass(commandBuffer, ref vkRenderPassBeginInfo, (VkSubpassContents)contents);
+            vkCmdBeginRenderPass(commandBuffer, &vkRenderPassBeginInfo, (VkSubpassContents)contents);
             renderPass = renderPassBeginInfo.renderPass;
             ClearDescriptorSets();
         }
@@ -79,13 +79,13 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public void SetScissor(in Rect2D pScissors)
         {
-            vkCmdSetScissor(commandBuffer, 0, 1, Utilities.AsIntPtr(in pScissors));
+            vkCmdSetScissor(commandBuffer, 0, 1, Utilities.AsPtr(in pScissors));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
         public void SetViewport(in Viewport pViewports)
         {
-            vkCmdSetViewport(commandBuffer, 0, 1, Utilities.AsIntPtr(in pViewports));
+            vkCmdSetViewport(commandBuffer, 0, 1, Utilities.AsPtr(in pViewports));
         }
 
         void ClearDescriptorSets()
@@ -186,13 +186,13 @@ namespace SharpGame
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindVertexBuffers(uint firstBinding, uint bindingCount, IntPtr pBuffers, ref ulong pOffsets)
         {
-            vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount, pBuffers, ref pOffsets);
+            vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount, (VkBuffer*)pBuffers, Utilities.AsPtr(ref pOffsets));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindVertexBuffers(uint firstBinding, Span<VkBuffer> pBuffers, ref ulong pOffsets)
         {
-            vkCmdBindVertexBuffers(commandBuffer, firstBinding, (uint)pBuffers.Length, ref pBuffers[0], ref pOffsets);
+            vkCmdBindVertexBuffers(commandBuffer, firstBinding, (uint)pBuffers.Length, Utilities.AsPtr(ref pBuffers[0]), Utilities.AsPtr(ref pOffsets));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -291,24 +291,24 @@ namespace SharpGame
             cmdBuffer.NeedSubmit = false;
         }
 
-        public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, ref BufferCopy region)
+        public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, ref VkBufferCopy region)
         {
-            vkCmdCopyBuffer(commandBuffer, srcBuffer.buffer, dstBuffer.buffer, 1, Utilities.AsPointer(ref region));
+            vkCmdCopyBuffer(commandBuffer, srcBuffer.buffer, dstBuffer.buffer, 1, Utilities.AsPtr(ref region));
         }
 
-        public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, Span<BufferCopy> pRegions)
+        public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, Span<VkBufferCopy> pRegions)
         {
-            vkCmdCopyBuffer(commandBuffer, srcBuffer.buffer, dstBuffer.buffer, (uint)pRegions.Length, Utilities.AsPointer(ref pRegions[0]));
+            vkCmdCopyBuffer(commandBuffer, srcBuffer.buffer, dstBuffer.buffer, (uint)pRegions.Length, Utilities.AsPtr(ref pRegions[0]));
         }
 
         public void BlitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ref ImageBlit pRegion, Filter filter)
         {
-            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, ref Unsafe.As<ImageBlit, VkImageBlit>(ref pRegion), (VkFilter)filter);
+            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, (VkImageBlit*)Unsafe.AsPointer(ref pRegion), (VkFilter)filter);
         }
 
         public void BlitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, Span<ImageBlit> pRegions, Filter filter)
         {
-            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, ref Unsafe.As<ImageBlit, VkImageBlit>(ref pRegions[0]), (VkFilter)filter);
+            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, (VkImageBlit*)Unsafe.AsPointer(ref pRegions[0]), (VkFilter)filter);
         }
 
         public void CopyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ref ImageCopy region)
@@ -355,8 +355,8 @@ namespace SharpGame
             uint memoryBarrierCount, ref VkMemoryBarrier pMemoryBarriers, uint bufferMemoryBarrierCount, IntPtr pBufferMemoryBarriers,
             uint imageMemoryBarrierCount, ref VkImageMemoryBarrier pImageMemoryBarriers)
         {
-            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, (VkDependencyFlags)dependencyFlags, memoryBarrierCount, ref pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers,
-                imageMemoryBarrierCount, ref pImageMemoryBarriers);
+            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, (VkDependencyFlags)dependencyFlags, memoryBarrierCount, Utilities.AsPtr(ref pMemoryBarriers), bufferMemoryBarrierCount, (VkBufferMemoryBarrier*)pBufferMemoryBarriers,
+                imageMemoryBarrierCount, Utilities.AsPtr(ref pImageMemoryBarriers));
         }
 
         public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags,
@@ -364,7 +364,7 @@ namespace SharpGame
             uint imageMemoryBarrierCount, ImageMemoryBarrier* pImageMemoryBarriers)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, (VkDependencyFlags)dependencyFlags, memoryBarrierCount, (VkMemoryBarrier*)pMemoryBarriers,
-                bufferMemoryBarrierCount, (VkBufferMemoryBarrier *) pBufferMemoryBarriers,
+                bufferMemoryBarrierCount, (VkBufferMemoryBarrier*) pBufferMemoryBarriers,
                 imageMemoryBarrierCount, (VkImageMemoryBarrier*)pImageMemoryBarriers);
         }
 
@@ -570,7 +570,8 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkRenderPassBeginInfo native)
         {
-            native = VkRenderPassBeginInfo.New();
+            native = new VkRenderPassBeginInfo();
+            native.sType = VkStructureType.RenderPassBeginInfo;
             native.renderPass = framebuffer.renderPass.handle;
             native.framebuffer = framebuffer.handle;
             native.renderArea = new VkRect2D(renderArea.x, renderArea.y, renderArea.width, renderArea.height);
@@ -631,7 +632,8 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkCommandBufferInheritanceInfo native)
         {
-            native = VkCommandBufferInheritanceInfo.New();
+            native = new VkCommandBufferInheritanceInfo();
+            native.sType = VkStructureType.CommandBufferInheritanceInfo;
             native.renderPass = renderPass.handle;
             native.subpass = subpass;
             native.framebuffer = framebuffer.handle;

@@ -6,7 +6,6 @@ namespace SharpGame
 {
     using System.Runtime.CompilerServices;
     using global::System.Runtime.InteropServices;
-    using Vulkan;
 
     public struct Semaphore : IDisposable
     {

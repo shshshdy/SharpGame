@@ -1,12 +1,12 @@
-﻿using Vulkan;
-using VkDeviceSize = System.UInt64;
-using static Vulkan.VulkanNative;
+﻿using VkDeviceSize = System.UInt64;
+
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System;
 
 namespace SharpGame
 {
+    using static Vulkan;
     public interface IBindableResource { }
     
     public class Buffer : RefCounted, IBindableResource
@@ -116,7 +116,7 @@ namespace SharpGame
 
         public ref T Map<T>(ulong offset = 0) where T : struct
         {
-            Mapped = Device.MapMemory(memory, (ulong)offset, Size, 0);
+            Mapped = Device.MapMemory(memory, (ulong)offset, Size, VkMemoryMapFlags.None);
             return ref Utilities.As<T>(Mapped);
         }
 
@@ -157,7 +157,7 @@ namespace SharpGame
                 {
                     Graphics.WithCommandBuffer((cmd) =>
                     {
-                        BufferCopy copyRegion = new BufferCopy { srcOffset = offset, size = size };
+                        VkBufferCopy copyRegion = new VkBufferCopy { srcOffset = offset, size = size };
                         cmd.CopyBuffer(stagingBuffer, this, ref copyRegion);
                     });
 
@@ -220,7 +220,8 @@ namespace SharpGame
 
         public unsafe BufferCreateInfo(BufferUsageFlags usage, ulong size, uint[] queueFamilyIndices = null)
         {
-            native = VkBufferCreateInfo.New();
+            native = new VkBufferCreateInfo();
+            native.sType = VkStructureType.BufferCreateInfo;
             pQueueFamilyIndices = queueFamilyIndices;
             if(queueFamilyIndices != null)
             {
@@ -241,7 +242,8 @@ namespace SharpGame
 
         public MemoryAllocateInfo(ulong allocationSize, uint memoryTypeIndex)
         {
-            native = VkMemoryAllocateInfo.New();
+            native = new VkMemoryAllocateInfo();
+            native.sType = VkStructureType.MemoryAllocateInfo;
             native.allocationSize = allocationSize;
             native.memoryTypeIndex = memoryTypeIndex;
         }

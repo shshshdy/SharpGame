@@ -1,8 +1,7 @@
-using SharpGame;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Vulkan
+namespace SharpGame
 {
     /// <summary>
     /// Opaque handle to a debug report callback object.
@@ -37,8 +36,8 @@ namespace Vulkan
                 callbackHandle = Marshal.GetFunctionPointerForDelegate(_callback);
             }
 
-            var nativeCreateInfo = VkDebugReportCallbackCreateInfoEXT.New();
-
+            var nativeCreateInfo = new VkDebugReportCallbackCreateInfoEXT();
+            nativeCreateInfo.sType = VkStructureType.DebugReportCallbackCreateInfoEXT;
             nativeCreateInfo.flags = createInfo.Flags;
             nativeCreateInfo.pfnCallback = callbackHandle;
             nativeCreateInfo.pUserData = (void*)createInfo.UserData;
@@ -60,7 +59,7 @@ namespace Vulkan
         /// </summary>
         protected override void Destroy(bool disposing)
         {
-            VulkanNative.vkDestroyDebugReportCallbackEXT(Parent, handle, null);
+            Vulkan.vkDestroyDebugReportCallbackEXT(Parent, handle, null);
             _callback = null;
          
         }

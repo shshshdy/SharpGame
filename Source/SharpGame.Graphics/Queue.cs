@@ -1,11 +1,10 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Vulkan;
-using static Vulkan.VulkanNative;
 
 namespace SharpGame
 {
+    using static Vulkan;
     public unsafe class Queue
     {
         internal VkQueue native;

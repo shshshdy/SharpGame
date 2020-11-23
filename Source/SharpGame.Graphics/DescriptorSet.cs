@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Vulkan;
+
 
 
 namespace SharpGame
@@ -38,7 +38,11 @@ namespace SharpGame
             {
                 var setLayouts = stackalloc VkDescriptorSetLayout[3] { resLayout.Handle, resLayout.Handle, resLayout.Handle };
 
-                var descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo.New();
+                var descriptorSetAllocateInfo = new VkDescriptorSetAllocateInfo
+                {
+                    sType = VkStructureType.DescriptorSetAllocateInfo
+                };
+
                 descriptorSetAllocateInfo.descriptorPool = descriptorPool;
                 descriptorSetAllocateInfo.pSetLayouts = setLayouts;
                 descriptorSetAllocateInfo.descriptorSetCount = Swapchain.IMAGE_COUNT;
@@ -363,7 +367,8 @@ namespace SharpGame
             ref VkDescriptorBufferInfo bufferInfo,
             uint descriptorCount = 1)
         {
-            native = VkWriteDescriptorSet.New();
+            native = new VkWriteDescriptorSet();
+            native.sType = VkStructureType.WriteDescriptorSet;
             native.dstSet = dstSet;
             native.descriptorType = (VkDescriptorType)type;
             native.dstBinding = binding;
@@ -378,7 +383,8 @@ namespace SharpGame
             ref DescriptorImageInfo imageInfo,
             uint descriptorCount = 1)
         {
-            native = VkWriteDescriptorSet.New();
+            native = new VkWriteDescriptorSet();
+            native.sType = VkStructureType.WriteDescriptorSet;
             native.dstSet = dstSet;
             native.descriptorType = (VkDescriptorType)type;
             native.dstBinding = binding;
@@ -392,7 +398,8 @@ namespace SharpGame
             ref VkDescriptorBufferInfo bufferInfo,
             BufferView bufferView)
         {
-            native = VkWriteDescriptorSet.New();
+            native = new VkWriteDescriptorSet();
+            native.sType = VkStructureType.WriteDescriptorSet;
             native.dstSet = dstSet;
             native.descriptorType = (VkDescriptorType)type;
             native.dstBinding = binding;

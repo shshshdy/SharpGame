@@ -201,7 +201,7 @@ namespace SharpGame
             
                 dependencies[0] = new SubpassDependency
                 {
-                    srcSubpass = Vulkan.VulkanNative.SubpassExternal,
+                    srcSubpass = Vulkan.SubpassExternal,
                     dstSubpass = 0,
                     srcStageMask = PipelineStageFlags.BottomOfPipe,
                     dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
@@ -230,7 +230,7 @@ namespace SharpGame
                 dependencies[subpasses.Count] = new SubpassDependency
                 {
                     srcSubpass = (uint)(subpasses.Count - 1),
-                    dstSubpass = Vulkan.VulkanNative.SubpassExternal,
+                    dstSubpass = Vulkan.SubpassExternal,
                     srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
                     dstStageMask = PipelineStageFlags.BottomOfPipe,
                     srcAccessMask = AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite,
