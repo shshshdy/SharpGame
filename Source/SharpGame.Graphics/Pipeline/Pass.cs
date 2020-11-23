@@ -351,7 +351,7 @@ namespace SharpGame
             {
                 if (sm != null)
                 {
-                    var shaderStage = VkPipelineShaderStageCreateInfo.New();
+                    var shaderStage = new VkPipelineShaderStageCreateInfo { sType = VkStructureType.PipelineShaderStageCreateInfo };
                     shaderStage.stage = (VkShaderStageFlags)sm.Stage;
                     shaderStage.module = sm.shaderModule;
                     shaderStage.pName = Strings.main;// sm.FuncName;
@@ -372,7 +372,10 @@ namespace SharpGame
         {
             if (ShaderModels[5] != null)
             {
-                var shaderStage = VkPipelineShaderStageCreateInfo.New();
+                var shaderStage = new VkPipelineShaderStageCreateInfo
+                {
+                    sType = VkStructureType.PipelineShaderStageCreateInfo
+                };
                 shaderStage.stage = VkShaderStageFlags.Compute;
                 shaderStage.module = ShaderModels[5].shaderModule;
                 shaderStage.pName = Strings.main;// sm.FuncName;
@@ -397,7 +400,10 @@ namespace SharpGame
 
         public unsafe Pipeline CreateGraphicsPipeline(RenderPass renderPass, uint subPass, VertexLayout vertexInput, PrimitiveTopology primitiveTopology)
         {
-            VkGraphicsPipelineCreateInfo pipelineCreateInfo = VkGraphicsPipelineCreateInfo.New();
+            VkGraphicsPipelineCreateInfo pipelineCreateInfo = new VkGraphicsPipelineCreateInfo
+            {
+                sType = VkStructureType.GraphicsPipelineCreateInfo
+            };
             pipelineCreateInfo.layout = PipelineLayout.handle;
             pipelineCreateInfo.renderPass = renderPass.handle;
             pipelineCreateInfo.subpass = subPass;
@@ -412,7 +418,7 @@ namespace SharpGame
             }
             else
             {
-                vertexInputState = VkPipelineVertexInputStateCreateInfo.New();
+                vertexInputState = new VkPipelineVertexInputStateCreateInfo { sType = VkStructureType.PipelineVertexInputStateCreateInfo };
             }
 
             pipelineCreateInfo.pVertexInputState = &vertexInputState;
@@ -422,7 +428,10 @@ namespace SharpGame
             pipelineCreateInfo.stageCount = count;
             pipelineCreateInfo.pStages = (VkPipelineShaderStageCreateInfo*)Unsafe.AsPointer(ref shaderStageCreateInfos[0]);
 
-            var pipelineInputAssemblyStateCreateInfo = VkPipelineInputAssemblyStateCreateInfo.New();
+            var pipelineInputAssemblyStateCreateInfo = new VkPipelineInputAssemblyStateCreateInfo
+            {
+                sType = VkStructureType.PipelineInputAssemblyStateCreateInfo
+            };
             pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)primitiveTopology;
             pipelineInputAssemblyStateCreateInfo.flags = 0;
             pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = false;
@@ -431,7 +440,10 @@ namespace SharpGame
             rasterizationState.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo);
             pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 
-            var pipelineViewportStateCreateInfo = VkPipelineViewportStateCreateInfo.New();
+            var pipelineViewportStateCreateInfo = new VkPipelineViewportStateCreateInfo
+            {
+                sType = VkStructureType.PipelineViewportStateCreateInfo
+            };
             pipelineViewportStateCreateInfo.viewportCount = 1;
             pipelineViewportStateCreateInfo.scissorCount = 1;
             pipelineViewportStateCreateInfo.flags = 0;
@@ -470,7 +482,10 @@ namespace SharpGame
                 return computeHandle;
             }
             
-            var pipelineCreateInfo = VkComputePipelineCreateInfo.New();
+            var pipelineCreateInfo = new VkComputePipelineCreateInfo
+            {
+                sType = VkStructureType.ComputePipelineCreateInfo
+            };
             pipelineCreateInfo.stage = GetComputeStageCreateInfo();
             pipelineCreateInfo.layout = PipelineLayout.handle;
 

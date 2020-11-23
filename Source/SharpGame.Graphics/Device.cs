@@ -119,18 +119,18 @@ namespace SharpGame
             MemoryProperties = memoryProperties;
             // Queue family properties, used for setting up requested queues upon device creation
             uint queueFamilyCount = 0;
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, ref queueFamilyCount, null);
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, null);
             Debug.Assert(queueFamilyCount > 0);
             QueueFamilyProperties.Resize(queueFamilyCount);
             vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, QueueFamilyProperties.DataPtr);
 
             // Get list of supported extensions
             uint extCount = 0;
-            vkEnumerateDeviceExtensionProperties(physicalDevice, (byte*)null, ref extCount, null);
+            vkEnumerateDeviceExtensionProperties(physicalDevice, (byte*)null, &extCount, null);
             if (extCount > 0)
             {
                 VkExtensionProperties* extensions = stackalloc VkExtensionProperties[(int)extCount];
-                if (vkEnumerateDeviceExtensionProperties(physicalDevice, (byte*)null, ref extCount, extensions) == VkResult.Success)
+                if (vkEnumerateDeviceExtensionProperties(physicalDevice, (byte*)null, &extCount, extensions) == VkResult.Success)
                 {
                     for (uint i = 0; i < extCount; i++)
                     {
@@ -154,14 +154,17 @@ namespace SharpGame
         {
             bool enableValidation = settings.Validation;
 
-            VkApplicationInfo appInfo = new VkApplicationInfo()
+            vkInitialize().CheckResult();
+
+            var appInfo = new VkApplicationInfo
             {
                 sType = VkStructureType.ApplicationInfo,
-                apiVersion = new VkVersion(1, 0, 0),
                 pApplicationName = settings.ApplicationName,
+                applicationVersion = new VkVersion(1, 0, 0),
                 pEngineName = engineName,
+                engineVersion = new VkVersion(1, 0, 0),
+                apiVersion = vkEnumerateInstanceVersion()
             };
-
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -176,7 +179,7 @@ namespace SharpGame
                 throw new PlatformNotSupportedException();
             }
 
-            VkInstanceCreateInfo instanceCreateInfo = VkInstanceCreateInfo.New();
+            VkInstanceCreateInfo instanceCreateInfo = new VkInstanceCreateInfo { sType = VkStructureType.InstanceCreateInfo };
             instanceCreateInfo.pApplicationInfo = &appInfo;
 
             if (instanceExtensions.Count > 0)
@@ -198,9 +201,10 @@ namespace SharpGame
             }
 
             VkInstance instance;
-            VulkanUtil.CheckResult(vkCreateInstance(&instanceCreateInfo, null, &instance));
+            VulkanUtil.CheckResult(vkCreateInstance(&instanceCreateInfo, null, out instance));
             VkInstance = instance;
 
+            vkLoadInstance(VkInstance);
             if (settings.Validation)
             {
                 debugReportCallbackExt = CreateDebugReportCallback();
@@ -293,7 +297,10 @@ namespace SharpGame
                         deviceExtensions.Add(Strings.VK_KHR_SWAPCHAIN_EXTENSION_NAME);
                     }
 
-                    VkDeviceCreateInfo deviceCreateInfo = VkDeviceCreateInfo.New();
+                    VkDeviceCreateInfo deviceCreateInfo = new VkDeviceCreateInfo
+                    {
+                        sType = VkStructureType.DeviceCreateInfo
+                    };
                     deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.Count;
                     deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.DataPtr;
                     deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
@@ -458,7 +465,7 @@ namespace SharpGame
 
         public static VkSwapchainKHR CreateSwapchainKHR(ref VkSwapchainCreateInfoKHR pCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateSwapchainKHR(device, ref pCreateInfo, null, out VkSwapchainKHR pSwapchain));
+            VulkanUtil.CheckResult(vkCreateSwapchainKHR(device, Utilities.AsPtr(ref pCreateInfo), null, out VkSwapchainKHR pSwapchain));
             return pSwapchain;
         }
 
@@ -472,16 +479,19 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkGetSwapchainImagesKHR(device, swapchain, pSwapchainImageCount, pSwapchainImages));
         }
 
-        public static VkResult AcquireNextImageKHR(VkSwapchainKHR swapchain, ulong timeout, VkSemaphore semaphore, VkFence fence, ref uint pImageIndex)
+        public static VkResult AcquireNextImageKHR(VkSwapchainKHR swapchain, ulong timeout, VkSemaphore semaphore, VkFence fence, out uint pImageIndex)
         {
-            return vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, ref pImageIndex);
+            return vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, out pImageIndex);
         }
 
-        public static VkSemaphore CreateSemaphore(uint flags = 0)
+        public static VkSemaphore CreateSemaphore(VkSemaphoreCreateFlags flags = 0)
         {
-            var semaphoreCreateInfo = VkSemaphoreCreateInfo.New();
+            var semaphoreCreateInfo = new VkSemaphoreCreateInfo
+            {
+                sType = VkStructureType.SemaphoreCreateInfo
+            };
             semaphoreCreateInfo.flags = flags;
-            VulkanUtil.CheckResult(vkCreateSemaphore(device, ref semaphoreCreateInfo, null, out VkSemaphore pSemaphore));
+            VulkanUtil.CheckResult(vkCreateSemaphore(device, &semaphoreCreateInfo, null, out VkSemaphore pSemaphore));
             return pSemaphore;
         }
 
@@ -492,7 +502,7 @@ namespace SharpGame
 
         public static VkEvent CreateEvent(ref VkEventCreateInfo pCreateInfo)
         {
-            vkCreateEvent(device, ref pCreateInfo, null, out VkEvent pEvent);
+            vkCreateEvent(device, Utilities.AsPtr(ref pCreateInfo), null, out VkEvent pEvent);
             return pEvent;
         }
 
@@ -518,7 +528,7 @@ namespace SharpGame
 
         public static VkFence CreateFence(ref VkFenceCreateInfo pCreateInfo)
         {
-            vkCreateFence(device, ref pCreateInfo, null, out VkFence pFence);
+            vkCreateFence(device, Utilities.AsPtr(ref pCreateInfo), null, out VkFence pFence);
             return pFence;
         }
 
@@ -529,12 +539,12 @@ namespace SharpGame
 
         public static void ResetFences(uint fenceCount, ref VkFence pFences)
         {
-            VulkanUtil.CheckResult(vkResetFences(device, fenceCount, ref pFences));
+            VulkanUtil.CheckResult(vkResetFences(device, fenceCount, Utilities.AsPtr(ref pFences)));
         }
 
         public static void WaitForFences(uint fenceCount, ref VkFence pFences, VkBool32 waitAll, ulong timeout)
         {
-            VulkanUtil.CheckResult(vkWaitForFences(device, fenceCount, ref pFences, waitAll, timeout));
+            VulkanUtil.CheckResult(vkWaitForFences(device, fenceCount, Utilities.AsPtr(ref pFences), waitAll, timeout));
         }
 
         public static void Destroy(VkFence fence)
@@ -544,7 +554,7 @@ namespace SharpGame
 
         public static VkQueryPool CreateQueryPool(ref VkQueryPoolCreateInfo pCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateQueryPool(device, ref pCreateInfo, null, out VkQueryPool pQueryPool));
+            VulkanUtil.CheckResult(vkCreateQueryPool(device, Utilities.AsPtr(ref pCreateInfo), null, out VkQueryPool pQueryPool));
             return pQueryPool;
         }
 
@@ -560,7 +570,7 @@ namespace SharpGame
 
         public static VkImage CreateImage(ref VkImageCreateInfo pCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateImage(device, ref pCreateInfo, null, out VkImage pImage));
+            VulkanUtil.CheckResult(vkCreateImage(device, Utilities.AsPtr(ref pCreateInfo), null, out VkImage pImage));
             return pImage;
         }
 
@@ -571,7 +581,7 @@ namespace SharpGame
 
         public static VkImageView CreateImageView(ref VkImageViewCreateInfo pCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateImageView(device, ref pCreateInfo, null, out VkImageView pView));
+            VulkanUtil.CheckResult(vkCreateImageView(device, Utilities.AsPtr(ref pCreateInfo), null, out VkImageView pView));
             return pView;
         }
 
@@ -582,7 +592,7 @@ namespace SharpGame
 
         public static VkSampler CreateSampler(ref VkSamplerCreateInfo vkSamplerCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateSampler(device, ref vkSamplerCreateInfo, null, out VkSampler vkSampler));
+            VulkanUtil.CheckResult(vkCreateSampler(device, Utilities.AsPtr(ref vkSamplerCreateInfo), null, out VkSampler vkSampler));
             return vkSampler;
         }
 
@@ -593,7 +603,7 @@ namespace SharpGame
 
         public static VkFramebuffer CreateFramebuffer(ref VkFramebufferCreateInfo framebufferCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateFramebuffer(device, ref framebufferCreateInfo, null, out VkFramebuffer framebuffer));
+            VulkanUtil.CheckResult(vkCreateFramebuffer(device, Utilities.AsPtr(ref framebufferCreateInfo), null, out VkFramebuffer framebuffer));
             return framebuffer;
         }
 
@@ -604,7 +614,7 @@ namespace SharpGame
 
         public static VkRenderPass CreateRenderPass(ref VkRenderPassCreateInfo createInfo)
         {
-            VulkanUtil.CheckResult(vkCreateRenderPass(device, ref createInfo, null, out VkRenderPass pRenderPass));
+            VulkanUtil.CheckResult(vkCreateRenderPass(device, Utilities.AsPtr(ref createInfo), null, out VkRenderPass pRenderPass));
             return pRenderPass;
         }
 
@@ -615,13 +625,13 @@ namespace SharpGame
 
         public static VkBuffer CreateBuffer(ref VkBufferCreateInfo pCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateBuffer(device, ref pCreateInfo, null, out VkBuffer buffer));
+            VulkanUtil.CheckResult(vkCreateBuffer(device, Utilities.AsPtr(ref pCreateInfo), null, out VkBuffer buffer));
             return buffer;
         }
 
         public static VkBufferView CreateBufferView(ref VkBufferViewCreateInfo pCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateBufferView(device, ref pCreateInfo, null, out VkBufferView pView));
+            VulkanUtil.CheckResult(vkCreateBufferView(device, Utilities.AsPtr(ref pCreateInfo), null, out VkBufferView pView));
             return pView;
         }
 
@@ -631,8 +641,9 @@ namespace SharpGame
         }
 
         public static VkDeviceMemory AllocateMemory(ref VkMemoryAllocateInfo pAllocateInfo)
-        {
-            VulkanUtil.CheckResult(vkAllocateMemory(device, ref pAllocateInfo, null, out VkDeviceMemory pMemory));
+        { 
+            VkDeviceMemory pMemory;
+            VulkanUtil.CheckResult(vkAllocateMemory(device, Utilities.AsPtr(ref pAllocateInfo), null, &pMemory));
             return pMemory;
         }
 
@@ -664,12 +675,12 @@ namespace SharpGame
 
         public static void FlushMappedMemoryRanges(uint memoryRangeCount, ref VkMappedMemoryRange pMemoryRanges)
         {
-            VulkanUtil.CheckResult(vkFlushMappedMemoryRanges(device, memoryRangeCount, ref pMemoryRanges));
+            VulkanUtil.CheckResult(vkFlushMappedMemoryRanges(device, memoryRangeCount, Utilities.AsPtr(ref pMemoryRanges)));
         }
 
         public static void InvalidateMappedMemoryRanges(uint memoryRangeCount, ref VkMappedMemoryRange pMemoryRanges)
         {
-            VulkanUtil.CheckResult(vkInvalidateMappedMemoryRanges(device, memoryRangeCount, ref pMemoryRanges));
+            VulkanUtil.CheckResult(vkInvalidateMappedMemoryRanges(device, memoryRangeCount, Utilities.AsPtr(ref pMemoryRanges)));
         }
 
         public static void GetImageMemoryRequirements(Image image, out VkMemoryRequirements pMemoryRequirements)
@@ -684,7 +695,10 @@ namespace SharpGame
 
         public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
         {
-            VkCommandPoolCreateInfo cmdPoolInfo = VkCommandPoolCreateInfo.New();
+            VkCommandPoolCreateInfo cmdPoolInfo = new VkCommandPoolCreateInfo
+            {
+                sType = VkStructureType.CommandPoolCreateInfo
+            };
             cmdPoolInfo.queueFamilyIndex = queueFamilyIndex;
             cmdPoolInfo.flags = createFlags;
             VulkanUtil.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out VkCommandPool cmdPool));
@@ -694,12 +708,15 @@ namespace SharpGame
         public static void AllocateCommandBuffers(VkCommandPool cmdPool, VkCommandBufferLevel level,
             uint count, VkCommandBuffer* cmdBuffers)
         {
-            VkCommandBufferAllocateInfo cmdBufAllocateInfo = VkCommandBufferAllocateInfo.New();
+            VkCommandBufferAllocateInfo cmdBufAllocateInfo = new VkCommandBufferAllocateInfo
+            {
+                sType = VkStructureType.CommandBufferAllocateInfo
+            };
             cmdBufAllocateInfo.commandPool = cmdPool;
             cmdBufAllocateInfo.level = level;
             cmdBufAllocateInfo.commandBufferCount = count;
 
-            VulkanUtil.CheckResult(vkAllocateCommandBuffers(device, ref cmdBufAllocateInfo, cmdBuffers));
+            VulkanUtil.CheckResult(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, cmdBuffers));
         }
 
         public static void ResetCommandPool(VkCommandPool cmdPool, VkCommandPoolResetFlags flags)
@@ -745,7 +762,7 @@ namespace SharpGame
 
         public static VkShaderModule CreateShaderModule(ref VkShaderModuleCreateInfo shaderModuleCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateShaderModule(device, ref shaderModuleCreateInfo, null, out VkShaderModule shaderModule));
+            VulkanUtil.CheckResult(vkCreateShaderModule(device, Utilities.AsPtr(ref shaderModuleCreateInfo), null, out VkShaderModule shaderModule));
             return shaderModule;
         }
 
@@ -812,7 +829,7 @@ namespace SharpGame
 
         public static VkDescriptorSetLayout CreateDescriptorSetLayout(ref VkDescriptorSetLayoutCreateInfo pCreateInfo)
         {
-            VulkanUtil.CheckResult(vkCreateDescriptorSetLayout(device, ref pCreateInfo, null, out var setLayout));
+            VulkanUtil.CheckResult(vkCreateDescriptorSetLayout(device, Utilities.AsPtr(ref pCreateInfo), null, out var setLayout));
             return setLayout;
         }
 

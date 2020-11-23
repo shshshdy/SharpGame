@@ -112,7 +112,10 @@ namespace SharpGame
                 };
             }
 
-            var descriptorSetLayoutCreateInfo = VkDescriptorSetLayoutCreateInfo.New();
+            var descriptorSetLayoutCreateInfo = new VkDescriptorSetLayoutCreateInfo
+            {
+                sType = VkStructureType.DescriptorSetLayoutCreateInfo
+            };
             descriptorSetLayoutCreateInfo.pBindings = (VkDescriptorSetLayoutBinding*)Utilities.AsPointer(ref bindings[0]);
             descriptorSetLayoutCreateInfo.bindingCount = (uint)bindings.Length;
 

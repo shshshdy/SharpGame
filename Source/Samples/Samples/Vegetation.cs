@@ -9,7 +9,7 @@ using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 6)]
+    [SampleDesc(sortOrder = -6)]
     public class Vegetation : Sample
     {
         RenderPipeline renderer = new NewRenderPipeline();
@@ -74,7 +74,7 @@ namespace SharpGame.Samples
                 var model = importer.Load("models/vegetation/plants.dae");
                 staticModel.SetModel(model);
 
-                var mat = new Material("shaders/Natural.shader");
+                var mat = new Material("shaders/Vegetation.shader");
 
                 mat.Shader.Main.VertexLayout = new VertexLayout(importer.vertexComponents,
                     new[] { VertexComponent.Float3, VertexComponent.Float3, VertexComponent.Float1, VertexComponent.Int1 });

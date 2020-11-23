@@ -13,7 +13,7 @@ namespace SharpGame
 
         public static readonly Semaphore Null;
 
-        public Semaphore(uint flags)
+        public Semaphore(VkSemaphoreCreateFlags flags)
         {
             native = Device.CreateSemaphore(flags);
         }
@@ -43,7 +43,10 @@ namespace SharpGame
         internal VkFence handle;
         public Fence(FenceCreateFlags flags)
         {
-            VkFenceCreateInfo createInfo = VkFenceCreateInfo.New();
+            VkFenceCreateInfo createInfo = new VkFenceCreateInfo
+            {
+                sType = VkStructureType.FenceCreateInfo
+            };
             createInfo.flags = (VkFenceCreateFlags)flags;
             handle = Device.CreateFence(ref createInfo);
         }
@@ -97,19 +100,16 @@ namespace SharpGame
         }
     }
 
-    [Flags]
-    public enum EventCreateFlags
-    {
-        None = 0
-    }
-
     public struct Event : IDisposable
     {
         internal VkEvent handle;
-        internal Event(EventCreateFlags flags)
+        internal Event(VkEventCreateFlags flags)
         {
-            var createInfo = VkEventCreateInfo.New();
-            createInfo.flags = (uint)flags;
+            var createInfo = new VkEventCreateInfo
+            {
+                sType = VkStructureType.EventCreateInfo
+            };
+            createInfo.flags = flags;
             handle = Device.CreateEvent(ref createInfo);            
         }
 

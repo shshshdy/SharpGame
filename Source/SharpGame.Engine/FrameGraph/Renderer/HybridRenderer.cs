@@ -3,7 +3,7 @@ using Assimp;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
@@ -174,7 +174,7 @@ namespace SharpGame
             {
                 new SubpassDependency
                 {
-                    srcSubpass = VulkanNative.SubpassExternal,
+                    srcSubpass = Vulkan.SubpassExternal,
                     dstSubpass = 0,
                     srcStageMask = PipelineStageFlags.BottomOfPipe,
                     dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
@@ -186,7 +186,7 @@ namespace SharpGame
                 new SubpassDependency
                 {
                     srcSubpass = 0,
-                    dstSubpass = VulkanNative.SubpassExternal,
+                    dstSubpass = Vulkan.SubpassExternal,
                     srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
                     dstStageMask = PipelineStageFlags.BottomOfPipe,
                     srcAccessMask = AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite,

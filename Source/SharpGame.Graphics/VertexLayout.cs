@@ -244,7 +244,10 @@ namespace SharpGame
                 needUpdate = false;
             }
 
-            native = VkPipelineVertexInputStateCreateInfo.New();
+            native = new VkPipelineVertexInputStateCreateInfo
+            {
+                sType = VkStructureType.PipelineVertexInputStateCreateInfo
+            };
             native.vertexBindingDescriptionCount = (uint)Bindings.Length;
             native.pVertexBindingDescriptions = (VkVertexInputBindingDescription*)Utilities.AsPointer(ref Bindings[0]);
             native.vertexAttributeDescriptionCount = (uint)Attributes.Count;

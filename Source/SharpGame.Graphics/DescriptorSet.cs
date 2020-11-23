@@ -67,7 +67,10 @@ namespace SharpGame
             unsafe
             {
                 var setLayouts = stackalloc VkDescriptorSetLayout[3] { resLayout.Handle, resLayout.Handle, resLayout.Handle };
-                var descriptorSetAllocateInfo = VkDescriptorSetAllocateInfo.New();
+                var descriptorSetAllocateInfo = new VkDescriptorSetAllocateInfo
+                {
+                    sType = VkStructureType.DescriptorSetAllocateInfo
+                };
                 descriptorSetAllocateInfo.descriptorPool = descriptorPool;
                 descriptorSetAllocateInfo.pSetLayouts = setLayouts;
                 descriptorSetAllocateInfo.descriptorSetCount = Swapchain.IMAGE_COUNT;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
@@ -102,7 +102,7 @@ namespace SharpGame
             {
                 new SubpassDependency
                 {
-                    srcSubpass = VulkanNative.SubpassExternal,
+                    srcSubpass = Vulkan.SubpassExternal,
                     dstSubpass = 0,
                     srcStageMask = PipelineStageFlags.FragmentShader,
                     dstStageMask = PipelineStageFlags.EarlyFragmentTests,
@@ -114,7 +114,7 @@ namespace SharpGame
                 new SubpassDependency
                 {
                     srcSubpass = 0,
-                    dstSubpass = VulkanNative.SubpassExternal,
+                    dstSubpass = Vulkan.SubpassExternal,
                     srcStageMask = PipelineStageFlags.LateFragmentTests,
                     dstStageMask = PipelineStageFlags.FragmentShader,
                     srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,
@@ -181,8 +181,8 @@ namespace SharpGame
             //todo:multi thread
             for (int i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                Viewport viewport = new Viewport(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM, 0.0f, 1.0f);
-                Rect2D renderArea = new Rect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
+                VkViewport viewport = new VkViewport(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM, 0.0f, 1.0f);
+                VkRect2D renderArea = new VkRect2D(0, 0, SHADOWMAP_DIM, SHADOWMAP_DIM);
 
                 BeginRenderPass(cmd, cascades[i].frameBuffer, renderArea, clearDepth);
 

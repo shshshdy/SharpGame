@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Vulkan;
 
 namespace SharpGame.Samples
 {
@@ -181,12 +180,12 @@ namespace SharpGame.Samples
 
                     commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer, preCopyBarriers);
 
-                    ImageCopy copyRegion = new ImageCopy
+                    VkImageCopy copyRegion = new VkImageCopy
                     {
-                        extent = new Extent3D { width = envMap.width, height = envMap.height, depth = 1 }
+                        extent = new VkExtent3D(envMap.width, envMap.height, 1)
                     };
 
-                    copyRegion.srcSubresource.aspectMask = ImageAspectFlags.Color;
+                    copyRegion.srcSubresource.aspectMask = VkImageAspectFlags.Color;
                     copyRegion.srcSubresource.layerCount = envMap.layers;
                     copyRegion.dstSubresource = copyRegion.srcSubresource;
 

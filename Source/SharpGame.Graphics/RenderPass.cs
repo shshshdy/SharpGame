@@ -15,7 +15,7 @@ namespace SharpGame
         internal VkRenderPass handle;
 
         public RenderPass(AttachmentDescription[] attachments,
-            SubpassDescription[] subpasses, SubpassDependency[] dependencies, uint flags = 0)
+            SubpassDescription[] subpasses, SubpassDependency[] dependencies, VkRenderPassCreateFlags flags = 0)
         {
             this.attachments = attachments;
             this.subpasses = subpasses;
@@ -25,7 +25,10 @@ namespace SharpGame
             {
                 using Vector<VkSubpassDescription> subPasses = new Vector<VkSubpassDescription>((uint)subpasses.Length, (uint)subpasses.Length);
 
-                var renderPassCreateInfo = VkRenderPassCreateInfo.New();
+                var renderPassCreateInfo = new VkRenderPassCreateInfo
+                {
+                    sType = VkStructureType.RenderPassCreateInfo
+                };
                 renderPassCreateInfo.flags = flags;
                 renderPassCreateInfo.attachmentCount = (uint)attachments.Length;
                 renderPassCreateInfo.pAttachments = (VkAttachmentDescription*)Unsafe.AsPointer(ref attachments[0]);

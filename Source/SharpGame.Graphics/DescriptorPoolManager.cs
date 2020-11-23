@@ -63,7 +63,10 @@ namespace SharpGame
                 sizes[i].descriptorCount = descriptorCount;
             }
 
-            var poolCI = VkDescriptorPoolCreateInfo.New();
+            var poolCI = new VkDescriptorPoolCreateInfo
+            {
+                sType = VkStructureType.DescriptorPoolCreateInfo
+            };
             poolCI.flags = VkDescriptorPoolCreateFlags.FreeDescriptorSet;
             poolCI.poolSizeCount = poolSizeCount;
             poolCI.maxSets = totalSets;

@@ -30,7 +30,8 @@ namespace SharpGame
 
             Device.GetImageMemoryRequirements(this, out var memReqs);
 
-            VkMemoryAllocateInfo memAllocInfo = VkMemoryAllocateInfo.New();
+            VkMemoryAllocateInfo memAllocInfo = new VkMemoryAllocateInfo();
+            memAllocInfo.sType = VkStructureType.MemoryAllocateInfo;
             memAllocInfo.allocationSize = memReqs.size;
             memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, MemoryPropertyFlags.DeviceLocal);
 
@@ -140,7 +141,10 @@ namespace SharpGame
         internal VkImageMemoryBarrier barrier;
         public ImageMemoryBarrier(Image image)
         {
-            barrier = VkImageMemoryBarrier.New();
+            barrier = new VkImageMemoryBarrier
+            {
+                sType = VkStructureType.ImageMemoryBarrier
+            };
             barrier.image = image.handle;
             barrier.srcQueueFamilyIndex = uint.MaxValue;
             barrier.dstQueueFamilyIndex = uint.MaxValue;
@@ -149,7 +153,10 @@ namespace SharpGame
         public ImageMemoryBarrier(Image image, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout,
             ImageAspectFlags aspectMask = ImageAspectFlags.Color, uint baseMipLevel = 0, uint levelCount = uint.MaxValue)
         {
-            barrier = VkImageMemoryBarrier.New();
+            barrier = new VkImageMemoryBarrier
+            {
+                sType = VkStructureType.ImageMemoryBarrier
+            };
 
             barrier.srcAccessMask = (VkAccessFlags)srcAccessMask;
             barrier.dstAccessMask = (VkAccessFlags)dstAccessMask;
@@ -168,8 +175,10 @@ namespace SharpGame
         public ImageMemoryBarrier(Image image, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout,
             ImageSubresourceRange subresourceRange)
         {
-            barrier = VkImageMemoryBarrier.New();
-
+            barrier = new VkImageMemoryBarrier
+            {
+                sType = VkStructureType.ImageMemoryBarrier
+            };
             barrier.srcAccessMask = (VkAccessFlags)srcAccessMask;
             barrier.dstAccessMask = (VkAccessFlags)dstAccessMask;
             barrier.oldLayout = (VkImageLayout)oldLayout;

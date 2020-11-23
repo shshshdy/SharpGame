@@ -20,9 +20,9 @@ namespace SharpGame
 
         public RenderPipeline Renderer { get; set; }
 
-        private Viewport viewport;
-        public ref Viewport Viewport => ref viewport;
-        public Rect2D ViewRect => new Rect2D((int)Viewport.x, (int)Viewport.y, (int)Viewport.width, (int)Viewport.height);
+        private VkViewport viewport;
+        public ref VkViewport Viewport => ref viewport;
+        public VkRect2D ViewRect => new VkRect2D((int)Viewport.x, (int)Viewport.y, (int)Viewport.width, (int)Viewport.height);
 
         public float Width => viewport.width;
         public float Height => viewport.height;
@@ -189,7 +189,7 @@ namespace SharpGame
             frameInfo.camera = camera;
             frameInfo.viewSize = new Int2((int)g.Width, (int)g.Height);
 
-            Viewport.Define(0, 0, g.Width, g.Height);
+            Viewport = new VkViewport(0, 0, g.Width, g.Height);
 
             if (camera && camera.AutoAspectRatio)
             {

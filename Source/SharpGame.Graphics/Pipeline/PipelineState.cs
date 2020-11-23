@@ -31,7 +31,10 @@ namespace SharpGame
 
         public void ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo)
         {
-            rasterizationStateCreateInfo = VkPipelineRasterizationStateCreateInfo.New();
+            rasterizationStateCreateInfo = new VkPipelineRasterizationStateCreateInfo
+            {
+                sType = VkStructureType.PipelineRasterizationStateCreateInfo
+            };
             rasterizationStateCreateInfo.depthClampEnable = depthClampEnable;
             rasterizationStateCreateInfo.rasterizerDiscardEnable = rasterizerDiscardEnable;
             rasterizationStateCreateInfo.polygonMode = (VkPolygonMode)polygonMode;
@@ -64,6 +67,7 @@ namespace SharpGame
         public unsafe void ToNative(out VkPipelineMultisampleStateCreateInfo native)
         {
             native = new VkPipelineMultisampleStateCreateInfo();
+            native.sType = VkStructureType.PipelineMultisampleStateCreateInfo;
             native.flags = flags;
             native.rasterizationSamples = (VkSampleCountFlags)rasterizationSamples;
             native.sampleShadingEnable = sampleShadingEnable;
@@ -240,7 +244,8 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkPipelineColorBlendStateCreateInfo native, uint attachmentCount)
         {
-            native = VkPipelineColorBlendStateCreateInfo.New();
+            native = new VkPipelineColorBlendStateCreateInfo();
+            native.sType = VkStructureType.PipelineColorBlendStateCreateInfo;
             native.logicOpEnable = logicOpEnable;
             native.logicOp = logicOp;
 

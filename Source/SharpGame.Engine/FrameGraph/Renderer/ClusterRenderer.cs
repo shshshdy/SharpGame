@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
-using Vulkan;
 
 namespace SharpGame
 {
@@ -222,7 +221,7 @@ namespace SharpGame
             {
                 new SubpassDependency
                 {
-                    srcSubpass = VulkanNative.SubpassExternal,
+                    srcSubpass = Vulkan.SubpassExternal,
                     dstSubpass = 0,
                     srcStageMask = PipelineStageFlags.BottomOfPipe,
                     dstStageMask = PipelineStageFlags.VertexShader,
@@ -234,7 +233,7 @@ namespace SharpGame
                 new SubpassDependency
                 {
                     srcSubpass = 0,
-                    dstSubpass = VulkanNative.SubpassExternal,
+                    dstSubpass = Vulkan.SubpassExternal,
                     srcStageMask = PipelineStageFlags.FragmentShader,
                     dstStageMask = PipelineStageFlags.ComputeShader,
                     srcAccessMask =  AccessFlags.ShaderWrite,

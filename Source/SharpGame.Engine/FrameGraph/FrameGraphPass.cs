@@ -275,8 +275,8 @@ namespace SharpGame
 
         }
 
-        Viewport viewport;
-        Rect2D renderArea;
+        VkViewport viewport;
+        VkRect2D renderArea;
         public void BeginRenderPass(CommandBuffer cb)
         {
             if(RenderPass == null)
@@ -303,8 +303,8 @@ namespace SharpGame
             }
             else
             {
-                viewport = new Viewport(0, 0, Graphics.Width, Graphics.Height);
-                renderArea = new Rect2D(0, 0, Graphics.Width, Graphics.Height);
+                viewport = new VkViewport(0, 0, Graphics.Width, Graphics.Height);
+                renderArea = new VkRect2D(0, 0, Graphics.Width, Graphics.Height);
             }
             /*
             int clearValuesCount = 0;
@@ -342,7 +342,7 @@ namespace SharpGame
             cb.SetScissor(in renderArea);
         }
 
-        public void BeginRenderPass(CommandBuffer cb, Framebuffer framebuffer, Rect2D renderArea, ClearValue[] clearValues)
+        public void BeginRenderPass(CommandBuffer cb, Framebuffer framebuffer, VkRect2D renderArea, ClearValue[] clearValues)
         {
             var rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues);
             cb.BeginRenderPass(in rpBeginInfo, UseSecondCmdBuffer? SubpassContents.SecondaryCommandBuffers : SubpassContents.Inline);

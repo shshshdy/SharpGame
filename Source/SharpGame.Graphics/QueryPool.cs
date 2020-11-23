@@ -49,7 +49,10 @@ namespace SharpGame
         public QueryPoolCreateInfo(QueryType queryType, uint queryCount,
             QueryPipelineStatisticFlags pipelineStatistics = QueryPipelineStatisticFlags.None)
         {
-            native = VkQueryPoolCreateInfo.New();
+            native = new VkQueryPoolCreateInfo
+            {
+                sType = VkStructureType.QueryPoolCreateInfo
+            };
             native.queryType = (VkQueryType)queryType;
             native.queryCount = queryCount;
             native.pipelineStatistics = (VkQueryPipelineStatisticFlags)pipelineStatistics;

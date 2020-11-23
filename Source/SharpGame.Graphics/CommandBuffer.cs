@@ -77,15 +77,15 @@
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void SetScissor(in Rect2D pScissors)
+        public void SetScissor(in VkRect2D pScissors)
         {
-            vkCmdSetScissor(commandBuffer, 0, 1, Utilities.AsPtr(in pScissors));
+            vkCmdSetScissor(commandBuffer, 0, 1, Utilities.InToPtr(in pScissors));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void SetViewport(in Viewport pViewports)
+        public void SetViewport(in VkViewport pViewports)
         {
-            vkCmdSetViewport(commandBuffer, 0, 1, Utilities.AsPtr(in pViewports));
+            vkCmdSetViewport(commandBuffer, 0, 1, Utilities.InToPtr(in pViewports));
         }
 
         void ClearDescriptorSets()
@@ -157,7 +157,7 @@
 
                 var t = pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext];
 
-                vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, ref t, dynamicOffsetCount, pDynamicOffsets);
+                vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, &t, dynamicOffsetCount, pDynamicOffsets);
             }
         }
 
@@ -198,7 +198,7 @@
         [MethodImpl((MethodImplOptions)0x100)]
         public void BindVertexBuffer(uint firstBinding, Buffer buffer, ulong pOffsets = 0)
         {
-            vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, ref buffer.buffer, ref pOffsets);
+            vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, Utilities.AsPtr(ref buffer.buffer), &pOffsets);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -286,7 +286,7 @@
         [MethodImpl((MethodImplOptions)0x100)]
         public void ExecuteCommand(CommandBuffer cmdBuffer)
         {
-            vkCmdExecuteCommands(commandBuffer, 1, ref cmdBuffer.commandBuffer);
+            vkCmdExecuteCommands(commandBuffer, 1, Utilities.AsPtr(ref cmdBuffer.commandBuffer));
 
             cmdBuffer.NeedSubmit = false;
         }
@@ -311,24 +311,24 @@
             vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, (VkImageBlit*)Unsafe.AsPointer(ref pRegions[0]), (VkFilter)filter);
         }
 
-        public void CopyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ref ImageCopy region)
+        public void CopyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ref VkImageCopy region)
         {
-            vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, ref Unsafe.As<ImageCopy, VkImageCopy>(ref region));
+            vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, Utilities.AsPtr(ref region));
         }
 
-        public void CopyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, Span<ImageCopy> region)
+        public void CopyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, Span<VkImageCopy> region)
         {
-            vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)region.Length, ref Unsafe.As<ImageCopy, VkImageCopy>(ref region[0]));
+            vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)region.Length, Utilities.AsPtr(ref region[0]));
         }
 
-        public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, ref BufferImageCopy region)
+        public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, ref VkBufferImageCopy region)
         {
-            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, 1, ref Unsafe.As<BufferImageCopy, VkBufferImageCopy>(ref region));
+            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, 1, Utilities.AsPtr(ref region));
         }
 
-        public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, Span<BufferImageCopy> pRegions)
+        public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, Span<VkBufferImageCopy> pRegions)
         {
-            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, ref Unsafe.As<BufferImageCopy, VkBufferImageCopy>(ref pRegions[0]));
+            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.buffer, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, Utilities.AsPtr(ref pRegions[0]));
         }
 
         public void FillBuffer(Buffer dstBuffer, ulong dstOffset, ulong size, uint data)
@@ -546,11 +546,11 @@
     {
         public RenderPass renderPass;
         public Framebuffer framebuffer;
-        public Rect2D renderArea;
+        public VkRect2D renderArea;
         public ClearValue[] clearValues;
         public int numClearValues;
 
-        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, params ClearValue[] clearValues)
+        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, VkRect2D renderArea, params ClearValue[] clearValues)
         {
             this.renderPass = renderPass;
             this.framebuffer = framebuffer;
@@ -559,7 +559,7 @@
             numClearValues = clearValues.Length;
         }
 
-        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, ClearValue[] clearValues, int num)
+        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, VkRect2D renderArea, ClearValue[] clearValues, int num)
         {
             this.renderPass = renderPass;
             this.framebuffer = framebuffer;
@@ -574,7 +574,7 @@
             native.sType = VkStructureType.RenderPassBeginInfo;
             native.renderPass = framebuffer.renderPass.handle;
             native.framebuffer = framebuffer.handle;
-            native.renderArea = new VkRect2D(renderArea.x, renderArea.y, renderArea.width, renderArea.height);
+            native.renderArea = new VkRect2D(renderArea.offset, renderArea.extent);
 
             if (clearValues != null && clearValues.Length > 0)
             {

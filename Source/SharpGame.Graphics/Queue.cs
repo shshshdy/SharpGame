@@ -40,7 +40,10 @@ namespace SharpGame
         {
             VkCommandBuffer commandBufferHandle = commandBuffer?.commandBuffer ?? VkCommandBuffer.Null;
 
-            var nativeSubmit = VkSubmitInfo.New();
+            var nativeSubmit = new VkSubmitInfo
+            {
+                sType = VkStructureType.SubmitInfo
+            };
 
             if (waitSemaphore != default)
             {
@@ -96,7 +99,10 @@ namespace SharpGame
         public SubmitInfo(Semaphore[] waitSemaphores = null, PipelineStageFlags[] waitDstStageMask = null,
             VkCommandBuffer[] commandBuffers = null, Semaphore[] signalSemaphores = null)
         {
-            native = VkSubmitInfo.New();
+            native = new VkSubmitInfo
+            {
+                sType = VkStructureType.SubmitInfo
+            };
             unsafe
             {
                 native.waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0);
@@ -120,9 +126,12 @@ namespace SharpGame
             SparseImageOpaqueMemoryBindInfo[] imageOpaqueBinds, SparseImageMemoryBindInfo[] imageBinds,
             Semaphore[] signalSemaphores)
         {
-            native = VkBindSparseInfo.New();
             unsafe
             {
+                native = new VkBindSparseInfo
+                {
+                    sType = VkStructureType.BindSparseInfo
+                };
                 native.waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0);
                 native.pWaitSemaphores = waitSemaphores != null ?(VkSemaphore*)Utilities.AsPtr(ref waitSemaphores[0]): null;
                 native.bufferBindCount = (uint)(bufferBinds?.Length ?? 0);

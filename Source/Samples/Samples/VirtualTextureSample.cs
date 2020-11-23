@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Vulkan;
 
 namespace SharpGame.Samples
 {
@@ -34,7 +33,8 @@ namespace SharpGame.Samples
 
             imageMemoryBind = new VkSparseImageMemoryBind();
 
-            var allocInfo = VkMemoryAllocateInfo.New();
+            var allocInfo = new VkMemoryAllocateInfo();
+            allocInfo.sType = VkStructureType.MemoryAllocateInfo;
             allocInfo.allocationSize = size;
             allocInfo.memoryTypeIndex = memoryTypeIndex;
             imageMemoryBind.memory = Device.AllocateMemory(ref allocInfo);
@@ -137,7 +137,7 @@ namespace SharpGame.Samples
         }
     }
 
-    [SampleDesc(sortOrder = -10)]
+    [SampleDesc(sortOrder = 10)]
     public class VirtualTextureSample : Sample
     {
         VirtualTexture texture;
@@ -264,7 +264,10 @@ namespace SharpGame.Samples
             }
 
             // Create sparse image
-            VkImageCreateInfo sparseImageCreateInfo = VkImageCreateInfo.New();
+            VkImageCreateInfo sparseImageCreateInfo = new VkImageCreateInfo
+            {
+                sType = VkStructureType.ImageCreateInfo
+            };
             sparseImageCreateInfo.imageType = VkImageType.Image2D;
             sparseImageCreateInfo.format = (VkFormat)texture.format;
             sparseImageCreateInfo.mipLevels = texture.mipLevels;
@@ -427,7 +430,8 @@ namespace SharpGame.Samples
                 if ((!texture.mipTailInfo.singleMipTail) && (sparseMemoryReq.imageMipTailFirstLod < texture.mipLevels))
                 {
                     // Allocate memory for the mip tail
-                    VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.New();
+                    VkMemoryAllocateInfo allocInfo = new VkMemoryAllocateInfo();
+                    allocInfo.sType = VkStructureType.MemoryAllocateInfo;
                     allocInfo.allocationSize = sparseMemoryReq.imageMipTailSize;
                     allocInfo.memoryTypeIndex = texture.memoryTypeIndex;
 
@@ -453,7 +457,8 @@ namespace SharpGame.Samples
             if (((sparseMemoryReq.formatProperties.flags & VkSparseImageFormatFlags.SingleMiptail) != 0) && (sparseMemoryReq.imageMipTailFirstLod < texture.mipLevels))
             {
                 // Allocate memory for the mip tail
-                VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.New();
+                VkMemoryAllocateInfo allocInfo = new VkMemoryAllocateInfo();
+                allocInfo.sType = VkStructureType.MemoryAllocateInfo;
                 allocInfo.allocationSize = sparseMemoryReq.imageMipTailSize;
                 allocInfo.memoryTypeIndex = texture.memoryTypeIndex;
 
@@ -518,12 +523,12 @@ namespace SharpGame.Samples
 
             var copyCmd = Graphics.BeginPrimaryCmd();
             copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferDstOptimal, PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer);
-            BufferImageCopy region = new BufferImageCopy();
-            region.imageSubresource.aspectMask = ImageAspectFlags.Color;
+            VkBufferImageCopy region = new VkBufferImageCopy();
+            region.imageSubresource.aspectMask = VkImageAspectFlags.Color;
             region.imageSubresource.layerCount = 1;
             region.imageSubresource.mipLevel = page.mipLevel;
-            region.imageOffset = new Offset3D(page.offset);
-            region.imageExtent = new Extent3D(page.extent);
+            region.imageOffset = page.offset;
+            region.imageExtent = page.extent;
             copyCmd.CopyBufferToImage(imageBuffer, image, ImageLayout.TransferDstOptimal, ref region);
             copyCmd.SetImageLayout(image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
 
@@ -575,7 +580,8 @@ namespace SharpGame.Samples
 
             VkSparseImageMemoryBind mipTailimageMemoryBind = new VkSparseImageMemoryBind();
 
-            VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.New();
+            VkMemoryAllocateInfo allocInfo = new VkMemoryAllocateInfo();
+            allocInfo.sType = VkStructureType.MemoryAllocateInfo;
             allocInfo.allocationSize = imageMipTailSize;
             allocInfo.memoryTypeIndex = texture.memoryTypeIndex;
             mipTailimageMemoryBind.memory = Device.AllocateMemory(ref allocInfo);
@@ -633,12 +639,12 @@ namespace SharpGame.Samples
 
                 var copyCmd = Graphics.BeginPrimaryCmd();
                 copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferDstOptimal, PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer);
-                BufferImageCopy region = new BufferImageCopy();
-                region.imageSubresource.aspectMask = ImageAspectFlags.Color;
+                VkBufferImageCopy region = new VkBufferImageCopy();
+                region.imageSubresource.aspectMask = VkImageAspectFlags.Color;
                 region.imageSubresource.layerCount = 1;
                 region.imageSubresource.mipLevel = i;
-                region.imageOffset = new Offset3D();
-                region.imageExtent = new Extent3D(width, height, depth);
+                region.imageOffset = VkOffset3D.Zero;
+                region.imageExtent = new VkExtent3D(width, height, depth);
                 copyCmd.CopyBufferToImage(imageBuffer, texture.image, ImageLayout.TransferDstOptimal, ref region);
                 copyCmd.SetImageLayout(texture.image, ImageAspectFlags.Color, ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
 

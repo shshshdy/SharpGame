@@ -91,7 +91,10 @@ namespace SharpGame
 
             unsafe
             {
-                var sm = VkShaderModuleCreateInfo.New();
+                var sm = new VkShaderModuleCreateInfo
+                {
+                    sType = VkStructureType.ShaderModuleCreateInfo
+                };
                 ulong shaderSize = (ulong)Code.Length;
                 fixed (byte* scPtr = Code)
                 {

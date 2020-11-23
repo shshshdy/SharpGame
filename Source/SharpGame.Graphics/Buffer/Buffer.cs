@@ -174,7 +174,10 @@ namespace SharpGame
 
         public unsafe void Flush(ulong size = WholeSize, ulong offset = 0)
         {
-            VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
+            VkMappedMemoryRange mappedRange = new VkMappedMemoryRange
+            {
+                sType = VkStructureType.MappedMemoryRange
+            };
             mappedRange.memory = memory;
             mappedRange.offset = offset;
             mappedRange.size = size;            
@@ -183,7 +186,10 @@ namespace SharpGame
 
         public unsafe void Invalidate(ulong size = WholeSize, ulong offset = 0)
         {
-            VkMappedMemoryRange mappedRange = VkMappedMemoryRange.New();
+            VkMappedMemoryRange mappedRange = new VkMappedMemoryRange
+            {
+                sType = VkStructureType.MappedMemoryRange
+            };
             mappedRange.memory = memory;
             mappedRange.offset = offset;
             mappedRange.size = size;

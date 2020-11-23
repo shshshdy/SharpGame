@@ -54,7 +54,7 @@ namespace SharpGame
             IntPtr mapped = stagingBuffer.Map();
 
             // Setup buffer copy regions for each face including all of it's miplevels
-            Span<BufferImageCopy> bufferCopyRegions = stackalloc BufferImageCopy[(int)(mipLevels* layers * faceCount)];
+            Span<VkBufferImageCopy> bufferCopyRegions = stackalloc VkBufferImageCopy[(int)(mipLevels* layers * faceCount)];
             uint offset = 0;
             int index = 0;
 
@@ -70,17 +70,17 @@ namespace SharpGame
 
                         Unsafe.CopyBlock((void*)(mapped + (int)offset), Unsafe.AsPointer(ref faceElement.Data[0]), (uint)faceElement.Data.Length);
 
-                        BufferImageCopy bufferCopyRegion = new BufferImageCopy
+                        VkBufferImageCopy bufferCopyRegion = new VkBufferImageCopy
                         {
-                            imageSubresource = new ImageSubresourceLayers
+                            imageSubresource = new VkImageSubresourceLayers
                             {
-                                aspectMask = ImageAspectFlags.Color,
+                                aspectMask = VkImageAspectFlags.Color,
                                 mipLevel = level,
                                 baseArrayLayer = (uint)(layer * faceCount + face),
                                 layerCount = 1
                             },
 
-                            imageExtent = new Extent3D(mipLevel.Width, mipLevel.Height, mipLevel.Depth),
+                            imageExtent = new VkExtent3D(mipLevel.Width, mipLevel.Height, mipLevel.Depth),
                             bufferOffset = offset
                         };
 
@@ -287,17 +287,17 @@ namespace SharpGame
 
             using (Buffer stagingBuffer = Buffer.CreateStagingBuffer(totalBytes, tex2DDataPtr))
             {
-                BufferImageCopy bufferCopyRegion = new BufferImageCopy
+                VkBufferImageCopy bufferCopyRegion = new VkBufferImageCopy
                 {
-                    imageSubresource = new ImageSubresourceLayers
+                    imageSubresource = new VkImageSubresourceLayers
                     {
-                        aspectMask = ImageAspectFlags.Color,
+                        aspectMask = VkImageAspectFlags.Color,
                         mipLevel = 0,
                         baseArrayLayer = 0,
                         layerCount = 1,
                     },
 
-                    imageExtent = new Extent3D(w, h, 1),
+                    imageExtent = new VkExtent3D(w, h, 1),
                     bufferOffset = 0
                 };
 

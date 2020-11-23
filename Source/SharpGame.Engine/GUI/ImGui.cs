@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Vulkan;
+
 
 namespace SharpGame
 {
@@ -365,7 +365,7 @@ namespace SharpGame
                         }
 
 
-                        Rect2D scissor = new Rect2D((int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y,
+                        VkRect2D scissor = new VkRect2D((int)pcmd.ClipRect.X, (int)pcmd.ClipRect.Y,
                             (int)(pcmd.ClipRect.Z - pcmd.ClipRect.X), (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y));
                         cmdBuffer.SetScissor(scissor);
 

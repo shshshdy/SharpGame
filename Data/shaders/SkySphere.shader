@@ -9,12 +9,12 @@ Shader "SkySphere"
 
 		@VertexShader
 		{
-            #include "vegetation/skysphere.vert"
+            #include "natural/skysphere.vert"
 		}
 		
 		@PixelShader
 		{
-            #include "vegetation/skysphere.frag"
+            #include "natural/skysphere.frag"
 		}
 		
 	}

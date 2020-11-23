@@ -95,7 +95,10 @@ namespace SharpGame
 
         public unsafe void Build()
         {
-            VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VkPipelineLayoutCreateInfo.New();
+            VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = new VkPipelineLayoutCreateInfo
+            {
+                sType = VkStructureType.PipelineLayoutCreateInfo
+            };
             if (!ResourceLayout.IsNullOrEmpty())
             {
                 foreach(var resLayout in ResourceLayout)

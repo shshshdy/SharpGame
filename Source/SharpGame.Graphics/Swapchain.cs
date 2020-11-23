@@ -91,7 +91,7 @@ namespace SharpGame
 
                 for (uint i = 0; i < queueCount; i++)
                 {
-                    vkGetPhysicalDeviceSurfaceSupportKHR(Device.PhysicalDevice, i, Surface, &supportsPresent[i]);
+                    vkGetPhysicalDeviceSurfaceSupportKHR(Device.PhysicalDevice, i, Surface, out supportsPresent[i]);
                 }
 
                 // Search for a graphics and a present queue in the array of queue
@@ -205,7 +205,7 @@ namespace SharpGame
 
             // Get physical Device Surface properties and formats
             VkSurfaceCapabilitiesKHR surfCaps;
-            err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Device.PhysicalDevice, Surface, &surfCaps);
+            err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Device.PhysicalDevice, Surface, out surfCaps);
             Debug.Assert(err == VkResult.Success);
 
             // Get available present modes
@@ -283,7 +283,10 @@ namespace SharpGame
                     preTransform = surfCaps.currentTransform;
                 }
 
-                VkSwapchainCreateInfoKHR swapchainCI = VkSwapchainCreateInfoKHR.New();
+                VkSwapchainCreateInfoKHR swapchainCI = new VkSwapchainCreateInfoKHR
+                {
+                    sType = VkStructureType.SwapchainCreateInfoKHR
+                };
                 swapchainCI.pNext = null;
                 swapchainCI.surface = Surface;
                 swapchainCI.minImageCount = desiredNumberOfSwapchainImages;
@@ -355,7 +358,7 @@ namespace SharpGame
 
             VkResult res = VkResult.Timeout;
             uint nextImageIndex = (uint)0;
-            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore? presentCompleteSemaphore.native : VkSemaphore.Null, new VkFence(), ref nextImageIndex);
+            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore? presentCompleteSemaphore.native : VkSemaphore.Null, new VkFence(), out nextImageIndex);
             
             if (res == VkResult.ErrorOutOfDateKHR)
             {
@@ -381,7 +384,10 @@ namespace SharpGame
 
         public unsafe void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = default)
         {
-            var presentInfo = VkPresentInfoKHR.New();
+            var presentInfo = new VkPresentInfoKHR
+            {
+                sType = VkStructureType.PresentInfoKHR
+            };
             presentInfo.pNext = null;
             presentInfo.swapchainCount = 1;
             var sc = swapchain;

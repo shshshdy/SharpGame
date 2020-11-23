@@ -242,7 +242,7 @@ namespace SharpGame
         /// <param name="dstAccessMask">Specifies a destination access mask.</param>
         public MemoryBarrier(AccessFlags srcAccessMask, AccessFlags dstAccessMask)
         {
-            native = VkMemoryBarrier.New();
+            native = new VkMemoryBarrier { sType = VkStructureType.MemoryBarrier };
             native.srcAccessMask = (VkAccessFlags)srcAccessMask;
             native.dstAccessMask = (VkAccessFlags)dstAccessMask;
         }
@@ -266,7 +266,10 @@ namespace SharpGame
         public BufferMemoryBarrier(Buffer buffer, AccessFlags srcAccessMask, AccessFlags dstAccessMask,
             uint srcQueueFamilyIndex, uint dstQueueFamilyIndex, ulong offset = 0, ulong size = WholeSize)
         {
-            native = VkBufferMemoryBarrier.New();
+            native = new VkBufferMemoryBarrier
+            {
+                sType = VkStructureType.BufferMemoryBarrier
+            };
             native.buffer = buffer.buffer;
             native.offset = offset;
             native.size = size;

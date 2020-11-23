@@ -38,6 +38,12 @@ namespace SharpGame
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T* InToPtr<T>(in T source) where T : unmanaged
+        {
+            return (T*)Unsafe.AsPointer(ref Unsafe.AsRef(source));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static K* AsPtr<K, T>(ref T source) where T : unmanaged where K : unmanaged
         {
             return (K*)Unsafe.AsPointer(ref source);
