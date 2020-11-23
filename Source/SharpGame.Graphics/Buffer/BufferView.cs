@@ -11,13 +11,15 @@ namespace SharpGame
 
         public BufferView(Buffer buffer, Format format, ulong offset, ulong range)
         {
-            var bufferViewCreateInfo = new BufferViewCreateInfo(buffer, format, offset, range);
-            view = Device.CreateBufferView(ref bufferViewCreateInfo.native);
-        }
-
-        public BufferView(ref BufferViewCreateInfo bufferViewCreateInfo)
-        {
-            view = Device.CreateBufferView(ref bufferViewCreateInfo.native);
+            var bufferViewCreateInfo = new VkBufferViewCreateInfo
+            {
+                sType = VkStructureType.BufferViewCreateInfo
+            };
+            bufferViewCreateInfo.buffer = buffer.buffer;
+            bufferViewCreateInfo.format = (VkFormat)format;
+            bufferViewCreateInfo.offset = offset;
+            bufferViewCreateInfo.range = range;
+            view = Device.CreateBufferView(ref bufferViewCreateInfo);
         }
 
         protected override void Destroy(bool disposing)
@@ -28,27 +30,4 @@ namespace SharpGame
         }
     }
 
-    public ref struct BufferViewCreateInfo
-    {
-        public Buffer buffer { set => native.buffer = value.buffer; }
-        public Format format { get => (Format)native.format; set => native.format = (VkFormat)value; }
-
-        public ulong offset { get => native.offset; set => native.offset = value; }
-        public ulong range { get => native.range; set => native.range = value; }
-
-        internal VkBufferViewCreateInfo native;
-
-        public BufferViewCreateInfo(Buffer buffer, Format format, ulong offset, ulong range)
-        {
-            native = new VkBufferViewCreateInfo
-            {
-                sType = VkStructureType.BufferViewCreateInfo
-            };
-            this.buffer = buffer;
-            this.format = format;
-            this.offset = offset;
-            this.range = range;
-        }
-
-    }
 }

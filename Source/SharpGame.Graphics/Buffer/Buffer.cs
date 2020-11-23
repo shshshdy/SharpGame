@@ -226,8 +226,10 @@ namespace SharpGame
 
         public unsafe BufferCreateInfo(BufferUsageFlags usage, ulong size, uint[] queueFamilyIndices = null)
         {
-            native = new VkBufferCreateInfo();
-            native.sType = VkStructureType.BufferCreateInfo;
+            native = new VkBufferCreateInfo
+            {
+                sType = VkStructureType.BufferCreateInfo
+            };
             pQueueFamilyIndices = queueFamilyIndices;
             if(queueFamilyIndices != null)
             {
