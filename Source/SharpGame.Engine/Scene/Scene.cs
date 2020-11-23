@@ -49,7 +49,19 @@ namespace SharpGame
 
             this.Subscribe((in Update e) => Update(e.timeDelta));
         }
-        
+
+        public Scene(params Component[] components)
+        {
+            NodeAdded(this);
+
+            this.Subscribe((in Update e) => Update(e.timeDelta));
+
+            foreach(var c in components)
+            {
+                Add(c);
+            }
+        }
+         
         public void NodeAdded(Node node)
         {
             if (node == null || node.Scene == this)

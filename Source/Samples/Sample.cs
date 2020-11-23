@@ -153,12 +153,15 @@ namespace SharpGame.Samples
             {
                 if (ImGui.Begin("HUD"))
                 {
-                    env.AmbientColor = ImGUI.Color4("Ambient Color", env.AmbientColor);
-                    env.SunlightColor = ImGUI.Color4("Sunlight Color", env.SunlightColor);
+                    if (ImGui.CollapsingHeader("Lighting", ref openCamera))
+                    {
+                        env.AmbientColor = ImGUI.Color4("Ambient Color", env.AmbientColor);
+                        env.SunlightColor = ImGUI.Color4("Sunlight Color", env.SunlightColor);
 
-                    Vector3 dir = (Vector3)env.SunlightDir;
-                    ImGui.SliderFloat3("Light dir", ref dir, -1.0f, 1.0f);
-                    env.SunlightDir = (vec3)dir;
+                        Vector3 dir = (Vector3)env.SunlightDir;
+                        ImGui.SliderFloat3("Light dir", ref dir, -1.0f, 1.0f);
+                        env.SunlightDir = (vec3)dir;
+                    }
                 }
 
                 ImGui.End();

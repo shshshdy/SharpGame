@@ -164,7 +164,7 @@ namespace SharpGame.Samples
                     new Camera
                     {
                         NearClip = 0.5f,
-                        FarClip = 100,
+                        FarClip = 400,
                     },
 
                 },
@@ -190,6 +190,12 @@ namespace SharpGame.Samples
 
         }
 
+        protected override void Destroy(bool disposing)
+        {
+            texture.Dispose();
+
+            base.Destroy(disposing);
+        }
 
         Uint3 alignedDivision(in VkExtent3D extent, in VkExtent3D granularity)
         {
