@@ -426,84 +426,6 @@ namespace SharpGame
             return CreateShaderModule(shaderStage, code, includeFile);
         }
 
-        public static ShaderReflection ReflectionShaderModule(string source, byte[] bytecode)
-        {
-#if NEW_RELECTION
-            ShaderReflection refl = new ShaderReflection();
-            refl.descriptorSets = new List<UniformBlock>();
-
-            using (var context = new SharpSPIRVCross.Context())
-            {
-                var ir = context.ParseIr(bytecode);
-                var compiler = context.CreateCompiler(Backend.GLSL, ir);
-
-                var caps = compiler.GetDeclaredCapabilities();
-                var extensions = compiler.GetDeclaredExtensions();
-                var resources = compiler.CreateShaderResources();
-                foreach (var uniformBuffer in resources.GetResources(SharpSPIRVCross.ResourceType.UniformBuffer))
-                {
-                    Console.WriteLine($"ID: {uniformBuffer.Id}, BaseTypeID: {uniformBuffer.BaseTypeId}, TypeID: {uniformBuffer.TypeId}, Name: {uniformBuffer.Name})");
-                    var set = compiler.GetDecoration(uniformBuffer.Id, SpvDecoration.DescriptorSet);
-                    var binding = compiler.GetDecoration(uniformBuffer.Id, SpvDecoration.Binding);
-                    var type = compiler.GetSpirvType(uniformBuffer.TypeId);
-                    Console.WriteLine($"  Set: {set}, Binding: {binding}");
-
-                    var descriptorType = DescriptorType.UniformBuffer;
-                    if (uniformBuffer.Name.EndsWith("dynamic"))
-                    {
-                        descriptorType = DescriptorType.UniformBufferDynamic;
-                    }
-
-                    UniformBlock u = new UniformBlock
-                    {
-                        name = uniformBuffer.Name,
-                        set = (int)set,
-                        binding = binding,
-                        descriptorType = descriptorType
-                    };
-
-                    refl.descriptorSets.Add(u);
-                }
-
-                foreach (var input in resources.GetResources(SharpSPIRVCross.ResourceType.StageInput))
-                {
-                    Console.WriteLine($"ID: {input.Id}, BaseTypeID: {input.BaseTypeId}, TypeID: {input.TypeId}, Name: {input.Name})");
-                    var location = compiler.GetDecoration(input.Id, SpvDecoration.Location);
-                    Console.WriteLine($"  Location: {location}");
-                }
-
-                foreach (var sampledImage in resources.GetResources(SharpSPIRVCross.ResourceType.SampledImage))
-                {
-                    var set = compiler.GetDecoration(sampledImage.Id, SpvDecoration.DescriptorSet);
-                    var binding = compiler.GetDecoration(sampledImage.Id, SpvDecoration.Binding);
-                    var base_type = compiler.GetSpirvType(sampledImage.BaseTypeId);
-                    var type = compiler.GetSpirvType(sampledImage.TypeId);
-                    Console.WriteLine($"  Set: {set}, Binding: {binding}");
-
-                    UniformBlock u = new UniformBlock
-                    {
-                        name = sampledImage.Name,
-                        set = (int)set,
-                        binding = binding,
-                        descriptorType = DescriptorType.CombinedImageSampler
-                    };
-                    refl.descriptorSets.Add(u);
-                }
-
-                //compiler.Options.SetOption(CompilerOption.GLSL_Version, 50);
-                //var glsl_source = compiler.Compile();
-            }
-
-            return refl;
-#else
-
-
-            LayoutParser layoutParser = new LayoutParser(source);
-            var refl = layoutParser.Reflection();
-            return refl;
-#endif
-        }
-
         public static ShaderModule CreateShaderModule(ShaderStage shaderStage, string code, string includeFile)
         {
             ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;
@@ -607,6 +529,105 @@ namespace SharpGame
             }
 
             return !string.IsNullOrEmpty(ver);
+        }
+
+        public static ShaderReflection ReflectionShaderModule(string source, byte[] bytecode)
+        {
+#if NEW_RELECTION
+            ShaderReflection refl = new ShaderReflection();
+            refl.descriptorSets = new List<UniformBlock>();
+
+            using (var context = new SharpSPIRVCross.Context())
+            {
+                var ir = context.ParseIr(bytecode);
+                var compiler = context.CreateCompiler(Backend.GLSL, ir);
+
+                var caps = compiler.GetDeclaredCapabilities();
+                var extensions = compiler.GetDeclaredExtensions();
+                var resources = compiler.CreateShaderResources();
+
+                Action<SharpSPIRVCross.ResourceType> CollectShaderResources = (SharpSPIRVCross.ResourceType resourceType) =>
+                {
+                    foreach (var rs in resources.GetResources(resourceType))
+                    {
+                        Console.WriteLine($"ID: {rs.Id}, BaseTypeID: {rs.BaseTypeId}, TypeID: {rs.TypeId}, Name: {rs.Name})");
+                        var set = compiler.GetDecoration(rs.Id, SpvDecoration.DescriptorSet);
+                        var binding = compiler.GetDecoration(rs.Id, SpvDecoration.Binding);
+                        var type = compiler.GetSpirvType(rs.TypeId);
+                        Console.WriteLine($"  Set: {set}, Binding: {binding}");
+
+                        bool isDynamic = rs.Name.EndsWith("dynamic");
+
+                        var descriptorType = resourceType switch
+                        {
+                            SharpSPIRVCross.ResourceType.UniformBuffer => isDynamic ? DescriptorType.UniformBufferDynamic : DescriptorType.UniformBuffer,
+                            SharpSPIRVCross.ResourceType.StorageBuffer => isDynamic ? DescriptorType.StorageBufferDynamic : DescriptorType.StorageBuffer,
+                            SharpSPIRVCross.ResourceType.StageInput => throw new NotImplementedException(),
+                            SharpSPIRVCross.ResourceType.StageOutput => throw new NotImplementedException(),
+                            SharpSPIRVCross.ResourceType.SubpassInput => DescriptorType.InputAttachment,
+                            SharpSPIRVCross.ResourceType.StorageImage => DescriptorType.StorageImage,
+                            SharpSPIRVCross.ResourceType.SampledImage => DescriptorType.CombinedImageSampler,
+                            SharpSPIRVCross.ResourceType.AtomicCounter => throw new NotImplementedException(),
+                            SharpSPIRVCross.ResourceType.PushConstant => throw new NotImplementedException(),
+                            SharpSPIRVCross.ResourceType.SeparateImage => DescriptorType.SampledImage,
+                            SharpSPIRVCross.ResourceType.SeparateSamplers => DescriptorType.Sampler,
+                            SharpSPIRVCross.ResourceType.AccelerationStructure => throw new NotImplementedException(),
+                            _=> throw new NotImplementedException(),
+                        };
+
+                        var u = new UniformBlock
+                        {
+                            name = rs.Name,
+                            set = (int)set,
+                            binding = binding,
+                            descriptorType = descriptorType
+                        };
+
+                        if(type.MemberCount > 0)
+                        {
+                            compiler.GetDeclaredStructSize(type, out int size);
+                            Console.WriteLine($"  struct, size:{size}");
+
+                            for (int i = 0; i < type.MemberCount; i++)
+                            {
+                                compiler.GetStructMemberOffset(type, i, out int offset);
+                                compiler.GetStructMemberArrayStride(type, i, out int sz);
+                                compiler.GetStructMemberMatrixStride(type, i, out int stride);
+                                Console.WriteLine($"  MemberOffset:{offset}, ArrayStride:{sz}, MatrixStride:{stride}");
+                            }
+                        }
+
+                        refl.descriptorSets.Add(u);
+                    }
+                };
+
+                CollectShaderResources(SharpSPIRVCross.ResourceType.UniformBuffer);
+                CollectShaderResources(SharpSPIRVCross.ResourceType.StorageBuffer);
+
+                foreach (var input in resources.GetResources(SharpSPIRVCross.ResourceType.StageInput))
+                {
+                    Console.WriteLine($"ID: {input.Id}, BaseTypeID: {input.BaseTypeId}, TypeID: {input.TypeId}, Name: {input.Name})");
+                    var location = compiler.GetDecoration(input.Id, SpvDecoration.Location);
+                    Console.WriteLine($"  Location: {location}");
+                }
+
+                CollectShaderResources(SharpSPIRVCross.ResourceType.StorageImage);
+                CollectShaderResources(SharpSPIRVCross.ResourceType.SampledImage);
+
+
+                //compiler.Options.SetOption(CompilerOption.GLSL_Version, 50);
+                //var glsl_source = compiler.Compile();
+            }
+
+            return refl;
+
+#else
+
+
+            LayoutParser layoutParser = new LayoutParser(source);
+            var refl = layoutParser.Reflection();
+            return refl;
+#endif
         }
 
     }
