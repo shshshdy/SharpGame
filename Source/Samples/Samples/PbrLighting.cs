@@ -58,9 +58,9 @@ namespace SharpGame.Samples
             camera = scene.GetComponent<Camera>(true);
             camera.Node.LookAt(new vec3(0.0f, 5.0f, -50), TransformSpace.WORLD);
 
-            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0, VkImageUsageFlags.Storage | VkImageUsageFlags.TransferSrc);
-            irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, VkImageUsageFlags.Storage);
-            brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, ImageViewType.Image2D, 1, Format.R16g16Sfloat, 1, VkImageUsageFlags.Storage);
+            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, VkImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0, VkImageUsageFlags.Storage | VkImageUsageFlags.TransferSrc);
+            irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, VkImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, VkImageUsageFlags.Storage);
+            brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, VkImageViewType.Image2D, 1, Format.R16g16Sfloat, 1, VkImageUsageFlags.Storage);
 
             {
                 var model = GeometryUtil.CreateCubeModel(10, 10, 10);
@@ -189,7 +189,7 @@ namespace SharpGame.Samples
                     copyRegion.srcSubresource.layerCount = envMap.layers;
                     copyRegion.dstSubresource = copyRegion.srcSubresource;
 
-                    commandBuffer.CopyImage(cubeMap.image, ImageLayout.TransferSrcOptimal, envMap.image, ImageLayout.TransferDstOptimal, ref copyRegion);
+                    commandBuffer.CopyImage(cubeMap.image, VkImageLayout.TransferSrcOptimal, envMap.image, VkImageLayout.TransferDstOptimal, ref copyRegion);
                     commandBuffer.PipelineBarrier(VkPipelineStageFlags.Transfer, VkPipelineStageFlags.ComputeShader, postCopyBarriers);
                  
                     // Pre-filter rest of the mip-chain.
@@ -201,7 +201,7 @@ namespace SharpGame.Samples
                     Span<DescriptorImageInfo> envTextureMipTailDescriptors = stackalloc DescriptorImageInfo[(int)numMipTailLevels];
                     for (uint level = 0; level < numMipTailLevels; ++level)
                     {
-                        var view = ImageView.Create(envMap.image, ImageViewType.ImageCube, Format.R16g16b16a16Sfloat, VkImageAspectFlags.Color, level + 1, 1, 0, envMap.image.arrayLayers);
+                        var view = ImageView.Create(envMap.image, VkImageViewType.ImageCube, Format.R16g16b16a16Sfloat, VkImageAspectFlags.Color, level + 1, 1, 0, envMap.image.arrayLayers);
                         envTextureMipTailViews.Add(view);
                         envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, VkImageLayout.General);
                     }

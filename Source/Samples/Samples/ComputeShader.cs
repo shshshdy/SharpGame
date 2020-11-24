@@ -72,7 +72,7 @@ namespace SharpGame.Samples
 
             };
 
-            geometry.SetDrawRange(PrimitiveTopology.PointList, 0, PARTICLE_COUNT);
+            geometry.SetDrawRange(VkPrimitiveTopology.PointList, 0, PARTICLE_COUNT);
 
             material = new Material(shader);
 

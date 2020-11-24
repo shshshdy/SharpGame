@@ -95,6 +95,19 @@ namespace SharpGame
         }
     }
 
+    public enum BlendMode
+    {
+        Replace = 0,
+        Add,
+        Multiply,
+        Alpha,
+        AddAlpha,
+        PremulAlpha,
+        InvdestAlpha,
+        Subtract,
+        SubtractAlpha,
+    }
+
     public partial class Pass : DisposeBase
     {
         public static readonly string Shadow = "shadow";
@@ -195,21 +208,21 @@ namespace SharpGame
         public ref ColorBlendStateInfo ColorBlendState => ref colorBlendState;
         private ColorBlendStateInfo colorBlendState = ColorBlendStateInfo.Replace;
 
-        public PolygonMode FillMode { get => rasterizationState.polygonMode; set => rasterizationState.polygonMode = value; }
-        public CullMode CullMode { get => rasterizationState.cullMode; set => rasterizationState.cullMode = value; }
-        public FrontFace FrontFace { get => rasterizationState.frontFace; set => rasterizationState.frontFace = value; }
+        public VkPolygonMode FillMode { get => rasterizationState.polygonMode; set => rasterizationState.polygonMode = value; }
+        public VkCullModeFlags CullMode { get => rasterizationState.cullMode; set => rasterizationState.cullMode = value; }
+        public VkFrontFace FrontFace { get => rasterizationState.frontFace; set => rasterizationState.frontFace = value; }
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
 
         private BlendMode blendMode = BlendMode.Replace;
         public BlendMode BlendMode { get => blendMode; set { blendMode = value; SetBlendMode(value); } }
-        public DynamicStateInfo DynamicStates { get; set; } = new DynamicStateInfo(DynamicState.Viewport, DynamicState.Scissor);
+        public DynamicStateInfo DynamicStates { get; set; } = new DynamicStateInfo(VkDynamicState.Viewport, VkDynamicState.Scissor);
         public string[] Defines { get; set; }
 
         public PipelineLayout PipelineLayout { get; set; } = new PipelineLayout();
      
         [IgnoreDataMember]
-        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
+        public VkPrimitiveTopology PrimitiveTopology { get; set; } = VkPrimitiveTopology.TriangleList;
         [IgnoreDataMember]
         public VertexLayout VertexLayout { get; set; }
 
@@ -398,7 +411,7 @@ namespace SharpGame
             return CreateGraphicsPipeline(renderPass, subPass, vertexInput, primitiveTopology);            
         }
 
-        public unsafe Pipeline CreateGraphicsPipeline(RenderPass renderPass, uint subPass, VertexLayout vertexInput, PrimitiveTopology primitiveTopology)
+        public unsafe Pipeline CreateGraphicsPipeline(RenderPass renderPass, uint subPass, VertexLayout vertexInput, VkPrimitiveTopology primitiveTopology)
         {
             VkGraphicsPipelineCreateInfo pipelineCreateInfo = new VkGraphicsPipelineCreateInfo
             {

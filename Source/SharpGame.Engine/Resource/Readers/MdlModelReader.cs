@@ -199,7 +199,7 @@ namespace SharpGame
                         }
                     */
 
-                    PrimitiveTopology type = primitiveType2Topology[stream.Read<int>()];
+                    VkPrimitiveTopology type = primitiveType2Topology[stream.Read<int>()];
                     int vbRef = stream.Read<int>();
                     int ibRef = stream.Read<int>();
                     int indexStart = stream.Read<int>();
@@ -347,9 +347,9 @@ namespace SharpGame
         }
 
 
-        static PrimitiveTopology[] primitiveType2Topology = new[]
+        static VkPrimitiveTopology[] primitiveType2Topology = new[]
         {
-            PrimitiveTopology.TriangleList, PrimitiveTopology.TriangleStrip, PrimitiveTopology.LineList, PrimitiveTopology.LineStrip, PrimitiveTopology.PointList
+            VkPrimitiveTopology.TriangleList, VkPrimitiveTopology.TriangleStrip, VkPrimitiveTopology.LineList, VkPrimitiveTopology.LineStrip, VkPrimitiveTopology.PointList
         };
 
         const uint MASK_NONE = 0x0;

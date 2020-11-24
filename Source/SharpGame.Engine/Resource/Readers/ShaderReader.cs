@@ -155,15 +155,15 @@ namespace SharpGame
                 switch (kvp.Key)
                 {
                     case "FillMode":
-                        pass.FillMode = (PolygonMode)Enum.Parse(typeof(PolygonMode), kvp.Value[0].value);
+                        pass.FillMode = (VkPolygonMode)Enum.Parse(typeof(VkPolygonMode), kvp.Value[0].value);
                         break;
 
                     case "CullMode":
-                        pass.CullMode = (CullMode)Enum.Parse(typeof(CullMode), kvp.Value[0].value);
+                        pass.CullMode = (VkCullModeFlags)Enum.Parse(typeof(VkCullModeFlags), kvp.Value[0].value);
                         break;
 
                     case "FrontFace":
-                        pass.FrontFace = (FrontFace)Enum.Parse(typeof(FrontFace), kvp.Value[0].value);
+                        pass.FrontFace = (VkFrontFace)Enum.Parse(typeof(VkFrontFace), kvp.Value[0].value);
                         break;
 
                     case "DepthTest":

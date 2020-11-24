@@ -49,7 +49,7 @@ namespace SharpGame
                     }
 
                     var initialLayout = attachmentDescriptions[OutputAttachments[i]].initialLayout;
-                    var imageLayout = initialLayout == ImageLayout.Undefined ? ImageLayout.ColorAttachmentOptimal : initialLayout;
+                    var imageLayout = initialLayout == VkImageLayout.Undefined ? VkImageLayout.ColorAttachmentOptimal : initialLayout;
                     subpassDescription.pColorAttachments[i] = new AttachmentReference(OutputAttachments[i], imageLayout);
                 }
             }
@@ -60,7 +60,7 @@ namespace SharpGame
                 for (int i = 0; i < InputAttachments.Length; i++)
                 {
                     var initialLayout = attachmentDescriptions[InputAttachments[i]].initialLayout;
-                    var imageLayout = initialLayout == ImageLayout.Undefined ? ImageLayout.ShaderReadOnlyOptimal : initialLayout;
+                    var imageLayout = initialLayout == VkImageLayout.Undefined ? VkImageLayout.ShaderReadOnlyOptimal : initialLayout;
                     subpassDescription.pInputAttachments[i] = new AttachmentReference(InputAttachments[i], imageLayout);
                 }
             }
@@ -74,7 +74,7 @@ namespace SharpGame
                 if(index != -1)
                 {
                     var initialLayout = attachmentDescriptions[index].initialLayout;
-                    var imageLayout = initialLayout == ImageLayout.Undefined ? ImageLayout.DepthStencilAttachmentOptimal : initialLayout;
+                    var imageLayout = initialLayout == VkImageLayout.Undefined ? VkImageLayout.DepthStencilAttachmentOptimal : initialLayout;
 
                     subpassDescription.pDepthStencilAttachment = new AttachmentReference[1]
                     {

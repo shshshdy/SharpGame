@@ -83,7 +83,7 @@ namespace SharpGame
                 renderPassCreator = ()=>
                 { 
                     var rp = graphics.CreateRenderPass();
-                    pipeline = pass.CreateGraphicsPipeline(rp, 0, VertexPos2dTexColor.Layout, PrimitiveTopology.TriangleList);
+                    pipeline = pass.CreateGraphicsPipeline(rp, 0, VertexPos2dTexColor.Layout, VkPrimitiveTopology.TriangleList);
 
                     return rp;
                 },
@@ -334,7 +334,7 @@ namespace SharpGame
             cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, 0, resourceSet);
             cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipeline);
             cmdBuffer.BindVertexBuffer(0, vb);
-            cmdBuffer.BindIndexBuffer(ib, 0, IndexType.Uint16);
+            cmdBuffer.BindIndexBuffer(ib, 0, VkIndexType.Uint16);
 
             draw_data.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
 

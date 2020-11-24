@@ -32,7 +32,7 @@ namespace SharpGame
                     var depthFormat = Device.GetSupportedDepthFormat();
                     depthRT = new RenderTexture(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat,
                         VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled, //ImageAspectFlags.Depth,
-                        VkSampleCountFlags.Count1/*, ImageLayout.DepthStencilReadOnlyOptimal*/);
+                        VkSampleCountFlags.Count1/*, VkImageLayout.DepthStencilReadOnlyOptimal*/);
                     depthRT.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
                     depthRT.UpdateDescriptor();
                 }
@@ -64,7 +64,7 @@ namespace SharpGame
 
             for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                cascades[i].view = ImageView.Create(DepthRT.image, ImageViewType.Image2D, depthFormat, VkImageAspectFlags.Depth, 0, 1, i, 1);
+                cascades[i].view = ImageView.Create(DepthRT.image, VkImageViewType.Image2D, depthFormat, VkImageAspectFlags.Depth, 0, 1, i, 1);
             }
 
             ubShadow = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));
@@ -81,7 +81,7 @@ namespace SharpGame
 
             AttachmentDescription[] attachments =
             {
-                new AttachmentDescription(depthFormat, finalLayout :ImageLayout.ShaderReadOnlyOptimal /*ImageLayout.DepthStencilReadOnlyOptimal*/)
+                new AttachmentDescription(depthFormat, finalLayout :VkImageLayout.ShaderReadOnlyOptimal /*VkImageLayout.DepthStencilReadOnlyOptimal*/)
             };
 
             SubpassDescription[] subpassDescription =
@@ -92,7 +92,7 @@ namespace SharpGame
 
                     pDepthStencilAttachment = new []
                     {
-                        new AttachmentReference(0, ImageLayout.DepthStencilAttachmentOptimal)
+                        new AttachmentReference(0, VkImageLayout.DepthStencilAttachmentOptimal)
                     },
                 }
             };
@@ -169,7 +169,7 @@ namespace SharpGame
                 }
             });
 
-            ClearValue[] clearDepth = { new ClearDepthStencilValue(1.0f, 0) };
+            VkClearValue[] clearDepth = { new VkClearDepthStencilValue(1.0f, 0) };
 
             if (RenderPass == null)
             {

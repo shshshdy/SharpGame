@@ -31,7 +31,7 @@ namespace SharpGame
 
             cb.BindVertexBuffer(0, geometry.VertexBuffer);
             cb.BindVertexBuffer(1, instanceBuffer);
-            cb.BindIndexBuffer(geometry.IndexBuffer, 0, IndexType.Uint32);
+            cb.BindIndexBuffer(geometry.IndexBuffer, 0, VkIndexType.Uint32);
 
             cb.DrawIndexedIndirect(indirectCommandsBuffer, 0, indirectDrawCount, 20/*(uint)sizeof(VkDrawIndexedIndirectCommand)*/);
 

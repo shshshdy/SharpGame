@@ -152,7 +152,7 @@ namespace SharpGame
         VkSparseBufferMemoryBindInfo native;
         public SparseBufferMemoryBindInfo(Buffer buffer, params VkSparseMemoryBind[] binds)
         {
-            native.buffer = buffer.buffer;
+            native.buffer = buffer.handle;
             native.bindCount = (uint)(binds?.Length ?? 0);
             native.pBinds = Utilities.AsPtr(ref binds[0]);
         }

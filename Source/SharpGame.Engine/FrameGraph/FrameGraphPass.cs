@@ -20,13 +20,13 @@ namespace SharpGame
         protected Framebuffer[] framebuffers;
         public Framebuffer[] Framebuffers => framebuffers;
 
-        public ClearColorValue[] ClearColorValue { get; set; } = { new ClearColorValue(0.25f, 0.25f, 0.25f, 1) };
-        public ClearDepthStencilValue? ClearDepthStencilValue { get; set; } = new ClearDepthStencilValue(1.0f, 0);
+        public VkClearColorValue[] VkClearColorValue { get; set; } = { new VkClearColorValue(0.25f, 0.25f, 0.25f, 1) };
+        public VkClearDepthStencilValue? VkClearDepthStencilValue { get; set; } = new VkClearDepthStencilValue(1.0f, 0);
 
-        public ClearValue[] clearValues = new ClearValue[2]
+        public VkClearValue[] clearValues = new VkClearValue[2]
         { 
-            new ClearColorValue(0.25f, 0.25f, 0.25f, 1),
-            new ClearDepthStencilValue(1.0f, 0)
+            new VkClearColorValue(0.25f, 0.25f, 0.25f, 1),
+            new VkClearDepthStencilValue(1.0f, 0)
         };
 
         List<Subpass> subpasses = new List<Subpass>();
@@ -98,7 +98,7 @@ namespace SharpGame
             }
         }
 
-        public void SetInitialLayout(params ImageLayout[] imageLayouts)
+        public void SetInitialLayout(params VkImageLayout[] imageLayouts)
         {
             for (int i = 0; i < imageLayouts.Length; i++)
             {
@@ -106,7 +106,7 @@ namespace SharpGame
             }
         }
 
-        public void SetFinalLayout(params ImageLayout[] imageLayouts)
+        public void SetFinalLayout(params VkImageLayout[] imageLayouts)
         {
             for (int i = 0; i < imageLayouts.Length; i++)
             {
@@ -264,7 +264,7 @@ namespace SharpGame
             {
                 if(i > 0)
                 {
-                    cmd.NextSubpass(SubpassContents.Inline);
+                    cmd.NextSubpass(VkSubpassContents.Inline);
                 }
 
                 subpasses[i].Draw(rc, cmd);
@@ -308,12 +308,12 @@ namespace SharpGame
             }
             /*
             int clearValuesCount = 0;
-            if (ClearColorValue != null)
+            if (VkClearColorValue != null)
             {
-                clearValuesCount = ClearColorValue.Length;
+                clearValuesCount = VkClearColorValue.Length;
             }
 
-            if (ClearDepthStencilValue.HasValue)
+            if (VkClearDepthStencilValue.HasValue)
             {
                 clearValuesCount += 1;
             }
@@ -323,17 +323,17 @@ namespace SharpGame
                 Array.Resize(ref clearValues, clearValuesCount);
             }
 
-            if (ClearColorValue != null)
+            if (VkClearColorValue != null)
             {
-                for (int i = 0; i < ClearColorValue.Length; i++)
+                for (int i = 0; i < VkClearColorValue.Length; i++)
                 {
-                    clearValues[i] = ClearColorValue[i];
+                    clearValues[i] = VkClearColorValue[i];
                 }
             }
 
-            if (ClearDepthStencilValue.HasValue)
+            if (VkClearDepthStencilValue.HasValue)
             {
-                clearValues[clearValues.Length - 1] = ClearDepthStencilValue.Value;
+                clearValues[clearValues.Length - 1] = VkClearDepthStencilValue.Value;
             }*/
 
             BeginRenderPass(cb, framebuffer, renderArea, clearValues);
@@ -342,10 +342,10 @@ namespace SharpGame
             cb.SetScissor(in renderArea);
         }
 
-        public void BeginRenderPass(CommandBuffer cb, Framebuffer framebuffer, VkRect2D renderArea, ClearValue[] clearValues)
+        public void BeginRenderPass(CommandBuffer cb, Framebuffer framebuffer, VkRect2D renderArea, VkClearValue[] clearValues)
         {
             var rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues);
-            cb.BeginRenderPass(in rpBeginInfo, UseSecondCmdBuffer? SubpassContents.SecondaryCommandBuffers : SubpassContents.Inline);
+            cb.BeginRenderPass(in rpBeginInfo, UseSecondCmdBuffer? VkSubpassContents.SecondaryCommandBuffers : VkSubpassContents.Inline);
         }
 
         public void EndRenderPass(CommandBuffer cb)

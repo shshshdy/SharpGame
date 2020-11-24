@@ -63,5 +63,16 @@ namespace SharpGame
             color = default;
             depthStencil = new VkClearDepthStencilValue(depth, stencil);
         }
+
+        public static implicit operator VkClearValue(in VkClearColorValue v)
+        {
+            return new VkClearValue(v);
+        }
+
+        public static implicit operator VkClearValue(in VkClearDepthStencilValue v)
+        {
+            return new VkClearValue(v);
+        }
+
     }
 }

@@ -19,7 +19,7 @@ namespace SharpGame
     {
         public string Name { get; set; }
         public VertexLayout VertexLayout { get; set; }
-        public PrimitiveTopology PrimitiveTopology { get; set; } = PrimitiveTopology.TriangleList;
+        public VkPrimitiveTopology PrimitiveTopology { get; set; } = VkPrimitiveTopology.TriangleList;
         public Buffer VertexBuffer { get; set; }
         public Buffer IndexBuffer { get; set; }
         public uint VertexStart { get; set; }
@@ -33,7 +33,7 @@ namespace SharpGame
         {
         }
 
-        public void SetDrawRange(PrimitiveTopology type, uint vertexStart, uint vertexCount)
+        public void SetDrawRange(VkPrimitiveTopology type, uint vertexStart, uint vertexCount)
         {
             PrimitiveTopology = type;
             IndexStart = 0;
@@ -42,7 +42,7 @@ namespace SharpGame
             VertexCount = vertexCount;
         }
 
-        public void SetDrawRange(PrimitiveTopology type, uint indexStart, uint indexCount, int vertexOffset)
+        public void SetDrawRange(VkPrimitiveTopology type, uint indexStart, uint indexCount, int vertexOffset)
         {
             PrimitiveTopology = type;
             IndexStart = indexStart;
@@ -57,7 +57,7 @@ namespace SharpGame
 
             if(IndexBuffer != null && IndexCount > 0)
             {
-                cmdBuffer.BindIndexBuffer(IndexBuffer, 0, IndexBuffer.Stride == 2 ?  IndexType.Uint16 : IndexType.Uint32);
+                cmdBuffer.BindIndexBuffer(IndexBuffer, 0, IndexBuffer.Stride == 2 ? VkIndexType.Uint16 : VkIndexType.Uint32);
                 cmdBuffer.DrawIndexed(IndexCount, 1, IndexStart, VertexOffset, 0);
             }
             else

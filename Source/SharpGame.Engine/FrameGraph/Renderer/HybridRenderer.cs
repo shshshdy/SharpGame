@@ -82,12 +82,12 @@ namespace SharpGame
 
             };
 
-            geometryPass.clearValues = new ClearValue[]
+            geometryPass.clearValues = new VkClearValue[]
             {
-                new ClearColorValue(0.25f, 0.25f, 0.25f, 1),
-                new ClearColorValue(0, 0, 0, 1),
-                new ClearColorValue(0, 0, 0, 0),
-                new ClearDepthStencilValue(1, 0)
+                new VkClearColorValue(0.25f, 0.25f, 0.25f, 1),
+                new VkClearColorValue(0, 0, 0, 1),
+                new VkClearColorValue(0, 0, 0, 0),
+                new VkClearDepthStencilValue(1, 0)
             };
 
             geometryPass.frameBufferCreator = OnCreateFramebuffer;
@@ -140,22 +140,22 @@ namespace SharpGame
 
             AttachmentDescription[] attachments =
             {
-                new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
-                new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
-                new AttachmentDescription(Format.R32g32b32a32Sfloat, finalLayout : ImageLayout.ShaderReadOnlyOptimal),
-                new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)
+                new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
+                new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
+                new AttachmentDescription(Format.R32g32b32a32Sfloat, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
+                new AttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)
             };
 
             var colorAttachments = new[]
             {
-                 new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal),
-                 new AttachmentReference(1, ImageLayout.ColorAttachmentOptimal),
-                 new AttachmentReference(2, ImageLayout.ColorAttachmentOptimal)
+                 new AttachmentReference(0, VkImageLayout.ColorAttachmentOptimal),
+                 new AttachmentReference(1, VkImageLayout.ColorAttachmentOptimal),
+                 new AttachmentReference(2, VkImageLayout.ColorAttachmentOptimal)
             };
 
             var depthStencilAttachment = new[]
             {
-                 new AttachmentReference(3, ImageLayout.DepthStencilAttachmentOptimal)
+                 new AttachmentReference(3, VkImageLayout.DepthStencilAttachmentOptimal)
             };
 
             SubpassDescription[] subpassDescription =

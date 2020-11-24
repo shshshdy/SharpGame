@@ -223,13 +223,13 @@ namespace SharpGame
 
         private static Geometry ConvertGeometry(Assimp.Mesh mesh, float scale, VertexLayout vertexLayout, VertexComponent[] vertexComponents, bool combineVB, bool combineIB, out BoundingBox meshBoundingBox)
         {
-            PrimitiveTopology[] primitiveTopology =
+            VkPrimitiveTopology[] primitiveTopology =
             {
-                PrimitiveTopology.PointList,
-                PrimitiveTopology.PointList,
-                PrimitiveTopology.LineList,
-                PrimitiveTopology.LineList,
-                PrimitiveTopology.TriangleList,
+                VkPrimitiveTopology.PointList,
+                VkPrimitiveTopology.PointList,
+                VkPrimitiveTopology.LineList,
+                VkPrimitiveTopology.LineList,
+                VkPrimitiveTopology.TriangleList,
             };
 
             if (!combineVB)

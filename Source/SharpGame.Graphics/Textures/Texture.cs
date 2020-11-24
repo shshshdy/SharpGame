@@ -99,7 +99,7 @@ namespace SharpGame
 
             CommandBuffer copyCmd = Graphics.BeginPrimaryCmd();
             copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal, subresourceRange);
-            copyCmd.CopyBufferToImage(stagingBuffer, image, ImageLayout.TransferDstOptimal, bufferCopyRegions);
+            copyCmd.CopyBufferToImage(stagingBuffer, image, VkImageLayout.TransferDstOptimal, bufferCopyRegions);
             copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, VkImageLayout.TransferDstOptimal, imageLayout, subresourceRange);
             Graphics.EndPrimaryCmd(copyCmd);
 
@@ -114,40 +114,40 @@ namespace SharpGame
 
         }
 
-        public ImageViewType ImageViewType
+        public VkImageViewType ImageViewType
         {
             get
             {
                 if (layers > 1)
                 {
                     if (height == 1)
-                        return ImageViewType.Image1DArray;
+                        return VkImageViewType.Image1DArray;
                     else
                     {
                         if (faceCount == 6)
                         {
-                            return ImageViewType.ImageCubeArray;
+                            return VkImageViewType.ImageCubeArray;
                         }
                         else
                         {
-                            return ImageViewType.Image2DArray;
+                            return VkImageViewType.Image2DArray;
                         }
                     }
                 }
                 else
                 {
                     if (height == 1)
-                        return ImageViewType.Image1D;
+                        return VkImageViewType.Image1D;
                     else
                     {
                         if (faceCount == 6)
-                            return ImageViewType.ImageCube;
+                            return VkImageViewType.ImageCube;
 
                         if(depth > 1)
                         {
-                            return ImageViewType.Image3D;
+                            return VkImageViewType.Image3D;
                         }
-                        return ImageViewType.Image2D;
+                        return VkImageViewType.Image2D;
                     }
                 }
 
@@ -196,7 +196,7 @@ namespace SharpGame
                     dstOffsets_1 = new VkOffset3D((int)(prevLevelWidth / 2), (int)(prevLevelHeight / 2), 1),
                 };
 
-                commandBuffer.BlitImage(image, ImageLayout.TransferSrcOptimal, image, ImageLayout.TransferDstOptimal, ref region, VkFilter.Linear);
+                commandBuffer.BlitImage(image, VkImageLayout.TransferSrcOptimal, image, VkImageLayout.TransferDstOptimal, ref region, VkFilter.Linear);
 
                 var postBlitBarrier = new VkImageMemoryBarrier(image.handle, VkAccessFlags.TransferWrite, VkAccessFlags.TransferRead, VkImageLayout.TransferDstOptimal, VkImageLayout.TransferSrcOptimal, VkImageAspectFlags.Color, level, 1);
                 commandBuffer.PipelineBarrier(VkPipelineStageFlags.Transfer, VkPipelineStageFlags.Transfer, ref postBlitBarrier);
@@ -245,7 +245,7 @@ namespace SharpGame
             return Texture.Create2D(1, 1, Format.R8g8b8a8Unorm, Utilities.AsPointer(ref color));
         }
 
-        public static Texture Create(uint width, uint height, ImageViewType imageViewType, uint layers, Format format, uint levels = 0, VkImageUsageFlags additionalUsage = VkImageUsageFlags.None)
+        public static Texture Create(uint width, uint height, VkImageViewType imageViewType, uint layers, Format format, uint levels = 0, VkImageUsageFlags additionalUsage = VkImageUsageFlags.None)
         {
             Texture texture = new Texture
             {
@@ -261,7 +261,7 @@ namespace SharpGame
                 usage |= VkImageUsageFlags.TransferSrc; // For mipmap generation
             }
 
-            texture.image = Image.Create(width, height, (imageViewType == ImageViewType.ImageCube || imageViewType == ImageViewType.ImageCubeArray) ? VkImageCreateFlags.CubeCompatible : VkImageCreateFlags.None, layers, texture.mipLevels, format, VkSampleCountFlags.Count1, usage);
+            texture.image = Image.Create(width, height, (imageViewType == VkImageViewType.ImageCube || imageViewType == VkImageViewType.ImageCubeArray) ? VkImageCreateFlags.CubeCompatible : VkImageCreateFlags.None, layers, texture.mipLevels, format, VkSampleCountFlags.Count1, usage);
             texture.imageView = ImageView.Create(texture.image, imageViewType, format, VkImageAspectFlags.Color, 0, Vulkan.RemainingMipLevels, 0, layers);
             texture.sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToBorder, Device.Features.samplerAnisotropy == true);
             texture.UpdateDescriptor();
@@ -301,7 +301,7 @@ namespace SharpGame
                 var subresourceRange = new VkImageSubresourceRange(VkImageAspectFlags.Color, 0, 1, 0, 1);
                 CommandBuffer copyCmd = Graphics.BeginPrimaryCmd();
                 copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal, subresourceRange);
-                copyCmd.CopyBufferToImage(stagingBuffer, texture.image, ImageLayout.TransferDstOptimal, ref bufferCopyRegion);
+                copyCmd.CopyBufferToImage(stagingBuffer, texture.image, VkImageLayout.TransferDstOptimal, ref bufferCopyRegion);
                 copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, VkImageLayout.TransferDstOptimal, texture.imageLayout, subresourceRange);
                 Graphics.EndPrimaryCmd(copyCmd);
 
@@ -309,7 +309,7 @@ namespace SharpGame
                 texture.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
             }
 
-            texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
+            texture.imageView = ImageView.Create(texture.image, VkImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
             texture.sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == true);
             texture.UpdateDescriptor();
             return texture;
@@ -349,7 +349,7 @@ namespace SharpGame
             });
 
             texture.imageLayout = VkImageLayout.General;
-            texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
+            texture.imageView = ImageView.Create(texture.image, VkImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
             texture.sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, Device.Features.samplerAnisotropy);
             texture.UpdateDescriptor();
             return texture;

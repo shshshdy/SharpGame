@@ -24,7 +24,7 @@ namespace SharpGame
 
         Format viewFormat;
 
-        internal VkBuffer buffer;
+        public VkBuffer handle;
         internal VkDeviceMemory memory;
 
         public BufferView view;
@@ -55,9 +55,9 @@ namespace SharpGame
                 bufferCreateInfo.usage |= VkBufferUsageFlags.TransferDst;
             }
 
-            buffer = Device.CreateBuffer(ref bufferCreateInfo);
+            handle = Device.CreateBuffer(ref bufferCreateInfo);
 
-            Device.GetBufferMemoryRequirements(buffer, out VkMemoryRequirements memReqs);
+            Device.GetBufferMemoryRequirements(handle, out VkMemoryRequirements memReqs);
 
             // Find a memory type index that fits the properties of the buffer
 
@@ -71,7 +71,7 @@ namespace SharpGame
             UsageFlags = usageFlags;
             memoryPropertyFlags = memoryPropFlags;
 
-            Device.BindBufferMemory(buffer, memory, 0);
+            Device.BindBufferMemory(handle, memory, 0);
 
             if (data != IntPtr.Zero)
             {
@@ -135,7 +135,7 @@ namespace SharpGame
         public void SetupDescriptor()
         {
             descriptor.offset = 0;
-            descriptor.buffer = buffer;
+            descriptor.buffer = handle;
             descriptor.range = WholeSize;// Size;
         }
 
@@ -198,9 +198,9 @@ namespace SharpGame
 
         protected override void Destroy()
         {
-            if (buffer.Handle != 0)
+            if (handle.Handle != 0)
             {
-                Device.DestroyBuffer(buffer);
+                Device.DestroyBuffer(handle);
             }
 
             if (memory.Handle != 0)
@@ -214,5 +214,28 @@ namespace SharpGame
 
     }
 
+    public class BufferView : DisposeBase
+    {
+        internal VkBufferView view;
 
+        public BufferView(Buffer buffer, Format format, ulong offset, ulong range)
+        {
+            var bufferViewCreateInfo = new VkBufferViewCreateInfo
+            {
+                sType = VkStructureType.BufferViewCreateInfo
+            };
+            bufferViewCreateInfo.buffer = buffer.handle;
+            bufferViewCreateInfo.format = (VkFormat)format;
+            bufferViewCreateInfo.offset = offset;
+            bufferViewCreateInfo.range = range;
+            view = Device.CreateBufferView(ref bufferViewCreateInfo);
+        }
+
+        protected override void Destroy(bool disposing)
+        {
+            base.Destroy(disposing);
+
+            Device.DestroyBufferView(view);
+        }
+    }
 }

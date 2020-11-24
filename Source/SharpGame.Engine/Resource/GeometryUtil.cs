@@ -38,7 +38,7 @@ namespace SharpGame
                 VertexLayout = VertexPosTexNorm.Layout
             };
 
-            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);
+            geom.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);
             return geom;
         }
 
@@ -64,7 +64,7 @@ namespace SharpGame
                 VertexLayout = VertexPosTexNTB.Layout
             };
 
-            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);
+            geom.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);
             return geom;
         }
 
@@ -140,7 +140,7 @@ namespace SharpGame
                 VertexLayout = VertexPosTexNorm.Layout
             };
 
-            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);
+            geom.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);
             return geom;
         }
 
@@ -167,7 +167,7 @@ namespace SharpGame
                 VertexLayout = VertexPos.Layout
             };
 
-            geom.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);
+            geom.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);
             return geom;
         }
     }

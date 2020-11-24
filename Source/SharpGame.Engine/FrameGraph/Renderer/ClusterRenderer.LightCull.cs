@@ -76,8 +76,8 @@ namespace SharpGame
             cmd_buf.ResetQueryPool(QueryPool, 4, 6);
             //cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2);
 
-            BufferMemoryBarrier* barriers = stackalloc BufferMemoryBarrier[2];
-            barriers[0] = new BufferMemoryBarrier(light_pos_ranges.Buffer, AccessFlags.HostWrite, AccessFlags.ShaderRead);
+            VkBufferMemoryBarrier* barriers = stackalloc VkBufferMemoryBarrier[2];
+            barriers[0] = new VkBufferMemoryBarrier(light_pos_ranges.Buffer.handle, VkAccessFlags.HostWrite, VkAccessFlags.ShaderRead);
 
             cmd_buf.PipelineBarrier(VkPipelineStageFlags.Host, VkPipelineStageFlags.ComputeShader, VkDependencyFlags.ByRegion, 0, null, 1, barriers, 0, null);
 
@@ -95,10 +95,10 @@ namespace SharpGame
 
              //   cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2 + 1);
 
-                barriers[0] = new BufferMemoryBarrier(lightBounds, AccessFlags.ShaderRead | AccessFlags.ShaderWrite,
-                                AccessFlags.ShaderRead | AccessFlags.ShaderWrite);
+                barriers[0] = new VkBufferMemoryBarrier(lightBounds.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite,
+                                VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite);
                 barriers[1] = barriers[0];
-                barriers[1].Buffer = gridLightCounts;
+                barriers[1].buffer = gridLightCounts.handle;
                 cmd_buf.PipelineBarrier(VkPipelineStageFlags.ComputeShader,
                             VkPipelineStageFlags.ComputeShader,
                             VkDependencyFlags.ByRegion,
@@ -121,8 +121,8 @@ namespace SharpGame
 
             //    cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_GRID_OFFSETS * 2 + 1);
 
-                barriers[0].Buffer = gridLightCountTotal;
-                barriers[1].Buffer = gridLightCountOffsets;
+                barriers[0].buffer = gridLightCountTotal.handle;
+                barriers[1].buffer = gridLightCountOffsets.handle;
                 cmd_buf.PipelineBarrier(VkPipelineStageFlags.ComputeShader,
                             VkPipelineStageFlags.ComputeShader,
                             VkDependencyFlags.ByRegion,

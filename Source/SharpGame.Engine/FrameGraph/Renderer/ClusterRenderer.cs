@@ -198,12 +198,12 @@ namespace SharpGame
             Format depthFormat = Device.GetSupportedDepthFormat();
             AttachmentDescription[] attachments =
             {
-                new AttachmentDescription(depthFormat, finalLayout : ImageLayout.DepthStencilReadOnlyOptimal)
+                new AttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)
             };
 
             var depthStencilAttachment = new[]
             {
-                 new AttachmentReference(0, ImageLayout.DepthStencilAttachmentOptimal)
+                 new AttachmentReference(0, VkImageLayout.DepthStencilAttachmentOptimal)
             };
 
             SubpassDescription[] subpassDescription =
@@ -292,12 +292,12 @@ namespace SharpGame
             // clean up buffers
             unsafe
             {
-                BufferMemoryBarrier* transfer_barriers = stackalloc BufferMemoryBarrier[]
+                VkBufferMemoryBarrier* transfer_barriers = stackalloc VkBufferMemoryBarrier[]
                 {
-                    new BufferMemoryBarrier(gridFlags, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
-                    new BufferMemoryBarrier(gridLightCounts, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
-                    new BufferMemoryBarrier(gridLightCountOffsets, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite),
-                    new BufferMemoryBarrier(lightList, AccessFlags.ShaderRead | AccessFlags.ShaderWrite, AccessFlags.TransferWrite)
+                    new VkBufferMemoryBarrier(gridFlags.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite),
+                    new VkBufferMemoryBarrier(gridLightCounts.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite),
+                    new VkBufferMemoryBarrier(gridLightCountOffsets.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite),
+                    new VkBufferMemoryBarrier(lightList.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite)
                 };
 
                 //cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_TRANSFER * 2);
@@ -318,12 +318,12 @@ namespace SharpGame
                 cmd_buf.FillBuffer(lightList, 0, Buffer.WholeSize, 0);
                 cmd_buf.FillBuffer(gridLightCountsCompare, 0, Buffer.WholeSize, 0);
 
-                BufferMemoryBarrier* transfer_barriers1 = stackalloc BufferMemoryBarrier[]
+                VkBufferMemoryBarrier* transfer_barriers1 = stackalloc VkBufferMemoryBarrier[]
                 {
-                    new BufferMemoryBarrier(gridFlags, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
-                    new BufferMemoryBarrier(gridLightCounts, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
-                    new BufferMemoryBarrier(gridLightCountOffsets, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite),
-                    new BufferMemoryBarrier(lightList, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite)
+                    new VkBufferMemoryBarrier(gridFlags.handle, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite),
+                    new VkBufferMemoryBarrier(gridLightCounts.handle, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite),
+                    new VkBufferMemoryBarrier(gridLightCountOffsets.handle, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite),
+                    new VkBufferMemoryBarrier(lightList.handle, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite)
                 };
 
                 cmd_buf.PipelineBarrier(VkPipelineStageFlags.Transfer,

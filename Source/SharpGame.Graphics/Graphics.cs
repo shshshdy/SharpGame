@@ -175,12 +175,12 @@ namespace SharpGame
             {
                 new AttachmentDescription(ColorFormat)
                 {
-                    finalLayout = ImageLayout.PresentSrcKHR
+                    finalLayout = VkImageLayout.PresentSrcKHR
                 },
 
                 new AttachmentDescription(DepthFormat)
                 {
-                    finalLayout = ImageLayout.DepthStencilAttachmentOptimal
+                    finalLayout = VkImageLayout.DepthStencilAttachmentOptimal
                 }
             };
 
@@ -191,11 +191,11 @@ namespace SharpGame
                     pipelineBindPoint = PipelineBindPoint.Graphics,
                     pColorAttachments = new []
                     {
-                        new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal)
+                        new AttachmentReference(0, VkImageLayout.ColorAttachmentOptimal)
                     },
                     pDepthStencilAttachment = new []
                     {
-                        new AttachmentReference(1, ImageLayout.DepthStencilAttachmentOptimal)
+                        new AttachmentReference(1, VkImageLayout.DepthStencilAttachmentOptimal)
                     },
 
                 }
@@ -238,7 +238,7 @@ namespace SharpGame
                 {
                     loadOp = clearColor? AttachmentLoadOp.Clear : AttachmentLoadOp.DontCare, // AttachmentLoadOp.Load,
                     storeOp = AttachmentStoreOp.Store,
-                    finalLayout = ImageLayout.PresentSrcKHR
+                    finalLayout = VkImageLayout.PresentSrcKHR
                 },
 
                 // Depth attachment
@@ -246,7 +246,7 @@ namespace SharpGame
                 {
                     loadOp = clearDepth? AttachmentLoadOp.Clear: AttachmentLoadOp.DontCare,
                     storeOp = AttachmentStoreOp.DontCare,
-                    finalLayout = ImageLayout.DepthStencilAttachmentOptimal
+                    finalLayout = VkImageLayout.DepthStencilAttachmentOptimal
                 }
             };
 
@@ -258,12 +258,12 @@ namespace SharpGame
 
                     pColorAttachments = new []
                     {
-                        new AttachmentReference(0, ImageLayout.ColorAttachmentOptimal)
+                        new AttachmentReference(0, VkImageLayout.ColorAttachmentOptimal)
                     },
 
                     pDepthStencilAttachment = new []
                     {
-                        new AttachmentReference(1, ImageLayout.DepthStencilAttachmentOptimal)
+                        new AttachmentReference(1, VkImageLayout.DepthStencilAttachmentOptimal)
                     },
                 }
             };

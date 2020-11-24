@@ -89,8 +89,8 @@ namespace SharpGame
         public AttachmentStoreOp storeOp;
         public AttachmentLoadOp stencilLoadOp;
         public AttachmentStoreOp stencilStoreOp;
-        public ImageLayout initialLayout;
-        public ImageLayout finalLayout;
+        public VkImageLayout initialLayout;
+        public VkImageLayout finalLayout;
 
         public AttachmentDescription(
             Format format,
@@ -99,8 +99,8 @@ namespace SharpGame
             AttachmentStoreOp storeOp = AttachmentStoreOp.Store,
             AttachmentLoadOp stencilLoadOp = AttachmentLoadOp.DontCare,
             AttachmentStoreOp stencilStoreOp = AttachmentStoreOp.DontCare,
-            ImageLayout initialLayout = ImageLayout.Undefined,
-            ImageLayout finalLayout = ImageLayout.PresentSrcKHR,
+            VkImageLayout initialLayout = VkImageLayout.Undefined,
+            VkImageLayout finalLayout = VkImageLayout.PresentSrcKHR,
             AttachmentDescriptionFlags flags =  AttachmentDescriptionFlags.None)
         {
             this.format = format;
@@ -118,9 +118,9 @@ namespace SharpGame
     public struct AttachmentReference
     {
         public uint attachment;
-        public ImageLayout layout;
+        public VkImageLayout layout;
 
-        public AttachmentReference(uint attachment, ImageLayout layout)
+        public AttachmentReference(uint attachment, VkImageLayout layout)
         {
             this.attachment = attachment;
             this.layout = layout;

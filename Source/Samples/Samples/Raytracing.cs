@@ -87,7 +87,7 @@ namespace SharpGame.Samples
                 VertexLayout = VertexPosTex.Layout
             };
 
-            geometry.SetDrawRange(PrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);         
+            geometry.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, (uint)indices.Length, 0);         
 
         }
 

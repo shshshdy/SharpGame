@@ -83,141 +83,51 @@ namespace SharpGame
 
     }
 
-    public struct ImageCreateInfo
+    public class ImageView : DisposeBase, IBindableResource
     {
-        public ImageCreateFlags flags;
-        public ImageType imageType;
-        public Format format;
-        public VkExtent3D extent;
-        public uint mipLevels;
-        public uint arrayLayers;
-        public SampleCountFlags samples;
-        public ImageTiling tiling;
-        public ImageUsageFlags usage;
-        public VkSharingMode sharingMode;
-        public uint[] queueFamilyIndices;
-        public ImageLayout initialLayout;
+        public Image Image { get; }
+        public uint Width => Image.extent.width;
+        public uint Height => Image.extent.height;
 
-        internal unsafe void ToNative(out VkImageCreateInfo native)
+        public VkImageView handle;
+
+        public DescriptorImageInfo descriptor;
+
+        public ImageView(Image image, ref VkImageViewCreateInfo imageViewCreateInfo)
         {
-            native = new VkImageCreateInfo();
-            native.sType = VkStructureType.ImageCreateInfo;
-            native.flags = (VkImageCreateFlags)flags;
-            native.imageType = (VkImageType)imageType;
-            native.format = (VkFormat)format;
-            native.extent = new VkExtent3D ((uint)extent.width, (uint)extent.height, (uint)extent.depth);
-            native.mipLevels = (uint)mipLevels;
-            native.arrayLayers = (uint)arrayLayers;
-            native.samples = (VkSampleCountFlags)samples;
-            native.tiling = (VkImageTiling)tiling;
-            native.usage = (VkImageUsageFlags)usage;
-            native.sharingMode = (VkSharingMode)sharingMode;
-
-            if (!queueFamilyIndices.IsNullOrEmpty())
-            {
-                native.queueFamilyIndexCount = (uint)queueFamilyIndices.Length;
-                native.pQueueFamilyIndices = (uint*)Unsafe.AsPointer(ref queueFamilyIndices[0]);
-            }
-
-            native.initialLayout = (VkImageLayout)initialLayout;
-
-        }
-    }
-
-    public enum ImageAspectFlags
-    {
-        None = 0,
-        Color = 1,
-        Depth = 2,
-        Stencil = 4,
-        Metadata = 8,
-        Plane0KHR = 16,
-        Plane1KHR = 32,
-        Plane2KHR = 64
-    }
-    /*
-    public struct ImageMemoryBarrier
-    {
-        internal VkImageMemoryBarrier barrier;
-        public ImageMemoryBarrier(Image image)
-        {
-            barrier = new VkImageMemoryBarrier
-            {
-                sType = VkStructureType.ImageMemoryBarrier
-            };
-            barrier.image = image.handle;
-            barrier.srcQueueFamilyIndex = uint.MaxValue;
-            barrier.dstQueueFamilyIndex = uint.MaxValue;
+            handle = Device.CreateImageView(ref imageViewCreateInfo);
+            Image = image;
+            descriptor = new DescriptorImageInfo(Sampler.ClampToEdge, this, VkImageLayout.ShaderReadOnlyOptimal);
         }
 
-        public ImageMemoryBarrier(Image image, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout,
-            ImageAspectFlags aspectMask = ImageAspectFlags.Color, uint baseMipLevel = 0, uint levelCount = uint.MaxValue)
+        protected override void Destroy(bool disposing)
         {
-            barrier = new VkImageMemoryBarrier
-            {
-                sType = VkStructureType.ImageMemoryBarrier
-            };
-
-            barrier.srcAccessMask = (VkAccessFlags)srcAccessMask;
-            barrier.dstAccessMask = (VkAccessFlags)dstAccessMask;
-            barrier.oldLayout = (VkImageLayout)oldLayout;
-            barrier.newLayout = (VkImageLayout)newLayout;
-            barrier.srcQueueFamilyIndex = uint.MaxValue;
-            barrier.dstQueueFamilyIndex = uint.MaxValue;
-            barrier.image = image.handle;
-
-            barrier.subresourceRange.aspectMask = (VkImageAspectFlags)aspectMask;
-            barrier.subresourceRange.baseMipLevel = baseMipLevel;
-            barrier.subresourceRange.levelCount = levelCount;
-            barrier.subresourceRange.layerCount = uint.MaxValue;
-	    }
-
-        public ImageMemoryBarrier(Image image, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout,
-            VkImageSubresourceRange subresourceRange)
-        {
-            barrier = new VkImageMemoryBarrier
-            {
-                sType = VkStructureType.ImageMemoryBarrier
-            };
-            barrier.srcAccessMask = (VkAccessFlags)srcAccessMask;
-            barrier.dstAccessMask = (VkAccessFlags)dstAccessMask;
-            barrier.oldLayout = (VkImageLayout)oldLayout;
-            barrier.newLayout = (VkImageLayout)newLayout;
-            barrier.srcQueueFamilyIndex = uint.MaxValue;
-            barrier.dstQueueFamilyIndex = uint.MaxValue;
-            barrier.image = image.handle;
-
-            barrier.subresourceRange = new VkImageSubresourceRange
-            {
-                aspectMask = (VkImageAspectFlags)subresourceRange.aspectMask,
-                baseMipLevel = subresourceRange.baseMipLevel,
-                levelCount = subresourceRange.levelCount,
-                baseArrayLayer = subresourceRange.baseArrayLayer,
-                layerCount = subresourceRange.layerCount,
-            };
+            Device.Destroy(handle);
         }
 
-        public AccessFlags srcAccessMask { get => (AccessFlags)barrier.srcAccessMask; set => barrier.srcAccessMask = (VkAccessFlags)value; }
-        public AccessFlags dstAccessMask { get => (AccessFlags)barrier.dstAccessMask; set => barrier.dstAccessMask = (VkAccessFlags)value; }
-        public VkImageLayout oldLayout { set => barrier.oldLayout = (VkImageLayout)value; }
-        public VkImageLayout newLayout { set => barrier.newLayout = (VkImageLayout)value; }
-
-        public VkImageSubresourceRange subresourceRange
+        public static ImageView Create(Image image, VkImageViewType viewType, Format format, VkImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels, uint baseArrayLayer = 0, uint arrayLayers = 1)
         {
-            set
+            var viewCreateInfo = new VkImageViewCreateInfo
             {
-                barrier.subresourceRange = new VkImageSubresourceRange
+                sType = VkStructureType.ImageViewCreateInfo,
+                image = image.handle,
+                viewType = viewType,
+                format = (VkFormat)format,
+                components = new VkComponentMapping(VkComponentSwizzle.R, VkComponentSwizzle.G, VkComponentSwizzle.B, VkComponentSwizzle.A),
+
+                subresourceRange = new VkImageSubresourceRange
                 {
-                    aspectMask = (VkImageAspectFlags)value.aspectMask,
-                    baseMipLevel = value.baseMipLevel,
-                    levelCount = value.levelCount,
-                    baseArrayLayer = value.baseArrayLayer,
-                    layerCount = value.layerCount,
-                };
-             }
-        }
+                    aspectMask = aspectMask,
+                    baseMipLevel = baseMipLevel,
+                    levelCount = numMipLevels,
+                    baseArrayLayer = baseArrayLayer,
+                    layerCount = arrayLayers,
+                }
+            };
 
-    }*/
+            return new ImageView(image, ref viewCreateInfo);
+        }
+    }
 
 
 }

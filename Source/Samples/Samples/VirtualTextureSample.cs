@@ -486,7 +486,7 @@ namespace SharpGame.Samples
             queue.WaitIdle();
 
             texture.sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, false);
-            texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
+            texture.imageView = ImageView.Create(texture.image, VkImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
             texture.UpdateDescriptor();
         }
 
@@ -528,7 +528,7 @@ namespace SharpGame.Samples
             region.imageSubresource.mipLevel = page.mipLevel;
             region.imageOffset = page.offset;
             region.imageExtent = page.extent;
-            copyCmd.CopyBufferToImage(imageBuffer, image, ImageLayout.TransferDstOptimal, ref region);
+            copyCmd.CopyBufferToImage(imageBuffer, image, VkImageLayout.TransferDstOptimal, ref region);
             copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, VkImageLayout.TransferDstOptimal, VkImageLayout.ShaderReadOnlyOptimal, VkPipelineStageFlags.Transfer, VkPipelineStageFlags.FragmentShader);
 
             Graphics.EndPrimaryCmd(copyCmd);
@@ -644,7 +644,7 @@ namespace SharpGame.Samples
                 region.imageSubresource.mipLevel = i;
                 region.imageOffset = VkOffset3D.Zero;
                 region.imageExtent = new VkExtent3D(width, height, depth);
-                copyCmd.CopyBufferToImage(imageBuffer, texture.image, ImageLayout.TransferDstOptimal, ref region);
+                copyCmd.CopyBufferToImage(imageBuffer, texture.image, VkImageLayout.TransferDstOptimal, ref region);
                 copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, VkImageLayout.TransferDstOptimal, VkImageLayout.ShaderReadOnlyOptimal, VkPipelineStageFlags.Transfer, VkPipelineStageFlags.FragmentShader);
 
                 Graphics.EndPrimaryCmd(copyCmd);
@@ -787,9 +787,9 @@ namespace SharpGame.Samples
                     {
                         copyCmd.BlitImage(
                             textures_source.image,
-                            ImageLayout.TransferSrcOptimal,
+                            VkImageLayout.TransferSrcOptimal,
                             texture.image,
-                            ImageLayout.TransferDstOptimal,
+                            VkImageLayout.TransferDstOptimal,
                             new Span<ImageBlit>(imageBlits.DataPtr, (int)imageBlits.Count),
                             Filter.Linear
                         );

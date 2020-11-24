@@ -15,7 +15,7 @@ namespace SharpGame
 
         public VkImageUsageFlags usage;
         public Swapchain swapchain;
-        public ClearValue clearValue = new ClearColorValue(0, 0, 0, 1);
+        public VkClearValue clearValue = new VkClearColorValue(0, 0, 0, 1);
 
         public ref Format format => ref attachmentDescription.format;
         public ref VkSampleCountFlags samples => ref attachmentDescription.samples;
@@ -23,14 +23,14 @@ namespace SharpGame
         public ref AttachmentStoreOp storeOp => ref attachmentDescription.storeOp;
         public ref AttachmentLoadOp stencilLoadOp => ref attachmentDescription.stencilLoadOp;
         public ref AttachmentStoreOp stencilStoreOp => ref attachmentDescription.stencilStoreOp;
-        public ref ImageLayout initialLayout => ref attachmentDescription.initialLayout;
-        public ref ImageLayout finalLayout => ref attachmentDescription.finalLayout;
+        public ref VkImageLayout initialLayout => ref attachmentDescription.initialLayout;
+        public ref VkImageLayout finalLayout => ref attachmentDescription.finalLayout;
 
         public RenderTextureInfo(Swapchain swapchain)
         {
             this.swapchain = swapchain;
             attachmentDescription = new AttachmentDescription(swapchain.ColorFormat, VkSampleCountFlags.Count1);
-            clearValue = new ClearColorValue(0, 0, 0, 1);
+            clearValue = new VkClearColorValue(0, 0, 0, 1);
         }
 
         public RenderTextureInfo(uint width, uint height, uint layers, Format format, VkImageUsageFlags usage,
@@ -44,11 +44,11 @@ namespace SharpGame
 
             if(Device.IsDepthFormat(format))
             {
-                clearValue = new ClearDepthStencilValue(1, 0);
+                clearValue = new VkClearDepthStencilValue(1, 0);
             }
             else
             {
-                clearValue = new ClearColorValue(0, 0, 0, 1);
+                clearValue = new VkClearColorValue(0, 0, 0, 1);
             }
         }
     }
@@ -123,7 +123,7 @@ namespace SharpGame
         {
             var aspectMask = Device.IsDepthFormat(format) ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color;
             image = Image.Create(width, height, VkImageCreateFlags.None, layers, 1, format, this.samples, imageUsageFlags);
-            imageView = ImageView.Create(image, layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
+            imageView = ImageView.Create(image, layers > 1 ? VkImageViewType.Image2DArray : VkImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
             sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
 
             this.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;

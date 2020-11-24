@@ -11,9 +11,9 @@ namespace SharpGame
         public uint flags;
         public bool depthClampEnable;
         public bool rasterizerDiscardEnable;
-        public PolygonMode polygonMode;
-        public CullMode cullMode;
-        public FrontFace frontFace;
+        public VkPolygonMode polygonMode;
+        public VkCullModeFlags cullMode;
+        public VkFrontFace frontFace;
         public bool depthBiasEnable;
         public float depthBiasConstantFactor;
         public float depthBiasClamp;
@@ -22,9 +22,9 @@ namespace SharpGame
 
         public static RasterizationStateInfo Default = new RasterizationStateInfo
         {
-            polygonMode = PolygonMode.Fill,
-            cullMode = CullMode.Back,
-            frontFace = FrontFace.CounterClockwise,
+            polygonMode = VkPolygonMode.Fill,
+            cullMode = VkCullModeFlags.Back,
+            frontFace = VkFrontFace.CounterClockwise,
             depthClampEnable = false,
             lineWidth = 1.0f
         };
@@ -51,7 +51,7 @@ namespace SharpGame
     public struct MultisampleStateInfo
     {
         public VkPipelineMultisampleStateCreateFlags flags;
-        public SampleCountFlags rasterizationSamples;
+        public VkSampleCountFlags rasterizationSamples;
         public bool sampleShadingEnable;
         public float minSampleShading;
         public uint[] pSampleMask;
@@ -60,7 +60,7 @@ namespace SharpGame
 
         public static MultisampleStateInfo Default = new MultisampleStateInfo
         {
-            rasterizationSamples = SampleCountFlags.Count1,
+            rasterizationSamples = VkSampleCountFlags.Count1,
             minSampleShading = 1.0f
         };
 
@@ -85,10 +85,10 @@ namespace SharpGame
 
     public struct StencilOpState
     {
-        public StencilOp failOp;
-        public StencilOp passOp;
-        public StencilOp depthFailOp;
-        public CompareOp compareOp;
+        public VkStencilOp failOp;
+        public VkStencilOp passOp;
+        public VkStencilOp depthFailOp;
+        public VkCompareOp compareOp;
         public uint compareMask;
         public uint writeMask;
         public uint reference;
@@ -99,7 +99,7 @@ namespace SharpGame
         public VkPipelineDepthStencilStateCreateFlags flags;
         public bool depthTestEnable;
         public bool depthWriteEnable;
-        public CompareOp depthCompareOp;
+        public VkCompareOp depthCompareOp;
         public bool depthBoundsTestEnable;
         public bool stencilTestEnable;
         public StencilOpState front;
@@ -111,18 +111,18 @@ namespace SharpGame
         {
             depthTestEnable = true,
             depthWriteEnable = true,
-            depthCompareOp = CompareOp.LessOrEqual,
+            depthCompareOp = VkCompareOp.LessOrEqual,
             back = new StencilOpState
             {
-                failOp = StencilOp.Keep,
-                passOp = StencilOp.Keep,
-                compareOp = CompareOp.Always
+                failOp = VkStencilOp.Keep,
+                passOp = VkStencilOp.Keep,
+                compareOp = VkCompareOp.Always
             },
             front = new StencilOpState
             {
-                failOp = StencilOp.Keep,
-                passOp = StencilOp.Keep,
-                compareOp = CompareOp.Always
+                failOp = VkStencilOp.Keep,
+                passOp = VkStencilOp.Keep,
+                compareOp = VkCompareOp.Always
             }
 
         };
@@ -149,13 +149,13 @@ namespace SharpGame
     public struct ColorBlendAttachment
     {
         public bool blendEnable;
-        public BlendFactor srcColorBlendFactor;
-        public BlendFactor dstColorBlendFactor;
-        public BlendOp colorBlendOp;
-        public BlendFactor srcAlphaBlendFactor;
-        public BlendFactor dstAlphaBlendFactor;
-        public BlendOp alphaBlendOp;
-        public ColorComponentFlags colorWriteMask;
+        public VkBlendFactor srcColorBlendFactor;
+        public VkBlendFactor dstColorBlendFactor;
+        public VkBlendOp colorBlendOp;
+        public VkBlendFactor srcAlphaBlendFactor;
+        public VkBlendFactor dstAlphaBlendFactor;
+        public VkBlendOp alphaBlendOp;
+        public VkColorComponentFlags colorWriteMask;
     }
 
     public struct ColorBlendStateInfo
@@ -177,13 +177,13 @@ namespace SharpGame
                 new ColorBlendAttachment
                 {
                     blendEnable = false,
-                    srcColorBlendFactor = BlendFactor.One,
-                    dstColorBlendFactor = BlendFactor.Zero,
-                    colorBlendOp = BlendOp.Add,
-                    srcAlphaBlendFactor = BlendFactor.One,
-                    dstAlphaBlendFactor = BlendFactor.Zero,
-                    alphaBlendOp = BlendOp.Add,
-                    colorWriteMask = ColorComponentFlags.All
+                    srcColorBlendFactor = VkBlendFactor.One,
+                    dstColorBlendFactor = VkBlendFactor.Zero,
+                    colorBlendOp = VkBlendOp.Add,
+                    srcAlphaBlendFactor = VkBlendFactor.One,
+                    dstAlphaBlendFactor = VkBlendFactor.Zero,
+                    alphaBlendOp = VkBlendOp.Add,
+                    colorWriteMask = VkColorComponentFlags.All
                 }
             }
         };
@@ -195,13 +195,13 @@ namespace SharpGame
                 new ColorBlendAttachment
                 {
                     blendEnable = true,
-                    srcColorBlendFactor = BlendFactor.One,
-                    dstColorBlendFactor = BlendFactor.One,
-                    colorBlendOp = BlendOp.Add,
-                    srcAlphaBlendFactor = BlendFactor.SrcAlpha,
-                    dstAlphaBlendFactor = BlendFactor.DstAlpha,
-                    alphaBlendOp = BlendOp.Add,
-                    colorWriteMask = ColorComponentFlags.All
+                    srcColorBlendFactor = VkBlendFactor.One,
+                    dstColorBlendFactor = VkBlendFactor.One,
+                    colorBlendOp = VkBlendOp.Add,
+                    srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
+                    dstAlphaBlendFactor = VkBlendFactor.DstAlpha,
+                    alphaBlendOp = VkBlendOp.Add,
+                    colorWriteMask = VkColorComponentFlags.All
                 }
             }
         };
@@ -213,13 +213,13 @@ namespace SharpGame
                 new ColorBlendAttachment
                 {
                     blendEnable = true,
-                    srcColorBlendFactor = BlendFactor.SrcAlpha,
-                    dstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                    colorBlendOp = BlendOp.Add,
-                    srcAlphaBlendFactor = BlendFactor.SrcAlpha,
-                    dstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                    alphaBlendOp = BlendOp.Add,
-                    colorWriteMask = ColorComponentFlags.All
+                    srcColorBlendFactor = VkBlendFactor.SrcAlpha,
+                    dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                    colorBlendOp = VkBlendOp.Add,
+                    srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
+                    dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                    alphaBlendOp = VkBlendOp.Add,
+                    colorWriteMask = VkColorComponentFlags.All
                 }
             }
         };
@@ -231,13 +231,13 @@ namespace SharpGame
                 new ColorBlendAttachment
                 {
                     blendEnable = true,
-                    srcColorBlendFactor = BlendFactor.One,
-                    dstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                    colorBlendOp = BlendOp.Add,
-                    srcAlphaBlendFactor = BlendFactor.One,
-                    dstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
-                    alphaBlendOp = BlendOp.Add,
-                    colorWriteMask = ColorComponentFlags.All
+                    srcColorBlendFactor = VkBlendFactor.One,
+                    dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                    colorBlendOp = VkBlendOp.Add,
+                    srcAlphaBlendFactor = VkBlendFactor.One,
+                    dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                    alphaBlendOp = VkBlendOp.Add,
+                    colorWriteMask = VkColorComponentFlags.All
                 }
             }
         };
@@ -270,16 +270,16 @@ namespace SharpGame
     public struct DynamicStateInfo
     {
         public VkPipelineDynamicStateCreateFlags flags;
-        public DynamicState[] dynamicStates;
+        public VkDynamicState[] dynamicStates;
         public bool HasValue => !dynamicStates.IsNullOrEmpty();
        
-        public DynamicStateInfo(params DynamicState[] dynamicStates)
+        public DynamicStateInfo(params VkDynamicState[] dynamicStates)
         {
             this.dynamicStates = dynamicStates;
             this.flags = 0;
         }
 
-        public bool HasState(DynamicState dynamicState)
+        public bool HasState(VkDynamicState dynamicState)
         {
             foreach(var ds in dynamicStates)
             {

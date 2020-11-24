@@ -336,7 +336,7 @@ namespace SharpGame
                         imageType = VkImageType.Image2D,
                         extent = extent
                     };
-                    ImageViews[i] = ImageView.Create(Images[i], ImageViewType.Image2D, ColorFormat, VkImageAspectFlags.Color, 0, 1);
+                    ImageViews[i] = ImageView.Create(Images[i], VkImageViewType.Image2D, ColorFormat, VkImageAspectFlags.Color, 0, 1);
                 }
             }
         }

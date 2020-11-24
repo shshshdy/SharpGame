@@ -12,7 +12,7 @@ namespace SharpGame
     public struct GeometryDesc
     {
         /// Primitive type.
-        public PrimitiveTopology primitiveTopology;
+        public VkPrimitiveTopology primitiveTopology;
         /// Vertex buffer ref.
         public int vbRef;
         /// Index buffer ref.
