@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.2</LangVersion>
+    <Description>Cross platform .net bindings for SPIRV-Cross</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)native\win-x86\cspirv_cross.dll">
+      <PackagePath>runtimes/win-x86/native</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)native\win-x64\cspirv_cross.dll">
+      <PackagePath>runtimes/win-x64/native</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)native\linux-x64\libcspirv_cross.so">
+      <PackagePath>runtimes/linux-x64/native/libcspirv_cross.so</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)native\osx-x64\libcspirv_cross.dylib">
+      <PackagePath>runtimes/osx-x64/native/libcspirv_cross.dylib</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="build\net40\SharpSPIRVCross.targets">
+      <PackagePath>build/net40/SharpSPIRVCross.targets</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+  </ItemGroup>
+
+</Project>

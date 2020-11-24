@@ -1,4 +1,6 @@
-﻿using SharpShaderCompiler;
+﻿#define NEW_RELECTION
+using SharpShaderCompiler;
+using SharpSPIRVCross;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -180,9 +182,9 @@ namespace SharpGame
                         pass.BlendMode = (BlendMode)Enum.Parse(typeof(BlendMode), kvp.Value[0].value);
                         break;
 
-                    case "ResourceLayout":
-                        pass.PipelineLayout.ResourceLayout = ReadResourceLayout(kvp.Value);
-                        break;
+//                     case "ResourceLayout":
+//                         pass.PipelineLayout.ResourceLayout = ReadResourceLayout(kvp.Value);
+//                         break;
 
                     case "PushConstant":
                         ReadPushConstant(pass, kvp.Value);
@@ -204,6 +206,14 @@ namespace SharpGame
                         pass.GeometryShader = LoadShaderModelFromFile(ShaderStage.Geometry, kvp.Value[0].value, pass.Defines);
                         break;
 
+                    case "TessControl":
+                        pass.HullShader = LoadShaderModelFromFile(ShaderStage.TessControl, kvp.Value[0].value, pass.Defines);
+                        break;
+
+                    case "TessEvaluation":
+                        pass.DomainShader = LoadShaderModelFromFile(ShaderStage.TessEvaluation, kvp.Value[0].value, pass.Defines);
+                        break;
+
                     case "@VertexShader":
                         pass.VertexShader = LoadShaderModel(ShaderStage.Vertex, kvp.Value[0].value, pass.Defines);
                         break;
@@ -215,6 +225,12 @@ namespace SharpGame
                         break;
                     case "@GeometryShader":
                         pass.GeometryShader = LoadShaderModel(ShaderStage.Geometry, kvp.Value[0].value, pass.Defines);
+                        break;
+                    case "@TessControl":
+                        pass.HullShader = LoadShaderModel(ShaderStage.TessControl, kvp.Value[0].value, pass.Defines);
+                        break;
+                    case "@TessEvaluation":
+                        pass.DomainShader = LoadShaderModel(ShaderStage.TessEvaluation, kvp.Value[0].value, pass.Defines);
                         break;
                 }
             }
@@ -348,7 +364,6 @@ namespace SharpGame
 
         ShaderModule LoadShaderModel(ShaderStage shaderStage, string code, string[] defs)
         {
-
             List<string> saveLines = new List<string>();
             string ver = "";
             string includeFile = "";
@@ -456,9 +471,6 @@ namespace SharpGame
 
             var source = r.GetString();
 
-            LayoutParser layoutParser = new LayoutParser(source);
-            var refl = layoutParser.Reflection();
-
             var res = c.Compile(source, stage, o, includeFile, "main");
             if (res.NumberOfErrors > 0)
             {
@@ -469,6 +481,8 @@ namespace SharpGame
             {
                 return null;
             }
+
+            var refl = ReflectionShaderModule(source, res.GetBytes());
 
             var shaderModule = new ShaderModule(shaderStage, res.GetBytes())
             {
@@ -515,6 +529,105 @@ namespace SharpGame
             }
 
             return !string.IsNullOrEmpty(ver);
+        }
+
+        public static ShaderReflection ReflectionShaderModule(string source, byte[] bytecode)
+        {
+#if NEW_RELECTION
+            ShaderReflection refl = new ShaderReflection();
+            refl.descriptorSets = new List<UniformBlock>();
+
+            using (var context = new SharpSPIRVCross.Context())
+            {
+                var ir = context.ParseIr(bytecode);
+                var compiler = context.CreateCompiler(Backend.GLSL, ir);
+
+                var caps = compiler.GetDeclaredCapabilities();
+                var extensions = compiler.GetDeclaredExtensions();
+                var resources = compiler.CreateShaderResources();
+
+                Action<SharpSPIRVCross.ResourceType> CollectShaderResources = (SharpSPIRVCross.ResourceType resourceType) =>
+                {
+                    foreach (var rs in resources.GetResources(resourceType))
+                    {
+                        Console.WriteLine($"ID: {rs.Id}, BaseTypeID: {rs.BaseTypeId}, TypeID: {rs.TypeId}, Name: {rs.Name})");
+                        var set = compiler.GetDecoration(rs.Id, SpvDecoration.DescriptorSet);
+                        var binding = compiler.GetDecoration(rs.Id, SpvDecoration.Binding);
+                        var type = compiler.GetSpirvType(rs.TypeId);
+                        Console.WriteLine($"  Set: {set}, Binding: {binding}");
+
+                        bool isDynamic = rs.Name.EndsWith("dynamic");
+
+                        var descriptorType = resourceType switch
+                        {
+                            SharpSPIRVCross.ResourceType.UniformBuffer => isDynamic ? DescriptorType.UniformBufferDynamic : DescriptorType.UniformBuffer,
+                            SharpSPIRVCross.ResourceType.StorageBuffer => isDynamic ? DescriptorType.StorageBufferDynamic : DescriptorType.StorageBuffer,
+                            SharpSPIRVCross.ResourceType.StageInput => throw new NotImplementedException(),
+                            SharpSPIRVCross.ResourceType.StageOutput => throw new NotImplementedException(),
+                            SharpSPIRVCross.ResourceType.SubpassInput => DescriptorType.InputAttachment,
+                            SharpSPIRVCross.ResourceType.StorageImage => DescriptorType.StorageImage,
+                            SharpSPIRVCross.ResourceType.SampledImage => DescriptorType.CombinedImageSampler,
+                            SharpSPIRVCross.ResourceType.AtomicCounter => throw new NotImplementedException(),
+                            SharpSPIRVCross.ResourceType.PushConstant => throw new NotImplementedException(),
+                            SharpSPIRVCross.ResourceType.SeparateImage => DescriptorType.SampledImage,
+                            SharpSPIRVCross.ResourceType.SeparateSamplers => DescriptorType.Sampler,
+                            SharpSPIRVCross.ResourceType.AccelerationStructure => throw new NotImplementedException(),
+                            _=> throw new NotImplementedException(),
+                        };
+
+                        var u = new UniformBlock
+                        {
+                            name = rs.Name,
+                            set = (int)set,
+                            binding = binding,
+                            descriptorType = descriptorType
+                        };
+
+                        if(type.MemberCount > 0)
+                        {
+                            compiler.GetDeclaredStructSize(type, out int size);
+                            Console.WriteLine($"  struct, size:{size}");
+
+                            for (int i = 0; i < type.MemberCount; i++)
+                            {
+                                compiler.GetStructMemberOffset(type, i, out int offset);
+                                compiler.GetStructMemberArrayStride(type, i, out int sz);
+                                compiler.GetStructMemberMatrixStride(type, i, out int stride);
+                                Console.WriteLine($"  MemberOffset:{offset}, ArrayStride:{sz}, MatrixStride:{stride}");
+                            }
+                        }
+
+                        refl.descriptorSets.Add(u);
+                    }
+                };
+
+                CollectShaderResources(SharpSPIRVCross.ResourceType.UniformBuffer);
+                CollectShaderResources(SharpSPIRVCross.ResourceType.StorageBuffer);
+
+                foreach (var input in resources.GetResources(SharpSPIRVCross.ResourceType.StageInput))
+                {
+                    Console.WriteLine($"ID: {input.Id}, BaseTypeID: {input.BaseTypeId}, TypeID: {input.TypeId}, Name: {input.Name})");
+                    var location = compiler.GetDecoration(input.Id, SpvDecoration.Location);
+                    Console.WriteLine($"  Location: {location}");
+                }
+
+                CollectShaderResources(SharpSPIRVCross.ResourceType.StorageImage);
+                CollectShaderResources(SharpSPIRVCross.ResourceType.SampledImage);
+
+
+                //compiler.Options.SetOption(CompilerOption.GLSL_Version, 50);
+                //var glsl_source = compiler.Compile();
+            }
+
+            return refl;
+
+#else
+
+
+            LayoutParser layoutParser = new LayoutParser(source);
+            var refl = layoutParser.Reflection();
+            return refl;
+#endif
         }
 
     }
