@@ -741,13 +741,13 @@ namespace SharpGame
             vkUnmapMemory(device, memory);
         }
 
-        public static uint GetMemoryType(uint typeBits, MemoryPropertyFlags properties)
+        public static uint GetMemoryType(uint typeBits, VkMemoryPropertyFlags properties)
         {
             for (uint i = 0; i < MemoryProperties.memoryTypeCount; i++)
             {
                 if ((typeBits & 1) == 1)
                 {
-                    if ((((MemoryPropertyFlags)MemoryProperties.GetMemoryType(i).propertyFlags) & properties) == properties)
+                    if ((((VkMemoryPropertyFlags)MemoryProperties.GetMemoryType(i).propertyFlags) & properties) == properties)
                     {
                         return i;
 

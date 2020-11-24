@@ -48,7 +48,7 @@ namespace SharpGame.Samples
             var shader = Resources.Load<Shader>("shaders/raytracing.shader");
 
             storageTex = Texture.CreateStorage(2048, 2048, Format.R8g8b8a8Snorm);
-            uniformBuffer = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<UboCompute>());
+            uniformBuffer = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<UboCompute>());
             
             material = new Material(shader);
             material.SetTexture("samplerColor", storageTex);
@@ -82,8 +82,8 @@ namespace SharpGame.Samples
 
             geometry = new Geometry
             {
-                VertexBuffer = Buffer.Create(BufferUsageFlags.VertexBuffer, vertices),
-                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexBuffer = Buffer.Create(VkBufferUsageFlags.VertexBuffer, vertices),
+                IndexBuffer = Buffer.Create(VkBufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTex.Layout
             };
 

@@ -122,7 +122,7 @@ namespace SharpGame
 
             if(combineVB)
             {
-                var vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, sizeof(float), vertexBuffer.Count, vertexBuffer.Data);
+                var vb = Buffer.Create(VkBufferUsageFlags.VertexBuffer, false, sizeof(float), vertexBuffer.Count, vertexBuffer.Data);
                 model.VertexBuffers.Add(vb);
 
                 foreach (var geo in geoList)
@@ -133,7 +133,7 @@ namespace SharpGame
 
             if (combineIB)
             {
-                var ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
+                var ib = Buffer.Create(VkBufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
                 model.IndexBuffers.Add(ib);
                 foreach (var geo in geoList)
                 {
@@ -202,7 +202,7 @@ namespace SharpGame
 
             if (combineVB)
             {
-                var vb = Buffer.Create(BufferUsageFlags.VertexBuffer, false, sizeof(float), vertexBuffer.Count, vertexBuffer.Data);
+                var vb = Buffer.Create(VkBufferUsageFlags.VertexBuffer, false, sizeof(float), vertexBuffer.Count, vertexBuffer.Data);
                 foreach (var geo in geoList)
                 {
                     geo.VertexBuffer = vb;
@@ -211,7 +211,7 @@ namespace SharpGame
 
             if (combineIB)
             {
-                var ib = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
+                var ib = Buffer.Create(VkBufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
                 foreach (var geo in geoList)
                 {
                     geo.IndexBuffer = ib;
@@ -248,12 +248,12 @@ namespace SharpGame
 
             if (!combineVB)
             {
-                geometry.VertexBuffer = Buffer.Create(BufferUsageFlags.VertexBuffer, false, sizeof(float), vertexBuffer.Count, vertexBuffer.Data);
+                geometry.VertexBuffer = Buffer.Create(VkBufferUsageFlags.VertexBuffer, false, sizeof(float), vertexBuffer.Count, vertexBuffer.Data);
             }
 
             if (!combineIB)
             {
-                geometry.IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
+                geometry.IndexBuffer = Buffer.Create(VkBufferUsageFlags.IndexBuffer, false, sizeof(uint), indexBuffer.Count, indexBuffer.Data);
             }
 
             geometry.SetDrawRange(primitiveTopology[(int)mesh.PrimitiveType], indexOffset, (uint)mesh.FaceCount*3, 0/*vertexOffset*/);

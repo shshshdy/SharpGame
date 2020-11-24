@@ -39,9 +39,9 @@ namespace SharpGame
 
         public SubmitQueueData[] submitQueue = new SubmitQueueData[(int)SubmitQueue.MaxCount];
 
-        private TransientBufferManager transientVB = new TransientBufferManager(BufferUsageFlags.VertexBuffer, 1024 * 1024);
-        private TransientBufferManager transientIB = new TransientBufferManager(BufferUsageFlags.IndexBuffer, 1024 * 1024);
-        private TransientBufferManager transientUB = new TransientBufferManager(BufferUsageFlags.UniformBuffer, 1024 * 1024);
+        private TransientBufferManager transientVB = new TransientBufferManager(VkBufferUsageFlags.VertexBuffer, 1024 * 1024);
+        private TransientBufferManager transientIB = new TransientBufferManager(VkBufferUsageFlags.IndexBuffer, 1024 * 1024);
+        private TransientBufferManager transientUB = new TransientBufferManager(VkBufferUsageFlags.UniformBuffer, 1024 * 1024);
 
 
         public List<System.Action> postActions = new List<Action>();

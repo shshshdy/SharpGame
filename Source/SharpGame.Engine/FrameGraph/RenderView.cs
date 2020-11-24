@@ -129,9 +129,9 @@ namespace SharpGame
         {
             ubFrameInfo = Buffer.CreateUniformBuffer<FrameUniform>();
 
-            ubCameraVS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
+            ubCameraVS = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
 
-            ubCameraPS = new SharedBuffer(BufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraPS>());
+            ubCameraPS = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraPS>());
             ubLight = Buffer.CreateUniformBuffer<LightParameter>();
 
             vsResLayout = new DescriptorSetLayout

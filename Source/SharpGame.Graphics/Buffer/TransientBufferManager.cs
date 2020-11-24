@@ -31,27 +31,27 @@ namespace SharpGame
         }
 
         FastList<TransientBufferDesc> buffers = new FastList<TransientBufferDesc>();
-        public BufferUsageFlags BufferUsageFlags { get; }
+        public VkBufferUsageFlags BufferUsageFlags { get; }
         public uint Size { get; }
         public ulong alignment;
-        public TransientBufferManager(BufferUsageFlags usage, uint size)
+        public TransientBufferManager(VkBufferUsageFlags usage, uint size)
         {
             BufferUsageFlags = usage;
             Size = size;
 
-            if (usage == BufferUsageFlags.UniformBuffer)
+            if (usage == VkBufferUsageFlags.UniformBuffer)
             {
                 alignment = Device.Properties.limits.minUniformBufferOffsetAlignment;
             }
-            else if (usage == BufferUsageFlags.StorageBuffer)
+            else if (usage == VkBufferUsageFlags.StorageBuffer)
             {
                 alignment = Device.Properties.limits.minStorageBufferOffsetAlignment;
             }
-            else if (usage == BufferUsageFlags.UniformTexelBuffer)
+            else if (usage == VkBufferUsageFlags.UniformTexelBuffer)
             {
                 alignment = Device.Properties.limits.minTexelBufferOffsetAlignment;
             }
-            else if (usage == BufferUsageFlags.IndexBuffer || usage == BufferUsageFlags.VertexBuffer || usage == BufferUsageFlags.IndirectBuffer)
+            else if (usage == VkBufferUsageFlags.IndexBuffer || usage == VkBufferUsageFlags.VertexBuffer || usage == VkBufferUsageFlags.IndirectBuffer)
             {
                 // Used to calculate the offset, required when allocating memory (its value should be power of 2)
                 alignment = 16;
@@ -121,7 +121,7 @@ namespace SharpGame
 
         private ref TransientBufferDesc CreateNewBuffer()
         {
-            var buffer = new Buffer(BufferUsageFlags, MemoryPropertyFlags.HostVisible | MemoryPropertyFlags.HostCoherent, Size);
+            var buffer = new Buffer(BufferUsageFlags, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, Size);
             buffer.Map();
             buffers.Add(new TransientBufferDesc { buffer = buffer, size = 0 });
             return ref buffers.At(buffers.Count - 1);

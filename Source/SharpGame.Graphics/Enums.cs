@@ -25,30 +25,6 @@ namespace SharpGame
         Uint32 = 1
     }
 
-    public enum BufferUsageFlags
-    {
-        None = 0,
-        TransferSrc = 1,
-        TransferDst = 2,
-        UniformTexelBuffer = 4,
-        StorageTexelBuffer = 8,
-        UniformBuffer = 16,
-        StorageBuffer = 32,
-        IndexBuffer = 64,
-        VertexBuffer = 128,
-        IndirectBuffer = 256,  
-    }
-
-    public enum MemoryPropertyFlags
-    {
-        None = 0,
-        DeviceLocal = 1,
-        HostVisible = 2,
-        HostCoherent = 4,
-        HostCached = 8,
-        LazilyAllocated = 16
-    }
-
     public enum Format
     {
         Undefined = 0,
@@ -513,12 +489,6 @@ namespace SharpGame
     {
         Optimal = 0,
         Linear = 1
-    }
-
-    public enum SharingMode
-    {
-        Exclusive = 0,
-        Concurrent = 1
     }
 
     public enum ImageViewType

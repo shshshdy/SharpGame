@@ -56,7 +56,7 @@ namespace SharpGame.Samples
                 particle.gradientPos = new vec4(particle.pos.X / 2.0f, 0, 0, 0);
             }
 
-            storageBuffer = Buffer.Create(BufferUsageFlags.VertexBuffer | BufferUsageFlags.StorageBuffer, particles, true);
+            storageBuffer = Buffer.Create(VkBufferUsageFlags.VertexBuffer | VkBufferUsageFlags.StorageBuffer, particles, true);
             uniformBuffer = Buffer.CreateUniformBuffer<UBO>();
 
             geometry = new Geometry

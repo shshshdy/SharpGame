@@ -55,7 +55,7 @@ namespace SharpGame
 
             uint size = Graphics.Settings.Validation ? 64 * 1000u : 64 * 1000 * 100u;
 
-            TransformBuffer = new DynamicBuffer(BufferUsageFlags.UniformBuffer, size);
+            TransformBuffer = new DynamicBuffer(VkBufferUsageFlags.UniformBuffer, size);
         }
 
         public void Resize(int w, int h)

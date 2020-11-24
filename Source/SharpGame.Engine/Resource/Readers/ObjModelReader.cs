@@ -61,7 +61,7 @@ namespace SharpGame
                         indices[(i * 3) + 1] = index2;
                     }
 
-                    ibs.Add(Buffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
+                    ibs.Add(Buffer.Create(VkBufferUsageFlags.IndexBuffer, indices, false));
                     triangles = indices;
                 }
                 else
@@ -80,7 +80,7 @@ namespace SharpGame
                         indices[(i * 3) + 1] = (ushort)index2;
                     }
 
-                    ibs.Add(Buffer.Create(BufferUsageFlags.IndexBuffer, indices, false));
+                    ibs.Add(Buffer.Create(VkBufferUsageFlags.IndexBuffer, indices, false));
 
                     triangles = new uint[indices.Length];
                     for (int i = 0; i < indices.Length; i++)
@@ -95,8 +95,8 @@ namespace SharpGame
             }
 
             CreateTangentSpaceTangents(vertices, tangentVertices, trianglesList);
-            //DeviceBuffer vb = DeviceBuffer.Create(BufferUsageFlags.VertexBuffer, vertices.ToArray(), false);
-            Buffer vb = Buffer.Create(BufferUsageFlags.VertexBuffer, tangentVertices.Items, false);
+
+            Buffer vb = Buffer.Create(VkBufferUsageFlags.VertexBuffer, tangentVertices.Items, false);
 
             Model model = new Model
             {

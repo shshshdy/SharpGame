@@ -33,8 +33,8 @@ namespace SharpGame
 
             var geom = new Geometry
             {
-                VertexBuffer = Buffer.Create(BufferUsageFlags.VertexBuffer, vertices),
-                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexBuffer = Buffer.Create(VkBufferUsageFlags.VertexBuffer, vertices),
+                IndexBuffer = Buffer.Create(VkBufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTexNorm.Layout
             };
 
@@ -59,8 +59,8 @@ namespace SharpGame
 
             var geom = new Geometry
             {
-                VertexBuffer = Buffer.Create(BufferUsageFlags.VertexBuffer, vertices),
-                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexBuffer = Buffer.Create(VkBufferUsageFlags.VertexBuffer, vertices),
+                IndexBuffer = Buffer.Create(VkBufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTexNTB.Layout
             };
 
@@ -135,8 +135,8 @@ namespace SharpGame
 
             var geom = new Geometry
             {
-                VertexBuffer = Buffer.Create(BufferUsageFlags.VertexBuffer, vertices),
-                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexBuffer = Buffer.Create(VkBufferUsageFlags.VertexBuffer, vertices),
+                IndexBuffer = Buffer.Create(VkBufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTexNorm.Layout
             };
 
@@ -162,8 +162,8 @@ namespace SharpGame
 
             var geom = new Geometry
             {
-                VertexBuffer = Buffer.Create(BufferUsageFlags.VertexBuffer, vertices),
-                IndexBuffer = Buffer.Create(BufferUsageFlags.IndexBuffer, indices),
+                VertexBuffer = Buffer.Create(VkBufferUsageFlags.VertexBuffer, vertices),
+                IndexBuffer = Buffer.Create(VkBufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPos.Layout
             };
 

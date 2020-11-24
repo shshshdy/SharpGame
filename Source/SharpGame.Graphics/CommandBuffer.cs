@@ -395,13 +395,13 @@
         // Fixed sub resource on first mip level and layer
         public void SetImageLayout(
             Image image,
-            ImageAspectFlags aspectMask,
+            VkImageAspectFlags aspectMask,
             ImageLayout oldImageLayout,
             ImageLayout newImageLayout,
             PipelineStageFlags srcStageMask = PipelineStageFlags.AllCommands,
             PipelineStageFlags dstStageMask = PipelineStageFlags.AllCommands)
         {
-            ImageSubresourceRange subresourceRange = new ImageSubresourceRange
+            var subresourceRange = new VkImageSubresourceRange
             {
                 aspectMask = aspectMask,
                 baseMipLevel = 0,
@@ -414,10 +414,10 @@
 
         public void SetImageLayout(
             Image image,
-            ImageAspectFlags aspectMask,
+            VkImageAspectFlags aspectMask,
             ImageLayout oldImageLayout,
             ImageLayout newImageLayout,
-            ImageSubresourceRange subresourceRange,
+            VkImageSubresourceRange subresourceRange,
             PipelineStageFlags srcStageMask = PipelineStageFlags.AllCommands,
             PipelineStageFlags dstStageMask = PipelineStageFlags.AllCommands)
         {

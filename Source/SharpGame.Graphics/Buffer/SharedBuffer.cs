@@ -12,18 +12,18 @@ namespace SharpGame
         public Buffer Buffer => buffers[Graphics.Instance.WorkContext];
         public IntPtr Mapped => buffers[Graphics.Instance.WorkContext].Mapped;
 
-        public SharedBuffer(BufferUsageFlags bufferUsage, uint size)
+        public SharedBuffer(VkBufferUsageFlags bufferUsage, uint size)
         {
-            buffers[0] = new Buffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
+            buffers[0] = new Buffer(bufferUsage, VkMemoryPropertyFlags.HostVisible, size);
             buffers[0].Map(0, size);
-            buffers[1] = new Buffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
+            buffers[1] = new Buffer(bufferUsage, VkMemoryPropertyFlags.HostVisible, size);
             buffers[1].Map(0, size);
-            buffers[2] = new Buffer(bufferUsage, MemoryPropertyFlags.HostVisible, size);
+            buffers[2] = new Buffer(bufferUsage, VkMemoryPropertyFlags.HostVisible, size);
             buffers[2].Map(0, size);
         }
 
-        public SharedBuffer(BufferUsageFlags usageFlags, MemoryPropertyFlags memoryPropFlags, ulong size, 
-            SharingMode sharingMode = SharingMode.Exclusive, uint[] queueFamilyIndices = null)
+        public SharedBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropFlags, ulong size,
+            VkSharingMode sharingMode = VkSharingMode.Exclusive, uint[] queueFamilyIndices = null)
         {
             buffers[0] = new Buffer(usageFlags, memoryPropFlags, size, 1, sharingMode, queueFamilyIndices);
             buffers[0].Map(0, size);
@@ -75,7 +75,7 @@ namespace SharpGame
 
         uint offset;
 
-        public DynamicBuffer(BufferUsageFlags bufferUsage, uint size) : base(bufferUsage, size)
+        public DynamicBuffer(VkBufferUsageFlags bufferUsage, uint size) : base(bufferUsage, size)
         {
             this.Size = size;            
         }

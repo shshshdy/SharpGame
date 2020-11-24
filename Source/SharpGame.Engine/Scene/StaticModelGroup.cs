@@ -136,7 +136,7 @@ namespace SharpGame
                 objectCount += indirectCmd.instanceCount;
             }
 
-            indirectCommandsBuffer = Buffer.Create<VkDrawIndexedIndirectCommand>(BufferUsageFlags.IndirectBuffer, false, indirectCommands.Count, indirectCommands.Data);
+            indirectCommandsBuffer = Buffer.Create<VkDrawIndexedIndirectCommand>(VkBufferUsageFlags.IndirectBuffer, false, indirectCommands.Count, indirectCommands.Data);
 
         }
 
@@ -155,7 +155,7 @@ namespace SharpGame
                 instanceData[i].texIndex = i / OBJECT_INSTANCE_COUNT;
             }
 
-            instanceBuffer = Buffer.Create<InstanceData>(BufferUsageFlags.VertexBuffer, false, instanceData.Count, instanceData.Data);
+            instanceBuffer = Buffer.Create<InstanceData>(VkBufferUsageFlags.VertexBuffer, false, instanceData.Count, instanceData.Data);
             this.boundingBox_ = new BoundingBox(-PLANT_RADIUS, PLANT_RADIUS);
         }
 

@@ -33,7 +33,7 @@ namespace SharpGame
             VkMemoryAllocateInfo memAllocInfo = new VkMemoryAllocateInfo();
             memAllocInfo.sType = VkStructureType.MemoryAllocateInfo;
             memAllocInfo.allocationSize = memReqs.size;
-            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, MemoryPropertyFlags.DeviceLocal);
+            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
             memory = Device.AllocateMemory(ref memAllocInfo);
             Device.BindImageMemory(handle, memory, 0);
@@ -72,7 +72,7 @@ namespace SharpGame
                 samples = samples,
                 tiling = ImageTiling.Optimal,
                 usage = usage,
-                sharingMode = SharingMode.Exclusive,
+                sharingMode = VkSharingMode.Exclusive,
                 initialLayout = ImageLayout.Undefined
             };
 
@@ -94,7 +94,7 @@ namespace SharpGame
         public SampleCountFlags samples;
         public ImageTiling tiling;
         public ImageUsageFlags usage;
-        public SharingMode sharingMode;
+        public VkSharingMode sharingMode;
         public uint[] queueFamilyIndices;
         public ImageLayout initialLayout;
 
@@ -173,7 +173,7 @@ namespace SharpGame
 	    }
 
         public ImageMemoryBarrier(Image image, AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout,
-            ImageSubresourceRange subresourceRange)
+            VkImageSubresourceRange subresourceRange)
         {
             barrier = new VkImageMemoryBarrier
             {
@@ -202,7 +202,7 @@ namespace SharpGame
         public ImageLayout oldLayout { set => barrier.oldLayout = (VkImageLayout)value; }
         public ImageLayout newLayout { set => barrier.newLayout = (VkImageLayout)value; }
 
-        public ImageSubresourceRange subresourceRange
+        public VkImageSubresourceRange subresourceRange
         {
             set
             {
