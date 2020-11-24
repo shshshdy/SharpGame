@@ -1,4 +1,6 @@
-﻿using SharpShaderCompiler;
+﻿#define NEW_RELECTION
+using SharpShaderCompiler;
+using SharpSPIRVCross;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -180,9 +182,9 @@ namespace SharpGame
                         pass.BlendMode = (BlendMode)Enum.Parse(typeof(BlendMode), kvp.Value[0].value);
                         break;
 
-                    case "ResourceLayout":
-                        pass.PipelineLayout.ResourceLayout = ReadResourceLayout(kvp.Value);
-                        break;
+//                     case "ResourceLayout":
+//                         pass.PipelineLayout.ResourceLayout = ReadResourceLayout(kvp.Value);
+//                         break;
 
                     case "PushConstant":
                         ReadPushConstant(pass, kvp.Value);
@@ -204,6 +206,14 @@ namespace SharpGame
                         pass.GeometryShader = LoadShaderModelFromFile(ShaderStage.Geometry, kvp.Value[0].value, pass.Defines);
                         break;
 
+                    case "TessControl":
+                        pass.HullShader = LoadShaderModelFromFile(ShaderStage.TessControl, kvp.Value[0].value, pass.Defines);
+                        break;
+
+                    case "TessEvaluation":
+                        pass.DomainShader = LoadShaderModelFromFile(ShaderStage.TessEvaluation, kvp.Value[0].value, pass.Defines);
+                        break;
+
                     case "@VertexShader":
                         pass.VertexShader = LoadShaderModel(ShaderStage.Vertex, kvp.Value[0].value, pass.Defines);
                         break;
@@ -215,6 +225,12 @@ namespace SharpGame
                         break;
                     case "@GeometryShader":
                         pass.GeometryShader = LoadShaderModel(ShaderStage.Geometry, kvp.Value[0].value, pass.Defines);
+                        break;
+                    case "@TessControl":
+                        pass.HullShader = LoadShaderModel(ShaderStage.TessControl, kvp.Value[0].value, pass.Defines);
+                        break;
+                    case "@TessEvaluation":
+                        pass.DomainShader = LoadShaderModel(ShaderStage.TessEvaluation, kvp.Value[0].value, pass.Defines);
                         break;
                 }
             }
@@ -348,7 +364,6 @@ namespace SharpGame
 
         ShaderModule LoadShaderModel(ShaderStage shaderStage, string code, string[] defs)
         {
-
             List<string> saveLines = new List<string>();
             string ver = "";
             string includeFile = "";
@@ -411,6 +426,84 @@ namespace SharpGame
             return CreateShaderModule(shaderStage, code, includeFile);
         }
 
+        public static ShaderReflection ReflectionShaderModule(string source, byte[] bytecode)
+        {
+#if NEW_RELECTION
+            ShaderReflection refl = new ShaderReflection();
+            refl.descriptorSets = new List<UniformBlock>();
+
+            using (var context = new SharpSPIRVCross.Context())
+            {
+                var ir = context.ParseIr(bytecode);
+                var compiler = context.CreateCompiler(Backend.GLSL, ir);
+
+                var caps = compiler.GetDeclaredCapabilities();
+                var extensions = compiler.GetDeclaredExtensions();
+                var resources = compiler.CreateShaderResources();
+                foreach (var uniformBuffer in resources.GetResources(SharpSPIRVCross.ResourceType.UniformBuffer))
+                {
+                    Console.WriteLine($"ID: {uniformBuffer.Id}, BaseTypeID: {uniformBuffer.BaseTypeId}, TypeID: {uniformBuffer.TypeId}, Name: {uniformBuffer.Name})");
+                    var set = compiler.GetDecoration(uniformBuffer.Id, SpvDecoration.DescriptorSet);
+                    var binding = compiler.GetDecoration(uniformBuffer.Id, SpvDecoration.Binding);
+                    var type = compiler.GetSpirvType(uniformBuffer.TypeId);
+                    Console.WriteLine($"  Set: {set}, Binding: {binding}");
+
+                    var descriptorType = DescriptorType.UniformBuffer;
+                    if (uniformBuffer.Name.EndsWith("dynamic"))
+                    {
+                        descriptorType = DescriptorType.UniformBufferDynamic;
+                    }
+
+                    UniformBlock u = new UniformBlock
+                    {
+                        name = uniformBuffer.Name,
+                        set = (int)set,
+                        binding = binding,
+                        descriptorType = descriptorType
+                    };
+
+                    refl.descriptorSets.Add(u);
+                }
+
+                foreach (var input in resources.GetResources(SharpSPIRVCross.ResourceType.StageInput))
+                {
+                    Console.WriteLine($"ID: {input.Id}, BaseTypeID: {input.BaseTypeId}, TypeID: {input.TypeId}, Name: {input.Name})");
+                    var location = compiler.GetDecoration(input.Id, SpvDecoration.Location);
+                    Console.WriteLine($"  Location: {location}");
+                }
+
+                foreach (var sampledImage in resources.GetResources(SharpSPIRVCross.ResourceType.SampledImage))
+                {
+                    var set = compiler.GetDecoration(sampledImage.Id, SpvDecoration.DescriptorSet);
+                    var binding = compiler.GetDecoration(sampledImage.Id, SpvDecoration.Binding);
+                    var base_type = compiler.GetSpirvType(sampledImage.BaseTypeId);
+                    var type = compiler.GetSpirvType(sampledImage.TypeId);
+                    Console.WriteLine($"  Set: {set}, Binding: {binding}");
+
+                    UniformBlock u = new UniformBlock
+                    {
+                        name = sampledImage.Name,
+                        set = (int)set,
+                        binding = binding,
+                        descriptorType = DescriptorType.CombinedImageSampler
+                    };
+                    refl.descriptorSets.Add(u);
+                }
+
+                //compiler.Options.SetOption(CompilerOption.GLSL_Version, 50);
+                //var glsl_source = compiler.Compile();
+            }
+
+            return refl;
+#else
+
+
+            LayoutParser layoutParser = new LayoutParser(source);
+            var refl = layoutParser.Reflection();
+            return refl;
+#endif
+        }
+
         public static ShaderModule CreateShaderModule(ShaderStage shaderStage, string code, string includeFile)
         {
             ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;
@@ -456,9 +549,6 @@ namespace SharpGame
 
             var source = r.GetString();
 
-            LayoutParser layoutParser = new LayoutParser(source);
-            var refl = layoutParser.Reflection();
-
             var res = c.Compile(source, stage, o, includeFile, "main");
             if (res.NumberOfErrors > 0)
             {
@@ -469,6 +559,8 @@ namespace SharpGame
             {
                 return null;
             }
+
+            var refl = ReflectionShaderModule(source, res.GetBytes());
 
             var shaderModule = new ShaderModule(shaderStage, res.GetBytes())
             {

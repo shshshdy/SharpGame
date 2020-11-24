@@ -11,6 +11,11 @@
     <DefineConstants>TRACE;ENABLE_PROFILER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="..\..\Tools\SharpSPIRVCross\src\SharpSPIRVCross\native\win-x64\cspirv_cross.dll" Link="cspirv_cross.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
     <PackageReference Include="ImGui.NET" Version="1.78.0" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="2.2.0" />

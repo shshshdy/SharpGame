@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Tools\SharpSPIRVCross\src\SharpSPIRVCross\SharpSPIRVCross.csproj" />
     <ProjectReference Include="..\..\Tools\SharpVulkan\src\Vulkan\SharpVulkan.csproj" />
     <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
     <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />

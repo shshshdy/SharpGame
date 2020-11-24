@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_SharpSPIRVCross_IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</_SharpSPIRVCross_IsWindows>
+    <_SharpSPIRVCross_IsMacOS Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</_SharpSPIRVCross_IsMacOS>
+    <_SharpSPIRVCross_IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</_SharpSPIRVCross_IsLinux>
+
+    <_SharpSPIRVCross_NativeRuntime Condition=" '$(_SharpSPIRVCross_NativeRuntime)' == '' And '$(_SharpSPIRVCross_IsMacOS)' == 'true' And ('$(Prefer32Bit)' == 'false' Or '$(PlatformTarget)' == 'x64')">osx-x64</_SharpSPIRVCross_NativeRuntime>
+    <_SharpSPIRVCross_NativeRuntime Condition=" '$(_SharpSPIRVCross_NativeRuntime)' == '' And '$(_SharpSPIRVCross_IsLinux)' == 'true' And ('$(Prefer32Bit)' == 'false' Or '$(PlatformTarget)' == 'x64')">linux-x64</_SharpSPIRVCross_NativeRuntime>
+    <_SharpSPIRVCross_NativeRuntime Condition=" '$(_SharpSPIRVCross_NativeRuntime)' == '' And '$(_SharpSPIRVCross_IsWindows)' == 'true' And ('$(Prefer32Bit)' == 'true' Or '$(PlatformTarget)' == 'x86')">win-x86</_SharpSPIRVCross_NativeRuntime>
+    <_SharpSPIRVCross_NativeRuntime Condition=" '$(_SharpSPIRVCross_NativeRuntime)' == '' And '$(_SharpSPIRVCross_IsWindows)' == 'true' And ('$(Prefer32Bit)' == 'false' Or '$(PlatformTarget)' == 'x64')">win-x64</_SharpSPIRVCross_NativeRuntime>
+
+    <_SharpSPIRVCross_NativeLibName Condition="'$(_SharpSPIRVCross_NativeRuntime)' == 'win-x86' Or '$(_SharpSPIRVCross_NativeRuntime)' == 'win-x64'">cspirv_cross.dll</_SharpSPIRVCross_NativeLibName>
+    <_SharpSPIRVCross_NativeLibName Condition="'$(_SharpSPIRVCross_NativeRuntime)' == 'osx-x64'">libcspirv_cross.dylib</_SharpSPIRVCross_NativeLibName>
+    <_SharpSPIRVCross_NativeLibName Condition="'$(_SharpSPIRVCross_NativeRuntime)' == 'linux-x64'">libcspirv_cross.so</_SharpSPIRVCross_NativeLibName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Condition="'$(_SharpSPIRVCross_NativeRuntime)' != ''" Include="$(MSBuildThisFileDirectory)..\..\runtimes\$(_SharpSPIRVCross_NativeRuntime)\native\$(_SharpSPIRVCross_NativeLibName)">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </Content>
+  </ItemGroup>
+</Project>
