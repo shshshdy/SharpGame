@@ -189,48 +189,6 @@ namespace SharpGame
         public ulong size;
     }
 
-    /// <summary>
-    /// Structure specifying an image resolve operation.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ImageResolve
-    {
-        /// <summary>
-        /// Specifies the image subresource of the source image data. Resolve of depth/stencil image
-        /// is not supported.
-        /// </summary>
-        public ImageSubresourceLayers SrcSubresource;
-        /// <summary>
-        /// Selects the initial <c>X</c>, <c>Y</c>, and <c>Z</c> offsets in texels of the sub-region
-        /// of the source image data.
-        /// </summary>
-        public Offset3D SrcOffset;
-        /// <summary>
-        /// Specifies the image subresource of the destination image data. Resolve of depth/stencil
-        /// image is not supported.
-        /// </summary>
-        public ImageSubresourceLayers DstSubresource;
-        /// <summary>
-        /// Selects the initial <c>X</c>, <c>Y</c>, and <c>Z</c> offsets in texels of the sub-region
-        /// of the destination image data.
-        /// </summary>
-        public Offset3D DstOffset;
-        /// <summary>
-        /// The size in texels of the source image to resolve in width, height and depth.
-        /// </summary>
-        public Extent3D Extent;
-    }
-
-    public struct BufferImageCopy
-    {
-        public ulong bufferOffset;
-        public uint bufferRowLength;
-        public uint bufferImageHeight;
-        public ImageSubresourceLayers imageSubresource;
-        public Offset3D imageOffset;
-        public Extent3D imageExtent;
-    }
-
     [StructLayout(LayoutKind.Sequential)]
     public struct MemoryBarrier
     {

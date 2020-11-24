@@ -24,7 +24,7 @@ namespace SharpGame
 
             clustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment),
+                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment),
 
                 new SceneSubpass("clustering")
                 {

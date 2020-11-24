@@ -211,8 +211,7 @@ namespace SharpGame.Samples
         {
             texture = new VirtualTexture
             {
-                width = width,
-                height = height,
+                extent = new VkExtent3D(width, height, 1),
                 mipLevels = (uint)Math.Floor(Math.Log2(Math.Max(width, height))) + 1,
                 layers = layerCount,
                 format = format
@@ -285,7 +284,7 @@ namespace SharpGame.Samples
 
             Graphics.WithCommandBuffer((cmd) =>
             {
-                cmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.ShaderReadOnlyOptimal);
+                cmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, VkImageLayout.Undefined, VkImageLayout.ShaderReadOnlyOptimal);
             });
 
             // Get memory requirements
@@ -486,7 +485,7 @@ namespace SharpGame.Samples
             //todo: use sparse bind semaphore
             queue.WaitIdle();
 
-            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, false);
+            texture.sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, false);
             texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
             texture.UpdateDescriptor();
         }
@@ -522,7 +521,7 @@ namespace SharpGame.Samples
             }
 
             var copyCmd = Graphics.BeginPrimaryCmd();
-            copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferDstOptimal, PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer);
+            copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, VkImageLayout.ShaderReadOnlyOptimal, VkImageLayout.TransferDstOptimal, VkPipelineStageFlags.TopOfPipe, VkPipelineStageFlags.Transfer);
             VkBufferImageCopy region = new VkBufferImageCopy();
             region.imageSubresource.aspectMask = VkImageAspectFlags.Color;
             region.imageSubresource.layerCount = 1;
@@ -530,7 +529,7 @@ namespace SharpGame.Samples
             region.imageOffset = page.offset;
             region.imageExtent = page.extent;
             copyCmd.CopyBufferToImage(imageBuffer, image, ImageLayout.TransferDstOptimal, ref region);
-            copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
+            copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, VkImageLayout.TransferDstOptimal, VkImageLayout.ShaderReadOnlyOptimal, VkPipelineStageFlags.Transfer, VkPipelineStageFlags.FragmentShader);
 
             Graphics.EndPrimaryCmd(copyCmd);
 
@@ -638,7 +637,7 @@ namespace SharpGame.Samples
                 }
 
                 var copyCmd = Graphics.BeginPrimaryCmd();
-                copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferDstOptimal, PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer);
+                copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, VkImageLayout.ShaderReadOnlyOptimal, VkImageLayout.TransferDstOptimal, VkPipelineStageFlags.TopOfPipe, VkPipelineStageFlags.Transfer);
                 var region = new VkBufferImageCopy();
                 region.imageSubresource.aspectMask = VkImageAspectFlags.Color;
                 region.imageSubresource.layerCount = 1;
@@ -646,7 +645,7 @@ namespace SharpGame.Samples
                 region.imageOffset = VkOffset3D.Zero;
                 region.imageExtent = new VkExtent3D(width, height, depth);
                 copyCmd.CopyBufferToImage(imageBuffer, texture.image, ImageLayout.TransferDstOptimal, ref region);
-                copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, ImageLayout.TransferDstOptimal, ImageLayout.ShaderReadOnlyOptimal, PipelineStageFlags.Transfer, PipelineStageFlags.FragmentShader);
+                copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, VkImageLayout.TransferDstOptimal, VkImageLayout.ShaderReadOnlyOptimal, VkPipelineStageFlags.Transfer, VkPipelineStageFlags.FragmentShader);
 
                 Graphics.EndPrimaryCmd(copyCmd);
 

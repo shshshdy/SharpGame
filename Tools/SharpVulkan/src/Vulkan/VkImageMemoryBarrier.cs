@@ -31,6 +31,25 @@ namespace SharpGame
             this.subresourceRange = subresourceRange;
         }
 
+        public unsafe VkImageMemoryBarrier(VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout,
+            VkImageAspectFlags aspectMask = VkImageAspectFlags.Color, uint baseMipLevel = 0, uint levelCount = uint.MaxValue)
+        {
+            this.sType = VkStructureType.ImageMemoryBarrier;
+            this.pNext = null;
+            this.srcAccessMask = (VkAccessFlags)srcAccessMask;
+            this.dstAccessMask = (VkAccessFlags)dstAccessMask;
+            this.oldLayout = (VkImageLayout)oldLayout;
+            this.newLayout = (VkImageLayout)newLayout;
+            this.srcQueueFamilyIndex = uint.MaxValue;
+            this.dstQueueFamilyIndex = uint.MaxValue;
+            this.image = image;
+            this.subresourceRange.aspectMask = (VkImageAspectFlags)aspectMask;
+            this.subresourceRange.baseMipLevel = baseMipLevel;
+            this.subresourceRange.baseArrayLayer = 0;
+            this.subresourceRange.levelCount = levelCount;
+            this.subresourceRange.layerCount = uint.MaxValue;
+        }
+
         public unsafe VkImageMemoryBarrier(
             VkImage image,
             VkImageLayout oldLayout,

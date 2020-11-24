@@ -301,14 +301,14 @@
             vkCmdCopyBuffer(commandBuffer, srcBuffer.buffer, dstBuffer.buffer, (uint)pRegions.Length, Utilities.AsPtr(ref pRegions[0]));
         }
 
-        public void BlitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ref ImageBlit pRegion, Filter filter)
+        public void BlitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ref VkImageBlit pRegion, VkFilter filter)
         {
-            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, (VkImageBlit*)Unsafe.AsPointer(ref pRegion), (VkFilter)filter);
+            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, (VkImageBlit*)Unsafe.AsPointer(ref pRegion), filter);
         }
 
-        public void BlitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, Span<ImageBlit> pRegions, Filter filter)
+        public void BlitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, Span<VkImageBlit> pRegions, VkFilter filter)
         {
-            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, (VkImageBlit*)Unsafe.AsPointer(ref pRegions[0]), (VkFilter)filter);
+            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, (VkImageBlit*)Unsafe.AsPointer(ref pRegions[0]), filter);
         }
 
         public void CopyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ref VkImageCopy region)
@@ -351,7 +351,7 @@
             vkCmdNextSubpass(commandBuffer, (VkSubpassContents)contents);
         }
 
-        public void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags,
+        public void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkDependencyFlags dependencyFlags,
             uint memoryBarrierCount, ref VkMemoryBarrier pMemoryBarriers, uint bufferMemoryBarrierCount, IntPtr pBufferMemoryBarriers,
             uint imageMemoryBarrierCount, ref VkImageMemoryBarrier pImageMemoryBarriers)
         {
@@ -359,34 +359,34 @@
                 imageMemoryBarrierCount, Utilities.AsPtr(ref pImageMemoryBarriers));
         }
 
-        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags,
+        public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkDependencyFlags dependencyFlags,
             uint memoryBarrierCount, MemoryBarrier* pMemoryBarriers, uint bufferMemoryBarrierCount, BufferMemoryBarrier* pBufferMemoryBarriers,
-            uint imageMemoryBarrierCount, ImageMemoryBarrier* pImageMemoryBarriers)
+            uint imageMemoryBarrierCount, VkImageMemoryBarrier* pImageMemoryBarriers)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, (VkDependencyFlags)dependencyFlags, memoryBarrierCount, (VkMemoryBarrier*)pMemoryBarriers,
                 bufferMemoryBarrierCount, (VkBufferMemoryBarrier*) pBufferMemoryBarriers,
                 imageMemoryBarrierCount, (VkImageMemoryBarrier*)pImageMemoryBarriers);
         }
 
-        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ref BufferMemoryBarrier barrier, uint bufferMemoryBarrierCount = 1)
+        public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, ref VkBufferMemoryBarrier barrier, uint bufferMemoryBarrierCount = 1)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
                 0, 0, null, bufferMemoryBarrierCount, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier), 0, null);
         }
 
-        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, Span<BufferMemoryBarrier> barrier)
+        public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, Span<VkBufferMemoryBarrier> barrier)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
                 0, 0, null, (uint)barrier.Length, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier[0]), 0, null);
         }
 
-        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ref ImageMemoryBarrier barrier)
+        public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, ref VkImageMemoryBarrier barrier)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
                 0, 0, null, 0, null, 1, (VkImageMemoryBarrier*)Unsafe.AsPointer(ref barrier));
         }
 
-        public unsafe void PipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, Span<ImageMemoryBarrier> barriers)
+        public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, Span<VkImageMemoryBarrier> barriers)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, 0, 0, null, 0, null, 
                 (uint)barriers.Length, (VkImageMemoryBarrier*)Unsafe.AsPointer(ref  barriers[0]));
@@ -396,10 +396,10 @@
         public void SetImageLayout(
             Image image,
             VkImageAspectFlags aspectMask,
-            ImageLayout oldImageLayout,
-            ImageLayout newImageLayout,
-            PipelineStageFlags srcStageMask = PipelineStageFlags.AllCommands,
-            PipelineStageFlags dstStageMask = PipelineStageFlags.AllCommands)
+            VkImageLayout oldImageLayout,
+            VkImageLayout newImageLayout,
+            VkPipelineStageFlags srcStageMask = VkPipelineStageFlags.AllCommands,
+            VkPipelineStageFlags dstStageMask = VkPipelineStageFlags.AllCommands)
         {
             var subresourceRange = new VkImageSubresourceRange
             {
@@ -415,15 +415,17 @@
         public void SetImageLayout(
             Image image,
             VkImageAspectFlags aspectMask,
-            ImageLayout oldImageLayout,
-            ImageLayout newImageLayout,
+            VkImageLayout oldImageLayout,
+            VkImageLayout newImageLayout,
             VkImageSubresourceRange subresourceRange,
-            PipelineStageFlags srcStageMask = PipelineStageFlags.AllCommands,
-            PipelineStageFlags dstStageMask = PipelineStageFlags.AllCommands)
+            VkPipelineStageFlags srcStageMask = VkPipelineStageFlags.AllCommands,
+            VkPipelineStageFlags dstStageMask = VkPipelineStageFlags.AllCommands)
         {
             // Create an image barrier object
-            ImageMemoryBarrier imageMemoryBarrier = new ImageMemoryBarrier(image)
+            var imageMemoryBarrier = new VkImageMemoryBarrier
             {
+                sType = VkStructureType.ImageMemoryBarrier,
+                image = image.handle,
                 oldLayout = oldImageLayout,
                 newLayout = newImageLayout,
                 subresourceRange = subresourceRange
@@ -434,48 +436,48 @@
             // before it will be transitioned to the new layout
             switch (oldImageLayout)
             {
-                case ImageLayout.Undefined:
+                case VkImageLayout.Undefined:
                     // Image layout is undefined (or does not matter)
                     // Only valid as initial layout
                     // No flags required, listed only for completeness
                     imageMemoryBarrier.srcAccessMask = 0;
                     break;
 
-                case ImageLayout.Preinitialized:
+                case VkImageLayout.Preinitialized:
                     // Image is preinitialized
                     // Only valid as initial layout for linear images, preserves memory contents
                     // Make sure host writes have been finished
-                    imageMemoryBarrier.srcAccessMask = AccessFlags.HostWrite;
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.HostWrite;
                     break;
 
-                case ImageLayout.ColorAttachmentOptimal:
+                case VkImageLayout.ColorAttachmentOptimal:
                     // Image is a color attachment
                     // Make sure any writes to the color buffer have been finished
-                    imageMemoryBarrier.srcAccessMask = AccessFlags.ColorAttachmentWrite;
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.ColorAttachmentWrite;
                     break;
 
-                case ImageLayout.DepthStencilAttachmentOptimal:
+                case VkImageLayout.DepthStencilAttachmentOptimal:
                     // Image is a depth/stencil attachment
                     // Make sure any writes to the depth/stencil buffer have been finished
-                    imageMemoryBarrier.srcAccessMask = AccessFlags.DepthStencilAttachmentWrite;
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.DepthStencilAttachmentWrite;
                     break;
 
-                case ImageLayout.TransferSrcOptimal:
+                case VkImageLayout.TransferSrcOptimal:
                     // Image is a transfer source 
                     // Make sure any reads from the image have been finished
-                    imageMemoryBarrier.srcAccessMask = AccessFlags.TransferRead;
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.TransferRead;
                     break;
 
-                case ImageLayout.TransferDstOptimal:
+                case VkImageLayout.TransferDstOptimal:
                     // Image is a transfer destination
                     // Make sure any writes to the image have been finished
-                    imageMemoryBarrier.srcAccessMask = AccessFlags.TransferWrite;
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.TransferWrite;
                     break;
 
-                case ImageLayout.ShaderReadOnlyOptimal:
+                case VkImageLayout.ShaderReadOnlyOptimal:
                     // Image is read by a shader
                     // Make sure any shader reads from the image have been finished
-                    imageMemoryBarrier.srcAccessMask = AccessFlags.ShaderRead;
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.ShaderRead;
                     break;
             }
 
@@ -483,40 +485,40 @@
             // Destination access mask controls the dependency for the new image layout
             switch (newImageLayout)
             {
-                case ImageLayout.TransferDstOptimal:
+                case VkImageLayout.TransferDstOptimal:
                     // Image will be used as a transfer destination
                     // Make sure any writes to the image have been finished
-                    imageMemoryBarrier.dstAccessMask = AccessFlags.TransferWrite;
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferWrite;
                     break;
 
-                case ImageLayout.TransferSrcOptimal:
+                case VkImageLayout.TransferSrcOptimal:
                     // Image will be used as a transfer source
                     // Make sure any reads from and writes to the image have been finished
-                    imageMemoryBarrier.srcAccessMask = imageMemoryBarrier.srcAccessMask | AccessFlags.TransferRead;
-                    imageMemoryBarrier.dstAccessMask = AccessFlags.TransferRead;
+                    imageMemoryBarrier.srcAccessMask = imageMemoryBarrier.srcAccessMask | VkAccessFlags.TransferRead;
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.TransferRead;
                     break;
 
-                case ImageLayout.ColorAttachmentOptimal:
+                case VkImageLayout.ColorAttachmentOptimal:
                     // Image will be used as a color attachment
                     // Make sure any writes to the color buffer have been finished
-                    imageMemoryBarrier.srcAccessMask = AccessFlags.TransferRead;
-                    imageMemoryBarrier.dstAccessMask = AccessFlags.ColorAttachmentWrite;
+                    imageMemoryBarrier.srcAccessMask = VkAccessFlags.TransferRead;
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.ColorAttachmentWrite;
                     break;
 
-                case ImageLayout.DepthStencilAttachmentOptimal:
+                case VkImageLayout.DepthStencilAttachmentOptimal:
                     // Image layout will be used as a depth/stencil attachment
                     // Make sure any writes to depth/stencil buffer have been finished
-                    imageMemoryBarrier.dstAccessMask = imageMemoryBarrier.dstAccessMask | AccessFlags.DepthStencilAttachmentWrite;
+                    imageMemoryBarrier.dstAccessMask = imageMemoryBarrier.dstAccessMask | VkAccessFlags.DepthStencilAttachmentWrite;
                     break;
 
-                case ImageLayout.ShaderReadOnlyOptimal:
+                case VkImageLayout.ShaderReadOnlyOptimal:
                     // Image will be read in a shader (sampler, input attachment)
                     // Make sure any writes to the image have been finished
                     if (imageMemoryBarrier.srcAccessMask == 0)
                     {
-                        imageMemoryBarrier.srcAccessMask = AccessFlags.HostWrite | AccessFlags.TransferWrite;
+                        imageMemoryBarrier.srcAccessMask = VkAccessFlags.HostWrite | VkAccessFlags.TransferWrite;
                     }
-                    imageMemoryBarrier.dstAccessMask = AccessFlags.ShaderRead;
+                    imageMemoryBarrier.dstAccessMask = VkAccessFlags.ShaderRead;
                     break;
             }
 

@@ -22,7 +22,7 @@ namespace SharpGame
             imageViewCreateInfo.ToNative(out VkImageViewCreateInfo native);
             handle = Device.CreateImageView(ref native);
             Image = imageViewCreateInfo.image;
-            descriptor = new DescriptorImageInfo(Sampler.ClampToEdge, this, ImageLayout.ShaderReadOnlyOptimal);
+            descriptor = new DescriptorImageInfo(Sampler.ClampToEdge, this, VkImageLayout.ShaderReadOnlyOptimal);
         }
 
         protected override void Destroy(bool disposing)

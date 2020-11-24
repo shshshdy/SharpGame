@@ -350,13 +350,13 @@ namespace SharpGame
     public struct DescriptorImageInfo
     {
         internal VkDescriptorImageInfo native;
-        public DescriptorImageInfo(Sampler sampler, ImageView imageView, ImageLayout imageLayout)
+        public DescriptorImageInfo(Sampler sampler, ImageView imageView, VkImageLayout imageLayout)
         {
             native = new VkDescriptorImageInfo
             {
                 sampler = sampler? sampler.handle : VkSampler.Null,
                 imageView = imageView.handle,
-                imageLayout = (VkImageLayout)imageLayout,
+                imageLayout = imageLayout,
             };
         }
     }

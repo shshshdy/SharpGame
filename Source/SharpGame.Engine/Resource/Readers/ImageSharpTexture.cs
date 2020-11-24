@@ -80,13 +80,11 @@ namespace SharpGame.ImageSharp
 
             Texture tex = new Texture
             {
-                width = (uint)Width,
-                height = (uint)Height,
+                extent = new VkExtent3D(Width, Height, 1),
                 mipLevels = (uint)MipLevels,
-                depth = 1,
                 format = Format,
-                imageUsageFlags = ImageUsageFlags.Sampled,
-                imageLayout = ImageLayout.ShaderReadOnlyOptimal,
+                imageUsageFlags = VkImageUsageFlags.Sampled,
+                imageLayout = VkImageLayout.ShaderReadOnlyOptimal,
             };
 
             tex.SetImageData(mipmaps);

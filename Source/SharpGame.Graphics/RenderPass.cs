@@ -84,7 +84,7 @@ namespace SharpGame
     {
         public AttachmentDescriptionFlags flags;
         public Format format;
-        public SampleCountFlags samples;
+        public VkSampleCountFlags samples;
         public AttachmentLoadOp loadOp;
         public AttachmentStoreOp storeOp;
         public AttachmentLoadOp stencilLoadOp;
@@ -94,7 +94,7 @@ namespace SharpGame
 
         public AttachmentDescription(
             Format format,
-            SampleCountFlags samples = SampleCountFlags.Count1,
+            VkSampleCountFlags samples = VkSampleCountFlags.Count1,
             AttachmentLoadOp loadOp = AttachmentLoadOp.Clear,
             AttachmentStoreOp storeOp = AttachmentStoreOp.Store,
             AttachmentLoadOp stencilLoadOp = AttachmentLoadOp.DontCare,

@@ -12,9 +12,9 @@ namespace SharpGame
         internal VkDeviceMemory memory;
         internal ulong allocationSize;
         internal uint memoryTypeIndex;
-        public ImageType imageType;
-        public Format format;
-        public Extent3D extent;
+        public VkImageType imageType;
+        public VkFormat format;
+        public VkExtent3D extent;
         public uint mipLevels;
         public uint arrayLayers;
 
@@ -23,10 +23,9 @@ namespace SharpGame
             this.handle = handle;
         }
 
-        public unsafe Image(ref ImageCreateInfo imageCreateInfo)
+        public unsafe Image(ref VkImageCreateInfo imageCreateInfo)
         {            
-            imageCreateInfo.ToNative(out VkImageCreateInfo native);
-            handle = Device.CreateImage(ref native);
+            handle = Device.CreateImage(ref imageCreateInfo);
 
             Device.GetImageMemoryRequirements(this, out var memReqs);
 
@@ -57,23 +56,24 @@ namespace SharpGame
                 Device.Destroy(handle);
         }
 
-        public unsafe static Image Create(uint width, uint height, ImageCreateFlags flags, uint layers, uint levels,
-            Format format, SampleCountFlags samples, ImageUsageFlags usage)
+        public unsafe static Image Create(uint width, uint height, VkImageCreateFlags flags, uint layers, uint levels,
+            Format format, VkSampleCountFlags samples, VkImageUsageFlags usage)
         {
-            var imageType = height == 1 ? width > 1 ? ImageType.Image1D : ImageType.Image2D : ImageType.Image2D;
-            ImageCreateInfo createInfo = new ImageCreateInfo
+            var imageType = height == 1 ? width > 1 ? VkImageType.Image1D : VkImageType.Image2D : VkImageType.Image2D;
+            var createInfo = new VkImageCreateInfo
             {
+                sType = VkStructureType.ImageCreateInfo,
                 flags = flags,
                 imageType = imageType,
-                format = format,
-                extent = new Extent3D { width = width, height = height, depth = 1 },
+                format = (VkFormat)format,
+                extent = new VkExtent3D(width, height, 1),
                 mipLevels = levels,
                 arrayLayers = layers,
                 samples = samples,
-                tiling = ImageTiling.Optimal,
+                tiling = VkImageTiling.Optimal,
                 usage = usage,
                 sharingMode = VkSharingMode.Exclusive,
-                initialLayout = ImageLayout.Undefined
+                initialLayout = VkImageLayout.Undefined
             };
 
             Image image = new Image(ref createInfo);
@@ -88,7 +88,7 @@ namespace SharpGame
         public ImageCreateFlags flags;
         public ImageType imageType;
         public Format format;
-        public Extent3D extent;
+        public VkExtent3D extent;
         public uint mipLevels;
         public uint arrayLayers;
         public SampleCountFlags samples;
@@ -135,7 +135,7 @@ namespace SharpGame
         Plane1KHR = 32,
         Plane2KHR = 64
     }
-
+    /*
     public struct ImageMemoryBarrier
     {
         internal VkImageMemoryBarrier barrier;
@@ -199,8 +199,8 @@ namespace SharpGame
 
         public AccessFlags srcAccessMask { get => (AccessFlags)barrier.srcAccessMask; set => barrier.srcAccessMask = (VkAccessFlags)value; }
         public AccessFlags dstAccessMask { get => (AccessFlags)barrier.dstAccessMask; set => barrier.dstAccessMask = (VkAccessFlags)value; }
-        public ImageLayout oldLayout { set => barrier.oldLayout = (VkImageLayout)value; }
-        public ImageLayout newLayout { set => barrier.newLayout = (VkImageLayout)value; }
+        public VkImageLayout oldLayout { set => barrier.oldLayout = (VkImageLayout)value; }
+        public VkImageLayout newLayout { set => barrier.newLayout = (VkImageLayout)value; }
 
         public VkImageSubresourceRange subresourceRange
         {
@@ -217,32 +217,7 @@ namespace SharpGame
              }
         }
 
-    }
+    }*/
 
-    public struct ImageSubresourceLayers
-    {
-        public ImageAspectFlags aspectMask;
-        public uint mipLevel;
-        public uint baseArrayLayer;
-        public uint layerCount;
-    }
 
-    public struct ImageCopy
-    {
-        public ImageSubresourceLayers srcSubresource;
-        public Offset3D srcOffset;
-        public ImageSubresourceLayers dstSubresource;
-        public Offset3D dstOffset;
-        public Extent3D extent;
-    }
-
-    public struct ImageBlit
-    {
-        public ImageSubresourceLayers srcSubresource;
-        public Offset3D srcOffsets_0;
-        public Offset3D srcOffsets_1;
-        public ImageSubresourceLayers dstSubresource;
-        public Offset3D dstOffsets_0;
-        public Offset3D dstOffsets_1;
-    }
 }

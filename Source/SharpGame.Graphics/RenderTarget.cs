@@ -13,12 +13,12 @@ namespace SharpGame
 
         public AttachmentDescription attachmentDescription;
 
-        public ImageUsageFlags usage;
+        public VkImageUsageFlags usage;
         public Swapchain swapchain;
         public ClearValue clearValue = new ClearColorValue(0, 0, 0, 1);
 
         public ref Format format => ref attachmentDescription.format;
-        public ref SampleCountFlags samples => ref attachmentDescription.samples;
+        public ref VkSampleCountFlags samples => ref attachmentDescription.samples;
         public ref AttachmentLoadOp loadOp => ref attachmentDescription.loadOp;
         public ref AttachmentStoreOp storeOp => ref attachmentDescription.storeOp;
         public ref AttachmentLoadOp stencilLoadOp => ref attachmentDescription.stencilLoadOp;
@@ -29,12 +29,12 @@ namespace SharpGame
         public RenderTextureInfo(Swapchain swapchain)
         {
             this.swapchain = swapchain;
-            attachmentDescription = new AttachmentDescription(swapchain.ColorFormat, SampleCountFlags.Count1);
+            attachmentDescription = new AttachmentDescription(swapchain.ColorFormat, VkSampleCountFlags.Count1);
             clearValue = new ClearColorValue(0, 0, 0, 1);
         }
 
-        public RenderTextureInfo(uint width, uint height, uint layers, Format format, ImageUsageFlags usage,
-            SampleCountFlags samples = SampleCountFlags.Count1)
+        public RenderTextureInfo(uint width, uint height, uint layers, Format format, VkImageUsageFlags usage,
+            VkSampleCountFlags samples = VkSampleCountFlags.Count1)
         {
             this.width = width;
             this.height = height;
@@ -55,7 +55,7 @@ namespace SharpGame
 
     public class RenderTexture : Texture
     {
-        public SampleCountFlags samples;
+        public VkSampleCountFlags samples;
         private Swapchain swapchain;
         public ImageView[] attachmentViews;
         public bool IsSwapchain => swapchain != null;
@@ -65,12 +65,10 @@ namespace SharpGame
             Create(swapchain);
         }
         
-        public RenderTexture(uint width, uint height, uint layers, Format format, ImageUsageFlags usage,
-            SampleCountFlags samples = SampleCountFlags.Count1)
+        public RenderTexture(uint width, uint height, uint layers, Format format, VkImageUsageFlags usage,
+            VkSampleCountFlags samples = VkSampleCountFlags.Count1)
         {
-            this.width = width;
-            this.height = height;
-            this.depth = 1;
+            this.extent = new VkExtent3D(width, height, 1);
             this.layers = layers;
             this.format = format;
             this.imageUsageFlags = usage;
@@ -99,9 +97,7 @@ namespace SharpGame
                 Create(info.swapchain);
             else
             {
-                this.width = info.width;
-                this.height = info.height;
-                this.depth = 1;
+                this.extent = new VkExtent3D(info.width, info.height, 1);                
                 this.layers = info.layers;
                 this.format = info.format;
                 this.imageUsageFlags = info.usage;
@@ -117,8 +113,8 @@ namespace SharpGame
             this.extent = swapchain.extent;
             this.layers = 1;
             this.format = swapchain.ColorFormat;
-            this.imageUsageFlags = ImageUsageFlags.ColorAttachment;
-            this.samples = SampleCountFlags.Count1;
+            this.imageUsageFlags = VkImageUsageFlags.ColorAttachment;
+            this.samples = VkSampleCountFlags.Count1;
 
             attachmentViews = (ImageView[])swapchain.ImageViews.Clone();
         }
@@ -126,11 +122,11 @@ namespace SharpGame
         protected void Create()
         {
             var aspectMask = Device.IsDepthFormat(format) ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color;
-            image = Image.Create(width, height, ImageCreateFlags.None, layers, 1, format, this.samples, imageUsageFlags);
+            image = Image.Create(width, height, VkImageCreateFlags.None, layers, 1, format, this.samples, imageUsageFlags);
             imageView = ImageView.Create(image, layers > 1 ? ImageViewType.Image2DArray : ImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
-            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+            sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
 
-            this.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
+            this.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
             descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
             attachmentViews = new ImageView[Swapchain.IMAGE_COUNT];
             Array.Fill(attachmentViews, imageView);
@@ -139,7 +135,7 @@ namespace SharpGame
 
     public class RenderTarget
     {
-        public Extent3D extent;
+        public VkExtent3D extent;
         public List<RenderTexture> attachments = new List<RenderTexture>();
         public RenderTarget()
         {

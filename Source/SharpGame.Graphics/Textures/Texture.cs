@@ -13,15 +13,15 @@ namespace SharpGame
         public Image image;
         public ImageView imageView;
         public Sampler sampler;
-        public Extent3D extent;
+        public VkExtent3D extent;
         public uint layers;
         public uint faceCount;
         public uint mipLevels;
         public Format format;
-        public ImageCreateFlags imageCreateFlags = ImageCreateFlags.None;
-        public ImageUsageFlags imageUsageFlags = ImageUsageFlags.Sampled;
-        public ImageLayout imageLayout = ImageLayout.ShaderReadOnlyOptimal;
-        public SamplerAddressMode samplerAddressMode = SamplerAddressMode.Repeat;
+        public VkImageCreateFlags imageCreateFlags = VkImageCreateFlags.None;
+        public VkImageUsageFlags imageUsageFlags = VkImageUsageFlags.Sampled;
+        public VkImageLayout imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
+        public VkSamplerAddressMode samplerAddressMode = VkSamplerAddressMode.Repeat;
 
         internal DescriptorImageInfo descriptor;
 
@@ -29,14 +29,13 @@ namespace SharpGame
         {
         }
 
-        public ref uint width => ref extent.width;
-        public ref uint height => ref extent.height;
-        public ref uint depth => ref extent.depth;
+        public uint width => extent.width;
+        public uint height => extent.height;
+        public uint depth => extent.depth;
 
         public unsafe void SetImageData(MipmapLevel[] imageData)
         {
-            width = imageData[0].Width;
-            height = imageData[0].Height;
+            this.extent = new VkExtent3D(imageData[0].Width, imageData[0].Height, 1);          
             mipLevels = (uint)imageData.Length;
             layers = (uint)imageData[0].ArrayElements.Length;
             faceCount = (uint)imageData[0].ArrayElements[0].Faces.Length;
@@ -49,7 +48,7 @@ namespace SharpGame
 
             Buffer stagingBuffer = Buffer.CreateStagingBuffer(totalSize, IntPtr.Zero);
 
-            image = Image.Create(width, height, imageCreateFlags, layers * faceCount, mipLevels, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
+            image = Image.Create(width, height, imageCreateFlags, layers * faceCount, mipLevels, format, VkSampleCountFlags.Count1, VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled);
 
             IntPtr mapped = stagingBuffer.Map();
 
@@ -99,17 +98,17 @@ namespace SharpGame
             var subresourceRange = new VkImageSubresourceRange(VkImageAspectFlags.Color, 0, mipLevels, 0, layers*(uint)faceCount);
 
             CommandBuffer copyCmd = Graphics.BeginPrimaryCmd();
-            copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
+            copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal, subresourceRange);
             copyCmd.CopyBufferToImage(stagingBuffer, image, ImageLayout.TransferDstOptimal, bufferCopyRegions);
-            copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, ImageLayout.TransferDstOptimal, imageLayout, subresourceRange);
+            copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, VkImageLayout.TransferDstOptimal, imageLayout, subresourceRange);
             Graphics.EndPrimaryCmd(copyCmd);
 
-            imageLayout = ImageLayout.ShaderReadOnlyOptimal;
+            imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
 
             stagingBuffer.Dispose();
 
             imageView = ImageView.Create(image, ImageViewType, format, VkImageAspectFlags.Color, 0, mipLevels, 0, layers);
-            sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == true);
+            sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, samplerAddressMode, Device.Features.samplerAnisotropy == true);
 
             UpdateDescriptor();
 
@@ -172,41 +171,41 @@ namespace SharpGame
             // Iterate through mip chain and consecutively blit from previous level to next level with linear filtering.
             for (uint level = 1, prevLevelWidth = width, prevLevelHeight = height; level < mipLevels; ++level, prevLevelWidth /= 2, prevLevelHeight /= 2)
             {
-                var preBlitBarrier = new ImageMemoryBarrier(image, 0, AccessFlags.TransferWrite, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, ImageAspectFlags.Color, level, 1);
-                commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.Transfer, ref preBlitBarrier);
+                var preBlitBarrier = new VkImageMemoryBarrier(image.handle, 0, VkAccessFlags.TransferWrite, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal, VkImageAspectFlags.Color, level, 1);
+                commandBuffer.PipelineBarrier(VkPipelineStageFlags.Transfer, VkPipelineStageFlags.Transfer, ref preBlitBarrier);
 
-                ImageBlit region = new ImageBlit
+                var region = new VkImageBlit
                 {
-                    srcSubresource = new ImageSubresourceLayers
+                    srcSubresource = new VkImageSubresourceLayers
                     {
-                        aspectMask = ImageAspectFlags.Color,
+                        aspectMask = VkImageAspectFlags.Color,
                         mipLevel = level - 1,
                         baseArrayLayer = 0,
                         layerCount = layers
                     },
 
-                    dstSubresource = new ImageSubresourceLayers
+                    dstSubresource = new VkImageSubresourceLayers
                     {
-                        aspectMask = ImageAspectFlags.Color,
+                        aspectMask = VkImageAspectFlags.Color,
                         mipLevel = level,
                         baseArrayLayer = 0,
                         layerCount = layers
                     },
 
-                    srcOffsets_1 = new Offset3D((int)(prevLevelWidth), (int)(prevLevelHeight), 1),
-                    dstOffsets_1 = new Offset3D((int)(prevLevelWidth / 2), (int)(prevLevelHeight / 2), 1),
+                    srcOffsets_1 = new VkOffset3D((int)(prevLevelWidth), (int)(prevLevelHeight), 1),
+                    dstOffsets_1 = new VkOffset3D((int)(prevLevelWidth / 2), (int)(prevLevelHeight / 2), 1),
                 };
 
-                commandBuffer.BlitImage(image, ImageLayout.TransferSrcOptimal, image, ImageLayout.TransferDstOptimal, ref region, Filter.Linear);
+                commandBuffer.BlitImage(image, ImageLayout.TransferSrcOptimal, image, ImageLayout.TransferDstOptimal, ref region, VkFilter.Linear);
 
-                var postBlitBarrier = new ImageMemoryBarrier(image, AccessFlags.TransferWrite, AccessFlags.TransferRead, ImageLayout.TransferDstOptimal, ImageLayout.TransferSrcOptimal, ImageAspectFlags.Color, level, 1);
-                commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.Transfer, ref postBlitBarrier);
+                var postBlitBarrier = new VkImageMemoryBarrier(image.handle, VkAccessFlags.TransferWrite, VkAccessFlags.TransferRead, VkImageLayout.TransferDstOptimal, VkImageLayout.TransferSrcOptimal, VkImageAspectFlags.Color, level, 1);
+                commandBuffer.PipelineBarrier(VkPipelineStageFlags.Transfer, VkPipelineStageFlags.Transfer, ref postBlitBarrier);
             }
 
             // Transition whole mip chain to shader read only layout.
             {
-                var barrier = new ImageMemoryBarrier(image, AccessFlags.TransferWrite, 0, ImageLayout.TransferSrcOptimal, ImageLayout.ShaderReadOnlyOptimal);
-                commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.BottomOfPipe, ref barrier);
+                var barrier = new VkImageMemoryBarrier(image.handle, VkAccessFlags.TransferWrite, 0, VkImageLayout.TransferSrcOptimal, VkImageLayout.ShaderReadOnlyOptimal);
+                commandBuffer.PipelineBarrier(VkPipelineStageFlags.Transfer, VkPipelineStageFlags.BottomOfPipe, ref barrier);
             }
 
             Graphics.EndPrimaryCmd(commandBuffer);
@@ -246,26 +245,25 @@ namespace SharpGame
             return Texture.Create2D(1, 1, Format.R8g8b8a8Unorm, Utilities.AsPointer(ref color));
         }
 
-        public static Texture Create(uint width, uint height, ImageViewType imageViewType, uint layers, Format format, uint levels = 0, ImageUsageFlags additionalUsage = ImageUsageFlags.None)
+        public static Texture Create(uint width, uint height, ImageViewType imageViewType, uint layers, Format format, uint levels = 0, VkImageUsageFlags additionalUsage = VkImageUsageFlags.None)
         {
             Texture texture = new Texture
             {
-                width = width,
-                height = height,
+                extent = new VkExtent3D(width, height, 1),
                 layers = layers,
                 mipLevels = (levels > 0) ? levels : (uint)NumMipmapLevels(width, height),
 
             };
 
-            ImageUsageFlags usage = ImageUsageFlags.Sampled | ImageUsageFlags.TransferDst | additionalUsage;
+            VkImageUsageFlags usage = VkImageUsageFlags.Sampled | VkImageUsageFlags.TransferDst | additionalUsage;
             if (texture.mipLevels > 1)
             {
-                usage |= ImageUsageFlags.TransferSrc; // For mipmap generation
+                usage |= VkImageUsageFlags.TransferSrc; // For mipmap generation
             }
 
-            texture.image = Image.Create(width, height, (imageViewType == ImageViewType.ImageCube || imageViewType == ImageViewType.ImageCubeArray) ? ImageCreateFlags.CubeCompatible : ImageCreateFlags.None, layers, texture.mipLevels, format, SampleCountFlags.Count1, usage);
+            texture.image = Image.Create(width, height, (imageViewType == ImageViewType.ImageCube || imageViewType == ImageViewType.ImageCubeArray) ? VkImageCreateFlags.CubeCompatible : VkImageCreateFlags.None, layers, texture.mipLevels, format, VkSampleCountFlags.Count1, usage);
             texture.imageView = ImageView.Create(texture.image, imageViewType, format, VkImageAspectFlags.Color, 0, Vulkan.RemainingMipLevels, 0, layers);
-            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, Device.Features.samplerAnisotropy == true);
+            texture.sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToBorder, Device.Features.samplerAnisotropy == true);
             texture.UpdateDescriptor();
             return texture;
         }
@@ -273,15 +271,13 @@ namespace SharpGame
         public unsafe static Texture Create2D(uint w, uint h, Format format, IntPtr tex2DDataPtr, bool dynamic = false)
         {
             var texture = new Texture
-            {
-                width = w,
-                height = h,
+            { 
+                extent = new VkExtent3D(w, h, 1),
                 mipLevels = 1,
-                depth = 1,
                 format = format
             };
 
-            texture.image = Image.Create(w, h, ImageCreateFlags.None, 1, 1, format, SampleCountFlags.Count1, ImageUsageFlags.TransferDst | ImageUsageFlags.Sampled);
+            texture.image = Image.Create(w, h, VkImageCreateFlags.None, 1, 1, format, VkSampleCountFlags.Count1, VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled);
 
             ulong totalBytes = texture.image.allocationSize;
 
@@ -304,17 +300,17 @@ namespace SharpGame
                 // The sub resource range describes the regions of the image we will be transition
                 var subresourceRange = new VkImageSubresourceRange(VkImageAspectFlags.Color, 0, 1, 0, 1);
                 CommandBuffer copyCmd = Graphics.BeginPrimaryCmd();
-                copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, ImageLayout.Undefined, ImageLayout.TransferDstOptimal, subresourceRange);
+                copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal, subresourceRange);
                 copyCmd.CopyBufferToImage(stagingBuffer, texture.image, ImageLayout.TransferDstOptimal, ref bufferCopyRegion);
-                copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, ImageLayout.TransferDstOptimal, texture.imageLayout, subresourceRange);
+                copyCmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, VkImageLayout.TransferDstOptimal, texture.imageLayout, subresourceRange);
                 Graphics.EndPrimaryCmd(copyCmd);
 
                 // Change texture image layout to shader read after all mip levels have been copied
-                texture.imageLayout = ImageLayout.ShaderReadOnlyOptimal;
+                texture.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
             }
 
             texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
-            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == true);
+            texture.sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, Device.Features.samplerAnisotropy == true);
             texture.UpdateDescriptor();
             return texture;
         }
@@ -324,38 +320,37 @@ namespace SharpGame
         {
             var texture = new Texture
             {
-                width = width,
-                height = height,
+                extent = new VkExtent3D(width, height, 1),
                 mipLevels = 1,
-                depth = 1,
                 format = format
             };
 
-            ImageCreateInfo createInfo = new ImageCreateInfo
+            var createInfo = new VkImageCreateInfo
             {
-                flags = ImageCreateFlags.None,
-                imageType = ImageType.Image2D,
-                format = format,
-                extent = new Extent3D { width = width, height = height, depth = 1 },
+                sType = VkStructureType.ImageCreateInfo,
+                flags = VkImageCreateFlags.None,
+                imageType = VkImageType.Image2D,
+                format = (VkFormat)format,
+                extent = new VkExtent3D(width, height, 1),
                 mipLevels = 1,
                 arrayLayers = 1,
-                samples = SampleCountFlags.Count1,
-                tiling = ImageTiling.Optimal,
-                usage = ImageUsageFlags.Storage | ImageUsageFlags.Sampled,
+                samples = VkSampleCountFlags.Count1,
+                tiling = VkImageTiling.Optimal,
+                usage = VkImageUsageFlags.Storage | VkImageUsageFlags.Sampled,
                 sharingMode = VkSharingMode.Exclusive,
-                initialLayout = ImageLayout.Preinitialized
+                initialLayout = VkImageLayout.Preinitialized
             };
 
             texture.image = new Image(ref createInfo);
 
             Graphics.WithCommandBuffer((cmd) =>
             {
-                cmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, ImageLayout.Preinitialized, ImageLayout.General);
+                cmd.SetImageLayout(texture.image, VkImageAspectFlags.Color, VkImageLayout.Preinitialized, VkImageLayout.General);
             });
 
-            texture.imageLayout = ImageLayout.General;
+            texture.imageLayout = VkImageLayout.General;
             texture.imageView = ImageView.Create(texture.image, ImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
-            texture.sampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, Device.Features.samplerAnisotropy);
+            texture.sampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, Device.Features.samplerAnisotropy);
             texture.UpdateDescriptor();
             return texture;
         }

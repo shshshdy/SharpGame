@@ -13,7 +13,7 @@ namespace SharpGame
     {
         public VkSurfaceKHR Surface { get; private set; }
         public uint QueueNodeIndex { get; private set; } = uint.MaxValue;
-        public Extent3D extent;
+        public VkExtent3D extent;
         public Format ColorFormat { get; private set; }
         public VkColorSpaceKHR ColorSpace { get; private set; }
         public VkSwapchainKHR swapchain;
@@ -220,24 +220,14 @@ namespace SharpGame
                 Debug.Assert(err == VkResult.Success);
                 presentModes.Count = presentModeCount;
 
-                extent.depth = 1;
                 // If width (and height) equals the special value 0xFFFFFFFF, the size of the Surface will be set by the swapchain
-                if (surfCaps.currentExtent.width == unchecked((uint)-1))
-                {
-                    // If the Surface size is undefined, the size is set to
-                    // the size of the Images requested.
-                    extent.width = width;
-                    extent.height = height;
-                }
-                else
+                if (surfCaps.currentExtent.width != unchecked((uint)-1))
                 {
                     width = surfCaps.currentExtent.width;
                     height = surfCaps.currentExtent.height;
-                    // If the Surface size is defined, the swap chain size must match
-                    extent.width = width;
-                    extent.height = height;
                 }
 
+                extent = new VkExtent3D(width, height, 1);
 
                 // Select a present mode for the swapchain
 
@@ -343,7 +333,7 @@ namespace SharpGame
                 {                 
                     Images[i] = new Image(VkImages[i])
                     {
-                        imageType = ImageType.Image2D,
+                        imageType = VkImageType.Image2D,
                         extent = extent
                     };
                     ImageViews[i] = ImageView.Create(Images[i], ImageViewType.Image2D, ColorFormat, VkImageAspectFlags.Color, 0, 1);

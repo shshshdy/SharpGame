@@ -97,7 +97,7 @@ namespace SharpGame
 
             translucentClustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment),
+                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment),
 
                 new SceneSubpass("clustering")
                 {
@@ -205,10 +205,10 @@ namespace SharpGame
             uint height = (uint)Graphics.Height;
             Format depthFormat = Device.GetSupportedDepthFormat();
 
-            albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled);
-            normalRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled);
-            positionRT = new RenderTexture(width, height, 1, Format.R32g32b32a32Sfloat, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled);
-            depthHWRT = new RenderTexture(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled);
+            albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            normalRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            positionRT = new RenderTexture(width, height, 1, Format.R32g32b32a32Sfloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            depthHWRT = new RenderTexture(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
 
             var geometryFB = Framebuffer.Create(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, positionRT.imageView, depthHWRT.imageView });
 #if HWDEPTH

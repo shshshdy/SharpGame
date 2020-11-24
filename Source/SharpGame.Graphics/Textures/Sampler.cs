@@ -9,10 +9,9 @@ namespace SharpGame
     {
         public VkSampler handle;
 
-        public Sampler(ref SamplerCreateInfo samplerCreateInfo)
+        public Sampler(ref VkSamplerCreateInfo samplerCreateInfo)
         {
-            samplerCreateInfo.ToNative(out VkSamplerCreateInfo vkSamplerCreate);
-            handle = Device.CreateSampler(ref vkSamplerCreate);
+            handle = Device.CreateSampler(ref samplerCreateInfo);
         }
 
         protected override void Destroy(bool disposing)
@@ -27,16 +26,17 @@ namespace SharpGame
 
         public static void Init()
         {
-            Default = Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.Repeat, true);
-            ClampToEdge = Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+            Default = Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, true);
+            ClampToEdge = Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
         }
 
-        public static Sampler Create(Filter filter, SamplerMipmapMode mipmapMode,
-            SamplerAddressMode addressMode, bool anisotropyEnable, BorderColor borderColor = BorderColor.FloatOpaqueWhite)
+        public static Sampler Create(VkFilter filter, VkSamplerMipmapMode mipmapMode,
+            VkSamplerAddressMode addressMode, bool anisotropyEnable, VkBorderColor borderColor = VkBorderColor.FloatOpaqueWhite)
         {
             // Create sampler
-            SamplerCreateInfo sampler = new SamplerCreateInfo
+            VkSamplerCreateInfo sampler = new VkSamplerCreateInfo
             {
+                sType = VkStructureType.SamplerCreateInfo,
                 magFilter = filter,
                 minFilter = filter,
                 mipmapMode = mipmapMode,
@@ -44,7 +44,7 @@ namespace SharpGame
                 addressModeV = addressMode,
                 addressModeW = addressMode,
                 mipLodBias = 0.0f,
-                compareOp = CompareOp.Never,
+                compareOp = VkCompareOp.Never,
                 minLod = 0.0f,
                 maxLod = 1.0f,// float.MaxValue,
                 borderColor = borderColor,
@@ -55,46 +55,5 @@ namespace SharpGame
         }
     }
 
-
-    public struct SamplerCreateInfo
-    {
-        public BorderColor borderColor;
-        public float maxLod;
-        public float minLod;
-        public CompareOp compareOp;
-        public bool compareEnable;
-        public float maxAnisotropy;
-        public bool anisotropyEnable;
-        public bool unnormalizedCoordinates;
-        public float mipLodBias;
-        public SamplerAddressMode addressModeV;
-        public SamplerAddressMode addressModeU;
-        public SamplerMipmapMode mipmapMode;
-        public Filter minFilter;
-        public Filter magFilter;
-        public VkSamplerCreateFlags flags;
-        public SamplerAddressMode addressModeW;
-
-        public void ToNative(out VkSamplerCreateInfo native)
-        {
-            native = new VkSamplerCreateInfo();
-            native.sType = VkStructureType.SamplerCreateInfo;
-            native.maxLod = maxLod;
-            native.minLod = minLod;
-            native.compareOp = (VkCompareOp)compareOp;
-            native.compareEnable = compareEnable;
-            native.maxAnisotropy = maxAnisotropy;
-            native.anisotropyEnable = anisotropyEnable;
-            native.unnormalizedCoordinates = unnormalizedCoordinates;
-            native.mipLodBias = mipLodBias;
-            native.addressModeV = (VkSamplerAddressMode)addressModeV;
-            native.addressModeU = (VkSamplerAddressMode)addressModeU;
-            native.mipmapMode = (VkSamplerMipmapMode)mipmapMode;
-            native.minFilter = (VkFilter)minFilter;
-            native.magFilter = (VkFilter)magFilter;
-            native.flags = flags;
-            native.addressModeW = (VkSamplerAddressMode)addressModeW;
-        }
-    }
 
 }

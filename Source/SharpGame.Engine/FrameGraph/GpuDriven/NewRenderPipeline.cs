@@ -17,7 +17,7 @@ namespace SharpGame
             Add(new FrameGraphPass
             {
                 new RenderTextureInfo(Graphics.Swapchain),
-                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment),
+                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment),
 
                 new SceneSubpass
                 {

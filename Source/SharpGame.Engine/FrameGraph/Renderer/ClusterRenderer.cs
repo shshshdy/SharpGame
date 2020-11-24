@@ -302,9 +302,9 @@ namespace SharpGame
 
                 //cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_TRANSFER * 2);
 
-                cmd_buf.PipelineBarrier(PipelineStageFlags.FragmentShader,
-                            PipelineStageFlags.Transfer,
-                            DependencyFlags.ByRegion,
+                cmd_buf.PipelineBarrier(VkPipelineStageFlags.FragmentShader,
+                            VkPipelineStageFlags.Transfer,
+                            VkDependencyFlags.ByRegion,
                             0, null,
                             4,
                             transfer_barriers,
@@ -326,9 +326,9 @@ namespace SharpGame
                     new BufferMemoryBarrier(lightList, AccessFlags.TransferWrite, AccessFlags.ShaderRead | AccessFlags.ShaderWrite)
                 };
 
-                cmd_buf.PipelineBarrier(PipelineStageFlags.Transfer,
-                                            PipelineStageFlags.FragmentShader,
-                                            DependencyFlags.ByRegion,
+                cmd_buf.PipelineBarrier(VkPipelineStageFlags.Transfer,
+                                            VkPipelineStageFlags.FragmentShader,
+                                            VkDependencyFlags.ByRegion,
                                             0, null,
                                             4,
                                             transfer_barriers1,

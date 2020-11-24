@@ -112,13 +112,11 @@ namespace SharpGame
 
                 Texture tex = new Texture
                 {
-                    width = (uint)image.Width,
-                    height = (uint)image.Height,
+                    extent = new VkExtent3D((uint)image.Width, (uint)image.Height, 1),                  
                     mipLevels = (uint)mipmaps.Length,
-                    depth = 1,
                     format = fmt,
-                    imageUsageFlags = ImageUsageFlags.Sampled,
-                    imageLayout = ImageLayout.ShaderReadOnlyOptimal,
+                    imageUsageFlags = VkImageUsageFlags.Sampled,
+                    imageLayout = VkImageLayout.ShaderReadOnlyOptimal,
                 };
 
                 tex.SetImageData(mipmaps);
@@ -131,7 +129,7 @@ namespace SharpGame
     public class KtxTextureReader : ResourceReader<Texture>
     {
         public Format Format { get; set; } = Format.Bc3UnormBlock;
-        public SamplerAddressMode SamplerAddressMode { get; set; } = SamplerAddressMode.Repeat;
+        public VkSamplerAddressMode SamplerAddressMode { get; set; } = VkSamplerAddressMode.Repeat;
 
         public KtxTextureReader() : base(".ktx")
         {
@@ -165,7 +163,7 @@ namespace SharpGame
 
             if(texFile.Header.IsCubeMap)
             {
-                tex.imageCreateFlags = ImageCreateFlags.CubeCompatible;
+                tex.imageCreateFlags = VkImageCreateFlags.CubeCompatible;
             }
 
             tex.SetImageData(texFile.Mipmaps);

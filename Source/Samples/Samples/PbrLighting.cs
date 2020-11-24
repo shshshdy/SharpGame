@@ -58,9 +58,9 @@ namespace SharpGame.Samples
             camera = scene.GetComponent<Camera>(true);
             camera.Node.LookAt(new vec3(0.0f, 5.0f, -50), TransformSpace.WORLD);
 
-            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0, ImageUsageFlags.Storage | ImageUsageFlags.TransferSrc);
-            irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, ImageUsageFlags.Storage);
-            brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, ImageViewType.Image2D, 1, Format.R16g16Sfloat, 1, ImageUsageFlags.Storage);
+            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0, VkImageUsageFlags.Storage | VkImageUsageFlags.TransferSrc);
+            irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, ImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, VkImageUsageFlags.Storage);
+            brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, ImageViewType.Image2D, 1, Format.R16g16Sfloat, 1, VkImageUsageFlags.Storage);
 
             {
                 var model = GeometryUtil.CreateCubeModel(10, 10, 10);
@@ -109,8 +109,8 @@ namespace SharpGame.Samples
             //todo:
             pbrMaterial.PipelineResourceSet[0].ResourceSet[2].Bind(envMap, irMap, brdfLUT);
 
-            computeSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToBorder, false, BorderColor.FloatTransparentBlack);
-            brdfLUTSampler = Sampler.Create(Filter.Linear, SamplerMipmapMode.Linear, SamplerAddressMode.ClampToEdge, false);
+            computeSampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToBorder, false, VkBorderColor.FloatTransparentBlack);
+            brdfLUTSampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
 
             SetCubeMap(cubeMaps[0]);
 
@@ -166,19 +166,19 @@ namespace SharpGame.Samples
                 // Copy base mipmap level into destination environment map.
                 {
 
-                    Span<ImageMemoryBarrier> preCopyBarriers = stackalloc[]
+                    Span<VkImageMemoryBarrier> preCopyBarriers = stackalloc[]
                     {
-                        new ImageMemoryBarrier(cubeMap.image, 0, AccessFlags.TransferRead, ImageLayout.ShaderReadOnlyOptimal, ImageLayout.TransferSrcOptimal, ImageAspectFlags.Color, 0, 1),
-                        new ImageMemoryBarrier(envMap.image, 0, AccessFlags.TransferWrite, ImageLayout.Undefined, ImageLayout.TransferDstOptimal),
+                        new VkImageMemoryBarrier(cubeMap.image.handle, 0, VkAccessFlags.TransferRead, VkImageLayout.ShaderReadOnlyOptimal, VkImageLayout.TransferSrcOptimal, VkImageAspectFlags.Color, 0, 1),
+                        new VkImageMemoryBarrier(envMap.image.handle, 0, VkAccessFlags.TransferWrite, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal),
                     };
 
-                    Span<ImageMemoryBarrier> postCopyBarriers = stackalloc[]
+                    Span<VkImageMemoryBarrier> postCopyBarriers = stackalloc[]
                     {
-                        new ImageMemoryBarrier(cubeMap.image, AccessFlags.TransferRead, AccessFlags.ShaderRead, ImageLayout.TransferSrcOptimal, ImageLayout.ShaderReadOnlyOptimal, ImageAspectFlags.Color, 0, 1),
-                        new ImageMemoryBarrier(envMap.image, AccessFlags.TransferWrite, AccessFlags.ShaderWrite, ImageLayout.TransferDstOptimal, ImageLayout.General),
+                        new VkImageMemoryBarrier(cubeMap.image.handle, VkAccessFlags.TransferRead, VkAccessFlags.ShaderRead, VkImageLayout.TransferSrcOptimal, VkImageLayout.ShaderReadOnlyOptimal, VkImageAspectFlags.Color, 0, 1),
+                        new VkImageMemoryBarrier(envMap.image.handle, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderWrite, VkImageLayout.TransferDstOptimal, VkImageLayout.General),
                     };
 
-                    commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.Transfer, preCopyBarriers);
+                    commandBuffer.PipelineBarrier(VkPipelineStageFlags.TopOfPipe, VkPipelineStageFlags.Transfer, preCopyBarriers);
 
                     VkImageCopy copyRegion = new VkImageCopy
                     {
@@ -190,12 +190,12 @@ namespace SharpGame.Samples
                     copyRegion.dstSubresource = copyRegion.srcSubresource;
 
                     commandBuffer.CopyImage(cubeMap.image, ImageLayout.TransferSrcOptimal, envMap.image, ImageLayout.TransferDstOptimal, ref copyRegion);
-                    commandBuffer.PipelineBarrier(PipelineStageFlags.Transfer, PipelineStageFlags.ComputeShader, postCopyBarriers);
+                    commandBuffer.PipelineBarrier(VkPipelineStageFlags.Transfer, VkPipelineStageFlags.ComputeShader, postCopyBarriers);
                  
                     // Pre-filter rest of the mip-chain.
                     List<ImageView> envTextureMipTailViews = new List<ImageView>();
                      
-                    var inputTexture = new DescriptorImageInfo(computeSampler, cubeMap.imageView, ImageLayout.ShaderReadOnlyOptimal);
+                    var inputTexture = new DescriptorImageInfo(computeSampler, cubeMap.imageView, VkImageLayout.ShaderReadOnlyOptimal);
                     spSet.Bind(0, ref inputTexture);
 
                     Span<DescriptorImageInfo> envTextureMipTailDescriptors = stackalloc DescriptorImageInfo[(int)numMipTailLevels];
@@ -203,7 +203,7 @@ namespace SharpGame.Samples
                     {
                         var view = ImageView.Create(envMap.image, ImageViewType.ImageCube, Format.R16g16b16a16Sfloat, VkImageAspectFlags.Color, level + 1, 1, 0, envMap.image.arrayLayers);
                         envTextureMipTailViews.Add(view);
-                        envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, ImageLayout.General);
+                        envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, VkImageLayout.General);
                     }
 
                     spSet.Bind(1, envTextureMipTailDescriptors);
@@ -222,8 +222,8 @@ namespace SharpGame.Samples
                         commandBuffer.Dispatch(numGroups, numGroups, 6);
                     }
                   
-                    var barrier = new ImageMemoryBarrier(envMap.image, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal);
-                    commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, ref barrier);
+                    var barrier = new VkImageMemoryBarrier(envMap.image.handle, VkAccessFlags.ShaderWrite, 0, VkImageLayout.General, VkImageLayout.ShaderReadOnlyOptimal);
+                    commandBuffer.PipelineBarrier(VkPipelineStageFlags.ComputeShader, VkPipelineStageFlags.BottomOfPipe, ref barrier);
                     
                 }
 
@@ -238,15 +238,15 @@ namespace SharpGame.Samples
 
                 CommandBuffer commandBuffer = Graphics.BeginPrimaryCmd();
                 {
-                    Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(irMap.image, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General) };
-                    commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
+                    Span<VkImageMemoryBarrier> barriers = stackalloc [] { new VkImageMemoryBarrier(irMap.image.handle, 0, VkAccessFlags.ShaderWrite, VkImageLayout.Undefined, VkImageLayout.General) };
+                    commandBuffer.PipelineBarrier(VkPipelineStageFlags.TopOfPipe, VkPipelineStageFlags.ComputeShader, barriers);
 
                     commandBuffer.BindComputePipeline(pass);
                     commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, irSet);
                     commandBuffer.Dispatch(kIrradianceMapSize / 32, kIrradianceMapSize / 32, 6);
 
-                    Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(irMap.image, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
-                    commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, postDispatchBarrier);
+                    Span<VkImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new VkImageMemoryBarrier(irMap.image.handle, VkAccessFlags.ShaderWrite, 0, VkImageLayout.General, VkImageLayout.ShaderReadOnlyOptimal) };
+                    commandBuffer.PipelineBarrier(VkPipelineStageFlags.ComputeShader, VkPipelineStageFlags.BottomOfPipe, postDispatchBarrier);
                 }
 
                 Graphics.EndPrimaryCmd(commandBuffer);
@@ -260,15 +260,15 @@ namespace SharpGame.Samples
 
                 CommandBuffer commandBuffer = Graphics.BeginPrimaryCmd();
                 {
-                    Span<ImageMemoryBarrier> barriers = stackalloc [] { new ImageMemoryBarrier(brdfLUT.image, 0, AccessFlags.ShaderWrite, ImageLayout.Undefined, ImageLayout.General)};
-                    commandBuffer.PipelineBarrier(PipelineStageFlags.TopOfPipe, PipelineStageFlags.ComputeShader, barriers);
+                    Span<VkImageMemoryBarrier> barriers = stackalloc [] { new VkImageMemoryBarrier(brdfLUT.image.handle, 0, VkAccessFlags.ShaderWrite, VkImageLayout.Undefined, VkImageLayout.General)};
+                    commandBuffer.PipelineBarrier(VkPipelineStageFlags.TopOfPipe, VkPipelineStageFlags.ComputeShader, barriers);
 
                     commandBuffer.BindComputePipeline(pass);
                     commandBuffer.BindComputeResourceSet(pass.PipelineLayout, 0, brdfLUTSet);
                     commandBuffer.Dispatch(kBRDF_LUT_Size / 32, kBRDF_LUT_Size / 32, 6);
 
-                    Span<ImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new ImageMemoryBarrier(brdfLUT.image, AccessFlags.ShaderWrite, 0, ImageLayout.General, ImageLayout.ShaderReadOnlyOptimal) };
-                    commandBuffer.PipelineBarrier(PipelineStageFlags.ComputeShader, PipelineStageFlags.BottomOfPipe, postDispatchBarrier);
+                    Span<VkImageMemoryBarrier> postDispatchBarrier = stackalloc [] { new VkImageMemoryBarrier(brdfLUT.image.handle, VkAccessFlags.ShaderWrite, 0, VkImageLayout.General, VkImageLayout.ShaderReadOnlyOptimal) };
+                    commandBuffer.PipelineBarrier(VkPipelineStageFlags.ComputeShader, VkPipelineStageFlags.BottomOfPipe, postDispatchBarrier);
                 }
 
                 Graphics.EndPrimaryCmd(commandBuffer);

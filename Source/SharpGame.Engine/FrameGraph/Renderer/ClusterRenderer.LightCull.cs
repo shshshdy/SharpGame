@@ -79,7 +79,7 @@ namespace SharpGame
             BufferMemoryBarrier* barriers = stackalloc BufferMemoryBarrier[2];
             barriers[0] = new BufferMemoryBarrier(light_pos_ranges.Buffer, AccessFlags.HostWrite, AccessFlags.ShaderRead);
 
-            cmd_buf.PipelineBarrier(PipelineStageFlags.Host, PipelineStageFlags.ComputeShader, DependencyFlags.ByRegion, 0, null, 1, barriers, 0, null);
+            cmd_buf.PipelineBarrier(VkPipelineStageFlags.Host, VkPipelineStageFlags.ComputeShader, VkDependencyFlags.ByRegion, 0, null, 1, barriers, 0, null);
 
             // --------------------- calc light grids ---------------------
 
@@ -99,9 +99,9 @@ namespace SharpGame
                                 AccessFlags.ShaderRead | AccessFlags.ShaderWrite);
                 barriers[1] = barriers[0];
                 barriers[1].Buffer = gridLightCounts;
-                cmd_buf.PipelineBarrier(PipelineStageFlags.ComputeShader,
-                            PipelineStageFlags.ComputeShader,
-                            DependencyFlags.ByRegion,
+                cmd_buf.PipelineBarrier(VkPipelineStageFlags.ComputeShader,
+                            VkPipelineStageFlags.ComputeShader,
+                            VkDependencyFlags.ByRegion,
                             0, null, 2, barriers, 0, null);
             }
 
@@ -123,9 +123,9 @@ namespace SharpGame
 
                 barriers[0].Buffer = gridLightCountTotal;
                 barriers[1].Buffer = gridLightCountOffsets;
-                cmd_buf.PipelineBarrier(PipelineStageFlags.ComputeShader,
-                            PipelineStageFlags.ComputeShader,
-                            DependencyFlags.ByRegion,
+                cmd_buf.PipelineBarrier(VkPipelineStageFlags.ComputeShader,
+                            VkPipelineStageFlags.ComputeShader,
+                            VkDependencyFlags.ByRegion,
                             0, null, 1, barriers, 0, null);
             }
 
