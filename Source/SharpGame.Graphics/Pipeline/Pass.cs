@@ -208,7 +208,7 @@ namespace SharpGame
         public ref ColorBlendStateInfo ColorBlendState => ref colorBlendState;
         private ColorBlendStateInfo colorBlendState = ColorBlendStateInfo.Replace;
 
-        public VkPolygonMode FillMode { get => rasterizationState.polygonMode; set => rasterizationState.polygonMode = value; }
+        public ref VkPolygonMode FillMode => ref rasterizationState.polygonMode;
         public VkCullModeFlags CullMode { get => rasterizationState.cullMode; set => rasterizationState.cullMode = value; }
         public VkFrontFace FrontFace { get => rasterizationState.frontFace; set => rasterizationState.frontFace = value; }
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }

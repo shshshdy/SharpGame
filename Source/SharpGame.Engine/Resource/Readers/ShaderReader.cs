@@ -182,10 +182,6 @@ namespace SharpGame
                         pass.BlendMode = (BlendMode)Enum.Parse(typeof(BlendMode), kvp.Value[0].value);
                         break;
 
-//                     case "ResourceLayout":
-//                         pass.PipelineLayout.ResourceLayout = ReadResourceLayout(kvp.Value);
-//                         break;
-
                     case "PushConstant":
                         ReadPushConstant(pass, kvp.Value);
                         break;
@@ -236,60 +232,6 @@ namespace SharpGame
             }
 
             return pass;
-        }
-
-        DescriptorSetLayout[] ReadResourceLayout(List<AstNode> layout)
-        {
-            List<DescriptorSetLayout> layouts = new List<DescriptorSetLayout>();
-            foreach(var node in layout)
-            {
-                var resLayout = ReadResourceLayout(node);
-                resLayout.Set = layouts.Count;
-                layouts.Add(resLayout);
-            }
-            return layouts.ToArray(); ;
-        }
-
-        DescriptorSetLayout ReadResourceLayout(AstNode node)
-        {
-            DescriptorSetLayout layout = new DescriptorSetLayout();            
-            node.GetChild("ResourceLayoutBinding", out var resourceLayoutBinding);
-
-            foreach(var c in resourceLayoutBinding)
-            {
-                DescriptorSetLayoutBinding binding = new DescriptorSetLayoutBinding
-                {
-                    binding = (uint)layout.Bindings.Count
-                };
-
-                if (!string.IsNullOrEmpty(c.value))
-                {
-                    binding.name = c.value;
-                }
-
-                foreach (var kvp in c.Children)
-                {                   
-                    switch (kvp.Key)
-                    {
-                        case "Binding":
-                            binding.binding = uint.Parse(kvp.Value[0].value);
-                            break;
-                        case "DescriptorType":
-                            binding.descriptorType = (DescriptorType)Enum.Parse(typeof(DescriptorType), kvp.Value[0].value);
-                            break;
-                        case "StageFlags":
-                            binding.stageFlags = (ShaderStage)Enum.Parse(typeof(ShaderStage), kvp.Value[0].value);
-                            break;
-                        case "DescriptorCount":
-                            binding.descriptorCount = uint.Parse(kvp.Value[0].value);
-                            break;
-                    }
-                }
-
-                layout.Add(binding);
-            }        
-
-            return layout;
         }
 
         void ReadPushConstant(Pass pass, List<AstNode> layout)
@@ -565,7 +507,7 @@ namespace SharpGame
                             SharpSPIRVCross.ResourceType.StageInput => throw new NotImplementedException(),
                             SharpSPIRVCross.ResourceType.StageOutput => throw new NotImplementedException(),
                             SharpSPIRVCross.ResourceType.SubpassInput => DescriptorType.InputAttachment,
-                            SharpSPIRVCross.ResourceType.StorageImage => DescriptorType.StorageImage,
+                            SharpSPIRVCross.ResourceType.StorageImage => type.ImageDimension == SpvDim.DimBuffer ? DescriptorType.StorageTexelBuffer : DescriptorType.StorageImage,
                             SharpSPIRVCross.ResourceType.SampledImage => DescriptorType.CombinedImageSampler,
                             SharpSPIRVCross.ResourceType.AtomicCounter => throw new NotImplementedException(),
                             SharpSPIRVCross.ResourceType.PushConstant => throw new NotImplementedException(),
@@ -619,6 +561,7 @@ namespace SharpGame
                 //var glsl_source = compiler.Compile();
             }
 
+            refl.descriptorSets?.Sort((x, y) => { return x.set * 1000 + (int)x.binding - x.set + (int)x.binding; });
             return refl;
 
 #else

@@ -244,12 +244,14 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkPipelineColorBlendStateCreateInfo native, uint attachmentCount)
         {
-            native = new VkPipelineColorBlendStateCreateInfo();
-            native.sType = VkStructureType.PipelineColorBlendStateCreateInfo;
-            native.logicOpEnable = logicOpEnable;
-            native.logicOp = logicOp;
+            native = new VkPipelineColorBlendStateCreateInfo
+            {
+                sType = VkStructureType.PipelineColorBlendStateCreateInfo,
+                logicOpEnable = logicOpEnable,
+                logicOp = logicOp
+            };
 
-            if(attachmentCount > attachments.Length)
+            if (attachmentCount > attachments.Length)
             {
                 Array.Resize(ref attachments, (int)attachmentCount);
                 for(int i = 1; i < attachmentCount; i++)
