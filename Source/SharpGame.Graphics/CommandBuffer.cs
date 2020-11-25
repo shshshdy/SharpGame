@@ -7,6 +7,49 @@
     using System.Threading;
     using static Vulkan;
 
+    public ref struct RenderPassBeginInfo
+    {
+        public RenderPass renderPass;
+        internal VkRenderPassBeginInfo native;
+        public unsafe RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, VkRect2D renderArea, Span<VkClearValue> clearValues)
+        {
+            this.renderPass = renderPass;
+
+            fixed (VkClearValue* pClearValues = clearValues)
+            {
+                native = new VkRenderPassBeginInfo
+                {
+                    sType = VkStructureType.RenderPassBeginInfo,
+                    renderPass = framebuffer.renderPass.handle,
+                    framebuffer = framebuffer.handle,
+                    renderArea = new VkRect2D(renderArea.offset, renderArea.extent),
+                    pClearValues = pClearValues,
+                    clearValueCount = (uint)clearValues.Length
+                };
+            }
+        }
+
+    }
+
+    public ref struct CommandBufferInheritanceInfo
+    {
+        internal VkCommandBufferInheritanceInfo native;
+        public unsafe CommandBufferInheritanceInfo(Framebuffer framebuffer, RenderPass renderPass, uint subpass, bool occlusionQueryEnable = false,
+            VkQueryControlFlags queryFlags = VkQueryControlFlags.None, VkQueryPipelineStatisticFlags pipelineStatistics = VkQueryPipelineStatisticFlags.None)
+        {
+            native = new VkCommandBufferInheritanceInfo
+            {
+                sType = VkStructureType.CommandBufferInheritanceInfo,
+                renderPass = renderPass.handle,
+                subpass = subpass,
+                framebuffer = framebuffer.handle,
+                occlusionQueryEnable = occlusionQueryEnable,
+                queryFlags = (VkQueryControlFlags)queryFlags,
+                pipelineStatistics = (VkQueryPipelineStatisticFlags)pipelineStatistics
+            };
+        }
+    }
+
     public unsafe partial class CommandBuffer : DisposeBase
     {
         internal VkCommandBuffer commandBuffer;
@@ -40,13 +83,14 @@
         [MethodImpl((MethodImplOptions)0x100)]
         public void Begin(VkCommandBufferUsageFlags flags, ref CommandBufferInheritanceInfo commandBufferInheritanceInfo)
         {
-            commandBufferInheritanceInfo.ToNative(out VkCommandBufferInheritanceInfo cmdBufInfo);
-            var cmdBufBeginInfo = new VkCommandBufferBeginInfo();
-            cmdBufBeginInfo.sType = VkStructureType.CommandBufferBeginInfo;
-            cmdBufBeginInfo.flags = (VkCommandBufferUsageFlags)flags;
             unsafe
             {
-                cmdBufBeginInfo.pInheritanceInfo = &cmdBufInfo;
+                var cmdBufBeginInfo = new VkCommandBufferBeginInfo
+                {
+                    sType = VkStructureType.CommandBufferBeginInfo,
+                    flags = (VkCommandBufferUsageFlags)flags,
+                    pInheritanceInfo = (VkCommandBufferInheritanceInfo*)Unsafe.AsPointer(ref commandBufferInheritanceInfo.native)
+                };
                 VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, &cmdBufBeginInfo));
             }
             opened = true;
@@ -62,10 +106,9 @@
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BeginRenderPass(in RenderPassBeginInfo renderPassBeginInfo, VkSubpassContents contents)
+        public void BeginRenderPass(ref RenderPassBeginInfo renderPassBeginInfo, VkSubpassContents contents)
         {
-            renderPassBeginInfo.ToNative(out VkRenderPassBeginInfo vkRenderPassBeginInfo);
-            vkCmdBeginRenderPass(commandBuffer, &vkRenderPassBeginInfo, (VkSubpassContents)contents);
+            vkCmdBeginRenderPass(commandBuffer, Utilities.AsPtr(ref renderPassBeginInfo.native), (VkSubpassContents)contents);
             renderPass = renderPassBeginInfo.renderPass;
             ClearDescriptorSets();
         }
@@ -101,11 +144,11 @@
         {
             var pipe = pass.GetComputePipeline();
 
-            if(pipe.handle != currentPipeline)
+            if (pipe != currentPipeline)
             {
                 ClearDescriptorSets();
-                currentPipeline = pipe.handle;
-                vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Compute, pipe.handle);
+                currentPipeline = pipe;
+                vkCmdBindPipeline(commandBuffer, VkPipelineBindPoint.Compute, pipe);
             }
         }
 
@@ -145,15 +188,15 @@
         public unsafe void BindResourceSet(VkPipelineBindPoint pipelineBindPoint,
             PipelineLayout pipelineLayout, int set, DescriptorSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
         {
-            if(descriptorSets[set] != pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext]
+            if (descriptorSets[set] != pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext]
                 || dynamicOffsetCounts[set] != dynamicOffsetCount
                 || (pDynamicOffsets != null && dynamicOffsets[set] != *pDynamicOffsets))
             {
 
                 descriptorSets[set] = pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext];
                 dynamicOffsetCounts[set] = dynamicOffsetCount;
-                if(dynamicOffsetCount > 0)
-                dynamicOffsets[set] = *pDynamicOffsets;
+                if (dynamicOffsetCount > 0)
+                    dynamicOffsets[set] = *pDynamicOffsets;
 
                 var t = pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext];
 
@@ -161,26 +204,17 @@
             }
         }
 
-        /*
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindPipeline(VkPipelineBindPoint pipelineBindPoint, Pass pass, Geometry geometry)
+        public void BindPipeline(VkPipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
         {
-            var pipeline = pass.GetGraphicsPipeline(renderPass, geometry);           
-            vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.handle);
-        }*/
-
-        [MethodImpl((MethodImplOptions)0x100)]
-        public void BindPipeline(VkPipelineBindPoint pipelineBindPoint, Pipeline pipeline)
-        {
-            if (pipeline.handle != currentPipeline)
+            if (pipeline != currentPipeline)
             {
                 ClearDescriptorSets();
-                currentPipeline = pipeline.handle;
+                currentPipeline = pipeline;
 
-                vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.handle);
+                vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline);
             }
 
-            //vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.handle);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -261,7 +295,7 @@
 
         public void DrawIndirect(Buffer buffer, ulong offset, uint drawCount, uint stride)
         {
-            vkCmdDrawIndirect(commandBuffer, buffer.handle, offset, drawCount, stride); 
+            vkCmdDrawIndirect(commandBuffer, buffer.handle, offset, drawCount, stride);
             Interlocked.Increment(ref Stats.drawIndirect);
         }
 
@@ -273,7 +307,7 @@
 
         public void DispatchIndirect(Buffer buffer, ulong offset)
         {
-            vkCmdDispatchIndirect(commandBuffer, buffer.handle, offset); 
+            vkCmdDispatchIndirect(commandBuffer, buffer.handle, offset);
             Interlocked.Increment(ref Stats.dispatchIndirect);
         }
 
@@ -364,7 +398,7 @@
             uint imageMemoryBarrierCount, VkImageMemoryBarrier* pImageMemoryBarriers)
         {
             vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, (VkDependencyFlags)dependencyFlags, memoryBarrierCount, (VkMemoryBarrier*)pMemoryBarriers,
-                bufferMemoryBarrierCount, (VkBufferMemoryBarrier*) pBufferMemoryBarriers,
+                bufferMemoryBarrierCount, (VkBufferMemoryBarrier*)pBufferMemoryBarriers,
                 imageMemoryBarrierCount, (VkImageMemoryBarrier*)pImageMemoryBarriers);
         }
 
@@ -388,8 +422,8 @@
 
         public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, Span<VkImageMemoryBarrier> barriers)
         {
-            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, 0, 0, null, 0, null, 
-                (uint)barriers.Length, (VkImageMemoryBarrier*)Unsafe.AsPointer(ref  barriers[0]));
+            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, 0, 0, null, 0, null,
+                (uint)barriers.Length, (VkImageMemoryBarrier*)Unsafe.AsPointer(ref barriers[0]));
         }
 
         // Fixed sub resource on first mip level and layer
@@ -529,76 +563,6 @@
         public void Reset(bool releaseRes)
         {
             vkResetCommandBuffer(commandBuffer, releaseRes ? VkCommandBufferResetFlags.ReleaseResources : VkCommandBufferResetFlags.None);
-        }
-    }
-
-    public ref struct RenderPassBeginInfo
-    {
-        public RenderPass renderPass;
-        public Framebuffer framebuffer;
-        public VkRect2D renderArea;
-        public VkClearValue[] clearValues;
-        public int numClearValues;
-
-        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, VkRect2D renderArea, params VkClearValue[] clearValues)
-        {
-            this.renderPass = renderPass;
-            this.framebuffer = framebuffer;
-            this.renderArea = renderArea;
-            this.clearValues = clearValues;
-            numClearValues = clearValues.Length;
-        }
-
-        public RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, VkRect2D renderArea, VkClearValue[] clearValues, int num)
-        {
-            this.renderPass = renderPass;
-            this.framebuffer = framebuffer;
-            this.renderArea = renderArea;
-            this.clearValues = clearValues;
-            numClearValues = num;
-        }
-
-        public unsafe void ToNative(out VkRenderPassBeginInfo native)
-        {
-            native = new VkRenderPassBeginInfo();
-            native.sType = VkStructureType.RenderPassBeginInfo;
-            native.renderPass = framebuffer.renderPass.handle;
-            native.framebuffer = framebuffer.handle;
-            native.renderArea = new VkRect2D(renderArea.offset, renderArea.extent);
-
-            if (clearValues != null && clearValues.Length > 0)
-            {
-                native.clearValueCount = (uint)numClearValues;
-                native.pClearValues = (VkClearValue*)Unsafe.AsPointer(ref clearValues[0]);
-            }
-            else
-            {
-                native.clearValueCount = 0;
-                native.pClearValues = null;
-            }
-        }
-
-    }
-
-    public ref struct CommandBufferInheritanceInfo
-    {
-        public RenderPass renderPass;
-        public uint subpass;
-        public Framebuffer framebuffer;
-        public bool occlusionQueryEnable;
-        public VkQueryControlFlags queryFlags;
-        public VkQueryPipelineStatisticFlags pipelineStatistics;
-
-        public unsafe void ToNative(out VkCommandBufferInheritanceInfo native)
-        {
-            native = new VkCommandBufferInheritanceInfo();
-            native.sType = VkStructureType.CommandBufferInheritanceInfo;
-            native.renderPass = renderPass.handle;
-            native.subpass = subpass;
-            native.framebuffer = framebuffer.handle;
-            native.occlusionQueryEnable = occlusionQueryEnable;
-            native.queryFlags = (VkQueryControlFlags)queryFlags;
-            native.pipelineStatistics = (VkQueryPipelineStatisticFlags)pipelineStatistics;
         }
     }
 

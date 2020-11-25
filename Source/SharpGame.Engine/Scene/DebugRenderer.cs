@@ -65,11 +65,11 @@ namespace SharpGame
 
         Shader debugShader;
 
-        Pipeline pipelineDepthLines;
-        Pipeline pipelineNoDepthLines;
+        VkPipeline pipelineDepthLines;
+        VkPipeline pipelineNoDepthLines;
 
-        Pipeline pipelineDepth;
-        Pipeline pipelineNoDepth;
+        VkPipeline pipelineDepth;
+        VkPipeline pipelineNoDepth;
 
         public DebugRenderer()
         {

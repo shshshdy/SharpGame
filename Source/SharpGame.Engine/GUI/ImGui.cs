@@ -21,7 +21,7 @@ namespace SharpGame
         Texture texture;
         Shader uiShader;
         Pass pass;
-        Pipeline pipeline;
+        VkPipeline pipeline;
         DescriptorSetLayout resourceLayout;
         DescriptorSet resourceSet;
         DescriptorSetLayout resourceLayoutTex;

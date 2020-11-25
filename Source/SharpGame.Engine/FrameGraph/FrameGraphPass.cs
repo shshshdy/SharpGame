@@ -345,7 +345,7 @@ namespace SharpGame
         public void BeginRenderPass(CommandBuffer cb, Framebuffer framebuffer, VkRect2D renderArea, VkClearValue[] clearValues)
         {
             var rpBeginInfo = new RenderPassBeginInfo(framebuffer.renderPass, framebuffer, renderArea, clearValues);
-            cb.BeginRenderPass(in rpBeginInfo, UseSecondCmdBuffer? VkSubpassContents.SecondaryCommandBuffers : VkSubpassContents.Inline);
+            cb.BeginRenderPass(ref rpBeginInfo, UseSecondCmdBuffer? VkSubpassContents.SecondaryCommandBuffers : VkSubpassContents.Inline);
         }
 
         public void EndRenderPass(CommandBuffer cb)

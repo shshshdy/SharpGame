@@ -212,8 +212,8 @@ namespace SharpGame
         [IgnoreDataMember]
         public VertexLayout VertexLayout { get; set; }
 
-        internal Pipeline computeHandle;
-        ConcurrentDictionary<long, Pipeline> pipelines = new ConcurrentDictionary<long, Pipeline>();
+        internal VkPipeline computeHandle;
+        ConcurrentDictionary<long, VkPipeline> pipelines = new ConcurrentDictionary<long, VkPipeline>();
 
         public Pass()
         {
@@ -384,7 +384,7 @@ namespace SharpGame
             return default;
         }
 
-        public Pipeline GetGraphicsPipeline(RenderPass renderPass, uint subPass, Geometry geometry)
+        public VkPipeline GetGraphicsPipeline(RenderPass renderPass, uint subPass, Geometry geometry)
         {
             var vertexInput = VertexLayout?? (geometry != null ? geometry.VertexLayout : null);
             var primitiveTopology = geometry != null ? geometry.PrimitiveTopology : PrimitiveTopology;
@@ -397,7 +397,7 @@ namespace SharpGame
             return CreateGraphicsPipeline(renderPass, subPass, vertexInput, primitiveTopology);            
         }
 
-        public unsafe Pipeline CreateGraphicsPipeline(RenderPass renderPass, uint subPass, VertexLayout vertexInput, VkPrimitiveTopology primitiveTopology)
+        public unsafe VkPipeline CreateGraphicsPipeline(RenderPass renderPass, uint subPass, VertexLayout vertexInput, VkPrimitiveTopology primitiveTopology)
         {
             VkGraphicsPipelineCreateInfo pipelineCreateInfo = new VkGraphicsPipelineCreateInfo
             {
@@ -464,19 +464,19 @@ namespace SharpGame
                 pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
             }
 
-            var handle = new Pipeline(Device.CreateGraphicsPipeline(ref pipelineCreateInfo));
+            var handle = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
             pipelines.TryAdd(vertexInput?.GetHashCode()??0, handle);
             return handle;
         }
 
-        public unsafe Pipeline GetComputePipeline()
+        public unsafe VkPipeline GetComputePipeline()
         {
             if (!IsComputeShader)
             {
-                return null;
+                return VkPipeline.Null;
             }
 
-            if (computeHandle != null)
+            if (computeHandle)
             {
                 return computeHandle;
             }
@@ -488,7 +488,7 @@ namespace SharpGame
             pipelineCreateInfo.stage = GetComputeStageCreateInfo();
             pipelineCreateInfo.layout = PipelineLayout.handle;
 
-            computeHandle = new Pipeline(Device.CreateComputePipeline(ref pipelineCreateInfo));
+            computeHandle = Device.CreateComputePipeline(ref pipelineCreateInfo);
             return computeHandle;
 
         }
@@ -510,7 +510,7 @@ namespace SharpGame
             if (computeHandle != null)
             {
                 computeHandle.Dispose();
-                computeHandle = null;
+                computeHandle = VkPipeline.Null;
             }
 
             PipelineLayout.Dispose();
