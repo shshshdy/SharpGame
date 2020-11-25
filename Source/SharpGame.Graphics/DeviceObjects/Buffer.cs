@@ -17,7 +17,7 @@ namespace SharpGame
 
         internal VkDescriptorBufferInfo descriptor;
 
-        Format viewFormat;
+        VkFormat viewFormat;
 
         public VkBuffer handle;
         public BufferView view;
@@ -83,7 +83,7 @@ namespace SharpGame
             return new Buffer(VkBufferUsageFlags.TransferSrc, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent, size, 1, VkSharingMode.Exclusive, null, data);
         }
 
-        public static Buffer CreateTexelBuffer(VkBufferUsageFlags flags, ulong size, Format format, VkSharingMode sharingMode, uint[] queueFamilyIndices)
+        public static Buffer CreateTexelBuffer(VkBufferUsageFlags flags, ulong size, VkFormat format, VkSharingMode sharingMode, uint[] queueFamilyIndices)
         {
             var buffer = new Buffer(VkBufferUsageFlags.StorageTexelBuffer | flags, VkMemoryPropertyFlags.DeviceLocal, size, 1, sharingMode, queueFamilyIndices);
             buffer.CreateView(format, 0, WholeSize);
@@ -112,7 +112,7 @@ namespace SharpGame
             descriptor.range = WholeSize;// Size;
         }
 
-        public void CreateView(Format format, ulong offset, ulong range)
+        public void CreateView(VkFormat format, ulong offset, ulong range)
         {
             view = new BufferView(this, format, offset, range);
         }
@@ -162,7 +162,7 @@ namespace SharpGame
     {
         internal VkBufferView handle;
 
-        public BufferView(Buffer buffer, Format format, ulong offset, ulong range)
+        public BufferView(Buffer buffer, VkFormat format, ulong offset, ulong range)
         {
             var bufferViewCreateInfo = new VkBufferViewCreateInfo
             {

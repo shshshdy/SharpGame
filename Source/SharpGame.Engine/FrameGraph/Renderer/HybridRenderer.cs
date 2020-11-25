@@ -70,9 +70,9 @@ namespace SharpGame
 
             geometryPass = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                //new RenderTextureInfo(width, height, 1, Format.R8g8b8a8Unorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
-                //new RenderTextureInfo(width, height, 1, Format.R8g8b8a8Unorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
-                //new RenderTextureInfo(width, height, 1, Format.R32g32b32a32Sfloat, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
+                //new RenderTextureInfo(width, height, 1, VkFormat.R8G8B8A8UNorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
+                //new RenderTextureInfo(width, height, 1, VkFormat.R8G8B8A8UNorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
+                //new RenderTextureInfo(width, height, 1, VkFormat.R32G32B32A32SFloat, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
                 //new RenderTextureInfo(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled),
 
                 new SceneSubpass("gbuffer")
@@ -136,13 +136,13 @@ namespace SharpGame
 
         RenderPass OnCreateRenderPass()
         {
-            Format depthFormat = Device.GetSupportedDepthFormat();
+            VkFormat depthFormat = Device.GetSupportedDepthFormat();
 
             AttachmentDescription[] attachments =
             {
-                new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
-                new AttachmentDescription(Format.R8g8b8a8Unorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
-                new AttachmentDescription(Format.R32g32b32a32Sfloat, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
+                new AttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
+                new AttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
+                new AttachmentDescription(VkFormat.R32G32B32A32SFloat, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
                 new AttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)
             };
 
@@ -203,11 +203,11 @@ namespace SharpGame
         {
             uint width = (uint)Graphics.Width;
             uint height = (uint)Graphics.Height;
-            Format depthFormat = Device.GetSupportedDepthFormat();
+            VkFormat depthFormat = Device.GetSupportedDepthFormat();
 
-            albedoRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
-            normalRT = new RenderTexture(width, height, 1, Format.R8g8b8a8Unorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
-            positionRT = new RenderTexture(width, height, 1, Format.R32g32b32a32Sfloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            albedoRT = new RenderTexture(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            normalRT = new RenderTexture(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            positionRT = new RenderTexture(width, height, 1, VkFormat.R32G32B32A32SFloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
             depthHWRT = new RenderTexture(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
 
             var geometryFB = Framebuffer.Create(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, positionRT.imageView, depthHWRT.imageView });

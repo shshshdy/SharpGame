@@ -50,7 +50,7 @@ namespace SharpGame
         }
 
         public unsafe static Image Create(uint width, uint height, VkImageCreateFlags flags, uint layers, uint levels,
-            Format format, VkSampleCountFlags samples, VkImageUsageFlags usage)
+            VkFormat format, VkSampleCountFlags samples, VkImageUsageFlags usage)
         {
             var imageType = height == 1 ? width > 1 ? VkImageType.Image1D : VkImageType.Image2D : VkImageType.Image2D;
             var createInfo = new VkImageCreateInfo
@@ -98,7 +98,7 @@ namespace SharpGame
             Device.Destroy(handle);
         }
 
-        public static ImageView Create(Image image, VkImageViewType viewType, Format format, VkImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels, uint baseArrayLayer = 0, uint arrayLayers = 1)
+        public static ImageView Create(Image image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels, uint baseArrayLayer = 0, uint arrayLayers = 1)
         {
             var viewCreateInfo = new VkImageViewCreateInfo
             {

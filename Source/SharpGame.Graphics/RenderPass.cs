@@ -83,7 +83,7 @@ namespace SharpGame
     public struct AttachmentDescription
     {
         public AttachmentDescriptionFlags flags;
-        public Format format;
+        public VkFormat format;
         public VkSampleCountFlags samples;
         public AttachmentLoadOp loadOp;
         public AttachmentStoreOp storeOp;
@@ -93,7 +93,7 @@ namespace SharpGame
         public VkImageLayout finalLayout;
 
         public AttachmentDescription(
-            Format format,
+            VkFormat format,
             VkSampleCountFlags samples = VkSampleCountFlags.Count1,
             AttachmentLoadOp loadOp = AttachmentLoadOp.Clear,
             AttachmentStoreOp storeOp = AttachmentStoreOp.Store,

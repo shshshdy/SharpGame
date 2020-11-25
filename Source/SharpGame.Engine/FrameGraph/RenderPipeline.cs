@@ -73,7 +73,7 @@ namespace SharpGame
             initialized = false;
         }
 
-        public void AddRenderTexture(string name, uint width, uint height, uint layers, Format format, VkImageUsageFlags usage,
+        public void AddRenderTexture(string name, uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage,
             VkSampleCountFlags samples = VkSampleCountFlags.Count1/*, VkImageLayout imageLayout = VkImageLayout.Undefined*/)
         {
             if(renderTextures.ContainsKey(name))

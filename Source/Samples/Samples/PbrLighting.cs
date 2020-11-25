@@ -58,9 +58,9 @@ namespace SharpGame.Samples
             camera = scene.GetComponent<Camera>(true);
             camera.Node.LookAt(new vec3(0.0f, 5.0f, -50), TransformSpace.WORLD);
 
-            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, VkImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 0, VkImageUsageFlags.Storage | VkImageUsageFlags.TransferSrc);
-            irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, VkImageViewType.ImageCube, 6, Format.R16g16b16a16Sfloat, 1, VkImageUsageFlags.Storage);
-            brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, VkImageViewType.Image2D, 1, Format.R16g16Sfloat, 1, VkImageUsageFlags.Storage);
+            envMap = Texture.Create(kEnvMapSize, kEnvMapSize, VkImageViewType.ImageCube, 6, VkFormat.R16G16B16A16SFloat, 0, VkImageUsageFlags.Storage | VkImageUsageFlags.TransferSrc);
+            irMap = Texture.Create(kIrradianceMapSize, kIrradianceMapSize, VkImageViewType.ImageCube, 6, VkFormat.R16G16B16A16SFloat, 1, VkImageUsageFlags.Storage);
+            brdfLUT = Texture.Create(kBRDF_LUT_Size, kBRDF_LUT_Size, VkImageViewType.Image2D, 1, VkFormat.R16G16SFloat, 1, VkImageUsageFlags.Storage);
 
             {
                 var model = GeometryUtil.CreateCubeModel(10, 10, 10);
@@ -81,16 +81,16 @@ namespace SharpGame.Samples
 
                 KtxTextureReader texReader = new KtxTextureReader
                 {
-                    Format = Format.R8g8b8a8Unorm,
+                    VkFormat = VkFormat.R8G8B8A8UNorm,
                 };
 
-                var colorMap = texReader.Load("models/cerberus/albedo.ktx");// Format.R8g8b8a8Srgb);
+                var colorMap = texReader.Load("models/cerberus/albedo.ktx");// VkFormat.R8g8b8a8Srgb);
                 var normalMap = texReader.Load("models/cerberus/normal.ktx");
-                texReader.Format = Format.R8Unorm;
+                texReader.VkFormat = VkFormat.R8UNorm;
                 var metallicMap = texReader.Load("models/cerberus/metallic.ktx");
-                texReader.Format = Format.R8Unorm;
+                texReader.VkFormat = VkFormat.R8UNorm;
                 var roughnessMap = texReader.Load("models/cerberus/roughness.ktx");
-                //var aoMap = Texture.LoadFromFile("models/cerberus/ao.ktx", Format.R8Unorm);
+                //var aoMap = Texture.LoadFromFile("models/cerberus/ao.ktx", VkFormat.R8Unorm);
 
                 var mat = new Material("Shaders/LitPbr.shader");
                 mat.SetTexture("albedoMap", colorMap);
@@ -136,7 +136,7 @@ namespace SharpGame.Samples
         {
             KtxTextureReader texReader = new KtxTextureReader
             {
-                Format = Format.R16g16b16a16Sfloat,
+                VkFormat = VkFormat.R16G16B16A16SFloat,
             };
 
             cubeMap = texReader.Load("textures/hdr/" + cubemap);
@@ -201,7 +201,7 @@ namespace SharpGame.Samples
                     Span<DescriptorImageInfo> envTextureMipTailDescriptors = stackalloc DescriptorImageInfo[(int)numMipTailLevels];
                     for (uint level = 0; level < numMipTailLevels; ++level)
                     {
-                        var view = ImageView.Create(envMap.image, VkImageViewType.ImageCube, Format.R16g16b16a16Sfloat, VkImageAspectFlags.Color, level + 1, 1, 0, envMap.image.arrayLayers);
+                        var view = ImageView.Create(envMap.image, VkImageViewType.ImageCube, VkFormat.R16G16B16A16SFloat, VkImageAspectFlags.Color, level + 1, 1, 0, envMap.image.arrayLayers);
                         envTextureMipTailViews.Add(view);
                         envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, VkImageLayout.General);
                     }

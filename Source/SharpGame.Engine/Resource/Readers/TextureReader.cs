@@ -84,29 +84,29 @@ namespace SharpGame
                     mipmaps[i] = new MipmapLevel(imageSize, newData.AsSpan(mip.DataOffset, mip.DataLen).ToArray(), (uint)mip.Width, (uint)mip.Height, 1);
                 }
 
-                Format fmt = Format.R8g8b8a8Unorm;
+                VkFormat fmt = VkFormat.R8G8B8A8UNorm;
                 switch (image.Format)
                 {
                     case Pfim.ImageFormat.Rgb8:
-                        fmt = Format.R4g4UnormPack8;
+                        fmt = VkFormat.R4G4UNormPack8;
                         break;
                     case Pfim.ImageFormat.R5g5b5:
-                        //fmt = Format.R5g5b5UnormPack16;
+                        //fmt = VkFormat.R5g5b5UnormPack16;
                         break;
                     case Pfim.ImageFormat.R5g6b5:
-                        fmt = Format.R5g6b5UnormPack16;
+                        fmt = VkFormat.R5G6B5UNormPack16;
                         break;
                     case Pfim.ImageFormat.R5g5b5a1:
-                        fmt = Format.R5g5b5a1UnormPack16;
+                        fmt = VkFormat.R5G5B5A1UNormPack16;
                         break;
                     case Pfim.ImageFormat.Rgba16:
-                        fmt = Format.R4g4b4a4UnormPack16;
+                        fmt = VkFormat.R4G4B4A4UNormPack16;
                         break;
                     case Pfim.ImageFormat.Rgb24:
-                        fmt = Format.R8g8b8Unorm;
+                        fmt = VkFormat.R8G8B8UNorm;
                         break;
                     case Pfim.ImageFormat.Rgba32:
-                        fmt = Format.B8g8r8a8Unorm;
+                        fmt = VkFormat.B8G8R8A8UNorm;
                         break;
                 }
 
@@ -128,7 +128,7 @@ namespace SharpGame
 
     public class KtxTextureReader : ResourceReader<Texture>
     {
-        public Format Format { get; set; } = Format.Bc3UnormBlock;
+        public VkFormat VkFormat { get; set; } = VkFormat.BC3UNormBlock;
         public VkSamplerAddressMode SamplerAddressMode { get; set; } = VkSamplerAddressMode.Repeat;
 
         public KtxTextureReader() : base(".ktx")
@@ -140,22 +140,22 @@ namespace SharpGame
             KtxFile texFile = KtxFile.Load(stream, false);
             Debug.Assert(!texFile.Header.SwapEndian);
 
-            Format fmt = Format;
+            VkFormat fmt = VkFormat;
             if(stream.Name.IndexOf("bc3_unorm", StringComparison.OrdinalIgnoreCase) != -1)
             {
-                fmt = Format.Bc3UnormBlock;
+                fmt = VkFormat.BC3UNormBlock;
             }
             else if(stream.Name.IndexOf("etc2_unorm", StringComparison.OrdinalIgnoreCase) != -1)
             {
-                fmt = Format.Etc2R8g8b8a8UnormBlock;
+                fmt = VkFormat.ETC2R8G8B8A8UNormBlock;
             }
             else if (stream.Name.IndexOf("astc_8x8_unorm", StringComparison.OrdinalIgnoreCase) != -1)
             {
-                fmt = Format.Astc8x8UnormBlock;
+                fmt = VkFormat.ASTC8x8UNormBlock;
             }
             else if (stream.Name.IndexOf("rgba", StringComparison.OrdinalIgnoreCase) != -1)
             {
-                fmt = Format.R8g8b8a8Unorm;
+                fmt = VkFormat.R8G8B8A8UNorm;
             }
 
             tex.format = fmt;

@@ -173,7 +173,7 @@ namespace SharpGame.Samples
 
             camera = scene.GetComponent<Camera>(true);
 
-            prepareSparseTexture(4096, 4096, 1, Format.R8g8b8a8Unorm);           
+            prepareSparseTexture(4096, 4096, 1, VkFormat.R8G8B8A8UNorm);           
 
             {
                 var node = scene.CreateChild("Plane");
@@ -207,7 +207,7 @@ namespace SharpGame.Samples
             };
         }
 
-        unsafe void prepareSparseTexture(uint width, uint height, uint layerCount, Format format)
+        unsafe void prepareSparseTexture(uint width, uint height, uint layerCount, VkFormat format)
         {
             texture = new VirtualTexture
             {

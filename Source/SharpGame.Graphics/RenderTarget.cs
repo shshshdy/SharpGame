@@ -17,7 +17,7 @@ namespace SharpGame
         public Swapchain swapchain;
         public VkClearValue clearValue = new VkClearColorValue(0, 0, 0, 1);
 
-        public ref Format format => ref attachmentDescription.format;
+        public ref VkFormat format => ref attachmentDescription.format;
         public ref VkSampleCountFlags samples => ref attachmentDescription.samples;
         public ref AttachmentLoadOp loadOp => ref attachmentDescription.loadOp;
         public ref AttachmentStoreOp storeOp => ref attachmentDescription.storeOp;
@@ -33,7 +33,7 @@ namespace SharpGame
             clearValue = new VkClearColorValue(0, 0, 0, 1);
         }
 
-        public RenderTextureInfo(uint width, uint height, uint layers, Format format, VkImageUsageFlags usage,
+        public RenderTextureInfo(uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage,
             VkSampleCountFlags samples = VkSampleCountFlags.Count1)
         {
             this.width = width;
@@ -65,7 +65,7 @@ namespace SharpGame
             Create(swapchain);
         }
         
-        public RenderTexture(uint width, uint height, uint layers, Format format, VkImageUsageFlags usage,
+        public RenderTexture(uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage,
             VkSampleCountFlags samples = VkSampleCountFlags.Count1)
         {
             this.extent = new VkExtent3D(width, height, 1);

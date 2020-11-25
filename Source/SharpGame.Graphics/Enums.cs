@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace SharpGame
-{
-    public enum Format
+{/*
+    public enum VkFormat
     {
         Undefined = 0,
         R4g4UnormPack8 = 1,
@@ -43,12 +43,12 @@ namespace SharpGame
         B8g8r8Uint = 34,
         B8g8r8Sint = 35,
         B8g8r8Srgb = 36,
-        R8g8b8a8Unorm = 37,
-        R8g8b8a8Snorm = 38,
+        R8G8B8A8UNorm = 37,
+        R8G8B8A8SNorm = 38,
         R8g8b8a8Uscaled = 39,
         R8g8b8a8Sscaled = 40,
-        R8g8b8a8Uint = 41,
-        R8g8b8a8Sint = 42,
+        R8G8B8A8UInt = 41,
+        R8G8B8A8SInt = 42,
         R8g8b8a8Srgb = 43,
         B8g8r8a8Unorm = 44,
         B8g8r8a8Snorm = 45,
@@ -103,19 +103,19 @@ namespace SharpGame
         R16g16b16a16Sscaled = 94,
         R16g16b16a16Uint = 95,
         R16g16b16a16Sint = 96,
-        R16g16b16a16Sfloat = 97,
+        R16G16B16A16SFloat = 97,
         R32Uint = 98,
         R32Sint = 99,
         R32Sfloat = 100,
         R32g32Uint = 101,
         R32g32Sint = 102,
-        R32g32Sfloat = 103,
+        R32G32SFloat = 103,
         R32g32b32Uint = 104,
         R32g32b32Sint = 105,
-        R32g32b32Sfloat = 106,
+        R32G32B32SFloat = 106,
         R32g32b32a32Uint = 107,
         R32g32b32a32Sint = 108,
-        R32g32b32a32Sfloat = 109,
+        R32G32B32A32SFloat = 109,
         R64Uint = 110,
         R64Sint = 111,
         R64Sfloat = 112,
@@ -234,6 +234,6 @@ namespace SharpGame
         G16B16r162plane422UnormKHR = 1000156032,
         G16B16R163plane444UnormKHR = 1000156033
     }
-
+    */
 
 }

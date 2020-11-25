@@ -368,16 +368,16 @@ namespace SharpGame
         const uint MASK_INSTANCEMATRIX2 = 0x1000;
         const uint MASK_INSTANCEMATRIX1 = 0x2000;
 
-        Format[] semanticToFormat =
+        VkFormat[] semanticToFormat =
         {
-            Format.R32g32b32Sfloat,
-            Format.R32g32b32Sfloat,
-            Format.R32g32b32a32Sfloat,
-            Format.R32g32b32a32Sfloat,
-            Format.R32g32Sfloat,
-            Format.R8g8b8a8Unorm,
-            Format.R32g32b32a32Sfloat,
-            Format.R8g8b8a8Sint,
+            VkFormat.R32G32B32SFloat,
+            VkFormat.R32G32B32SFloat,
+            VkFormat.R32G32B32A32SFloat,
+            VkFormat.R32G32B32A32SFloat,
+            VkFormat.R32G32SFloat,
+            VkFormat.R8G8B8A8UNorm,
+            VkFormat.R32G32B32A32SFloat,
+            VkFormat.R8G8B8A8SInt,
         };
 
         uint[] semanticSize = { 12, 12, 16, 16, 8, 4, 16, 4 };
@@ -388,49 +388,49 @@ namespace SharpGame
             uint location = 0;
             if ((mask & MASK_POSITION) != 0)
             {
-                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32b32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, VkFormat.R32G32B32SFloat, stride));
                 stride += 12;
                 location++;
             }
             if ((mask & MASK_NORMAL) != 0)
             {
-                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32b32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, VkFormat.R32G32B32SFloat, stride));
                 stride += 12;
                 location++;
             }
             if ((mask & MASK_COLOR) != 0)
             {
-                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R8g8b8a8Unorm, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, VkFormat.R8G8B8A8UNorm, stride));
                 stride += 4;
                 location++;
             }
             if ((mask & MASK_TEXCOORD1) != 0)
             {
-                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, VkFormat.R32G32SFloat, stride));
                 stride += 8;
                 location++;
             }
             if ((mask & MASK_TEXCOORD2) != 0)
             {
-                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, VkFormat.R32G32SFloat, stride));
                 stride += 8;
                 location++;
             }
             if ((mask & MASK_TANGENT) != 0)
             {
-                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32b32a32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, VkFormat.R32G32B32A32SFloat, stride));
                 stride += 16;
                 location++;
             }
             if ((mask & MASK_BLENDWEIGHTS) != 0)
             {
-                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R32g32b32a32Sfloat, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, VkFormat.R32G32B32A32SFloat, stride));
                 stride += 16;
                 location++;
             }
             if ((mask & MASK_BLENDINDICES) != 0)
             {
-                vertexInputAttributes.Add(new VertexAttribute(0, location, Format.R8g8b8a8Uint, stride));
+                vertexInputAttributes.Add(new VertexAttribute(0, location, VkFormat.R8G8B8A8UInt, stride));
                 stride += 4;
                 location++;
             }

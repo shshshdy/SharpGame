@@ -35,7 +35,7 @@ namespace SharpGame.ImageSharp
         /// <summary>
         /// The pixel format of all images.
         /// </summary>
-        public Format Format { get; }
+        public VkFormat VkFormat { get; }
 
         /// <summary>
         /// The size of each pixel, in bytes.
@@ -56,7 +56,7 @@ namespace SharpGame.ImageSharp
         public ImageSharpTexture(Image<Rgba32> image, bool mipmap = true) : this(image, mipmap, false) { }
         public ImageSharpTexture(Image<Rgba32> image, bool mipmap, bool srgb)
         {
-            Format = srgb ? Format.R8g8b8a8Srgb : Format.R8g8b8a8Unorm;
+            VkFormat = srgb ? VkFormat.R8G8B8A8SRgb : VkFormat.R8G8B8A8UNorm;
             if (mipmap)
             {
                 Images = MipmapHelper.GenerateMipmaps(image);
@@ -82,7 +82,7 @@ namespace SharpGame.ImageSharp
             {
                 extent = new VkExtent3D(Width, Height, 1),
                 mipLevels = (uint)MipLevels,
-                format = Format,
+                format = VkFormat,
                 imageUsageFlags = VkImageUsageFlags.Sampled,
                 imageLayout = VkImageLayout.ShaderReadOnlyOptimal,
             };

@@ -34,10 +34,10 @@ namespace SharpGame
     {
         public uint location;
         public uint binding;
-        public Format format;
+        public VkFormat format;
         public uint offset;
 
-        public VertexAttribute(uint bind, uint loc, Format fmt, uint offset)
+        public VertexAttribute(uint bind, uint loc, VkFormat fmt, uint offset)
         {
             binding = bind;
             location = loc;
@@ -157,71 +157,71 @@ namespace SharpGame
             Bindings = new[] { new VertexBinding(0, offset + size, VertexInputRate.Vertex) };
         }
 
-        Format GetFormat(VertexComponent vc)
+        VkFormat GetFormat(VertexComponent vc)
         {
             switch (vc)
             {
                 case VertexComponent.Position:
                 case VertexComponent.Normal:
-                    return Format.R32g32b32Sfloat;
+                    return VkFormat.R32G32B32SFloat;
                 case VertexComponent.Texcoord:
-                    return Format.R32g32Sfloat;
+                    return VkFormat.R32G32SFloat;
                 case VertexComponent.Tangent:
-                    return Format.R32g32b32Sfloat;
+                    return VkFormat.R32G32B32SFloat;
                 case VertexComponent.Bitangent:
-                    return Format.R32g32b32Sfloat;
+                    return VkFormat.R32G32B32SFloat;
                 case VertexComponent.Color:
-                    return Format.R8g8b8a8Unorm;
+                    return VkFormat.R8G8B8A8UNorm;
                 case VertexComponent.BlendIndices:
-                    return Format.R8g8b8a8Uint;
+                    return VkFormat.R8G8B8A8UInt;
                 case VertexComponent.BlendWeights:
-                    return Format.R32g32b32a32Sfloat;
+                    return VkFormat.R32G32B32A32SFloat;
 
                 case VertexComponent.Int1:
-                    return Format.R32Sint;
+                    return VkFormat.R32SInt;
                 case VertexComponent.Int2:
-                    return Format.R32g32Sint;
+                    return VkFormat.R32G32SInt;
                 case VertexComponent.Int3:
-                    return Format.R32g32b32Sint;
+                    return VkFormat.R32G32B32SInt;
                 case VertexComponent.Int4:
-                    return Format.R32g32b32a32Sint;
+                    return VkFormat.R32G32B32A32SInt;
 
                 case VertexComponent.Float1:
-                    return Format.R32Sfloat;
+                    return VkFormat.R32SFloat;
                 case VertexComponent.Float2:
-                    return Format.R32g32Sfloat;
+                    return VkFormat.R32G32SFloat;
                 case VertexComponent.Float3:
-                    return Format.R32g32b32Sfloat;
+                    return VkFormat.R32G32B32SFloat;
                 case VertexComponent.Float4:
-                    return Format.R32g32b32a32Sfloat;
+                    return VkFormat.R32G32B32A32SFloat;
             }
 
-            return Format.Undefined;
+            return VkFormat.Undefined;
         }
        
-        uint GetFormatSize(Format format)
+        uint GetFormatSize(VkFormat format)
         {
             switch(format)
             {
-                case Format.R8g8b8a8Unorm:
-                case Format.R16g16Unorm:
-                case Format.R16g16Snorm:
-                case Format.R32Uint:
-                case Format.R32Sint:
-                case Format.R32Sfloat:
-                case Format.R8g8b8a8Uint:
-                case Format.R8g8b8a8Sint:
+                case VkFormat.R8G8B8A8UNorm:
+                case VkFormat.R16G16UNorm:
+                case VkFormat.R16G16SNorm:
+                case VkFormat.R32UInt:
+                case VkFormat.R32SInt:
+                case VkFormat.R32SFloat:
+                case VkFormat.R8G8B8A8UInt:
+                case VkFormat.R8G8B8A8SInt:
                     return 4;
 
-                case Format.R16g16b16a16Unorm:
-                case Format.R16g16b16a16Sfloat:
-                case Format.R32g32Uint:
-                case Format.R32g32Sint:
-                case Format.R32g32Sfloat:
+                case VkFormat.R16G16B16A16UNorm:
+                case VkFormat.R16G16B16A16SFloat:
+                case VkFormat.R32G32UInt:
+                case VkFormat.R32G32SInt:
+                case VkFormat.R32G32SFloat:
                     return 8;
-                case Format.R32g32b32Sfloat:
+                case VkFormat.R32G32B32SFloat:
                     return 12;
-                case Format.R32g32b32a32Sfloat:
+                case VkFormat.R32G32B32A32SFloat:
                     return 16;
                 default:
                     Log.Error("Error format size : " + format);

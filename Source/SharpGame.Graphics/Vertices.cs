@@ -21,7 +21,7 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         {
-            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0)
+            new VertexAttribute(0, 0, VkFormat.R32G32B32SFloat, 0)
         };
     }
 
@@ -47,8 +47,8 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         {
-            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexAttribute(0, 1, Format.R32g32Sfloat, 12),
+            new VertexAttribute(0, 0, VkFormat.R32G32B32SFloat, 0),
+            new VertexAttribute(0, 1, VkFormat.R32G32SFloat, 12),
         };
     }
 
@@ -77,9 +77,9 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         {
-            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexAttribute(0, 1, Format.R32g32Sfloat, 12),
-            new VertexAttribute(0, 2, Format.R32g32b32Sfloat, 20)
+            new VertexAttribute(0, 0, VkFormat.R32G32B32SFloat, 0),
+            new VertexAttribute(0, 1, VkFormat.R32G32SFloat, 12),
+            new VertexAttribute(0, 2, VkFormat.R32G32B32SFloat, 20)
         };
     }
 
@@ -105,11 +105,11 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         {
-            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexAttribute(0, 1, Format.R32g32Sfloat, 12),
-            new VertexAttribute(0, 2, Format.R32g32b32Sfloat, 20),
-            new VertexAttribute(0, 3, Format.R32g32b32Sfloat, 32),
-            new VertexAttribute(0, 4, Format.R32g32b32Sfloat, 44)
+            new VertexAttribute(0, 0, VkFormat.R32G32B32SFloat, 0),
+            new VertexAttribute(0, 1, VkFormat.R32G32SFloat, 12),
+            new VertexAttribute(0, 2, VkFormat.R32G32B32SFloat, 20),
+            new VertexAttribute(0, 3, VkFormat.R32G32B32SFloat, 32),
+            new VertexAttribute(0, 4, VkFormat.R32G32B32SFloat, 44)
         };
     }
 
@@ -133,10 +133,10 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         {
-            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexAttribute(0, 1, Format.R32g32Sfloat, 12),
-            new VertexAttribute(0, 2, Format.R32g32b32Sfloat, 20),
-            new VertexAttribute(0, 3, Format.R32g32b32a32Sfloat, 32)
+            new VertexAttribute(0, 0, VkFormat.R32G32B32SFloat, 0),
+            new VertexAttribute(0, 1, VkFormat.R32G32SFloat, 12),
+            new VertexAttribute(0, 2, VkFormat.R32G32B32SFloat, 20),
+            new VertexAttribute(0, 3, VkFormat.R32G32B32A32SFloat, 32)
         };
     }
 
@@ -160,10 +160,10 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         {
-            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexAttribute(0, 1, Format.R32g32Sfloat, 8),
-            new VertexAttribute(0, 2, Format.R32g32b32Sfloat, 20),
-            new VertexAttribute(0, 3, Format.R8g8b8a8Unorm, 32)
+            new VertexAttribute(0, 0, VkFormat.R32G32B32SFloat, 0),
+            new VertexAttribute(0, 1, VkFormat.R32G32SFloat, 8),
+            new VertexAttribute(0, 2, VkFormat.R32G32B32SFloat, 20),
+            new VertexAttribute(0, 3, VkFormat.R8G8B8A8UNorm, 32)
         };
     }
 
@@ -177,8 +177,8 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         {
-            new VertexAttribute(0, 0, Format.R32g32b32Sfloat, 0),
-            new VertexAttribute(0, 1, Format.R8g8b8a8Unorm, 12)
+            new VertexAttribute(0, 0, VkFormat.R32G32B32SFloat, 0),
+            new VertexAttribute(0, 1, VkFormat.R8G8B8A8UNorm, 12)
         };
     }
 
@@ -194,9 +194,9 @@ namespace SharpGame
 
         public static VertexLayout Layout = new VertexLayout
         {
-            new VertexAttribute(0, 0, Format.R32g32Sfloat, 0),
-            new VertexAttribute(0, 1, Format.R32g32Sfloat, 8),
-            new VertexAttribute(0, 2, Format.R8g8b8a8Unorm, 16)
+            new VertexAttribute(0, 0, VkFormat.R32G32SFloat, 0),
+            new VertexAttribute(0, 1, VkFormat.R32G32SFloat, 8),
+            new VertexAttribute(0, 2, VkFormat.R8G8B8A8UNorm, 16)
         };
     }
 }

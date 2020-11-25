@@ -29,7 +29,7 @@ namespace SharpGame.ImageSharp
         /// <summary>
         /// The pixel format cubemap textures.
         /// </summary>
-        public Format Format => Format.R8g8b8a8Unorm;
+        public VkFormat VkFormat => VkFormat.R8G8B8A8UNorm;
 
         /// <summary>
         /// The size of each pixel, in bytes.
@@ -139,7 +139,7 @@ namespace SharpGame.ImageSharp
                         Height,
                         MipLevels,
                         1,
-                        Format,
+                        VkFormat,
                         TextureUsage.Sampled | TextureUsage.Cubemap));
 
             for (int level = 0; level < MipLevels; level++){

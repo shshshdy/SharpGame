@@ -47,7 +47,7 @@ namespace SharpGame.Samples
 
             var shader = Resources.Load<Shader>("shaders/raytracing.shader");
 
-            storageTex = Texture.CreateStorage(2048, 2048, Format.R8g8b8a8Snorm);
+            storageTex = Texture.CreateStorage(2048, 2048, VkFormat.R8G8B8A8SNorm);
             uniformBuffer = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<UboCompute>());
             
             material = new Material(shader);

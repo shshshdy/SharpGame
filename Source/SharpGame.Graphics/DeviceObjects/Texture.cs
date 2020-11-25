@@ -17,7 +17,7 @@ namespace SharpGame
         public uint layers;
         public uint faceCount;
         public uint mipLevels;
-        public Format format;
+        public VkFormat format;
         public VkImageCreateFlags imageCreateFlags = VkImageCreateFlags.None;
         public VkImageUsageFlags imageUsageFlags = VkImageUsageFlags.Sampled;
         public VkImageLayout imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
@@ -242,10 +242,10 @@ namespace SharpGame
 
         public static Texture CreateByColor(Color color)
         {
-            return Texture.Create2D(1, 1, Format.R8g8b8a8Unorm, Utilities.AsPointer(ref color));
+            return Texture.Create2D(1, 1, VkFormat.R8G8B8A8UNorm, Utilities.AsPointer(ref color));
         }
 
-        public static Texture Create(uint width, uint height, VkImageViewType imageViewType, uint layers, Format format, uint levels = 0, VkImageUsageFlags additionalUsage = VkImageUsageFlags.None)
+        public static Texture Create(uint width, uint height, VkImageViewType imageViewType, uint layers, VkFormat format, uint levels = 0, VkImageUsageFlags additionalUsage = VkImageUsageFlags.None)
         {
             Texture texture = new Texture
             {
@@ -268,7 +268,7 @@ namespace SharpGame
             return texture;
         }
 
-        public unsafe static Texture Create2D(uint w, uint h, Format format, IntPtr tex2DDataPtr, bool dynamic = false)
+        public unsafe static Texture Create2D(uint w, uint h, VkFormat format, IntPtr tex2DDataPtr, bool dynamic = false)
         {
             var texture = new Texture
             { 
@@ -316,7 +316,7 @@ namespace SharpGame
         }
 
         // Prepare a texture target that is used to store compute shader calculations
-        public static Texture CreateStorage(uint width, uint height, Format format)
+        public static Texture CreateStorage(uint width, uint height, VkFormat format)
         {
             var texture = new Texture
             {

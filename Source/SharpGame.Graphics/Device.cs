@@ -406,7 +406,7 @@ namespace SharpGame
             return pQueue;
         }
 
-        public static Format GetSupportedDepthFormat()
+        public static VkFormat GetSupportedDepthFormat()
         {
             // Since all depth formats may be optional, we need to find a suitable depth format to use
             // Start with the highest precision packed format
@@ -423,32 +423,32 @@ namespace SharpGame
             {
                 VkFormatProperties formatProps;
                 vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, out formatProps);
-                // Format must support depth stencil attachment for optimal tiling
+                // VkFormat must support depth stencil attachment for optimal tiling
                 if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.DepthStencilAttachment) != 0)
                 {
-                    return (Format)format;
+                    return (VkFormat)format;
                 }
             }
 
-            return Format.Undefined;
+            return VkFormat.Undefined;
         }
 
-        public static bool IsDepthFormat(Format format)
+        public static bool IsDepthFormat(VkFormat format)
         {
             switch (format)
             {
-                case Format.D32SfloatS8Uint:
-                case Format.D32Sfloat:
-                case Format.D24UnormS8Uint:
-                case Format.D16UnormS8Uint:
-                case Format.D16Unorm:
+                case VkFormat.D32SFloatS8UInt:
+                case VkFormat.D32SFloat:
+                case VkFormat.D24UNormS8UInt:
+                case VkFormat.D16UNormS8UInt:
+                case VkFormat.D16UNorm:
                     return true;
             }
 
             return false;
         }
 
-        public static void GetPhysicalDeviceFormatProperties(Format format, out VkFormatProperties pFeatures)
+        public static void GetPhysicalDeviceFormatProperties(VkFormat format, out VkFormatProperties pFeatures)
         {
             vkGetPhysicalDeviceFormatProperties(PhysicalDevice, (VkFormat)format, out pFeatures);
         }

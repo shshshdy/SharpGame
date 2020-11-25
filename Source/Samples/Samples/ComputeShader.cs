@@ -65,9 +65,9 @@ namespace SharpGame.Samples
 
                 VertexLayout = new VertexLayout
                 {
-                    new VertexAttribute(0, 0, Format.R32g32Sfloat, 0),
-                    //new VertexInputAttribute(0, 1, Format.R32g32Sfloat, 8),
-                    new VertexAttribute(0, 1, Format.R32g32b32a32Sfloat, 16)
+                    new VertexAttribute(0, 0, VkFormat.R32G32SFloat, 0),
+                    //new VertexInputAttribute(0, 1, VkFormat.R32G32SFloat, 8),
+                    new VertexAttribute(0, 1, VkFormat.R32G32B32A32SFloat, 16)
                 }
 
             };
@@ -78,7 +78,7 @@ namespace SharpGame.Samples
 
             KtxTextureReader texReader = new KtxTextureReader
             {
-                Format = Format.R8g8b8a8Unorm,
+                VkFormat = VkFormat.R8G8B8A8UNorm,
             };
 
             var tex = texReader.Load("textures/particle01_rgba.ktx");            

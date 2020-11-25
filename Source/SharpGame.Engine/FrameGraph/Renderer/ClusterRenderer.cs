@@ -145,20 +145,20 @@ namespace SharpGame
 
             light_pos_ranges = new SharedBuffer(VkBufferUsageFlags.StorageTexelBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
                 MAX_NUM_LIGHTS * 4 * sizeof(float), VkSharingMode.Exclusive, queue_families);
-            light_pos_ranges.CreateView(Format.R32g32b32a32Sfloat);
+            light_pos_ranges.CreateView(VkFormat.R32G32B32A32SFloat);
 
             light_colors = new SharedBuffer(VkBufferUsageFlags.StorageTexelBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
                 MAX_NUM_LIGHTS * sizeof(uint), sharingMode, queue_families);
-            light_colors.CreateView(Format.R8g8b8a8Unorm);
+            light_colors.CreateView(VkFormat.R8G8B8A8UNorm);
 
             uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
-            gridFlags = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count, Format.R8Uint, sharingMode, queue_families);
-            lightBounds = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, MAX_NUM_LIGHTS * 6 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // max tile count 1d (z 256)
-            gridLightCounts = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
-            gridLightCountTotal = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count total * max grid count
-            gridLightCountOffsets = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // same as above
-            lightList = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light idx
-            gridLightCountsCompare = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), Format.R32Uint, sharingMode, queue_families); // light count / grid
+            gridFlags = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count, VkFormat.R8UInt, sharingMode, queue_families);
+            lightBounds = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, MAX_NUM_LIGHTS * 6 * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // max tile count 1d (z 256)
+            gridLightCounts = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light count / grid
+            gridLightCountTotal = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light count total * max grid count
+            gridLightCountOffsets = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // same as above
+            lightList = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light idx
+            gridLightCountsCompare = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light count / grid
 
             resourceLayout0 = new DescriptorSetLayout
             {
@@ -194,7 +194,7 @@ namespace SharpGame
 
         protected RenderPass OnCreateClusterRenderPass()
         {
-            Format depthFormat = Device.GetSupportedDepthFormat();
+            VkFormat depthFormat = Device.GetSupportedDepthFormat();
             AttachmentDescription[] attachments =
             {
                 new AttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)

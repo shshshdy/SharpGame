@@ -14,7 +14,7 @@ namespace SharpGame
         public VkSurfaceKHR Surface { get; private set; }
         public uint QueueNodeIndex { get; private set; } = uint.MaxValue;
         public VkExtent3D extent;
-        public Format ColorFormat { get; private set; }
+        public VkFormat ColorFormat { get; private set; }
         public VkColorSpaceKHR ColorSpace { get; private set; }
         public VkSwapchainKHR swapchain;
         public uint ImageCount { get; private set; }
@@ -160,7 +160,7 @@ namespace SharpGame
                     // there is no preferered format, so we assume VK_FORMAT_B8G8R8A8_UNORM
                     if ((formatCount == 1) && (surfaceFormats[0].format == VkFormat.Undefined))
                     {
-                        ColorFormat = Format.B8g8r8a8Unorm;
+                        ColorFormat = VkFormat.B8G8R8A8UNorm;
                         ColorSpace = surfaceFormats[0].colorSpace;
                     }
                     else
@@ -172,7 +172,7 @@ namespace SharpGame
                         {
                             if (surfaceFormat.format == VkFormat.B8G8R8A8UNorm)
                             {
-                                ColorFormat = (Format)surfaceFormat.format;
+                                ColorFormat = (VkFormat)surfaceFormat.format;
                                 ColorSpace = surfaceFormat.colorSpace;
                                 found_B8G8R8A8_UNORM = true;
                                 break;
@@ -183,7 +183,7 @@ namespace SharpGame
                         // select the first available color format
                         if (!found_B8G8R8A8_UNORM)
                         {
-                            ColorFormat = (Format)surfaceFormats[0].format;
+                            ColorFormat = (VkFormat)surfaceFormats[0].format;
                             ColorSpace = surfaceFormats[0].colorSpace;
                         }
                     }

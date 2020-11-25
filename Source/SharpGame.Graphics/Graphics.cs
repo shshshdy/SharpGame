@@ -33,8 +33,8 @@ namespace SharpGame
         public static Queue ComputeQueue { get; protected set; }
         public static Queue TransferQueue { get; protected set; }
 
-        public Format ColorFormat => Swapchain.ColorFormat;
-        public Format DepthFormat { get; protected set; }
+        public VkFormat ColorFormat => Swapchain.ColorFormat;
+        public VkFormat DepthFormat { get; protected set; }
         public Swapchain Swapchain { get; private set; }
 
         public uint Width { get; private set; }
