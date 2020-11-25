@@ -65,6 +65,12 @@ namespace SharpShaderCompiler
             }
         }
 
+        public uint GetCode(out IntPtr nativeBuf)
+        {
+            uint size = (uint)ShadercNative.shaderc_result_get_length(_handle);
+            nativeBuf = ShadercNative.shaderc_result_get_bytes(_handle);            
+            return size;
+        }
         /// <summary>
         /// Get the produced SpirV bytecode
         /// </summary>

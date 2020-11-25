@@ -63,6 +63,7 @@ namespace SharpGame
         [DataMember]
         public byte[] Code { get; set; }
 
+
         [DataMember]
         public ShaderReflection ShaderReflection { get; set; }
 
@@ -80,6 +81,22 @@ namespace SharpGame
             Code = code;
 
             Build();
+        }
+
+        public ShaderModule(ShaderStage stage, IntPtr CodePointer, uint CodeLength)
+        {
+            Stage = stage;
+            unsafe
+            {
+                var sm = new VkShaderModuleCreateInfo
+                {
+                    sType = VkStructureType.ShaderModuleCreateInfo,
+                    pCode = (uint*)CodePointer,
+                    codeSize = new UIntPtr(CodeLength),
+                };
+
+                shaderModule = Device.CreateShaderModule(ref sm);
+            }
         }
 
         public bool Build()

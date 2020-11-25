@@ -71,6 +71,19 @@ namespace SharpSPIRVCross
             }
         }
 
+        public ParseIr ParseIr(IntPtr codePointer, uint len)
+        {
+            unsafe
+            {
+                var result = spvc_context_parse_spirv(_context,
+                    (void*)codePointer,
+                    new IntPtr(len),
+                    out var parsed_ir);
+                result.CheckError();
+                return new ParseIr(parsed_ir);
+            }
+        }
+
         public Compiler CreateCompiler(Backend backend, ParseIr ir, CaptureMode mode = CaptureMode.TakeOwnership)
         {
             var result = spvc_context_create_compiler(_context, backend, ir.Handle, mode, out var compiler);
@@ -81,6 +94,7 @@ namespace SharpSPIRVCross
         [MonoPInvokeCallback(typeof(spvc_error_callback))]
         private static void ErrorCallback(IntPtr userData, [MarshalAs(UnmanagedType.LPStr)] string description)
         {
+            Console.WriteLine(description);
         }
     }
 }

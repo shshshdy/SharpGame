@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		
+		<ReleaseVersion>0.1.1</ReleaseVersion>		
+		<AssemblyVersion>$(ReleaseVersion)</AssemblyVersion>
+		<PackageVersion>$(ReleaseVersion)</PackageVersion>
+		
+		<Description>shaderc binding for .net</Description>
+		<RepositoryUrl>https://github.com/jpbruyere/shaderc.net.git</RepositoryUrl>
+		<PackageTags>vulkan opengl shaderc glsl hlsl net binding shader</PackageTags>
+		
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		
+		<PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+		<PackageProjectUrl>https://github.com/jpbruyere/shaderc.net/blob/master/README.md</PackageProjectUrl>
+		<License>MIT</License>
+		<Authors>Jean-Philippe Bruyère</Authors>
+		<Copyright>Copyright 2020 (c) Jean-Philippe Bruyère. All rights reserved.</Copyright>
+		<PackageReleaseNotes>
+		</PackageReleaseNotes>
+
+		<SynchReleaseVersion>false</SynchReleaseVersion>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		
+<!--		<Icon>vk.net-64.png</Icon>
+		<PackageIcon>vk.net-64.png</PackageIcon>-->
+		
+		<OutputPath>$(SolutionDir)build\$(Configuration)\</OutputPath>
+		<IntermediateOutputPath>$(SolutionDir)build\obj\$(Configuration)\</IntermediateOutputPath>		
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DefineConstants>TRACE;NETSTANDARD;NETSTANDARD2_0;DEBUG</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<DefineConstants>NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+	</PropertyGroup>
+
+</Project>
