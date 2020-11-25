@@ -2,7 +2,7 @@
 
 
 #include "GridCoord.glsl"
-#include "cluster_lighting.h"
+#include "ClusterLighting.glsl"
 
 layout(set = 3, binding = 0) uniform sampler2D samplerAlbedo;
 layout(set = 3, binding = 1) uniform sampler2D samplerNormal;

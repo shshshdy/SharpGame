@@ -1,5 +1,4 @@
-﻿#define NEW_RELECTION
-#define SHARP_SHADER_COMPILER
+﻿#define SHARP_SHADER_COMPILER
 
 using SharpSPIRVCross;
 using System;
@@ -568,7 +567,6 @@ namespace SharpGame
 
         public static ShaderReflection ReflectionShaderModule(string source, IntPtr bytecode, uint len)
         {
-#if NEW_RELECTION
             ShaderReflection refl = new ShaderReflection();
             refl.descriptorSets = new List<UniformBlock>();
 
@@ -656,15 +654,7 @@ namespace SharpGame
 
             refl.descriptorSets?.Sort((x, y) => { return x.set * 1000 + (int)x.binding - (y.set*1000 + (int)y.binding); });
             return refl;
-
-#else
-
-
-            LayoutParser layoutParser = new LayoutParser(source);
-            var refl = layoutParser.Reflection();
-            return refl;
-#endif
-        }
+         }
 
     }
 

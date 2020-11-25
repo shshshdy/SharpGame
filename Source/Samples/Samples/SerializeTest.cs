@@ -3,7 +3,7 @@ using Utf8Json.Resolvers;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 5)]
+    [SampleDesc(sortOrder = -5)]
     public class SerializeTest : Sample
     {
        public override void Init()
@@ -21,29 +21,15 @@ namespace SharpGame.Samples
                     System.IO.File.WriteAllText("test.material", text);
                 }
 
-                /*
-                var mat1 = Resources.Load<Material>("materials/Stone.material");
-
                 {
-                    var bytes = MessagePack.MessagePackSerializer.Serialize(mat, MessagePack.Resolvers.ContractlessStandardResolver.Instance);
+                    var mat1 = Resources.Load<Material>("materials/Stone.material");
+                    var bytes = MessagePack.MessagePackSerializer.Serialize(mat1, MessagePack.Resolvers.ContractlessStandardResolver.Options);
 
-                    System.IO.File.WriteAllText("test1.material", MessagePack.MessagePackSerializer.ToJson(bytes));
+                    System.IO.File.WriteAllText("test1.material", MessagePack.MessagePackSerializer.ConvertToJson(bytes));
                     System.IO.File.WriteAllBytes("test2.material", bytes);
-                }*/
-
-                using (File file = FileSystem.Instance.GetFile("Shaders/Common/UniformsVS.glsl"))
-                {
-                    LayoutParser layoutParser = new LayoutParser(file);
-                    var layouts = layoutParser.Parse();
                 }
-                /*
-                var file = FileSystem.Instance.GetFile("Shaders/Brdf.shader");
-                //Shader shader = HoconSerializer.Deserialize<Shader>(file);
-                AstParser ast = new AstParser();
-                ast.Parse(file.ReadAllText());
-                ast.Print();*/
 
-                var shader = Resources.Load<Shader>("Shaders/Brdf.shader");
+
             }
 
         }

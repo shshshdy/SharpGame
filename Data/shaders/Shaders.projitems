@@ -34,7 +34,7 @@
     <None Include="$(MSBuildThisFileDirectory)GLSL\clustering.frag" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\clustering.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_forward.frag" />
-    <None Include="$(MSBuildThisFileDirectory)Common\cluster_lighting.h" />
+    <None Include="$(MSBuildThisFileDirectory)Common\ClusterLighting.glsl" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_forward.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\cluster_gbuffer.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\debug.frag" />

@@ -18,7 +18,15 @@ namespace SharpGame
         public Resource resource;
 
         public readonly static ResourceRef Null = new ResourceRef();
-        
+
+        public ResourceRef(String typeName, string filePath, in Guid fileID)
+        {
+            Type = typeName;
+            FilePath = filePath;
+            FileID = fileID;
+            resource = null;
+        }
+
         public ResourceRef(Type type, string filePath, Resource resource = null)
         {
             Type = type.Name;

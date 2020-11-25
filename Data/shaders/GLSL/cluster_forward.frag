@@ -1,7 +1,7 @@
 #version 450 core
 
 #include "GridCoord.glsl"
-#include "cluster_lighting.h"
+#include "ClusterLighting.glsl"
 
 #define AMBIENT_GLOBAL 0.2f
 
