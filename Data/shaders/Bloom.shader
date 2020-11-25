@@ -7,12 +7,12 @@ Shader "bloom"
 
 		@VertexShader
 		{
-		#include "fullscreen.vert"
+			#include "post/fullscreen.vert"
 		}
 
 		@PixelShader
 		{
-		#include "brightness_mask.frag"
+			#include "post/brightness_mask.frag"
 		}
 
 	}
@@ -24,12 +24,12 @@ Shader "bloom"
 
 		@VertexShader
 		{
-			#include "fullscreen.vert"
+			#include "post/fullscreen.vert"
 		}
 
 		@PixelShader
 		{
-			#include "gaussian_blur.frag"
+			#include "post/gaussian_blur.frag"
 		}
 
 	}
@@ -41,12 +41,12 @@ Shader "bloom"
 
 		@VertexShader
 		{
-			#include "fullscreen.vert"
+			#include "post/fullscreen.vert"
 		}
 
 		@PixelShader
 		{
-			#include "merge.frag"
+			#include "post/merge.frag"
 		}
 
 	}
