@@ -341,14 +341,14 @@ namespace SharpGame
             }
         }
 
-        public bool AcquireNextImage(Semaphore presentCompleteSemaphore, out int imageIndex)
+        public bool AcquireNextImage(VkSemaphore presentCompleteSemaphore, out int imageIndex)
         {
             // By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
             // With that we don't have to handle VK_NOT_READY
 
             VkResult res = VkResult.Timeout;
             uint nextImageIndex = (uint)0;
-            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore? presentCompleteSemaphore.native : VkSemaphore.Null, new VkFence(), out nextImageIndex);
+            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore ? presentCompleteSemaphore : VkSemaphore.Null, new VkFence(), out nextImageIndex);
             
             if (res == VkResult.ErrorOutOfDateKHR)
             {
@@ -372,7 +372,7 @@ namespace SharpGame
 
         }
 
-        public unsafe void QueuePresent(Queue queue, uint imageIndex, Semaphore waitSemaphore = default)
+        public unsafe void QueuePresent(Queue queue, uint imageIndex, VkSemaphore waitSemaphore = default)
         {
             var presentInfo = new VkPresentInfoKHR
             {
@@ -386,7 +386,7 @@ namespace SharpGame
             // Check if a wait semaphore has been specified to wait for before presenting the image
             if (waitSemaphore != default)
             {
-                presentInfo.pWaitSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphore.native);
+                presentInfo.pWaitSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphore);
                 presentInfo.waitSemaphoreCount = 1;
             }
 

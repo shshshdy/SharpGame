@@ -12,8 +12,8 @@ namespace SharpGame
         public ulong Size { get; set; }
 
         internal VkMemoryPropertyFlags memoryPropertyFlags;
-        internal ulong allocationSize;
-        internal uint memoryTypeIndex;
+        internal ulong allocationSize = 0;
+        internal uint memoryTypeIndex = 0;
 
         public void Allocate(ulong size, uint memoryTypeIndex)
         {

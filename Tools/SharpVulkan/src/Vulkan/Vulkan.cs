@@ -17,6 +17,7 @@ namespace SharpGame
         private static IntPtr s_vulkanModule = IntPtr.Zero;
         private static VkInstance s_loadedInstance = VkInstance.Null;
         private static VkDevice s_loadedDevice = VkDevice.Null;
+        internal static VkDevice device => s_loadedDevice;
 
         public static VkResult vkInitialize()
         {
@@ -70,6 +71,13 @@ namespace SharpGame
                 vkCreateWin32SurfaceKHR_ptr = vkGetInstanceProcAddr(instance.Handle, nameof(vkCreateWin32SurfaceKHR));
                 vkGetPhysicalDeviceWin32PresentationSupportKHR_ptr = vkGetInstanceProcAddr(instance.Handle, nameof(vkGetPhysicalDeviceWin32PresentationSupportKHR));
             }
+        }
+
+        public static VkDevice CreateDevice(VkPhysicalDevice physicalDevice, VkDeviceCreateInfo* createInfo, VkAllocationCallbacks* allocator = null)
+        {
+            vkCreateDevice(physicalDevice, createInfo, allocator, out VkDevice device).CheckResult();
+            s_loadedDevice = device;
+            return device;
         }
 
         private static void GenLoadLoader(IntPtr context, LoadFunction load)

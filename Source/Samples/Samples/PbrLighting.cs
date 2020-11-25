@@ -154,7 +154,7 @@ namespace SharpGame.Samples
                 uint numMipTailLevels = (uint)kEnvMapLevels - 1;
 
                 // Compute pre-filtered specular environment map.            
-                var specializationInfo = new SpecializationInfo(new SpecializationMapEntry(0, 0, sizeof(uint)));
+                var specializationInfo = new SpecializationInfo(new VkSpecializationMapEntry(0, 0, sizeof(uint)));
                 specializationInfo.Write(0, numMipTailLevels);
                 pass.ComputeShader.SpecializationInfo = specializationInfo;
                 DescriptorSetLayout resLayout = pass.GetResourceLayout(0);

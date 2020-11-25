@@ -9,23 +9,9 @@ namespace SharpGame
     using global::System.Runtime.CompilerServices;
     using global::System.Collections.Concurrent;
 
-    public struct SpecializationMapEntry
-    {
-        public uint constantID;
-        public uint offset;
-        public UIntPtr size;
-
-        public SpecializationMapEntry(uint id, uint offset, uint size)
-        {
-            constantID = id;
-            this.offset = offset;
-            this.size = (UIntPtr)size;
-        }
-    }
-
     public unsafe class SpecializationInfo
     {
-        public SpecializationMapEntry[] mapEntries;
+        public VkSpecializationMapEntry[] mapEntries;
         public byte[] data;
         private VkSpecializationInfo* pSpecializationInfo;
 
@@ -33,7 +19,7 @@ namespace SharpGame
         {
         }
 
-        public SpecializationInfo(params SpecializationMapEntry[] mapEntries)
+        public SpecializationInfo(params VkSpecializationMapEntry[] mapEntries)
         {
             this.mapEntries = mapEntries;
             uint size = 0;
@@ -300,7 +286,7 @@ namespace SharpGame
 
         }
 
-        public unsafe void SetBlendMode(BlendMode blendMode)
+        public void SetBlendMode(BlendMode blendMode)
         {
             switch (blendMode)
             {
@@ -391,7 +377,7 @@ namespace SharpGame
                 };
                 shaderStage.stage = VkShaderStageFlags.Compute;
                 shaderStage.module = ShaderModels[5].shaderModule;
-                shaderStage.pName = Strings.main;// sm.FuncName;
+                shaderStage.pName = Strings.main;
                 return shaderStage;
             }
 

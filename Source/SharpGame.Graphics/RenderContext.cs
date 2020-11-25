@@ -15,8 +15,8 @@ namespace SharpGame
     public struct SubmitQueueData
     {
         public CommandBuffer cmdBuffer;
-        public Semaphore semaphore;
-        public Fence submitFence;
+        public VkSemaphore semaphore;
+        public VkFence submitFence;
         public VkPipelineStageFlags pipelineStageFlags;
     }
 
@@ -27,13 +27,13 @@ namespace SharpGame
 
         public RenderTexture renderSurface;
 
-        public Semaphore acquireSemaphore;
+        public VkSemaphore acquireSemaphore;
 
-        public Semaphore preRenderSemaphore => submitQueue[0].semaphore;
-        public Semaphore computeSemaphore => submitQueue[1].semaphore;
-        public Semaphore renderSemaphore => submitQueue[2].semaphore;
+        public VkSemaphore preRenderSemaphore => submitQueue[0].semaphore;
+        public VkSemaphore computeSemaphore => submitQueue[1].semaphore;
+        public VkSemaphore renderSemaphore => submitQueue[2].semaphore;
 
-        public Fence presentFence;
+        public VkFence presentFence;
 
         public CommandBuffer RenderCmdBuffer => submitQueue[2].cmdBuffer;
 
@@ -53,15 +53,15 @@ namespace SharpGame
         {
             this.id = id;
 
-            acquireSemaphore = new Semaphore(0);
+            acquireSemaphore = new VkSemaphore(VkSemaphoreCreateFlags.None);
 
             for(int i = 0; i < (int)SubmitQueue.MaxCount; i++)
             {
                 submitQueue[i] = new SubmitQueueData
                 {
                     cmdBuffer = pools[i].AllocateCommandBuffer(VkCommandBufferLevel.Primary),
-                    submitFence = new Fence(FenceCreateFlags.Signaled),
-                    semaphore = new Semaphore(0),
+                    submitFence = new VkFence(VkFenceCreateFlags.Signaled),
+                    semaphore = new VkSemaphore(VkSemaphoreCreateFlags.None),
                     pipelineStageFlags = (i == (int)SubmitQueue.Compute ? VkPipelineStageFlags.ComputeShader : VkPipelineStageFlags.FragmentShader)
                 };
             }

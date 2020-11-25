@@ -59,7 +59,7 @@ namespace SharpGame
         public RenderContext WorkFrame => renderFrames[WorkContext];
         public RenderContext renderFrame;
 
-        public Semaphore acquireSemaphore;
+        public VkSemaphore acquireSemaphore;
 
         public Graphics(Settings settings)
         {
@@ -88,7 +88,7 @@ namespace SharpGame
 
             DescriptorPoolManager = new DescriptorPoolManager();
 
-            acquireSemaphore = new Semaphore(0);
+            acquireSemaphore = new VkSemaphore(VkSemaphoreCreateFlags.None);
 
         }
 
@@ -340,7 +340,7 @@ namespace SharpGame
         {
             cmdBuffer.End();
 
-            WorkQueue.Submit(Semaphore.Null, VkPipelineStageFlags.None, cmdBuffer, Semaphore.Null);
+            WorkQueue.Submit(VkSemaphore.Null, VkPipelineStageFlags.None, cmdBuffer, VkSemaphore.Null);
             WorkQueue.WaitIdle();
 
             primaryCmdPool.FreeCommandBuffer(cmdBuffer);
@@ -378,7 +378,7 @@ namespace SharpGame
             var frame = renderFrames[renderContext];
             if (!frame.presentFence)
             {
-                frame.presentFence = new Fence(FenceCreateFlags.None);
+                frame.presentFence = new VkFence(VkFenceCreateFlags.None);
             }
             else
             {

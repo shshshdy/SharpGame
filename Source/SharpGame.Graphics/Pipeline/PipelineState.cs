@@ -33,18 +33,18 @@ namespace SharpGame
         {
             rasterizationStateCreateInfo = new VkPipelineRasterizationStateCreateInfo
             {
-                sType = VkStructureType.PipelineRasterizationStateCreateInfo
+                sType = VkStructureType.PipelineRasterizationStateCreateInfo,
+                depthClampEnable = depthClampEnable,
+                rasterizerDiscardEnable = rasterizerDiscardEnable,
+                polygonMode = (VkPolygonMode)polygonMode,
+                cullMode = (VkCullModeFlags)cullMode,
+                frontFace = (VkFrontFace)frontFace,
+                depthBiasEnable = depthBiasEnable,
+                depthBiasConstantFactor = depthBiasConstantFactor,
+                depthBiasClamp = depthBiasClamp,
+                depthBiasSlopeFactor = depthBiasSlopeFactor,
+                lineWidth = lineWidth
             };
-            rasterizationStateCreateInfo.depthClampEnable = depthClampEnable;
-            rasterizationStateCreateInfo.rasterizerDiscardEnable = rasterizerDiscardEnable;
-            rasterizationStateCreateInfo.polygonMode = (VkPolygonMode)polygonMode;
-            rasterizationStateCreateInfo.cullMode = (VkCullModeFlags)cullMode;
-            rasterizationStateCreateInfo.frontFace = (VkFrontFace)frontFace;
-            rasterizationStateCreateInfo.depthBiasEnable = depthBiasEnable;
-            rasterizationStateCreateInfo.depthBiasConstantFactor = depthBiasConstantFactor;
-            rasterizationStateCreateInfo.depthBiasClamp = depthBiasClamp;
-            rasterizationStateCreateInfo.depthBiasSlopeFactor = depthBiasSlopeFactor;
-            rasterizationStateCreateInfo.lineWidth = lineWidth;
         }
     }
 
@@ -66,12 +66,14 @@ namespace SharpGame
 
         public unsafe void ToNative(out VkPipelineMultisampleStateCreateInfo native)
         {
-            native = new VkPipelineMultisampleStateCreateInfo();
-            native.sType = VkStructureType.PipelineMultisampleStateCreateInfo;
-            native.flags = flags;
-            native.rasterizationSamples = (VkSampleCountFlags)rasterizationSamples;
-            native.sampleShadingEnable = sampleShadingEnable;
-            native.minSampleShading = minSampleShading;
+            native = new VkPipelineMultisampleStateCreateInfo
+            {
+                sType = VkStructureType.PipelineMultisampleStateCreateInfo,
+                flags = flags,
+                rasterizationSamples = (VkSampleCountFlags)rasterizationSamples,
+                sampleShadingEnable = sampleShadingEnable,
+                minSampleShading = minSampleShading
+            };
 
             if (pSampleMask != null && pSampleMask.Length > 0)
             {
@@ -83,17 +85,6 @@ namespace SharpGame
         }
     }
 
-    public struct StencilOpState
-    {
-        public VkStencilOp failOp;
-        public VkStencilOp passOp;
-        public VkStencilOp depthFailOp;
-        public VkCompareOp compareOp;
-        public uint compareMask;
-        public uint writeMask;
-        public uint reference;
-    }
-
     public struct DepthStencilStateInfo
     {
         public VkPipelineDepthStencilStateCreateFlags flags;
@@ -102,8 +93,8 @@ namespace SharpGame
         public VkCompareOp depthCompareOp;
         public bool depthBoundsTestEnable;
         public bool stencilTestEnable;
-        public StencilOpState front;
-        public StencilOpState back;
+        public VkStencilOpState front;
+        public VkStencilOpState back;
         public float minDepthBounds;
         public float maxDepthBounds;
 
@@ -112,13 +103,13 @@ namespace SharpGame
             depthTestEnable = true,
             depthWriteEnable = true,
             depthCompareOp = VkCompareOp.LessOrEqual,
-            back = new StencilOpState
+            back = new VkStencilOpState
             {
                 failOp = VkStencilOp.Keep,
                 passOp = VkStencilOp.Keep,
                 compareOp = VkCompareOp.Always
             },
-            front = new StencilOpState
+            front = new VkStencilOpState
             {
                 failOp = VkStencilOp.Keep,
                 passOp = VkStencilOp.Keep,
@@ -131,18 +122,18 @@ namespace SharpGame
         {
             native = new VkPipelineDepthStencilStateCreateInfo
             {
-                sType = VkStructureType.PipelineDepthStencilStateCreateInfo
+                sType = VkStructureType.PipelineDepthStencilStateCreateInfo,
+                flags = flags,
+                depthTestEnable = depthTestEnable,
+                depthWriteEnable = depthWriteEnable,
+                depthCompareOp = (VkCompareOp)depthCompareOp,
+                depthBoundsTestEnable = depthBoundsTestEnable,
+                stencilTestEnable = stencilTestEnable,
+                front = *(VkStencilOpState*)Unsafe.AsPointer(ref front),
+                back = *(VkStencilOpState*)Unsafe.AsPointer(ref back),
+                minDepthBounds = minDepthBounds,
+                maxDepthBounds = maxDepthBounds
             };
-            native.flags = flags;
-            native.depthTestEnable = depthTestEnable;
-            native.depthWriteEnable = depthWriteEnable;
-            native.depthCompareOp = (VkCompareOp)depthCompareOp;
-            native.depthBoundsTestEnable = depthBoundsTestEnable;
-            native.stencilTestEnable = stencilTestEnable;
-            native.front = *(VkStencilOpState*)Unsafe.AsPointer(ref front);
-            native.back = *(VkStencilOpState*)Unsafe.AsPointer(ref back);
-            native.minDepthBounds = minDepthBounds;
-            native.maxDepthBounds = maxDepthBounds;
         }
     }
 

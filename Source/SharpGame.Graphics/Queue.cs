@@ -24,19 +24,19 @@ namespace SharpGame
             return new Queue(pQueue, queueFamilyIndex, queueIndex);
         }
 
-        public void Submit(SubmitInfo[] submits, Fence fence = default)
+        public void Submit(SubmitInfo[] submits, VkFence fence = default)
         {
             int count = submits?.Length ?? 0;
-            VulkanUtil.CheckResult(vkQueueSubmit(native, (uint)count, submits != null ? Utilities.AsPtr(ref submits[0].native) : null, fence.handle));           
+            VulkanUtil.CheckResult(vkQueueSubmit(native, (uint)count, submits != null ? Utilities.AsPtr(ref submits[0].native) : null, fence));           
         }
 
-        public void Submit(SubmitInfo submit, Fence fence = default)
+        public void Submit(SubmitInfo submit, VkFence fence = default)
         {
-            VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &submit.native, fence.handle));
+            VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &submit.native, fence));
         }
 
-        public void Submit(Semaphore waitSemaphore, VkPipelineStageFlags waitDstStageMask,
-            CommandBuffer commandBuffer, Semaphore signalSemaphore, Fence fence = default)
+        public void Submit(VkSemaphore waitSemaphore, VkPipelineStageFlags waitDstStageMask,
+            CommandBuffer commandBuffer, VkSemaphore signalSemaphore, VkFence fence = default)
         {
             VkCommandBuffer commandBufferHandle = commandBuffer?.commandBuffer ?? VkCommandBuffer.Null;
 
@@ -48,7 +48,7 @@ namespace SharpGame
             if (waitSemaphore != default)
             {
                 nativeSubmit.waitSemaphoreCount = 1;
-                nativeSubmit.pWaitSemaphores = &waitSemaphore.native;
+                nativeSubmit.pWaitSemaphores = &waitSemaphore;
                 nativeSubmit.pWaitDstStageMask = (VkPipelineStageFlags*)&waitDstStageMask;
             }
 
@@ -61,10 +61,10 @@ namespace SharpGame
             if (signalSemaphore != default)
             {
                 nativeSubmit.signalSemaphoreCount = 1;
-                nativeSubmit.pSignalSemaphores = &signalSemaphore.native;
+                nativeSubmit.pSignalSemaphores = &signalSemaphore;
             }
             
-            VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &nativeSubmit, fence.handle));
+            VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &nativeSubmit, fence));
 
             if (commandBuffer)
             {
@@ -77,16 +77,16 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkQueueWaitIdle(native));
         }
 
-        public void BindSparse(BindSparseInfo bindInfo, Fence fence = default)
+        public void BindSparse(BindSparseInfo bindInfo, VkFence fence = default)
         {
-            VulkanUtil.CheckResult(vkQueueBindSparse(native, 1, &bindInfo.native, fence.handle));           
+            VulkanUtil.CheckResult(vkQueueBindSparse(native, 1, &bindInfo.native, fence));           
         }
 
-        public void BindSparse(BindSparseInfo[] bindInfo, Fence fence = default)
+        public void BindSparse(BindSparseInfo[] bindInfo, VkFence fence = default)
         {
             int count = bindInfo?.Length ?? 0;
 
-            VulkanUtil.CheckResult(vkQueueBindSparse(native, (uint)count, bindInfo != null ? Utilities.AsPtr(ref bindInfo[0].native) : null, fence.handle));
+            VulkanUtil.CheckResult(vkQueueBindSparse(native, (uint)count, bindInfo != null ? Utilities.AsPtr(ref bindInfo[0].native) : null, fence));
 
         }
 
@@ -96,22 +96,22 @@ namespace SharpGame
     {
         internal VkSubmitInfo native;
         
-        public SubmitInfo(Semaphore[] waitSemaphores = null, VkPipelineStageFlags[] waitDstStageMask = null,
-            VkCommandBuffer[] commandBuffers = null, Semaphore[] signalSemaphores = null)
+        public SubmitInfo(VkSemaphore[] waitSemaphores = null, VkPipelineStageFlags[] waitDstStageMask = null,
+            VkCommandBuffer[] commandBuffers = null, VkSemaphore[] signalSemaphores = null)
         {
-            native = new VkSubmitInfo
-            {
-                sType = VkStructureType.SubmitInfo
-            };
             unsafe
             {
-                native.waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0);
-                native.pWaitSemaphores = (VkSemaphore*)Utilities.AsPtr(ref waitSemaphores[0]);
-                native.pWaitDstStageMask = (VkPipelineStageFlags*)Utilities.AsPtr(ref waitDstStageMask[0]);
-                native.commandBufferCount = (uint)(commandBuffers?.Length ?? 0);
-                native.pCommandBuffers = Utilities.AsPtr(ref commandBuffers[0]);
-                native.signalSemaphoreCount = (uint)(signalSemaphores?.Length ?? 0);
-                native.pSignalSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphores[0]);
+                native = new VkSubmitInfo
+                {
+                    sType = VkStructureType.SubmitInfo,
+                    waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0),
+                    pWaitSemaphores = (VkSemaphore*)Utilities.AsPtr(ref waitSemaphores[0]),
+                    pWaitDstStageMask = (VkPipelineStageFlags*)Utilities.AsPtr(ref waitDstStageMask[0]),
+                    commandBufferCount = (uint)(commandBuffers?.Length ?? 0),
+                    pCommandBuffers = Utilities.AsPtr(ref commandBuffers[0]),
+                    signalSemaphoreCount = (uint)(signalSemaphores?.Length ?? 0),
+                    pSignalSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphores[0])
+                };
             }
         }
 
@@ -122,26 +122,26 @@ namespace SharpGame
     {
         internal VkBindSparseInfo native;
 
-        public BindSparseInfo(Semaphore[] waitSemaphores, SparseBufferMemoryBindInfo[] bufferBinds,
+        public BindSparseInfo(VkSemaphore[] waitSemaphores, SparseBufferMemoryBindInfo[] bufferBinds,
             SparseImageOpaqueMemoryBindInfo[] imageOpaqueBinds, SparseImageMemoryBindInfo[] imageBinds,
-            Semaphore[] signalSemaphores)
+            VkSemaphore[] signalSemaphores)
         {
             unsafe
             {
                 native = new VkBindSparseInfo
                 {
-                    sType = VkStructureType.BindSparseInfo
+                    sType = VkStructureType.BindSparseInfo,
+                    waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0),
+                    pWaitSemaphores = waitSemaphores != null ? (VkSemaphore*)Utilities.AsPtr(ref waitSemaphores[0]) : null,
+                    bufferBindCount = (uint)(bufferBinds?.Length ?? 0),
+                    pBufferBinds = bufferBinds != null ? (VkSparseBufferMemoryBindInfo*)Utilities.AsPtr(ref bufferBinds[0]) : null,
+                    imageOpaqueBindCount = (uint)(imageOpaqueBinds?.Length ?? 0),
+                    pImageOpaqueBinds = imageOpaqueBinds != null ? (VkSparseImageOpaqueMemoryBindInfo*)Utilities.AsPtr(ref imageOpaqueBinds[0]) : null,
+                    imageBindCount = (uint)(imageBinds?.Length ?? 0),
+                    pImageBinds = imageBinds != null ? (VkSparseImageMemoryBindInfo*)Utilities.AsPtr(ref imageBinds[0]) : null,
+                    signalSemaphoreCount = (uint)(signalSemaphores?.Length ?? 0),
+                    pSignalSemaphores = signalSemaphores != null ? (VkSemaphore*)Utilities.AsPtr(ref signalSemaphores[0]) : null
                 };
-                native.waitSemaphoreCount = (uint)(waitSemaphores?.Length ?? 0);
-                native.pWaitSemaphores = waitSemaphores != null ?(VkSemaphore*)Utilities.AsPtr(ref waitSemaphores[0]): null;
-                native.bufferBindCount = (uint)(bufferBinds?.Length ?? 0);
-                native.pBufferBinds = bufferBinds != null ? (VkSparseBufferMemoryBindInfo*)Utilities.AsPtr(ref bufferBinds[0]) : null;
-                native.imageOpaqueBindCount = (uint)(imageOpaqueBinds?.Length ?? 0);
-                native.pImageOpaqueBinds = imageOpaqueBinds != null ? (VkSparseImageOpaqueMemoryBindInfo*)Utilities.AsPtr(ref imageOpaqueBinds[0]) : null;
-                native.imageBindCount = (uint)(imageBinds?.Length ?? 0);
-                native.pImageBinds = imageBinds != null ? (VkSparseImageMemoryBindInfo*)Utilities.AsPtr(ref imageBinds[0]) : null;
-                native.signalSemaphoreCount = (uint)(signalSemaphores?.Length ?? 0);
-                native.pSignalSemaphores = signalSemaphores != null ? (VkSemaphore*)Utilities.AsPtr(ref signalSemaphores[0]) : null;
             }
         }
        

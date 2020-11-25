@@ -142,10 +142,23 @@ namespace SharpGame
                 }
             }
 
-            VulkanUtil.CheckResult(CreateLogicalDevice(Features, enabledExtensions));
+            device = CreateLogicalDevice(Features, enabledExtensions);
+
             queue = GetDeviceQueue(QFGraphics, 0);
 
-            vkCmdPushDescriptorSetKHR();
+            if (device != VkDevice.Null)
+            {
+                // Create a default command pool for graphics command buffers
+                commandPool = CreateCommandPool(QFGraphics);
+
+                VkPipelineCacheCreateInfo pipelineCacheCreateInfo = new VkPipelineCacheCreateInfo()
+                {
+                    sType = VkStructureType.PipelineCacheCreateInfo
+                };
+
+                VulkanUtil.CheckResult(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, null, out pipelineCache));
+
+            }
 
             return device;
         }
@@ -200,11 +213,11 @@ namespace SharpGame
                 instanceCreateInfo.ppEnabledLayerNames = (byte**)enabledLayerNames.Data;
             }
 
-            VkInstance instance;
-            VulkanUtil.CheckResult(vkCreateInstance(&instanceCreateInfo, null, out instance));
+            VulkanUtil.CheckResult(vkCreateInstance(&instanceCreateInfo, null, out VkInstance instance));
             VkInstance = instance;
 
             vkLoadInstance(VkInstance);
+
             if (settings.Validation)
             {
                 debugReportCallbackExt = CreateDebugReportCallback();
@@ -213,120 +226,99 @@ namespace SharpGame
             return instance;
         }
 
-        static VkResult CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, Vector<IntPtr> enabledExtensions,
+        static VkDevice CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, Vector<IntPtr> enabledExtensions,
             bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
         {
-            // Desired queues need to be requested upon logical device creation
-            // Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if the application
-            // requests different queue types
+            using Vector<VkDeviceQueueCreateInfo> queueCreateInfos = new Vector<VkDeviceQueueCreateInfo>();
+            float defaultQueuePriority = 0.0f;
 
-            using (Vector<VkDeviceQueueCreateInfo> queueCreateInfos = new Vector<VkDeviceQueueCreateInfo>())
+            // Graphics queue
+            if ((requestedQueueTypes & VkQueueFlags.Graphics) != 0)
             {
-                float defaultQueuePriority = 0.0f;
-
-                // Graphics queue
-                if ((requestedQueueTypes & VkQueueFlags.Graphics) != 0)
+                QFGraphics = GetQueueFamilyIndex(VkQueueFlags.Graphics);
+                VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
                 {
-                    QFGraphics = GetQueueFamilyIndex(VkQueueFlags.Graphics);
+                    sType = VkStructureType.DeviceQueueCreateInfo,
+                    queueFamilyIndex = QFGraphics,
+                    queueCount = 1,
+                    pQueuePriorities = &defaultQueuePriority
+                };
+                queueCreateInfos.Add(queueInfo);
+            }
+            else
+            {
+                QFGraphics = (uint)IntPtr.Zero;
+            }
+
+            // Dedicated compute queue
+            if ((requestedQueueTypes & VkQueueFlags.Compute) != 0)
+            {
+                QFCompute = GetQueueFamilyIndex(VkQueueFlags.Compute);
+                if (QFCompute != QFGraphics)
+                {
+                    // If compute family index differs, we need an additional queue create info for the compute queue
                     VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
                     {
                         sType = VkStructureType.DeviceQueueCreateInfo,
-                        queueFamilyIndex = QFGraphics,
+                        queueFamilyIndex = QFCompute,
                         queueCount = 1,
                         pQueuePriorities = &defaultQueuePriority
                     };
                     queueCreateInfos.Add(queueInfo);
                 }
-                else
-                {
-                    QFGraphics = (uint)IntPtr.Zero;
-                }
+            }
+            else
+            {
+                // Else we use the same queue
+                QFCompute = QFGraphics;
+            }
 
-                // Dedicated compute queue
-                if ((requestedQueueTypes & VkQueueFlags.Compute) != 0)
+            // Dedicated transfer queue
+            if ((requestedQueueTypes & VkQueueFlags.Transfer) != 0)
+            {
+                QFTransfer = GetQueueFamilyIndex(VkQueueFlags.Transfer);
+                if (QFTransfer != QFGraphics && QFTransfer != QFCompute)
                 {
-                    QFCompute = GetQueueFamilyIndex(VkQueueFlags.Compute);
-                    if (QFCompute != QFGraphics)
+                    // If compute family index differs, we need an additional queue create info for the transfer queue
+                    VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
                     {
-                        // If compute family index differs, we need an additional queue create info for the compute queue
-                        VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
-                        {
-                            sType = VkStructureType.DeviceQueueCreateInfo,
-                            queueFamilyIndex = QFCompute,
-                            queueCount = 1,
-                            pQueuePriorities = &defaultQueuePriority
-                        };
-                        queueCreateInfos.Add(queueInfo);
-                    }
-                }
-                else
-                {
-                    // Else we use the same queue
-                    QFCompute = QFGraphics;
-                }
-
-                // Dedicated transfer queue
-                if ((requestedQueueTypes & VkQueueFlags.Transfer) != 0)
-                {
-                    QFTransfer = GetQueueFamilyIndex(VkQueueFlags.Transfer);
-                    if (QFTransfer != QFGraphics && QFTransfer != QFCompute)
-                    {
-                        // If compute family index differs, we need an additional queue create info for the transfer queue
-                        VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
-                        {
-                            sType = VkStructureType.DeviceQueueCreateInfo,
-                            queueFamilyIndex = QFTransfer,
-                            queueCount = 1,
-                            pQueuePriorities = &defaultQueuePriority
-                        };
-                        queueCreateInfos.Add(queueInfo);
-                    }
-                }
-                else
-                {
-                    // Else we use the same queue
-                    QFTransfer = QFGraphics;
-                }
-
-                // Create the logical device representation
-                using (Vector<IntPtr> deviceExtensions = new Vector<IntPtr>(enabledExtensions))
-                {
-                    if (useSwapChain)
-                    {
-                        // If the device will be used for presenting to a display via a swapchain we need to request the swapchain extension
-                        deviceExtensions.Add(Strings.VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-                    }
-
-                    VkDeviceCreateInfo deviceCreateInfo = new VkDeviceCreateInfo
-                    {
-                        sType = VkStructureType.DeviceCreateInfo
+                        sType = VkStructureType.DeviceQueueCreateInfo,
+                        queueFamilyIndex = QFTransfer,
+                        queueCount = 1,
+                        pQueuePriorities = &defaultQueuePriority
                     };
-                    deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.Count;
-                    deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.DataPtr;
-                    deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
-
-                    if (deviceExtensions.Count > 0)
-                    {
-                        deviceCreateInfo.enabledExtensionCount = deviceExtensions.Count;
-                        deviceCreateInfo.ppEnabledExtensionNames = (byte**)deviceExtensions.Data;
-                    }
-
-                    VkResult result = vkCreateDevice(PhysicalDevice, &deviceCreateInfo, null, out device);
-                    if (result == VkResult.Success)
-                    {
-                        // Create a default command pool for graphics command buffers
-                        commandPool = CreateCommandPool(QFGraphics);
-                    }
-
-                    VkPipelineCacheCreateInfo pipelineCacheCreateInfo = new VkPipelineCacheCreateInfo()
-                    {
-                        sType = VkStructureType.PipelineCacheCreateInfo
-                    };
-
-                    VulkanUtil.CheckResult(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, null, out pipelineCache));
-                    return result;
+                    queueCreateInfos.Add(queueInfo);
                 }
             }
+            else
+            {
+                // Else we use the same queue
+                QFTransfer = QFGraphics;
+            }
+
+            // Create the logical device representation
+            using Vector<IntPtr> deviceExtensions = new Vector<IntPtr>(enabledExtensions);
+            if (useSwapChain)
+            {
+                // If the device will be used for presenting to a display via a swapchain we need to request the swapchain extension
+                deviceExtensions.Add(Strings.VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+            }
+
+            VkDeviceCreateInfo deviceCreateInfo = new VkDeviceCreateInfo
+            {
+                sType = VkStructureType.DeviceCreateInfo,
+                queueCreateInfoCount = queueCreateInfos.Count,
+                pQueueCreateInfos = queueCreateInfos.DataPtr,
+                pEnabledFeatures = &enabledFeatures
+            };
+
+            if (deviceExtensions.Count > 0)
+            {
+                deviceCreateInfo.enabledExtensionCount = deviceExtensions.Count;
+                deviceCreateInfo.ppEnabledExtensionNames = (byte**)deviceExtensions.Data;
+            }
+
+            return Vulkan.CreateDevice(PhysicalDevice, &deviceCreateInfo);
 
         }
 
@@ -639,7 +631,7 @@ namespace SharpGame
         }
 
         public static VkDeviceMemory AllocateMemory(ref VkMemoryAllocateInfo pAllocateInfo)
-        { 
+        {
             VkDeviceMemory pMemory;
             VulkanUtil.CheckResult(vkAllocateMemory(device, Utilities.AsPtr(ref pAllocateInfo), null, &pMemory));
             return pMemory;

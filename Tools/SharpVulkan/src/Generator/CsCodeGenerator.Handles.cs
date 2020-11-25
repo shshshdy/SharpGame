@@ -53,8 +53,9 @@ namespace Generator
                     writer.WriteLine($"public readonly {handleType} Handle;");
 
                     writer.WriteLine($"public {csName}({handleType} handle) {{ Handle = handle; }}");
-                    writer.WriteLine($"public static {csName} Null => new {csName}({nullValue});");
-                    writer.WriteLine($"public static implicit operator {csName}({handleType} handle) => new {csName}(handle);");
+                    writer.WriteLine($"public static {csName} Null => new {csName}(({handleType}){nullValue});");
+                    writer.WriteLine($"public static implicit operator {csName}({handleType} handle) => new {csName}(({handleType})handle);");
+                    writer.WriteLine($"public static implicit operator bool({csName} handle) => handle.Handle != {nullValue};");
                     writer.WriteLine($"public static bool operator ==({csName} left, {csName} right) => left.Handle == right.Handle;");
                     writer.WriteLine($"public static bool operator !=({csName} left, {csName} right) => left.Handle != right.Handle;");
                     writer.WriteLine($"public static bool operator ==({csName} left, {handleType} right) => left.Handle == right;");

@@ -141,8 +141,8 @@ namespace SharpGame
             pass = uiShader.Main;
 
             var specializationInfo = new SpecializationInfo(
-                new SpecializationMapEntry(0, 0, sizeof(uint)),
-                new SpecializationMapEntry(1, 4, sizeof(uint)));
+                new VkSpecializationMapEntry(0, 0, sizeof(uint)),
+                new VkSpecializationMapEntry(1, 4, sizeof(uint)));
             specializationInfo.Write(0, RenderView.NegativeViewport? 0 : 1);
             pass.VertexShader.SpecializationInfo = specializationInfo;
 

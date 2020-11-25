@@ -6,15 +6,6 @@ using System.Text;
 
 namespace SharpGame
 {
-    public struct Primitive
-    {
-        public Buffer vertexBuffer;
-        public Buffer IndexBuffer;
-        public uint start;
-        public uint count;
-        public int vertexOffset;
-    }
-
     public class Geometry
     {
         public string Name { get; set; }

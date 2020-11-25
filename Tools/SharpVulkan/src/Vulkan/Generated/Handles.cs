@@ -20,8 +20,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkBuffer(ulong handle) { Handle = handle; }
-		public static VkBuffer Null => new VkBuffer(0);
-		public static implicit operator VkBuffer(ulong handle) => new VkBuffer(handle);
+		public static VkBuffer Null => new VkBuffer((ulong)0);
+		public static implicit operator VkBuffer(ulong handle) => new VkBuffer((ulong)handle);
+		public static implicit operator bool(VkBuffer handle) => handle.Handle != 0;
 		public static bool operator ==(VkBuffer left, VkBuffer right) => left.Handle == right.Handle;
 		public static bool operator !=(VkBuffer left, VkBuffer right) => left.Handle != right.Handle;
 		public static bool operator ==(VkBuffer left, ulong right) => left.Handle == right;
@@ -41,8 +42,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkImage(ulong handle) { Handle = handle; }
-		public static VkImage Null => new VkImage(0);
-		public static implicit operator VkImage(ulong handle) => new VkImage(handle);
+		public static VkImage Null => new VkImage((ulong)0);
+		public static implicit operator VkImage(ulong handle) => new VkImage((ulong)handle);
+		public static implicit operator bool(VkImage handle) => handle.Handle != 0;
 		public static bool operator ==(VkImage left, VkImage right) => left.Handle == right.Handle;
 		public static bool operator !=(VkImage left, VkImage right) => left.Handle != right.Handle;
 		public static bool operator ==(VkImage left, ulong right) => left.Handle == right;
@@ -62,8 +64,9 @@ namespace SharpGame
 	{
 		public readonly IntPtr Handle;
 		public VkInstance(IntPtr handle) { Handle = handle; }
-		public static VkInstance Null => new VkInstance(IntPtr.Zero);
-		public static implicit operator VkInstance(IntPtr handle) => new VkInstance(handle);
+		public static VkInstance Null => new VkInstance((IntPtr)IntPtr.Zero);
+		public static implicit operator VkInstance(IntPtr handle) => new VkInstance((IntPtr)handle);
+		public static implicit operator bool(VkInstance handle) => handle.Handle != IntPtr.Zero;
 		public static bool operator ==(VkInstance left, VkInstance right) => left.Handle == right.Handle;
 		public static bool operator !=(VkInstance left, VkInstance right) => left.Handle != right.Handle;
 		public static bool operator ==(VkInstance left, IntPtr right) => left.Handle == right;
@@ -83,8 +86,9 @@ namespace SharpGame
 	{
 		public readonly IntPtr Handle;
 		public VkPhysicalDevice(IntPtr handle) { Handle = handle; }
-		public static VkPhysicalDevice Null => new VkPhysicalDevice(IntPtr.Zero);
-		public static implicit operator VkPhysicalDevice(IntPtr handle) => new VkPhysicalDevice(handle);
+		public static VkPhysicalDevice Null => new VkPhysicalDevice((IntPtr)IntPtr.Zero);
+		public static implicit operator VkPhysicalDevice(IntPtr handle) => new VkPhysicalDevice((IntPtr)handle);
+		public static implicit operator bool(VkPhysicalDevice handle) => handle.Handle != IntPtr.Zero;
 		public static bool operator ==(VkPhysicalDevice left, VkPhysicalDevice right) => left.Handle == right.Handle;
 		public static bool operator !=(VkPhysicalDevice left, VkPhysicalDevice right) => left.Handle != right.Handle;
 		public static bool operator ==(VkPhysicalDevice left, IntPtr right) => left.Handle == right;
@@ -104,8 +108,9 @@ namespace SharpGame
 	{
 		public readonly IntPtr Handle;
 		public VkDevice(IntPtr handle) { Handle = handle; }
-		public static VkDevice Null => new VkDevice(IntPtr.Zero);
-		public static implicit operator VkDevice(IntPtr handle) => new VkDevice(handle);
+		public static VkDevice Null => new VkDevice((IntPtr)IntPtr.Zero);
+		public static implicit operator VkDevice(IntPtr handle) => new VkDevice((IntPtr)handle);
+		public static implicit operator bool(VkDevice handle) => handle.Handle != IntPtr.Zero;
 		public static bool operator ==(VkDevice left, VkDevice right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDevice left, VkDevice right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDevice left, IntPtr right) => left.Handle == right;
@@ -125,8 +130,9 @@ namespace SharpGame
 	{
 		public readonly IntPtr Handle;
 		public VkQueue(IntPtr handle) { Handle = handle; }
-		public static VkQueue Null => new VkQueue(IntPtr.Zero);
-		public static implicit operator VkQueue(IntPtr handle) => new VkQueue(handle);
+		public static VkQueue Null => new VkQueue((IntPtr)IntPtr.Zero);
+		public static implicit operator VkQueue(IntPtr handle) => new VkQueue((IntPtr)handle);
+		public static implicit operator bool(VkQueue handle) => handle.Handle != IntPtr.Zero;
 		public static bool operator ==(VkQueue left, VkQueue right) => left.Handle == right.Handle;
 		public static bool operator !=(VkQueue left, VkQueue right) => left.Handle != right.Handle;
 		public static bool operator ==(VkQueue left, IntPtr right) => left.Handle == right;
@@ -146,8 +152,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkSemaphore(ulong handle) { Handle = handle; }
-		public static VkSemaphore Null => new VkSemaphore(0);
-		public static implicit operator VkSemaphore(ulong handle) => new VkSemaphore(handle);
+		public static VkSemaphore Null => new VkSemaphore((ulong)0);
+		public static implicit operator VkSemaphore(ulong handle) => new VkSemaphore((ulong)handle);
+		public static implicit operator bool(VkSemaphore handle) => handle.Handle != 0;
 		public static bool operator ==(VkSemaphore left, VkSemaphore right) => left.Handle == right.Handle;
 		public static bool operator !=(VkSemaphore left, VkSemaphore right) => left.Handle != right.Handle;
 		public static bool operator ==(VkSemaphore left, ulong right) => left.Handle == right;
@@ -167,8 +174,9 @@ namespace SharpGame
 	{
 		public readonly IntPtr Handle;
 		public VkCommandBuffer(IntPtr handle) { Handle = handle; }
-		public static VkCommandBuffer Null => new VkCommandBuffer(IntPtr.Zero);
-		public static implicit operator VkCommandBuffer(IntPtr handle) => new VkCommandBuffer(handle);
+		public static VkCommandBuffer Null => new VkCommandBuffer((IntPtr)IntPtr.Zero);
+		public static implicit operator VkCommandBuffer(IntPtr handle) => new VkCommandBuffer((IntPtr)handle);
+		public static implicit operator bool(VkCommandBuffer handle) => handle.Handle != IntPtr.Zero;
 		public static bool operator ==(VkCommandBuffer left, VkCommandBuffer right) => left.Handle == right.Handle;
 		public static bool operator !=(VkCommandBuffer left, VkCommandBuffer right) => left.Handle != right.Handle;
 		public static bool operator ==(VkCommandBuffer left, IntPtr right) => left.Handle == right;
@@ -188,8 +196,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkFence(ulong handle) { Handle = handle; }
-		public static VkFence Null => new VkFence(0);
-		public static implicit operator VkFence(ulong handle) => new VkFence(handle);
+		public static VkFence Null => new VkFence((ulong)0);
+		public static implicit operator VkFence(ulong handle) => new VkFence((ulong)handle);
+		public static implicit operator bool(VkFence handle) => handle.Handle != 0;
 		public static bool operator ==(VkFence left, VkFence right) => left.Handle == right.Handle;
 		public static bool operator !=(VkFence left, VkFence right) => left.Handle != right.Handle;
 		public static bool operator ==(VkFence left, ulong right) => left.Handle == right;
@@ -209,8 +218,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDeviceMemory(ulong handle) { Handle = handle; }
-		public static VkDeviceMemory Null => new VkDeviceMemory(0);
-		public static implicit operator VkDeviceMemory(ulong handle) => new VkDeviceMemory(handle);
+		public static VkDeviceMemory Null => new VkDeviceMemory((ulong)0);
+		public static implicit operator VkDeviceMemory(ulong handle) => new VkDeviceMemory((ulong)handle);
+		public static implicit operator bool(VkDeviceMemory handle) => handle.Handle != 0;
 		public static bool operator ==(VkDeviceMemory left, VkDeviceMemory right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDeviceMemory left, VkDeviceMemory right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDeviceMemory left, ulong right) => left.Handle == right;
@@ -230,8 +240,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkEvent(ulong handle) { Handle = handle; }
-		public static VkEvent Null => new VkEvent(0);
-		public static implicit operator VkEvent(ulong handle) => new VkEvent(handle);
+		public static VkEvent Null => new VkEvent((ulong)0);
+		public static implicit operator VkEvent(ulong handle) => new VkEvent((ulong)handle);
+		public static implicit operator bool(VkEvent handle) => handle.Handle != 0;
 		public static bool operator ==(VkEvent left, VkEvent right) => left.Handle == right.Handle;
 		public static bool operator !=(VkEvent left, VkEvent right) => left.Handle != right.Handle;
 		public static bool operator ==(VkEvent left, ulong right) => left.Handle == right;
@@ -251,8 +262,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkQueryPool(ulong handle) { Handle = handle; }
-		public static VkQueryPool Null => new VkQueryPool(0);
-		public static implicit operator VkQueryPool(ulong handle) => new VkQueryPool(handle);
+		public static VkQueryPool Null => new VkQueryPool((ulong)0);
+		public static implicit operator VkQueryPool(ulong handle) => new VkQueryPool((ulong)handle);
+		public static implicit operator bool(VkQueryPool handle) => handle.Handle != 0;
 		public static bool operator ==(VkQueryPool left, VkQueryPool right) => left.Handle == right.Handle;
 		public static bool operator !=(VkQueryPool left, VkQueryPool right) => left.Handle != right.Handle;
 		public static bool operator ==(VkQueryPool left, ulong right) => left.Handle == right;
@@ -272,8 +284,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkBufferView(ulong handle) { Handle = handle; }
-		public static VkBufferView Null => new VkBufferView(0);
-		public static implicit operator VkBufferView(ulong handle) => new VkBufferView(handle);
+		public static VkBufferView Null => new VkBufferView((ulong)0);
+		public static implicit operator VkBufferView(ulong handle) => new VkBufferView((ulong)handle);
+		public static implicit operator bool(VkBufferView handle) => handle.Handle != 0;
 		public static bool operator ==(VkBufferView left, VkBufferView right) => left.Handle == right.Handle;
 		public static bool operator !=(VkBufferView left, VkBufferView right) => left.Handle != right.Handle;
 		public static bool operator ==(VkBufferView left, ulong right) => left.Handle == right;
@@ -293,8 +306,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkImageView(ulong handle) { Handle = handle; }
-		public static VkImageView Null => new VkImageView(0);
-		public static implicit operator VkImageView(ulong handle) => new VkImageView(handle);
+		public static VkImageView Null => new VkImageView((ulong)0);
+		public static implicit operator VkImageView(ulong handle) => new VkImageView((ulong)handle);
+		public static implicit operator bool(VkImageView handle) => handle.Handle != 0;
 		public static bool operator ==(VkImageView left, VkImageView right) => left.Handle == right.Handle;
 		public static bool operator !=(VkImageView left, VkImageView right) => left.Handle != right.Handle;
 		public static bool operator ==(VkImageView left, ulong right) => left.Handle == right;
@@ -314,8 +328,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkShaderModule(ulong handle) { Handle = handle; }
-		public static VkShaderModule Null => new VkShaderModule(0);
-		public static implicit operator VkShaderModule(ulong handle) => new VkShaderModule(handle);
+		public static VkShaderModule Null => new VkShaderModule((ulong)0);
+		public static implicit operator VkShaderModule(ulong handle) => new VkShaderModule((ulong)handle);
+		public static implicit operator bool(VkShaderModule handle) => handle.Handle != 0;
 		public static bool operator ==(VkShaderModule left, VkShaderModule right) => left.Handle == right.Handle;
 		public static bool operator !=(VkShaderModule left, VkShaderModule right) => left.Handle != right.Handle;
 		public static bool operator ==(VkShaderModule left, ulong right) => left.Handle == right;
@@ -335,8 +350,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkPipelineCache(ulong handle) { Handle = handle; }
-		public static VkPipelineCache Null => new VkPipelineCache(0);
-		public static implicit operator VkPipelineCache(ulong handle) => new VkPipelineCache(handle);
+		public static VkPipelineCache Null => new VkPipelineCache((ulong)0);
+		public static implicit operator VkPipelineCache(ulong handle) => new VkPipelineCache((ulong)handle);
+		public static implicit operator bool(VkPipelineCache handle) => handle.Handle != 0;
 		public static bool operator ==(VkPipelineCache left, VkPipelineCache right) => left.Handle == right.Handle;
 		public static bool operator !=(VkPipelineCache left, VkPipelineCache right) => left.Handle != right.Handle;
 		public static bool operator ==(VkPipelineCache left, ulong right) => left.Handle == right;
@@ -356,8 +372,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkPipelineLayout(ulong handle) { Handle = handle; }
-		public static VkPipelineLayout Null => new VkPipelineLayout(0);
-		public static implicit operator VkPipelineLayout(ulong handle) => new VkPipelineLayout(handle);
+		public static VkPipelineLayout Null => new VkPipelineLayout((ulong)0);
+		public static implicit operator VkPipelineLayout(ulong handle) => new VkPipelineLayout((ulong)handle);
+		public static implicit operator bool(VkPipelineLayout handle) => handle.Handle != 0;
 		public static bool operator ==(VkPipelineLayout left, VkPipelineLayout right) => left.Handle == right.Handle;
 		public static bool operator !=(VkPipelineLayout left, VkPipelineLayout right) => left.Handle != right.Handle;
 		public static bool operator ==(VkPipelineLayout left, ulong right) => left.Handle == right;
@@ -377,8 +394,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkPipeline(ulong handle) { Handle = handle; }
-		public static VkPipeline Null => new VkPipeline(0);
-		public static implicit operator VkPipeline(ulong handle) => new VkPipeline(handle);
+		public static VkPipeline Null => new VkPipeline((ulong)0);
+		public static implicit operator VkPipeline(ulong handle) => new VkPipeline((ulong)handle);
+		public static implicit operator bool(VkPipeline handle) => handle.Handle != 0;
 		public static bool operator ==(VkPipeline left, VkPipeline right) => left.Handle == right.Handle;
 		public static bool operator !=(VkPipeline left, VkPipeline right) => left.Handle != right.Handle;
 		public static bool operator ==(VkPipeline left, ulong right) => left.Handle == right;
@@ -398,8 +416,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkRenderPass(ulong handle) { Handle = handle; }
-		public static VkRenderPass Null => new VkRenderPass(0);
-		public static implicit operator VkRenderPass(ulong handle) => new VkRenderPass(handle);
+		public static VkRenderPass Null => new VkRenderPass((ulong)0);
+		public static implicit operator VkRenderPass(ulong handle) => new VkRenderPass((ulong)handle);
+		public static implicit operator bool(VkRenderPass handle) => handle.Handle != 0;
 		public static bool operator ==(VkRenderPass left, VkRenderPass right) => left.Handle == right.Handle;
 		public static bool operator !=(VkRenderPass left, VkRenderPass right) => left.Handle != right.Handle;
 		public static bool operator ==(VkRenderPass left, ulong right) => left.Handle == right;
@@ -419,8 +438,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDescriptorSetLayout(ulong handle) { Handle = handle; }
-		public static VkDescriptorSetLayout Null => new VkDescriptorSetLayout(0);
-		public static implicit operator VkDescriptorSetLayout(ulong handle) => new VkDescriptorSetLayout(handle);
+		public static VkDescriptorSetLayout Null => new VkDescriptorSetLayout((ulong)0);
+		public static implicit operator VkDescriptorSetLayout(ulong handle) => new VkDescriptorSetLayout((ulong)handle);
+		public static implicit operator bool(VkDescriptorSetLayout handle) => handle.Handle != 0;
 		public static bool operator ==(VkDescriptorSetLayout left, VkDescriptorSetLayout right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDescriptorSetLayout left, VkDescriptorSetLayout right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDescriptorSetLayout left, ulong right) => left.Handle == right;
@@ -440,8 +460,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkSampler(ulong handle) { Handle = handle; }
-		public static VkSampler Null => new VkSampler(0);
-		public static implicit operator VkSampler(ulong handle) => new VkSampler(handle);
+		public static VkSampler Null => new VkSampler((ulong)0);
+		public static implicit operator VkSampler(ulong handle) => new VkSampler((ulong)handle);
+		public static implicit operator bool(VkSampler handle) => handle.Handle != 0;
 		public static bool operator ==(VkSampler left, VkSampler right) => left.Handle == right.Handle;
 		public static bool operator !=(VkSampler left, VkSampler right) => left.Handle != right.Handle;
 		public static bool operator ==(VkSampler left, ulong right) => left.Handle == right;
@@ -461,8 +482,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDescriptorSet(ulong handle) { Handle = handle; }
-		public static VkDescriptorSet Null => new VkDescriptorSet(0);
-		public static implicit operator VkDescriptorSet(ulong handle) => new VkDescriptorSet(handle);
+		public static VkDescriptorSet Null => new VkDescriptorSet((ulong)0);
+		public static implicit operator VkDescriptorSet(ulong handle) => new VkDescriptorSet((ulong)handle);
+		public static implicit operator bool(VkDescriptorSet handle) => handle.Handle != 0;
 		public static bool operator ==(VkDescriptorSet left, VkDescriptorSet right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDescriptorSet left, VkDescriptorSet right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDescriptorSet left, ulong right) => left.Handle == right;
@@ -482,8 +504,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDescriptorPool(ulong handle) { Handle = handle; }
-		public static VkDescriptorPool Null => new VkDescriptorPool(0);
-		public static implicit operator VkDescriptorPool(ulong handle) => new VkDescriptorPool(handle);
+		public static VkDescriptorPool Null => new VkDescriptorPool((ulong)0);
+		public static implicit operator VkDescriptorPool(ulong handle) => new VkDescriptorPool((ulong)handle);
+		public static implicit operator bool(VkDescriptorPool handle) => handle.Handle != 0;
 		public static bool operator ==(VkDescriptorPool left, VkDescriptorPool right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDescriptorPool left, VkDescriptorPool right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDescriptorPool left, ulong right) => left.Handle == right;
@@ -503,8 +526,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkFramebuffer(ulong handle) { Handle = handle; }
-		public static VkFramebuffer Null => new VkFramebuffer(0);
-		public static implicit operator VkFramebuffer(ulong handle) => new VkFramebuffer(handle);
+		public static VkFramebuffer Null => new VkFramebuffer((ulong)0);
+		public static implicit operator VkFramebuffer(ulong handle) => new VkFramebuffer((ulong)handle);
+		public static implicit operator bool(VkFramebuffer handle) => handle.Handle != 0;
 		public static bool operator ==(VkFramebuffer left, VkFramebuffer right) => left.Handle == right.Handle;
 		public static bool operator !=(VkFramebuffer left, VkFramebuffer right) => left.Handle != right.Handle;
 		public static bool operator ==(VkFramebuffer left, ulong right) => left.Handle == right;
@@ -524,8 +548,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkCommandPool(ulong handle) { Handle = handle; }
-		public static VkCommandPool Null => new VkCommandPool(0);
-		public static implicit operator VkCommandPool(ulong handle) => new VkCommandPool(handle);
+		public static VkCommandPool Null => new VkCommandPool((ulong)0);
+		public static implicit operator VkCommandPool(ulong handle) => new VkCommandPool((ulong)handle);
+		public static implicit operator bool(VkCommandPool handle) => handle.Handle != 0;
 		public static bool operator ==(VkCommandPool left, VkCommandPool right) => left.Handle == right.Handle;
 		public static bool operator !=(VkCommandPool left, VkCommandPool right) => left.Handle != right.Handle;
 		public static bool operator ==(VkCommandPool left, ulong right) => left.Handle == right;
@@ -545,8 +570,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkSamplerYcbcrConversion(ulong handle) { Handle = handle; }
-		public static VkSamplerYcbcrConversion Null => new VkSamplerYcbcrConversion(0);
-		public static implicit operator VkSamplerYcbcrConversion(ulong handle) => new VkSamplerYcbcrConversion(handle);
+		public static VkSamplerYcbcrConversion Null => new VkSamplerYcbcrConversion((ulong)0);
+		public static implicit operator VkSamplerYcbcrConversion(ulong handle) => new VkSamplerYcbcrConversion((ulong)handle);
+		public static implicit operator bool(VkSamplerYcbcrConversion handle) => handle.Handle != 0;
 		public static bool operator ==(VkSamplerYcbcrConversion left, VkSamplerYcbcrConversion right) => left.Handle == right.Handle;
 		public static bool operator !=(VkSamplerYcbcrConversion left, VkSamplerYcbcrConversion right) => left.Handle != right.Handle;
 		public static bool operator ==(VkSamplerYcbcrConversion left, ulong right) => left.Handle == right;
@@ -566,8 +592,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDescriptorUpdateTemplate(ulong handle) { Handle = handle; }
-		public static VkDescriptorUpdateTemplate Null => new VkDescriptorUpdateTemplate(0);
-		public static implicit operator VkDescriptorUpdateTemplate(ulong handle) => new VkDescriptorUpdateTemplate(handle);
+		public static VkDescriptorUpdateTemplate Null => new VkDescriptorUpdateTemplate((ulong)0);
+		public static implicit operator VkDescriptorUpdateTemplate(ulong handle) => new VkDescriptorUpdateTemplate((ulong)handle);
+		public static implicit operator bool(VkDescriptorUpdateTemplate handle) => handle.Handle != 0;
 		public static bool operator ==(VkDescriptorUpdateTemplate left, VkDescriptorUpdateTemplate right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDescriptorUpdateTemplate left, VkDescriptorUpdateTemplate right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDescriptorUpdateTemplate left, ulong right) => left.Handle == right;
@@ -587,8 +614,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkSurfaceKHR(ulong handle) { Handle = handle; }
-		public static VkSurfaceKHR Null => new VkSurfaceKHR(0);
-		public static implicit operator VkSurfaceKHR(ulong handle) => new VkSurfaceKHR(handle);
+		public static VkSurfaceKHR Null => new VkSurfaceKHR((ulong)0);
+		public static implicit operator VkSurfaceKHR(ulong handle) => new VkSurfaceKHR((ulong)handle);
+		public static implicit operator bool(VkSurfaceKHR handle) => handle.Handle != 0;
 		public static bool operator ==(VkSurfaceKHR left, VkSurfaceKHR right) => left.Handle == right.Handle;
 		public static bool operator !=(VkSurfaceKHR left, VkSurfaceKHR right) => left.Handle != right.Handle;
 		public static bool operator ==(VkSurfaceKHR left, ulong right) => left.Handle == right;
@@ -608,8 +636,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkSwapchainKHR(ulong handle) { Handle = handle; }
-		public static VkSwapchainKHR Null => new VkSwapchainKHR(0);
-		public static implicit operator VkSwapchainKHR(ulong handle) => new VkSwapchainKHR(handle);
+		public static VkSwapchainKHR Null => new VkSwapchainKHR((ulong)0);
+		public static implicit operator VkSwapchainKHR(ulong handle) => new VkSwapchainKHR((ulong)handle);
+		public static implicit operator bool(VkSwapchainKHR handle) => handle.Handle != 0;
 		public static bool operator ==(VkSwapchainKHR left, VkSwapchainKHR right) => left.Handle == right.Handle;
 		public static bool operator !=(VkSwapchainKHR left, VkSwapchainKHR right) => left.Handle != right.Handle;
 		public static bool operator ==(VkSwapchainKHR left, ulong right) => left.Handle == right;
@@ -629,8 +658,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDisplayKHR(ulong handle) { Handle = handle; }
-		public static VkDisplayKHR Null => new VkDisplayKHR(0);
-		public static implicit operator VkDisplayKHR(ulong handle) => new VkDisplayKHR(handle);
+		public static VkDisplayKHR Null => new VkDisplayKHR((ulong)0);
+		public static implicit operator VkDisplayKHR(ulong handle) => new VkDisplayKHR((ulong)handle);
+		public static implicit operator bool(VkDisplayKHR handle) => handle.Handle != 0;
 		public static bool operator ==(VkDisplayKHR left, VkDisplayKHR right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDisplayKHR left, VkDisplayKHR right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDisplayKHR left, ulong right) => left.Handle == right;
@@ -650,8 +680,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDisplayModeKHR(ulong handle) { Handle = handle; }
-		public static VkDisplayModeKHR Null => new VkDisplayModeKHR(0);
-		public static implicit operator VkDisplayModeKHR(ulong handle) => new VkDisplayModeKHR(handle);
+		public static VkDisplayModeKHR Null => new VkDisplayModeKHR((ulong)0);
+		public static implicit operator VkDisplayModeKHR(ulong handle) => new VkDisplayModeKHR((ulong)handle);
+		public static implicit operator bool(VkDisplayModeKHR handle) => handle.Handle != 0;
 		public static bool operator ==(VkDisplayModeKHR left, VkDisplayModeKHR right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDisplayModeKHR left, VkDisplayModeKHR right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDisplayModeKHR left, ulong right) => left.Handle == right;
@@ -671,8 +702,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDebugReportCallbackEXT(ulong handle) { Handle = handle; }
-		public static VkDebugReportCallbackEXT Null => new VkDebugReportCallbackEXT(0);
-		public static implicit operator VkDebugReportCallbackEXT(ulong handle) => new VkDebugReportCallbackEXT(handle);
+		public static VkDebugReportCallbackEXT Null => new VkDebugReportCallbackEXT((ulong)0);
+		public static implicit operator VkDebugReportCallbackEXT(ulong handle) => new VkDebugReportCallbackEXT((ulong)handle);
+		public static implicit operator bool(VkDebugReportCallbackEXT handle) => handle.Handle != 0;
 		public static bool operator ==(VkDebugReportCallbackEXT left, VkDebugReportCallbackEXT right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDebugReportCallbackEXT left, VkDebugReportCallbackEXT right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDebugReportCallbackEXT left, ulong right) => left.Handle == right;
@@ -692,8 +724,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDebugUtilsMessengerEXT(ulong handle) { Handle = handle; }
-		public static VkDebugUtilsMessengerEXT Null => new VkDebugUtilsMessengerEXT(0);
-		public static implicit operator VkDebugUtilsMessengerEXT(ulong handle) => new VkDebugUtilsMessengerEXT(handle);
+		public static VkDebugUtilsMessengerEXT Null => new VkDebugUtilsMessengerEXT((ulong)0);
+		public static implicit operator VkDebugUtilsMessengerEXT(ulong handle) => new VkDebugUtilsMessengerEXT((ulong)handle);
+		public static implicit operator bool(VkDebugUtilsMessengerEXT handle) => handle.Handle != 0;
 		public static bool operator ==(VkDebugUtilsMessengerEXT left, VkDebugUtilsMessengerEXT right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDebugUtilsMessengerEXT left, VkDebugUtilsMessengerEXT right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDebugUtilsMessengerEXT left, ulong right) => left.Handle == right;
@@ -713,8 +746,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkValidationCacheEXT(ulong handle) { Handle = handle; }
-		public static VkValidationCacheEXT Null => new VkValidationCacheEXT(0);
-		public static implicit operator VkValidationCacheEXT(ulong handle) => new VkValidationCacheEXT(handle);
+		public static VkValidationCacheEXT Null => new VkValidationCacheEXT((ulong)0);
+		public static implicit operator VkValidationCacheEXT(ulong handle) => new VkValidationCacheEXT((ulong)handle);
+		public static implicit operator bool(VkValidationCacheEXT handle) => handle.Handle != 0;
 		public static bool operator ==(VkValidationCacheEXT left, VkValidationCacheEXT right) => left.Handle == right.Handle;
 		public static bool operator !=(VkValidationCacheEXT left, VkValidationCacheEXT right) => left.Handle != right.Handle;
 		public static bool operator ==(VkValidationCacheEXT left, ulong right) => left.Handle == right;
@@ -734,8 +768,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkAccelerationStructureKHR(ulong handle) { Handle = handle; }
-		public static VkAccelerationStructureKHR Null => new VkAccelerationStructureKHR(0);
-		public static implicit operator VkAccelerationStructureKHR(ulong handle) => new VkAccelerationStructureKHR(handle);
+		public static VkAccelerationStructureKHR Null => new VkAccelerationStructureKHR((ulong)0);
+		public static implicit operator VkAccelerationStructureKHR(ulong handle) => new VkAccelerationStructureKHR((ulong)handle);
+		public static implicit operator bool(VkAccelerationStructureKHR handle) => handle.Handle != 0;
 		public static bool operator ==(VkAccelerationStructureKHR left, VkAccelerationStructureKHR right) => left.Handle == right.Handle;
 		public static bool operator !=(VkAccelerationStructureKHR left, VkAccelerationStructureKHR right) => left.Handle != right.Handle;
 		public static bool operator ==(VkAccelerationStructureKHR left, ulong right) => left.Handle == right;
@@ -755,8 +790,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkPerformanceConfigurationINTEL(ulong handle) { Handle = handle; }
-		public static VkPerformanceConfigurationINTEL Null => new VkPerformanceConfigurationINTEL(0);
-		public static implicit operator VkPerformanceConfigurationINTEL(ulong handle) => new VkPerformanceConfigurationINTEL(handle);
+		public static VkPerformanceConfigurationINTEL Null => new VkPerformanceConfigurationINTEL((ulong)0);
+		public static implicit operator VkPerformanceConfigurationINTEL(ulong handle) => new VkPerformanceConfigurationINTEL((ulong)handle);
+		public static implicit operator bool(VkPerformanceConfigurationINTEL handle) => handle.Handle != 0;
 		public static bool operator ==(VkPerformanceConfigurationINTEL left, VkPerformanceConfigurationINTEL right) => left.Handle == right.Handle;
 		public static bool operator !=(VkPerformanceConfigurationINTEL left, VkPerformanceConfigurationINTEL right) => left.Handle != right.Handle;
 		public static bool operator ==(VkPerformanceConfigurationINTEL left, ulong right) => left.Handle == right;
@@ -776,8 +812,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkIndirectCommandsLayoutNV(ulong handle) { Handle = handle; }
-		public static VkIndirectCommandsLayoutNV Null => new VkIndirectCommandsLayoutNV(0);
-		public static implicit operator VkIndirectCommandsLayoutNV(ulong handle) => new VkIndirectCommandsLayoutNV(handle);
+		public static VkIndirectCommandsLayoutNV Null => new VkIndirectCommandsLayoutNV((ulong)0);
+		public static implicit operator VkIndirectCommandsLayoutNV(ulong handle) => new VkIndirectCommandsLayoutNV((ulong)handle);
+		public static implicit operator bool(VkIndirectCommandsLayoutNV handle) => handle.Handle != 0;
 		public static bool operator ==(VkIndirectCommandsLayoutNV left, VkIndirectCommandsLayoutNV right) => left.Handle == right.Handle;
 		public static bool operator !=(VkIndirectCommandsLayoutNV left, VkIndirectCommandsLayoutNV right) => left.Handle != right.Handle;
 		public static bool operator ==(VkIndirectCommandsLayoutNV left, ulong right) => left.Handle == right;
@@ -797,8 +834,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkPrivateDataSlotEXT(ulong handle) { Handle = handle; }
-		public static VkPrivateDataSlotEXT Null => new VkPrivateDataSlotEXT(0);
-		public static implicit operator VkPrivateDataSlotEXT(ulong handle) => new VkPrivateDataSlotEXT(handle);
+		public static VkPrivateDataSlotEXT Null => new VkPrivateDataSlotEXT((ulong)0);
+		public static implicit operator VkPrivateDataSlotEXT(ulong handle) => new VkPrivateDataSlotEXT((ulong)handle);
+		public static implicit operator bool(VkPrivateDataSlotEXT handle) => handle.Handle != 0;
 		public static bool operator ==(VkPrivateDataSlotEXT left, VkPrivateDataSlotEXT right) => left.Handle == right.Handle;
 		public static bool operator !=(VkPrivateDataSlotEXT left, VkPrivateDataSlotEXT right) => left.Handle != right.Handle;
 		public static bool operator ==(VkPrivateDataSlotEXT left, ulong right) => left.Handle == right;
@@ -818,8 +856,9 @@ namespace SharpGame
 	{
 		public readonly ulong Handle;
 		public VkDeferredOperationKHR(ulong handle) { Handle = handle; }
-		public static VkDeferredOperationKHR Null => new VkDeferredOperationKHR(0);
-		public static implicit operator VkDeferredOperationKHR(ulong handle) => new VkDeferredOperationKHR(handle);
+		public static VkDeferredOperationKHR Null => new VkDeferredOperationKHR((ulong)0);
+		public static implicit operator VkDeferredOperationKHR(ulong handle) => new VkDeferredOperationKHR((ulong)handle);
+		public static implicit operator bool(VkDeferredOperationKHR handle) => handle.Handle != 0;
 		public static bool operator ==(VkDeferredOperationKHR left, VkDeferredOperationKHR right) => left.Handle == right.Handle;
 		public static bool operator !=(VkDeferredOperationKHR left, VkDeferredOperationKHR right) => left.Handle != right.Handle;
 		public static bool operator ==(VkDeferredOperationKHR left, ulong right) => left.Handle == right;

@@ -141,7 +141,7 @@ namespace SharpGame.Samples
     public class VirtualTextureSample : Sample
     {
         VirtualTexture texture;
-        Semaphore bindSparseSemaphore;
+        VkSemaphore bindSparseSemaphore;
 
         Queue queue;
 
@@ -474,7 +474,7 @@ namespace SharpGame.Samples
                 texture.opaqueMemoryBinds.Add(sparseMemoryBind);
             }
 
-            bindSparseSemaphore = new Semaphore(0);
+            bindSparseSemaphore = new VkSemaphore(VkSemaphoreCreateFlags.None);
 
             // Prepare bind sparse info for reuse in queue submission
             texture.updateSparseBindInfo();
@@ -557,7 +557,7 @@ namespace SharpGame.Samples
             // Update sparse queue binding
             texture.updateSparseBindInfo();
 
-            Fence fence = new Fence(FenceCreateFlags.None);
+            VkFence fence = new VkFence(VkFenceCreateFlags.None);
 
             queue.BindSparse(texture.bindSparseInfo, fence);
             fence.Wait();
@@ -666,7 +666,7 @@ namespace SharpGame.Samples
             // Update sparse queue binding
             texture.updateSparseBindInfo();
 
-            Fence fence = new Fence(FenceCreateFlags.None);
+            VkFence fence = new VkFence(VkFenceCreateFlags.None);
             queue.BindSparse(texture.bindSparseInfo, fence);
             fence.Wait();
         }
