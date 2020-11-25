@@ -9,24 +9,17 @@ namespace SharpGame
     using static Vulkan;
     public interface IBindableResource { }
     
-    public class Buffer : RefCounted, IBindableResource
+    public class Buffer : DeviceMemory, IBindableResource
     {
         public const ulong WholeSize = ulong.MaxValue;
         public ulong Stride { get; set; }
-        public ulong Count { get; set; }
-        public ulong Size { get; set; }
         public VkBufferUsageFlags UsageFlags { get; set; }
 
-        public IntPtr Mapped { get; private set; }
-
         internal VkDescriptorBufferInfo descriptor;
-        internal VkMemoryPropertyFlags memoryPropertyFlags;
 
         Format viewFormat;
 
         public VkBuffer handle;
-        internal VkDeviceMemory memory;
-
         public BufferView view;
         internal DescriptorImageInfo imageDescriptor;
 
@@ -63,11 +56,9 @@ namespace SharpGame
 
             var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropFlags);
 
-            var memAlloc = new VkMemoryAllocateInfo(memReqs.size, memoryTypeIndex);
-            memory = Device.AllocateMemory(ref memAlloc);
+            Allocate(memReqs.size, memoryTypeIndex);
 
-            //buffer.alignment = memReqs.alignment;
-            Size = memAlloc.allocationSize;
+            Size = allocationSize;
             UsageFlags = usageFlags;
             memoryPropertyFlags = memoryPropFlags;
 
@@ -114,24 +105,6 @@ namespace SharpGame
             return new Buffer(usageFlags, dynamic ? VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent : VkMemoryPropertyFlags.DeviceLocal, stride, count, VkSharingMode.Exclusive, null, data);
         }
 
-        public ref T Map<T>(ulong offset = 0) where T : struct
-        {
-            Mapped = Device.MapMemory(memory, (ulong)offset, Size, VkMemoryMapFlags.None);
-            return ref Utilities.As<T>(Mapped);
-        }
-
-        public IntPtr Map(ulong offset = 0, ulong size = WholeSize)
-        {
-            Mapped = Device.MapMemory(memory, offset, size, 0);
-            return Mapped;
-        }
-               
-        public void Unmap()
-        {
-            Device.UnmapMemory(memory);
-            Mapped = IntPtr.Zero;
-        }
-
         public void SetupDescriptor()
         {
             descriptor.offset = 0;
@@ -153,15 +126,13 @@ namespace SharpGame
         {
             if ((memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
             {
-                using (Buffer stagingBuffer = CreateStagingBuffer(size, data))
-                {
-                    Graphics.WithCommandBuffer((cmd) =>
-                    {
-                        VkBufferCopy copyRegion = new VkBufferCopy { srcOffset = offset, size = size };
-                        cmd.CopyBuffer(stagingBuffer, this, ref copyRegion);
-                    });
+                using Buffer stagingBuffer = CreateStagingBuffer(size, data);
 
-                }
+                Graphics.WithCommandBuffer((cmd) =>
+                {
+                    VkBufferCopy copyRegion = new VkBufferCopy { srcOffset = offset, size = size };
+                    cmd.CopyBuffer(stagingBuffer, this, ref copyRegion);
+                });
             }
             else
             {
@@ -171,44 +142,17 @@ namespace SharpGame
             }
 
         }
-
-        public unsafe void Flush(ulong size = WholeSize, ulong offset = 0)
-        {
-            VkMappedMemoryRange mappedRange = new VkMappedMemoryRange
-            {
-                sType = VkStructureType.MappedMemoryRange
-            };
-            mappedRange.memory = memory;
-            mappedRange.offset = offset;
-            mappedRange.size = size;            
-            Device.FlushMappedMemoryRanges(1, ref mappedRange);
-        }
-
-        public unsafe void Invalidate(ulong size = WholeSize, ulong offset = 0)
-        {
-            VkMappedMemoryRange mappedRange = new VkMappedMemoryRange
-            {
-                sType = VkStructureType.MappedMemoryRange
-            };
-            mappedRange.memory = memory;
-            mappedRange.offset = offset;
-            mappedRange.size = size;
-            Device.InvalidateMappedMemoryRanges(1, ref mappedRange);
-        }
-
+        
         protected override void Destroy()
         {
-            if (handle.Handle != 0)
+            if (handle != 0)
             {
                 Device.DestroyBuffer(handle);
             }
 
-            if (memory.Handle != 0)
-            {
-                Device.FreeMemory(memory);
-            }
-
             view?.Dispose();
+
+            base.Destroy();
         }
 
 
@@ -216,26 +160,26 @@ namespace SharpGame
 
     public class BufferView : DisposeBase
     {
-        internal VkBufferView view;
+        internal VkBufferView handle;
 
         public BufferView(Buffer buffer, Format format, ulong offset, ulong range)
         {
             var bufferViewCreateInfo = new VkBufferViewCreateInfo
             {
-                sType = VkStructureType.BufferViewCreateInfo
+                sType = VkStructureType.BufferViewCreateInfo,
+                buffer = buffer.handle,
+                format = (VkFormat)format,
+                offset = offset,
+                range = range
             };
-            bufferViewCreateInfo.buffer = buffer.handle;
-            bufferViewCreateInfo.format = (VkFormat)format;
-            bufferViewCreateInfo.offset = offset;
-            bufferViewCreateInfo.range = range;
-            view = Device.CreateBufferView(ref bufferViewCreateInfo);
+            handle = Device.CreateBufferView(ref bufferViewCreateInfo);
         }
 
         protected override void Destroy(bool disposing)
         {
             base.Destroy(disposing);
 
-            Device.DestroyBufferView(view);
+            Device.DestroyBufferView(handle);
         }
     }
 }

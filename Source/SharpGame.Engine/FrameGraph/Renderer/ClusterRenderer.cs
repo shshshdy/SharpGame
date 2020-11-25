@@ -127,8 +127,7 @@ namespace SharpGame
             query_count_ = (uint)QUERY_HSIZE * 2;
             for (int i = 0; i < 3; i++)
             {
-                var queryPoolCreateInfo = new QueryPoolCreateInfo(QueryType.Timestamp, query_count_);
-                query_pool[i] = new QueryPool(ref queryPoolCreateInfo);
+                query_pool[i] = new QueryPool(VkQueryType.Timestamp, query_count_);
             }
 
             uint[] queue_families = null;

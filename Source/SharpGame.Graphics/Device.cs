@@ -332,8 +332,7 @@ namespace SharpGame
 
         private static DebugReportCallbackExt CreateDebugReportCallback()
         {
-            // Attach debug callback.
-            var debugReportCreateInfo = new DebugReportCallbackCreateInfoExt(
+            return new DebugReportCallbackExt(VkInstance,
                 //VkDebugReportFlagsEXT.Information | 
                 //VkDebugReportFlagsEXT.Debug |
                 VkDebugReportFlagsEXT.Warning |
@@ -343,10 +342,9 @@ namespace SharpGame
                 {
                     System.Diagnostics.Debug.WriteLine($"[{args.Flags}][{args.LayerPrefix}]");
                     System.Diagnostics.Debug.WriteLine("\t" + args.Message);
-                    return args.Flags.HasFlag(DebugReportFlagsExt.Error);
-                }, IntPtr.Zero
-            );
-            return new DebugReportCallbackExt(VkInstance, ref debugReportCreateInfo);
+
+                    return args.Flags.HasFlag(VkDebugReportFlagsEXT.Error);
+                });
         }
 
         private static uint GetQueueFamilyIndex(VkQueueFlags queueFlags)

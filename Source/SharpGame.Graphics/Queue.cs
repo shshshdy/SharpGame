@@ -158,13 +158,6 @@ namespace SharpGame
         }
     }
 
-    [Flags]
-    public enum SparseMemoryBindFlags
-    {
-        None = 0,
-        Metadata = 1 << 0
-    }
-
     public unsafe struct SparseImageOpaqueMemoryBindInfo
     {
         VkSparseImageOpaqueMemoryBindInfo native;

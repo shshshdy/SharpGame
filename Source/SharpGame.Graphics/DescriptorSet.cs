@@ -408,7 +408,7 @@ namespace SharpGame
             native.dstBinding = binding;
             native.descriptorCount = 1;
             native.pBufferInfo = (VkDescriptorBufferInfo*)Unsafe.AsPointer(ref bufferInfo);            
-            native.pTexelBufferView = (VkBufferView*)Unsafe.AsPointer(ref bufferView.view);
+            native.pTexelBufferView = (VkBufferView*)Unsafe.AsPointer(ref bufferView.handle);
             
         }
     }

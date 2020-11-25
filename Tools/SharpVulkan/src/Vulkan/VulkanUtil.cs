@@ -1,11 +1,13 @@
 ﻿// Copyright (c) BobbyBao and contributors.
 // Distributed under the MIT license. See the LICENSE file in the project root for more information.
 
+using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace SharpGame
 {
-    public static unsafe class VkUtils
+    public static unsafe class VulkanUtil
     {
         [DebuggerHidden]
         [DebuggerStepThrough]
@@ -13,7 +15,8 @@ namespace SharpGame
         {
             if (result != VkResult.Success)
             {
-                throw new VkException(result);
+                if (VkResult.ErrorValidationFailedEXT != result)
+                    throw new VkException(result);
             }
         }
 
@@ -57,5 +60,45 @@ namespace SharpGame
 
             return uint.MaxValue;
         }
+
+        public static IntPtr GetProcAddr(this VkInstance instance, string name)
+        {
+            int byteCount = Interop.GetMaxByteCount(name);
+            var dstPtr = stackalloc byte[byteCount];
+            Interop.StringToPointer(name, dstPtr, byteCount);
+            var addr = Vulkan.vkGetInstanceProcAddr(instance, dstPtr);
+            return addr;
+        }
+
+        public unsafe static TDelegate GetProc<TDelegate>(this VkInstance instance, string name) where TDelegate : class
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            IntPtr ptr = GetProcAddr(instance, name);
+
+            return ptr != IntPtr.Zero ? Marshal.GetDelegateForFunctionPointer<TDelegate>(ptr) : default;
+
+        }
+
+        public static IntPtr GetProcAddr(this VkDevice device, string name)
+        {
+            int byteCount = Interop.GetMaxByteCount(name);
+            var dstPtr = stackalloc byte[byteCount];
+            Interop.StringToPointer(name, dstPtr, byteCount);
+            var addr = Vulkan.vkGetDeviceProcAddr(device, dstPtr);
+            return addr;
+        }
+
+        public unsafe static TDelegate GetProc<TDelegate>(this VkDevice device, string name) where TDelegate : class
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            IntPtr ptr = GetProcAddr(device, name);
+            TDelegate proc = ptr != IntPtr.Zero ? Marshal.GetDelegateForFunctionPointer<TDelegate>(ptr) : null;
+            return proc;
+        }
+
     }
 }

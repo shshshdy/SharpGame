@@ -6,12 +6,9 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Image : DisposeBase
+    public class Image : DeviceMemory
     {
         public VkImage handle;
-        internal VkDeviceMemory memory;
-        internal ulong allocationSize;
-        internal uint memoryTypeIndex;
         public VkImageType imageType;
         public VkFormat format;
         public VkExtent3D extent;
@@ -29,12 +26,10 @@ namespace SharpGame
 
             Device.GetImageMemoryRequirements(this, out var memReqs);
 
-            VkMemoryAllocateInfo memAllocInfo = new VkMemoryAllocateInfo();
-            memAllocInfo.sType = VkStructureType.MemoryAllocateInfo;
-            memAllocInfo.allocationSize = memReqs.size;
-            memAllocInfo.memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
+            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
 
-            memory = Device.AllocateMemory(ref memAllocInfo);
+            Allocate(memReqs.size, memoryTypeIndex);
+
             Device.BindImageMemory(handle, memory, 0);
 
             imageType = imageCreateInfo.imageType;
@@ -43,17 +38,15 @@ namespace SharpGame
             mipLevels = imageCreateInfo.mipLevels;
             arrayLayers = imageCreateInfo.arrayLayers;
 
-            allocationSize = memAllocInfo.allocationSize;
-            memoryTypeIndex = memAllocInfo.memoryTypeIndex;
         }
 
-        protected override void Destroy(bool disposing)
+        protected override void Destroy()
         {
-            Device.FreeMemory(memory);
-
             //Donot destroy swapchain image 
             if(memory != VkDeviceMemory.Null)
                 Device.Destroy(handle);
+
+            base.Destroy();
         }
 
         public unsafe static Image Create(uint width, uint height, VkImageCreateFlags flags, uint layers, uint levels,
