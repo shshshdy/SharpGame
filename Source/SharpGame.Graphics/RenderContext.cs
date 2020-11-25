@@ -17,7 +17,7 @@ namespace SharpGame
         public CommandBuffer cmdBuffer;
         public Semaphore semaphore;
         public Fence submitFence;
-        public PipelineStageFlags pipelineStageFlags;
+        public VkPipelineStageFlags pipelineStageFlags;
     }
 
     public class RenderContext
@@ -59,10 +59,10 @@ namespace SharpGame
             {
                 submitQueue[i] = new SubmitQueueData
                 {
-                    cmdBuffer = pools[i].AllocateCommandBuffer(CommandBufferLevel.Primary),
+                    cmdBuffer = pools[i].AllocateCommandBuffer(VkCommandBufferLevel.Primary),
                     submitFence = new Fence(FenceCreateFlags.Signaled),
                     semaphore = new Semaphore(0),
-                    pipelineStageFlags = (i == (int)SubmitQueue.Compute ? PipelineStageFlags.ComputeShader : PipelineStageFlags.FragmentShader)
+                    pipelineStageFlags = (i == (int)SubmitQueue.Compute ? VkPipelineStageFlags.ComputeShader : VkPipelineStageFlags.FragmentShader)
                 };
             }
 
@@ -70,9 +70,9 @@ namespace SharpGame
 
         public static void Init()
         {
-            pools[0] = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
-            pools[1] = new CommandBufferPool(Device.QFCompute, CommandPoolCreateFlags.ResetCommandBuffer);
-            pools[2] = new CommandBufferPool(Device.QFGraphics, CommandPoolCreateFlags.ResetCommandBuffer);
+            pools[0] = new CommandBufferPool(Device.QFGraphics, VkCommandPoolCreateFlags.ResetCommandBuffer);
+            pools[1] = new CommandBufferPool(Device.QFCompute, VkCommandPoolCreateFlags.ResetCommandBuffer);
+            pools[2] = new CommandBufferPool(Device.QFGraphics, VkCommandPoolCreateFlags.ResetCommandBuffer);
         }
 
         public static void Shutdown()
@@ -101,7 +101,7 @@ namespace SharpGame
         {
             for (int i = 0; i < (int)SubmitQueue.MaxCount; i++)
             {
-                submitQueue[i].cmdBuffer = pools[i].AllocateCommandBuffer(CommandBufferLevel.Primary);
+                submitQueue[i].cmdBuffer = pools[i].AllocateCommandBuffer(VkCommandBufferLevel.Primary);
             }
         }
 

@@ -45,8 +45,8 @@ namespace SharpGame
             var cmdBufferPool = new CommandBufferPool[3];
             for (int i = 0; i < 3; i++)
             {
-                cmdBufferPool[i] = new CommandBufferPool(Graphics.Swapchain.QueueNodeIndex, CommandPoolCreateFlags.ResetCommandBuffer);
-                cmdBufferPool[i].Allocate(CommandBufferLevel.Secondary, numCmd);
+                cmdBufferPool[i] = new CommandBufferPool(Graphics.Swapchain.QueueNodeIndex, VkCommandPoolCreateFlags.ResetCommandBuffer);
+                cmdBufferPool[i].Allocate(VkCommandBufferLevel.Secondary, numCmd);
             }
 
             cmdBufferPools.Add(cmdBufferPool);
@@ -65,8 +65,8 @@ namespace SharpGame
                     renderPass = FrameGraphPass.RenderPass
                 };
 
-                cb.Begin(CommandBufferUsageFlags.OneTimeSubmit | CommandBufferUsageFlags.RenderPassContinue
-                    | CommandBufferUsageFlags.SimultaneousUse, ref inherit);
+                cb.Begin(VkCommandBufferUsageFlags.OneTimeSubmit | VkCommandBufferUsageFlags.RenderPassContinue
+                    | VkCommandBufferUsageFlags.SimultaneousUse, ref inherit);
             }
 
             return cb;

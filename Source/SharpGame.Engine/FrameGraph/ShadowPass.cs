@@ -79,47 +79,47 @@ namespace SharpGame
         {
             var depthFormat = Device.GetSupportedDepthFormat();
 
-            AttachmentDescription[] attachments =
+            VkAttachmentDescription[] attachments =
             {
-                new AttachmentDescription(depthFormat, finalLayout :VkImageLayout.ShaderReadOnlyOptimal /*VkImageLayout.DepthStencilReadOnlyOptimal*/)
+                new VkAttachmentDescription(depthFormat, finalLayout :VkImageLayout.ShaderReadOnlyOptimal /*VkImageLayout.DepthStencilReadOnlyOptimal*/)
             };
 
             SubpassDescription[] subpassDescription =
             {
                 new SubpassDescription
                 {
-                    pipelineBindPoint = PipelineBindPoint.Graphics,
+                    pipelineBindPoint = VkPipelineBindPoint.Graphics,
 
                     pDepthStencilAttachment = new []
                     {
-                        new AttachmentReference(0, VkImageLayout.DepthStencilAttachmentOptimal)
+                        new VkAttachmentReference(0, VkImageLayout.DepthStencilAttachmentOptimal)
                     },
                 }
             };
 
             // Subpass dependencies for layout transitions
-            SubpassDependency[] dependencies =
+            VkSubpassDependency[] dependencies =
             {
-                new SubpassDependency
+                new VkSubpassDependency
                 {
                     srcSubpass = Vulkan.SubpassExternal,
                     dstSubpass = 0,
-                    srcStageMask = PipelineStageFlags.FragmentShader,
-                    dstStageMask = PipelineStageFlags.EarlyFragmentTests,
-                    srcAccessMask = AccessFlags.ShaderRead,
-                    dstAccessMask = AccessFlags.DepthStencilAttachmentWrite,
-                    dependencyFlags = DependencyFlags.ByRegion
+                    srcStageMask = VkPipelineStageFlags.FragmentShader,
+                    dstStageMask = VkPipelineStageFlags.EarlyFragmentTests,
+                    srcAccessMask = VkAccessFlags.ShaderRead,
+                    dstAccessMask = VkAccessFlags.DepthStencilAttachmentWrite,
+                    dependencyFlags = VkDependencyFlags.ByRegion
                 },
 
-                new SubpassDependency
+                new VkSubpassDependency
                 {
                     srcSubpass = 0,
                     dstSubpass = Vulkan.SubpassExternal,
-                    srcStageMask = PipelineStageFlags.LateFragmentTests,
-                    dstStageMask = PipelineStageFlags.FragmentShader,
-                    srcAccessMask =  AccessFlags.DepthStencilAttachmentWrite,
-                    dstAccessMask = AccessFlags.ShaderRead,
-                    dependencyFlags = DependencyFlags.ByRegion
+                    srcStageMask = VkPipelineStageFlags.LateFragmentTests,
+                    dstStageMask = VkPipelineStageFlags.FragmentShader,
+                    srcAccessMask =  VkAccessFlags.DepthStencilAttachmentWrite,
+                    dstAccessMask = VkAccessFlags.ShaderRead,
+                    dependencyFlags = VkDependencyFlags.ByRegion
                 },
             };
 
@@ -130,7 +130,7 @@ namespace SharpGame
         {
             for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                cascades[i].frameBuffer = SharpGame.Framebuffer.Create(RenderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
+                cascades[i].frameBuffer = new Framebuffer(RenderPass, SHADOWMAP_DIM, SHADOWMAP_DIM, 1, new[] { cascades[i].view });
             }
 
         }
@@ -193,7 +193,7 @@ namespace SharpGame
 
                 Span<ConstBlock> consts = stackalloc ConstBlock[]
                 {
-                    new ConstBlock(ShaderStage.Vertex, 0, 4, Utilities.AsPointer(ref cascade))
+                    new ConstBlock(VkShaderStageFlags.Vertex, 0, 4, Utilities.AsPointer(ref cascade))
                 };
 
                 foreach (var batch in casters[0])
@@ -218,7 +218,7 @@ namespace SharpGame
             var pass = shader.GetPass(passID);
             var pipe = pass.GetGraphicsPipeline(RenderPass, 0, batch.geometry);
 
-            cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
+            cb.BindPipeline(VkPipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
 
             foreach (ConstBlock constBlock in pushConsts)

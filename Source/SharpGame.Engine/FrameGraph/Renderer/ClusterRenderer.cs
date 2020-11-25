@@ -162,20 +162,20 @@ namespace SharpGame
 
             resourceLayout0 = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(2, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
             };
 
             resourceLayout1 = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(2, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(3, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(4, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(5, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(6, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
             };
 
             resourceSet0 = new DescriptorSet(resourceLayout0, uboCluster, light_pos_ranges, light_colors);
@@ -185,8 +185,8 @@ namespace SharpGame
 
             clusterLayout1 = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
             };
 
             clusterSet1 = new DescriptorSet(clusterLayout1, uboCluster, gridFlags);
@@ -195,14 +195,14 @@ namespace SharpGame
         protected RenderPass OnCreateClusterRenderPass()
         {
             VkFormat depthFormat = Device.GetSupportedDepthFormat();
-            AttachmentDescription[] attachments =
+            VkAttachmentDescription[] attachments =
             {
-                new AttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)
+                new VkAttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)
             };
 
             var depthStencilAttachment = new[]
             {
-                 new AttachmentReference(0, VkImageLayout.DepthStencilAttachmentOptimal)
+                 new VkAttachmentReference(0, VkImageLayout.DepthStencilAttachmentOptimal)
             };
 
             SubpassDescription[] subpassDescription =
@@ -210,34 +210,34 @@ namespace SharpGame
 		        // clustering subpass
                 new SubpassDescription
                 {
-                    pipelineBindPoint = PipelineBindPoint.Graphics,
+                    pipelineBindPoint = VkPipelineBindPoint.Graphics,
                     pDepthStencilAttachment = depthStencilAttachment
                 },
             };
 
             // Subpass dependencies for layout transitions
-            SubpassDependency[] dependencies =
+            VkSubpassDependency[] dependencies =
             {
-                new SubpassDependency
+                new VkSubpassDependency
                 {
                     srcSubpass = Vulkan.SubpassExternal,
                     dstSubpass = 0,
-                    srcStageMask = PipelineStageFlags.BottomOfPipe,
-                    dstStageMask = PipelineStageFlags.VertexShader,
-                    srcAccessMask = AccessFlags.MemoryWrite,
-                    dstAccessMask = AccessFlags.UniformRead,
-                    dependencyFlags = DependencyFlags.ByRegion
+                    srcStageMask = VkPipelineStageFlags.BottomOfPipe,
+                    dstStageMask = VkPipelineStageFlags.VertexShader,
+                    srcAccessMask = VkAccessFlags.MemoryWrite,
+                    dstAccessMask = VkAccessFlags.UniformRead,
+                    dependencyFlags = VkDependencyFlags.ByRegion
                 },
 
-                new SubpassDependency
+                new VkSubpassDependency
                 {
                     srcSubpass = 0,
                     dstSubpass = Vulkan.SubpassExternal,
-                    srcStageMask = PipelineStageFlags.FragmentShader,
-                    dstStageMask = PipelineStageFlags.ComputeShader,
-                    srcAccessMask =  AccessFlags.ShaderWrite,
-                    dstAccessMask = AccessFlags.ShaderRead,
-                    dependencyFlags = DependencyFlags.ByRegion
+                    srcStageMask = VkPipelineStageFlags.FragmentShader,
+                    dstStageMask = VkPipelineStageFlags.ComputeShader,
+                    srcAccessMask =  VkAccessFlags.ShaderWrite,
+                    dstAccessMask = VkAccessFlags.ShaderRead,
+                    dependencyFlags = VkDependencyFlags.ByRegion
                 },
             };
 

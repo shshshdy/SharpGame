@@ -36,7 +36,7 @@ namespace SharpGame
             var pass = shader.GetPass(passID);
             var pipe = pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, subpassIndex, batch.geometry);
 
-            cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
+            cb.BindPipeline(VkPipelineBindPoint.Graphics, pipe);
             cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
 
             int firstSet = 1;

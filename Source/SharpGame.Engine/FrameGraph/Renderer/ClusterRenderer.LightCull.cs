@@ -19,19 +19,19 @@ namespace SharpGame
 
             computeLayout0 = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Compute),
-                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Compute),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
             };
 
             computeLayout1 = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new DescriptorSetLayoutBinding(1, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new DescriptorSetLayoutBinding(2, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new DescriptorSetLayoutBinding(3, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new DescriptorSetLayoutBinding(4, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new DescriptorSetLayoutBinding(5, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
-                new DescriptorSetLayoutBinding(6, DescriptorType.StorageTexelBuffer, ShaderStage.Compute),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
+                new DescriptorSetLayoutBinding(2, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
+                new DescriptorSetLayoutBinding(3, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
+                new DescriptorSetLayoutBinding(4, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
+                new DescriptorSetLayoutBinding(5, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
+                new DescriptorSetLayoutBinding(6, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
             };
 
             computeSet0 = new DescriptorSet(computeLayout0, uboCluster, light_pos_ranges);

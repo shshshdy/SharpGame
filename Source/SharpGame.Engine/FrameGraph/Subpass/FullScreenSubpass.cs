@@ -30,7 +30,7 @@ namespace SharpGame
         {
             var pipe = pass.GetGraphicsPipeline(renderPass, subpass, null);
 
-            cb.BindPipeline(PipelineBindPoint.Graphics, pipe);
+            cb.BindPipeline(VkPipelineBindPoint.Graphics, pipe);
 
             foreach (var rs in resourceSet)
             {

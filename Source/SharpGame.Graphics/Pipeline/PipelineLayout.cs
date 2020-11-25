@@ -10,10 +10,10 @@ namespace SharpGame
 
     public struct PushConstantRange
     {
-        public ShaderStage stageFlags;
+        public VkShaderStageFlags stageFlags;
         public int offset;
         public int size;
-        public PushConstantRange(ShaderStage shaderStage, int offset, int size)
+        public PushConstantRange(VkShaderStageFlags shaderStage, int offset, int size)
         {
             this.stageFlags = shaderStage;
             this.offset = offset;

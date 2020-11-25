@@ -10,7 +10,7 @@ namespace SharpGame
         public PushConstantRange range;
         public IntPtr data;
 
-        public ConstBlock(ShaderStage shaderStage, int offset, int size, IntPtr data)
+        public ConstBlock(VkShaderStageFlags shaderStage, int offset, int size, IntPtr data)
         {
             range = new PushConstantRange(shaderStage, offset, size);
             this.data = data;
@@ -137,7 +137,7 @@ namespace SharpGame
             int size = maxPushConstRange - minPushConstRange;
             if (size > 0)
             {
-                ShaderStage shaderStage = ShaderStage.None;
+                VkShaderStageFlags shaderStage = VkShaderStageFlags.None;
                 int minRange = minPushConstRange;
                 int currentSize = 0;
                 for (int i = 0; i < pipelineLayout.PushConstant.Length; i++)

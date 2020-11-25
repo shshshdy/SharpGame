@@ -26,21 +26,21 @@ namespace SharpGame
 
         public uint subpassIndex = 0;
 
-        public PipelineBindPoint pipelineBindPoint = PipelineBindPoint.Graphics;
+        public VkPipelineBindPoint pipelineBindPoint = VkPipelineBindPoint.Graphics;
 
         public uint[] InputAttachments { get; set; } = new uint[0];
         public uint[] OutputAttachments { get; set; } = new uint[1] { 0 };
         public bool DisableDepthStencilAttachment { get; set; } = true;
 
-        public SubpassDependency Dependency { get; set; }
+        public VkSubpassDependency Dependency { get; set; }
 
-        public void GetDescription(AttachmentDescription[] attachmentDescriptions, ref SubpassDescription subpassDescription)
+        public void GetDescription(VkAttachmentDescription[] attachmentDescriptions, ref SubpassDescription subpassDescription)
         {
             subpassDescription.pipelineBindPoint = pipelineBindPoint;
 
             if(OutputAttachments.Length > 0)
             {
-                subpassDescription.pColorAttachments = new AttachmentReference[OutputAttachments.Length];
+                subpassDescription.pColorAttachments = new VkAttachmentReference[OutputAttachments.Length];
                 for(int i = 0; i < OutputAttachments.Length; i++)
                 {
                     if(Device.IsDepthFormat(attachmentDescriptions[OutputAttachments[i]].format))
@@ -50,18 +50,18 @@ namespace SharpGame
 
                     var initialLayout = attachmentDescriptions[OutputAttachments[i]].initialLayout;
                     var imageLayout = initialLayout == VkImageLayout.Undefined ? VkImageLayout.ColorAttachmentOptimal : initialLayout;
-                    subpassDescription.pColorAttachments[i] = new AttachmentReference(OutputAttachments[i], imageLayout);
+                    subpassDescription.pColorAttachments[i] = new VkAttachmentReference(OutputAttachments[i], imageLayout);
                 }
             }
 
             if (InputAttachments.Length > 0)
             {
-                subpassDescription.pColorAttachments = new AttachmentReference[InputAttachments.Length];
+                subpassDescription.pColorAttachments = new VkAttachmentReference[InputAttachments.Length];
                 for (int i = 0; i < InputAttachments.Length; i++)
                 {
                     var initialLayout = attachmentDescriptions[InputAttachments[i]].initialLayout;
                     var imageLayout = initialLayout == VkImageLayout.Undefined ? VkImageLayout.ShaderReadOnlyOptimal : initialLayout;
-                    subpassDescription.pInputAttachments[i] = new AttachmentReference(InputAttachments[i], imageLayout);
+                    subpassDescription.pInputAttachments[i] = new VkAttachmentReference(InputAttachments[i], imageLayout);
                 }
             }
 
@@ -76,9 +76,9 @@ namespace SharpGame
                     var initialLayout = attachmentDescriptions[index].initialLayout;
                     var imageLayout = initialLayout == VkImageLayout.Undefined ? VkImageLayout.DepthStencilAttachmentOptimal : initialLayout;
 
-                    subpassDescription.pDepthStencilAttachment = new AttachmentReference[1]
+                    subpassDescription.pDepthStencilAttachment = new VkAttachmentReference[1]
                     {
-                        new AttachmentReference((uint)index, imageLayout)
+                        new VkAttachmentReference((uint)index, imageLayout)
                     };
 
                 }

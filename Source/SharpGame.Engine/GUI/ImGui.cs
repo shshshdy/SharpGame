@@ -129,12 +129,12 @@ namespace SharpGame
 
             resourceLayout = new DescriptorSetLayout(0)
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex)
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex)
             };
 
             resourceLayoutTex = new DescriptorSetLayout(1)
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment)
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment)
             };
 
             uiShader = Resources.Instance.Load<Shader>("Shaders/ImGui.shader");           
@@ -331,8 +331,8 @@ namespace SharpGame
                 indexOffsetInElements += (uint)cmd_list.IdxBuffer.Size;
             }
             
-            cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, 0, resourceSet);
-            cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipeline);
+            cmdBuffer.BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, 0, resourceSet);
+            cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipeline);
             cmdBuffer.BindVertexBuffer(0, vb);
             cmdBuffer.BindIndexBuffer(ib, 0, VkIndexType.Uint16);
 
@@ -356,11 +356,11 @@ namespace SharpGame
                         {
                             if (pcmd.TextureId == fontAtlasID)
                             {
-                                cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, 1, resourceSetTex);
+                                cmdBuffer.BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, 1, resourceSetTex);
                             }
                             else
                             {
-                                cmdBuffer.BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, 1, GetImageResourceSet(pcmd.TextureId));
+                                cmdBuffer.BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, 1, GetImageResourceSet(pcmd.TextureId));
                             }
                         }
 

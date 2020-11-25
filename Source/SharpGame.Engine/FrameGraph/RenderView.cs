@@ -136,17 +136,17 @@ namespace SharpGame
 
             vsResLayout = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
-                new DescriptorSetLayoutBinding(1, DescriptorType.UniformBufferDynamic, ShaderStage.Vertex),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.UniformBufferDynamic, VkShaderStageFlags.Vertex),
             };
 
             vsResourceSet = new DescriptorSet(vsResLayout, ubCameraVS, FrameGraph.TransformBuffer);
 
             psResLayout = new DescriptorSetLayout(1)
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(1, DescriptorType.UniformBuffer, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(2, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
             };
 
             psResourceSet = new DescriptorSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);

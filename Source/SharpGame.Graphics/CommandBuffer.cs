@@ -26,7 +26,7 @@
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void Begin(CommandBufferUsageFlags flags = CommandBufferUsageFlags.None)
+        public void Begin(VkCommandBufferUsageFlags flags = VkCommandBufferUsageFlags.None)
         {
             var cmdBufInfo = new VkCommandBufferBeginInfo();
             cmdBufInfo.sType = VkStructureType.CommandBufferBeginInfo;
@@ -38,7 +38,7 @@
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void Begin(CommandBufferUsageFlags flags, ref CommandBufferInheritanceInfo commandBufferInheritanceInfo)
+        public void Begin(VkCommandBufferUsageFlags flags, ref CommandBufferInheritanceInfo commandBufferInheritanceInfo)
         {
             commandBufferInheritanceInfo.ToNative(out VkCommandBufferInheritanceInfo cmdBufInfo);
             var cmdBufBeginInfo = new VkCommandBufferBeginInfo();
@@ -122,7 +122,7 @@
                 pDynamicOffsets = (uint*)Unsafe.AsPointer(ref val);
             }
 
-            BindResourceSet(PipelineBindPoint.Graphics, pipelineLayout, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
+            BindResourceSet(VkPipelineBindPoint.Graphics, pipelineLayout, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -138,11 +138,11 @@
                 pDynamicOffsets = (uint*)Unsafe.AsPointer(ref val);
             }
 
-            BindResourceSet(PipelineBindPoint.Compute, pipelineLayout, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
+            BindResourceSet(VkPipelineBindPoint.Compute, pipelineLayout, firstSet, resourceSet, dynamicOffsetCount, pDynamicOffsets);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void BindResourceSet(PipelineBindPoint pipelineBindPoint,
+        public unsafe void BindResourceSet(VkPipelineBindPoint pipelineBindPoint,
             PipelineLayout pipelineLayout, int set, DescriptorSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
         {
             if(descriptorSets[set] != pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext]
@@ -163,14 +163,14 @@
 
         /*
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindPipeline(PipelineBindPoint pipelineBindPoint, Pass pass, Geometry geometry)
+        public void BindPipeline(VkPipelineBindPoint pipelineBindPoint, Pass pass, Geometry geometry)
         {
             var pipeline = pass.GetGraphicsPipeline(renderPass, geometry);           
             vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline.handle);
         }*/
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public void BindPipeline(PipelineBindPoint pipelineBindPoint, Pipeline pipeline)
+        public void BindPipeline(VkPipelineBindPoint pipelineBindPoint, Pipeline pipeline)
         {
             if (pipeline.handle != currentPipeline)
             {
@@ -208,14 +208,14 @@
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void PushConstants<T>(PipelineLayout pipelineLayout, ShaderStage shaderStage, int offset, ref T value) where T : struct
+        public unsafe void PushConstants<T>(PipelineLayout pipelineLayout, VkShaderStageFlags shaderStage, int offset, ref T value) where T : struct
         {
             vkCmdPushConstants(commandBuffer, pipelineLayout.handle, (VkShaderStageFlags)shaderStage,
                 (uint)offset, (uint)Utilities.SizeOf<T>(), Unsafe.AsPointer(ref value));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void PushConstants(PipelineLayout pipelineLayout, ShaderStage shaderStage, int offset, int size, IntPtr value)
+        public unsafe void PushConstants(PipelineLayout pipelineLayout, VkShaderStageFlags shaderStage, int offset, int size, IntPtr value)
         {
             vkCmdPushConstants(commandBuffer, pipelineLayout.handle, (VkShaderStageFlags)shaderStage, (uint)offset, (uint)size, (void*)value);
         }
@@ -240,7 +240,7 @@
         public unsafe void DrawGeometry(Geometry geometry, Pass pass, uint subPass, Material material)
         {
             var pipe = pass.GetGraphicsPipeline(renderPass, subPass, geometry);
-            BindPipeline(PipelineBindPoint.Graphics, pipe);
+            BindPipeline(VkPipelineBindPoint.Graphics, pipe);
 
             material.Bind(pass.passIndex, this);
 
@@ -251,10 +251,10 @@
         public unsafe void DrawGeometry(Geometry geometry, Pass pass, uint subPass, Span<DescriptorSet> resourceSet)
         {
             var pipe = pass.GetGraphicsPipeline(renderPass, subPass, geometry);
-            BindPipeline(PipelineBindPoint.Graphics, pipe);
+            BindPipeline(VkPipelineBindPoint.Graphics, pipe);
             for (int i = 0; i < resourceSet.Length; i++)
             {
-                BindResourceSet(PipelineBindPoint.Graphics, pass.PipelineLayout, i, resourceSet[i]);
+                BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, i, resourceSet[i]);
             }
             geometry.Draw(this);
         }
@@ -341,7 +341,7 @@
             vkCmdResetQueryPool(commandBuffer, queryPool.handle, firstQuery, queryCount);
         }
 
-        public void WriteTimestamp(PipelineStageFlags pipelineStage, QueryPool queryPool, uint query)
+        public void WriteTimestamp(VkPipelineStageFlags pipelineStage, QueryPool queryPool, uint query)
         {
             vkCmdWriteTimestamp(commandBuffer, (VkPipelineStageFlags)pipelineStage, queryPool.handle, (uint)query);
         }
@@ -532,19 +532,7 @@
         }
     }
 
-    public enum PipelineBindPoint
-    {
-        Graphics = 0,
-        Compute = 1
-    }
-
-    public enum CommandBufferLevel
-    {
-        Primary = 0,
-        Secondary = 1
-    }
-
-    public struct RenderPassBeginInfo
+    public ref struct RenderPassBeginInfo
     {
         public RenderPass renderPass;
         public Framebuffer framebuffer;
@@ -592,45 +580,14 @@
 
     }
 
-    [Flags]
-    public enum CommandBufferUsageFlags
-    {
-        None = 0,
-        OneTimeSubmit = 1,
-        RenderPassContinue = 2,
-        SimultaneousUse = 4
-    }
-
-    public enum QueryControlFlags
-    {
-        None = 0,
-        Precise = 1
-    }
-
-    public enum QueryPipelineStatisticFlags
-    {
-        None = 0,
-        InputAssemblyVertices = 1,
-        InputAssemblyPrimitives = 2,
-        VertexShaderInvocations = 4,
-        GeometryShaderInvocations = 8,
-        GeometryShaderPrimitives = 16,
-        ClippingInvocations = 32,
-        ClippingPrimitives = 64,
-        FragmentShaderInvocations = 128,
-        TessellationControlShaderPatches = 256,
-        TessellationEvaluationShaderInvocations = 512,
-        ComputeShaderInvocations = 1024
-    }
-
-    public struct CommandBufferInheritanceInfo
+    public ref struct CommandBufferInheritanceInfo
     {
         public RenderPass renderPass;
         public uint subpass;
         public Framebuffer framebuffer;
         public bool occlusionQueryEnable;
-        public QueryControlFlags queryFlags;
-        public QueryPipelineStatisticFlags pipelineStatistics;
+        public VkQueryControlFlags queryFlags;
+        public VkQueryPipelineStatisticFlags pipelineStatistics;
 
         public unsafe void ToNative(out VkCommandBufferInheritanceInfo native)
         {

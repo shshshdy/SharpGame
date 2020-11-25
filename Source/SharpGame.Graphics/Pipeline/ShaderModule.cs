@@ -8,20 +8,6 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    [Flags]
-    public enum ShaderStage
-    {
-        None = 0,
-        Vertex = 1,
-        TessControl = 2,
-        TessEvaluation = 4,
-        Geometry = 8,
-        Fragment = 16,
-        AllGraphics = 31,
-        Compute = 32,
-        All = int.MaxValue
-    }
-
     public struct BlockMember
     {
         public string name;
@@ -44,7 +30,7 @@ namespace SharpGame
         public List<BlockMember> members;
         public int set;
         public uint binding;
-        public DescriptorType descriptorType;
+        public VkDescriptorType descriptorType;
         public uint descriptorCount;
     }
 
@@ -58,7 +44,7 @@ namespace SharpGame
     public class ShaderModule : Object
     {
         [DataMember]
-        public ShaderStage Stage { get; set; }
+        public VkShaderStageFlags Stage { get; set; }
 
         [DataMember]
         public byte[] Code { get; set; }
@@ -75,7 +61,7 @@ namespace SharpGame
         {
         }
 
-        public ShaderModule(ShaderStage stage, byte[] code)
+        public ShaderModule(VkShaderStageFlags stage, byte[] code)
         {
             Stage = stage;
             Code = code;
@@ -83,7 +69,7 @@ namespace SharpGame
             Build();
         }
 
-        public ShaderModule(ShaderStage stage, IntPtr CodePointer, uint CodeLength)
+        public ShaderModule(VkShaderStageFlags stage, IntPtr CodePointer, uint CodeLength)
         {
             Stage = stage;
             unsafe

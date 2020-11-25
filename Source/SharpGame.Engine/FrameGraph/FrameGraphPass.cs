@@ -66,7 +66,7 @@ namespace SharpGame
             subpasses.Add(subpass);
         }
 
-        public void SetLoadOp(params AttachmentLoadOp[] attachmentLoadOp)
+        public void SetLoadOp(params VkAttachmentLoadOp[] attachmentLoadOp)
         {
             for(int i = 0; i < attachmentLoadOp.Length; i++)
             {
@@ -74,7 +74,7 @@ namespace SharpGame
             }
         }
 
-        public void SetStoreOp(params AttachmentStoreOp[] attachmentStoreOp)
+        public void SetStoreOp(params VkAttachmentStoreOp[] attachmentStoreOp)
         {
             for (int i = 0; i < attachmentStoreOp.Length; i++)
             {
@@ -82,7 +82,7 @@ namespace SharpGame
             }
         }
 
-        public void SetStencilLoadOp(params AttachmentLoadOp[] attachmentLoadOp)
+        public void SetStencilLoadOp(params VkAttachmentLoadOp[] attachmentLoadOp)
         {
             for (int i = 0; i < attachmentLoadOp.Length; i++)
             {
@@ -90,7 +90,7 @@ namespace SharpGame
             }
         }
 
-        public void SetStencilStoreOp(params AttachmentStoreOp[] attachmentStoreOp)
+        public void SetStencilStoreOp(params VkAttachmentStoreOp[] attachmentStoreOp)
         {
             for (int i = 0; i < attachmentStoreOp.Length; i++)
             {
@@ -189,9 +189,9 @@ namespace SharpGame
             }
             else if(!renderTextureInfos.Empty())
             {   
-                var attachmentDescriptions = new AttachmentDescription[renderTextureInfos.Count];
+                var attachmentDescriptions = new VkAttachmentDescription[renderTextureInfos.Count];
                 var subpassDescriptions = new SubpassDescription[subpasses.Count];
-                var dependencies = new SubpassDependency[subpasses.Count + 1];
+                var dependencies = new VkSubpassDependency[subpasses.Count + 1];
                 
 
                 for(int i = 0; i < renderTextureInfos.Count; i++)
@@ -199,15 +199,15 @@ namespace SharpGame
                     attachmentDescriptions[i] = renderTextureInfos[i].attachmentDescription;       
                 }
             
-                dependencies[0] = new SubpassDependency
+                dependencies[0] = new VkSubpassDependency
                 {
                     srcSubpass = Vulkan.SubpassExternal,
                     dstSubpass = 0,
-                    srcStageMask = PipelineStageFlags.BottomOfPipe,
-                    dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
-                    srcAccessMask = AccessFlags.MemoryRead,
-                    dstAccessMask = (AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite),
-                    dependencyFlags = DependencyFlags.ByRegion
+                    srcStageMask = VkPipelineStageFlags.BottomOfPipe,
+                    dstStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+                    srcAccessMask = VkAccessFlags.MemoryRead,
+                    dstAccessMask = (VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite),
+                    dependencyFlags = VkDependencyFlags.ByRegion
                 };
 
                 for (int i = 0; i < subpasses.Count; i++)
@@ -219,23 +219,23 @@ namespace SharpGame
                         dependencies[i] = subpasses[i].Dependency;
                         dependencies[i].srcSubpass = (uint)(i - 1);
                         dependencies[i].dstSubpass = (uint)i;
-                        dependencies[i].srcStageMask = PipelineStageFlags.ColorAttachmentOutput;
-                        dependencies[i].dstStageMask = PipelineStageFlags.FragmentShader;
-                        dependencies[i].srcAccessMask = AccessFlags.ColorAttachmentWrite;
-                        dependencies[i].dstAccessMask = AccessFlags.InputAttachmentRead;
-                        dependencies[i].dependencyFlags = DependencyFlags.ByRegion;
+                        dependencies[i].srcStageMask = VkPipelineStageFlags.ColorAttachmentOutput;
+                        dependencies[i].dstStageMask = VkPipelineStageFlags.FragmentShader;
+                        dependencies[i].srcAccessMask = VkAccessFlags.ColorAttachmentWrite;
+                        dependencies[i].dstAccessMask = VkAccessFlags.InputAttachmentRead;
+                        dependencies[i].dependencyFlags = VkDependencyFlags.ByRegion;
                     }
                 }
 
-                dependencies[subpasses.Count] = new SubpassDependency
+                dependencies[subpasses.Count] = new VkSubpassDependency
                 {
                     srcSubpass = (uint)(subpasses.Count - 1),
                     dstSubpass = Vulkan.SubpassExternal,
-                    srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
-                    dstStageMask = PipelineStageFlags.BottomOfPipe,
-                    srcAccessMask = AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite,
-                    dstAccessMask = AccessFlags.MemoryRead,
-                    dependencyFlags = DependencyFlags.ByRegion
+                    srcStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+                    dstStageMask = VkPipelineStageFlags.BottomOfPipe,
+                    srcAccessMask = VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite,
+                    dstAccessMask = VkAccessFlags.MemoryRead,
+                    dependencyFlags = VkDependencyFlags.ByRegion
                 };
 
                 RenderPass = new RenderPass(attachmentDescriptions, subpassDescriptions, dependencies);

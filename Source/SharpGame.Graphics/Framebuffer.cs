@@ -39,34 +39,49 @@ namespace SharpGame
 
         internal VkFramebuffer handle;
 
-        public unsafe Framebuffer(RenderPass renderPass, uint width, uint height, uint layers, VkImageView[] attachments, VkFramebufferCreateFlags flags = 0)
+        public Framebuffer(RenderPass renderPass, uint width, uint height, uint layers, ImageView[] attachments)
+        {
+            Span<VkImageView> views = stackalloc VkImageView[attachments.Length];
+            for (int i = 0; i < views.Length; i++)
+            {
+                views[i] = attachments[i].handle;
+            }
+
+            this.renderPass = renderPass;
+            Width = width;
+            Height = height;
+
+            Create(renderPass, width, height, layers, views, VkFramebufferCreateFlags.None);
+        }
+
+        public Framebuffer(RenderPass renderPass, uint width, uint height, uint layers, ReadOnlySpan<VkImageView> attachments, VkFramebufferCreateFlags flags = 0)
         {
             this.renderPass = renderPass;
             Width = width;
             Height = height;
 
-            var framebufferCreateInfo = new VkFramebufferCreateInfo
-            {
-                sType = VkStructureType.FramebufferCreateInfo
-            };
-            framebufferCreateInfo.flags = flags;
-            framebufferCreateInfo.renderPass = renderPass.handle;
-            framebufferCreateInfo.attachmentCount = (uint)attachments.Length;
-            framebufferCreateInfo.pAttachments = (VkImageView*)Unsafe.AsPointer(ref attachments[0]);
-            framebufferCreateInfo.width = width;
-            framebufferCreateInfo.height = height;
-            framebufferCreateInfo.layers = layers;
-            handle = Device.CreateFramebuffer(ref framebufferCreateInfo);
-
+            Create(renderPass, width, height, layers, attachments, flags);
         }
 
-        public Framebuffer(ref FramebufferCreateInfo framebufferCreateInfo)
+        unsafe void Create(RenderPass renderPass, uint width, uint height, uint layers, ReadOnlySpan<VkImageView> attachments, VkFramebufferCreateFlags flags = 0)
         {
-            renderPass = framebufferCreateInfo.renderPass;
-            framebufferCreateInfo.ToNative(out VkFramebufferCreateInfo native);
-            handle = Device.CreateFramebuffer(ref native);
-            Width = native.width;
-            Height = native.height;
+            fixed (VkImageView* attachmentsPtr = attachments)
+            {
+                var framebufferCreateInfo = new VkFramebufferCreateInfo
+                {
+                    sType = VkStructureType.FramebufferCreateInfo,
+                    flags = flags,
+                    renderPass = renderPass.handle,
+                    attachmentCount = (uint)attachments.Length,
+                    pAttachments = attachmentsPtr,
+                    width = width,
+                    height = height,
+                    layers = layers
+                };
+
+                handle = Device.CreateFramebuffer(ref framebufferCreateInfo);
+            };
+
         }
 
         protected override void Destroy(bool disposing)
@@ -74,24 +89,5 @@ namespace SharpGame
             Device.Destroy(handle);
         }
 
-        public static Framebuffer Create(RenderPass renderPass, uint width, uint height, uint layers, ImageView[] attachments)
-        {
-            Span<VkImageView> views = stackalloc VkImageView[attachments.Length];
-            for(int i = 0; i < views.Length; i++)
-            {
-                views[i] = attachments[i].handle;
-            }
-
-            var framebufferCreateInfo = new FramebufferCreateInfo
-            {
-                renderPass = renderPass,
-                attachments = views,
-                width = width,
-                height = height,
-                layers = layers
-            };
-
-            return new Framebuffer(ref framebufferCreateInfo);
-        }
     }
 }

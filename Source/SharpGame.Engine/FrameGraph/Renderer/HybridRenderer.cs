@@ -46,16 +46,16 @@ namespace SharpGame
 
             deferredLayout0 = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.UniformBuffer, ShaderStage.Vertex),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex),
             };
 
             deferredSet0 = new DescriptorSet(deferredLayout0, View.ubCameraVS);
 
             deferredLayout1 = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(1, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
-                new DescriptorSetLayoutBinding(2, DescriptorType.CombinedImageSampler, ShaderStage.Fragment),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(2, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
             };
 
         }
@@ -138,24 +138,24 @@ namespace SharpGame
         {
             VkFormat depthFormat = Device.GetSupportedDepthFormat();
 
-            AttachmentDescription[] attachments =
+            VkAttachmentDescription[] attachments =
             {
-                new AttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
-                new AttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
-                new AttachmentDescription(VkFormat.R32G32B32A32SFloat, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
-                new AttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)
+                new VkAttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
+                new VkAttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
+                new VkAttachmentDescription(VkFormat.R32G32B32A32SFloat, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
+                new VkAttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)
             };
 
             var colorAttachments = new[]
             {
-                 new AttachmentReference(0, VkImageLayout.ColorAttachmentOptimal),
-                 new AttachmentReference(1, VkImageLayout.ColorAttachmentOptimal),
-                 new AttachmentReference(2, VkImageLayout.ColorAttachmentOptimal)
+                 new VkAttachmentReference(0, VkImageLayout.ColorAttachmentOptimal),
+                 new VkAttachmentReference(1, VkImageLayout.ColorAttachmentOptimal),
+                 new VkAttachmentReference(2, VkImageLayout.ColorAttachmentOptimal)
             };
 
             var depthStencilAttachment = new[]
             {
-                 new AttachmentReference(3, VkImageLayout.DepthStencilAttachmentOptimal)
+                 new VkAttachmentReference(3, VkImageLayout.DepthStencilAttachmentOptimal)
             };
 
             SubpassDescription[] subpassDescription =
@@ -163,35 +163,35 @@ namespace SharpGame
 		        // clustering subpass
                 new SubpassDescription
                 {
-                    pipelineBindPoint = PipelineBindPoint.Graphics,
+                    pipelineBindPoint = VkPipelineBindPoint.Graphics,
                     pColorAttachments = colorAttachments,
                     pDepthStencilAttachment = depthStencilAttachment
                 },
             };
 
             // Subpass dependencies for layout transitions
-            SubpassDependency[] dependencies =
+            VkSubpassDependency[] dependencies =
             {
-                new SubpassDependency
+                new VkSubpassDependency
                 {
                     srcSubpass = Vulkan.SubpassExternal,
                     dstSubpass = 0,
-                    srcStageMask = PipelineStageFlags.BottomOfPipe,
-                    dstStageMask = PipelineStageFlags.ColorAttachmentOutput,
-                    srcAccessMask = AccessFlags.MemoryRead,
-                    dstAccessMask = AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite,
-                    dependencyFlags = DependencyFlags.ByRegion
+                    srcStageMask = VkPipelineStageFlags.BottomOfPipe,
+                    dstStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+                    srcAccessMask = VkAccessFlags.MemoryRead,
+                    dstAccessMask = VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite,
+                    dependencyFlags = VkDependencyFlags.ByRegion
                 },
 
-                new SubpassDependency
+                new VkSubpassDependency
                 {
                     srcSubpass = 0,
                     dstSubpass = Vulkan.SubpassExternal,
-                    srcStageMask = PipelineStageFlags.ColorAttachmentOutput,
-                    dstStageMask = PipelineStageFlags.BottomOfPipe,
-                    srcAccessMask = AccessFlags.ColorAttachmentRead | AccessFlags.ColorAttachmentWrite,
-                    dstAccessMask = AccessFlags.MemoryRead,
-                    dependencyFlags = DependencyFlags.ByRegion
+                    srcStageMask = VkPipelineStageFlags.ColorAttachmentOutput,
+                    dstStageMask = VkPipelineStageFlags.BottomOfPipe,
+                    srcAccessMask = VkAccessFlags.ColorAttachmentRead | VkAccessFlags.ColorAttachmentWrite,
+                    dstAccessMask = VkAccessFlags.MemoryRead,
+                    dependencyFlags = VkDependencyFlags.ByRegion
                 },
             };
 
@@ -210,7 +210,7 @@ namespace SharpGame
             positionRT = new RenderTexture(width, height, 1, VkFormat.R32G32B32A32SFloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
             depthHWRT = new RenderTexture(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
 
-            var geometryFB = Framebuffer.Create(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, positionRT.imageView, depthHWRT.imageView });
+            var geometryFB = new Framebuffer(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, positionRT.imageView, depthHWRT.imageView });
 #if HWDEPTH
             deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
 #else

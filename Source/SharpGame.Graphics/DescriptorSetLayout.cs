@@ -7,38 +7,22 @@ using System.Text;
 
 namespace SharpGame
 {
-    public enum DescriptorType
-    {
-        Sampler = 0,
-        CombinedImageSampler = 1,
-        SampledImage = 2,
-        StorageImage = 3,
-        UniformTexelBuffer = 4,
-        StorageTexelBuffer = 5,
-        UniformBuffer = 6,
-        StorageBuffer = 7,
-        UniformBufferDynamic = 8,
-        StorageBufferDynamic = 9,
-        InputAttachment = 10,
-        InlineUniformBlockExt = 1000138000,
-    }
-
     public class DescriptorSetLayoutBinding
     {
         public string name;
         public uint binding;
-        public DescriptorType descriptorType;
+        public VkDescriptorType descriptorType;
         public uint descriptorCount = 1;
-        public ShaderStage stageFlags;
+        public VkShaderStageFlags stageFlags;
         public VkSampler[] pImmutableSamplers;
 
-        public bool IsTexture => descriptorType == DescriptorType.CombinedImageSampler;
+        public bool IsTexture => descriptorType == VkDescriptorType.CombinedImageSampler;
 
         public DescriptorSetLayoutBinding()
         {
         }
 
-        public DescriptorSetLayoutBinding(uint binding, DescriptorType type, ShaderStage stageFlags, uint descriptorCount = 1)
+        public DescriptorSetLayoutBinding(uint binding, VkDescriptorType type, VkShaderStageFlags stageFlags, uint descriptorCount = 1)
         {
             descriptorType = type;
             this.binding = binding;

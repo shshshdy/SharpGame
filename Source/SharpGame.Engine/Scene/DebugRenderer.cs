@@ -589,7 +589,7 @@ namespace SharpGame
             if (lines_.Count > 0)
             {
                 count = (uint)lines_.Count * 2;
-                cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelineDepthLines);
+                cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipelineDepthLines);
                 cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.Set0, 0);
                 cmdBuffer.Draw(count, 1, start, 0);                
                 start += count;
@@ -599,7 +599,7 @@ namespace SharpGame
             {
                 count = (uint)noDepthLines_.Count * 2;
 
-                cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelineNoDepthLines);
+                cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipelineNoDepthLines);
                 cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.Set0, 0);
                 cmdBuffer.Draw(count, 1, start, 0);
 
@@ -610,7 +610,7 @@ namespace SharpGame
             {
                 count = (uint)triangles_.Count * 3;
 
-                cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelineDepth);
+                cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipelineDepth);
                 cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.Set0, 0);
                 cmdBuffer.Draw(count, 1, start, 0);
                 start += count;
@@ -620,7 +620,7 @@ namespace SharpGame
             {
                 count = (uint)noDepthTriangles_.Count * 3;
 
-                cmdBuffer.BindPipeline(PipelineBindPoint.Graphics, pipelineNoDepth);
+                cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipelineNoDepth);
                 cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.Set0, 0);
                 cmdBuffer.Draw(count, 1, start, 0);
             }

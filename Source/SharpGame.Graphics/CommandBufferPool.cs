@@ -7,13 +7,6 @@ using System.Threading;
 
 namespace SharpGame
 {
-    public enum CommandPoolCreateFlags
-    {
-        None = 0,
-        Transient = 1,
-        ResetCommandBuffer = 2
-    }
-
     public class CommandBufferPool : DisposeBase
     {
         public CommandBuffer[] CommandBuffers { get; private set; }
@@ -28,7 +21,7 @@ namespace SharpGame
 
         public IntPtr GetAddress(uint idx) => cmdBuffers.GetAddress(idx);
 
-        public CommandBufferPool(uint queue, CommandPoolCreateFlags commandPoolCreateFlags)
+        public CommandBufferPool(uint queue, VkCommandPoolCreateFlags commandPoolCreateFlags)
         {
             QueueIndex = queue;
             cmdPool = Device.CreateCommandPool(queue, (VkCommandPoolCreateFlags)commandPoolCreateFlags);
@@ -44,7 +37,7 @@ namespace SharpGame
             //Free();
         }
 
-        public unsafe CommandBuffer AllocateCommandBuffer(CommandBufferLevel commandBufferLevel)
+        public unsafe CommandBuffer AllocateCommandBuffer(VkCommandBufferLevel commandBufferLevel)
         {
             VkCommandBuffer cmdBuffer;
             Device.AllocateCommandBuffers(cmdPool, (VkCommandBufferLevel)commandBufferLevel, 1, &cmdBuffer);
@@ -57,7 +50,7 @@ namespace SharpGame
                 Device.FreeCommandBuffers(cmdPool, 1, cb);
         }
 
-        public unsafe void Allocate(CommandBufferLevel commandBufferLevel, uint count)
+        public unsafe void Allocate(VkCommandBufferLevel commandBufferLevel, uint count)
         {
             if(cmdBuffers.Count > 0)
             {
@@ -65,7 +58,7 @@ namespace SharpGame
             }
 
             cmdBuffers.Resize(count);
-            Device.AllocateCommandBuffers(cmdPool, (VkCommandBufferLevel)commandBufferLevel, count, (VkCommandBuffer*)cmdBuffers.Data);
+            Device.AllocateCommandBuffers(cmdPool, commandBufferLevel, count, (VkCommandBuffer*)cmdBuffers.Data);
 
             CommandBuffers = new CommandBuffer[count];
             for (int i = 0; i < count; i++)

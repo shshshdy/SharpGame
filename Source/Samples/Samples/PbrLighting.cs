@@ -218,7 +218,7 @@ namespace SharpGame.Samples
                         uint numGroups = Math.Max(1, size / 32);
 
                         var pushConstants = new SpecularFilterPushConstants { level = level - 1, roughness = level * deltaRoughness };
-                        commandBuffer.PushConstants(pass.PipelineLayout, ShaderStage.Compute, 0, ref pushConstants);
+                        commandBuffer.PushConstants(pass.PipelineLayout, VkShaderStageFlags.Compute, 0, ref pushConstants);
                         commandBuffer.Dispatch(numGroups, numGroups, 6);
                     }
                   

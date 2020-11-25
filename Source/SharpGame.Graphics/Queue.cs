@@ -35,7 +35,7 @@ namespace SharpGame
             VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &submit.native, fence.handle));
         }
 
-        public void Submit(Semaphore waitSemaphore, PipelineStageFlags waitDstStageMask,
+        public void Submit(Semaphore waitSemaphore, VkPipelineStageFlags waitDstStageMask,
             CommandBuffer commandBuffer, Semaphore signalSemaphore, Fence fence = default)
         {
             VkCommandBuffer commandBufferHandle = commandBuffer?.commandBuffer ?? VkCommandBuffer.Null;
@@ -96,7 +96,7 @@ namespace SharpGame
     {
         internal VkSubmitInfo native;
         
-        public SubmitInfo(Semaphore[] waitSemaphores = null, PipelineStageFlags[] waitDstStageMask = null,
+        public SubmitInfo(Semaphore[] waitSemaphores = null, VkPipelineStageFlags[] waitDstStageMask = null,
             VkCommandBuffer[] commandBuffers = null, Semaphore[] signalSemaphores = null)
         {
             native = new VkSubmitInfo

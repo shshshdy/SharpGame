@@ -12,32 +12,32 @@ namespace SharpGame
             Pass pass = new Pass();
             if (!string.IsNullOrEmpty(vertexShader))
             {
-                pass.VertexShader = CreateShaderModule(ShaderStage.Vertex, vertexShader);
+                pass.VertexShader = CreateShaderModule(VkShaderStageFlags.Vertex, vertexShader);
             }
 
             if (!string.IsNullOrEmpty(pixelShader))
             {
-                pass.PixelShader = CreateShaderModule(ShaderStage.Fragment, pixelShader);
+                pass.PixelShader = CreateShaderModule(VkShaderStageFlags.Fragment, pixelShader);
             }
 
             if (!string.IsNullOrEmpty(geometryShader))
             {
-                pass.GeometryShader = CreateShaderModule(ShaderStage.Geometry, geometryShader);
+                pass.GeometryShader = CreateShaderModule(VkShaderStageFlags.Geometry, geometryShader);
             }
 
             if (!string.IsNullOrEmpty(hullShader))
             {
-                pass.HullShader = CreateShaderModule(ShaderStage.TessControl, hullShader);
+                pass.HullShader = CreateShaderModule(VkShaderStageFlags.TessellationControl, hullShader);
             }
 
             if (!string.IsNullOrEmpty(domainShader))
             {
-                pass.DomainShader = CreateShaderModule(ShaderStage.TessEvaluation, domainShader);
+                pass.DomainShader = CreateShaderModule(VkShaderStageFlags.TessellationEvaluation, domainShader);
             }
 
             if (!string.IsNullOrEmpty(computeShader))
             {
-                pass.ComputeShader = CreateShaderModule(ShaderStage.Compute, computeShader);
+                pass.ComputeShader = CreateShaderModule(VkShaderStageFlags.Compute, computeShader);
             }
 
             pass.Build();
@@ -49,14 +49,14 @@ namespace SharpGame
             Pass pass = new Pass();
             if (!string.IsNullOrEmpty(computeShader))
             {
-                pass.ComputeShader = CreateShaderModule(ShaderStage.Compute, computeShader);
+                pass.ComputeShader = CreateShaderModule(VkShaderStageFlags.Compute, computeShader);
             }
 
             pass.Build();
             return pass;
         }
 
-        public static ShaderModule CreateShaderModule(ShaderStage stage, string fileName, string funcName = "main")
+        public static ShaderModule CreateShaderModule(VkShaderStageFlags stage, string fileName, string funcName = "main")
         {
             using (File stream = FileSystem.Instance.GetFile(fileName))
             {

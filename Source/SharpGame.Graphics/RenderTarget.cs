@@ -11,7 +11,7 @@ namespace SharpGame
         public uint height;
         public uint layers;
 
-        public AttachmentDescription attachmentDescription;
+        public VkAttachmentDescription attachmentDescription;
 
         public VkImageUsageFlags usage;
         public Swapchain swapchain;
@@ -19,17 +19,17 @@ namespace SharpGame
 
         public ref VkFormat format => ref attachmentDescription.format;
         public ref VkSampleCountFlags samples => ref attachmentDescription.samples;
-        public ref AttachmentLoadOp loadOp => ref attachmentDescription.loadOp;
-        public ref AttachmentStoreOp storeOp => ref attachmentDescription.storeOp;
-        public ref AttachmentLoadOp stencilLoadOp => ref attachmentDescription.stencilLoadOp;
-        public ref AttachmentStoreOp stencilStoreOp => ref attachmentDescription.stencilStoreOp;
+        public ref VkAttachmentLoadOp loadOp => ref attachmentDescription.loadOp;
+        public ref VkAttachmentStoreOp storeOp => ref attachmentDescription.storeOp;
+        public ref VkAttachmentLoadOp stencilLoadOp => ref attachmentDescription.stencilLoadOp;
+        public ref VkAttachmentStoreOp stencilStoreOp => ref attachmentDescription.stencilStoreOp;
         public ref VkImageLayout initialLayout => ref attachmentDescription.initialLayout;
         public ref VkImageLayout finalLayout => ref attachmentDescription.finalLayout;
 
         public RenderTextureInfo(Swapchain swapchain)
         {
             this.swapchain = swapchain;
-            attachmentDescription = new AttachmentDescription(swapchain.ColorFormat, VkSampleCountFlags.Count1);
+            attachmentDescription = new VkAttachmentDescription(swapchain.ColorFormat, VkSampleCountFlags.Count1);
             clearValue = new VkClearColorValue(0, 0, 0, 1);
         }
 
@@ -40,7 +40,7 @@ namespace SharpGame
             this.height = height;
             this.layers = layers;
             this.usage = usage;
-            attachmentDescription = new AttachmentDescription(format, samples); 
+            attachmentDescription = new VkAttachmentDescription(format, samples); 
 
             if(Device.IsDepthFormat(format))
             {

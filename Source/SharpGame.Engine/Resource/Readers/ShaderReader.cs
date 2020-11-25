@@ -193,46 +193,46 @@ namespace SharpGame
                         break;
 
                     case "VertexShader":
-                        pass.VertexShader = LoadShaderModelFromFile(ShaderStage.Vertex, kvp.Value[0].value, pass.Defines);
+                        pass.VertexShader = LoadShaderModelFromFile(VkShaderStageFlags.Vertex, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "PixelShader":
-                        pass.PixelShader = LoadShaderModelFromFile(ShaderStage.Fragment, kvp.Value[0].value, pass.Defines);
+                        pass.PixelShader = LoadShaderModelFromFile(VkShaderStageFlags.Fragment, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "ComputeShader":
-                        pass.ComputeShader = LoadShaderModelFromFile(ShaderStage.Compute, kvp.Value[0].value, pass.Defines);
+                        pass.ComputeShader = LoadShaderModelFromFile(VkShaderStageFlags.Compute, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "GeometryShader":
-                        pass.GeometryShader = LoadShaderModelFromFile(ShaderStage.Geometry, kvp.Value[0].value, pass.Defines);
+                        pass.GeometryShader = LoadShaderModelFromFile(VkShaderStageFlags.Geometry, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "TessControl":
-                        pass.HullShader = LoadShaderModelFromFile(ShaderStage.TessControl, kvp.Value[0].value, pass.Defines);
+                        pass.HullShader = LoadShaderModelFromFile(VkShaderStageFlags.TessellationControl, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "TessEvaluation":
-                        pass.DomainShader = LoadShaderModelFromFile(ShaderStage.TessEvaluation, kvp.Value[0].value, pass.Defines);
+                        pass.DomainShader = LoadShaderModelFromFile(VkShaderStageFlags.TessellationEvaluation, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "@VertexShader":
-                        pass.VertexShader = LoadShaderModel(ShaderStage.Vertex, kvp.Value[0].value, pass.Defines);
+                        pass.VertexShader = LoadShaderModel(VkShaderStageFlags.Vertex, kvp.Value[0].value, pass.Defines);
                         break;
                     case "@PixelShader":
-                        pass.PixelShader = LoadShaderModel(ShaderStage.Fragment, kvp.Value[0].value, pass.Defines);
+                        pass.PixelShader = LoadShaderModel(VkShaderStageFlags.Fragment, kvp.Value[0].value, pass.Defines);
                         break;
                     case "@ComputeShader":
-                        pass.ComputeShader = LoadShaderModel(ShaderStage.Compute, kvp.Value[0].value, pass.Defines);
+                        pass.ComputeShader = LoadShaderModel(VkShaderStageFlags.Compute, kvp.Value[0].value, pass.Defines);
                         break;
                     case "@GeometryShader":
-                        pass.GeometryShader = LoadShaderModel(ShaderStage.Geometry, kvp.Value[0].value, pass.Defines);
+                        pass.GeometryShader = LoadShaderModel(VkShaderStageFlags.Geometry, kvp.Value[0].value, pass.Defines);
                         break;
                     case "@TessControl":
-                        pass.HullShader = LoadShaderModel(ShaderStage.TessControl, kvp.Value[0].value, pass.Defines);
+                        pass.HullShader = LoadShaderModel(VkShaderStageFlags.TessellationControl, kvp.Value[0].value, pass.Defines);
                         break;
                     case "@TessEvaluation":
-                        pass.DomainShader = LoadShaderModel(ShaderStage.TessEvaluation, kvp.Value[0].value, pass.Defines);
+                        pass.DomainShader = LoadShaderModel(VkShaderStageFlags.TessellationEvaluation, kvp.Value[0].value, pass.Defines);
                         break;
                 }
             }
@@ -270,7 +270,7 @@ namespace SharpGame
                 switch (kvp.Key)
                 {
                     case "StageFlags":
-                        layout.stageFlags = (ShaderStage)Enum.Parse(typeof(ShaderStage), kvp.Value[0].value);
+                        layout.stageFlags = (VkShaderStageFlags)Enum.Parse(typeof(VkShaderStageFlags), kvp.Value[0].value);
                         break;
                     case "Offset":
                         layout.offset = int.Parse(kvp.Value[0].value);
@@ -284,7 +284,7 @@ namespace SharpGame
             return layout;
         }
 
-        ShaderModule LoadShaderModelFromFile(ShaderStage shaderStage, string file, string[] defs)
+        ShaderModule LoadShaderModelFromFile(VkShaderStageFlags shaderStage, string file, string[] defs)
         {
             using (File stream = FileSystem.Instance.GetFile(file))
             {
@@ -292,7 +292,7 @@ namespace SharpGame
             }
         }
 
-        ShaderModule LoadShaderModel(ShaderStage shaderStage, string code, string[] defs)
+        ShaderModule LoadShaderModel(VkShaderStageFlags shaderStage, string code, string[] defs)
         {
             List<string> saveLines = new List<string>();
             string ver = "";
@@ -356,28 +356,28 @@ namespace SharpGame
             return CreateShaderModule(shaderStage, code, includeFile);
         }
 
-        public static ShaderModule CreateShaderModule(ShaderStage shaderStage, string code, string includeFile)
+        public static ShaderModule CreateShaderModule(VkShaderStageFlags shaderStage, string code, string includeFile)
         {
 #if SHARP_SHADER_COMPILER
             ShaderCompiler.Stage stage = ShaderCompiler.Stage.Vertex;
             switch (shaderStage)
             {
-                case ShaderStage.Vertex:
+                case VkShaderStageFlags.Vertex:
                     stage = ShaderCompiler.Stage.Vertex;
                     break;
-                case ShaderStage.Fragment:
+                case VkShaderStageFlags.Fragment:
                     stage = ShaderCompiler.Stage.Fragment;
                     break;
-                case ShaderStage.Geometry:
+                case VkShaderStageFlags.Geometry:
                     stage = ShaderCompiler.Stage.Geometry;
                     break;
-                case ShaderStage.Compute:
+                case VkShaderStageFlags.Compute:
                     stage = ShaderCompiler.Stage.Compute;
                     break;
-                case ShaderStage.TessControl:
+                case VkShaderStageFlags.TessellationControl:
                     stage = ShaderCompiler.Stage.TessControl;
                     break;
-                case ShaderStage.TessEvaluation:
+                case VkShaderStageFlags.TessellationEvaluation:
                     stage = ShaderCompiler.Stage.TessEvaluation;
                     break;
             }
@@ -426,22 +426,22 @@ namespace SharpGame
             shaderc.ShaderKind stage = shaderc.ShaderKind.VertexShader;
             switch (shaderStage)
             {
-                case ShaderStage.Vertex:
+                case VkShaderStageFlags.Vertex:
                     stage = shaderc.ShaderKind.VertexShader;
                     break;
-                case ShaderStage.Fragment:
+                case VkShaderStageFlags.Fragment:
                     stage = shaderc.ShaderKind.FragmentShader;
                     break;
-                case ShaderStage.Geometry:
+                case VkShaderStageFlags.Geometry:
                     stage = shaderc.ShaderKind.GeometryShader;
                     break;
-                case ShaderStage.Compute:
+                case VkShaderStageFlags.Compute:
                     stage = shaderc.ShaderKind.ComputeShader;
                     break;
-                case ShaderStage.TessControl:
+                case VkShaderStageFlags.TessControl:
                     stage = shaderc.ShaderKind.TessControlShader;
                     break;
-                case ShaderStage.TessEvaluation:
+                case VkShaderStageFlags.TessEvaluation:
                     stage = shaderc.ShaderKind.TessEvaluationShader;
                     break;
             }
@@ -593,17 +593,17 @@ namespace SharpGame
 
                         var descriptorType = resourceType switch
                         {
-                            SharpSPIRVCross.ResourceType.UniformBuffer => isDynamic ? DescriptorType.UniformBufferDynamic : DescriptorType.UniformBuffer,
-                            SharpSPIRVCross.ResourceType.StorageBuffer => isDynamic ? DescriptorType.StorageBufferDynamic : DescriptorType.StorageBuffer,
+                            SharpSPIRVCross.ResourceType.UniformBuffer => isDynamic ? VkDescriptorType.UniformBufferDynamic : VkDescriptorType.UniformBuffer,
+                            SharpSPIRVCross.ResourceType.StorageBuffer => isDynamic ? VkDescriptorType.StorageBufferDynamic : VkDescriptorType.StorageBuffer,
                             SharpSPIRVCross.ResourceType.StageInput => throw new NotImplementedException(),
                             SharpSPIRVCross.ResourceType.StageOutput => throw new NotImplementedException(),
-                            SharpSPIRVCross.ResourceType.SubpassInput => DescriptorType.InputAttachment,
-                            SharpSPIRVCross.ResourceType.StorageImage => type.ImageDimension == SpvDim.DimBuffer ? DescriptorType.StorageTexelBuffer : DescriptorType.StorageImage,
-                            SharpSPIRVCross.ResourceType.SampledImage => DescriptorType.CombinedImageSampler,
+                            SharpSPIRVCross.ResourceType.SubpassInput => VkDescriptorType.InputAttachment,
+                            SharpSPIRVCross.ResourceType.StorageImage => type.ImageDimension == SpvDim.DimBuffer ? VkDescriptorType.StorageTexelBuffer : VkDescriptorType.StorageImage,
+                            SharpSPIRVCross.ResourceType.SampledImage => VkDescriptorType.CombinedImageSampler,
                             SharpSPIRVCross.ResourceType.AtomicCounter => throw new NotImplementedException(),
                             SharpSPIRVCross.ResourceType.PushConstant => throw new NotImplementedException(),
-                            SharpSPIRVCross.ResourceType.SeparateImage => DescriptorType.SampledImage,
-                            SharpSPIRVCross.ResourceType.SeparateSamplers => DescriptorType.Sampler,
+                            SharpSPIRVCross.ResourceType.SeparateImage => VkDescriptorType.SampledImage,
+                            SharpSPIRVCross.ResourceType.SeparateSamplers => VkDescriptorType.Sampler,
                             SharpSPIRVCross.ResourceType.AccelerationStructure => throw new NotImplementedException(),
                             _=> throw new NotImplementedException(),
                         };

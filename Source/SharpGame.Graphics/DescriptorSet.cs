@@ -228,10 +228,10 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             switch(descriptorType)
             {
-                case DescriptorType.Sampler:
+                case VkDescriptorType.Sampler:
                     break;
-                case DescriptorType.InputAttachment:
-                case DescriptorType.CombinedImageSampler:
+                case VkDescriptorType.InputAttachment:
+                case VkDescriptorType.CombinedImageSampler:
                     {
                         if (bindable is RenderTexture rt)
                         {
@@ -252,17 +252,17 @@ namespace SharpGame
 
                     }
                     break;
-                case DescriptorType.SampledImage:
+                case VkDescriptorType.SampledImage:
                     break;
-                case DescriptorType.StorageImage:
+                case VkDescriptorType.StorageImage:
                     {
                         var texture = bindable as Texture;
                         Bind(dstBinding, ref texture.descriptor);                       
                     }
                     break;
 
-                case DescriptorType.UniformTexelBuffer:
-                case DescriptorType.StorageTexelBuffer:
+                case VkDescriptorType.UniformTexelBuffer:
+                case VkDescriptorType.StorageTexelBuffer:
                     {
                         if (bindable is Buffer buffer)
                             Bind(dstBinding, ref buffer.descriptor, buffer.view);
@@ -271,10 +271,10 @@ namespace SharpGame
                     }
                     break;
 
-                case DescriptorType.UniformBuffer:
-                case DescriptorType.StorageBuffer:
-                case DescriptorType.UniformBufferDynamic:
-                case DescriptorType.StorageBufferDynamic:
+                case VkDescriptorType.UniformBuffer:
+                case VkDescriptorType.StorageBuffer:
+                case VkDescriptorType.UniformBufferDynamic:
+                case VkDescriptorType.StorageBufferDynamic:
                     {
                         if (bindable is Buffer buffer)
                         {
@@ -366,7 +366,7 @@ namespace SharpGame
         internal VkWriteDescriptorSet native;
         public unsafe WriteDescriptorSet(uint binding,
             VkDescriptorSet dstSet,
-            DescriptorType type,
+            VkDescriptorType type,
             ref VkDescriptorBufferInfo bufferInfo,
             uint descriptorCount = 1)
         {
@@ -382,7 +382,7 @@ namespace SharpGame
         public unsafe WriteDescriptorSet(
             uint binding,
             VkDescriptorSet dstSet,
-            DescriptorType type,
+            VkDescriptorType type,
             ref DescriptorImageInfo imageInfo,
             uint descriptorCount = 1)
         {
@@ -397,7 +397,7 @@ namespace SharpGame
 
         public unsafe WriteDescriptorSet(uint binding,
             VkDescriptorSet dstSet,
-            DescriptorType type,
+            VkDescriptorType type,
             ref VkDescriptorBufferInfo bufferInfo,
             BufferView bufferView)
         {

@@ -10,13 +10,13 @@ namespace SharpGame
     {
         public VkAttachmentDescription(
             VkFormat format,
-            VkSampleCountFlags samples,
-            VkAttachmentLoadOp loadOp,
-            VkAttachmentStoreOp storeOp,
-            VkAttachmentLoadOp stencilLoadOp,
-            VkAttachmentStoreOp stencilStoreOp,
-            VkImageLayout initialLayout,
-            VkImageLayout finalLayout,
+            VkSampleCountFlags samples = VkSampleCountFlags.Count1,
+            VkAttachmentLoadOp loadOp = VkAttachmentLoadOp.Clear,
+            VkAttachmentStoreOp storeOp = VkAttachmentStoreOp.Store,
+            VkAttachmentLoadOp stencilLoadOp = VkAttachmentLoadOp.DontCare,
+            VkAttachmentStoreOp stencilStoreOp = VkAttachmentStoreOp.DontCare,
+            VkImageLayout initialLayout = VkImageLayout.Undefined,
+            VkImageLayout finalLayout = VkImageLayout.PresentSrcKHR,
             VkAttachmentDescriptionFlags flags = VkAttachmentDescriptionFlags.None)
         {
             this.flags = flags;
@@ -29,5 +29,6 @@ namespace SharpGame
             this.initialLayout = initialLayout;
             this.finalLayout = finalLayout;
         }
+        
     }
 }
