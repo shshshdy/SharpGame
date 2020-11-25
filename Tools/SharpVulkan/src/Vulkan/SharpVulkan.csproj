@@ -29,7 +29,7 @@
 
   <Target Name="PathDll" AfterTargets="Build">
     <Message Text="Patch dll." />
-    <Exec Command='dotnet "$(PatcherExecutable)" --input "$(TargetPath)"' />
+    <Exec Command="dotnet &quot;$(PatcherExecutable)&quot; --input &quot;$(TargetPath)&quot;" />
   </Target>
 
 </Project>
