@@ -17,8 +17,7 @@ namespace SharpGame
                 flags = flags
             };
 
-            Vulkan.vkCreateSemaphore(Vulkan.device, &semaphoreCreateInfo, null, out VkSemaphore handle);
-            Handle = handle.Handle;
+            Vulkan.vkCreateSemaphore(Vulkan.device, &semaphoreCreateInfo, null, out this).CheckResult();
         }
 
         public void Dispose()

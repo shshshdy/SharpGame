@@ -93,11 +93,11 @@ namespace SharpGame
         protected DescriptorSet resourceSet1;
         protected DescriptorSet clusterSet1;
 
-        protected QueryPool[] query_pool = new QueryPool[3];
+        protected VkQueryPool[] query_pool = new VkQueryPool[3];
         protected QueryData[] queryData = new QueryData[3];
 
         public ref QueryData QueryData => ref queryData[Graphics.WorkContext];
-        public QueryPool QueryPool => query_pool[Graphics.WorkContext];
+        public VkQueryPool QueryPool => query_pool[Graphics.WorkContext];
 
         protected ComputePass lightCull;
 
@@ -108,6 +108,11 @@ namespace SharpGame
         
         protected override void Destroy(bool disposing)
         {
+            for (int i = 0; i < 3; i++)
+            {
+                query_pool[i].Dispose();
+            }
+
             FrameGraph.OnSubmit -= Renderer_OnSubmit;
 
             base.Destroy(disposing);
@@ -127,7 +132,7 @@ namespace SharpGame
             query_count_ = (uint)QUERY_HSIZE * 2;
             for (int i = 0; i < 3; i++)
             {
-                query_pool[i] = new QueryPool(VkQueryType.Timestamp, query_count_);
+                query_pool[i] = new VkQueryPool(VkQueryType.Timestamp, query_count_);
             }
 
             uint[] queue_families = null;

@@ -18,7 +18,7 @@ namespace SharpGame
 
     public partial struct VkBufferCreateInfo
     {
-        public unsafe VkBufferCreateInfo(VkBufferUsageFlags usage, ulong size, uint[] queueFamilyIndices = null)
+        public unsafe VkBufferCreateInfo(VkBufferUsageFlags usage, ulong size, uint[] queueFamilyIndices = default)
         {
             this.sType = VkStructureType.BufferCreateInfo;
             this.pNext = null;

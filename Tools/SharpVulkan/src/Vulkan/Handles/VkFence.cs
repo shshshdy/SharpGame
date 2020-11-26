@@ -16,8 +16,7 @@ namespace SharpGame
                 flags = flags
             };
 
-            Vulkan.vkCreateFence(Vulkan.device, &createInfo, null, out VkFence handle).CheckResult();
-            Handle = handle.Handle;
+            Vulkan.vkCreateFence(Vulkan.device, &createInfo, null, out this).CheckResult();
         }
 
         public VkResult GetStatus()

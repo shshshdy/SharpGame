@@ -77,8 +77,7 @@ namespace SharpGame
 
             IntPtr ptr = GetProcAddr(instance, name);
 
-            return ptr != IntPtr.Zero ? Marshal.GetDelegateForFunctionPointer<TDelegate>(ptr) : default;
-
+            return Marshal.GetDelegateForFunctionPointer<TDelegate>(ptr);
         }
 
         public static IntPtr GetProcAddr(this VkDevice device, string name)
@@ -96,8 +95,7 @@ namespace SharpGame
                 throw new ArgumentNullException(nameof(name));
 
             IntPtr ptr = GetProcAddr(device, name);
-            TDelegate proc = ptr != IntPtr.Zero ? Marshal.GetDelegateForFunctionPointer<TDelegate>(ptr) : null;
-            return proc;
+            return Marshal.GetDelegateForFunctionPointer<TDelegate>(ptr);
         }
 
     }

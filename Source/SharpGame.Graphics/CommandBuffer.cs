@@ -370,14 +370,14 @@
             vkCmdFillBuffer(commandBuffer, dstBuffer.handle, dstOffset, size, data);
         }
 
-        public void ResetQueryPool(QueryPool queryPool, uint firstQuery, uint queryCount)
+        public void ResetQueryPool(VkQueryPool queryPool, uint firstQuery, uint queryCount)
         {
-            vkCmdResetQueryPool(commandBuffer, queryPool.handle, firstQuery, queryCount);
+            vkCmdResetQueryPool(commandBuffer, queryPool, firstQuery, queryCount);
         }
 
-        public void WriteTimestamp(VkPipelineStageFlags pipelineStage, QueryPool queryPool, uint query)
+        public void WriteTimestamp(VkPipelineStageFlags pipelineStage, VkQueryPool queryPool, uint query)
         {
-            vkCmdWriteTimestamp(commandBuffer, (VkPipelineStageFlags)pipelineStage, queryPool.handle, (uint)query);
+            vkCmdWriteTimestamp(commandBuffer, (VkPipelineStageFlags)pipelineStage, queryPool, (uint)query);
         }
 
         public void NextSubpass(VkSubpassContents contents)

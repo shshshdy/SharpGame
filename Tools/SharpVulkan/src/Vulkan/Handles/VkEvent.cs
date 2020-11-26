@@ -14,8 +14,7 @@ namespace SharpGame
                 flags = flags
             };
 
-            Vulkan.vkCreateEvent(Vulkan.device, &createInfo, null, out VkEvent handle);
-            Handle = handle.Handle;
+            Vulkan.vkCreateEvent(Vulkan.device, &createInfo, null, out this).CheckResult();
         }
 
         public VkResult Status

@@ -34,17 +34,17 @@ namespace SharpGame
         private static UTF8String engineName = "SharpGame";
         private static List<string> supportedExtensions = new List<string>();
 
-        private static Vector<IntPtr> instanceExtensions = new Vector<IntPtr>(8);
+        private static CStringList instanceExtensions = new CStringList();
         private static CStringList deviceExtensions = new CStringList();
 
-        public static VkDevice Create(Settings settings, VkPhysicalDeviceFeatures enabledFeatures, Vector<IntPtr> enabledExtensions,
+        public static VkDevice Create(Settings settings, VkPhysicalDeviceFeatures enabledFeatures, CStringList enabledExtensions,
             bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
         {
-            instanceExtensions.Add(Strings.VK_KHR_SURFACE_EXTENSION_NAME);
-            instanceExtensions.Add(Strings.VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+            instanceExtensions.Add(Vulkan.KHRSurfaceExtensionName);
+            instanceExtensions.Add(Vulkan.KHRGetPhysicalDeviceProperties2ExtensionName);
 
-            enabledExtensions.Add(Strings.VK_KHR_MAINTENANCE1_EXTENSION_NAME);
-            enabledExtensions.Add(Strings.VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME);
+            enabledExtensions.Add(Vulkan.KHRMaintenance1ExtensionName);
+            enabledExtensions.Add(Vulkan.EXTInlineUniformBlockExtensionName);
 
             //enabledExtensions.Add(Strings.VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT_EXT);
 
@@ -127,11 +127,11 @@ namespace SharpGame
 
             // Get list of supported extensions
             uint extCount = 0;
-            vkEnumerateDeviceExtensionProperties(physicalDevice, (byte*)null, &extCount, null);
+            vkEnumerateDeviceExtensionProperties(physicalDevice, null, &extCount, null);
             if (extCount > 0)
             {
                 VkExtensionProperties* extensions = stackalloc VkExtensionProperties[(int)extCount];
-                if (vkEnumerateDeviceExtensionProperties(physicalDevice, (byte*)null, &extCount, extensions) == VkResult.Success)
+                if (vkEnumerateDeviceExtensionProperties(physicalDevice, null, &extCount, extensions) == VkResult.Success)
                 {
                     for (uint i = 0; i < extCount; i++)
                     {
@@ -182,11 +182,11 @@ namespace SharpGame
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                instanceExtensions.Add(Strings.VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+                instanceExtensions.Add("VK_KHR_win32_surface");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                instanceExtensions.Add(Strings.VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+                instanceExtensions.Add("VK_KHR_xlib_surface");
             }
             else
             {
@@ -200,13 +200,13 @@ namespace SharpGame
             {
                 if (enableValidation)
                 {
-                    instanceExtensions.Add(Strings.VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+                    instanceExtensions.Add(Vulkan.EXTDebugReportExtensionName);
                 }
                 instanceCreateInfo.enabledExtensionCount = instanceExtensions.Count;
                 instanceCreateInfo.ppEnabledExtensionNames = (byte**)instanceExtensions.Data;
             }
 
-            using Vector<IntPtr> enabledLayerNames = new Vector<IntPtr> { Strings.StandardValidationLayeName };
+            using CStringList enabledLayerNames = new CStringList { "VK_LAYER_KHRONOS_validation" };
 
             if (enableValidation)
             {
@@ -227,7 +227,7 @@ namespace SharpGame
             return instance;
         }
 
-        static VkDevice CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, Vector<IntPtr> enabledExtensions,
+        static VkDevice CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, CStringList enabledExtensions,
             bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
         {
             using Vector<VkDeviceQueueCreateInfo> queueCreateInfos = new Vector<VkDeviceQueueCreateInfo>();
@@ -237,7 +237,7 @@ namespace SharpGame
             if ((requestedQueueTypes & VkQueueFlags.Graphics) != 0)
             {
                 QFGraphics = GetQueueFamilyIndex(VkQueueFlags.Graphics);
-                VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
+                var queueInfo = new VkDeviceQueueCreateInfo
                 {
                     sType = VkStructureType.DeviceQueueCreateInfo,
                     queueFamilyIndex = QFGraphics,
@@ -258,7 +258,7 @@ namespace SharpGame
                 if (QFCompute != QFGraphics)
                 {
                     // If compute family index differs, we need an additional queue create info for the compute queue
-                    VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
+                    var queueInfo = new VkDeviceQueueCreateInfo
                     {
                         sType = VkStructureType.DeviceQueueCreateInfo,
                         queueFamilyIndex = QFCompute,
@@ -281,7 +281,7 @@ namespace SharpGame
                 if (QFTransfer != QFGraphics && QFTransfer != QFCompute)
                 {
                     // If compute family index differs, we need an additional queue create info for the transfer queue
-                    VkDeviceQueueCreateInfo queueInfo = new VkDeviceQueueCreateInfo
+                    var queueInfo = new VkDeviceQueueCreateInfo
                     {
                         sType = VkStructureType.DeviceQueueCreateInfo,
                         queueFamilyIndex = QFTransfer,
@@ -298,14 +298,14 @@ namespace SharpGame
             }
 
             // Create the logical device representation
-            using Vector<IntPtr> deviceExtensions = new Vector<IntPtr>(enabledExtensions);
+            using CStringList deviceExtensions = new CStringList(enabledExtensions);
             if (useSwapChain)
             {
                 // If the device will be used for presenting to a display via a swapchain we need to request the swapchain extension
-                deviceExtensions.Add(Strings.VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+                deviceExtensions.Add(Vulkan.KHRSwapchainExtensionName);
             }
 
-            VkDeviceCreateInfo deviceCreateInfo = new VkDeviceCreateInfo
+            var deviceCreateInfo = new VkDeviceCreateInfo
             {
                 sType = VkStructureType.DeviceCreateInfo,
                 queueCreateInfoCount = queueCreateInfos.Count,
@@ -414,12 +414,11 @@ namespace SharpGame
 
             foreach (VkFormat format in depthFormats)
             {
-                VkFormatProperties formatProps;
-                vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, out formatProps);
+                vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, out VkFormatProperties formatProps);
                 // VkFormat must support depth stencil attachment for optimal tiling
                 if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.DepthStencilAttachment) != 0)
                 {
-                    return (VkFormat)format;
+                    return format;
                 }
             }
 
@@ -443,7 +442,7 @@ namespace SharpGame
 
         public static void GetPhysicalDeviceFormatProperties(VkFormat format, out VkFormatProperties pFeatures)
         {
-            vkGetPhysicalDeviceFormatProperties(PhysicalDevice, (VkFormat)format, out pFeatures);
+            vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, out pFeatures);
         }
 
         public delegate VkResult vkCmdPushDescriptorSetKHRDelegate(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint set, uint descriptorWriteCount, VkWriteDescriptorSet* pDescriptorWrites);
@@ -473,90 +472,6 @@ namespace SharpGame
         public static VkResult AcquireNextImageKHR(VkSwapchainKHR swapchain, ulong timeout, VkSemaphore semaphore, VkFence fence, out uint pImageIndex)
         {
             return vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, out pImageIndex);
-        }
-
-        public static VkSemaphore CreateSemaphore(VkSemaphoreCreateFlags flags = 0)
-        {
-            var semaphoreCreateInfo = new VkSemaphoreCreateInfo
-            {
-                sType = VkStructureType.SemaphoreCreateInfo
-            };
-            semaphoreCreateInfo.flags = flags;
-            VulkanUtil.CheckResult(vkCreateSemaphore(device, &semaphoreCreateInfo, null, out VkSemaphore pSemaphore));
-            return pSemaphore;
-        }
-
-        public static void Destroy(VkSemaphore semaphore)
-        {
-            vkDestroySemaphore(device, semaphore, null);
-        }
-
-        public static VkEvent CreateEvent(ref VkEventCreateInfo pCreateInfo)
-        {
-            vkCreateEvent(device, Utilities.AsPtr(ref pCreateInfo), null, out VkEvent pEvent);
-            return pEvent;
-        }
-
-        public static VkResult GetEventStatus(VkEvent evt)
-        {
-            return vkGetEventStatus(device, evt);
-        }
-
-        public static void SetEvent(VkEvent evt)
-        {
-            VulkanUtil.CheckResult(vkSetEvent(device, evt));
-        }
-
-        public static void ResetEvent(VkEvent evt)
-        {
-            VulkanUtil.CheckResult(vkResetEvent(device, evt));
-        }
-
-        public static void Destroy(VkEvent @event)
-        {
-            vkDestroyEvent(device, @event, null);
-        }
-
-        public static VkFence CreateFence(ref VkFenceCreateInfo pCreateInfo)
-        {
-            vkCreateFence(device, Utilities.AsPtr(ref pCreateInfo), null, out VkFence pFence);
-            return pFence;
-        }
-
-        public static VkResult GetFenceStatus(VkFence fence)
-        {
-            return vkGetFenceStatus(device, fence);
-        }
-
-        public static void ResetFences(uint fenceCount, ref VkFence pFences)
-        {
-            VulkanUtil.CheckResult(vkResetFences(device, fenceCount, Utilities.AsPtr(ref pFences)));
-        }
-
-        public static void WaitForFences(uint fenceCount, ref VkFence pFences, VkBool32 waitAll, ulong timeout)
-        {
-            VulkanUtil.CheckResult(vkWaitForFences(device, fenceCount, Utilities.AsPtr(ref pFences), waitAll, timeout));
-        }
-
-        public static void Destroy(VkFence fence)
-        {
-            vkDestroyFence(device, fence, null);
-        }
-
-        public static VkQueryPool CreateQueryPool(ref VkQueryPoolCreateInfo pCreateInfo)
-        {
-            VulkanUtil.CheckResult(vkCreateQueryPool(device, Utilities.AsPtr(ref pCreateInfo), null, out VkQueryPool pQueryPool));
-            return pQueryPool;
-        }
-
-        public static void GetQueryPoolResults(VkQueryPool queryPool, uint firstQuery, uint queryCount, UIntPtr dataSize, void* pData, ulong stride, VkQueryResultFlags flags)
-        {
-            VulkanUtil.CheckResult(vkGetQueryPoolResults(device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags));
-        }
-
-        public static void DestroyQueryPool(ref VkQueryPool queryPool)
-        {
-            vkDestroyQueryPool(device, queryPool, null);
         }
 
         public static VkImage CreateImage(ref VkImageCreateInfo pCreateInfo)
@@ -732,7 +647,7 @@ namespace SharpGame
             {
                 if ((typeBits & 1) == 1)
                 {
-                    if ((((VkMemoryPropertyFlags)MemoryProperties.GetMemoryType(i).propertyFlags) & properties) == properties)
+                    if ((MemoryProperties.GetMemoryType(i).propertyFlags & properties) == properties)
                     {
                         return i;
 

@@ -26,7 +26,7 @@ namespace SharpGame
         public Stats stats = new Stats();
 
         public VkPhysicalDeviceFeatures enabledFeatures;
-        public Vector<IntPtr> EnabledExtensions { get; } = new Vector<IntPtr>();
+        public CStringList EnabledExtensions { get; } = new CStringList();
 
         public static Queue GraphicsQueue { get; protected set; }
         public static Queue WorkQueue { get; protected set; }

@@ -96,11 +96,13 @@ namespace SharpGame
 
     public partial class Pass : DisposeBase
     {
-        public static readonly string Shadow = "shadow";
-        public static readonly string Depth = "depth";
-        public static readonly string EarlyZ = "early_z";
-        public static readonly string Clear = "clear";
-        public static readonly string Main = "main";
+        public static readonly UTF8String FuncName = "main";
+
+        public const string Shadow = "shadow";
+        public const string Depth = "depth";
+        public const string EarlyZ = "early_z";
+        public const string Clear = "clear";
+        public const string Main = "main";
 
         private static List<string> passList = new List<string>();
 
@@ -353,7 +355,7 @@ namespace SharpGame
                     var shaderStage = new VkPipelineShaderStageCreateInfo { sType = VkStructureType.PipelineShaderStageCreateInfo };
                     shaderStage.stage = (VkShaderStageFlags)sm.Stage;
                     shaderStage.module = sm.shaderModule;
-                    shaderStage.pName = Strings.main;// sm.FuncName;
+                    shaderStage.pName = Pass.FuncName;// sm.FuncName;
 
                     if(sm.SpecializationInfo != null)
                     {
@@ -377,7 +379,7 @@ namespace SharpGame
                 };
                 shaderStage.stage = VkShaderStageFlags.Compute;
                 shaderStage.module = ShaderModels[5].shaderModule;
-                shaderStage.pName = Strings.main;
+                shaderStage.pName = Pass.FuncName;
                 return shaderStage;
             }
 
