@@ -58,7 +58,7 @@ namespace SharpGame
                 sType = VkStructureType.ImageCreateInfo,
                 flags = flags,
                 imageType = imageType,
-                format = (VkFormat)format,
+                format = format,
                 extent = new VkExtent3D(width, height, 1),
                 mipLevels = levels,
                 arrayLayers = layers,
@@ -105,7 +105,7 @@ namespace SharpGame
                 sType = VkStructureType.ImageViewCreateInfo,
                 image = image.handle,
                 viewType = viewType,
-                format = (VkFormat)format,
+                format = format,
                 components = new VkComponentMapping(VkComponentSwizzle.R, VkComponentSwizzle.G, VkComponentSwizzle.B, VkComponentSwizzle.A),
 
                 subresourceRange = new VkImageSubresourceRange

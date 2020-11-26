@@ -32,15 +32,6 @@ namespace SharpGame
         }
     }
 
-    [Flags]
-    public enum DefaultResourcSet : int
-    {
-        None = 0,
-        Set0 = 1,
-        Set1 = 2,
-        PBR = 4,
-    }
-
     public class DescriptorSetLayout : DisposeBase, IEnumerable<DescriptorSetLayoutBinding>
     {
         public int Set { get; set; }

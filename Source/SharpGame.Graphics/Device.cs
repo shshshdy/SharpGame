@@ -35,6 +35,7 @@ namespace SharpGame
         private static List<string> supportedExtensions = new List<string>();
 
         private static Vector<IntPtr> instanceExtensions = new Vector<IntPtr>(8);
+        private static CStringList deviceExtensions = new CStringList();
 
         public static VkDevice Create(Settings settings, VkPhysicalDeviceFeatures enabledFeatures, Vector<IntPtr> enabledExtensions,
             bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
@@ -779,11 +780,6 @@ namespace SharpGame
             VkPipeline pPipelines;
             VulkanUtil.CheckResult(vkCreateComputePipelines(device, pipelineCache, 1, Utilities.AsPtr(ref pCreateInfos), null, &pPipelines));
             return pPipelines;
-        }
-
-        public static void DestroyPipeline(VkPipeline pipeline)
-        {
-            vkDestroyPipeline(device, pipeline, null);
         }
 
         public static void DestroyBuffer(VkBuffer buffer)

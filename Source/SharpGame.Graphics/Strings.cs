@@ -1,5 +1,34 @@
-﻿namespace SharpGame
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+
+namespace SharpGame
 {
+    public class CStringList : DisposeBase
+    {
+        private Vector<IntPtr> nativeStrs = new Vector<IntPtr>();
+
+        public IntPtr Data => nativeStrs.Data;
+        public uint Count => nativeStrs.Count;
+
+
+        public void Add(string str)
+        {
+            var ptr = Marshal.StringToHGlobalAnsi(str);
+            nativeStrs.Add(ptr);
+        }
+
+        protected override void Destroy(bool disposing)
+        {
+            foreach(var ptr in nativeStrs)
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
+
+            nativeStrs.Clear();
+        }
+    }
+
     public static class Strings
     {
         public static UTF8String VK_KHR_SURFACE_EXTENSION_NAME = "VK_KHR_surface";
@@ -14,5 +43,10 @@
         public static UTF8String VK_KHR_MAINTENANCE1_EXTENSION_NAME = "VK_KHR_maintenance1";
         public static UTF8String VK_EXT_INLINE_UNIFORM_BLOCK_EXTENSION_NAME = "VK_EXT_inline_uniform_block";
         public static UTF8String main = "main";
+
+        public static void AddString(this Vector<IntPtr> strs, string str)
+        {
+
+        }
     }
 }

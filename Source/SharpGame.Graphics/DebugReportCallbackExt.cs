@@ -17,7 +17,6 @@ namespace SharpGame
 
     public unsafe class DebugReportCallbackExt : DisposeBase
     {
-        // We need to keep the callback alive since it is being called from unmanaged code.
         private DebugReportCallback _callback;
         public VkDebugReportCallbackEXT handle;
 

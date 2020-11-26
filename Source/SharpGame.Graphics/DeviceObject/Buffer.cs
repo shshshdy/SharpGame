@@ -15,13 +15,11 @@ namespace SharpGame
         public ulong Stride { get; set; }
         public VkBufferUsageFlags UsageFlags { get; set; }
 
-        internal VkDescriptorBufferInfo descriptor;
-
-        VkFormat viewFormat;
-
         public VkBuffer handle;
         public BufferView view;
-        internal DescriptorImageInfo imageDescriptor;
+
+        internal VkDescriptorBufferInfo descriptor;
+
 
         public Buffer()
         {

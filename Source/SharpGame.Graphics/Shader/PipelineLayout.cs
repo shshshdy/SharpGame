@@ -31,8 +31,6 @@ namespace SharpGame
         private Vector<PushConstantRange> combindePushConstant = new Vector<PushConstantRange>();
         public List<string> PushConstantNames { get; set; }
 
-        public DefaultResourcSet DefaultResourcSet { get; set;}
-
         internal VkPipelineLayout handle;
 
         public PipelineLayout()

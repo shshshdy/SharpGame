@@ -11,8 +11,6 @@ namespace SharpGame
     {
         public CommandBuffer[] CommandBuffers { get; private set; }
         public uint QueueIndex { get; }
-        public string Name {get; set;}
-
         private VkCommandPool cmdPool;
         private Vector<VkCommandBuffer> cmdBuffers = new Vector<VkCommandBuffer>();
 
@@ -24,7 +22,7 @@ namespace SharpGame
         public CommandBufferPool(uint queue, VkCommandPoolCreateFlags commandPoolCreateFlags)
         {
             QueueIndex = queue;
-            cmdPool = Device.CreateCommandPool(queue, (VkCommandPoolCreateFlags)commandPoolCreateFlags);
+            cmdPool = Device.CreateCommandPool(queue, commandPoolCreateFlags);
         }
 
         public CommandBuffer this[int index]
@@ -32,15 +30,10 @@ namespace SharpGame
             get { return CommandBuffers[index]; }
         }
 
-        protected override void Destroy(bool disposing)
-        {
-            //Free();
-        }
-
         public unsafe CommandBuffer AllocateCommandBuffer(VkCommandBufferLevel commandBufferLevel)
         {
             VkCommandBuffer cmdBuffer;
-            Device.AllocateCommandBuffers(cmdPool, (VkCommandBufferLevel)commandBufferLevel, 1, &cmdBuffer);
+            Device.AllocateCommandBuffers(cmdPool, commandBufferLevel, 1, &cmdBuffer);
             return new CommandBuffer(cmdBuffer);
         }
 
