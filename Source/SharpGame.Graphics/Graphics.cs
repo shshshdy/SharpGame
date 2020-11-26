@@ -77,10 +77,10 @@ namespace SharpGame
             Device.Create(settings, enabledFeatures, EnabledExtensions);
 
             // Get a graphics queue from the Device
-            GraphicsQueue = Queue.GetDeviceQueue(Device.QFGraphics, 0);
-            WorkQueue = Queue.GetDeviceQueue(Device.QFGraphics, 0);
-            ComputeQueue = Queue.GetDeviceQueue(Device.QFCompute, 0);
-            TransferQueue = Queue.GetDeviceQueue(Device.QFTransfer, 0);
+            GraphicsQueue = new Queue(Device.QFGraphics, 0);
+            WorkQueue = new Queue(Device.QFGraphics, 0);
+            ComputeQueue = new Queue(Device.QFCompute, 0);
+            TransferQueue = new Queue(Device.QFTransfer, 0);
 
             DepthFormat = Device.GetSupportedDepthFormat();
 

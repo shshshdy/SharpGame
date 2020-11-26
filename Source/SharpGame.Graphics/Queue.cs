@@ -5,34 +5,23 @@ using System.Runtime.InteropServices;
 namespace SharpGame
 {
     using static Vulkan;
-    public unsafe class Queue
+    public unsafe partial class Queue
     {
-        internal VkQueue native;
-        public uint FamilyIndex { get; }
-        public uint Index { get; }
-
-        internal Queue(VkQueue handle, uint familyIndex, uint index)
+        internal VkQueue handle;
+        public Queue(uint queueFamilyIndex, uint queueIndex)
         {
-            native = handle;
-            FamilyIndex = familyIndex;
-            Index = index;
-        }
-
-        public static Queue GetDeviceQueue(uint queueFamilyIndex, uint queueIndex)
-        {
-            VkQueue pQueue = Device.GetDeviceQueue(queueFamilyIndex, queueIndex);
-            return new Queue(pQueue, queueFamilyIndex, queueIndex);
+            handle = Device.GetDeviceQueue(queueFamilyIndex, queueIndex);
         }
 
         public void Submit(SubmitInfo[] submits, VkFence fence = default)
         {
             int count = submits?.Length ?? 0;
-            VulkanUtil.CheckResult(vkQueueSubmit(native, (uint)count, submits != null ? Utilities.AsPtr(ref submits[0].native) : null, fence));           
+            VulkanUtil.CheckResult(vkQueueSubmit(handle, (uint)count, submits != null ? Utilities.AsPtr(ref submits[0].native) : null, fence));           
         }
 
         public void Submit(SubmitInfo submit, VkFence fence = default)
         {
-            VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &submit.native, fence));
+            VulkanUtil.CheckResult(vkQueueSubmit(handle, 1, &submit.native, fence));
         }
 
         public void Submit(VkSemaphore waitSemaphore, VkPipelineStageFlags waitDstStageMask,
@@ -64,7 +53,7 @@ namespace SharpGame
                 nativeSubmit.pSignalSemaphores = &signalSemaphore;
             }
             
-            VulkanUtil.CheckResult(vkQueueSubmit(native, 1, &nativeSubmit, fence));
+            VulkanUtil.CheckResult(vkQueueSubmit(handle, 1, &nativeSubmit, fence));
 
             if (commandBuffer)
             {
@@ -74,19 +63,19 @@ namespace SharpGame
 
         public void WaitIdle()
         {
-            VulkanUtil.CheckResult(vkQueueWaitIdle(native));
+            VulkanUtil.CheckResult(vkQueueWaitIdle(handle));
         }
 
         public void BindSparse(BindSparseInfo bindInfo, VkFence fence = default)
         {
-            VulkanUtil.CheckResult(vkQueueBindSparse(native, 1, &bindInfo.native, fence));           
+            VulkanUtil.CheckResult(vkQueueBindSparse(handle, 1, &bindInfo.native, fence));           
         }
 
         public void BindSparse(BindSparseInfo[] bindInfo, VkFence fence = default)
         {
             int count = bindInfo?.Length ?? 0;
 
-            VulkanUtil.CheckResult(vkQueueBindSparse(native, (uint)count, bindInfo != null ? Utilities.AsPtr(ref bindInfo[0].native) : null, fence));
+            VulkanUtil.CheckResult(vkQueueBindSparse(handle, (uint)count, bindInfo != null ? Utilities.AsPtr(ref bindInfo[0].native) : null, fence));
 
         }
 

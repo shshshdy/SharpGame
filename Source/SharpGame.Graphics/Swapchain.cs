@@ -390,7 +390,7 @@ namespace SharpGame
                 presentInfo.waitSemaphoreCount = 1;
             }
 
-            VulkanUtil.CheckResult(vkQueuePresentKHR(queue.native, &presentInfo));
+            VulkanUtil.CheckResult(vkQueuePresentKHR(queue.handle, &presentInfo));
         }
     }
 
