@@ -141,7 +141,7 @@ namespace SharpGame
 
         public bool IsDisposed => dataPtr == null;
 
-        public void Add(ref T item, uint numElements)
+        public void Add(in T item, uint numElements)
         {
             ThrowIfDisposed();
 
@@ -151,10 +151,15 @@ namespace SharpGame
             }
 
             //Unsafe.Copy(dataPtr + count, ref item);
-            Unsafe.CopyBlock(dataPtr + count, Unsafe.AsPointer(ref item), numElements * s_elementByteSize);
+            Unsafe.CopyBlock(dataPtr + count, Unsafe.AsPointer(ref Unsafe.AsRef(item)), numElements * s_elementByteSize);
             count += numElements;
         }
 
+        public void Add(ReadOnlySpan<T> item)
+        {
+            Add(item.GetPinnableReference(), (uint)item.Length);
+        }
+        
         public void Add(T item)
         {
             ThrowIfDisposed();

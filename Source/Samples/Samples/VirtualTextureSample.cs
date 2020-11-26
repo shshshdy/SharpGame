@@ -303,21 +303,15 @@ namespace SharpGame.Samples
                 return;
             };
 
-            // Get sparse memory requirements
-            // Count
-            uint sparseMemoryReqsCount = 32;
-            Vector<VkSparseImageMemoryRequirements> sparseMemoryReqs = new Vector<VkSparseImageMemoryRequirements>(sparseMemoryReqsCount, sparseMemoryReqsCount);
-            Vulkan.vkGetImageSparseMemoryRequirements(Device.Handle, texture.image.handle, &sparseMemoryReqsCount, sparseMemoryReqs.DataPtr);
-            if (sparseMemoryReqsCount == 0)
+            // Get actual requirements
+            var sparseMemoryReqs = Vulkan.vkGetImageSparseMemoryRequirements(Device.Handle, texture.image.handle);
+            if (sparseMemoryReqs.Length == 0)
             {
                 Log.Error("No memory requirements for the sparse image!");
                 return;
             }
-            sparseMemoryReqs.Resize(sparseMemoryReqsCount);
-            // Get actual requirements
-            Vulkan.vkGetImageSparseMemoryRequirements(Device.Handle, texture.image.handle, &sparseMemoryReqsCount, sparseMemoryReqs.DataPtr);
 
-            Log.Info("Sparse image memory requirements: " + sparseMemoryReqsCount);
+            Log.Info("Sparse image memory requirements: " + sparseMemoryReqs.Length);
             foreach (var reqs in sparseMemoryReqs)
             {
                 Log.Info("\t Image granularity: w = " + reqs.formatProperties.imageGranularity.width + " h = " + reqs.formatProperties.imageGranularity.height + " d = " + reqs.formatProperties.imageGranularity.depth);

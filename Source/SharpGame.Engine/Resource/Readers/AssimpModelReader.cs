@@ -283,20 +283,20 @@ namespace SharpGame
                     {
                         case VertexComponent.Position:
                             var position = new vec3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z) * scale;
-                            vertexBuffer.Add(ref position.x, 3);
+                            vertexBuffer.Add(position.x, 3);
                             meshBoundingBox.Merge(position);
                             break;
                         case VertexComponent.Normal:
                             var normal = new vec3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z);
-                            vertexBuffer.Add(ref normal.x, 3);
+                            vertexBuffer.Add(normal.x, 3);
                             break;
                         case VertexComponent.Tangent:
                             var tan = new vec3(mesh.Tangents[v].X, mesh.Tangents[v].Y, mesh.Tangents[v].Z);
-                            vertexBuffer.Add(ref tan.x, 3);
+                            vertexBuffer.Add(tan.x, 3);
                             break;
                         case VertexComponent.Bitangent:
                             var bitan = new vec3(mesh.BiTangents[v].X, mesh.BiTangents[v].Y, mesh.BiTangents[v].Z);
-                            vertexBuffer.Add(ref bitan.x, 3);
+                            vertexBuffer.Add(bitan.x, 3);
                             break;
                         case VertexComponent.Texcoord:
                             vec2 texcoord = vec2.Zero;
@@ -305,7 +305,7 @@ namespace SharpGame
                             {
                                 texcoord = new vec2(mesh.TextureCoordinateChannels[0][v].X, mesh.TextureCoordinateChannels[0][v].Y);
                             }
-                            vertexBuffer.Add(ref texcoord.x, 2);
+                            vertexBuffer.Add(texcoord.x, 2);
                             break;
                         case VertexComponent.Color:
                             uint color = 0xffffffff;

@@ -27,8 +27,6 @@ namespace SharpGame
         public static int MaxPushConstantsSize => (int)Device.Properties.limits.maxPushConstantsSize;
 
         private static VkDevice device;
-        private static VkQueue queue;
-        private static VkCommandPool commandPool;
         private static VkPipelineCache pipelineCache;
         private static DebugReportCallbackExt debugReportCallbackExt;
         private static UTF8String engineName = "SharpGame";
@@ -51,31 +49,18 @@ namespace SharpGame
             CreateInstance(settings);
 
             // Physical Device
-            uint gpuCount = 0;
-            VulkanUtil.CheckResult(vkEnumeratePhysicalDevices(VkInstance, &gpuCount, null));
-            Debug.Assert(gpuCount > 0);
-            // Enumerate devices
-            IntPtr* physicalDevices = stackalloc IntPtr[(int)gpuCount];
+            var physicalDevices = Vulkan.vkEnumeratePhysicalDevices(VkInstance);
 
-            VkResult err = vkEnumeratePhysicalDevices(VkInstance, &gpuCount, (VkPhysicalDevice*)physicalDevices);
-            if (err != VkResult.Success)
-            {
-                throw new InvalidOperationException("Could not enumerate physical devices.");
-            }
-
-            uint selectedDevice = 0;
             // TODO: Implement arg parsing, etc.
+            int selectedDevice = 0;
 
-            var physicalDevice = ((VkPhysicalDevice*)physicalDevices)[selectedDevice];
-
-            Debug.Assert(physicalDevice.Handle != IntPtr.Zero);
-            PhysicalDevice = physicalDevice;
-            vkGetPhysicalDeviceProperties(physicalDevice, out VkPhysicalDeviceProperties properties);
+            PhysicalDevice = physicalDevices[selectedDevice];
+            Debug.Assert(PhysicalDevice.Handle != IntPtr.Zero);
+           
+            vkGetPhysicalDeviceProperties(PhysicalDevice, out VkPhysicalDeviceProperties properties);
             Properties = properties;
 
-            // Features should be checked by the examples before using them
-            vkGetPhysicalDeviceFeatures(physicalDevice, out VkPhysicalDeviceFeatures features);
-
+            vkGetPhysicalDeviceFeatures(PhysicalDevice, out VkPhysicalDeviceFeatures features);
             Features = features;
 
             if (features.multiDrawIndirect)
@@ -113,52 +98,33 @@ namespace SharpGame
                 Log.Warn("Sparse binding not supported");
             }
 
-
             // Memory properties are used regularly for creating all kinds of buffers
             VkPhysicalDeviceMemoryProperties memoryProperties;
-            vkGetPhysicalDeviceMemoryProperties(physicalDevice, out memoryProperties);
+            vkGetPhysicalDeviceMemoryProperties(PhysicalDevice, out memoryProperties);
             MemoryProperties = memoryProperties;
-            // Queue family properties, used for setting up requested queues upon device creation
-            uint queueFamilyCount = 0;
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, null);
-            Debug.Assert(queueFamilyCount > 0);
-            QueueFamilyProperties.Resize(queueFamilyCount);
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, QueueFamilyProperties.DataPtr);
+            
+            var qf = Vulkan.vkGetPhysicalDeviceQueueFamilyProperties(PhysicalDevice);
+            QueueFamilyProperties.Add(qf);
 
-            // Get list of supported extensions
-            uint extCount = 0;
-            vkEnumerateDeviceExtensionProperties(physicalDevice, null, &extCount, null);
-            if (extCount > 0)
+            var extensions = Vulkan.vkEnumerateDeviceExtensionProperties(PhysicalDevice);
+            
+            foreach(var ext in extensions)
             {
-                VkExtensionProperties* extensions = stackalloc VkExtensionProperties[(int)extCount];
-                if (vkEnumerateDeviceExtensionProperties(physicalDevice, null, &extCount, extensions) == VkResult.Success)
-                {
-                    for (uint i = 0; i < extCount; i++)
-                    {
-                        var ext = extensions[i];
-                        string strExt = UTF8String.FromPointer(ext.extensionName);
-                        //enabledExtensions.Add((IntPtr)ext.extensionName);
-                        supportedExtensions.Add(strExt);
-                    }
-                }
+                string strExt = UTF8String.FromPointer(ext.extensionName);
+                //enabledExtensions.Add((IntPtr)ext.extensionName);
+                supportedExtensions.Add(strExt);
             }
-
+              
             device = CreateLogicalDevice(Features, enabledExtensions);
-
-            queue = GetDeviceQueue(QFGraphics, 0);
 
             if (device != VkDevice.Null)
             {
-                // Create a default command pool for graphics command buffers
-                commandPool = CreateCommandPool(QFGraphics);
-
                 VkPipelineCacheCreateInfo pipelineCacheCreateInfo = new VkPipelineCacheCreateInfo()
                 {
                     sType = VkStructureType.PipelineCacheCreateInfo
                 };
 
                 VulkanUtil.CheckResult(vkCreatePipelineCache(device, &pipelineCacheCreateInfo, null, out pipelineCache));
-
             }
 
             return device;
