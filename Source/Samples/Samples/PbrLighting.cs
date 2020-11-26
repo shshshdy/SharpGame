@@ -109,8 +109,8 @@ namespace SharpGame.Samples
             //todo:
             pbrMaterial.PipelineResourceSet[0].ResourceSet[2].Bind(envMap, irMap, brdfLUT);
 
-            computeSampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToBorder, false, VkBorderColor.FloatTransparentBlack);
-            brdfLUTSampler = Sampler.Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
+            computeSampler = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToBorder, false, VkBorderColor.FloatTransparentBlack);
+            brdfLUTSampler = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
 
             SetCubeMap(cubeMaps[0]);
 

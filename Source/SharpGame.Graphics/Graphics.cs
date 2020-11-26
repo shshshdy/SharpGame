@@ -64,7 +64,7 @@ namespace SharpGame
         public Graphics(Settings settings)
         {
 #if DEBUG
-            settings.Validation = true;
+            //settings.Validation = true;
 #else
             settings.Validation = false;
 #endif
@@ -101,7 +101,7 @@ namespace SharpGame
             primaryCmdPool = new CommandBufferPool(Device.QFGraphics, VkCommandPoolCreateFlags.ResetCommandBuffer);
 
             Texture.Init();
-            Sampler.Init();
+            //Sampler.Init();
 
             RenderContext.Init();
 

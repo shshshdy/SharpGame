@@ -11,7 +11,6 @@ namespace SharpGame
     
     public class Buffer : DeviceMemory, IBindableResource
     {
-        public const ulong WholeSize = ulong.MaxValue;
         public ulong Stride { get; set; }
         public VkBufferUsageFlags UsageFlags { get; set; }
 
@@ -41,6 +40,7 @@ namespace SharpGame
             // Create the buffer handle
             var bufferCreateInfo = new VkBufferCreateInfo(usageFlags, size, queueFamilyIndices);
             bufferCreateInfo.sharingMode = sharingMode;
+
             if (data != null && (memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
             {
                 bufferCreateInfo.usage |= VkBufferUsageFlags.TransferDst;
@@ -48,19 +48,15 @@ namespace SharpGame
 
             handle = Device.CreateBuffer(ref bufferCreateInfo);
 
-            Device.GetBufferMemoryRequirements(handle, out VkMemoryRequirements memReqs);
-
-            // Find a memory type index that fits the properties of the buffer
-
-            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropFlags);
-
-            Allocate(memReqs.size, memoryTypeIndex);
-
-            Size = allocationSize;
             UsageFlags = usageFlags;
             memoryPropertyFlags = memoryPropFlags;
 
+            Device.GetBufferMemoryRequirements(handle, out VkMemoryRequirements memReqs);
+
+            Allocate(memReqs);
             Device.BindBufferMemory(handle, memory, 0);
+
+            Size = allocationSize;
 
             if (data != IntPtr.Zero)
             {

@@ -11,13 +11,14 @@ namespace SharpGame
         public ulong Count { get; set; }
         public ulong Size { get; set; }
 
-        internal VkMemoryPropertyFlags memoryPropertyFlags;
+        internal VkMemoryPropertyFlags memoryPropertyFlags = VkMemoryPropertyFlags.DeviceLocal;
         internal ulong allocationSize = 0;
         internal uint memoryTypeIndex = 0;
 
-        public void Allocate(ulong size, uint memoryTypeIndex)
+        public void Allocate(in VkMemoryRequirements memReqs)
         {
-            VkMemoryAllocateInfo memAllocInfo = new VkMemoryAllocateInfo(size, memoryTypeIndex);
+            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
+            VkMemoryAllocateInfo memAllocInfo = new VkMemoryAllocateInfo(memReqs.size, memoryTypeIndex);
             memory = Device.AllocateMemory(ref memAllocInfo);
             
             allocationSize = memAllocInfo.allocationSize;
@@ -41,7 +42,6 @@ namespace SharpGame
             Device.UnmapMemory(memory);
             Mapped = IntPtr.Zero;
         }
-
 
         public unsafe void Flush(ulong size = Vulkan.WholeSize, ulong offset = 0)
         {

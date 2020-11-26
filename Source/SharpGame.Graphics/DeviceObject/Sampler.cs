@@ -9,32 +9,11 @@ namespace SharpGame
     {
         public VkSampler handle;
 
-        public Sampler(ref VkSamplerCreateInfo samplerCreateInfo)
-        {
-            handle = Device.CreateSampler(ref samplerCreateInfo);
-        }
-
-        protected override void Destroy(bool disposing)
-        {
-            Device.Destroy(handle);
-
-            base.Destroy(disposing);
-        }
-
-        public static Sampler Default;
-        public static Sampler ClampToEdge;
-
-        public static void Init()
-        {
-            Default = Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, true);
-            ClampToEdge = Create(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
-        }
-
-        public static Sampler Create(VkFilter filter, VkSamplerMipmapMode mipmapMode,
+        public Sampler(VkFilter filter, VkSamplerMipmapMode mipmapMode,
             VkSamplerAddressMode addressMode, bool anisotropyEnable, VkBorderColor borderColor = VkBorderColor.FloatOpaqueWhite)
         {
             // Create sampler
-            VkSamplerCreateInfo sampler = new VkSamplerCreateInfo
+            var samplerCreateInfo = new VkSamplerCreateInfo
             {
                 sType = VkStructureType.SamplerCreateInfo,
                 magFilter = filter,
@@ -51,8 +30,30 @@ namespace SharpGame
                 maxAnisotropy = anisotropyEnable ? Device.Properties.limits.maxSamplerAnisotropy : 1,
                 anisotropyEnable = anisotropyEnable
             };
-            return new Sampler(ref sampler);
+            handle = Device.CreateSampler(ref samplerCreateInfo);
         }
+
+        public Sampler(ref VkSamplerCreateInfo samplerCreateInfo)
+        {
+            handle = Device.CreateSampler(ref samplerCreateInfo);
+        }
+
+        protected override void Destroy(bool disposing)
+        {
+            Device.Destroy(handle);
+
+            base.Destroy(disposing);
+        }
+
+        public static Sampler Default;
+        public static Sampler ClampToEdge;
+
+        static Sampler()
+        {
+            Default = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, true);
+            ClampToEdge = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
+        }
+
     }
 
 

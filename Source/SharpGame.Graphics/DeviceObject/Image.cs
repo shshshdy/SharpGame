@@ -23,21 +23,17 @@ namespace SharpGame
         public unsafe Image(ref VkImageCreateInfo imageCreateInfo)
         {            
             handle = Device.CreateImage(ref imageCreateInfo);
-
-            Device.GetImageMemoryRequirements(this, out var memReqs);
-
-            var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, VkMemoryPropertyFlags.DeviceLocal);
-
-            Allocate(memReqs.size, memoryTypeIndex);
-
-            Device.BindImageMemory(handle, memory, 0);
-
             imageType = imageCreateInfo.imageType;
             format = imageCreateInfo.format;
             extent = imageCreateInfo.extent;
             mipLevels = imageCreateInfo.mipLevels;
             arrayLayers = imageCreateInfo.arrayLayers;
 
+            Device.GetImageMemoryRequirements(this, out var memReqs);
+
+            Allocate(memReqs);
+
+            Device.BindImageMemory(handle, memory, 0);
         }
 
         protected override void Destroy()

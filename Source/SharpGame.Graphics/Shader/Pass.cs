@@ -294,7 +294,7 @@ namespace SharpGame
                     ColorBlendState = ColorBlendStateInfo.Replace;
                     break;
                 case BlendMode.Add:
-                    ColorBlendState = ColorBlendStateInfo.Add;
+                    ColorBlendState = ColorBlendStateInfo.Addtive;
                     break;
                 case BlendMode.Multiply:
                     break;

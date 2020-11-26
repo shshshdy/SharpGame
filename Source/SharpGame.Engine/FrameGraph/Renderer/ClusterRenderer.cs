@@ -309,13 +309,13 @@ namespace SharpGame
                             transfer_barriers,
                             0, null);
 
-                cmd_buf.FillBuffer(gridFlags, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(lightBounds, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(gridLightCounts, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(gridLightCountOffsets, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(gridLightCountTotal, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(lightList, 0, Buffer.WholeSize, 0);
-                cmd_buf.FillBuffer(gridLightCountsCompare, 0, Buffer.WholeSize, 0);
+                cmd_buf.FillBuffer(gridFlags, 0, Vulkan.WholeSize, 0);
+                cmd_buf.FillBuffer(lightBounds, 0, Vulkan.WholeSize, 0);
+                cmd_buf.FillBuffer(gridLightCounts, 0, Vulkan.WholeSize, 0);
+                cmd_buf.FillBuffer(gridLightCountOffsets, 0, Vulkan.WholeSize, 0);
+                cmd_buf.FillBuffer(gridLightCountTotal, 0, Vulkan.WholeSize, 0);
+                cmd_buf.FillBuffer(lightList, 0, Vulkan.WholeSize, 0);
+                cmd_buf.FillBuffer(gridLightCountsCompare, 0, Vulkan.WholeSize, 0);
 
                 VkBufferMemoryBarrier* transfer_barriers1 = stackalloc VkBufferMemoryBarrier[]
                 {

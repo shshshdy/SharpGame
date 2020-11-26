@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -72,7 +73,9 @@ namespace SharpGame
                 flags = flags,
                 rasterizationSamples = (VkSampleCountFlags)rasterizationSamples,
                 sampleShadingEnable = sampleShadingEnable,
-                minSampleShading = minSampleShading
+                minSampleShading = minSampleShading,
+                alphaToCoverageEnable = alphaToCoverageEnable,
+                alphaToOneEnable = alphaToOneEnable,
             };
 
             if (pSampleMask != null && pSampleMask.Length > 0)
@@ -80,8 +83,6 @@ namespace SharpGame
                 native.pSampleMask = (uint*)Utilities.AsPointer(ref pSampleMask[0]);
             }
 
-            native.alphaToCoverageEnable = alphaToCoverageEnable;
-            native.alphaToOneEnable = alphaToOneEnable;
         }
     }
 
@@ -103,12 +104,14 @@ namespace SharpGame
             depthTestEnable = true,
             depthWriteEnable = true,
             depthCompareOp = VkCompareOp.LessOrEqual,
+
             back = new VkStencilOpState
             {
                 failOp = VkStencilOp.Keep,
                 passOp = VkStencilOp.Keep,
                 compareOp = VkCompareOp.Always
             },
+
             front = new VkStencilOpState
             {
                 failOp = VkStencilOp.Keep,
@@ -149,88 +152,87 @@ namespace SharpGame
         public VkColorComponentFlags colorWriteMask;
     }
 
-    public struct ColorBlendStateInfo
+    public struct ColorBlendStateInfo : IEnumerable
     {
         public uint flags;
         public VkBool32 logicOpEnable;
         public VkLogicOp logicOp;
-        public uint attachmentCount;
-        public ColorBlendAttachment[] attachments;
+        public Vector<ColorBlendAttachment> attachments;
         public float blendConstants_0;
         public float blendConstants_1;
         public float blendConstants_2;
         public float blendConstants_3;
 
+        public void Add(in ColorBlendAttachment colorBlendAttachment)
+        {
+            if(attachments == null)
+                attachments = new Vector<ColorBlendAttachment>();
+            
+            attachments.Add(colorBlendAttachment);
+        }
+
         public static ColorBlendStateInfo Replace = new ColorBlendStateInfo
         {
-            attachments = new[]
+            new ColorBlendAttachment
             {
-                new ColorBlendAttachment
-                {
-                    blendEnable = false,
-                    srcColorBlendFactor = VkBlendFactor.One,
-                    dstColorBlendFactor = VkBlendFactor.Zero,
-                    colorBlendOp = VkBlendOp.Add,
-                    srcAlphaBlendFactor = VkBlendFactor.One,
-                    dstAlphaBlendFactor = VkBlendFactor.Zero,
-                    alphaBlendOp = VkBlendOp.Add,
-                    colorWriteMask = VkColorComponentFlags.All
-                }
+                blendEnable = false,
+                srcColorBlendFactor = VkBlendFactor.One,
+                dstColorBlendFactor = VkBlendFactor.Zero,
+                colorBlendOp = VkBlendOp.Add,
+                srcAlphaBlendFactor = VkBlendFactor.One,
+                dstAlphaBlendFactor = VkBlendFactor.Zero,
+                alphaBlendOp = VkBlendOp.Add,
+                colorWriteMask = VkColorComponentFlags.All
             }
+            
         };
 
-        public static ColorBlendStateInfo Add = new ColorBlendStateInfo
+        public static ColorBlendStateInfo Addtive = new ColorBlendStateInfo
         {
-            attachments = new[]
+            new ColorBlendAttachment
             {
-                new ColorBlendAttachment
-                {
-                    blendEnable = true,
-                    srcColorBlendFactor = VkBlendFactor.One,
-                    dstColorBlendFactor = VkBlendFactor.One,
-                    colorBlendOp = VkBlendOp.Add,
-                    srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
-                    dstAlphaBlendFactor = VkBlendFactor.DstAlpha,
-                    alphaBlendOp = VkBlendOp.Add,
-                    colorWriteMask = VkColorComponentFlags.All
-                }
+                blendEnable = true,
+                srcColorBlendFactor = VkBlendFactor.One,
+                dstColorBlendFactor = VkBlendFactor.One,
+                colorBlendOp = VkBlendOp.Add,
+                srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
+                dstAlphaBlendFactor = VkBlendFactor.DstAlpha,
+                alphaBlendOp = VkBlendOp.Add,
+                colorWriteMask = VkColorComponentFlags.All
             }
+
         };
 
         public static ColorBlendStateInfo AlphaBlend = new ColorBlendStateInfo
         {
-            attachments = new[]
+            new ColorBlendAttachment
             {
-                new ColorBlendAttachment
-                {
-                    blendEnable = true,
-                    srcColorBlendFactor = VkBlendFactor.SrcAlpha,
-                    dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                    colorBlendOp = VkBlendOp.Add,
-                    srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
-                    dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                    alphaBlendOp = VkBlendOp.Add,
-                    colorWriteMask = VkColorComponentFlags.All
-                }
+                blendEnable = true,
+                srcColorBlendFactor = VkBlendFactor.SrcAlpha,
+                dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                colorBlendOp = VkBlendOp.Add,
+                srcAlphaBlendFactor = VkBlendFactor.SrcAlpha,
+                dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                alphaBlendOp = VkBlendOp.Add,
+                colorWriteMask = VkColorComponentFlags.All
             }
+
         };
 
         public static ColorBlendStateInfo PremulAlpha = new ColorBlendStateInfo
         {
-            attachments = new[]
+            new ColorBlendAttachment
             {
-                new ColorBlendAttachment
-                {
-                    blendEnable = true,
-                    srcColorBlendFactor = VkBlendFactor.One,
-                    dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                    colorBlendOp = VkBlendOp.Add,
-                    srcAlphaBlendFactor = VkBlendFactor.One,
-                    dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
-                    alphaBlendOp = VkBlendOp.Add,
-                    colorWriteMask = VkColorComponentFlags.All
-                }
+                blendEnable = true,
+                srcColorBlendFactor = VkBlendFactor.One,
+                dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                colorBlendOp = VkBlendOp.Add,
+                srcAlphaBlendFactor = VkBlendFactor.One,
+                dstAlphaBlendFactor = VkBlendFactor.OneMinusSrcAlpha,
+                alphaBlendOp = VkBlendOp.Add,
+                colorWriteMask = VkColorComponentFlags.All
             }
+           
         };
 
         public unsafe void ToNative(out VkPipelineColorBlendStateCreateInfo native, uint attachmentCount)
@@ -242,21 +244,22 @@ namespace SharpGame
                 logicOp = logicOp
             };
 
-            if (attachmentCount > attachments.Length)
+            while (attachmentCount > attachments.Count)
             {
-                Array.Resize(ref attachments, (int)attachmentCount);
-                for(int i = 1; i < attachmentCount; i++)
-                {
-                    attachments[i] = attachments[0];
-                }
+                attachments.Add(attachments.Back());
             }
 
-            native.attachmentCount = (uint)attachments.Length;
-            native.pAttachments = (VkPipelineColorBlendAttachmentState*)Utilities.AsPointer(ref attachments[0]);
+            native.attachmentCount = (uint)attachments.Count;
+            native.pAttachments = (VkPipelineColorBlendAttachmentState*)attachments.DataPtr;
             native.blendConstants[0] = blendConstants_0;
             native.blendConstants[1] = blendConstants_1;
             native.blendConstants[2] = blendConstants_2;
             native.blendConstants[3] = blendConstants_3;
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return ((IEnumerable)attachments).GetEnumerator();
         }
     }
 
