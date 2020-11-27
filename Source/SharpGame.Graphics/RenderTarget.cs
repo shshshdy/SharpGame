@@ -127,7 +127,7 @@ namespace SharpGame
             sampler = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
 
             this.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
-            descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
+            descriptor = new VkDescriptorImageInfo(sampler, imageView, imageLayout);
             attachmentViews = new ImageView[Swapchain.IMAGE_COUNT];
             Array.Fill(attachmentViews, imageView);
         }

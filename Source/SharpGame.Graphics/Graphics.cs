@@ -1,5 +1,4 @@
-﻿#define NEW_BACK_BUFF
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -101,7 +100,6 @@ namespace SharpGame
             primaryCmdPool = new CommandBufferPool(Device.QFGraphics, VkCommandPoolCreateFlags.ResetCommandBuffer);
 
             Texture.Init();
-            //Sampler.Init();
 
             RenderContext.Init();
 

@@ -171,6 +171,8 @@ namespace SharpGame
             handle = Device.CreateBufferView(ref bufferViewCreateInfo);
         }
 
+        public static implicit operator VkBufferView(BufferView view) => view.handle;
+
         protected override void Destroy(bool disposing)
         {
             base.Destroy(disposing);

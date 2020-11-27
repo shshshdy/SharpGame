@@ -82,14 +82,16 @@ namespace SharpGame
 
         public VkImageView handle;
 
-        public DescriptorImageInfo descriptor;
+        public VkDescriptorImageInfo descriptor;
 
         public ImageView(Image image, ref VkImageViewCreateInfo imageViewCreateInfo)
         {
             handle = Device.CreateImageView(ref imageViewCreateInfo);
             Image = image;
-            descriptor = new DescriptorImageInfo(Sampler.ClampToEdge, this, VkImageLayout.ShaderReadOnlyOptimal);
+            descriptor = new VkDescriptorImageInfo(Sampler.ClampToEdge, this, VkImageLayout.ShaderReadOnlyOptimal);
         }
+
+        public static implicit operator VkImageView(ImageView view) => view.handle;
 
         protected override void Destroy(bool disposing)
         {

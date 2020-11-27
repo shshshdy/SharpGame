@@ -23,7 +23,7 @@ namespace SharpGame
         public VkImageLayout imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
         public VkSamplerAddressMode samplerAddressMode = VkSamplerAddressMode.Repeat;
 
-        internal DescriptorImageInfo descriptor;
+        internal VkDescriptorImageInfo descriptor;
 
         public Texture()
         {
@@ -213,7 +213,7 @@ namespace SharpGame
 
         public void UpdateDescriptor()
         {
-            descriptor = new DescriptorImageInfo(sampler, imageView, imageLayout);
+            descriptor = new VkDescriptorImageInfo(sampler, imageView, imageLayout);
         }
 
         protected override void Destroy(bool disposing)

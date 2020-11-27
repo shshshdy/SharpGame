@@ -38,6 +38,8 @@ namespace SharpGame
             handle = Device.CreateSampler(ref samplerCreateInfo);
         }
 
+        public static implicit operator VkSampler(Sampler sampler) => sampler.handle;
+
         protected override void Destroy(bool disposing)
         {
             Device.Destroy(handle);

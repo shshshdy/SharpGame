@@ -195,15 +195,15 @@ namespace SharpGame.Samples
                     // Pre-filter rest of the mip-chain.
                     List<ImageView> envTextureMipTailViews = new List<ImageView>();
                      
-                    var inputTexture = new DescriptorImageInfo(computeSampler, cubeMap.imageView, VkImageLayout.ShaderReadOnlyOptimal);
+                    var inputTexture = new VkDescriptorImageInfo(computeSampler, cubeMap.imageView, VkImageLayout.ShaderReadOnlyOptimal);
                     spSet.Bind(0, ref inputTexture);
 
-                    Span<DescriptorImageInfo> envTextureMipTailDescriptors = stackalloc DescriptorImageInfo[(int)numMipTailLevels];
+                    Span<VkDescriptorImageInfo> envTextureMipTailDescriptors = stackalloc VkDescriptorImageInfo[(int)numMipTailLevels];
                     for (uint level = 0; level < numMipTailLevels; ++level)
                     {
                         var view = ImageView.Create(envMap.image, VkImageViewType.ImageCube, VkFormat.R16G16B16A16SFloat, VkImageAspectFlags.Color, level + 1, 1, 0, envMap.image.arrayLayers);
                         envTextureMipTailViews.Add(view);
-                        envTextureMipTailDescriptors[(int)level] = new DescriptorImageInfo(null, view, VkImageLayout.General);
+                        envTextureMipTailDescriptors[(int)level] = new VkDescriptorImageInfo(VkSampler.Null, view, VkImageLayout.General);
                     }
 
                     spSet.Bind(1, envTextureMipTailDescriptors);
