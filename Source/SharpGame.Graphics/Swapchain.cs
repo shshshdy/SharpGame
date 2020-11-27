@@ -296,8 +296,7 @@ namespace SharpGame
                 swapchainCI.compositeAlpha = VkCompositeAlphaFlagsKHR.Opaque;
 
                 // Set additional usage flag for blitting from the swapchain Images if supported
-                VkFormatProperties formatProps;
-                Device.GetPhysicalDeviceFormatProperties(ColorFormat, out formatProps);
+                Device.GetPhysicalDeviceFormatProperties(ColorFormat, out VkFormatProperties formatProps);
                 if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.BlitDst) != 0)
                 {
                     swapchainCI.imageUsage |= VkImageUsageFlags.TransferSrc;
@@ -346,10 +345,8 @@ namespace SharpGame
             // By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
             // With that we don't have to handle VK_NOT_READY
 
-            VkResult res = VkResult.Timeout;
-            uint nextImageIndex = (uint)0;
-            res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore ? presentCompleteSemaphore : VkSemaphore.Null, new VkFence(), out nextImageIndex);
-            
+            VkResult res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore, new VkFence(), out uint nextImageIndex);
+
             if (res == VkResult.ErrorOutOfDateKHR)
             {
                 Log.Error(res.ToString());
@@ -376,15 +373,15 @@ namespace SharpGame
         {
             var presentInfo = new VkPresentInfoKHR
             {
-                sType = VkStructureType.PresentInfoKHR
+                sType = VkStructureType.PresentInfoKHR,
+                pNext = null,
+                swapchainCount = 1,
+                pSwapchains = &swapchain,
+                pImageIndices = &imageIndex
             };
-            presentInfo.pNext = null;
-            presentInfo.swapchainCount = 1;
-            var sc = swapchain;
-            presentInfo.pSwapchains = &sc;
-            presentInfo.pImageIndices = &imageIndex;
+
             // Check if a wait semaphore has been specified to wait for before presenting the image
-            if (waitSemaphore != default)
+            if (waitSemaphore != VkSampler.Null)
             {
                 presentInfo.pWaitSemaphores = (VkSemaphore*)Unsafe.AsPointer(ref waitSemaphore);
                 presentInfo.waitSemaphoreCount = 1;

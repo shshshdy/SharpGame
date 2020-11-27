@@ -22,4 +22,9 @@
     <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DeviceObject\" />
+    <Folder Include="Shader\" />
+  </ItemGroup>
+
 </Project>

@@ -7,7 +7,7 @@ namespace SharpGame
 {
     public class Sampler : DisposeBase, IBindableResource
     {
-        public VkSampler handle;
+        private VkSampler handle;
 
         public Sampler(VkFilter filter, VkSamplerMipmapMode mipmapMode,
             VkSamplerAddressMode addressMode, bool anisotropyEnable, VkBorderColor borderColor = VkBorderColor.FloatOpaqueWhite)
