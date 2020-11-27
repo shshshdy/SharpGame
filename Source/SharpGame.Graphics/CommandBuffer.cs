@@ -56,7 +56,6 @@
         public RenderPass renderPass;
         bool opened = false;
         public bool IsOpen => opened;
-        public bool NeedSubmit { get; set; }
 
         VkPipeline currentPipeline;
         FixedArray8<VkDescriptorSet> descriptorSets = new FixedArray8<VkDescriptorSet>();
@@ -68,6 +67,8 @@
             commandBuffer = cmdBuffer;
         }
 
+        public static implicit operator VkCommandBuffer(CommandBuffer cmd) => cmd.commandBuffer;
+
         [MethodImpl((MethodImplOptions)0x100)]
         public void Begin(VkCommandBufferUsageFlags flags = VkCommandBufferUsageFlags.None)
         {
@@ -76,7 +77,6 @@
             cmdBufInfo.flags = (VkCommandBufferUsageFlags)flags;
             VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
             opened = true;
-            NeedSubmit = true;
             ClearDescriptorSets();
         }
 
@@ -94,7 +94,6 @@
                 VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, &cmdBufBeginInfo));
             }
             opened = true;
-            NeedSubmit = true;
             ClearDescriptorSets();
         }
 
@@ -321,8 +320,6 @@
         public void ExecuteCommand(CommandBuffer cmdBuffer)
         {
             vkCmdExecuteCommands(commandBuffer, 1, Utilities.AsPtr(ref cmdBuffer.commandBuffer));
-
-            cmdBuffer.NeedSubmit = false;
         }
 
         public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, ref VkBufferCopy region)

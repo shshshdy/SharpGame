@@ -36,6 +36,8 @@ namespace SharpGame
             Device.BindImageMemory(handle, memory, 0);
         }
 
+        public static implicit operator VkImage(Image img) => img.handle;
+
         protected override void Destroy()
         {
             //Donot destroy swapchain image 

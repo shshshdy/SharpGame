@@ -13,16 +13,13 @@ namespace SharpGame
 
         internal VkMemoryPropertyFlags memoryPropertyFlags = VkMemoryPropertyFlags.DeviceLocal;
         internal ulong allocationSize = 0;
-        internal uint memoryTypeIndex = 0;
 
         public void Allocate(in VkMemoryRequirements memReqs)
         {
             var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
             VkMemoryAllocateInfo memAllocInfo = new VkMemoryAllocateInfo(memReqs.size, memoryTypeIndex);
-            memory = Device.AllocateMemory(ref memAllocInfo);
-            
+            memory = Device.AllocateMemory(ref memAllocInfo);            
             allocationSize = memAllocInfo.allocationSize;
-            memoryTypeIndex = memAllocInfo.memoryTypeIndex;
         }
 
         public ref T Map<T>(ulong offset = 0) where T : struct

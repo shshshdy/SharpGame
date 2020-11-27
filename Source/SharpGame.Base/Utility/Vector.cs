@@ -113,10 +113,10 @@ namespace SharpGame
             return ref dataPtr[Count - 1];
         }
 
-        public ReadOnlyNativeListView<T> GetReadOnlyView()
+        public ReadOnlySpan<T> AsSpan()
         {
             ThrowIfDisposed();
-            return new ReadOnlyNativeListView<T>(this, 0, count);
+            return new ReadOnlySpan<T>(DataPtr, (int)count);
         }
 
         public ReadOnlyNativeListView<T> GetReadOnlyView(uint start, uint count)

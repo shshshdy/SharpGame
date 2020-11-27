@@ -28,10 +28,10 @@ namespace SharpGame
         public VkPhysicalDeviceFeatures enabledFeatures;
         public CStringList EnabledExtensions { get; } = new CStringList();
 
-        public static Queue GraphicsQueue { get; protected set; }
-        public static Queue WorkQueue { get; protected set; }
-        public static Queue ComputeQueue { get; protected set; }
-        public static Queue TransferQueue { get; protected set; }
+        public static VkQueue GraphicsQueue { get; protected set; }
+        public static VkQueue WorkQueue { get; protected set; }
+        public static VkQueue ComputeQueue { get; protected set; }
+        public static VkQueue TransferQueue { get; protected set; }
 
         public VkFormat ColorFormat => Swapchain.ColorFormat;
         public VkFormat DepthFormat { get; protected set; }
@@ -77,10 +77,10 @@ namespace SharpGame
             Device.Create(settings, enabledFeatures, EnabledExtensions);
 
             // Get a graphics queue from the Device
-            GraphicsQueue = new Queue(Device.QFGraphics, 0);
-            WorkQueue = new Queue(Device.QFGraphics, 0);
-            ComputeQueue = new Queue(Device.QFCompute, 0);
-            TransferQueue = new Queue(Device.QFTransfer, 0);
+            GraphicsQueue = new VkQueue(Device.QFGraphics, 0);
+            WorkQueue = new VkQueue(Device.QFGraphics, 0);
+            ComputeQueue = new VkQueue(Device.QFCompute, 0);
+            TransferQueue = new VkQueue(Device.QFTransfer, 0);
 
             DepthFormat = Device.GetSupportedDepthFormat();
 

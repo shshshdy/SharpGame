@@ -372,7 +372,7 @@ namespace SharpGame
 
         }
 
-        public unsafe void QueuePresent(Queue queue, uint imageIndex, VkSemaphore waitSemaphore = default)
+        public unsafe void QueuePresent(VkQueue queue, uint imageIndex, VkSemaphore waitSemaphore = default)
         {
             var presentInfo = new VkPresentInfoKHR
             {
@@ -390,7 +390,7 @@ namespace SharpGame
                 presentInfo.waitSemaphoreCount = 1;
             }
 
-            VulkanUtil.CheckResult(vkQueuePresentKHR(queue.handle, &presentInfo));
+            VulkanUtil.CheckResult(vkQueuePresentKHR(queue, &presentInfo));
         }
     }
 

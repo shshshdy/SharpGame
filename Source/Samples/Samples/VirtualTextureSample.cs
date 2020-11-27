@@ -64,12 +64,12 @@ namespace SharpGame.Samples
     // Virtual texture object containing all pages
     public class VirtualTexture : Texture
     {
-        public BindSparseInfo bindSparseInfo;                                    // Sparse queue binding information
+        public VkBindSparseInfo bindSparseInfo;                                    // Sparse queue binding information
         public Vector<VirtualTexturePage> pages = new Vector<VirtualTexturePage>();                              // Contains all virtual pages of the texture
         Vector<VkSparseImageMemoryBind> sparseImageMemoryBinds = new Vector<VkSparseImageMemoryBind>();   // Sparse image memory bindings of all memory-backed virtual tables
         public Vector<VkSparseMemoryBind> opaqueMemoryBinds = new Vector<VkSparseMemoryBind>();                  // Sparse ópaque memory bindings for the mip tail (if present)
-        SparseImageMemoryBindInfo[] imageMemoryBindInfo;                    // Sparse image memory bind info
-        SparseImageOpaqueMemoryBindInfo[] opaqueMemoryBindInfo;             // Sparse image opaque memory bind info (mip tail)
+        VkSparseImageMemoryBindInfo[] imageMemoryBindInfo;                    // Sparse image memory bind info
+        VkSparseImageOpaqueMemoryBindInfo[] opaqueMemoryBindInfo;             // Sparse image opaque memory bind info (mip tail)
         public uint mipTailStart;                                              // First mip level in mip tail
         public VkSparseImageMemoryRequirements sparseImageMemoryRequirements;
         public uint memoryTypeIndex;
@@ -114,12 +114,12 @@ namespace SharpGame.Samples
             }
 
             // Image memory binds
-            imageMemoryBindInfo = new[] { new SparseImageMemoryBindInfo(image, sparseImageMemoryBinds) };
+            imageMemoryBindInfo = new[] { new VkSparseImageMemoryBindInfo(image, sparseImageMemoryBinds.AsSpan()) };
 
             // Opaque image memory binds for the mip tail
-            opaqueMemoryBindInfo = new[] { new SparseImageOpaqueMemoryBindInfo(image, opaqueMemoryBinds) };
+            opaqueMemoryBindInfo = new[] { new VkSparseImageOpaqueMemoryBindInfo(image, opaqueMemoryBinds.AsSpan()) };
 
-            bindSparseInfo = new BindSparseInfo(null, null, opaqueMemoryBindInfo, imageMemoryBindInfo, null);
+            bindSparseInfo = new VkBindSparseInfo(null, null, opaqueMemoryBindInfo, imageMemoryBindInfo, null);
         }
         protected override void Destroy(bool disposing)
         {
@@ -143,7 +143,7 @@ namespace SharpGame.Samples
         VirtualTexture texture;
         VkSemaphore bindSparseSemaphore;
 
-        Queue queue;
+        VkQueue queue;
 
         public override void Init()
         {

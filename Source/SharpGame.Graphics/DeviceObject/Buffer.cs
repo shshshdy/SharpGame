@@ -67,6 +67,8 @@ namespace SharpGame
 
         }
 
+        public static implicit operator VkBuffer(Buffer buffer) => buffer.handle;
+
         public static Buffer CreateUniformBuffer<T>(ulong count = 1) where T : unmanaged
         {
             return Create<T>(VkBufferUsageFlags.UniformBuffer, true, count);
