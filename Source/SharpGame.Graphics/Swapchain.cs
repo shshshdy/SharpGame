@@ -17,7 +17,7 @@ namespace SharpGame
         public VkFormat ColorFormat { get; private set; }
         public VkColorSpaceKHR ColorSpace { get; private set; }
         public VkSwapchainKHR swapchain;
-        public uint ImageCount { get; private set; }
+        public uint ImageCount => VkImages.Count;
         public Vector<VkImage> VkImages { get; private set; } = new Vector<VkImage>();
         public Image[] Images { get; private set; }
         public ImageView[] ImageViews { get; private set; }
