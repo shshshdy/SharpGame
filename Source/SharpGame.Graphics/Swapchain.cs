@@ -172,7 +172,7 @@ namespace SharpGame
                         {
                             if (surfaceFormat.format == VkFormat.B8G8R8A8UNorm)
                             {
-                                ColorFormat = (VkFormat)surfaceFormat.format;
+                                ColorFormat = surfaceFormat.format;
                                 ColorSpace = surfaceFormat.colorSpace;
                                 found_B8G8R8A8_UNORM = true;
                                 break;
@@ -183,7 +183,7 @@ namespace SharpGame
                         // select the first available color format
                         if (!found_B8G8R8A8_UNORM)
                         {
-                            ColorFormat = (VkFormat)surfaceFormats[0].format;
+                            ColorFormat = surfaceFormats[0].format;
                             ColorSpace = surfaceFormats[0].colorSpace;
                         }
                     }
@@ -275,28 +275,29 @@ namespace SharpGame
 
                 VkSwapchainCreateInfoKHR swapchainCI = new VkSwapchainCreateInfoKHR
                 {
-                    sType = VkStructureType.SwapchainCreateInfoKHR
+                    sType = VkStructureType.SwapchainCreateInfoKHR,
+                    pNext = null,
+                    surface = Surface,
+                    minImageCount = desiredNumberOfSwapchainImages,
+                    imageFormat = ColorFormat,
+                    imageColorSpace = ColorSpace,
+                    imageExtent = new VkExtent2D(extent.width, extent.height),
+                    imageUsage = VkImageUsageFlags.ColorAttachment,
+                    preTransform = preTransform,
+                    imageArrayLayers = 1,
+                    imageSharingMode = VkSharingMode.Exclusive,
+                    queueFamilyIndexCount = 0,
+                    pQueueFamilyIndices = null,
+                    presentMode = swapchainPresentMode,
+                    oldSwapchain = oldSwapchain,
+                    // Setting clipped to VK_TRUE allows the implementation to discard rendering outside of the Surface area
+                    clipped = true,
+                    compositeAlpha = VkCompositeAlphaFlagsKHR.Opaque
                 };
-                swapchainCI.pNext = null;
-                swapchainCI.surface = Surface;
-                swapchainCI.minImageCount = desiredNumberOfSwapchainImages;
-                swapchainCI.imageFormat = (VkFormat)ColorFormat;
-                swapchainCI.imageColorSpace = ColorSpace;
-                swapchainCI.imageExtent = new VkExtent2D(extent.width, extent.height);
-                swapchainCI.imageUsage = VkImageUsageFlags.ColorAttachment;
-                swapchainCI.preTransform = preTransform;
-                swapchainCI.imageArrayLayers = 1;
-                swapchainCI.imageSharingMode = VkSharingMode.Exclusive;
-                swapchainCI.queueFamilyIndexCount = 0;
-                swapchainCI.pQueueFamilyIndices = null;
-                swapchainCI.presentMode = swapchainPresentMode;
-                swapchainCI.oldSwapchain = oldSwapchain;
-                // Setting clipped to VK_TRUE allows the implementation to discard rendering outside of the Surface area
-                swapchainCI.clipped = true;
-                swapchainCI.compositeAlpha = VkCompositeAlphaFlagsKHR.Opaque;
 
                 // Set additional usage flag for blitting from the swapchain Images if supported
                 Device.GetPhysicalDeviceFormatProperties(ColorFormat, out VkFormatProperties formatProps);
+
                 if ((formatProps.optimalTilingFeatures & VkFormatFeatureFlags.BlitDst) != 0)
                 {
                     swapchainCI.imageUsage |= VkImageUsageFlags.TransferSrc;
@@ -316,35 +317,27 @@ namespace SharpGame
                     Device.DestroySwapchainKHR(oldSwapchain);
                 }
 
-                uint imageCount;
-                Device.GetSwapchainImagesKHR(swapchain, &imageCount, null);
-
-                ImageCount = imageCount;
-                // Get the swap chain Images
-                VkImages.Resize(imageCount);
-
-                Device.GetSwapchainImagesKHR(swapchain, &imageCount, VkImages.DataPtr);
+                var vkImages = Vulkan.vkGetSwapchainImagesKHR(Device.Handle, swapchain);
               
-                // Get the swap chain Buffers containing the image and imageview
-                Images = new Image[(int)imageCount];
-                ImageViews = new ImageView[(int)imageCount];
-                for (int i = 0; i < imageCount; i++)
+                Images = new Image[vkImages.Length];
+                ImageViews = new ImageView[vkImages.Length];
+                for (int i = 0; i < vkImages.Length; i++)
                 {                 
-                    Images[i] = new Image(VkImages[i])
+                    Images[i] = new Image(vkImages[i])
                     {
                         imageType = VkImageType.Image2D,
                         extent = extent
                     };
                     ImageViews[i] = ImageView.Create(Images[i], VkImageViewType.Image2D, ColorFormat, VkImageAspectFlags.Color, 0, 1);
-                }
+                }              
+                
+                // Get the swap chain Images
+                VkImages.Add(vkImages);
             }
         }
 
         public bool AcquireNextImage(VkSemaphore presentCompleteSemaphore, out int imageIndex)
         {
-            // By setting timeout to UINT64_MAX we will always wait until the next image has been acquired or an actual error is thrown
-            // With that we don't have to handle VK_NOT_READY
-
             VkResult res = Device.AcquireNextImageKHR(swapchain, ulong.MaxValue, presentCompleteSemaphore, new VkFence(), out uint nextImageIndex);
 
             if (res == VkResult.ErrorOutOfDateKHR)
@@ -371,12 +364,13 @@ namespace SharpGame
 
         public unsafe void QueuePresent(VkQueue queue, uint imageIndex, VkSemaphore waitSemaphore = default)
         {
+            var sc = swapchain;
             var presentInfo = new VkPresentInfoKHR
             {
                 sType = VkStructureType.PresentInfoKHR,
                 pNext = null,
                 swapchainCount = 1,
-                pSwapchains = &swapchain,
+                pSwapchains = &sc,
                 pImageIndices = &imageIndex
             };
 

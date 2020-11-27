@@ -44,7 +44,6 @@ namespace SharpGame
             Build();
         }
 
-
         public DescriptorSetLayoutBinding GetBinding(string name)
         {
             foreach(var layout in ResourceLayout)
@@ -117,7 +116,7 @@ namespace SharpGame
 
             if (!pushConstant.IsNullOrEmpty())
             {
-                pipelineLayoutCreateInfo.pushConstantRangeCount = (uint)combindePushConstant.Count;
+                pipelineLayoutCreateInfo.pushConstantRangeCount = combindePushConstant.Count;
                 pipelineLayoutCreateInfo.pPushConstantRanges = (VkPushConstantRange*)Unsafe.AsPointer(ref combindePushConstant[0]);
             }
 

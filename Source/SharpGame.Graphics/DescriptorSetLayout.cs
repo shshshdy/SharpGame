@@ -80,8 +80,8 @@ namespace SharpGame
             {
                 bindings[i] = new VkDescriptorSetLayoutBinding
                 {
-                    descriptorType = (VkDescriptorType)Bindings[i].descriptorType,
-                    stageFlags = (VkShaderStageFlags)Bindings[i].stageFlags,
+                    descriptorType = Bindings[i].descriptorType,
+                    stageFlags = Bindings[i].stageFlags,
                     binding = Bindings[i].binding,
                     descriptorCount = Bindings[i].descriptorCount
                 };

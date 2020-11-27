@@ -37,9 +37,9 @@ namespace SharpGame
                 sType = VkStructureType.PipelineRasterizationStateCreateInfo,
                 depthClampEnable = depthClampEnable,
                 rasterizerDiscardEnable = rasterizerDiscardEnable,
-                polygonMode = (VkPolygonMode)polygonMode,
-                cullMode = (VkCullModeFlags)cullMode,
-                frontFace = (VkFrontFace)frontFace,
+                polygonMode = polygonMode,
+                cullMode = cullMode,
+                frontFace = frontFace,
                 depthBiasEnable = depthBiasEnable,
                 depthBiasConstantFactor = depthBiasConstantFactor,
                 depthBiasClamp = depthBiasClamp,
@@ -71,7 +71,7 @@ namespace SharpGame
             {
                 sType = VkStructureType.PipelineMultisampleStateCreateInfo,
                 flags = flags,
-                rasterizationSamples = (VkSampleCountFlags)rasterizationSamples,
+                rasterizationSamples = rasterizationSamples,
                 sampleShadingEnable = sampleShadingEnable,
                 minSampleShading = minSampleShading,
                 alphaToCoverageEnable = alphaToCoverageEnable,
@@ -129,7 +129,7 @@ namespace SharpGame
                 flags = flags,
                 depthTestEnable = depthTestEnable,
                 depthWriteEnable = depthWriteEnable,
-                depthCompareOp = (VkCompareOp)depthCompareOp,
+                depthCompareOp = depthCompareOp,
                 depthBoundsTestEnable = depthBoundsTestEnable,
                 stencilTestEnable = stencilTestEnable,
                 front = *(VkStencilOpState*)Unsafe.AsPointer(ref front),
@@ -249,7 +249,7 @@ namespace SharpGame
                 attachments.Add(attachments.Back());
             }
 
-            native.attachmentCount = (uint)attachments.Count;
+            native.attachmentCount = attachments.Count;
             native.pAttachments = (VkPipelineColorBlendAttachmentState*)attachments.DataPtr;
             native.blendConstants[0] = blendConstants_0;
             native.blendConstants[1] = blendConstants_1;

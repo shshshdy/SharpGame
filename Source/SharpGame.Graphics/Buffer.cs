@@ -115,7 +115,7 @@ namespace SharpGame
 
         public void SetData<T>(ref T data, uint offset = 0) where T : unmanaged
         {
-            SetData(Utilities.AsPointer(ref data), (uint)offset, (uint)Unsafe.SizeOf<T>());
+            SetData(Utilities.AsPointer(ref data), offset, (uint)Unsafe.SizeOf<T>());
         }
 
         public void SetData(IntPtr data, ulong offset, ulong size)
@@ -164,7 +164,7 @@ namespace SharpGame
             {
                 sType = VkStructureType.BufferViewCreateInfo,
                 buffer = buffer.handle,
-                format = (VkFormat)format,
+                format = format,
                 offset = offset,
                 range = range
             };

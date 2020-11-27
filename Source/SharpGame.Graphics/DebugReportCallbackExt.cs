@@ -55,7 +55,7 @@ namespace SharpGame
             long handle;
             VkResult result = vkCreateDebugReportCallbackEXT(Parent)(Parent.Handle, &nativeCreateInfo, null, &handle);
 
-            this.handle = (VkDebugReportCallbackEXT)(ulong)handle;
+            this.handle = (ulong)handle;
    
         }
 

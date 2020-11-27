@@ -25,7 +25,7 @@ namespace SharpGame
             uint size = 0;
             foreach(var entry in mapEntries)
             {
-                var sz = entry.offset + (uint)entry.size;
+                var sz = entry.offset + entry.size;
                 if(sz > size)
                 {
                     size = sz;
@@ -353,7 +353,7 @@ namespace SharpGame
                 if (sm != null)
                 {
                     var shaderStage = new VkPipelineShaderStageCreateInfo { sType = VkStructureType.PipelineShaderStageCreateInfo };
-                    shaderStage.stage = (VkShaderStageFlags)sm.Stage;
+                    shaderStage.stage = sm.Stage;
                     shaderStage.module = sm.shaderModule;
                     shaderStage.pName = Pass.FuncName;// sm.FuncName;
 
@@ -433,7 +433,7 @@ namespace SharpGame
             {
                 sType = VkStructureType.PipelineInputAssemblyStateCreateInfo
             };
-            pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)primitiveTopology;
+            pipelineInputAssemblyStateCreateInfo.topology = primitiveTopology;
             pipelineInputAssemblyStateCreateInfo.flags = 0;
             pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = false;
             pipelineCreateInfo.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo;

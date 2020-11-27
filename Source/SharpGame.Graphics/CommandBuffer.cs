@@ -44,8 +44,8 @@
                 subpass = subpass,
                 framebuffer = framebuffer.handle,
                 occlusionQueryEnable = occlusionQueryEnable,
-                queryFlags = (VkQueryControlFlags)queryFlags,
-                pipelineStatistics = (VkQueryPipelineStatisticFlags)pipelineStatistics
+                queryFlags = queryFlags,
+                pipelineStatistics = pipelineStatistics
             };
         }
     }
@@ -74,7 +74,7 @@
         {
             var cmdBufInfo = new VkCommandBufferBeginInfo();
             cmdBufInfo.sType = VkStructureType.CommandBufferBeginInfo;
-            cmdBufInfo.flags = (VkCommandBufferUsageFlags)flags;
+            cmdBufInfo.flags = flags;
             VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
             opened = true;
             ClearDescriptorSets();
@@ -88,7 +88,7 @@
                 var cmdBufBeginInfo = new VkCommandBufferBeginInfo
                 {
                     sType = VkStructureType.CommandBufferBeginInfo,
-                    flags = (VkCommandBufferUsageFlags)flags,
+                    flags = flags,
                     pInheritanceInfo = (VkCommandBufferInheritanceInfo*)Unsafe.AsPointer(ref commandBufferInheritanceInfo.native)
                 };
                 VulkanUtil.CheckResult(vkBeginCommandBuffer(commandBuffer, &cmdBufBeginInfo));
@@ -107,7 +107,7 @@
         [MethodImpl((MethodImplOptions)0x100)]
         public void BeginRenderPass(ref RenderPassBeginInfo renderPassBeginInfo, VkSubpassContents contents)
         {
-            vkCmdBeginRenderPass(commandBuffer, Utilities.AsPtr(ref renderPassBeginInfo.native), (VkSubpassContents)contents);
+            vkCmdBeginRenderPass(commandBuffer, Utilities.AsPtr(ref renderPassBeginInfo.native), contents);
             renderPass = renderPassBeginInfo.renderPass;
             ClearDescriptorSets();
         }
@@ -199,7 +199,7 @@
 
                 var t = pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext];
 
-                vkCmdBindDescriptorSets(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, &t, dynamicOffsetCount, pDynamicOffsets);
+                vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, &t, dynamicOffsetCount, pDynamicOffsets);
             }
         }
 
@@ -211,7 +211,7 @@
                 ClearDescriptorSets();
                 currentPipeline = pipeline;
 
-                vkCmdBindPipeline(commandBuffer, (VkPipelineBindPoint)pipelineBindPoint, pipeline);
+                vkCmdBindPipeline(commandBuffer, pipelineBindPoint, pipeline);
             }
 
         }
@@ -237,20 +237,20 @@
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindIndexBuffer(Buffer buffer, ulong offset, VkIndexType indexType)
         {
-            vkCmdBindIndexBuffer(commandBuffer, buffer.handle, offset, (VkIndexType)indexType);
+            vkCmdBindIndexBuffer(commandBuffer, buffer.handle, offset, indexType);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void PushConstants<T>(PipelineLayout pipelineLayout, VkShaderStageFlags shaderStage, int offset, ref T value) where T : struct
         {
-            vkCmdPushConstants(commandBuffer, pipelineLayout.handle, (VkShaderStageFlags)shaderStage,
+            vkCmdPushConstants(commandBuffer, pipelineLayout.handle, shaderStage,
                 (uint)offset, (uint)Utilities.SizeOf<T>(), Unsafe.AsPointer(ref value));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void PushConstants(PipelineLayout pipelineLayout, VkShaderStageFlags shaderStage, int offset, int size, IntPtr value)
         {
-            vkCmdPushConstants(commandBuffer, pipelineLayout.handle, (VkShaderStageFlags)shaderStage, (uint)offset, (uint)size, (void*)value);
+            vkCmdPushConstants(commandBuffer, pipelineLayout.handle, shaderStage, (uint)offset, (uint)size, (void*)value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -334,32 +334,32 @@
 
         public void BlitImage(Image srcImage, VkImageLayout srcImageLayout, Image dstImage, VkImageLayout dstImageLayout, ref VkImageBlit pRegion, VkFilter filter)
         {
-            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, (VkImageBlit*)Unsafe.AsPointer(ref pRegion), filter);
+            vkCmdBlitImage(commandBuffer, srcImage.handle, srcImageLayout, dstImage.handle, dstImageLayout, 1, (VkImageBlit*)Unsafe.AsPointer(ref pRegion), filter);
         }
 
         public void BlitImage(Image srcImage, VkImageLayout srcImageLayout, Image dstImage, VkImageLayout dstImageLayout, Span<VkImageBlit> pRegions, VkFilter filter)
         {
-            vkCmdBlitImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, (VkImageBlit*)Unsafe.AsPointer(ref pRegions[0]), filter);
+            vkCmdBlitImage(commandBuffer, srcImage.handle, srcImageLayout, dstImage.handle, dstImageLayout, (uint)pRegions.Length, (VkImageBlit*)Unsafe.AsPointer(ref pRegions[0]), filter);
         }
 
         public void CopyImage(Image srcImage, VkImageLayout srcImageLayout, Image dstImage, VkImageLayout dstImageLayout, ref VkImageCopy region)
         {
-            vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, 1, Utilities.AsPtr(ref region));
+            vkCmdCopyImage(commandBuffer, srcImage.handle, srcImageLayout, dstImage.handle, dstImageLayout, 1, Utilities.AsPtr(ref region));
         }
 
         public void CopyImage(Image srcImage, VkImageLayout srcImageLayout, Image dstImage, VkImageLayout dstImageLayout, Span<VkImageCopy> region)
         {
-            vkCmdCopyImage(commandBuffer, srcImage.handle, (VkImageLayout)srcImageLayout, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)region.Length, Utilities.AsPtr(ref region[0]));
+            vkCmdCopyImage(commandBuffer, srcImage.handle, srcImageLayout, dstImage.handle, dstImageLayout, (uint)region.Length, Utilities.AsPtr(ref region[0]));
         }
 
         public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, VkImageLayout dstImageLayout, ref VkBufferImageCopy region)
         {
-            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.handle, dstImage.handle, (VkImageLayout)dstImageLayout, 1, Utilities.AsPtr(ref region));
+            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.handle, dstImage.handle, dstImageLayout, 1, Utilities.AsPtr(ref region));
         }
 
         public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, VkImageLayout dstImageLayout, Span<VkBufferImageCopy> pRegions)
         {
-            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.handle, dstImage.handle, (VkImageLayout)dstImageLayout, (uint)pRegions.Length, Utilities.AsPtr(ref pRegions[0]));
+            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.handle, dstImage.handle, dstImageLayout, (uint)pRegions.Length, Utilities.AsPtr(ref pRegions[0]));
         }
 
         public void FillBuffer(Buffer dstBuffer, ulong dstOffset, ulong size, uint data)
@@ -374,19 +374,19 @@
 
         public void WriteTimestamp(VkPipelineStageFlags pipelineStage, VkQueryPool queryPool, uint query)
         {
-            vkCmdWriteTimestamp(commandBuffer, (VkPipelineStageFlags)pipelineStage, queryPool, (uint)query);
+            vkCmdWriteTimestamp(commandBuffer, pipelineStage, queryPool, query);
         }
 
         public void NextSubpass(VkSubpassContents contents)
         {
-            vkCmdNextSubpass(commandBuffer, (VkSubpassContents)contents);
+            vkCmdNextSubpass(commandBuffer, contents);
         }
 
         public void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkDependencyFlags dependencyFlags,
             uint memoryBarrierCount, ref VkMemoryBarrier pMemoryBarriers, uint bufferMemoryBarrierCount, IntPtr pBufferMemoryBarriers,
             uint imageMemoryBarrierCount, ref VkImageMemoryBarrier pImageMemoryBarriers)
         {
-            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, (VkDependencyFlags)dependencyFlags, memoryBarrierCount, Utilities.AsPtr(ref pMemoryBarriers), bufferMemoryBarrierCount, (VkBufferMemoryBarrier*)pBufferMemoryBarriers,
+            vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, Utilities.AsPtr(ref pMemoryBarriers), bufferMemoryBarrierCount, (VkBufferMemoryBarrier*)pBufferMemoryBarriers,
                 imageMemoryBarrierCount, Utilities.AsPtr(ref pImageMemoryBarriers));
         }
 
@@ -394,32 +394,32 @@
             uint memoryBarrierCount, VkMemoryBarrier* pMemoryBarriers, uint bufferMemoryBarrierCount, VkBufferMemoryBarrier* pBufferMemoryBarriers,
             uint imageMemoryBarrierCount, VkImageMemoryBarrier* pImageMemoryBarriers)
         {
-            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, (VkDependencyFlags)dependencyFlags, memoryBarrierCount, (VkMemoryBarrier*)pMemoryBarriers,
-                bufferMemoryBarrierCount, (VkBufferMemoryBarrier*)pBufferMemoryBarriers,
-                imageMemoryBarrierCount, (VkImageMemoryBarrier*)pImageMemoryBarriers);
+            vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers,
+                bufferMemoryBarrierCount, pBufferMemoryBarriers,
+                imageMemoryBarrierCount, pImageMemoryBarriers);
         }
 
         public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, ref VkBufferMemoryBarrier barrier, uint bufferMemoryBarrierCount = 1)
         {
-            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
+            vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask,
                 0, 0, null, bufferMemoryBarrierCount, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier), 0, null);
         }
 
         public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, Span<VkBufferMemoryBarrier> barrier)
         {
-            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
+            vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask,
                 0, 0, null, (uint)barrier.Length, (VkBufferMemoryBarrier*)Unsafe.AsPointer(ref barrier[0]), 0, null);
         }
 
         public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, ref VkImageMemoryBarrier barrier)
         {
-            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask,
+            vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask,
                 0, 0, null, 0, null, 1, (VkImageMemoryBarrier*)Unsafe.AsPointer(ref barrier));
         }
 
         public unsafe void PipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, Span<VkImageMemoryBarrier> barriers)
         {
-            vkCmdPipelineBarrier(commandBuffer, (VkPipelineStageFlags)srcStageMask, (VkPipelineStageFlags)dstStageMask, 0, 0, null, 0, null,
+            vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, 0, 0, null, 0, null,
                 (uint)barriers.Length, (VkImageMemoryBarrier*)Unsafe.AsPointer(ref barriers[0]));
         }
 

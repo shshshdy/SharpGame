@@ -18,8 +18,8 @@ namespace SharpGame
 
         public unsafe void ToNative(VkSubpassDescription* native)
         {
-            native->flags = (VkSubpassDescriptionFlags)flags;
-            native->pipelineBindPoint = (VkPipelineBindPoint)pipelineBindPoint;
+            native->flags = flags;
+            native->pipelineBindPoint = pipelineBindPoint;
 
             if (!pInputAttachments.IsNullOrEmpty())
             {

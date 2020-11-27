@@ -43,7 +43,7 @@ namespace SharpGame
             ulong totalSize = 0;
             foreach (var mip in imageData)
             {
-                totalSize += (ulong)(mip.TotalSize* layers * faceCount);
+                totalSize += mip.TotalSize * layers * faceCount;
             }
 
             Buffer stagingBuffer = Buffer.CreateStagingBuffer(totalSize, IntPtr.Zero);
@@ -95,7 +95,7 @@ namespace SharpGame
 
             stagingBuffer.Unmap();
 
-            var subresourceRange = new VkImageSubresourceRange(VkImageAspectFlags.Color, 0, mipLevels, 0, layers*(uint)faceCount);
+            var subresourceRange = new VkImageSubresourceRange(VkImageAspectFlags.Color, 0, mipLevels, 0, layers* faceCount);
 
             CommandBuffer copyCmd = Graphics.BeginPrimaryCmd();
             copyCmd.SetImageLayout(image, VkImageAspectFlags.Color, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal, subresourceRange);

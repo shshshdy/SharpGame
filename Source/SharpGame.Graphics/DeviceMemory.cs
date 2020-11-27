@@ -24,7 +24,7 @@ namespace SharpGame
 
         public ref T Map<T>(ulong offset = 0) where T : struct
         {
-            Mapped = Device.MapMemory(memory, (ulong)offset, Size, VkMemoryMapFlags.None);
+            Mapped = Device.MapMemory(memory, offset, Size, VkMemoryMapFlags.None);
             return ref Utilities.As<T>(Mapped);
         }
 

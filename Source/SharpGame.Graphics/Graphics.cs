@@ -316,7 +316,7 @@ namespace SharpGame
         protected void CreateDepthStencil()
         {
             depthStencil?.Dispose();
-            depthStencil = new RenderTexture((uint)Width, (uint)Height, 1, DepthFormat, VkImageUsageFlags.DepthStencilAttachment);
+            depthStencil = new RenderTexture(Width, Height, 1, DepthFormat, VkImageUsageFlags.DepthStencilAttachment);
         }
 
         public static void WithCommandBuffer(Action<CommandBuffer> action)
