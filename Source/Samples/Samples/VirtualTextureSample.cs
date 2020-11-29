@@ -275,8 +275,8 @@ namespace SharpGame.Samples
                 flags = VkImageCreateFlags.SparseBinding | VkImageCreateFlags.SparseResidency
             };
 
-            //var img = Device.CreateImage(ref sparseImageCreateInfo);
-            texture.image = new Image(ref sparseImageCreateInfo);
+            var img = Device.CreateImage(ref sparseImageCreateInfo);
+            texture.image = new Image(img);
 
             Graphics.WithCommandBuffer((cmd) =>
             {

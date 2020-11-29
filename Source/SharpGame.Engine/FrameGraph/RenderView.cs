@@ -287,28 +287,14 @@ namespace SharpGame
             float nearClip = camera.NearClip;
             float farClip = camera.FarClip;
 
-            cameraVS.FrustumSize = farVector;
             cameraVS.NearClip = camera.NearClip;
             cameraVS.FarClip = camera.FarClip;
-
-            if(camera.Orthographic)
-            {
-                cameraVS.DepthMode = new vec4(1, 0, 1, 0);
-            }
-            else
-            {
-                cameraVS.DepthMode = new vec4(0, 0, 0, 1 / farClip);
-            }
 
             ubCameraVS.SetData(ref cameraVS);
             ubCameraVS.Flush();
 
             cameraPS.ViewInv = cameraVS.ViewInv;
             cameraPS.CameraPos = camera.Node.Position;
-
-            vec4 depthReconstruct = new vec4(farClip / (farClip - nearClip), -nearClip / (farClip - nearClip),
-                camera.Orthographic ? 1.0f : 0.0f, camera.Orthographic ? 0.0f : 1.0f);
-            cameraPS.DepthReconstruct = depthReconstruct;
 
             cameraPS.GBufferInvSize = new vec2(1.0f / Width, 1.0f / Height);
 

@@ -4,7 +4,6 @@ layout (set = 1, binding = 0) uniform CameraPS
     mat4 ViewInv;
 	vec3 CameraPos;
 	float pading1;
-	vec4 DepthReconstruct;
 	vec2 GBufferInvSize;
 	float NearClip;
 	float FarClip;

@@ -19,11 +19,14 @@ namespace SharpGame
         public mat4 ViewInv;
         public mat4 ViewProj;
         public vec3 CameraPos;
+        float pading1;
+        public vec2 GBufferInvSize;
         public float NearClip;
-        public vec3 FrustumSize;
         public float FarClip;
-        public vec4 DepthMode;
-        public vec4 GBufferOffsets;
+
+//         public float NearClip;
+//         public vec3 FrustumSize;
+//         public float FarClip;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -32,7 +35,6 @@ namespace SharpGame
         public mat4 ViewInv;
         public vec3 CameraPos;
         float pading1;
-        public vec4 DepthReconstruct;
         public vec2 GBufferInvSize;
         public float NearClip;
         public float FarClip;

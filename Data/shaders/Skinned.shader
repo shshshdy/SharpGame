@@ -20,7 +20,6 @@ Shader "Skinned"
 			#extension GL_ARB_shading_language_420pack : enable
 			
 			#include "UniformsVS.glsl"
-			#include "Transform.glsl"
 				
 			layout(location = 0) in vec3 inPos;
 			layout(location = 1) in vec3 inNormal;
@@ -43,6 +42,14 @@ Shader "Skinned"
 			{
 				vec4 gl_Position;
 			};
+
+			mat4 GetSkinMatrix(vec4 blendWeights, ivec4 idx)
+			{
+				return SkinMatrices[idx.x] * blendWeights.x +
+					SkinMatrices[idx.y] * blendWeights.y +
+					SkinMatrices[idx.z] * blendWeights.z +
+					SkinMatrices[idx.w] * blendWeights.w;
+			}
 
 			void main() 
 			{

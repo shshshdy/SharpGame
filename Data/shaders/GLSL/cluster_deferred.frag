@@ -9,8 +9,6 @@ layout(set = 3, binding = 1) uniform sampler2D samplerNormal;
 layout(set = 3, binding = 2) uniform sampler2D samplerDepth;
 
 layout(location = 0) in vec2 inUV;
-layout(location = 1) in vec3 iFarRay;
-layout(location = 2) in vec3 iNearRay;
 
 layout(location = 0) out vec4 outFragcolor;
 
@@ -38,16 +36,6 @@ void main()
 	highp vec4 world_w = ubo_in.inv_view_proj * clip;
 	highp vec3 worldPos = world_w.xyz / world_w.w;
 
-    /*
-    float depth = ReconstructDepth(pos.w);
-      
-#ifdef ORTHO
-    vec3 worldPos = lerp(iNearRay, iFarRay, depth);
-#else
-    vec3 worldPos = iFarRay * depth;
-#endif
-    worldPos += ubo_in.cam_pos;
-    */
 #else
 	vec4 pos = texture(samplerDepth, inUV);
     vec3 worldPos = pos.xyz;// ReconstructPositionFromDepth(depth);
