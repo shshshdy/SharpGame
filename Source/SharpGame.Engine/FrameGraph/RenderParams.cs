@@ -17,29 +17,18 @@ namespace SharpGame
     {
         public mat4 View;
         public mat4 ViewInv;
+        public mat4 Proj;
+        public mat4 ProjInv;
         public mat4 ViewProj;
+        public mat4 ViewProjInv;
         public vec3 CameraPos;
         float pading1;
-        public vec2 GBufferInvSize;
-        public float NearClip;
-        public float FarClip;
-
-//         public float NearClip;
-//         public vec3 FrustumSize;
-//         public float FarClip;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CameraPS
-    {
-        public mat4 ViewInv;
-        public vec3 CameraPos;
-        float pading1;
+        public vec3 CameraDir;
+        float pading2;
         public vec2 GBufferInvSize;
         public float NearClip;
         public float FarClip;
     }
-
 
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct LightParameter

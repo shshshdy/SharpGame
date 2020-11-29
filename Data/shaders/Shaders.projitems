@@ -19,7 +19,6 @@
     <None Include="$(MSBuildThisFileDirectory)Common\Pbr.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Shadow.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\ToneMap.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)Common\Common.h" />
     <None Include="$(MSBuildThisFileDirectory)Common\Lighting.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Common.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ClusterLight.shader" />

@@ -52,7 +52,6 @@ namespace SharpGame
 
         private FrameUniform frameUniform = new FrameUniform();
         private CameraVS cameraVS = new CameraVS();
-        private CameraPS cameraPS = new CameraPS();
         private LightParameter lightParameter = new LightParameter();
 
         internal Buffer ubFrameInfo;
@@ -129,7 +128,6 @@ namespace SharpGame
 
             ubCameraVS = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
 
-            ubCameraPS = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraPS>());
             ubLight = Buffer.CreateUniformBuffer<LightParameter>();
 
             vsResLayout = new DescriptorSetLayout
@@ -147,7 +145,7 @@ namespace SharpGame
                 new DescriptorSetLayoutBinding(1, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
             };
 
-            psResourceSet = new DescriptorSet(psResLayout, /*ubCameraPS,*/ ubLight, ShadowPass.DepthRT);
+            psResourceSet = new DescriptorSet(psResLayout, ubLight, ShadowPass.DepthRT);
 
         }
 
@@ -277,7 +275,10 @@ namespace SharpGame
         {
             cameraVS.View = camera.View;
             cameraVS.ViewInv = glm.inverse(cameraVS.View);
+            cameraVS.Proj = camera.Projection;
+            cameraVS.ProjInv = glm.inverse(cameraVS.Proj);
             cameraVS.ViewProj = camera.VkProjection*camera.View;
+            cameraVS.ViewProjInv = glm.inverse(cameraVS.ViewProj);
             cameraVS.CameraPos = camera.Node.Position;
 
             camera.GetFrustumSize(out var nearVector, out var farVector);
@@ -291,16 +292,6 @@ namespace SharpGame
             ubCameraVS.SetData(ref cameraVS);
             ubCameraVS.Flush();
 
-            cameraPS.ViewInv = cameraVS.ViewInv;
-            cameraPS.CameraPos = camera.Node.Position;
-
-            cameraPS.GBufferInvSize = new vec2(1.0f / Width, 1.0f / Height);
-
-            cameraPS.NearClip = nearClip;
-            cameraPS.FarClip = farClip;
-
-            ubCameraPS.SetData(ref cameraPS);
-            ubCameraPS.Flush();
 
         }
 

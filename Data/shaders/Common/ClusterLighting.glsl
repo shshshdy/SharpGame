@@ -10,8 +10,7 @@ layout(set = 2, binding = 4, r32ui) uniform uimageBuffer grid_light_count_offset
 layout(set = 2, binding = 5, r32ui) uniform uimageBuffer light_list;
 layout(set = 2, binding = 6, r32ui) uniform uimageBuffer grid_light_counts_compare;
 
-vec3 ClusterLighting(vec3 world_pos, vec3 world_norm, vec3 diffColor,
-    vec3 specularColor, float specularPower)
+vec3 ClusterLighting(vec3 world_pos, vec3 world_norm, vec3 diffColor, vec3 specularColor, float specularPower)
 {
     vec3 outDiff = vec3(0);
     vec3 outSpec = vec3(0);

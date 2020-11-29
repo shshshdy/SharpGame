@@ -3,12 +3,14 @@ layout (binding = 0) uniform CameraVS
 {
     mat4 View;
     mat4 ViewInv;
+    mat4 Proj;
+    mat4 ProjInv;
     mat4 ViewProj;
+    mat4 ViewProjInv;
 	vec3 CameraPos;
-	//float NearClip;
-	//vec3 FrustumSize;
-	//float FarClip;
 	float pading1;
+	vec3 CameraDir;
+	float pading2;
 	vec2 GBufferInvSize;
 	float NearClip;
 	float FarClip;
