@@ -5,16 +5,75 @@ namespace SharpGame
 {
     public partial class ClusterRenderer : RenderPipeline
     {
+        protected SharedBuffer light_pos_ranges;
+        protected SharedBuffer light_colors;
+
+        private Buffer lightBounds;
+        private Buffer gridLightCounts;
+        private Buffer gridLightCountTotal;
+        private Buffer gridLightCountOffsets;
+        private Buffer lightList;
+        private Buffer gridLightCountsCompare;
+
         private DescriptorSetLayout computeLayout0;
         private DescriptorSetLayout computeLayout1;
 
         private DescriptorSet computeSet0;
         private DescriptorSet computeSet1;
-        PipelineLayout pipelineLayout;
 
         protected Shader clusterLight;
         private void InitLightCompute()
         {
+            uint[] queue_families = null;
+
+            VkSharingMode sharingMode = VkSharingMode.Exclusive;
+
+            if (Device.QFGraphics != Device.QFCompute)
+            {
+                sharingMode = VkSharingMode.Concurrent;
+                queue_families = new[] { Device.QFGraphics, Device.QFCompute };
+            }
+
+            uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
+
+            light_pos_ranges = new SharedBuffer(VkBufferUsageFlags.StorageTexelBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
+                MAX_NUM_LIGHTS * 4 * sizeof(float), VkSharingMode.Exclusive, queue_families);
+            light_pos_ranges.CreateView(VkFormat.R32G32B32A32SFloat);
+
+            light_colors = new SharedBuffer(VkBufferUsageFlags.StorageTexelBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
+                MAX_NUM_LIGHTS * sizeof(uint), sharingMode, queue_families);
+            light_colors.CreateView(VkFormat.R8G8B8A8UNorm);
+
+            lightBounds = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, MAX_NUM_LIGHTS * 6 * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // max tile count 1d (z 256)
+            gridLightCounts = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light count / grid
+            gridLightCountTotal = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light count total * max grid count
+            gridLightCountOffsets = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // same as above
+            lightList = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light idx
+            gridLightCountsCompare = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light count / grid
+
+            resourceLayout0 = new DescriptorSetLayout
+            {
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(2, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+            };
+
+            resourceLayout1 = new DescriptorSetLayout
+            {
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(2, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(3, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(4, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(5, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(6, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
+            };
+
+            resourceSet0 = new DescriptorSet(resourceLayout0, uboCluster, light_pos_ranges, light_colors);
+            resourceSet1 = new DescriptorSet(resourceLayout1, gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
+                gridLightCountOffsets, lightList, gridLightCountsCompare);
+
+
             clusterLight = Resources.Instance.Load<Shader>("Shaders/ClusterLight.shader");
 
             computeLayout0 = new DescriptorSetLayout
@@ -35,8 +94,6 @@ namespace SharpGame
             };
 
             computeSet0 = new DescriptorSet(computeLayout0, uboCluster, light_pos_ranges);
-
-            pipelineLayout = new PipelineLayout(computeLayout0, computeLayout1);
 
             computeSet1 = new DescriptorSet(computeLayout1,
                 gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
@@ -89,8 +146,8 @@ namespace SharpGame
             {
                 var pass = clusterLight.Pass[0];
                 cmd_buf.BindComputePipeline(pass);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
+                cmd_buf.BindComputeResourceSet(pass.PipelineLayout, 0, computeSet0);
+                cmd_buf.BindComputeResourceSet(pass.PipelineLayout, 1, computeSet1);
                 cmd_buf.Dispatch((num_lights - 1) / 32 + 1, 1, 1);
 
              //   cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2 + 1);
@@ -114,15 +171,15 @@ namespace SharpGame
 
                 var pass = clusterLight.Pass[1];
                 cmd_buf.BindComputePipeline(pass);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
+                cmd_buf.BindComputeResourceSet(pass.PipelineLayout, 0, computeSet0);
+                cmd_buf.BindComputeResourceSet(pass.PipelineLayout, 1, computeSet1);
 
                 cmd_buf.Dispatch((tile_count_x - 1) / 16 + 1, (tile_count_y - 1) / 16 + 1, TILE_COUNT_Z);
 
             //    cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_GRID_OFFSETS * 2 + 1);
 
-                barriers[0].buffer = gridLightCountTotal.handle;
-                barriers[1].buffer = gridLightCountOffsets.handle;
+                barriers[0].buffer = gridLightCountTotal;
+                barriers[1].buffer = gridLightCountOffsets;
                 cmd_buf.PipelineBarrier(VkPipelineStageFlags.ComputeShader,
                             VkPipelineStageFlags.ComputeShader,
                             VkDependencyFlags.ByRegion,
@@ -139,8 +196,8 @@ namespace SharpGame
                 var pass = clusterLight.Pass[2];
 
                 cmd_buf.BindComputePipeline(pass);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 0, computeSet0);
-                cmd_buf.BindComputeResourceSet(pipelineLayout, 1, computeSet1);
+                cmd_buf.BindComputeResourceSet(pass.PipelineLayout, 0, computeSet0);
+                cmd_buf.BindComputeResourceSet(pass.PipelineLayout, 1, computeSet1);
                 cmd_buf.Dispatch((num_lights - 1) / 32 + 1, 1, 1);
 
             //    cmd_buf.WriteTimestamp(PipelineStageFlags.FragmentShader, QueryPool, QUERY_CALC_LIGHT_LIST * 2 + 1);

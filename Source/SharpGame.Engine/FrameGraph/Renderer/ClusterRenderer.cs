@@ -74,16 +74,7 @@ namespace SharpGame
         protected ClusterUniforms clusterUniforms = new ClusterUniforms();
 
         protected SharedBuffer uboCluster;
-        protected SharedBuffer light_pos_ranges;
-        protected SharedBuffer light_colors;
-
         private Buffer gridFlags;
-        private Buffer lightBounds;
-        private Buffer gridLightCounts;
-        private Buffer gridLightCountTotal;
-        private Buffer gridLightCountOffsets;
-        private Buffer lightList;
-        private Buffer gridLightCountsCompare;
 
         protected DescriptorSetLayout resourceLayout0;
         protected DescriptorSetLayout resourceLayout1;
@@ -148,45 +139,8 @@ namespace SharpGame
             uboCluster = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
                 (uint)Utilities.SizeOf<ClusterUniforms>(), sharingMode, queue_families);
 
-            light_pos_ranges = new SharedBuffer(VkBufferUsageFlags.StorageTexelBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                MAX_NUM_LIGHTS * 4 * sizeof(float), VkSharingMode.Exclusive, queue_families);
-            light_pos_ranges.CreateView(VkFormat.R32G32B32A32SFloat);
-
-            light_colors = new SharedBuffer(VkBufferUsageFlags.StorageTexelBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                MAX_NUM_LIGHTS * sizeof(uint), sharingMode, queue_families);
-            light_colors.CreateView(VkFormat.R8G8B8A8UNorm);
-
             uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
             gridFlags = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count, VkFormat.R8UInt, sharingMode, queue_families);
-            lightBounds = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, MAX_NUM_LIGHTS * 6 * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // max tile count 1d (z 256)
-            gridLightCounts = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light count / grid
-            gridLightCountTotal = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light count total * max grid count
-            gridLightCountOffsets = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // same as above
-            lightList = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, 1024 * 1024 * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light idx
-            gridLightCountsCompare = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count * sizeof(uint), VkFormat.R32UInt, sharingMode, queue_families); // light count / grid
-
-            resourceLayout0 = new DescriptorSetLayout
-            {
-                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(2, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
-            };
-
-            resourceLayout1 = new DescriptorSetLayout
-            {
-                new DescriptorSetLayoutBinding(0, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(2, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(3, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(4, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(5, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(6, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Fragment),
-            };
-
-            resourceSet0 = new DescriptorSet(resourceLayout0, uboCluster, light_pos_ranges, light_colors);
-            resourceSet1 = new DescriptorSet(resourceLayout1,
-                gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
-                gridLightCountOffsets, lightList, gridLightCountsCompare);
 
             clusterLayout1 = new DescriptorSetLayout
             {
@@ -197,7 +151,28 @@ namespace SharpGame
             clusterSet1 = new DescriptorSet(clusterLayout1, uboCluster, gridFlags);
         }
 
-        protected RenderPass OnCreateClusterRenderPass()
+        protected FrameGraphPass CreateClusteringPass()
+        {
+            var depthFormat = Graphics.DepthFormat;
+            uint width = (uint)Graphics.Width;
+            uint height = (uint)Graphics.Height;
+
+            var clustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
+            {
+                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment),
+
+                new SceneSubpass("clustering")
+                {
+                    Set1 = clusterSet1
+                }
+
+            };
+
+            clustering.renderPassCreator = OnCreateClusterRenderPass;
+            return clustering;
+        }
+
+        RenderPass OnCreateClusterRenderPass()
         {
             VkFormat depthFormat = Device.GetSupportedDepthFormat();
             VkAttachmentDescription[] attachments =

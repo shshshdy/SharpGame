@@ -34,12 +34,13 @@ namespace SharpGame
 
             View = renderView;
 
-            OnInit();
 
             foreach (var rp in RenderPassList)
             {
                 rp.Init();
             }
+
+            OnInit();
 
             initialized = true;
         }

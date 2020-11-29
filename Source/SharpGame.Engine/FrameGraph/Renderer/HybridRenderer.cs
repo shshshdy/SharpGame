@@ -64,10 +64,6 @@ namespace SharpGame
         {
             this.Add(new ShadowPass());
 
-            var depthFormat = Graphics.DepthFormat;
-            uint width = (uint)Graphics.Width;
-            uint height = (uint)Graphics.Height;
-
             geometryPass = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
                 //new RenderTextureInfo(width, height, 1, VkFormat.R8G8B8A8UNorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
@@ -95,18 +91,7 @@ namespace SharpGame
 
             this.Add(geometryPass);
 
-            translucentClustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
-            {
-                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment),
-
-                new SceneSubpass("clustering")
-                {
-                    Set1 = clusterSet1
-                }
-
-            };
-
-            translucentClustering.renderPassCreator = OnCreateClusterRenderPass;
+            translucentClustering = this.CreateClusteringPass();
 
             this.Add(translucentClustering);
 
