@@ -46,7 +46,7 @@ namespace SharpGame
 
             deferredLayout0 = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.All),
             };
 
             deferredSet0 = new DescriptorSet(deferredLayout0, View.ubCameraVS);
@@ -212,7 +212,7 @@ namespace SharpGame
 
             Span<DescriptorSet> sets = new []
             {
-                deferredSet0,
+                View.Set0,
                 resourceSet0,
                 resourceSet1,
                 deferredSet1,

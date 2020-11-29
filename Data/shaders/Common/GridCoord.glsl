@@ -2,12 +2,7 @@
 #define CAM_NEAR 0.1f
 #define GRID_DIM_Z 256
 
-#ifdef UBO_SET
-#else
-#define UBO_SET 1
-#endif
-
-layout(set = UBO_SET, binding = 0) uniform UBO
+layout(set = 1, binding = 0) uniform UBO
 {
     mat4 view;
     mat4 projection_clip;

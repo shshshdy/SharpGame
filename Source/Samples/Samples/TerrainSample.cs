@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -11)]
+    [SampleDesc(sortOrder = 11)]
     public class TerrainSample : Sample
     {
         public override void Init()

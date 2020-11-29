@@ -2,7 +2,7 @@
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 2)]
+    [SampleDesc(sortOrder = -2)]
     public class Sponza : Sample
     {
         ClusterRenderer clusterRenderer;
