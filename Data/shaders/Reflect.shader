@@ -24,7 +24,7 @@ Shader "Reflect"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
-			#include "UniformsVS.glsl"
+			#include "Common.glsl"
 
 			layout(push_constant) uniform PushConsts{
 				float lodBias;

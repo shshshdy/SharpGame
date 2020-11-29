@@ -1,6 +1,6 @@
 #version 450
 
-#include "UniformsVS.glsl"
+#include "Common.glsl"
 
 // Vertex attributes
 layout (location = 0) in vec4 inPos;

@@ -10,8 +10,6 @@ namespace SharpGame
  
     public class RenderView : Object
     {
-        public static bool NegativeViewport { get; set; } = false;
-
         private Scene scene;
         public Scene Scene => scene;
 
@@ -136,7 +134,7 @@ namespace SharpGame
 
             vsResLayout = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.All),
                 new DescriptorSetLayoutBinding(1, VkDescriptorType.UniformBufferDynamic, VkShaderStageFlags.Vertex),
             };
 
@@ -144,12 +142,12 @@ namespace SharpGame
 
             psResLayout = new DescriptorSetLayout(1)
             {
+                //new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
                 new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(1, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(2, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
             };
 
-            psResourceSet = new DescriptorSet(psResLayout, ubCameraPS, ubLight, ShadowPass.DepthRT);
+            psResourceSet = new DescriptorSet(psResLayout, /*ubCameraPS,*/ ubLight, ShadowPass.DepthRT);
 
         }
 

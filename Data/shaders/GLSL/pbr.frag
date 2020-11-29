@@ -5,7 +5,8 @@
 // This implementation is based on "Real Shading in Unreal Engine 4" SIGGRAPH 2013 course notes by Epic Games.
 // See: http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
 
-#include "UniformsPS.glsl"
+#include "Common.glsl"
+#include "Lighting.glsl"
 #include "Pbr.glsl"
 #include "ToneMap.glsl"
 

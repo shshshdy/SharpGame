@@ -3,8 +3,9 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-#include "UniformsPS.glsl"		
-#include "Lighting.glsl"
+#include "Common.glsl"	
+#include "Lighting.glsl"		
+#include "LightFunc.glsl"
 #include "Shadow.glsl"
 
 layout(set = 2, binding = 0) uniform sampler2D DiffMap;

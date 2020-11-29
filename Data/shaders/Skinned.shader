@@ -19,7 +19,7 @@ Shader "Skinned"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 			
-			#include "UniformsVS.glsl"
+			#include "Common.glsl"
 				
 			layout(location = 0) in vec3 inPos;
 			layout(location = 1) in vec3 inNormal;
@@ -80,8 +80,8 @@ Shader "Skinned"
 			#extension GL_ARB_separate_shader_objects : enable
 			#extension GL_ARB_shading_language_420pack : enable
 
-			#include "UniformsPS.glsl"		
-			#include "Lighting.glsl"
+			#include "Lighting.glsl"		
+			#include "LightFunc.glsl"
 
 
 			layout(set = 2, binding = 0) uniform sampler2D DiffMap;

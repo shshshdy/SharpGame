@@ -1,6 +1,6 @@
 #version 450 core
 			
-#include "UniformsVS.glsl"
+#include "Common.glsl"
 
 layout (location= 0) in vec3 inPos;
 #ifdef ALPHA_TEST

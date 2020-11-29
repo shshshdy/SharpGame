@@ -140,12 +140,6 @@ namespace SharpGame
             uiShader = Resources.Instance.Load<Shader>("Shaders/ImGui.shader");           
             pass = uiShader.Main;
 
-            var specializationInfo = new SpecializationInfo(
-                new VkSpecializationMapEntry(0, 0, sizeof(uint)),
-                new VkSpecializationMapEntry(1, 4, sizeof(uint)));
-            specializationInfo.Write(0, RenderView.NegativeViewport? 0 : 1);
-            pass.VertexShader.SpecializationInfo = specializationInfo;
-
         }
 
         private unsafe void RecreateFontDeviceTexture()

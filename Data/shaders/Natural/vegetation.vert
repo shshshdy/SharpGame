@@ -1,6 +1,6 @@
 #version 450
 
-#include "UniformsVS.glsl"
+#include "Common.glsl"
 
 #define INSTANCED
 

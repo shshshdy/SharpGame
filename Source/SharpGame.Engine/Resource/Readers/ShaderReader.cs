@@ -624,9 +624,10 @@ namespace SharpGame
                             for (int i = 0; i < type.MemberCount; i++)
                             {
                                 compiler.GetStructMemberOffset(type, i, out int offset);
-                                compiler.GetStructMemberArrayStride(type, i, out int sz);
-                                compiler.GetStructMemberMatrixStride(type, i, out int stride);
-                                Console.WriteLine($"  MemberOffset:{offset}, ArrayStride:{sz}, MatrixStride:{stride}");
+                                //compiler.GetStructMemberArrayStride(type, i, out int sz);
+                                //compiler.GetStructMemberMatrixStride(type, i, out int stride);
+                                Console.WriteLine($"  MemberOffset:{offset}");
+                                //Console.WriteLine($"  MemberOffset:{offset}, ArrayStride:{sz}, MatrixStride:{stride}");
                             }
                         }
 

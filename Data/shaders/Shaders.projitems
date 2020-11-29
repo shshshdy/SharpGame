@@ -15,13 +15,13 @@
     <None Include="$(MSBuildThisFileDirectory)ClusterDeferred.shader" />
     <None Include="$(MSBuildThisFileDirectory)Common\Clustering.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\GridCoord.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)Common\Lighting.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\LightFunc.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Pbr.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Shadow.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\ToneMap.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)Common\Uniforms.h" />
-    <None Include="$(MSBuildThisFileDirectory)Common\UniformsPS.glsl" />
-    <None Include="$(MSBuildThisFileDirectory)Common\UniformsVS.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\Common.h" />
+    <None Include="$(MSBuildThisFileDirectory)Common\Lighting.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\Common.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ClusterLight.shader" />
     <None Include="$(MSBuildThisFileDirectory)Debug.shader" />
     <None Include="$(MSBuildThisFileDirectory)Natural\sparseresidency.frag" />
@@ -50,6 +50,7 @@
     <None Include="$(MSBuildThisFileDirectory)Natural\terrain.tesc" />
     <None Include="$(MSBuildThisFileDirectory)Natural\terrain.tese" />
     <None Include="$(MSBuildThisFileDirectory)Natural\terrain.vert" />
+    <None Include="$(MSBuildThisFileDirectory)Terrain.shader" />
     <None Include="$(MSBuildThisFileDirectory)Vegetation.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitAlphaTest.shader" />
     <None Include="$(MSBuildThisFileDirectory)post\blur.frag" />
