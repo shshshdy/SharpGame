@@ -31,7 +31,7 @@ namespace SharpGame
 
         public uint ViewMask { get; set; } = 1;
         public ref FrameInfo Frame => ref frameInfo;
-        public ref LightParameter LightParam => ref lightParameter;
+        public ref LightUBO LightParam => ref lightParameter;
 
         internal FastList<Drawable> drawables = new FastList<Drawable>();
 
@@ -50,24 +50,21 @@ namespace SharpGame
 
         private FrameInfo frameInfo;
 
-        private FrameUniform frameUniform = new FrameUniform();
-        private CameraVS cameraVS = new CameraVS();
-        private LightParameter lightParameter = new LightParameter();
+        private GlobalUBO cameraUBO = new GlobalUBO();
+        private LightUBO lightParameter = new LightUBO();
 
-        internal Buffer ubFrameInfo;
-        public SharedBuffer ubCameraVS;
+        public SharedBuffer ubGlobal;
 
-        internal SharedBuffer ubCameraPS;
         internal Buffer ubLight;
 
-        private DescriptorSetLayout vsResLayout;
+        private DescriptorSetLayout set0Layout;
 
-        public DescriptorSet Set0 => vsResourceSet;
-        DescriptorSet vsResourceSet;
+        public DescriptorSet Set0 => descriptorSetGlobal;
+        DescriptorSet descriptorSetGlobal;
 
-        private DescriptorSetLayout psResLayout;
-        public DescriptorSet Set1 => psResourceSet;
-        DescriptorSet psResourceSet;
+        private DescriptorSetLayout set1Layout;
+        public DescriptorSet Set1 => descriptorSetLight;
+        DescriptorSet descriptorSetLight;
 
         Graphics Graphics => Graphics.Instance;
         FrameGraph FrameGraph => FrameGraph.Instance;
@@ -124,28 +121,25 @@ namespace SharpGame
 
         protected void CreateBuffers()
         {
-            ubFrameInfo = Buffer.CreateUniformBuffer<FrameUniform>();
+            ubGlobal = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<GlobalUBO>());
 
-            ubCameraVS = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<CameraVS>());
+            ubLight = Buffer.CreateUniformBuffer<LightUBO>();
 
-            ubLight = Buffer.CreateUniformBuffer<LightParameter>();
-
-            vsResLayout = new DescriptorSetLayout
+            set0Layout = new DescriptorSetLayout
             {
                 new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.All),
                 new DescriptorSetLayoutBinding(1, VkDescriptorType.UniformBufferDynamic, VkShaderStageFlags.Vertex),
             };
 
-            vsResourceSet = new DescriptorSet(vsResLayout, ubCameraVS, FrameGraph.TransformBuffer);
+            descriptorSetGlobal = new DescriptorSet(set0Layout, ubGlobal, FrameGraph.TransformBuffer);
 
-            psResLayout = new DescriptorSetLayout(1)
+            set1Layout = new DescriptorSetLayout(1)
             {
-                //new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
                 new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment),
                 new DescriptorSetLayoutBinding(1, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
             };
 
-            psResourceSet = new DescriptorSet(psResLayout, ubLight, ShadowPass.DepthRT);
+            descriptorSetLight = new DescriptorSet(set1Layout, ubLight, ShadowPass.DepthRT);
 
         }
 
@@ -199,11 +193,6 @@ namespace SharpGame
             translucentBatches.Clear();
 
             UpdateDrawables();
-
-            frameUniform.DeltaTime = Time.Delta;
-            frameUniform.ElapsedTime = Time.Elapsed;
-
-            ubFrameInfo.SetData(ref frameUniform);
 
             if (camera != null)
             {
@@ -273,24 +262,19 @@ namespace SharpGame
 
         private void UpdateViewParameters()
         {
-            cameraVS.View = camera.View;
-            cameraVS.ViewInv = glm.inverse(cameraVS.View);
-            cameraVS.Proj = camera.Projection;
-            cameraVS.ProjInv = glm.inverse(cameraVS.Proj);
-            cameraVS.ViewProj = camera.VkProjection*camera.View;
-            cameraVS.ViewProjInv = glm.inverse(cameraVS.ViewProj);
-            cameraVS.CameraPos = camera.Node.Position;
+            cameraUBO.View = camera.View;
+            cameraUBO.ViewInv = glm.inverse(cameraUBO.View);
+            cameraUBO.Proj = camera.VkProjection;
+            cameraUBO.ProjInv = glm.inverse(cameraUBO.Proj);
+            cameraUBO.ViewProj = camera.VkProjection*camera.View;
+            cameraUBO.ViewProjInv = glm.inverse(cameraUBO.ViewProj);
+            cameraUBO.CameraPos = camera.Node.Position;
+            cameraUBO.CameraDir = camera.Node.WorldDirection;
+            cameraUBO.NearClip = camera.NearClip;
+            cameraUBO.FarClip = camera.FarClip;
 
-            camera.GetFrustumSize(out var nearVector, out var farVector);
-
-            float nearClip = camera.NearClip;
-            float farClip = camera.FarClip;
-
-            cameraVS.NearClip = camera.NearClip;
-            cameraVS.FarClip = camera.FarClip;
-
-            ubCameraVS.SetData(ref cameraVS);
-            ubCameraVS.Flush();
+            ubGlobal.SetData(ref cameraUBO);
+            ubGlobal.Flush();
 
 
         }

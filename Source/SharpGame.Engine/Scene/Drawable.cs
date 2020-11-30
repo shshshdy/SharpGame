@@ -116,7 +116,7 @@ namespace SharpGame
         }
         protected vec3 worldCenter_;
         /// Local-space bounding box.
-        protected BoundingBox boundingBox_;
+        protected BoundingBox boundingBox_= BoundingBox.Infinity;
 
         /// Draw call source data.
         [IgnoreDataMember]

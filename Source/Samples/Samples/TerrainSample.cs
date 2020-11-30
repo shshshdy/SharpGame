@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 11)]
+    [SampleDesc(sortOrder = -11)]
     public class TerrainSample : Sample
     {
         public override void Init()
@@ -48,10 +48,26 @@ namespace SharpGame.Samples
                 staticModel.SetMaterial(mat);
             }
 
+            {
+                var node = scene.CreateChild("Terrain");
+
+                var terrain = node.AddComponent<Terrain>();
+                terrain.GenerateTerrain();
+
+                var mat = new Material("shaders/Terrain.shader");
+                terrain.SetMaterial(mat);
+            }
+
 
             MainView.Attach(camera, scene);
 
         }
 
+
     }
+
+
+
+
+
 }

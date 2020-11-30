@@ -81,14 +81,14 @@ namespace SharpGame.Samples
 
                 KtxTextureReader texReader = new KtxTextureReader
                 {
-                    VkFormat = VkFormat.R8G8B8A8UNorm,
+                    Format = VkFormat.R8G8B8A8UNorm,
                 };
 
                 var colorMap = texReader.Load("models/cerberus/albedo.ktx");// VkFormat.R8g8b8a8Srgb);
                 var normalMap = texReader.Load("models/cerberus/normal.ktx");
-                texReader.VkFormat = VkFormat.R8UNorm;
+                texReader.Format = VkFormat.R8UNorm;
                 var metallicMap = texReader.Load("models/cerberus/metallic.ktx");
-                texReader.VkFormat = VkFormat.R8UNorm;
+                texReader.Format = VkFormat.R8UNorm;
                 var roughnessMap = texReader.Load("models/cerberus/roughness.ktx");
                 //var aoMap = Texture.LoadFromFile("models/cerberus/ao.ktx", VkFormat.R8Unorm);
 
@@ -136,7 +136,7 @@ namespace SharpGame.Samples
         {
             KtxTextureReader texReader = new KtxTextureReader
             {
-                VkFormat = VkFormat.R16G16B16A16SFloat,
+                Format = VkFormat.R16G16B16A16SFloat,
             };
 
             cubeMap = texReader.Load("textures/hdr/" + cubemap);

@@ -40,6 +40,10 @@ namespace SharpGame
     {
         public static readonly BoundingBox Empty = new BoundingBox(
             new vec3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity), new vec3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity));
+
+        public static readonly BoundingBox Infinity = new BoundingBox(
+            new vec3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity), new vec3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity));
+
         /// <summary>
         /// The minimum point of the box.
         /// </summary>

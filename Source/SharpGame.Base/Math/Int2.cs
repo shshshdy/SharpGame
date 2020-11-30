@@ -40,6 +40,12 @@ namespace SharpGame
             this.y = y;
         }
 
+        public Int2(int xy) : this(xy, xy)
+        {
+            this.x = xy;
+            this.y = xy;
+        }
+
         public int X => x;
 
         public int Y => y;
@@ -99,6 +105,46 @@ namespace SharpGame
         {
             return new vec2(value.X, value.Y);
         }
-        
+
+        public static Int2 operator +(in Int2 lhs, in Int2 rhs)
+        {
+            return new Int2(lhs.x + rhs.x, lhs.y + rhs.y);
+        }
+
+        public static Int2 operator +(in Int2 lhs, int rhs)
+        {
+            return new Int2(lhs.x + rhs, lhs.y + rhs);
+        }
+
+        public static Int2 operator -(in Int2 lhs, in Int2 rhs)
+        {
+            return new Int2(lhs.x - rhs.x, lhs.y - rhs.y);
+        }
+
+        public static Int2 operator -(in Int2 lhs, int rhs)
+        {
+            return new Int2(lhs.x - rhs, lhs.y - rhs);
+        }
+
+        public static Int2 operator *(in Int2 self, int s)
+        {
+            return new Int2(self.x * s, self.y * s);
+        }
+
+        public static Int2 operator *(int lhs, in Int2 rhs)
+        {
+            return new Int2(rhs.x * lhs, rhs.y * lhs);
+        }
+
+        public static Int2 operator *(in Int2 lhs, in Int2 rhs)
+        {
+            return new Int2(rhs.x * lhs.x, rhs.y * lhs.y);
+        }
+
+        public static Int2 operator /(in Int2 lhs, int rhs)
+        {
+            return new Int2(lhs.x / rhs, lhs.y / rhs);
+        }
+
     }
 }

@@ -13,7 +13,7 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct CameraVS
+    public struct GlobalUBO
     {
         public mat4 View;
         public mat4 ViewInv;
@@ -31,7 +31,7 @@ namespace SharpGame
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct LightParameter
+    public unsafe struct LightUBO
     {
         public Color4 AmbientColor;
         public Color4 SunlightColor;

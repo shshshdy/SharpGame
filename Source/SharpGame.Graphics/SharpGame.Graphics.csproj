@@ -16,15 +16,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DeviceObject\**" />
+    <Compile Remove="Shader\**" />
+    <EmbeddedResource Remove="DeviceObject\**" />
+    <EmbeddedResource Remove="Shader\**" />
+    <None Remove="DeviceObject\**" />
+    <None Remove="Shader\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Tools\SharpSPIRVCross\src\SharpSPIRVCross\SharpSPIRVCross.csproj" />
     <ProjectReference Include="..\..\Tools\SharpVulkan\src\Vulkan\SharpVulkan.csproj" />
     <ProjectReference Include="..\SharpGame.Base\SharpGame.Base.csproj" />
     <ProjectReference Include="..\SharpGame.Sdl2\SharpGame.Sdl2.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DeviceObject\" />
-    <Folder Include="Shader\" />
   </ItemGroup>
 
 </Project>

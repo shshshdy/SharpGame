@@ -46,7 +46,7 @@ namespace SharpGame.Samples
             {
                 KtxTextureReader texReader = new KtxTextureReader
                 {
-                    VkFormat = VkFormat.R8G8B8A8UNorm,
+                    Format = VkFormat.R8G8B8A8UNorm,
                     SamplerAddressMode = VkSamplerAddressMode.Repeat,
                 };
 

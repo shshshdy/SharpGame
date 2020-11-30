@@ -128,7 +128,7 @@ namespace SharpGame
 
     public class KtxTextureReader : ResourceReader<Texture>
     {
-        public VkFormat VkFormat { get; set; } = VkFormat.BC3UNormBlock;
+        public VkFormat Format { get; set; } = VkFormat.BC3UNormBlock;
         public VkSamplerAddressMode SamplerAddressMode { get; set; } = VkSamplerAddressMode.Repeat;
 
         public KtxTextureReader() : base(".ktx")
@@ -140,7 +140,7 @@ namespace SharpGame
             KtxFile texFile = KtxFile.Load(stream, false);
             Debug.Assert(!texFile.Header.SwapEndian);
 
-            VkFormat fmt = VkFormat;
+            VkFormat fmt = Format;
             if(stream.Name.IndexOf("bc3_unorm", StringComparison.OrdinalIgnoreCase) != -1)
             {
                 fmt = VkFormat.BC3UNormBlock;

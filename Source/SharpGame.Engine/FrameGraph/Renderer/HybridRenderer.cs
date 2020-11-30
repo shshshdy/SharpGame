@@ -49,7 +49,7 @@ namespace SharpGame
                 new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.All),
             };
 
-            deferredSet0 = new DescriptorSet(deferredLayout0, View.ubCameraVS);
+            deferredSet0 = new DescriptorSet(deferredLayout0, View.ubGlobal);
 
             deferredLayout1 = new DescriptorSetLayout
             {

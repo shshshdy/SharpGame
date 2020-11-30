@@ -466,6 +466,13 @@ namespace SharpGame
                 pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
             }
 
+            VkPipelineTessellationStateCreateInfo tessellationStateCreateInfo = new VkPipelineTessellationStateCreateInfo
+            {
+                sType = VkStructureType.PipelineTessellationStateCreateInfo,
+                patchControlPoints = 4
+            };
+            pipelineCreateInfo.pTessellationState = &tessellationStateCreateInfo;
+
             var handle = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
             pipelines.TryAdd(vertexInput?.GetHashCode()??0, handle);
             return handle;
