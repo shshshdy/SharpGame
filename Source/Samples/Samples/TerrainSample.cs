@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 11)]
+    [SampleDesc(sortOrder = -11)]
     public class TerrainSample : Sample
     {
         public override void Init()
@@ -34,7 +34,7 @@ namespace SharpGame.Samples
             };
 
             camera = scene.GetComponent<Camera>(true);
-
+            /*
             var importer = new AssimpModelReader(VertexComponent.Position, VertexComponent.Texcoord);
 
             {
@@ -46,8 +46,8 @@ namespace SharpGame.Samples
                 staticModel.SetBoundingBox(new BoundingBox(-10000, 10000));
                 var mat = new Material("shaders/SkySphere.shader");
                 staticModel.SetMaterial(mat);
-            }
-
+            }*/
+            
             {
                 var node = scene.CreateChild("Terrain");
 

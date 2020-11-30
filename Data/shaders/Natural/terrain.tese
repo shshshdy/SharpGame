@@ -1,6 +1,6 @@
 #version 450
 
-layout (set = 0, binding = 0) uniform UBO 
+layout (set = 1, binding = 0) uniform UBO 
 {
 	mat4 projection;
 	mat4 modelview;
@@ -12,7 +12,8 @@ layout (set = 0, binding = 0) uniform UBO
 	float tessellatedEdgeSize;
 } ubo; 
 
-layout (set = 0, binding = 1) uniform sampler2D displacementMap; 
+layout (set = 1, binding = 1) uniform sampler2D displacementMap; 
+layout (set = 1, binding = 2) uniform sampler2DArray samplerLayers;
 
 layout(quads, equal_spacing, cw) in;
 

@@ -63,6 +63,11 @@ namespace SharpGame
             vkGetPhysicalDeviceFeatures(PhysicalDevice, out VkPhysicalDeviceFeatures features);
             Features = features;
 
+            if (features.tessellationShader)
+            {
+                enabledFeatures.tessellationShader = true;
+            }
+               
             if (features.multiDrawIndirect)
             {
                 enabledFeatures.multiDrawIndirect = true;

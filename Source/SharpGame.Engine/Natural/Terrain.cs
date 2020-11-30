@@ -25,7 +25,7 @@ namespace SharpGame
 
         public override void Draw(CommandBuffer cb, Pass pass)
         {
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, dsTess);
+            //cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, dsTess);
             material.Bind(pass.passIndex, cb);
             geometry.Draw(cb);
         }
@@ -38,6 +38,7 @@ namespace SharpGame
         const float UV_SCALE = 1.0f;
      
         HeightMap heightMap;
+        Texture colorMap;
         Material material;
 
         TessUBO uboTess;
@@ -70,8 +71,9 @@ namespace SharpGame
 
             batch.dsLayout = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
-                new DescriptorSetLayoutBinding(1, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment | VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment | VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
+                new DescriptorSetLayoutBinding(2, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment | VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
             };
 
             batch.dsTess = new DescriptorSet(batch.dsLayout);
@@ -81,6 +83,8 @@ namespace SharpGame
         // Generate a terrain quad patch for feeding to the tessellation control shader
         public void GenerateTerrain()
         {
+            heightMap = new HeightMap("textures/terrain_heightmap_r16.ktx", PATCH_SIZE);
+
             const uint vertexCount = PATCH_SIZE * PATCH_SIZE;
             // We use the Vertex definition from the glTF model loader, so we can re-use the vertex input state
             VertexPosTexNorm[] vertices = new VertexPosTexNorm[vertexCount];
@@ -101,7 +105,6 @@ namespace SharpGame
             }
 
             // Calculate normals from height map using a sobel filter
-            heightMap = new HeightMap("textures/terrain_heightmap_r16.ktx", PATCH_SIZE);
             float[,] heights = new float[3, 3];
             for (uint x = 0; x < PATCH_SIZE; x++)
             {
@@ -156,13 +159,19 @@ namespace SharpGame
             };
 
             batch.geometry.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, indexCount, 0);
+            //batch.geometry.PrimitiveTopology = VkPrimitiveTopology.PatchList;
+
+
+            colorMap = Resources.Instance.Load<Texture>("textures/terrain_texturearray_rgba.ktx");
 
             batch.dsTess.Bind(1, heightMap.texture);
+            batch.dsTess.Bind(2, colorMap);
+
         }
 
         bool tessellation = true;
         public override void UpdateGeometry(in FrameInfo frameInfo)
-        {        
+        {
             // Tessellation
             uboTess.projection = frameInfo.camera.VkProjection;
             uboTess.modelview = frameInfo.camera.View * new mat4(1.0f);
@@ -187,6 +196,20 @@ namespace SharpGame
             {
                 uboTess.tessellationFactor = savedFactor;
             }
+
+        }
+
+        public override void UpdateBatches(in FrameInfo frame)
+        {
+            ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
+            distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
+
+            batch.distance = distance_;
+
+            ref mat4 worldTransform = ref node_.WorldTransform;
+
+            batch.worldTransform = node_.worldTransform_;
+            batch.numWorldTransforms = 1;
 
         }
 

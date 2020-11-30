@@ -44,7 +44,7 @@ Shader "Basic"
 			layout (location = 0) out vec4 out_Color;
 
 			void main()
-            {			   
+            {
                 vec4 color = texture(DiffMap, in_TexCoord);
                 if (color.a < 0.5) {
                     discard;
