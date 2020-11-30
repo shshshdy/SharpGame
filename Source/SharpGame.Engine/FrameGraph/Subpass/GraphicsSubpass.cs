@@ -54,7 +54,7 @@ namespace SharpGame
                 cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
             }
             
-            batch.Draw(cb, pass.passIndex);
+            batch.Draw(cb, pass);
         }
 
         public void DrawBatches(CommandBuffer commandBuffer, Span<SourceBatch> sourceBatches, DescriptorSet set0, Span<DescriptorSet> set1)

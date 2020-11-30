@@ -25,9 +25,9 @@ namespace SharpGame
         public uint indirectDrawCount;
         public long triangleCount = 0;
 
-        public override void Draw(CommandBuffer cb, int passIndex)
+        public override void Draw(CommandBuffer cb, Pass pass)
         {
-            material.Bind(passIndex, cb);
+            material.Bind(pass.passIndex, cb);
 
             cb.BindVertexBuffer(0, geometry.VertexBuffer);
             cb.BindVertexBuffer(1, instanceBuffer);
@@ -88,25 +88,19 @@ namespace SharpGame
                 }
 
                 batch.numWorldTransforms = 1;
-
-                Material mat = model.GetMaterial(0);
-                if (mat)
-                {
-                    SetMaterial(0, mat);
-                }
           
             }
             else
             {
             }
 
-            prepareIndirectData();
-            prepareInstanceData();
+            PrepareIndirectData();
+            PrepareInstanceData();
         }
 
 
         // Prepare (and stage) a buffer containing the indirect draw commands
-        void prepareIndirectData()
+        void PrepareIndirectData()
         {
             indirectCommands.Clear();
             batch.triangleCount = 0;
@@ -141,7 +135,7 @@ namespace SharpGame
         }
 
         // Prepare (and stage) a buffer containing instanced data for the mesh draws
-        void prepareInstanceData()
+        void PrepareInstanceData()
         {
             instanceData.Resize(objectCount);
 

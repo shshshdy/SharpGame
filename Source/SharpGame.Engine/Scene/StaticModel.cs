@@ -46,14 +46,32 @@ namespace SharpGame
             OnMarkedDirty(node_);
         }
 
-        public override void SetNumGeometries(int num)
+        public virtual void SetNumGeometries(int num)
         {
-            base.SetNumGeometries(num);
-            
+            Array.Resize(ref batches, num);
+
+            for (int i = 0; i < num; i++)
+            {
+                if (batches[i] == null)
+                {
+                    batches[i] = new SourceBatch
+                    {
+                        geometryType = GeometryType
+                    };
+                }
+            }
+
             Array.Resize(ref geometries_, num);
             Array.Resize(ref geometryData_, num);
 
             ResetLodLevels();
+        }
+
+        public void SetGeometry(int index, Geometry geometry)
+        {
+            batches[index].geometry = geometry;
+            batches[index].worldTransform = node_.worldTransform_;
+            batches[index].numWorldTransforms = 1;
         }
 
         public virtual StaticModel SetModel(Model model)

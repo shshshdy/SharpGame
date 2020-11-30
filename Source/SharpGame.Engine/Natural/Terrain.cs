@@ -18,33 +18,64 @@ namespace SharpGame
         public float tessellatedEdgeSize;
     };
 
+    public class TerrainBatch : SourceBatch
+    {
+        public DescriptorSetLayout dsLayout;
+        public DescriptorSet dsTess;
+
+        public override void Draw(CommandBuffer cb, Pass pass)
+        {
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, dsTess);
+            material.Bind(pass.passIndex, cb);
+            geometry.Draw(cb);
+        }
+
+    }
+
     public class Terrain : Drawable
     {
         const uint PATCH_SIZE = 64;
         const float UV_SCALE = 1.0f;
      
         HeightMap heightMap;
-        Geometry geometry;
         Material material;
 
         TessUBO uboTess;
 
         SharedBuffer ubTess;
+        TerrainBatch batch;
+
 
         public Terrain()
         {
+            batch = new TerrainBatch();
+            batches = new[] { batch };
+
             material = new Material("shaders/Terrain.shader");
 
-            uboTess.lightPos = new vec4(-48.0f, -40.0f, 46.0f, 0.0f);
-            //public fixed vec4 frustumPlanes[6];
-            uboTess.displacementFactor = 32.0f;
-            uboTess.tessellationFactor = 0.75f;
-            uboTess.tessellatedEdgeSize = 20.0f;
+            uboTess = new TessUBO
+            {
+                lightPos = new vec4(-48.0f, -40.0f, 46.0f, 0.0f),
+                displacementFactor = 32.0f,
+                tessellationFactor = 0.75f,
+                tessellatedEdgeSize = 20.0f
+            };
+
+            batch.material = material;
 
             unsafe
             {
                 ubTess = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)sizeof(TessUBO));
             }
+
+            batch.dsLayout = new DescriptorSetLayout
+            {
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
+            };
+
+            batch.dsTess = new DescriptorSet(batch.dsLayout);
+            batch.dsTess.Bind(0, ubTess);
         }
 
         // Generate a terrain quad patch for feeding to the tessellation control shader
@@ -81,7 +112,7 @@ namespace SharpGame
                     {
                         for (int hy = -1; hy <= 1; hy++)
                         {
-                            heights[hx + 1, hy + 1] = heightMap.getHeight((int)x + hx, (int)y + hy);
+                            heights[hx + 1, hy + 1] = heightMap.GetHeight((int)x + hx, (int)y + hy);
                         }
                     }
 
@@ -117,20 +148,16 @@ namespace SharpGame
                 }
             }
 
-            geometry = new Geometry
+            batch.geometry = new Geometry
             {
                 VertexBuffer = Buffer.Create(VkBufferUsageFlags.VertexBuffer, vertices),
                 IndexBuffer = Buffer.Create(VkBufferUsageFlags.IndexBuffer, indices),
                 VertexLayout = VertexPosTexNorm.Layout,
             };
 
-            geometry.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, indexCount, 0);
+            batch.geometry.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, indexCount, 0);
 
-            SetNumGeometries(1);
-            SetGeometry(0, geometry);
-            SetMaterial(material);
-
-            //material.SetBuffer("", ubTess);
+            batch.dsTess.Bind(1, heightMap.texture);
         }
 
         bool tessellation = true;
@@ -154,7 +181,7 @@ namespace SharpGame
                 uboTess.tessellationFactor = 0.0f;
             }
 
-            //memcpy(uniformBuffers.terrainTessellation.mapped, &uboTess, sizeof(uboTess));
+            ubTess.SetData(ref uboTess);
 
             if (!tessellation)
             {
@@ -170,7 +197,7 @@ namespace SharpGame
         ushort[] heightdata;
         uint dim;
         uint scale;
-        Texture texture;
+        public Texture texture;
         public HeightMap(string filename, uint patchsize)
         {
             KtxTextureReader importer = new KtxTextureReader();
@@ -184,7 +211,7 @@ namespace SharpGame
 
         }
 
-        public float getHeight(int x, int y)
+        public float GetHeight(int x, int y)
         {
             Int2 rpos = new Int2(x * (int)scale, y * (int)scale);
             rpos.x = Math.Max(0, Math.Min(rpos.x, (int)dim - 1));

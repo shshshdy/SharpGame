@@ -56,9 +56,9 @@ namespace SharpGame
         public int offset;
         public int frameNum;
 
-        public virtual void Draw(CommandBuffer cb,  int passIndex)
+        public virtual void Draw(CommandBuffer cb, Pass pass)
         {
-            material.Bind(passIndex, cb);
+            material.Bind(pass.passIndex, cb);
             geometry.Draw(cb);
         }
 
@@ -156,32 +156,9 @@ namespace SharpGame
         {
         }
 
-        public virtual void SetNumGeometries(int num)
-        {
-            Array.Resize(ref batches, num);
-
-            for (int i = 0; i < num; i++)
-            {
-                if (batches[i] == null)
-                {
-                    batches[i] = new SourceBatch
-                    {
-                        geometryType = GeometryType
-                    };
-                }
-            }
-        }
-
-        public void SetGeometry(int index, Geometry geometry)
-        {
-            batches[index].geometry = geometry;
-            batches[index].worldTransform = node_.worldTransform_;
-            batches[index].numWorldTransforms = 1;
-        }
-
         public void SetMaterial(Material mat)
         {
-            foreach(var batch in batches)
+            foreach (var batch in batches)
             {
                 batch.material = mat;
             }
