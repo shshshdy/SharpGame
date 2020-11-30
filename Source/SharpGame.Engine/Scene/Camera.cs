@@ -154,7 +154,6 @@ namespace SharpGame
                 if(frustumDirty_)
                 {
                     frustum_.Matrix = projection_ * View;
-                    //frustum_ = BoundingFrustum.FromCamera(Node.WorldPosition, Node.WorldDirection, Node.WorldUp, Fov, NearClip, FarClip, AspectRatio);
                     frustumDirty_ = false;
                 }
 
@@ -162,20 +161,6 @@ namespace SharpGame
             }
 
         }
-
-        /*
-        [IgnoreDataMember]
-        public BoundingFrustum ViewSpaceFrustum
-        {
-            get
-            {
-                if (projectionDirty_)
-                    UpdateProjection();
-
-                return new BoundingFrustum(projection_);
-            }
-
-        }*/
 
         public void SetNearClip(float nearClip)
         {

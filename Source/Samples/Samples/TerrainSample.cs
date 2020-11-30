@@ -54,8 +54,6 @@ namespace SharpGame.Samples
                 var terrain = node.AddComponent<Terrain>();
                 terrain.GenerateTerrain();
 
-                var mat = new Material("shaders/Terrain.shader");
-                terrain.SetMaterial(mat);
             }
 
 

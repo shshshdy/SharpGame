@@ -25,6 +25,9 @@ namespace SharpGame
 
         internal VkDescriptorImageInfo descriptor;
 
+        MipmapLevel[] imageData;
+        public MipmapLevel[] ImageData => imageData;
+
         public Texture()
         {
         }
@@ -33,8 +36,14 @@ namespace SharpGame
         public uint height => extent.height;
         public uint depth => extent.depth;
 
+        public byte[] GetData(int level, int layer, int face)
+        {
+            return imageData[level].ArrayElements[layer].Faces[face].Data;
+        }
+
         public unsafe void SetImageData(MipmapLevel[] imageData)
         {
+            this.imageData = imageData;
             this.extent = new VkExtent3D(imageData[0].Width, imageData[0].Height, 1);          
             mipLevels = (uint)imageData.Length;
             layers = (uint)imageData[0].ArrayElements.Length;

@@ -3,7 +3,21 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace SharpGame
-{
+{       
+    // Shared values for tessellation control and evaluation stages
+    public unsafe struct TessUBO
+    {           
+        public mat4 projection;
+        public mat4 modelview;
+        public vec4 lightPos;
+        public FixedArray6<Plane> frustumPlanes;
+        public float displacementFactor;
+        public float tessellationFactor;
+        public vec2 viewportDim;
+        // Desired size of tessellated quad patch edge
+        public float tessellatedEdgeSize;
+    };
+
     public class Terrain : Drawable
     {
         const uint PATCH_SIZE = 64;
@@ -11,9 +25,26 @@ namespace SharpGame
      
         HeightMap heightMap;
         Geometry geometry;
+        Material material;
+
+        TessUBO uboTess;
+
+        SharedBuffer ubTess;
 
         public Terrain()
         {
+            material = new Material("shaders/Terrain.shader");
+
+            uboTess.lightPos = new vec4(-48.0f, -40.0f, 46.0f, 0.0f);
+            //public fixed vec4 frustumPlanes[6];
+            uboTess.displacementFactor = 32.0f;
+            uboTess.tessellationFactor = 0.75f;
+            uboTess.tessellatedEdgeSize = 20.0f;
+
+            unsafe
+            {
+                ubTess = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)sizeof(TessUBO));
+            }
         }
 
         // Generate a terrain quad patch for feeding to the tessellation control shader
@@ -97,6 +128,39 @@ namespace SharpGame
 
             SetNumGeometries(1);
             SetGeometry(0, geometry);
+            SetMaterial(material);
+
+            material.SetBuffer("", ubTess);
+        }
+
+        bool tessellation = true;
+        public override void UpdateGeometry(in FrameInfo frameInfo)
+        {        
+            // Tessellation
+            uboTess.projection = frameInfo.camera.VkProjection;
+            uboTess.modelview = frameInfo.camera.View * new mat4(1.0f);
+            uboTess.lightPos.y = -0.5f - uboTess.displacementFactor; // todo: Not uesed yet
+            uboTess.viewportDim = new vec2((float)frameInfo.viewSize.x, (float)frameInfo.viewSize.y);
+
+            for(int i = 0; i < 6; i++)
+            {
+                uboTess.frustumPlanes[i] = frameInfo.camera.Frustum.GetPlane(i);
+            }
+
+            float savedFactor = uboTess.tessellationFactor;
+            if (!tessellation)
+            {
+                // Setting this to zero sets all tessellation factors to 1.0 in the shader
+                uboTess.tessellationFactor = 0.0f;
+            }
+
+            //memcpy(uniformBuffers.terrainTessellation.mapped, &uboTess, sizeof(uboTess));
+
+            if (!tessellation)
+            {
+                uboTess.tessellationFactor = savedFactor;
+            }
+
         }
 
     }
@@ -114,7 +178,8 @@ namespace SharpGame
             texture = importer.Load(filename);
             dim = texture.width;
             heightdata = new ushort[dim * dim];
-            //             memcpy(heightdata, ktxImage, ktxSize);
+            var imgData = texture.GetData(0, 0, 0);
+            System.Buffer.BlockCopy(imgData, 0, heightdata, 0, imgData.Length);
             scale = dim / patchsize;
 
         }
