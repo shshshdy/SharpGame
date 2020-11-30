@@ -5,9 +5,16 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Sampler : DisposeBase, IBindableResource
+    public class Sampler : HandleBase<VkSampler>, IBindableResource
     {
-        private VkSampler handle;
+        public static Sampler Default;
+        public static Sampler ClampToEdge;
+
+        static Sampler()
+        {
+            Default = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, true);
+            ClampToEdge = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
+        }
 
         public Sampler(VkFilter filter, VkSamplerMipmapMode mipmapMode,
             VkSamplerAddressMode addressMode, bool anisotropyEnable, VkBorderColor borderColor = VkBorderColor.FloatOpaqueWhite)
@@ -38,23 +45,6 @@ namespace SharpGame
             handle = Device.CreateSampler(ref samplerCreateInfo);
         }
 
-        public static implicit operator VkSampler(Sampler sampler) => sampler.handle;
-
-        protected override void Destroy(bool disposing)
-        {
-            Device.Destroy(handle);
-
-            base.Destroy(disposing);
-        }
-
-        public static Sampler Default;
-        public static Sampler ClampToEdge;
-
-        static Sampler()
-        {
-            Default = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, true);
-            ClampToEdge = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
-        }
 
     }
 
