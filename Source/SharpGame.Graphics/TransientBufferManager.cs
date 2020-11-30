@@ -70,7 +70,6 @@ namespace SharpGame
             }
         }
 
-
         public TransientBuffer Alloc(uint size)
         {
             var tb = new TransientBuffer

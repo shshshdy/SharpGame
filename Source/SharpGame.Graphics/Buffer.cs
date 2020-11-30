@@ -11,13 +11,13 @@ namespace SharpGame
     
     public class Buffer : DeviceMemory<VkBuffer>, IBindableResource
     {
+        public ulong Count { get; protected set; }
+        public ulong Size { get; protected set; }
         public ulong Stride { get; set; }
         public VkBufferUsageFlags UsageFlags { get; set; }
 
         public BufferView view;
-
         internal VkDescriptorBufferInfo descriptor;
-
 
         public Buffer()
         {
@@ -33,12 +33,13 @@ namespace SharpGame
         {
             Stride = stride;
             Count = count;
-
-            ulong size = stride * count;
+            Size = stride * count;
 
             // Create the buffer handle
-            var bufferCreateInfo = new VkBufferCreateInfo(usageFlags, size, queueFamilyIndices);
-            bufferCreateInfo.sharingMode = sharingMode;
+            var bufferCreateInfo = new VkBufferCreateInfo(usageFlags, Size, queueFamilyIndices)
+            {
+                sharingMode = sharingMode
+            };
 
             if (data != null && (memoryPropertyFlags & VkMemoryPropertyFlags.HostCoherent) == 0)
             {
@@ -51,15 +52,12 @@ namespace SharpGame
             memoryPropertyFlags = memoryPropFlags;
 
             Device.GetBufferMemoryRequirements(handle, out VkMemoryRequirements memReqs);
-
             Allocate(memReqs);
             Device.BindBufferMemory(handle, memory, 0);
 
-            Size = allocationSize;
-
             if (data != IntPtr.Zero)
             {
-                SetData(data, 0, size);
+                SetData(data, 0, Size);
             }
 
             SetupDescriptor();

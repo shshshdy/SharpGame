@@ -288,7 +288,7 @@ namespace SharpGame
 
             texture.image = Image.Create(w, h, VkImageCreateFlags.None, 1, 1, format, VkSampleCountFlags.Count1, VkImageUsageFlags.TransferDst | VkImageUsageFlags.Sampled);
 
-            ulong totalBytes = texture.image.allocationSize;
+            ulong totalBytes = texture.image.AllocationSize;
 
             using (Buffer stagingBuffer = Buffer.CreateStagingBuffer(totalBytes, tex2DDataPtr))
             {

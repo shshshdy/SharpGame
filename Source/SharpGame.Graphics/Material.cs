@@ -23,7 +23,6 @@ namespace SharpGame
         All = 7
     }
 
-
     public class Material : Resource
     {
         public ResourceRef ShaderResource { get; set; }
@@ -56,7 +55,6 @@ namespace SharpGame
         [IgnoreDataMember]
         public Shader Shader { get => shader; set => SetShader(value); }
         private Shader shader;
-
 
         [IgnoreDataMember]
         public PipelineResourceSet[] PipelineResourceSet => pipelineResourceSet;

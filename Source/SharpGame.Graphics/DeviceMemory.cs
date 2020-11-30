@@ -8,23 +8,21 @@ namespace SharpGame
     {
         internal VkDeviceMemory memory;
         public IntPtr Mapped { get; private set; }
-        public ulong Count { get; set; }
-        public ulong Size { get; set; }
 
         internal VkMemoryPropertyFlags memoryPropertyFlags = VkMemoryPropertyFlags.DeviceLocal;
-        internal ulong allocationSize = 0;
+        public ulong AllocationSize { get; private set; } = 0;
 
         public void Allocate(in VkMemoryRequirements memReqs)
         {
             var memoryTypeIndex = Device.GetMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
             VkMemoryAllocateInfo memAllocInfo = new VkMemoryAllocateInfo(memReqs.size, memoryTypeIndex);
-            memory = Device.AllocateMemory(ref memAllocInfo);            
-            allocationSize = memAllocInfo.allocationSize;
+            memory = Device.AllocateMemory(ref memAllocInfo);
+            AllocationSize = memAllocInfo.allocationSize;
         }
 
         public ref K Map<K>(ulong offset = 0) where K : struct
         {
-            Mapped = Device.MapMemory(memory, offset, Size, VkMemoryMapFlags.None);
+            Mapped = Device.MapMemory(memory, offset, Vulkan.WholeSize, VkMemoryMapFlags.None);
             return ref Utilities.As<K>(Mapped);
         }
 
@@ -44,11 +42,11 @@ namespace SharpGame
         {
             VkMappedMemoryRange mappedRange = new VkMappedMemoryRange
             {
-                sType = VkStructureType.MappedMemoryRange
+                sType = VkStructureType.MappedMemoryRange,
+                memory = memory,
+                offset = offset,
+                size = size
             };
-            mappedRange.memory = memory;
-            mappedRange.offset = offset;
-            mappedRange.size = size;
             Device.FlushMappedMemoryRanges(1, ref mappedRange);
         }
 
@@ -56,17 +54,17 @@ namespace SharpGame
         {
             VkMappedMemoryRange mappedRange = new VkMappedMemoryRange
             {
-                sType = VkStructureType.MappedMemoryRange
+                sType = VkStructureType.MappedMemoryRange,
+                memory = memory,
+                offset = offset,
+                size = size
             };
-            mappedRange.memory = memory;
-            mappedRange.offset = offset;
-            mappedRange.size = size;
             Device.InvalidateMappedMemoryRanges(1, ref mappedRange);
         }
 
         protected override void Destroy(bool disposing)
         {
-            if (memory != 0)
+            if (memory != VkDeviceMemory.Null)
             {
                 Device.FreeMemory(memory);
             }

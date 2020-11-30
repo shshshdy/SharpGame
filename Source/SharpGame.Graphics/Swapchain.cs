@@ -74,121 +74,111 @@ namespace SharpGame
                 throw new NotImplementedException($"SDL backend not implemented: {sysWmInfo.subsystem}.");
             }*/
 
-            // Get available queue family properties
-            uint queueCount;
-            vkGetPhysicalDeviceQueueFamilyProperties(Device.PhysicalDevice, &queueCount, null);
-            Debug.Assert(queueCount >= 1);
+            var queueProps = vkGetPhysicalDeviceQueueFamilyProperties(Device.PhysicalDevice);
 
-            using (Vector<VkQueueFamilyProperties> queueProps = new Vector<VkQueueFamilyProperties>(queueCount))
+            // Iterate over each queue to learn whether it supports presenting:
+            // Find a queue with present support
+            // Will be used to present the swap chain Images to the windowing system
+            VkBool32* supportsPresent = stackalloc VkBool32[(int)queueProps.Length];
+
+            for (int i = 0; i < queueProps.Length; i++)
             {
-                vkGetPhysicalDeviceQueueFamilyProperties(Device.PhysicalDevice, &queueCount, queueProps.DataPtr);
-                queueProps.Count = queueCount;
+                vkGetPhysicalDeviceSurfaceSupportKHR(Device.PhysicalDevice, (uint)i, Surface, out supportsPresent[i]);
+            }
 
-                // Iterate over each queue to learn whether it supports presenting:
-                // Find a queue with present support
-                // Will be used to present the swap chain Images to the windowing system
-                VkBool32* supportsPresent = stackalloc VkBool32[(int)queueCount];
-
-                for (uint i = 0; i < queueCount; i++)
+            // Search for a graphics and a present queue in the array of queue
+            // families, try to find one that supports both
+            uint graphicsQueueNodeIndex = uint.MaxValue;
+            uint presentQueueNodeIndex = uint.MaxValue;
+            for (int i = 0; i < queueProps.Length; i++)
+            {
+                if ((queueProps[i].queueFlags & VkQueueFlags.Graphics) != 0)
                 {
-                    vkGetPhysicalDeviceSurfaceSupportKHR(Device.PhysicalDevice, i, Surface, out supportsPresent[i]);
-                }
-
-                // Search for a graphics and a present queue in the array of queue
-                // families, try to find one that supports both
-                uint graphicsQueueNodeIndex = uint.MaxValue;
-                uint presentQueueNodeIndex = uint.MaxValue;
-                for (uint i = 0; i < queueCount; i++)
-                {
-                    if ((queueProps[i].queueFlags & VkQueueFlags.Graphics) != 0)
+                    if (graphicsQueueNodeIndex == uint.MaxValue)
                     {
-                        if (graphicsQueueNodeIndex == uint.MaxValue)
-                        {
-                            graphicsQueueNodeIndex = i;
-                        }
-
-                        if (supportsPresent[i] == true)
-                        {
-                            graphicsQueueNodeIndex = i;
-                            presentQueueNodeIndex = i;
-                            break;
-                        }
+                        graphicsQueueNodeIndex = (uint)i;
                     }
-                }
 
-                if (presentQueueNodeIndex == uint.MaxValue)
-                {
-                    // If there's no queue that supports both present and graphics
-                    // try to find a separate present queue
-                    for (uint i = 0; i < queueCount; ++i)
+                    if (supportsPresent[i] == true)
                     {
-                        if (supportsPresent[i] == true)
-                        {
-                            presentQueueNodeIndex = i;
-                            break;
-                        }
-                    }
-                }
-
-                // Exit if either a graphics or a presenting queue hasn't been found
-                if (graphicsQueueNodeIndex == uint.MaxValue || presentQueueNodeIndex == uint.MaxValue)
-                {
-                    throw new InvalidOperationException("Could not find a graphics and/or presenting queue!");
-                }
-
-                // todo : Add support for separate graphics and presenting queue
-                if (graphicsQueueNodeIndex != presentQueueNodeIndex)
-                {
-                    throw new InvalidOperationException("Separate graphics and presenting queues are not supported yet!");
-                }
-
-                QueueNodeIndex = graphicsQueueNodeIndex;
-
-                // Get list of supported Surface formats
-                uint formatCount;
-                err = vkGetPhysicalDeviceSurfaceFormatsKHR(Device.PhysicalDevice, Surface, &formatCount, null);
-                Debug.Assert(err == VkResult.Success);
-                Debug.Assert(formatCount > 0);
-
-                using (Vector<VkSurfaceFormatKHR> surfaceFormats = new Vector<VkSurfaceFormatKHR>(formatCount))
-                {
-                    err = vkGetPhysicalDeviceSurfaceFormatsKHR(Device.PhysicalDevice, Surface, &formatCount, surfaceFormats.DataPtr);
-                    surfaceFormats.Count = formatCount;
-                    Debug.Assert(err == VkResult.Success);
-
-                    // If the Surface format list only includes one entry with VK_FORMAT_UNDEFINED,
-                    // there is no preferered format, so we assume VK_FORMAT_B8G8R8A8_UNORM
-                    if ((formatCount == 1) && (surfaceFormats[0].format == VkFormat.Undefined))
-                    {
-                        ColorFormat = VkFormat.B8G8R8A8UNorm;
-                        ColorSpace = surfaceFormats[0].colorSpace;
-                    }
-                    else
-                    {
-                        // iterate over the list of available Surface format and
-                        // check for the presence of VK_FORMAT_B8G8R8A8_UNORM
-                        bool found_B8G8R8A8_UNORM = false;
-                        foreach (var surfaceFormat in surfaceFormats)
-                        {
-                            if (surfaceFormat.format == VkFormat.B8G8R8A8UNorm)
-                            {
-                                ColorFormat = surfaceFormat.format;
-                                ColorSpace = surfaceFormat.colorSpace;
-                                found_B8G8R8A8_UNORM = true;
-                                break;
-                            }
-                        }
-
-                        // in case VK_FORMAT_B8G8R8A8_UNORM is not available
-                        // select the first available color format
-                        if (!found_B8G8R8A8_UNORM)
-                        {
-                            ColorFormat = surfaceFormats[0].format;
-                            ColorSpace = surfaceFormats[0].colorSpace;
-                        }
+                        graphicsQueueNodeIndex = (uint)i;
+                        presentQueueNodeIndex = (uint)i;
+                        break;
                     }
                 }
             }
+
+            if (presentQueueNodeIndex == uint.MaxValue)
+            {
+                // If there's no queue that supports both present and graphics
+                // try to find a separate present queue
+                for (uint i = 0; i < queueProps.Length; ++i)
+                {
+                    if (supportsPresent[i] == true)
+                    {
+                        presentQueueNodeIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // Exit if either a graphics or a presenting queue hasn't been found
+            if (graphicsQueueNodeIndex == uint.MaxValue || presentQueueNodeIndex == uint.MaxValue)
+            {
+                throw new InvalidOperationException("Could not find a graphics and/or presenting queue!");
+            }
+
+            // todo : Add support for separate graphics and presenting queue
+            if (graphicsQueueNodeIndex != presentQueueNodeIndex)
+            {
+                throw new InvalidOperationException("Separate graphics and presenting queues are not supported yet!");
+            }
+
+            QueueNodeIndex = graphicsQueueNodeIndex;
+
+            // Get list of supported Surface formats
+            uint formatCount;
+            err = vkGetPhysicalDeviceSurfaceFormatsKHR(Device.PhysicalDevice, Surface, &formatCount, null);
+            Debug.Assert(err == VkResult.Success);
+            Debug.Assert(formatCount > 0);
+
+            using Vector<VkSurfaceFormatKHR> surfaceFormats = new Vector<VkSurfaceFormatKHR>(formatCount);
+            err = vkGetPhysicalDeviceSurfaceFormatsKHR(Device.PhysicalDevice, Surface, &formatCount, surfaceFormats.DataPtr);
+            surfaceFormats.Count = formatCount;
+            Debug.Assert(err == VkResult.Success);
+
+            // If the Surface format list only includes one entry with VK_FORMAT_UNDEFINED,
+            // there is no preferered format, so we assume VK_FORMAT_B8G8R8A8_UNORM
+            if ((formatCount == 1) && (surfaceFormats[0].format == VkFormat.Undefined))
+            {
+                ColorFormat = VkFormat.B8G8R8A8UNorm;
+                ColorSpace = surfaceFormats[0].colorSpace;
+            }
+            else
+            {
+                // iterate over the list of available Surface format and
+                // check for the presence of VK_FORMAT_B8G8R8A8_UNORM
+                bool found_B8G8R8A8_UNORM = false;
+                foreach (var surfaceFormat in surfaceFormats)
+                {
+                    if (surfaceFormat.format == VkFormat.B8G8R8A8UNorm)
+                    {
+                        ColorFormat = surfaceFormat.format;
+                        ColorSpace = surfaceFormat.colorSpace;
+                        found_B8G8R8A8_UNORM = true;
+                        break;
+                    }
+                }
+
+                // in case VK_FORMAT_B8G8R8A8_UNORM is not available
+                // select the first available color format
+                if (!found_B8G8R8A8_UNORM)
+                {
+                    ColorFormat = surfaceFormats[0].format;
+                    ColorSpace = surfaceFormats[0].colorSpace;
+                }
+            }
+
         }
 
         /** 
@@ -304,7 +294,7 @@ namespace SharpGame
                 }
 
                 swapchain = Device.CreateSwapchainKHR(ref swapchainCI);
-                
+
                 // If an existing swap chain is re-created, destroy the old swap chain
                 // This also cleans up all the presentable Images
                 if (oldSwapchain.Handle != 0)
@@ -318,19 +308,19 @@ namespace SharpGame
                 }
 
                 var vkImages = Vulkan.vkGetSwapchainImagesKHR(Device.Handle, swapchain);
-              
+
                 Images = new Image[vkImages.Length];
                 ImageViews = new ImageView[vkImages.Length];
                 for (int i = 0; i < vkImages.Length; i++)
-                {                 
+                {
                     Images[i] = new Image(vkImages[i])
                     {
                         imageType = VkImageType.Image2D,
                         extent = extent
                     };
                     ImageViews[i] = ImageView.Create(Images[i], VkImageViewType.Image2D, ColorFormat, VkImageAspectFlags.Color, 0, 1);
-                }              
-                
+                }
+
                 // Get the swap chain Images
                 VkImages.Add(vkImages);
             }
@@ -350,7 +340,7 @@ namespace SharpGame
             {
                 Log.Info(res.ToString());
             }
-            else if(res != VkResult.Success)
+            else if (res != VkResult.Success)
             {
                 Log.Info(res.ToString());
                 imageIndex = 0;
