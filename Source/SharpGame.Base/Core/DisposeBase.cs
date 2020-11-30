@@ -51,4 +51,16 @@ namespace SharpGame
             return obj != null && !obj.disposed;
         }
     }
+
+    public class HandleBase<T> : DisposeBase where T : IDisposable
+    {
+        protected T handle;
+
+        public static implicit operator T(HandleBase<T> cmd) => cmd.handle;
+
+        protected override void Destroy(bool disposing)
+        {
+            handle?.Dispose();
+        }
+    }
 }

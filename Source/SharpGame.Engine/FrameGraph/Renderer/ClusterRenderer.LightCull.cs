@@ -134,7 +134,7 @@ namespace SharpGame
             //cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2);
 
             VkBufferMemoryBarrier* barriers = stackalloc VkBufferMemoryBarrier[2];
-            barriers[0] = new VkBufferMemoryBarrier(light_pos_ranges.Buffer.handle, VkAccessFlags.HostWrite, VkAccessFlags.ShaderRead);
+            barriers[0] = new VkBufferMemoryBarrier(light_pos_ranges.Buffer, VkAccessFlags.HostWrite, VkAccessFlags.ShaderRead);
 
             cmd_buf.PipelineBarrier(VkPipelineStageFlags.Host, VkPipelineStageFlags.ComputeShader, VkDependencyFlags.ByRegion, 0, null, 1, barriers, 0, null);
 
@@ -152,10 +152,10 @@ namespace SharpGame
 
              //   cmd_buf.WriteTimestamp(PipelineStageFlags.ComputeShader, QueryPool, QUERY_CALC_LIGHT_GRIDS * 2 + 1);
 
-                barriers[0] = new VkBufferMemoryBarrier(lightBounds.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite,
+                barriers[0] = new VkBufferMemoryBarrier(lightBounds, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite,
                                 VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite);
                 barriers[1] = barriers[0];
-                barriers[1].buffer = gridLightCounts.handle;
+                barriers[1].buffer = gridLightCounts;
                 cmd_buf.PipelineBarrier(VkPipelineStageFlags.ComputeShader,
                             VkPipelineStageFlags.ComputeShader,
                             VkDependencyFlags.ByRegion,

@@ -22,7 +22,7 @@ namespace SharpGame
                 sType = VkStructureType.FramebufferCreateInfo
             };
             native.flags = flags;
-            native.renderPass = renderPass.handle;
+            native.renderPass = renderPass;
             native.attachmentCount = (uint)attachments.Length;
             native.pAttachments = (VkImageView*)Unsafe.AsPointer(ref attachments[0]);
             native.width = width;
@@ -31,20 +31,18 @@ namespace SharpGame
         }
     }
 
-    public class Framebuffer : DisposeBase
+    public class Framebuffer : HandleBase<VkFramebuffer>
     {
         public RenderPass renderPass { get; }
         public uint Width { get; }
         public uint Height { get; }
-
-        internal VkFramebuffer handle;
 
         public Framebuffer(RenderPass renderPass, uint width, uint height, uint layers, ImageView[] attachments)
         {
             Span<VkImageView> views = stackalloc VkImageView[attachments.Length];
             for (int i = 0; i < views.Length; i++)
             {
-                views[i] = attachments[i].handle;
+                views[i] = attachments[i];
             }
 
             this.renderPass = renderPass;
@@ -63,6 +61,8 @@ namespace SharpGame
             Create(renderPass, width, height, layers, attachments, flags);
         }
 
+        public static implicit operator VkFramebuffer(Framebuffer cmd) => cmd.handle;
+
         unsafe void Create(RenderPass renderPass, uint width, uint height, uint layers, ReadOnlySpan<VkImageView> attachments, VkFramebufferCreateFlags flags = 0)
         {
             fixed (VkImageView* attachmentsPtr = attachments)
@@ -71,7 +71,7 @@ namespace SharpGame
                 {
                     sType = VkStructureType.FramebufferCreateInfo,
                     flags = flags,
-                    renderPass = renderPass.handle,
+                    renderPass = renderPass,
                     attachmentCount = (uint)attachments.Length,
                     pAttachments = attachmentsPtr,
                     width = width,
@@ -82,11 +82,6 @@ namespace SharpGame
                 handle = Device.CreateFramebuffer(ref framebufferCreateInfo);
             };
 
-        }
-
-        protected override void Destroy(bool disposing)
-        {
-            Device.Destroy(handle);
         }
 
     }

@@ -300,13 +300,13 @@ namespace SharpGame
         {
             Span<VkImageView> attachments = stackalloc VkImageView[2];
             // Depth/Stencil attachment is the same for all frame buffers
-            attachments[1] = depthStencil.imageView.handle;
+            attachments[1] = depthStencil.imageView;
 
             // Create frame buffers for every swap chain image
             var framebuffers = new Framebuffer[Swapchain.ImageCount];
             for (uint i = 0; i < framebuffers.Length; i++)
             {
-                attachments[0] = Swapchain.ImageViews[i].handle;
+                attachments[0] = Swapchain.ImageViews[i];
                 framebuffers[i] = new Framebuffer(vkRenderPass, Width, Height, 1, attachments);
             }
 

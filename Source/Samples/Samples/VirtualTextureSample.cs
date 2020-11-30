@@ -523,7 +523,7 @@ namespace SharpGame.Samples
 
             Graphics.EndPrimaryCmd(copyCmd);
 
-            imageBuffer.Release();
+            imageBuffer.Dispose();
         }
 
         Vector<VirtualTexturePage> updatedPages = new Vector<VirtualTexturePage>();
@@ -639,7 +639,7 @@ namespace SharpGame.Samples
 
                 Graphics.EndPrimaryCmd(copyCmd);
 
-                imageBuffer.Release();
+                imageBuffer.Dispose();
             }
         }
 

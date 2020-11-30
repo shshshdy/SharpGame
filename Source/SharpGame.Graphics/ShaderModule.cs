@@ -41,7 +41,7 @@ namespace SharpGame
         public List<SpecializationConst> specializationConsts;
     }
 
-    public class ShaderModule : Object
+    public class ShaderModule : HandleBase<VkShaderModule>
     {
         [DataMember]
         public VkShaderStageFlags Stage { get; set; }
@@ -54,8 +54,6 @@ namespace SharpGame
         public ShaderReflection ShaderReflection { get; set; }
 
         public SpecializationInfo SpecializationInfo { get; set; }
-
-        internal VkShaderModule shaderModule;
 
         public ShaderModule()
         {
@@ -81,7 +79,7 @@ namespace SharpGame
                     codeSize = new UIntPtr(CodeLength),
                 };
 
-                shaderModule = Device.CreateShaderModule(ref sm);
+                handle = Device.CreateShaderModule(ref sm);
             }
         }
 
@@ -105,20 +103,14 @@ namespace SharpGame
                     sm.codeSize = new UIntPtr(shaderSize);
                 }
 
-                shaderModule = Device.CreateShaderModule(ref sm);
+                handle = Device.CreateShaderModule(ref sm);
             }
 
-            return shaderModule != null;
+            return handle != null;
         }
 
         protected override void Destroy(bool disposing)
         {
-            if(shaderModule != 0)
-            {
-                Device.Destroy(shaderModule);
-                shaderModule = 0;
-            }
-
             Code = null;
 
             base.Destroy(disposing);

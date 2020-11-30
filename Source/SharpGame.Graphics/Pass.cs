@@ -354,7 +354,7 @@ namespace SharpGame
                 {
                     var shaderStage = new VkPipelineShaderStageCreateInfo { sType = VkStructureType.PipelineShaderStageCreateInfo };
                     shaderStage.stage = sm.Stage;
-                    shaderStage.module = sm.shaderModule;
+                    shaderStage.module = sm;
                     shaderStage.pName = Pass.FuncName;// sm.FuncName;
 
                     if(sm.SpecializationInfo != null)
@@ -378,7 +378,7 @@ namespace SharpGame
                     sType = VkStructureType.PipelineShaderStageCreateInfo
                 };
                 shaderStage.stage = VkShaderStageFlags.Compute;
-                shaderStage.module = ShaderModels[5].shaderModule;
+                shaderStage.module = ShaderModels[5];
                 shaderStage.pName = Pass.FuncName;
                 return shaderStage;
             }
@@ -405,8 +405,8 @@ namespace SharpGame
             {
                 sType = VkStructureType.GraphicsPipelineCreateInfo
             };
-            pipelineCreateInfo.layout = PipelineLayout.handle;
-            pipelineCreateInfo.renderPass = renderPass.handle;
+            pipelineCreateInfo.layout = PipelineLayout;
+            pipelineCreateInfo.renderPass = renderPass;
             pipelineCreateInfo.subpass = subPass;
             pipelineCreateInfo.flags = 0;
             pipelineCreateInfo.basePipelineIndex = -1;
@@ -495,7 +495,7 @@ namespace SharpGame
                 sType = VkStructureType.ComputePipelineCreateInfo
             };
             pipelineCreateInfo.stage = GetComputeStageCreateInfo();
-            pipelineCreateInfo.layout = PipelineLayout.handle;
+            pipelineCreateInfo.layout = PipelineLayout;
 
             computeHandle = Device.CreateComputePipeline(ref pipelineCreateInfo);
             return computeHandle;

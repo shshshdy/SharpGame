@@ -202,7 +202,7 @@ namespace SharpGame
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
                 writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref bufferInfo, ref bufferView.handle);
+                               descriptorType, ref bufferInfo, ref bufferView.HandleRef);
                 needUpdated[img][dstBinding] = true;
             }
 
@@ -216,7 +216,7 @@ namespace SharpGame
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
                 writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref buffer.Buffer.descriptor, ref buffer.Buffer.view.handle);
+                               descriptorType, ref buffer.Buffer.descriptor, ref buffer.Buffer.view.HandleRef);
                 needUpdated[img][dstBinding] = true;
             }
 

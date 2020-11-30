@@ -19,7 +19,7 @@ namespace SharpGame
             Utilities.CopyMemory(Data, Utilities.AsPointer(ref data), (int)size);
         }
 
-        public VkDescriptorBufferInfo Descriptor => new VkDescriptorBufferInfo { buffer = buffer.handle, offset = offset, range = size };
+        public VkDescriptorBufferInfo Descriptor => new VkDescriptorBufferInfo { buffer = buffer, offset = offset, range = size };
     }
 
     public class TransientBufferManager : DisposeBase
@@ -66,7 +66,7 @@ namespace SharpGame
         {
             foreach(var buf in buffers)
             {
-                buf.buffer.Release();
+                buf.buffer.Dispose();
             }
         }
 

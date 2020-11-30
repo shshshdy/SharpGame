@@ -21,7 +21,7 @@ namespace SharpGame
         }
     }
 
-    public class PipelineLayout : DisposeBase
+    public class PipelineLayout : HandleBase<VkPipelineLayout>
     {
         public DescriptorSetLayout[] ResourceLayout { get; set; }
 
@@ -30,8 +30,6 @@ namespace SharpGame
 
         private Vector<PushConstantRange> combindePushConstant = new Vector<PushConstantRange>();
         public List<string> PushConstantNames { get; set; }
-
-        internal VkPipelineLayout handle;
 
         public PipelineLayout()
         {
@@ -122,16 +120,6 @@ namespace SharpGame
 
             handle = Device.CreatePipelineLayout(ref pipelineLayoutCreateInfo);
         }
-
-        protected override void Destroy(bool disposing)
-        {
-            if(handle != 0)
-            {
-                Device.DestroyPipelineLayout(handle);
-                handle = 0;
-            }
-        }
-
 
     }
 }

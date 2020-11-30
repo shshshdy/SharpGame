@@ -76,13 +76,11 @@ namespace SharpGame
 
     }
 
-    public class RenderPass : DisposeBase
+    public class RenderPass : HandleBase<VkRenderPass>
     {
         public VkAttachmentDescription[] attachments;
         public SubpassDescription[] subpasses;
         public VkSubpassDependency[] dependencies;
-
-        internal VkRenderPass handle;
 
         public RenderPass(VkAttachmentDescription[] attachments,
             SubpassDescription[] subpasses, VkSubpassDependency[] dependencies, VkRenderPassCreateFlags flags = 0)
@@ -123,10 +121,6 @@ namespace SharpGame
             return (uint)(pColorAttachments != null ? pColorAttachments.Length : 1);
         }
 
-        protected override void Destroy(bool disposing)
-        {
-            Device.Destroy(handle);
-        }
 
     }
 

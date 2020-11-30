@@ -130,7 +130,7 @@ namespace SharpGame
             SetGeometry(0, geometry);
             SetMaterial(material);
 
-            material.SetBuffer("", ubTess);
+            //material.SetBuffer("", ubTess);
         }
 
         bool tessellation = true;

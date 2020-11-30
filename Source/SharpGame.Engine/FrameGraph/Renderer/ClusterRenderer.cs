@@ -273,10 +273,10 @@ namespace SharpGame
             {
                 VkBufferMemoryBarrier* transfer_barriers = stackalloc VkBufferMemoryBarrier[]
                 {
-                    new VkBufferMemoryBarrier(gridFlags.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite),
-                    new VkBufferMemoryBarrier(gridLightCounts.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite),
-                    new VkBufferMemoryBarrier(gridLightCountOffsets.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite),
-                    new VkBufferMemoryBarrier(lightList.handle, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite)
+                    new VkBufferMemoryBarrier(gridFlags, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite),
+                    new VkBufferMemoryBarrier(gridLightCounts, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite),
+                    new VkBufferMemoryBarrier(gridLightCountOffsets, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite),
+                    new VkBufferMemoryBarrier(lightList, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite, VkAccessFlags.TransferWrite)
                 };
 
                 //cmd_buf.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_TRANSFER * 2);
@@ -299,10 +299,10 @@ namespace SharpGame
 
                 VkBufferMemoryBarrier* transfer_barriers1 = stackalloc VkBufferMemoryBarrier[]
                 {
-                    new VkBufferMemoryBarrier(gridFlags.handle, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite),
-                    new VkBufferMemoryBarrier(gridLightCounts.handle, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite),
-                    new VkBufferMemoryBarrier(gridLightCountOffsets.handle, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite),
-                    new VkBufferMemoryBarrier(lightList.handle, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite)
+                    new VkBufferMemoryBarrier(gridFlags, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite),
+                    new VkBufferMemoryBarrier(gridLightCounts, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite),
+                    new VkBufferMemoryBarrier(gridLightCountOffsets, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite),
+                    new VkBufferMemoryBarrier(lightList, VkAccessFlags.TransferWrite, VkAccessFlags.ShaderRead | VkAccessFlags.ShaderWrite)
                 };
 
                 cmd_buf.PipelineBarrier(VkPipelineStageFlags.Transfer,

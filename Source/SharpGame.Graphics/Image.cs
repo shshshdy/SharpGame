@@ -6,9 +6,8 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class Image : DeviceMemory
+    public class Image : DeviceMemory<VkImage>
     {
-        public VkImage handle;
         public VkImageType imageType;
         public VkFormat format;
         public VkExtent3D extent;
@@ -36,15 +35,14 @@ namespace SharpGame
             Device.BindImageMemory(handle, memory, 0);
         }
 
-        public static implicit operator VkImage(Image img) => img.handle;
-
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
             //Donot destroy swapchain image 
-            if(memory != VkDeviceMemory.Null)
-                Device.Destroy(handle);
+            if (memory != VkDeviceMemory.Null)
+            { 
+                base.Destroy(disposing);
+            }
 
-            base.Destroy();
         }
 
         public unsafe static Image Create(uint width, uint height, VkImageCreateFlags flags, uint layers, uint levels,
@@ -74,13 +72,11 @@ namespace SharpGame
 
     }
 
-    public class ImageView : DisposeBase, IBindableResource
+    public class ImageView : HandleBase<VkImageView>, IBindableResource
     {
         public Image Image { get; }
         public uint Width => Image.extent.width;
         public uint Height => Image.extent.height;
-
-        public VkImageView handle;
 
         public VkDescriptorImageInfo descriptor;
 
@@ -91,19 +87,12 @@ namespace SharpGame
             descriptor = new VkDescriptorImageInfo(Sampler.ClampToEdge, this, VkImageLayout.ShaderReadOnlyOptimal);
         }
 
-        public static implicit operator VkImageView(ImageView view) => view.handle;
-
-        protected override void Destroy(bool disposing)
-        {
-            Device.Destroy(handle);
-        }
-
         public static ImageView Create(Image image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint baseMipLevel, uint numMipLevels, uint baseArrayLayer = 0, uint arrayLayers = 1)
         {
             var viewCreateInfo = new VkImageViewCreateInfo
             {
                 sType = VkStructureType.ImageViewCreateInfo,
-                image = image.handle,
+                image = image,
                 viewType = viewType,
                 format = format,
                 components = new VkComponentMapping(VkComponentSwizzle.R, VkComponentSwizzle.G, VkComponentSwizzle.B, VkComponentSwizzle.A),

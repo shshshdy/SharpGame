@@ -20,8 +20,8 @@
                 native = new VkRenderPassBeginInfo
                 {
                     sType = VkStructureType.RenderPassBeginInfo,
-                    renderPass = framebuffer.renderPass.handle,
-                    framebuffer = framebuffer.handle,
+                    renderPass = framebuffer.renderPass,
+                    framebuffer = framebuffer,
                     renderArea = new VkRect2D(renderArea.offset, renderArea.extent),
                     pClearValues = pClearValues,
                     clearValueCount = (uint)clearValues.Length
@@ -40,9 +40,9 @@
             native = new VkCommandBufferInheritanceInfo
             {
                 sType = VkStructureType.CommandBufferInheritanceInfo,
-                renderPass = renderPass.handle,
+                renderPass = renderPass,
                 subpass = subpass,
-                framebuffer = framebuffer.handle,
+                framebuffer = framebuffer,
                 occlusionQueryEnable = occlusionQueryEnable,
                 queryFlags = queryFlags,
                 pipelineStatistics = pipelineStatistics
@@ -199,7 +199,7 @@
 
                 var t = pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext];
 
-                vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, pipelineLayout.handle, (uint)set, 1, &t, dynamicOffsetCount, pDynamicOffsets);
+                vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, pipelineLayout, (uint)set, 1, &t, dynamicOffsetCount, pDynamicOffsets);
             }
         }
 
@@ -231,26 +231,27 @@
         [MethodImpl((MethodImplOptions)0x100)]
         public void BindVertexBuffer(uint firstBinding, Buffer buffer, ulong pOffsets = 0)
         {
-            vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, Utilities.AsPtr(ref buffer.handle), &pOffsets);
+            VkBuffer vb = buffer;
+            vkCmdBindVertexBuffers(commandBuffer, firstBinding, 1, Utilities.AsPtr(ref vb), &pOffsets);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindIndexBuffer(Buffer buffer, ulong offset, VkIndexType indexType)
         {
-            vkCmdBindIndexBuffer(commandBuffer, buffer.handle, offset, indexType);
+            vkCmdBindIndexBuffer(commandBuffer, buffer, offset, indexType);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void PushConstants<T>(PipelineLayout pipelineLayout, VkShaderStageFlags shaderStage, int offset, ref T value) where T : struct
         {
-            vkCmdPushConstants(commandBuffer, pipelineLayout.handle, shaderStage,
+            vkCmdPushConstants(commandBuffer, pipelineLayout, shaderStage,
                 (uint)offset, (uint)Utilities.SizeOf<T>(), Unsafe.AsPointer(ref value));
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void PushConstants(PipelineLayout pipelineLayout, VkShaderStageFlags shaderStage, int offset, int size, IntPtr value)
         {
-            vkCmdPushConstants(commandBuffer, pipelineLayout.handle, shaderStage, (uint)offset, (uint)size, (void*)value);
+            vkCmdPushConstants(commandBuffer, pipelineLayout, shaderStage, (uint)offset, (uint)size, (void*)value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -294,19 +295,19 @@
 
         public void DrawIndirect(Buffer buffer, ulong offset, uint drawCount, uint stride)
         {
-            vkCmdDrawIndirect(commandBuffer, buffer.handle, offset, drawCount, stride);
+            vkCmdDrawIndirect(commandBuffer, buffer, offset, drawCount, stride);
             Interlocked.Increment(ref Stats.drawIndirect);
         }
 
         public void DrawIndexedIndirect(Buffer buffer, ulong offset, uint drawCount, uint stride)
         {
-            vkCmdDrawIndexedIndirect(commandBuffer, buffer.handle, offset, drawCount, stride);
+            vkCmdDrawIndexedIndirect(commandBuffer, buffer, offset, drawCount, stride);
             Interlocked.Increment(ref Stats.drawIndirect);
         }
 
         public void DispatchIndirect(Buffer buffer, ulong offset)
         {
-            vkCmdDispatchIndirect(commandBuffer, buffer.handle, offset);
+            vkCmdDispatchIndirect(commandBuffer, buffer, offset);
             Interlocked.Increment(ref Stats.dispatchIndirect);
         }
 
@@ -324,47 +325,47 @@
 
         public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, ref VkBufferCopy region)
         {
-            vkCmdCopyBuffer(commandBuffer, srcBuffer.handle, dstBuffer.handle, 1, Utilities.AsPtr(ref region));
+            vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, Utilities.AsPtr(ref region));
         }
 
         public void CopyBuffer(Buffer srcBuffer, Buffer dstBuffer, Span<VkBufferCopy> pRegions)
         {
-            vkCmdCopyBuffer(commandBuffer, srcBuffer.handle, dstBuffer.handle, (uint)pRegions.Length, Utilities.AsPtr(ref pRegions[0]));
+            vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, (uint)pRegions.Length, Utilities.AsPtr(ref pRegions[0]));
         }
 
         public void BlitImage(Image srcImage, VkImageLayout srcImageLayout, Image dstImage, VkImageLayout dstImageLayout, ref VkImageBlit pRegion, VkFilter filter)
         {
-            vkCmdBlitImage(commandBuffer, srcImage.handle, srcImageLayout, dstImage.handle, dstImageLayout, 1, (VkImageBlit*)Unsafe.AsPointer(ref pRegion), filter);
+            vkCmdBlitImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, 1, (VkImageBlit*)Unsafe.AsPointer(ref pRegion), filter);
         }
 
         public void BlitImage(Image srcImage, VkImageLayout srcImageLayout, Image dstImage, VkImageLayout dstImageLayout, Span<VkImageBlit> pRegions, VkFilter filter)
         {
-            vkCmdBlitImage(commandBuffer, srcImage.handle, srcImageLayout, dstImage.handle, dstImageLayout, (uint)pRegions.Length, (VkImageBlit*)Unsafe.AsPointer(ref pRegions[0]), filter);
+            vkCmdBlitImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, (uint)pRegions.Length, (VkImageBlit*)Unsafe.AsPointer(ref pRegions[0]), filter);
         }
 
         public void CopyImage(Image srcImage, VkImageLayout srcImageLayout, Image dstImage, VkImageLayout dstImageLayout, ref VkImageCopy region)
         {
-            vkCmdCopyImage(commandBuffer, srcImage.handle, srcImageLayout, dstImage.handle, dstImageLayout, 1, Utilities.AsPtr(ref region));
+            vkCmdCopyImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, 1, Utilities.AsPtr(ref region));
         }
 
         public void CopyImage(Image srcImage, VkImageLayout srcImageLayout, Image dstImage, VkImageLayout dstImageLayout, Span<VkImageCopy> region)
         {
-            vkCmdCopyImage(commandBuffer, srcImage.handle, srcImageLayout, dstImage.handle, dstImageLayout, (uint)region.Length, Utilities.AsPtr(ref region[0]));
+            vkCmdCopyImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, (uint)region.Length, Utilities.AsPtr(ref region[0]));
         }
 
         public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, VkImageLayout dstImageLayout, ref VkBufferImageCopy region)
         {
-            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.handle, dstImage.handle, dstImageLayout, 1, Utilities.AsPtr(ref region));
+            vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, dstImageLayout, 1, Utilities.AsPtr(ref region));
         }
 
         public void CopyBufferToImage(Buffer srcBuffer, Image dstImage, VkImageLayout dstImageLayout, Span<VkBufferImageCopy> pRegions)
         {
-            vkCmdCopyBufferToImage(commandBuffer, srcBuffer.handle, dstImage.handle, dstImageLayout, (uint)pRegions.Length, Utilities.AsPtr(ref pRegions[0]));
+            vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, dstImageLayout, (uint)pRegions.Length, Utilities.AsPtr(ref pRegions[0]));
         }
 
         public void FillBuffer(Buffer dstBuffer, ulong dstOffset, ulong size, uint data)
         {
-            vkCmdFillBuffer(commandBuffer, dstBuffer.handle, dstOffset, size, data);
+            vkCmdFillBuffer(commandBuffer, dstBuffer, dstOffset, size, data);
         }
 
         public void ResetQueryPool(VkQueryPool queryPool, uint firstQuery, uint queryCount)
@@ -456,7 +457,7 @@
             var imageMemoryBarrier = new VkImageMemoryBarrier
             {
                 sType = VkStructureType.ImageMemoryBarrier,
-                image = image.handle,
+                image = image,
                 oldLayout = oldImageLayout,
                 newLayout = newImageLayout,
                 subresourceRange = subresourceRange

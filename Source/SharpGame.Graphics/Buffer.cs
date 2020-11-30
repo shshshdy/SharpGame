@@ -9,12 +9,11 @@ namespace SharpGame
     using static Vulkan;
     public interface IBindableResource { }
     
-    public class Buffer : DeviceMemory, IBindableResource
+    public class Buffer : DeviceMemory<VkBuffer>, IBindableResource
     {
         public ulong Stride { get; set; }
         public VkBufferUsageFlags UsageFlags { get; set; }
 
-        public VkBuffer handle;
         public BufferView view;
 
         internal VkDescriptorBufferInfo descriptor;
@@ -66,8 +65,6 @@ namespace SharpGame
             SetupDescriptor();
 
         }
-
-        public static implicit operator VkBuffer(Buffer buffer) => buffer.handle;
 
         public static Buffer CreateUniformBuffer<T>(ulong count = 1) where T : unmanaged
         {
@@ -139,31 +136,24 @@ namespace SharpGame
 
         }
         
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            if (handle != 0)
-            {
-                Device.DestroyBuffer(handle);
-            }
-
             view?.Dispose();
 
-            base.Destroy();
+            base.Destroy(disposing);
         }
 
 
     }
 
-    public class BufferView : DisposeBase
+    public class BufferView : HandleBase<VkBufferView>
     {
-        internal VkBufferView handle;
-
         public BufferView(Buffer buffer, VkFormat format, ulong offset, ulong range)
         {
             var bufferViewCreateInfo = new VkBufferViewCreateInfo
             {
                 sType = VkStructureType.BufferViewCreateInfo,
-                buffer = buffer.handle,
+                buffer = buffer,
                 format = format,
                 offset = offset,
                 range = range
@@ -171,13 +161,6 @@ namespace SharpGame
             handle = Device.CreateBufferView(ref bufferViewCreateInfo);
         }
 
-        public static implicit operator VkBufferView(BufferView view) => view.handle;
-
-        protected override void Destroy(bool disposing)
-        {
-            base.Destroy(disposing);
-
-            Device.DestroyBufferView(handle);
-        }
+        public ref VkBufferView HandleRef => ref handle;
     }
 }

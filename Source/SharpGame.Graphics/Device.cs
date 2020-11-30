@@ -551,7 +551,7 @@ namespace SharpGame
 
         public static void GetImageMemoryRequirements(Image image, out VkMemoryRequirements pMemoryRequirements)
         {
-            vkGetImageMemoryRequirements(device, image.handle, out pMemoryRequirements);
+            vkGetImageMemoryRequirements(device, image, out pMemoryRequirements);
         }
 
         public static void BindImageMemory(VkImage image, VkDeviceMemory memory, ulong offset)

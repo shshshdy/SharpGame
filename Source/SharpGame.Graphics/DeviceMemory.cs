@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class DeviceMemory : RefCounted
+    public class DeviceMemory<T> : HandleBase<T> where T : IDisposable
     {
         internal VkDeviceMemory memory;
         public IntPtr Mapped { get; private set; }
@@ -22,10 +22,10 @@ namespace SharpGame
             allocationSize = memAllocInfo.allocationSize;
         }
 
-        public ref T Map<T>(ulong offset = 0) where T : struct
+        public ref K Map<K>(ulong offset = 0) where K : struct
         {
             Mapped = Device.MapMemory(memory, offset, Size, VkMemoryMapFlags.None);
-            return ref Utilities.As<T>(Mapped);
+            return ref Utilities.As<K>(Mapped);
         }
 
         public IntPtr Map(ulong offset = 0, ulong size = Vulkan.WholeSize)
@@ -64,12 +64,14 @@ namespace SharpGame
             Device.InvalidateMappedMemoryRanges(1, ref mappedRange);
         }
 
-        protected override void Destroy()
+        protected override void Destroy(bool disposing)
         {
-            if (memory.Handle != 0)
+            if (memory != 0)
             {
                 Device.FreeMemory(memory);
             }
+
+            base.Destroy(disposing);
         }
     }
 }

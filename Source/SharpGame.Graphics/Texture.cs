@@ -180,7 +180,7 @@ namespace SharpGame
             // Iterate through mip chain and consecutively blit from previous level to next level with linear filtering.
             for (uint level = 1, prevLevelWidth = width, prevLevelHeight = height; level < mipLevels; ++level, prevLevelWidth /= 2, prevLevelHeight /= 2)
             {
-                var preBlitBarrier = new VkImageMemoryBarrier(image.handle, 0, VkAccessFlags.TransferWrite, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal, VkImageAspectFlags.Color, level, 1);
+                var preBlitBarrier = new VkImageMemoryBarrier(image, 0, VkAccessFlags.TransferWrite, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal, VkImageAspectFlags.Color, level, 1);
                 commandBuffer.PipelineBarrier(VkPipelineStageFlags.Transfer, VkPipelineStageFlags.Transfer, ref preBlitBarrier);
 
                 var region = new VkImageBlit
@@ -207,13 +207,13 @@ namespace SharpGame
 
                 commandBuffer.BlitImage(image, VkImageLayout.TransferSrcOptimal, image, VkImageLayout.TransferDstOptimal, ref region, VkFilter.Linear);
 
-                var postBlitBarrier = new VkImageMemoryBarrier(image.handle, VkAccessFlags.TransferWrite, VkAccessFlags.TransferRead, VkImageLayout.TransferDstOptimal, VkImageLayout.TransferSrcOptimal, VkImageAspectFlags.Color, level, 1);
+                var postBlitBarrier = new VkImageMemoryBarrier(image, VkAccessFlags.TransferWrite, VkAccessFlags.TransferRead, VkImageLayout.TransferDstOptimal, VkImageLayout.TransferSrcOptimal, VkImageAspectFlags.Color, level, 1);
                 commandBuffer.PipelineBarrier(VkPipelineStageFlags.Transfer, VkPipelineStageFlags.Transfer, ref postBlitBarrier);
             }
 
             // Transition whole mip chain to shader read only layout.
             {
-                var barrier = new VkImageMemoryBarrier(image.handle, VkAccessFlags.TransferWrite, 0, VkImageLayout.TransferSrcOptimal, VkImageLayout.ShaderReadOnlyOptimal);
+                var barrier = new VkImageMemoryBarrier(image, VkAccessFlags.TransferWrite, 0, VkImageLayout.TransferSrcOptimal, VkImageLayout.ShaderReadOnlyOptimal);
                 commandBuffer.PipelineBarrier(VkPipelineStageFlags.Transfer, VkPipelineStageFlags.BottomOfPipe, ref barrier);
             }
 

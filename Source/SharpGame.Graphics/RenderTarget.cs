@@ -169,7 +169,7 @@ namespace SharpGame
             var views = new VkImageView[AttachmentCount];
             for(int i = 0; i < AttachmentCount; i++)
             {
-                views[i] = this[i].attachmentViews[imageIndex].handle;
+                views[i] = this[i].attachmentViews[imageIndex];
             }
 
             return views;
