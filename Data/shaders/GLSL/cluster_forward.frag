@@ -24,7 +24,7 @@ void main()
     vec4 specColor = texture(SpecMap, inUV);
     vec3 normal_sample = texture(NormalMap, inUV).rgb * 2.f - 1.f;
 
-    vec3 N = inNormal * normal_sample;
+    vec3 N = normalize(inNormal * normal_sample);
 
     vec3 color = ClusterLighting(inWorldPos.xyz, N, diffColor.rgb, specColor.rgb, specColor.a*255);
 
