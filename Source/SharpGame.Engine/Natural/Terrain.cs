@@ -172,6 +172,9 @@ namespace SharpGame
         }
 
         bool tessellation = true;
+        public ref bool Tessellation => ref tessellation;
+        public ref float TessellationFactor => ref uboTess.tessellationFactor;
+
         public override void UpdateGeometry(in FrameInfo frameInfo)
         {
             // Tessellation

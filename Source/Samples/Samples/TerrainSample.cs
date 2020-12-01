@@ -69,6 +69,12 @@ namespace SharpGame.Samples
                 {
                     terrain.WireframeMode = val;
                 }
+
+                ImGui.Checkbox("Enable Tessellation", ref terrain.Tessellation);
+
+                ImGui.DragFloat("Tessellation Factor", ref terrain.TessellationFactor, 0.01f, 0.0f, 1.0f);
+                
+
             }
 
             ImGui.End();
