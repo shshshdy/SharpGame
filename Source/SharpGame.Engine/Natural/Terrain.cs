@@ -8,6 +8,7 @@ namespace SharpGame
     public unsafe struct TessUBO
     {           
         public mat4 projection;
+        public mat4 vkProjection;
         public mat4 modelview;
         public vec4 lightPos;
         public FixedArray6<Plane> frustumPlanes;
@@ -178,9 +179,10 @@ namespace SharpGame
         public override void UpdateGeometry(in FrameInfo frameInfo)
         {
             // Tessellation
-            uboTess.projection = frameInfo.camera.VkProjection;
+            uboTess.projection = frameInfo.camera.Projection;
+            uboTess.vkProjection = frameInfo.camera.VkProjection;
             uboTess.modelview = frameInfo.camera.View * new mat4(1.0f);
-            uboTess.lightPos.y = -0.5f - uboTess.displacementFactor; // todo: Not uesed yet
+            uboTess.lightPos.y = -0.5f - uboTess.displacementFactor;
             uboTess.viewportDim = new vec2(frameInfo.viewSize.x, frameInfo.viewSize.y);
 
             for(int i = 0; i < 6; i++)

@@ -3,6 +3,7 @@
 layout(set = 0, binding = 0) uniform UBO
 {
 	mat4 projection;
+	mat4 vkProjection;
 	mat4 modelview;
 	vec4 lightPos;
 	vec4 frustumPlanes[6];
@@ -60,7 +61,7 @@ bool frustumCheck()
 	// Fixed radius (increase if patch size is increased in example)
 	const float radius = 8.0f;
 	vec4 pos = gl_in[gl_InvocationID].gl_Position;
-	pos.y -= textureLod(samplerHeight, inUV[0], 0.0).r * ubo.displacementFactor;
+	pos.y += textureLod(samplerHeight, inUV[0], 0.0).r * ubo.displacementFactor;
 
 	// Check sphere against frustum planes
 	for (int i = 0; i < 6; i++) {

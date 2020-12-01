@@ -3,6 +3,7 @@
 layout (set = 0, binding = 0) uniform UBO 
 {
 	mat4 projection;
+	mat4 vkProjection;
 	mat4 modelview;
 	vec4 lightPos;
 	vec4 frustumPlanes[6];
@@ -43,9 +44,9 @@ void main()
 	vec4 pos2 = mix(gl_in[3].gl_Position, gl_in[2].gl_Position, gl_TessCoord.x);
 	vec4 pos = mix(pos1, pos2, gl_TessCoord.y);
 	// Displace
-	pos.y -= textureLod(samplerHeight, outUV, 0.0).r * ubo.displacementFactor;
+	pos.y += textureLod(samplerHeight, outUV, 0.0).r * ubo.displacementFactor;
 	// Perspective projection
-	gl_Position = ubo.projection * ubo.modelview * pos;
+	gl_Position = ubo.vkProjection * ubo.modelview * pos;
 
 	// Calculate vectors for lighting based on tessellated position
 	outViewVec = -pos.xyz;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = -11)]
+    [SampleDesc(sortOrder = 11)]
     public class TerrainSample : Sample
     {
         Terrain terrain;
@@ -15,17 +15,13 @@ namespace SharpGame.Samples
         {
             scene = new Scene()
             {
-                new Environment
-                {
-                    SunlightDir = glm.normalize(new vec3(-1.0f, -1.0f, 0.0f))
-                },
-
-                new Node("Camera", new vec3(0, 2, -10), glm.radians(10, 0, 0))
+                new Node("Camera", new vec3(18.0f, 22.5f, 57.5f), glm.radians(12.0f, -159.0f, 0.0f))
                 {
                     new Camera
                     {
-                        NearClip = 0.5f,
-                        FarClip = 400,
+                        NearClip = 0.1f,
+                        FarClip = 512.0f,
+                        Fov = glm.radians(60)
                     },
 
                 },
@@ -61,7 +57,6 @@ namespace SharpGame.Samples
 
         public override void OnGUI()
         {
-
             if (ImGui.Begin("HUD"))
             {
                 bool val = terrain.WireframeMode;
@@ -71,10 +66,8 @@ namespace SharpGame.Samples
                 }
 
                 ImGui.Checkbox("Enable Tessellation", ref terrain.Tessellation);
-
-                ImGui.DragFloat("Tessellation Factor", ref terrain.TessellationFactor, 0.01f, 0.0f, 1.0f);
+                ImGui.InputFloat("Tessellation Factor", ref terrain.TessellationFactor, 0.1f);
                 
-
             }
 
             ImGui.End();
