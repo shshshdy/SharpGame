@@ -9,7 +9,7 @@ Shader "Terrain"
 		{
 			#include "Natural/terrain.vert"
 		}
-                /*
+	/*
 		@TessControl
 		{
 			#include "Natural/terrain.tesc"
@@ -24,7 +24,6 @@ Shader "Terrain"
 		{
 			//#include "Natural/terrain.frag"
 
-			
 			#version 450
 
 			layout (location = 0) in vec3 in_Normal;

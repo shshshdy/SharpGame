@@ -219,15 +219,9 @@ namespace SharpGame
             var pipe = pass.GetGraphicsPipeline(RenderPass, 0, batch.geometry);
 
             cb.BindPipeline(VkPipelineBindPoint.Graphics, pipe);
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
 
-            foreach (ConstBlock constBlock in pushConsts)
-            {
-                cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
-            }
+            batch.Draw(cb, pushConsts, resourceSet, default, pass);
 
-            batch.material.Bind(pass.passIndex, cb);
-            batch.geometry.Draw(cb);
         }
 
         /*

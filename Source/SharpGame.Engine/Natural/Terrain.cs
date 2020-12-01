@@ -23,8 +23,25 @@ namespace SharpGame
         public DescriptorSetLayout dsLayout;
         public DescriptorSet dsTess;
 
-        public override void Draw(CommandBuffer cb, Pass pass)
+        public override void Draw(CommandBuffer cb, Span<ConstBlock> pushConsts, DescriptorSet resourceSet, Span<DescriptorSet> resourceSet1, Pass pass)
         {
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, offset);
+
+            int firstSet = 1;
+            foreach (var rs in resourceSet1)
+            {
+                if (firstSet < pass.PipelineLayout.ResourceLayout.Length && rs != null)
+                {
+                    cb.BindGraphicsResourceSet(pass.PipelineLayout, firstSet, rs, -1);
+                }
+                firstSet++;
+            }
+
+            foreach (ConstBlock constBlock in pushConsts)
+            {
+                cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
+            }
+
             //cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, dsTess);
             material.Bind(pass.passIndex, cb);
             geometry.Draw(cb);
@@ -202,12 +219,7 @@ namespace SharpGame
         public override void UpdateBatches(in FrameInfo frame)
         {
             ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
-            distance_ = frame.camera.GetDistance(worldBoundingBox.Center);
-
-            batch.distance = distance_;
-
             ref mat4 worldTransform = ref node_.WorldTransform;
-
             batch.worldTransform = node_.worldTransform_;
             batch.numWorldTransforms = 1;
 

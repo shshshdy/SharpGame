@@ -36,7 +36,7 @@ namespace SharpGame
         private static CStringList deviceExtensions = new CStringList();
 
         public static VkDevice Create(Settings settings, VkPhysicalDeviceFeatures enabledFeatures, CStringList enabledExtensions,
-            bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
+            VkQueueFlags requestedQueueTypes = VkQueueFlags.Graphics | VkQueueFlags.Compute | VkQueueFlags.Transfer)
         {
             instanceExtensions.Add(Vulkan.KHRSurfaceExtensionName);
             instanceExtensions.Add(Vulkan.KHRGetPhysicalDeviceProperties2ExtensionName);
@@ -120,7 +120,7 @@ namespace SharpGame
                 supportedExtensions.Add(strExt);
             }
               
-            device = CreateLogicalDevice(Features, enabledExtensions);
+            device = CreateLogicalDevice(Features, enabledExtensions, true, requestedQueueTypes);
 
             if (device != VkDevice.Null)
             {
@@ -416,14 +416,6 @@ namespace SharpGame
             vkGetPhysicalDeviceFormatProperties(PhysicalDevice, format, out pFeatures);
         }
 
-        public delegate VkResult vkCmdPushDescriptorSetKHRDelegate(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint set, uint descriptorWriteCount, VkWriteDescriptorSet* pDescriptorWrites);
-
-        public static vkCmdPushDescriptorSetKHRDelegate CmdPushDescriptorSetKHR;
-        private static void vkCmdPushDescriptorSetKHR()
-        {
-            CmdPushDescriptorSetKHR = device.GetProc<vkCmdPushDescriptorSetKHRDelegate>(nameof(vkCmdPushDescriptorSetKHR));
-        }
-
         public static VkSwapchainKHR CreateSwapchainKHR(ref VkSwapchainCreateInfoKHR pCreateInfo)
         {
             VulkanUtil.CheckResult(vkCreateSwapchainKHR(device, Utilities.AsPtr(ref pCreateInfo), null, out VkSwapchainKHR pSwapchain));
@@ -445,78 +437,6 @@ namespace SharpGame
             return vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, out pImageIndex);
         }
 
-        public static VkImage CreateImage(ref VkImageCreateInfo pCreateInfo)
-        {
-            VulkanUtil.CheckResult(vkCreateImage(device, Utilities.AsPtr(ref pCreateInfo), null, out VkImage pImage));
-            return pImage;
-        }
-
-        public static void Destroy(VkImage image)
-        {
-            vkDestroyImage(device, image, null);
-        }
-
-        public static VkImageView CreateImageView(ref VkImageViewCreateInfo pCreateInfo)
-        {
-            VulkanUtil.CheckResult(vkCreateImageView(device, Utilities.AsPtr(ref pCreateInfo), null, out VkImageView pView));
-            return pView;
-        }
-
-        public static void Destroy(VkImageView imageView)
-        {
-            vkDestroyImageView(device, imageView, null);
-        }
-
-        public static VkSampler CreateSampler(ref VkSamplerCreateInfo vkSamplerCreateInfo)
-        {
-            VulkanUtil.CheckResult(vkCreateSampler(device, Utilities.AsPtr(ref vkSamplerCreateInfo), null, out VkSampler vkSampler));
-            return vkSampler;
-        }
-
-        public static void Destroy(VkSampler sampler)
-        {
-            vkDestroySampler(device, sampler, null);
-        }
-
-        public static VkFramebuffer CreateFramebuffer(ref VkFramebufferCreateInfo framebufferCreateInfo)
-        {
-            VulkanUtil.CheckResult(vkCreateFramebuffer(device, Utilities.AsPtr(ref framebufferCreateInfo), null, out VkFramebuffer framebuffer));
-            return framebuffer;
-        }
-
-        public static void Destroy(VkFramebuffer framebuffer)
-        {
-            vkDestroyFramebuffer(device, framebuffer, null);
-        }
-
-        public static VkRenderPass CreateRenderPass(ref VkRenderPassCreateInfo createInfo)
-        {
-            VulkanUtil.CheckResult(vkCreateRenderPass(device, Utilities.AsPtr(ref createInfo), null, out VkRenderPass pRenderPass));
-            return pRenderPass;
-        }
-
-        public static void Destroy(VkRenderPass renderPass)
-        {
-            vkDestroyRenderPass(device, renderPass, null);
-        }
-
-        public static VkBuffer CreateBuffer(ref VkBufferCreateInfo pCreateInfo)
-        {
-            VulkanUtil.CheckResult(vkCreateBuffer(device, Utilities.AsPtr(ref pCreateInfo), null, out VkBuffer buffer));
-            return buffer;
-        }
-
-        public static VkBufferView CreateBufferView(ref VkBufferViewCreateInfo pCreateInfo)
-        {
-            VulkanUtil.CheckResult(vkCreateBufferView(device, Utilities.AsPtr(ref pCreateInfo), null, out VkBufferView pView));
-            return pView;
-        }
-
-        public static void GetBufferMemoryRequirements(VkBuffer buffer, out VkMemoryRequirements pMemoryRequirements)
-        {
-            vkGetBufferMemoryRequirements(device, buffer, out pMemoryRequirements);
-        }
-
         public static VkDeviceMemory AllocateMemory(ref VkMemoryAllocateInfo pAllocateInfo)
         {
             VkDeviceMemory pMemory;
@@ -524,80 +444,9 @@ namespace SharpGame
             return pMemory;
         }
 
-        public static void BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, ulong memoryOffset)
+        public static void FreeMemory(VkDeviceMemory memory)
         {
-            VulkanUtil.CheckResult(vkBindBufferMemory(device, buffer, memory, memoryOffset));
-        }
-
-        private static uint FindMemoryType(uint typeFilter, VkMemoryPropertyFlags properties)
-        {
-            vkGetPhysicalDeviceMemoryProperties(PhysicalDevice, out VkPhysicalDeviceMemoryProperties memProperties);
-            for (int i = 0; i < memProperties.memoryTypeCount; i++)
-            {
-                if (((typeFilter & (1 << i)) != 0)
-                    && (memProperties.GetMemoryType((uint)i).propertyFlags & properties) == properties)
-                {
-                    return (uint)i;
-                }
-            }
-
-            throw new InvalidOperationException("No suitable memory type.");
-        }
-
-        public static void FlushMappedMemoryRanges(uint memoryRangeCount, ref VkMappedMemoryRange pMemoryRanges)
-        {
-            VulkanUtil.CheckResult(vkFlushMappedMemoryRanges(device, memoryRangeCount, Utilities.AsPtr(ref pMemoryRanges)));
-        }
-
-        public static void InvalidateMappedMemoryRanges(uint memoryRangeCount, ref VkMappedMemoryRange pMemoryRanges)
-        {
-            VulkanUtil.CheckResult(vkInvalidateMappedMemoryRanges(device, memoryRangeCount, Utilities.AsPtr(ref pMemoryRanges)));
-        }
-
-        public static void GetImageMemoryRequirements(Image image, out VkMemoryRequirements pMemoryRequirements)
-        {
-            vkGetImageMemoryRequirements(device, image, out pMemoryRequirements);
-        }
-
-        public static void BindImageMemory(VkImage image, VkDeviceMemory memory, ulong offset)
-        {
-            VulkanUtil.CheckResult(vkBindImageMemory(device, image, memory, offset));
-        }
-
-        public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
-        {
-            VkCommandPoolCreateInfo cmdPoolInfo = new VkCommandPoolCreateInfo
-            {
-                sType = VkStructureType.CommandPoolCreateInfo
-            };
-            cmdPoolInfo.queueFamilyIndex = queueFamilyIndex;
-            cmdPoolInfo.flags = createFlags;
-            VulkanUtil.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out VkCommandPool cmdPool));
-            return cmdPool;
-        }
-
-        public static void AllocateCommandBuffers(VkCommandPool cmdPool, VkCommandBufferLevel level,
-            uint count, VkCommandBuffer* cmdBuffers)
-        {
-            VkCommandBufferAllocateInfo cmdBufAllocateInfo = new VkCommandBufferAllocateInfo
-            {
-                sType = VkStructureType.CommandBufferAllocateInfo
-            };
-            cmdBufAllocateInfo.commandPool = cmdPool;
-            cmdBufAllocateInfo.level = level;
-            cmdBufAllocateInfo.commandBufferCount = count;
-
-            VulkanUtil.CheckResult(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, cmdBuffers));
-        }
-
-        public static void ResetCommandPool(VkCommandPool cmdPool, VkCommandPoolResetFlags flags)
-        {
-            vkResetCommandPool(device, cmdPool, flags);
-        }
-
-        public static void FreeCommandBuffers(VkCommandPool cmdPool, uint count, VkCommandBuffer* cmdBuffers)
-        {
-            vkFreeCommandBuffers(device, cmdPool, count, cmdBuffers);
+            vkFreeMemory(device, memory, null);
         }
 
         public static IntPtr MapMemory(VkDeviceMemory memory, ulong offset, ulong size, VkMemoryMapFlags flags)
@@ -631,15 +480,117 @@ namespace SharpGame
 
         }
 
+        public static void FlushMappedMemoryRanges(uint memoryRangeCount, ref VkMappedMemoryRange pMemoryRanges)
+        {
+            VulkanUtil.CheckResult(vkFlushMappedMemoryRanges(device, memoryRangeCount, Utilities.AsPtr(ref pMemoryRanges)));
+        }
+
+        public static void InvalidateMappedMemoryRanges(uint memoryRangeCount, ref VkMappedMemoryRange pMemoryRanges)
+        {
+            VulkanUtil.CheckResult(vkInvalidateMappedMemoryRanges(device, memoryRangeCount, Utilities.AsPtr(ref pMemoryRanges)));
+        }
+
+        public static VkBuffer CreateBuffer(ref VkBufferCreateInfo pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateBuffer(device, Utilities.AsPtr(ref pCreateInfo), null, out VkBuffer buffer));
+            return buffer;
+        }
+
+        public static VkBufferView CreateBufferView(ref VkBufferViewCreateInfo pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateBufferView(device, Utilities.AsPtr(ref pCreateInfo), null, out VkBufferView pView));
+            return pView;
+        }
+
+        public static void GetBufferMemoryRequirements(VkBuffer buffer, out VkMemoryRequirements pMemoryRequirements)
+        {
+            vkGetBufferMemoryRequirements(device, buffer, out pMemoryRequirements);
+        }
+
+        public static void BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, ulong memoryOffset)
+        {
+            VulkanUtil.CheckResult(vkBindBufferMemory(device, buffer, memory, memoryOffset));
+        }
+
+        public static VkImage CreateImage(ref VkImageCreateInfo pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateImage(device, Utilities.AsPtr(ref pCreateInfo), null, out VkImage pImage));
+            return pImage;
+        }
+
+        public static VkImageView CreateImageView(ref VkImageViewCreateInfo pCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateImageView(device, Utilities.AsPtr(ref pCreateInfo), null, out VkImageView pView));
+            return pView;
+        }
+
+        public static void GetImageMemoryRequirements(Image image, out VkMemoryRequirements pMemoryRequirements)
+        {
+            vkGetImageMemoryRequirements(device, image, out pMemoryRequirements);
+        }
+
+        public static void BindImageMemory(VkImage image, VkDeviceMemory memory, ulong offset)
+        {
+            VulkanUtil.CheckResult(vkBindImageMemory(device, image, memory, offset));
+        }
+
+        public static VkSampler CreateSampler(ref VkSamplerCreateInfo vkSamplerCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateSampler(device, Utilities.AsPtr(ref vkSamplerCreateInfo), null, out VkSampler vkSampler));
+            return vkSampler;
+        }
+
+        public static VkFramebuffer CreateFramebuffer(ref VkFramebufferCreateInfo framebufferCreateInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateFramebuffer(device, Utilities.AsPtr(ref framebufferCreateInfo), null, out VkFramebuffer framebuffer));
+            return framebuffer;
+        }
+
+        public static VkRenderPass CreateRenderPass(ref VkRenderPassCreateInfo createInfo)
+        {
+            VulkanUtil.CheckResult(vkCreateRenderPass(device, Utilities.AsPtr(ref createInfo), null, out VkRenderPass pRenderPass));
+            return pRenderPass;
+        }
+
+        public static VkCommandPool CreateCommandPool(uint queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VkCommandPoolCreateFlags.ResetCommandBuffer)
+        {
+            VkCommandPoolCreateInfo cmdPoolInfo = new VkCommandPoolCreateInfo
+            {
+                sType = VkStructureType.CommandPoolCreateInfo
+            };
+            cmdPoolInfo.queueFamilyIndex = queueFamilyIndex;
+            cmdPoolInfo.flags = createFlags;
+            VulkanUtil.CheckResult(vkCreateCommandPool(device, &cmdPoolInfo, null, out VkCommandPool cmdPool));
+            return cmdPool;
+        }
+
+        public static void AllocateCommandBuffers(VkCommandPool cmdPool, VkCommandBufferLevel level, uint count, VkCommandBuffer* cmdBuffers)
+        {
+            VkCommandBufferAllocateInfo cmdBufAllocateInfo = new VkCommandBufferAllocateInfo
+            {
+                sType = VkStructureType.CommandBufferAllocateInfo
+            };
+            cmdBufAllocateInfo.commandPool = cmdPool;
+            cmdBufAllocateInfo.level = level;
+            cmdBufAllocateInfo.commandBufferCount = count;
+
+            VulkanUtil.CheckResult(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, cmdBuffers));
+        }
+
+        public static void ResetCommandPool(VkCommandPool cmdPool, VkCommandPoolResetFlags flags)
+        {
+            vkResetCommandPool(device, cmdPool, flags);
+        }
+
+        public static void FreeCommandBuffers(VkCommandPool cmdPool, uint count, VkCommandBuffer* cmdBuffers)
+        {
+            vkFreeCommandBuffers(device, cmdPool, count, cmdBuffers);
+        }
+
         public static VkShaderModule CreateShaderModule(ref VkShaderModuleCreateInfo shaderModuleCreateInfo)
         {
             VulkanUtil.CheckResult(vkCreateShaderModule(device, Utilities.AsPtr(ref shaderModuleCreateInfo), null, out VkShaderModule shaderModule));
             return shaderModule;
-        }
-
-        public static void Destroy(VkShaderModule shaderModule)
-        {
-            vkDestroyShaderModule(device, shaderModule, null);
         }
 
         public static VkPipeline CreateGraphicsPipeline(ref VkGraphicsPipelineCreateInfo pCreateInfos)
@@ -662,21 +613,6 @@ namespace SharpGame
             return pPipelines;
         }
 
-        public static void DestroyBuffer(VkBuffer buffer)
-        {
-            vkDestroyBuffer(device, buffer, null);
-        }
-
-        public static void DestroyBufferView(VkBufferView view)
-        {
-            vkDestroyBufferView(device, view, null);
-        }
-
-        public static void FreeMemory(VkDeviceMemory memory)
-        {
-            vkFreeMemory(device, memory, null);
-        }
-
         public static VkDescriptorPool CreateDescriptorPool(ref VkDescriptorPoolCreateInfo pCreateInfo)
         {
             VulkanUtil.CheckResult(vkCreateDescriptorPool(device, Utilities.AsPtr(ref pCreateInfo), null, out VkDescriptorPool pDescriptorPool));
@@ -686,11 +622,6 @@ namespace SharpGame
         public static void DestroyDescriptorPool(VkDescriptorPool descriptorPool)
         {
             vkDestroyDescriptorPool(device, descriptorPool, null);
-        }
-
-        public static void DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
-        {
-            vkDestroyPipelineLayout(device, pipelineLayout, null);
         }
 
         public static VkDescriptorSetLayout CreateDescriptorSetLayout(ref VkDescriptorSetLayoutCreateInfo pCreateInfo)

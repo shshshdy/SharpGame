@@ -37,24 +37,9 @@ namespace SharpGame
             var pipe = pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, subpassIndex, batch.geometry);
 
             cb.BindPipeline(VkPipelineBindPoint.Graphics, pipe);
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, batch.offset);
 
-            int firstSet = 1;
-            foreach (var rs in resourceSet1)
-            {
-                if (firstSet < pass.PipelineLayout.ResourceLayout.Length && rs != null)
-                {
-                    cb.BindGraphicsResourceSet(pass.PipelineLayout, firstSet, rs, -1);
-                }
-                firstSet++;
-            }
+            batch.Draw(cb, pushConsts, resourceSet, resourceSet1, pass);
 
-            foreach (ConstBlock constBlock in pushConsts)
-            {
-                cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
-            }
-            
-            batch.Draw(cb, pass);
         }
 
         public void DrawBatches(CommandBuffer commandBuffer, Span<SourceBatch> sourceBatches, DescriptorSet set0, Span<DescriptorSet> set1)
