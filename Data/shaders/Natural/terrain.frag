@@ -1,6 +1,6 @@
 #version 450
 
-layout (set = 1, binding = 0) uniform UBO 
+layout (set = 0, binding = 0) uniform UBO 
 {
 	mat4 projection;
 	mat4 modelview;
@@ -11,8 +11,8 @@ layout (set = 1, binding = 0) uniform UBO
 	vec2 viewportDim;
 	float tessellatedEdgeSize;
 } ubo; 
-layout (set = 1, binding = 1) uniform sampler2D samplerHeight; 
-layout (set = 1, binding = 2) uniform sampler2DArray samplerLayers;
+layout (set = 0, binding = 1) uniform sampler2D samplerHeight; 
+layout (set = 0, binding = 2) uniform sampler2DArray samplerLayers;
 
 layout (location = 0) in vec3 inNormal;
 layout (location = 1) in vec2 inUV;

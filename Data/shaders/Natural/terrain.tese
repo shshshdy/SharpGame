@@ -1,6 +1,6 @@
 #version 450
 
-layout (set = 1, binding = 0) uniform UBO 
+layout (set = 0, binding = 0) uniform UBO 
 {
 	mat4 projection;
 	mat4 modelview;
@@ -12,8 +12,8 @@ layout (set = 1, binding = 0) uniform UBO
 	float tessellatedEdgeSize;
 } ubo; 
 
-layout (set = 1, binding = 1) uniform sampler2D displacementMap; 
-layout (set = 1, binding = 2) uniform sampler2DArray samplerLayers;
+layout (set = 0, binding = 1) uniform sampler2D samplerHeight; 
+layout (set = 0, binding = 2) uniform sampler2DArray samplerLayers;
 
 layout(quads, equal_spacing, cw) in;
 
@@ -43,7 +43,7 @@ void main()
 	vec4 pos2 = mix(gl_in[3].gl_Position, gl_in[2].gl_Position, gl_TessCoord.x);
 	vec4 pos = mix(pos1, pos2, gl_TessCoord.y);
 	// Displace
-	pos.y -= textureLod(displacementMap, outUV, 0.0).r * ubo.displacementFactor;
+	pos.y -= textureLod(samplerHeight, outUV, 0.0).r * ubo.displacementFactor;
 	// Perspective projection
 	gl_Position = ubo.projection * ubo.modelview * pos;
 

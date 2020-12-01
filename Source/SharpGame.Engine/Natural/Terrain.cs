@@ -25,24 +25,7 @@ namespace SharpGame
 
         public override void Draw(CommandBuffer cb, Span<ConstBlock> pushConsts, DescriptorSet resourceSet, Span<DescriptorSet> resourceSet1, Pass pass)
         {
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, offset);
-
-            int firstSet = 1;
-            foreach (var rs in resourceSet1)
-            {
-                if (firstSet < pass.PipelineLayout.ResourceLayout.Length && rs != null)
-                {
-                    cb.BindGraphicsResourceSet(pass.PipelineLayout, firstSet, rs, -1);
-                }
-                firstSet++;
-            }
-
-            foreach (ConstBlock constBlock in pushConsts)
-            {
-                cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
-            }
-
-            //cb.BindGraphicsResourceSet(pass.PipelineLayout, 1, dsTess);
+            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, dsTess);
             material.Bind(pass.passIndex, cb);
             geometry.Draw(cb);
         }
@@ -80,11 +63,8 @@ namespace SharpGame
             };
 
             batch.material = material;
-
-            unsafe
-            {
-                ubTess = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)sizeof(TessUBO));
-            }
+              
+            ubTess = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<TessUBO>());           
 
             batch.dsLayout = new DescriptorSetLayout
             {
@@ -115,7 +95,7 @@ namespace SharpGame
                 {
                     uint index = (x + y * PATCH_SIZE);
                     vertices[index].position[0] = x * wx + wx / 2.0f - (float)PATCH_SIZE * wx / 2.0f;
-                    vertices[index].position[1] = 0.0f;
+                    vertices[index].position[1] = 0.0f; //heightMap.GetHeight((int)x, (int)y)*10;
                     vertices[index].position[2] = y * wy + wy / 2.0f - (float)PATCH_SIZE * wy / 2.0f;
                     vertices[index].texcoord = glm.vec2((float)x / PATCH_SIZE, (float)y / PATCH_SIZE) * UV_SCALE;
                 }
@@ -176,14 +156,14 @@ namespace SharpGame
             };
 
             batch.geometry.SetDrawRange(VkPrimitiveTopology.TriangleList, 0, indexCount, 0);
-            //batch.geometry.PrimitiveTopology = VkPrimitiveTopology.PatchList;
+            batch.geometry.PrimitiveTopology = VkPrimitiveTopology.PatchList;
 
 
             colorMap = Resources.Instance.Load<Texture>("textures/terrain_texturearray_rgba.ktx");
 
             batch.dsTess.Bind(1, heightMap.texture);
             batch.dsTess.Bind(2, colorMap);
-
+            batch.dsTess.UpdateSets();
         }
 
         bool tessellation = true;
@@ -218,7 +198,6 @@ namespace SharpGame
 
         public override void UpdateBatches(in FrameInfo frame)
         {
-            ref BoundingBox worldBoundingBox = ref WorldBoundingBox;
             ref mat4 worldTransform = ref node_.WorldTransform;
             batch.worldTransform = node_.worldTransform_;
             batch.numWorldTransforms = 1;
@@ -252,7 +231,7 @@ namespace SharpGame
             rpos.x = Math.Max(0, Math.Min(rpos.x, (int)dim - 1));
             rpos.y = Math.Max(0, Math.Min(rpos.y, (int)dim - 1));
             rpos /= (int)scale;
-            return (heightdata[rpos.x + rpos.y * dim] * scale) / 65535.0f;
+            return (heightdata[(rpos.x + rpos.y * dim) * scale]) / 65535.0f;
         }
     }
 }

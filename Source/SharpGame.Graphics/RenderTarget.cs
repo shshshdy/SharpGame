@@ -124,7 +124,7 @@ namespace SharpGame
             var aspectMask = Device.IsDepthFormat(format) ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color;
             image = Image.Create(width, height, VkImageCreateFlags.None, layers, 1, format, this.samples, imageUsageFlags);
             imageView = ImageView.Create(image, layers > 1 ? VkImageViewType.Image2DArray : VkImageViewType.Image2D, format, aspectMask, 0, 1, 0, layers);
-            sampler = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
+            sampler = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, 1, false);
 
             this.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
             descriptor = new VkDescriptorImageInfo(sampler, imageView, imageLayout);

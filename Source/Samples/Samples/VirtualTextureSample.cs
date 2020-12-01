@@ -475,7 +475,7 @@ namespace SharpGame.Samples
             //todo: use sparse bind semaphore
             queue.WaitIdle();
 
-            texture.sampler = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, false);
+            texture.sampler = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, texture.mipLevels, false);
             texture.imageView = ImageView.Create(texture.image, VkImageViewType.Image2D, format, VkImageAspectFlags.Color, 0, texture.mipLevels);
             texture.UpdateDescriptor();
         }

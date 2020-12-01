@@ -34,7 +34,7 @@ namespace SharpGame.Samples
             };
 
             camera = scene.GetComponent<Camera>(true);
-            /*
+            
             var importer = new AssimpModelReader(VertexComponent.Position, VertexComponent.Texcoord);
 
             {
@@ -43,10 +43,9 @@ namespace SharpGame.Samples
                 importer.scale = 5;
                 var model = importer.Load("models/vegetation/skysphere.dae");
                 staticModel.SetModel(model);
-                staticModel.SetBoundingBox(new BoundingBox(-10000, 10000));
                 var mat = new Material("shaders/SkySphere.shader");
                 staticModel.SetMaterial(mat);
-            }*/
+            }
             
             {
                 var node = scene.CreateChild("Terrain");

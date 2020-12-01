@@ -439,7 +439,6 @@ namespace SharpGame
         private int renderContext = -1;
         int[] contextToImage = new int[3] { -1, -1, -1 };
         public int WorkContext => workContext;
-        //public int RenderContext => renderContext;
         public int WorkImage => contextToImage[workContext];
         public int RenderImage => contextToImage[renderContext];
 

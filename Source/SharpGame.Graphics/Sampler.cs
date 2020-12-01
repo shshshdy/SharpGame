@@ -12,12 +12,12 @@ namespace SharpGame
 
         static Sampler()
         {
-            Default = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, true);
-            ClampToEdge = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, false);
+            Default = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.Repeat, 1, true);
+            ClampToEdge = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, VkSamplerAddressMode.ClampToEdge, 1, false);
         }
 
         public Sampler(VkFilter filter, VkSamplerMipmapMode mipmapMode,
-            VkSamplerAddressMode addressMode, bool anisotropyEnable, VkBorderColor borderColor = VkBorderColor.FloatOpaqueWhite)
+            VkSamplerAddressMode addressMode, uint mipLevels, bool anisotropyEnable, VkBorderColor borderColor = VkBorderColor.FloatOpaqueWhite)
         {
             // Create sampler
             var samplerCreateInfo = new VkSamplerCreateInfo
@@ -32,7 +32,7 @@ namespace SharpGame
                 mipLodBias = 0.0f,
                 compareOp = VkCompareOp.Never,
                 minLod = 0.0f,
-                maxLod = 1.0f,// float.MaxValue,
+                maxLod = mipLevels,
                 borderColor = borderColor,
                 maxAnisotropy = anisotropyEnable ? Device.Properties.limits.maxSamplerAnisotropy : 1,
                 anisotropyEnable = anisotropyEnable
