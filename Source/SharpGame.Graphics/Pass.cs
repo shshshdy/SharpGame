@@ -189,8 +189,8 @@ namespace SharpGame
         private MultisampleStateInfo multisampleState = MultisampleStateInfo.Default;
 
         [IgnoreDataMember]
-        public ref DepthStencilStateInfo DepthStencilState => ref depthStencilState_;
-        private DepthStencilStateInfo depthStencilState_ = DepthStencilStateInfo.Solid;
+        public ref DepthStencilStateInfo DepthStencilState => ref depthStencilState;
+        private DepthStencilStateInfo depthStencilState = DepthStencilStateInfo.Solid;
 
         [IgnoreDataMember]
         public ref ColorBlendStateInfo ColorBlendState => ref colorBlendState;
@@ -199,8 +199,8 @@ namespace SharpGame
         public ref VkPolygonMode FillMode => ref rasterizationState.polygonMode;
         public VkCullModeFlags CullMode { get => rasterizationState.cullMode; set => rasterizationState.cullMode = value; }
         public VkFrontFace FrontFace { get => rasterizationState.frontFace; set => rasterizationState.frontFace = value; }
-        public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
-        public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
+        public bool DepthTestEnable { get => depthStencilState.depthTestEnable; set => depthStencilState.depthTestEnable = value; }
+        public bool DepthWriteEnable { get => depthStencilState.depthWriteEnable; set => depthStencilState.depthWriteEnable = value; }
         public uint PatchControlPoints { get; set; } = 4;
 
         private BlendMode blendMode = BlendMode.Replace;
@@ -443,8 +443,8 @@ namespace SharpGame
             };
 
             this.multisampleState.ToNative(out VkPipelineMultisampleStateCreateInfo multisampleState);
-            depthStencilState_.ToNative(out VkPipelineDepthStencilStateCreateInfo depthStencilState);
-            ColorBlendState.ToNative(out var colorBlendState, renderPass.GetColorAttachmentCount(subPass));
+            depthStencilState.ToNative(out VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilState);
+            colorBlendState.ToNative(out var pipelineColorBlendState, renderPass.GetColorAttachmentCount(subPass));
 
             VkGraphicsPipelineCreateInfo pipelineCreateInfo = new VkGraphicsPipelineCreateInfo
             {
@@ -464,8 +464,8 @@ namespace SharpGame
             pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
             pipelineCreateInfo.pViewportState = &pipelineViewportStateCreateInfo;
             pipelineCreateInfo.pMultisampleState = &multisampleState;
-            pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-            pipelineCreateInfo.pColorBlendState = &colorBlendState;
+            pipelineCreateInfo.pDepthStencilState = &pipelineDepthStencilState;
+            pipelineCreateInfo.pColorBlendState = &pipelineColorBlendState;
 
             VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
             if (DynamicStates.HasValue)

@@ -8,7 +8,7 @@ Shader "ClusterDeferred"
 
 		@VertexShader
         {
-            #include "cluster_deferred.vert"
+            #include "post/fullscreen.vert"
         }
 
         @PixelShader

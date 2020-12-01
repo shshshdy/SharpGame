@@ -184,6 +184,17 @@
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
+        public unsafe void BindResourceSet(VkPipelineBindPoint pipelineBindPoint, PipelineLayout pipelineLayout, int set, DescriptorSet pDescriptorSets, Span<uint> dynamicOffsets)
+        {
+            fixed (uint* pDynamicOffsets = dynamicOffsets)
+            {
+                BindResourceSet(pipelineBindPoint,
+                    pipelineLayout, set, pDescriptorSets, (uint)dynamicOffsets.Length, pDynamicOffsets);
+            }
+            
+        }
+
+        [MethodImpl((MethodImplOptions)0x100)]
         public unsafe void BindResourceSet(VkPipelineBindPoint pipelineBindPoint,
             PipelineLayout pipelineLayout, int set, DescriptorSet pDescriptorSets, uint dynamicOffsetCount = 0, uint* pDynamicOffsets = null)
         {
@@ -191,7 +202,6 @@
                 || dynamicOffsetCounts[set] != dynamicOffsetCount
                 || (pDynamicOffsets != null && dynamicOffsets[set] != *pDynamicOffsets))
             {
-
                 descriptorSets[set] = pDescriptorSets.descriptorSet[Graphics.Instance.WorkContext];
                 dynamicOffsetCounts[set] = dynamicOffsetCount;
                 if (dynamicOffsetCount > 0)
@@ -282,15 +292,35 @@
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
-        public unsafe void DrawGeometry(Geometry geometry, Pass pass, uint subPass, Span<DescriptorSet> resourceSet)
+        public unsafe void DrawGeometry(Geometry geometry, Pass pass, uint subPass, DescriptorSet set0, Span<uint> offset, Span<DescriptorSet> resourceSet)
         {
             var pipe = pass.GetGraphicsPipeline(renderPass, subPass, geometry);
+
             BindPipeline(VkPipelineBindPoint.Graphics, pipe);
+
+            BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, 0, set0, offset);
+
             for (int i = 0; i < resourceSet.Length; i++)
             {
-                BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, i, resourceSet[i]);
+                BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, i + 1, resourceSet[i]);
             }
             geometry.Draw(this);
+        }
+
+        public void DrawFullScreenQuad(Pass pass, uint subpass, DescriptorSet set0, Span<uint> offset, Span<DescriptorSet> resourceSet)
+        {
+            var pipe = pass.GetGraphicsPipeline(renderPass, subpass, null);
+
+            BindPipeline(VkPipelineBindPoint.Graphics, pipe);
+
+            BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, 0, set0, offset);
+
+            for (int i = 0; i < resourceSet.Length; i++)
+            {                   
+                BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, i + 1, resourceSet[i]);
+            }
+
+            Draw(3, 1, 0, 0);
         }
 
         public void DrawIndirect(Buffer buffer, ulong offset, uint drawCount, uint stride)

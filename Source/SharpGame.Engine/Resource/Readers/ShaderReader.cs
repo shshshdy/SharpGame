@@ -583,11 +583,11 @@ namespace SharpGame
                 {
                     foreach (var rs in resources.GetResources(resourceType))
                     {
-                        Console.WriteLine($"ID: {rs.Id}, BaseTypeID: {rs.BaseTypeId}, TypeID: {rs.TypeId}, Name: {rs.Name})");
+                        //Console.WriteLine($"ID: {rs.Id}, BaseTypeID: {rs.BaseTypeId}, TypeID: {rs.TypeId}, Name: {rs.Name})");
                         var set = compiler.GetDecoration(rs.Id, SpvDecoration.DescriptorSet);
                         var binding = compiler.GetDecoration(rs.Id, SpvDecoration.Binding);
                         var type = compiler.GetSpirvType(rs.TypeId);
-                        Console.WriteLine($"  Set: {set}, Binding: {binding}");
+                        //Console.WriteLine($"  Set: {set}, Binding: {binding}");
 
                         bool isDynamic = rs.Name.EndsWith("dynamic");
 
@@ -619,14 +619,14 @@ namespace SharpGame
                         if(type.MemberCount > 0)
                         {
                             compiler.GetDeclaredStructSize(type, out int size);
-                            Console.WriteLine($"  struct, size:{size}");
+                            //Console.WriteLine($"  struct, size:{size}");
                             u.size = (uint)size;
                             for (int i = 0; i < type.MemberCount; i++)
                             {
                                 compiler.GetStructMemberOffset(type, i, out int offset);
                                 //compiler.GetStructMemberArrayStride(type, i, out int sz);
                                 //compiler.GetStructMemberMatrixStride(type, i, out int stride);
-                                Console.WriteLine($"  MemberOffset:{offset}");
+                                //Console.WriteLine($"  MemberOffset:{offset}");
                                 //Console.WriteLine($"  MemberOffset:{offset}, ArrayStride:{sz}, MatrixStride:{stride}");
                             }
                         }
@@ -640,9 +640,9 @@ namespace SharpGame
 
                 foreach (var input in resources.GetResources(SharpSPIRVCross.ResourceType.StageInput))
                 {
-                    Console.WriteLine($"ID: {input.Id}, BaseTypeID: {input.BaseTypeId}, TypeID: {input.TypeId}, Name: {input.Name})");
+                    //Console.WriteLine($"ID: {input.Id}, BaseTypeID: {input.BaseTypeId}, TypeID: {input.TypeId}, Name: {input.Name})");
                     var location = compiler.GetDecoration(input.Id, SpvDecoration.Location);
-                    Console.WriteLine($"  Location: {location}");
+                    //Console.WriteLine($"  Location: {location}");
                 }
 
                 CollectShaderResources(SharpSPIRVCross.ResourceType.StorageImage);

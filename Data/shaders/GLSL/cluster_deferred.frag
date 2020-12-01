@@ -1,23 +1,6 @@
 #version 450
 
-//#include "Common.glsl"
-layout (binding = 0) uniform CameraVS
-{
-    mat4 View;
-    mat4 ViewInv;
-    mat4 Proj;
-    mat4 ProjInv;
-    mat4 ViewProj;
-    mat4 ViewProjInv;
-	vec3 CameraPos;
-	float pading1;
-	vec3 CameraDir;
-	float pading2;
-	vec2 GBufferInvSize;
-	float NearClip;
-	float FarClip;
-};
-
+#include "Common.glsl"
 #include "GridCoord.glsl"
 #include "ClusterLighting.glsl"
 
@@ -29,28 +12,21 @@ layout(location = 0) in vec2 inUV;
 
 layout(location = 0) out vec4 outFragcolor;
 
-//precision highp float;
+precision highp float;
 
-/*
-vec3 ReconstructWSPosFromDepth(vec2 uv, float depth)
-{
-	vec4 pos = vec4(uv * 2.0 - 1.0, depth, 1.0f);
-	vec4 posVS = uboConstant.invProj * pos;
-	vec3 posNDC = posVS.xyz / posVS.w;
-	return (uboConstant.invView * vec4(posNDC, 1)).xyz;
-}*/
 
 void main() 
 {
 	// Get G-Buffer values
 	vec4 albedo = texture(samplerAlbedo, inUV);
 	vec4 normal = texture(samplerNormal, inUV);
-
+	
+//#define DEPTH_RECONSTRUCT 
 #ifdef DEPTH_RECONSTRUCT
 
 	float depth = texture(samplerDepth, inUV).r;
 	vec4 clip = vec4(inUV * 2.0 - 1.0, depth, 1.0);
-	highp vec4 world_w = ubo_in.inv_view_proj * clip;
+	highp vec4 world_w = ViewProjInv * clip;
 	highp vec3 worldPos = world_w.xyz / world_w.w;
 
 #else

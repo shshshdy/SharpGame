@@ -21,8 +21,6 @@ namespace SharpGame
 
         protected Shader clusterDeferred;
 
-        Geometry quad;
-
         DescriptorSetLayout deferredLayout0;
         DescriptorSetLayout deferredLayout1;
 
@@ -42,7 +40,6 @@ namespace SharpGame
             //FrameGraph.AddDebugImage(depthHWRT.view);
 
             clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
-            quad = GeometryUtil.CreateUnitQuad();
 
             deferredLayout0 = new DescriptorSetLayout
             {
@@ -100,21 +97,19 @@ namespace SharpGame
             
             onscreenPass = new FrameGraphPass
             {
-                renderPassCreator = () => Graphics.CreateRenderPass(false, false),
-                frameBufferCreator = (rp) => Graphics.CreateSwapChainFramebuffers(rp),
-
-                Subpasses = new[]
+                new SceneSubpass("cluster_forward")
                 {
-                    new SceneSubpass("cluster_forward")
-                    {
-                        OnDraw = Composite,
+                    OnDraw = Composite,
 
-                        Set1 = resourceSet0,
-                        Set2 = resourceSet1,
-                        BlendFlags = BlendFlags.AlphaBlend
-                    }
+                    Set1 = resourceSet0,
+                    Set2 = resourceSet1,
+                    BlendFlags = BlendFlags.AlphaBlend
                 }
+
             };
+
+            onscreenPass.renderPassCreator = () => Graphics.CreateRenderPass(false, false);
+            onscreenPass.frameBufferCreator = (rp) => Graphics.CreateSwapChainFramebuffers(rp);
 
             this.Add(onscreenPass);
         }
@@ -212,13 +207,13 @@ namespace SharpGame
 
             Span<DescriptorSet> sets = new []
             {
-                View.Set0,
                 resourceSet0,
                 resourceSet1,
                 deferredSet1,
             };
 
-            cmd.DrawGeometry(quad, pass, 0, sets);
+            Span<uint> offset = new uint[] {0};
+            cmd.DrawFullScreenQuad(pass, 0, View.Set0, offset, sets);
 
             scenePass.DrawScene(cmd, BlendFlags.AlphaBlend);
 

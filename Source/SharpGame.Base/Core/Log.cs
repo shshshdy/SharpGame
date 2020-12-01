@@ -30,28 +30,38 @@ namespace SharpGame
 
         public static void Warn(string msg)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(msg);
+            Console.ResetColor();
         }
 
         public static void Warn(string msg, params object[] arg)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(msg, arg);
+            Console.ResetColor();
         }
 
         public static void Error(string msg)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(msg);
+            Console.ResetColor();
         }
 
         public static void Error(string msg, params object[] arg)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(msg, arg);
+            Console.ResetColor();
         }
 
         public static void Exception(Exception e)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);
+            Console.ResetColor();
         }
 
         [Conditional("RENDER_LOG")]
@@ -62,7 +72,9 @@ namespace SharpGame
 
         public static void Error(int line, string message)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Log.Error("[line " + line + "]: " +  message);
+            Console.ResetColor();
         }
 
     }

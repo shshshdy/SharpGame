@@ -157,21 +157,19 @@ namespace SharpGame
         public uint flags;
         public VkBool32 logicOpEnable;
         public VkLogicOp logicOp;
-        public Vector<ColorBlendAttachment> attachments;
+        int attachmentNum;
+        public FixedArray8<ColorBlendAttachment> attachments;
         public float blendConstants_0;
         public float blendConstants_1;
         public float blendConstants_2;
         public float blendConstants_3;
 
         public void Add(in ColorBlendAttachment colorBlendAttachment)
-        {
-            if(attachments == null)
-                attachments = new Vector<ColorBlendAttachment>();
-            
-            attachments.Add(colorBlendAttachment);
+        {            
+            attachments[attachmentNum++] = colorBlendAttachment;
         }
 
-        public static ColorBlendStateInfo Replace = new ColorBlendStateInfo
+        public static readonly ColorBlendStateInfo Replace = new ColorBlendStateInfo
         {
             new ColorBlendAttachment
             {
@@ -187,7 +185,7 @@ namespace SharpGame
             
         };
 
-        public static ColorBlendStateInfo Addtive = new ColorBlendStateInfo
+        public static readonly ColorBlendStateInfo Addtive = new ColorBlendStateInfo
         {
             new ColorBlendAttachment
             {
@@ -203,7 +201,7 @@ namespace SharpGame
 
         };
 
-        public static ColorBlendStateInfo AlphaBlend = new ColorBlendStateInfo
+        public static readonly ColorBlendStateInfo AlphaBlend = new ColorBlendStateInfo
         {
             new ColorBlendAttachment
             {
@@ -219,7 +217,7 @@ namespace SharpGame
 
         };
 
-        public static ColorBlendStateInfo PremulAlpha = new ColorBlendStateInfo
+        public static readonly ColorBlendStateInfo PremulAlpha = new ColorBlendStateInfo
         {
             new ColorBlendAttachment
             {
@@ -244,13 +242,20 @@ namespace SharpGame
                 logicOp = logicOp
             };
 
-            while (attachmentCount > attachments.Count)
+            while (attachmentCount > attachmentNum)
             {
-                attachments.Add(attachments.Back());
+                if (attachmentNum > 0)
+                {
+                    Add(attachments[attachmentNum - 1]);
+                }
+                else
+                {
+                    Add(new ColorBlendAttachment());
+                }
             }
 
-            native.attachmentCount = attachments.Count;
-            native.pAttachments = (VkPipelineColorBlendAttachmentState*)attachments.DataPtr;
+            native.attachmentCount = (uint)attachmentNum;
+            native.pAttachments = (VkPipelineColorBlendAttachmentState*)attachments.Data;
             native.blendConstants[0] = blendConstants_0;
             native.blendConstants[1] = blendConstants_1;
             native.blendConstants[2] = blendConstants_2;
