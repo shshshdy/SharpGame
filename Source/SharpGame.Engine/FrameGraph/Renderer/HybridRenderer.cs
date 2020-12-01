@@ -1,4 +1,4 @@
-﻿//#define HWDEPTH
+﻿#define HWDEPTH
 using Assimp;
 using System;
 using System.Collections.Generic;
@@ -35,10 +35,6 @@ namespace SharpGame
         {
             base.CreateResources();
 
-            //FrameGraph.AddDebugImage(albedoRT.view);
-            //FrameGraph.AddDebugImage(normalRT.view);
-            //FrameGraph.AddDebugImage(depthHWRT.view);
-
             clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
 
             deferredLayout0 = new DescriptorSetLayout
@@ -65,7 +61,6 @@ namespace SharpGame
             {
                 //new RenderTextureInfo(width, height, 1, VkFormat.R8G8B8A8UNorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
                 //new RenderTextureInfo(width, height, 1, VkFormat.R8G8B8A8UNorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
-                //new RenderTextureInfo(width, height, 1, VkFormat.R32G32B32A32SFloat, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
                 //new RenderTextureInfo(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled),
 
                 new SceneSubpass("gbuffer")
@@ -79,7 +74,6 @@ namespace SharpGame
             {
                 new VkClearColorValue(0.25f, 0.25f, 0.25f, 1),
                 new VkClearColorValue(0, 0, 0, 1),
-                new VkClearColorValue(0, 0, 0, 0),
                 new VkClearDepthStencilValue(1, 0)
             };
 
@@ -122,20 +116,18 @@ namespace SharpGame
             {
                 new VkAttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
                 new VkAttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
-                new VkAttachmentDescription(VkFormat.R32G32B32A32SFloat, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
-                new VkAttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)
+                new VkAttachmentDescription(depthFormat, finalLayout : VkImageLayout.ShaderReadOnlyOptimal /*VkImageLayout.DepthStencilReadOnlyOptimal*/)
             };
 
             var colorAttachments = new[]
             {
                  new VkAttachmentReference(0, VkImageLayout.ColorAttachmentOptimal),
-                 new VkAttachmentReference(1, VkImageLayout.ColorAttachmentOptimal),
-                 new VkAttachmentReference(2, VkImageLayout.ColorAttachmentOptimal)
+                 new VkAttachmentReference(1, VkImageLayout.ColorAttachmentOptimal)
             };
 
             var depthStencilAttachment = new[]
             {
-                 new VkAttachmentReference(3, VkImageLayout.DepthStencilAttachmentOptimal)
+                 new VkAttachmentReference(2, VkImageLayout.DepthStencilAttachmentOptimal)
             };
 
             SubpassDescription[] subpassDescription =
@@ -186,16 +178,17 @@ namespace SharpGame
             VkFormat depthFormat = Device.GetSupportedDepthFormat();
 
             albedoRT = new RenderTexture(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
-            normalRT = new RenderTexture(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
-            positionRT = new RenderTexture(width, height, 1, VkFormat.R32G32B32A32SFloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            normalRT = new RenderTexture(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);            
             depthHWRT = new RenderTexture(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
 
-            var geometryFB = new Framebuffer(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, positionRT.imageView, depthHWRT.imageView });
-#if HWDEPTH
-            deferredSet1 = new ResourceSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
-#else
-            deferredSet1 = new DescriptorSet(deferredLayout1, albedoRT, normalRT, positionRT);
-#endif
+            var geometryFB = new Framebuffer(rp, width, height, 1, new[] { albedoRT.imageView, normalRT.imageView, depthHWRT.imageView });
+           
+            deferredSet1 = new DescriptorSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
+
+            FrameGraph.AddDebugImage(albedoRT);
+            FrameGraph.AddDebugImage(normalRT);
+            FrameGraph.AddDebugImage(depthHWRT);
+
             return new Framebuffer[] { geometryFB, geometryFB, geometryFB };
 
         }

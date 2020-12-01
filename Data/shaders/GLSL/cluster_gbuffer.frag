@@ -21,7 +21,7 @@ layout (location = 2) in mat3 inNormal;
 
 layout(location = 0) out vec4 outAlbedoSpec;
 layout(location = 1) out vec4 outNormalRoughness;
-layout(location = 2) out vec4 outDepth;
+//layout(location = 2) out vec4 outDepth;
 
 vec3 DecodeNormal(vec4 normalInput)
 {
@@ -53,7 +53,7 @@ void main ()
 
 	float z = linearDepth(gl_FragCoord.z);
 
-    outDepth = vec4(inWorldPos.xyz, z);
+    //outDepth = vec4(inWorldPos.xyz, z);
 
     vec4 viewPos = ubo_in.view*inWorldPos;
 
