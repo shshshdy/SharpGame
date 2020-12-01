@@ -308,7 +308,7 @@ namespace SharpGame
                 }
 
                 var vkImages = Vulkan.vkGetSwapchainImagesKHR(Device.Handle, swapchain);
-
+                VkImages.Clear();
                 Images = new Image[vkImages.Length];
                 ImageViews = new ImageView[vkImages.Length];
                 for (int i = 0; i < vkImages.Length; i++)

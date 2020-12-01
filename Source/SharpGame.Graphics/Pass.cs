@@ -167,10 +167,10 @@ namespace SharpGame
         public ref ShaderModule GeometryShader => ref shaderModels[1];
 
         [IgnoreDataMember]
-        public ref ShaderModule HullShader => ref shaderModels[2];
+        public ref ShaderModule TessControlShader => ref shaderModels[2];
 
         [IgnoreDataMember]
-        public ref ShaderModule DomainShader => ref shaderModels[3];
+        public ref ShaderModule TessEvaluationShader => ref shaderModels[3];
 
         [IgnoreDataMember]
         public ref ShaderModule ComputeShader => ref shaderModels[5];
@@ -201,6 +201,7 @@ namespace SharpGame
         public VkFrontFace FrontFace { get => rasterizationState.frontFace; set => rasterizationState.frontFace = value; }
         public bool DepthTestEnable { get => depthStencilState_.depthTestEnable; set => depthStencilState_.depthTestEnable = value; }
         public bool DepthWriteEnable { get => depthStencilState_.depthWriteEnable; set => depthStencilState_.depthWriteEnable = value; }
+        public uint PatchControlPoints { get; set; } = 4;
 
         private BlendMode blendMode = BlendMode.Replace;
         public BlendMode BlendMode { get => blendMode; set { blendMode = value; SetBlendMode(value); } }
@@ -215,7 +216,7 @@ namespace SharpGame
         public VertexLayout VertexLayout { get; set; }
 
         internal VkPipeline computeHandle;
-        ConcurrentDictionary<long, VkPipeline> pipelines = new ConcurrentDictionary<long, VkPipeline>();
+        readonly ConcurrentDictionary<long, VkPipeline> pipelines = new ConcurrentDictionary<long, VkPipeline>();
 
         public Pass()
         {
@@ -317,6 +318,12 @@ namespace SharpGame
             }
         }
 
+        public void MakeDirty()
+        {
+            pipelines.Clear();
+            computeHandle = VkPipeline.Null;
+        }
+
         public DescriptorSetLayout GetResourceLayout(int index)
         {
             if(index >= PipelineLayout.ResourceLayout.Length)
@@ -352,12 +359,15 @@ namespace SharpGame
             {
                 if (sm != null)
                 {
-                    var shaderStage = new VkPipelineShaderStageCreateInfo { sType = VkStructureType.PipelineShaderStageCreateInfo };
-                    shaderStage.stage = sm.Stage;
-                    shaderStage.module = sm;
-                    shaderStage.pName = Pass.FuncName;// sm.FuncName;
+                    var shaderStage = new VkPipelineShaderStageCreateInfo
+                    {
+                        sType = VkStructureType.PipelineShaderStageCreateInfo,
+                        stage = sm.Stage,
+                        module = sm,
+                        pName = Pass.FuncName
+                    };
 
-                    if(sm.SpecializationInfo != null)
+                    if (sm.SpecializationInfo != null)
                     {
                         shaderStage.pSpecializationInfo = sm.SpecializationInfo.ToNative;
                     }
@@ -369,17 +379,17 @@ namespace SharpGame
             return (uint)count;
         }
 
-        private unsafe VkPipelineShaderStageCreateInfo GetComputeStageCreateInfo()
+        private VkPipelineShaderStageCreateInfo GetComputeStageCreateInfo()
         {
             if (ShaderModels[5] != null)
             {
                 var shaderStage = new VkPipelineShaderStageCreateInfo
                 {
-                    sType = VkStructureType.PipelineShaderStageCreateInfo
+                    sType = VkStructureType.PipelineShaderStageCreateInfo,
+                    stage = VkShaderStageFlags.Compute,
+                    module = ShaderModels[5],
+                    pName = Pass.FuncName
                 };
-                shaderStage.stage = VkShaderStageFlags.Compute;
-                shaderStage.module = ShaderModels[5];
-                shaderStage.pName = Pass.FuncName;
                 return shaderStage;
             }
 
@@ -388,7 +398,7 @@ namespace SharpGame
 
         public VkPipeline GetGraphicsPipeline(RenderPass renderPass, uint subPass, Geometry geometry)
         {
-            var vertexInput = VertexLayout?? (geometry != null ? geometry.VertexLayout : null);
+            var vertexInput = VertexLayout?? (geometry?.VertexLayout);
             var primitiveTopology = geometry != null ? geometry.PrimitiveTopology : PrimitiveTopology;
 
             if (pipelines.TryGetValue(vertexInput?.GetHashCode() ?? 0, out var pipe))
@@ -401,17 +411,6 @@ namespace SharpGame
 
         public unsafe VkPipeline CreateGraphicsPipeline(RenderPass renderPass, uint subPass, VertexLayout vertexInput, VkPrimitiveTopology primitiveTopology)
         {
-            VkGraphicsPipelineCreateInfo pipelineCreateInfo = new VkGraphicsPipelineCreateInfo
-            {
-                sType = VkStructureType.GraphicsPipelineCreateInfo
-            };
-            pipelineCreateInfo.layout = PipelineLayout;
-            pipelineCreateInfo.renderPass = renderPass;
-            pipelineCreateInfo.subpass = subPass;
-            pipelineCreateInfo.flags = 0;
-            pipelineCreateInfo.basePipelineIndex = -1;
-            pipelineCreateInfo.basePipelineHandle = new VkPipeline();
-
             VkPipelineVertexInputStateCreateInfo vertexInputState;
             if (vertexInput != null)
             {
@@ -422,41 +421,50 @@ namespace SharpGame
                 vertexInputState = new VkPipelineVertexInputStateCreateInfo { sType = VkStructureType.PipelineVertexInputStateCreateInfo };
             }
 
-            pipelineCreateInfo.pVertexInputState = &vertexInputState;
+            var pipelineInputAssemblyStateCreateInfo = new VkPipelineInputAssemblyStateCreateInfo
+            {
+                sType = VkStructureType.PipelineInputAssemblyStateCreateInfo,
+                topology = primitiveTopology,
+                flags = 0,
+                primitiveRestartEnable = false
+            };
 
             Span<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = stackalloc VkPipelineShaderStageCreateInfo[6];
             uint count = GetShaderStageCreateInfos(shaderStageCreateInfos);
-            pipelineCreateInfo.stageCount = count;
-            pipelineCreateInfo.pStages = (VkPipelineShaderStageCreateInfo*)Unsafe.AsPointer(ref shaderStageCreateInfos[0]);
-
-            var pipelineInputAssemblyStateCreateInfo = new VkPipelineInputAssemblyStateCreateInfo
-            {
-                sType = VkStructureType.PipelineInputAssemblyStateCreateInfo
-            };
-            pipelineInputAssemblyStateCreateInfo.topology = primitiveTopology;
-            pipelineInputAssemblyStateCreateInfo.flags = 0;
-            pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = false;
-            pipelineCreateInfo.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo;
 
             rasterizationState.ToNative(out VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo);
-            pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 
             var pipelineViewportStateCreateInfo = new VkPipelineViewportStateCreateInfo
             {
-                sType = VkStructureType.PipelineViewportStateCreateInfo
+                sType = VkStructureType.PipelineViewportStateCreateInfo,
+                viewportCount = 1,
+                scissorCount = 1,
+                flags = 0
             };
-            pipelineViewportStateCreateInfo.viewportCount = 1;
-            pipelineViewportStateCreateInfo.scissorCount = 1;
-            pipelineViewportStateCreateInfo.flags = 0;
-            pipelineCreateInfo.pViewportState = &pipelineViewportStateCreateInfo;
 
             this.multisampleState.ToNative(out VkPipelineMultisampleStateCreateInfo multisampleState);
-            pipelineCreateInfo.pMultisampleState = &multisampleState;
-
             depthStencilState_.ToNative(out VkPipelineDepthStencilStateCreateInfo depthStencilState);
-            pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-
             ColorBlendState.ToNative(out var colorBlendState, renderPass.GetColorAttachmentCount(subPass));
+
+            VkGraphicsPipelineCreateInfo pipelineCreateInfo = new VkGraphicsPipelineCreateInfo
+            {
+                sType = VkStructureType.GraphicsPipelineCreateInfo,
+                layout = PipelineLayout,
+                renderPass = renderPass,
+                subpass = subPass,
+                flags = 0,
+                basePipelineIndex = -1,
+                basePipelineHandle = new VkPipeline()
+            };
+
+            pipelineCreateInfo.pVertexInputState = &vertexInputState;
+            pipelineCreateInfo.stageCount = count;
+            pipelineCreateInfo.pStages = (VkPipelineShaderStageCreateInfo*)Unsafe.AsPointer(ref shaderStageCreateInfos[0]);
+            pipelineCreateInfo.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo;
+            pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
+            pipelineCreateInfo.pViewportState = &pipelineViewportStateCreateInfo;
+            pipelineCreateInfo.pMultisampleState = &multisampleState;
+            pipelineCreateInfo.pDepthStencilState = &depthStencilState;
             pipelineCreateInfo.pColorBlendState = &colorBlendState;
 
             VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo;
@@ -466,19 +474,23 @@ namespace SharpGame
                 pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
             }
 
-            VkPipelineTessellationStateCreateInfo tessellationStateCreateInfo = new VkPipelineTessellationStateCreateInfo
+            if(TessControlShader != null)
             {
-                sType = VkStructureType.PipelineTessellationStateCreateInfo,
-                patchControlPoints = 4
-            };
-            pipelineCreateInfo.pTessellationState = &tessellationStateCreateInfo;
+                VkPipelineTessellationStateCreateInfo tessellationStateCreateInfo = new VkPipelineTessellationStateCreateInfo
+                {
+                    sType = VkStructureType.PipelineTessellationStateCreateInfo,
+                    patchControlPoints = PatchControlPoints
+                };
+
+                pipelineCreateInfo.pTessellationState = &tessellationStateCreateInfo;
+            }
 
             var handle = Device.CreateGraphicsPipeline(ref pipelineCreateInfo);
             pipelines.TryAdd(vertexInput?.GetHashCode()??0, handle);
             return handle;
         }
 
-        public unsafe VkPipeline GetComputePipeline()
+        public VkPipeline GetComputePipeline()
         {
             if (!IsComputeShader)
             {
@@ -516,7 +528,7 @@ namespace SharpGame
 
             pipelines.Clear();
 
-            if (computeHandle != null)
+            if (computeHandle != VkPipeline.Null)
             {
                 computeHandle.Dispose();
                 computeHandle = VkPipeline.Null;

@@ -209,11 +209,11 @@ namespace SharpGame
                         break;
 
                     case "TessControl":
-                        pass.HullShader = LoadShaderModelFromFile(VkShaderStageFlags.TessellationControl, kvp.Value[0].value, pass.Defines);
+                        pass.TessControlShader = LoadShaderModelFromFile(VkShaderStageFlags.TessellationControl, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "TessEvaluation":
-                        pass.DomainShader = LoadShaderModelFromFile(VkShaderStageFlags.TessellationEvaluation, kvp.Value[0].value, pass.Defines);
+                        pass.TessEvaluationShader = LoadShaderModelFromFile(VkShaderStageFlags.TessellationEvaluation, kvp.Value[0].value, pass.Defines);
                         break;
 
                     case "@VertexShader":
@@ -229,10 +229,10 @@ namespace SharpGame
                         pass.GeometryShader = LoadShaderModel(VkShaderStageFlags.Geometry, kvp.Value[0].value, pass.Defines);
                         break;
                     case "@TessControl":
-                        pass.HullShader = LoadShaderModel(VkShaderStageFlags.TessellationControl, kvp.Value[0].value, pass.Defines);
+                        pass.TessControlShader = LoadShaderModel(VkShaderStageFlags.TessellationControl, kvp.Value[0].value, pass.Defines);
                         break;
                     case "@TessEvaluation":
-                        pass.DomainShader = LoadShaderModel(VkShaderStageFlags.TessellationEvaluation, kvp.Value[0].value, pass.Defines);
+                        pass.TessEvaluationShader = LoadShaderModel(VkShaderStageFlags.TessellationEvaluation, kvp.Value[0].value, pass.Defines);
                         break;
                 }
             }

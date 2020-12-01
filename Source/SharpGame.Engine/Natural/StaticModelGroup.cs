@@ -14,49 +14,6 @@ namespace SharpGame
         public uint texIndex;
     }
 
-    public class GroupBatch : SourceBatch
-    {
-
-        // Contains the instanced data
-        public Buffer instanceBuffer;
-        // Contains the indirect drawing commands
-        public Buffer indirectCommandsBuffer;
-
-        public uint indirectDrawCount;
-        public long triangleCount = 0;
-
-        public override void Draw(CommandBuffer cb, Span<ConstBlock> pushConsts, DescriptorSet resourceSet, Span<DescriptorSet> resourceSet1, Pass pass)
-        {
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, offset);
-
-            int firstSet = 1;
-            foreach (var rs in resourceSet1)
-            {
-                if (firstSet < pass.PipelineLayout.ResourceLayout.Length && rs != null)
-                {
-                    cb.BindGraphicsResourceSet(pass.PipelineLayout, firstSet, rs, -1);
-                }
-                firstSet++;
-            }
-
-            foreach (ConstBlock constBlock in pushConsts)
-            {
-                cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
-            }
-
-            material.Bind(pass.passIndex, cb);
-
-            cb.BindVertexBuffer(0, geometry.VertexBuffer);
-            cb.BindVertexBuffer(1, instanceBuffer);
-            cb.BindIndexBuffer(geometry.IndexBuffer, 0, VkIndexType.Uint32);
-
-            cb.DrawIndexedIndirect(indirectCommandsBuffer, 0, indirectDrawCount, 20/*(uint)sizeof(VkDrawIndexedIndirectCommand)*/);
-
-            Stats.indirectTriCount += triangleCount;
-        }
-
-    }
-
 
     public class StaticModelGroup : Drawable
     {
@@ -186,6 +143,48 @@ namespace SharpGame
 
         }
 
+
+        public class GroupBatch : SourceBatch
+        {
+            // Contains the instanced data
+            public Buffer instanceBuffer;
+            // Contains the indirect drawing commands
+            public Buffer indirectCommandsBuffer;
+
+            public uint indirectDrawCount;
+            public long triangleCount = 0;
+
+            public override void Draw(CommandBuffer cb, Span<ConstBlock> pushConsts, DescriptorSet resourceSet, Span<DescriptorSet> resourceSet1, Pass pass)
+            {
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, resourceSet, offset);
+
+                int firstSet = 1;
+                foreach (var rs in resourceSet1)
+                {
+                    if (firstSet < pass.PipelineLayout.ResourceLayout.Length && rs != null)
+                    {
+                        cb.BindGraphicsResourceSet(pass.PipelineLayout, firstSet, rs, -1);
+                    }
+                    firstSet++;
+                }
+
+                foreach (ConstBlock constBlock in pushConsts)
+                {
+                    cb.PushConstants(pass.PipelineLayout, constBlock.range.stageFlags, constBlock.range.offset, constBlock.range.size, constBlock.data);
+                }
+
+                material.Bind(pass.passIndex, cb);
+
+                cb.BindVertexBuffer(0, geometry.VertexBuffer);
+                cb.BindVertexBuffer(1, instanceBuffer);
+                cb.BindIndexBuffer(geometry.IndexBuffer, 0, VkIndexType.Uint32);
+
+                cb.DrawIndexedIndirect(indirectCommandsBuffer, 0, indirectDrawCount, 20/*(uint)sizeof(VkDrawIndexedIndirectCommand)*/);
+
+                Stats.indirectTriCount += triangleCount;
+            }
+
+        }
 
 
     }

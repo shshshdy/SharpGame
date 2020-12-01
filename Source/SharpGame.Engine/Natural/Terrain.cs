@@ -18,20 +18,6 @@ namespace SharpGame
         public float tessellatedEdgeSize;
     };
 
-    public class TerrainBatch : SourceBatch
-    {
-        public DescriptorSetLayout dsLayout;
-        public DescriptorSet dsTess;
-
-        public override void Draw(CommandBuffer cb, Span<ConstBlock> pushConsts, DescriptorSet resourceSet, Span<DescriptorSet> resourceSet1, Pass pass)
-        {
-            cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, dsTess);
-            material.Bind(pass.passIndex, cb);
-            geometry.Draw(cb);
-        }
-
-    }
-
     public class Terrain : Drawable
     {
         const uint PATCH_SIZE = 64;
@@ -46,6 +32,8 @@ namespace SharpGame
         SharedBuffer ubTess;
         TerrainBatch batch;
 
+        public DescriptorSetLayout dsLayout;
+        public DescriptorSet dsTess;
 
         public Terrain()
         {
@@ -66,15 +54,32 @@ namespace SharpGame
               
             ubTess = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)Utilities.SizeOf<TessUBO>());           
 
-            batch.dsLayout = new DescriptorSetLayout
+            dsLayout = new DescriptorSetLayout
             {
                 new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Fragment | VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
                 new DescriptorSetLayoutBinding(1, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment | VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
                 new DescriptorSetLayoutBinding(2, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment | VkShaderStageFlags.TessellationControl | VkShaderStageFlags.TessellationEvaluation),
             };
 
-            batch.dsTess = new DescriptorSet(batch.dsLayout);
-            batch.dsTess.Bind(0, ubTess);
+            dsTess = new DescriptorSet(dsLayout);
+            dsTess.Bind(0, ubTess);
+        }
+
+        bool wireframeMode = false;
+        public bool WireframeMode
+        {
+            get => wireframeMode;
+
+            set
+            {
+                if(value != wireframeMode)
+                {
+                    wireframeMode = value;
+                    material.Shader.Main.FillMode = (value ? VkPolygonMode.Line : VkPolygonMode.Fill);
+                    material.Shader.Main.MakeDirty();
+                }
+
+            }
         }
 
         // Generate a terrain quad patch for feeding to the tessellation control shader
@@ -94,9 +99,9 @@ namespace SharpGame
                 for (uint y = 0; y < PATCH_SIZE; y++)
                 {
                     uint index = (x + y * PATCH_SIZE);
-                    vertices[index].position[0] = x * wx + wx / 2.0f - (float)PATCH_SIZE * wx / 2.0f;
-                    vertices[index].position[1] = 0.0f; //heightMap.GetHeight((int)x, (int)y)*10;
-                    vertices[index].position[2] = y * wy + wy / 2.0f - (float)PATCH_SIZE * wy / 2.0f;
+                    vertices[index].position[0] = x * wx + wx / 2.0f - PATCH_SIZE * wx / 2.0f;
+                    vertices[index].position[1] = 0.0f;
+                    vertices[index].position[2] = y * wy + wy / 2.0f - PATCH_SIZE * wy / 2.0f;
                     vertices[index].texcoord = glm.vec2((float)x / PATCH_SIZE, (float)y / PATCH_SIZE) * UV_SCALE;
                 }
             }
@@ -161,9 +166,9 @@ namespace SharpGame
 
             colorMap = Resources.Instance.Load<Texture>("textures/terrain_texturearray_rgba.ktx");
 
-            batch.dsTess.Bind(1, heightMap.texture);
-            batch.dsTess.Bind(2, colorMap);
-            batch.dsTess.UpdateSets();
+            dsTess.Bind(1, heightMap.texture);
+            dsTess.Bind(2, colorMap);
+            dsTess.UpdateSets();
         }
 
         bool tessellation = true;
@@ -173,7 +178,7 @@ namespace SharpGame
             uboTess.projection = frameInfo.camera.VkProjection;
             uboTess.modelview = frameInfo.camera.View * new mat4(1.0f);
             uboTess.lightPos.y = -0.5f - uboTess.displacementFactor; // todo: Not uesed yet
-            uboTess.viewportDim = new vec2((float)frameInfo.viewSize.x, (float)frameInfo.viewSize.y);
+            uboTess.viewportDim = new vec2(frameInfo.viewSize.x, frameInfo.viewSize.y);
 
             for(int i = 0; i < 6; i++)
             {
@@ -201,6 +206,19 @@ namespace SharpGame
             ref mat4 worldTransform = ref node_.WorldTransform;
             batch.worldTransform = node_.worldTransform_;
             batch.numWorldTransforms = 1;
+            batch.dsTess = dsTess;
+
+        }
+
+        public class TerrainBatch : SourceBatch
+        {
+            public DescriptorSet dsTess;
+            public override void Draw(CommandBuffer cb, Span<ConstBlock> pushConsts, DescriptorSet resourceSet, Span<DescriptorSet> resourceSet1, Pass pass)
+            {
+                cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, dsTess);
+                material.Bind(pass.passIndex, cb);
+                geometry.Draw(cb);
+            }
 
         }
 

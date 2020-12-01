@@ -160,7 +160,7 @@ namespace SharpGame
 
                 return worldRotation_ * vec3.Up;
             }
-}
+        }
 
         /// Return node's right vector in world space.
         public vec3 WorldRight
@@ -172,24 +172,6 @@ namespace SharpGame
 
                 return worldRotation_ * vec3.Right;
             }
-        }
-
-        public Node WithPosition(in vec3 pos)
-        {
-            Position = pos;
-            return this;
-        }
-
-        public Node WithRotation(in vec3 rot)
-        {
-            EulerAngles = rot;
-            return this;
-        }
-
-        public Node WithScaling(in vec3 s)
-        {
-            Scaling = s;
-            return this;
         }
 
         public void SetTransform(in vec3 position, in quat rotation)

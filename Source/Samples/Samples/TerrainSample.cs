@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,13 +10,11 @@ namespace SharpGame.Samples
     [SampleDesc(sortOrder = -11)]
     public class TerrainSample : Sample
     {
+        Terrain terrain;
         public override void Init()
         {
             scene = new Scene()
             {
-                new Octree { },
-                new DebugRenderer { },
-
                 new Environment
                 {
                     SunlightDir = glm.normalize(new vec3(-1.0f, -1.0f, 0.0f))
@@ -50,7 +49,7 @@ namespace SharpGame.Samples
             {
                 var node = scene.CreateChild("Terrain");
 
-                var terrain = node.AddComponent<Terrain>();
+                terrain = node.AddComponent<Terrain>();
                 terrain.GenerateTerrain();
 
             }
@@ -60,7 +59,20 @@ namespace SharpGame.Samples
 
         }
 
+        public override void OnGUI()
+        {
 
+            if (ImGui.Begin("HUD"))
+            {
+                bool val = terrain.WireframeMode;
+                if(ImGui.Checkbox("Wireframe Mode", ref val))
+                {
+                    terrain.WireframeMode = val;
+                }
+            }
+
+            ImGui.End();
+        }
     }
 
 

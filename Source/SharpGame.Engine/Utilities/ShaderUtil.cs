@@ -27,12 +27,12 @@ namespace SharpGame
 
             if (!string.IsNullOrEmpty(hullShader))
             {
-                pass.HullShader = CreateShaderModule(VkShaderStageFlags.TessellationControl, hullShader);
+                pass.TessControlShader = CreateShaderModule(VkShaderStageFlags.TessellationControl, hullShader);
             }
 
             if (!string.IsNullOrEmpty(domainShader))
             {
-                pass.DomainShader = CreateShaderModule(VkShaderStageFlags.TessellationEvaluation, domainShader);
+                pass.TessEvaluationShader = CreateShaderModule(VkShaderStageFlags.TessellationEvaluation, domainShader);
             }
 
             if (!string.IsNullOrEmpty(computeShader))
