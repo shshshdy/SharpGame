@@ -8,9 +8,18 @@ using System.Text;
 
 namespace SharpGame
 {
+    public struct DrawEvent
+    {
+        public RenderPass rendrPass;
+        public RenderContext renderContext;
+        public CommandBuffer cmd;
+    }
+
+
+
     public class RenderPipeline : Object
     {
-        public List<FrameGraphPass> RenderPassList { get; set; } = new List<FrameGraphPass>();
+        public List<FrameGraphPass> RenderPassList { get; } = new List<FrameGraphPass>();
 
         public RenderView View { get; private set; }
 
@@ -19,7 +28,10 @@ namespace SharpGame
         public Graphics Graphics => Graphics.Instance;
         public FrameGraph FrameGraph => FrameGraph.Instance;
 
-        Dictionary<string, RenderTexture> renderTextures = new Dictionary<string, RenderTexture>();
+        RenderTexture colorTexture;
+        RenderTexture depthTexture;
+
+        public RenderTarget RenderTarget { get; } = new RenderTarget();
 
         public RenderPipeline()
         {
@@ -34,6 +46,7 @@ namespace SharpGame
 
             View = renderView;
 
+            OnCreateRenderTarget();
 
             foreach (var rp in RenderPassList)
             {
@@ -46,6 +59,10 @@ namespace SharpGame
         }
         public virtual void DeviceLost()
         {
+            colorTexture?.Dispose();
+            depthTexture?.Dispose();
+            RenderTarget.Clear();
+
             foreach (var rp in RenderPassList)
             {
                 rp.DeviceLost();
@@ -54,7 +71,7 @@ namespace SharpGame
           
         public virtual void DeviceReset()
         {
-            OnReset();
+            OnCreateRenderTarget();
 
             foreach (var rp in RenderPassList)
             {
@@ -72,27 +89,6 @@ namespace SharpGame
             OnShutdown();
 
             initialized = false;
-        }
-
-        public void AddRenderTexture(string name, uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage,
-            VkSampleCountFlags samples = VkSampleCountFlags.Count1/*, VkImageLayout imageLayout = VkImageLayout.Undefined*/)
-        {
-            if(renderTextures.ContainsKey(name))
-            {
-                return;
-            }
-
-            renderTextures[name] = new RenderTexture(width, height, layers, format, usage, samples/*, imageLayout*/);
-        }
-
-        public RenderTexture GetRenderTexture(string name)
-        {
-            if(renderTextures.TryGetValue(name, out var rt))
-            {
-                return rt;
-            }
-
-            return null;
         }
 
         public FrameGraphPass AddGraphicsPass(Action<GraphicsSubpass, RenderContext, CommandBuffer> onDraw)
@@ -182,8 +178,7 @@ namespace SharpGame
 
         public RenderPipeline Add(FrameGraphPass renderPass)
         {
-            RenderPassList.Add(renderPass);
-            renderPass.Renderer = this;
+            AddRenderPass(renderPass);
             return this;
         }
 
@@ -191,8 +186,16 @@ namespace SharpGame
         {
         }
 
-        protected virtual void OnReset()
+        protected virtual void OnCreateRenderTarget()
         {
+            var depthFormat = Graphics.DepthFormat;
+            uint width = (uint)Graphics.Width;
+            uint height = (uint)Graphics.Height;
+            colorTexture = new RenderTexture(Graphics.Swapchain);            
+            depthTexture = new RenderTexture(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment);
+
+            RenderTarget.Add(colorTexture);
+            RenderTarget.Add(depthTexture);
         }
 
         protected virtual void OnUpdate()

@@ -33,11 +33,6 @@ namespace SharpGame
             set
             {
                 drawDebug = value;
-
-                if(debugPass == null)
-                {
-                    CreateDebugPass();
-                }
             }
         }
 
@@ -85,7 +80,9 @@ namespace SharpGame
 
         public RenderView()
         {
-            CreateBuffers();           
+            CreateBuffers();
+
+            CreateDebugPass();
         }
 
         public void Reset()
@@ -100,6 +97,7 @@ namespace SharpGame
             this.camera = camera;
             Renderer = frameGraph;
             Renderer?.Init(this);
+            Renderer?.Add(debugPass);
         }
 
         protected void CreateBuffers()
@@ -137,26 +135,12 @@ namespace SharpGame
             {
                 new GraphicsSubpass
                 {
-                   OnDraw = (pass, rc, cmdBuffer) =>
-                   {
-                       if (Scene == null)
-                       {
-                           return;
-                       }
-
-                       var debug = Scene.GetComponent<DebugRenderer>();
-                       if (debug == null)
-                       {
-                           return;
-                       }
-
-                       debug.Render(this, cmdBuffer);
-                   }
+                   OnDraw = DrawOverlay
                 }
             };
 
             debugPass.renderPassCreator = () => Graphics.CreateRenderPass();
-            debugPass.frameBufferCreator = (rp) => Graphics.CreateSwapChainFramebuffers(rp);
+            //debugPass.frameBufferCreator = () => Graphics.CreateSwapChainFramebuffers(rp);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -223,19 +207,20 @@ namespace SharpGame
             {
                 Renderer = new ForwardRenderer();
                 Renderer.Init(this);
+                Renderer.Add(debugPass);
             }
 
             Renderer.Update();
 
-            if (DrawDebug)
-            {
-                if(debugPass == null)
-                {
-                    CreateDebugPass();
-                }
-
-                debugPass.Update();
-            }
+//             if (DrawDebug)
+//             {
+//                 if(debugPass == null)
+//                 {
+//                     CreateDebugPass();
+//                 }
+// 
+//                 debugPass.Update();
+//             }
 
             Profiler.EndSample();
         }
@@ -244,10 +229,10 @@ namespace SharpGame
         {
             Renderer.Draw(rc);
 
-            if (DrawDebug)
-            {
-                debugPass?.Draw(rc, rc.RenderCmdBuffer);
-            }
+//             if (DrawDebug)
+//             {
+//                 debugPass?.Draw(rc, rc.RenderCmdBuffer);
+//             }
 
 
         }
@@ -341,6 +326,31 @@ namespace SharpGame
             ubLight.SetData(ref lightUBO);
         }
 
+        void DrawOverlay(GraphicsSubpass pass, RenderContext rc, CommandBuffer cmdBuffer)
+        {
+            if(DrawDebug)
+                OnDrawDebug(cmdBuffer);
+
+            this.SendGlobalEvent(new DrawEvent { rendrPass = pass.FrameGraphPass.RenderPass, renderContext = rc, cmd = cmdBuffer });
+        }
+
+        void OnDrawDebug(CommandBuffer cmdBuffer)
+        {
+            if (Scene == null)
+            {
+                return;
+            }
+
+            var debug = Scene.GetComponent<DebugRenderer>();
+            if (debug == null)
+            {
+                return;
+            }
+
+            debug.Render(this, cmdBuffer);
+
+
+        }
     }
 
 

@@ -43,7 +43,7 @@ namespace SharpGame
         }
 
         public Func<RenderPass> renderPassCreator { get; set; }
-        public Func<RenderPass, Framebuffer[]> frameBufferCreator { get; set; }
+        public Func<RenderTarget> frameBufferCreator { get; set; }
 
         protected RenderTarget renderTarget;
 
@@ -146,41 +146,6 @@ namespace SharpGame
 
         }
 
-        protected virtual void CreateRenderTargets()
-        {
-            if (frameBufferCreator != null)
-            {
-                framebuffers = frameBufferCreator.Invoke(RenderPass);
-            }
-            else
-            {
-                if(renderTextureInfos.Count > 0)
-                {
-                    renderTarget = new RenderTarget();
-
-                    Array.Resize(ref clearValues, renderTextureInfos.Count);
-                    for(int i = 0; i < renderTextureInfos.Count; i++)
-                    {
-                        renderTarget.Add(renderTextureInfos[i]);
-                        clearValues[i] = renderTextureInfos[i].clearValue;
-                    }
-
-                    framebuffers = new Framebuffer[Swapchain.IMAGE_COUNT];
-                    for (int i = 0; i < framebuffers.Length; i++)
-                    {
-                        var attachments = renderTarget.GetViews(i);
-                        framebuffers[i] = new Framebuffer(RenderPass, renderTarget.extent.width, renderTarget.extent.height, 1, attachments);
-                    }
-                }
-
-            }
-
-            if (framebuffers == null)
-            {
-                framebuffers = Graphics.Framebuffers;
-            }
-        }
-
         protected virtual void CreateRenderPass()
         {
             if (renderPassCreator != null)
@@ -245,6 +210,45 @@ namespace SharpGame
             {
                 RenderPass = Graphics.RenderPass;
             }            
+
+        }
+
+        protected virtual void CreateRenderTargets()
+        {
+            Debug.Assert(RenderPass != null);
+
+            if (frameBufferCreator != null)
+            {
+                renderTarget = frameBufferCreator();
+            }
+            else
+            {
+                if (renderTextureInfos.Count > 0)
+                {
+                    renderTarget = new RenderTarget();
+
+                    Array.Resize(ref clearValues, renderTextureInfos.Count);
+                    for (int i = 0; i < renderTextureInfos.Count; i++)
+                    {
+                        renderTarget.Add(renderTextureInfos[i]);
+                        clearValues[i] = renderTextureInfos[i].clearValue;
+                    }
+
+                }
+
+            }
+
+            if (renderTarget == null)
+            {
+                renderTarget = Renderer.RenderTarget;
+            }
+
+            framebuffers = new Framebuffer[Swapchain.IMAGE_COUNT];
+            for (int i = 0; i < framebuffers.Length; i++)
+            {
+                var attachments = renderTarget.GetViews(i);
+                framebuffers[i] = new Framebuffer(RenderPass, renderTarget.extent.width, renderTarget.extent.height, 1, attachments);
+            }
 
         }
 

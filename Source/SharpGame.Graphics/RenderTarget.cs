@@ -144,6 +144,14 @@ namespace SharpGame
         public RenderTexture this[int index] => attachments[index];
         public uint AttachmentCount => (uint)attachments.Count;
 
+        public RenderTexture Add(uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage,
+            VkSampleCountFlags samples = VkSampleCountFlags.Count1)
+        {
+            var rt = new RenderTexture(width, height, layers, format, usage, samples);
+            Add(rt);
+            return rt;
+        }
+
         public void Add(in RenderTextureInfo info)
         {
             Add(new RenderTexture(info));

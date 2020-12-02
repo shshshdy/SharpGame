@@ -284,6 +284,7 @@
         public unsafe void DrawGeometry(Geometry geometry, Pass pass, uint subPass, Material material)
         {
             var pipe = pass.GetGraphicsPipeline(renderPass, subPass, geometry);
+
             BindPipeline(VkPipelineBindPoint.Graphics, pipe);
 
             material.Bind(pass.passIndex, this);
@@ -304,6 +305,7 @@
             {
                 BindResourceSet(VkPipelineBindPoint.Graphics, pass.PipelineLayout, i + 1, resourceSet[i]);
             }
+
             geometry.Draw(this);
         }
 

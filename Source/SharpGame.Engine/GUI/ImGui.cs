@@ -75,7 +75,8 @@ namespace SharpGame
             ImGui.NewFrame();
 
             this.Subscribe<BeginFrame>((e) => Update());
-
+            this.Subscribe<DrawEvent>(RenderImDrawData);
+            /*
             var graphics = Graphics.Instance;
 
             guiPass = new FrameGraphPass
@@ -88,10 +89,7 @@ namespace SharpGame
                     return rp;
                 },
 
-                frameBufferCreator = (rp)=>
-                { 
-                    return graphics.CreateSwapChainFramebuffers(rp);
-                },
+                //frameBufferCreator = (rp)=> graphics.CreateSwapChainFramebuffers(rp),
 
                 Subpasses = new[]
                 {
@@ -99,13 +97,13 @@ namespace SharpGame
                    {
                         OnDraw = (pass, rc, cmd) =>
                         {
-                            RenderImDrawData(cmd, ImGui.GetDrawData());
+                            RenderImDrawData(cmd);
                         }
                     }
                 }
             };
 
-            FrameGraph.Instance.OverlayPass = guiPass;
+            FrameGraph.Instance.OverlayPass = guiPass;*/
 
         }
 
@@ -275,16 +273,23 @@ namespace SharpGame
 
         }
 
-        private unsafe void RenderImDrawData(CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
+        private unsafe void RenderImDrawData(DrawEvent e)
         {
+            CommandBuffer cmdBuffer = e.cmd;
             var io = ImGui.GetIO();
             var graphics = Graphics.Instance;
             float width = io.DisplaySize.X;
             float height = io.DisplaySize.Y;
+            ImDrawDataPtr draw_data = ImGui.GetDrawData();
 
             if (draw_data.CmdListsCount == 0)
             {
                 return;
+            }
+
+            if (pipeline == VkPipeline.Null)
+            {
+                pipeline = pass.CreateGraphicsPipeline(e.rendrPass, 0, VertexPos2dTexColor.Layout, VkPrimitiveTopology.TriangleList);
             }
 
             ref Buffer vb = ref vertexBuffer[graphics.WorkContext];

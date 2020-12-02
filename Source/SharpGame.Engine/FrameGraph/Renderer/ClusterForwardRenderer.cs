@@ -37,7 +37,7 @@ namespace SharpGame
             };
 
             mainPass.renderPassCreator = () => Graphics.RenderPass;
-            mainPass.frameBufferCreator = (rp) => Graphics.Framebuffers;
+            //mainPass.frameBufferCreator = CreateRenderTarget;
 
             Add(mainPass);
         }
