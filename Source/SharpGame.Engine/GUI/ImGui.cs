@@ -275,10 +275,6 @@ namespace SharpGame
 
         }
 
-        private void Render()
-        {
-        }
-
         private unsafe void RenderImDrawData(CommandBuffer cmdBuffer, ImDrawDataPtr draw_data)
         {
             var io = ImGui.GetIO();

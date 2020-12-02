@@ -306,35 +306,6 @@ namespace SharpGame
                 viewport = new VkViewport(0, 0, Graphics.Width, Graphics.Height);
                 renderArea = new VkRect2D(0, 0, Graphics.Width, Graphics.Height);
             }
-            /*
-            int clearValuesCount = 0;
-            if (VkClearColorValue != null)
-            {
-                clearValuesCount = VkClearColorValue.Length;
-            }
-
-            if (VkClearDepthStencilValue.HasValue)
-            {
-                clearValuesCount += 1;
-            }
-
-            if (clearValues.Length != clearValuesCount)
-            {
-                Array.Resize(ref clearValues, clearValuesCount);
-            }
-
-            if (VkClearColorValue != null)
-            {
-                for (int i = 0; i < VkClearColorValue.Length; i++)
-                {
-                    clearValues[i] = VkClearColorValue[i];
-                }
-            }
-
-            if (VkClearDepthStencilValue.HasValue)
-            {
-                clearValues[clearValues.Length - 1] = VkClearDepthStencilValue.Value;
-            }*/
 
             BeginRenderPass(cb, framebuffer, renderArea, clearValues);
 

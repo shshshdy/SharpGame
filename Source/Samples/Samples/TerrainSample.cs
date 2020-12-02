@@ -15,6 +15,8 @@ namespace SharpGame.Samples
         {
             scene = new Scene()
             {
+                new DebugRenderer { },
+
                 new Node("Camera", new vec3(18.0f, 22.5f, 57.5f), glm.radians(12.0f, -159.0f, 0.0f))
                 {
                     new Camera

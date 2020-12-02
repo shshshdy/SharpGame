@@ -63,6 +63,8 @@ namespace SharpGame
         bool lineAntiAlias_;
 
 
+        Buffer[] vertexBuffer = new Buffer[3];
+
         Shader debugShader;
 
         VkPipeline pipelineDepthLines;
@@ -499,9 +501,15 @@ namespace SharpGame
 
             int numVertices = (lines_.Count + noDepthLines_.Count) * 2 + (triangles_.Count + noDepthTriangles_.Count) * 3;
 
-            TransientBuffer vertex_buffer = workFrame.AllocVertexBuffer((uint)(numVertices * VertexPosColor.Size));
+            ref Buffer vb = ref vertexBuffer[graphics.WorkContext];
 
-            float* dest = (float*)vertex_buffer.Data;
+            if (vb == null || numVertices * VertexPosColor.Size > (int)vb.Size)
+            {
+                vb?.Dispose();
+                vb = Buffer.Create<VertexPosColor>(VkBufferUsageFlags.VertexBuffer, true, (uint)(1.5f * numVertices * VertexPosColor.Size));
+            }
+
+            float* dest = (float*)vb.Map();
 
             for(int i = 0; i < lines_.Count; ++i)
             {
@@ -580,11 +588,13 @@ namespace SharpGame
 
                 dest += 12;
             }
-         
+            
+            vb.Unmap();
+
             uint start = 0;
             uint count = 0;
 
-            cmdBuffer.BindVertexBuffer(0, vertex_buffer.buffer);
+            cmdBuffer.BindVertexBuffer(0, vb);
 
             if (lines_.Count > 0)
             {

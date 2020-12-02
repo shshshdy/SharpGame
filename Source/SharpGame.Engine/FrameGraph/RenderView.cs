@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
- 
+
     public class RenderView : Object
     {
         private Scene scene;
@@ -25,13 +25,27 @@ namespace SharpGame
         public float Width => viewport.width;
         public float Height => viewport.height;
 
-        public bool DrawDebug { get => FrameGraph.drawDebug && drawDebug; set => drawDebug = value; }
         bool drawDebug = true;
+        public bool DrawDebug
+        {
+            get => FrameGraph.drawDebug && drawDebug; 
+            
+            set
+            {
+                drawDebug = value;
+
+                if(debugPass == null)
+                {
+                    CreateDebugPass();
+                }
+            }
+        }
+
         FrameGraphPass debugPass;
 
         public uint ViewMask { get; set; } = 1;
         public ref FrameInfo Frame => ref frameInfo;
-        public ref LightUBO LightParam => ref lightParameter;
+        public ref LightUBO LightParam => ref lightUBO;
 
         internal FastList<Drawable> drawables = new FastList<Drawable>();
 
@@ -51,7 +65,7 @@ namespace SharpGame
         private FrameInfo frameInfo;
 
         private GlobalUBO cameraUBO = new GlobalUBO();
-        private LightUBO lightParameter = new LightUBO();
+        private LightUBO lightUBO = new LightUBO();
 
         public SharedBuffer ubGlobal;
 
@@ -71,52 +85,21 @@ namespace SharpGame
 
         public RenderView()
         {
-            CreateBuffers();
-
-            /*
-            var renderPass = Graphics.CreateRenderPass();
-
-            debugPass = new GraphicsPass
-            {
-                RenderPass = renderPass,
-                Framebuffers = Graphics.CreateSwapChainFramebuffers(renderPass),
-                OnDraw = (pass, view) =>
-                {
-                    if (view.Scene == null)
-                    {
-                        return;
-                    }
-
-                    var debug = view.Scene.GetComponent<DebugRenderer>();
-                    if (debug == null)
-                    {
-                        return;
-                    }
-
-                    var cmdBuffer = pass.CmdBuffer;
-                    debug.Render(view, cmdBuffer);
-                }
-            };*/
-
-
+            CreateBuffers();           
         }
 
         public void Reset()
         {
             Renderer?.DeviceReset();
-            //debugPass?.Reset();
+            debugPass?.DeviceReset();
         }
 
         public void Attach(Camera camera, Scene scene, RenderPipeline frameGraph = null)
         {
             this.scene = scene;
             this.camera = camera;
-
             Renderer = frameGraph;
-
             Renderer?.Init(this);
-
-
         }
 
         protected void CreateBuffers()
@@ -143,10 +126,43 @@ namespace SharpGame
 
         }
 
+        void CreateDebugPass()
+        {
+            if(debugPass != null)
+            {
+                return;
+            }
+
+            debugPass = new FrameGraphPass
+            {
+                new GraphicsSubpass
+                {
+                   OnDraw = (pass, rc, cmdBuffer) =>
+                   {
+                       if (Scene == null)
+                       {
+                           return;
+                       }
+
+                       var debug = Scene.GetComponent<DebugRenderer>();
+                       if (debug == null)
+                       {
+                           return;
+                       }
+
+                       debug.Render(this, cmdBuffer);
+                   }
+                }
+            };
+
+            debugPass.renderPassCreator = () => Graphics.CreateRenderPass();
+            debugPass.frameBufferCreator = (rp) => Graphics.CreateSwapChainFramebuffers(rp);
+        }
+
         [MethodImpl((MethodImplOptions)0x100)]
         public void AddDrawable(Drawable drawable)
         {
-            if(drawable.DrawableFlags == Drawable.DRAWABLE_LIGHT)
+            if (drawable.DrawableFlags == Drawable.DRAWABLE_LIGHT)
             {
                 lights.Add(drawable as Light);
             }
@@ -166,7 +182,7 @@ namespace SharpGame
 
                 }
             }
-        
+
         }
 
         public void Update(ref FrameInfo frame)
@@ -213,7 +229,12 @@ namespace SharpGame
 
             if (DrawDebug)
             {
-                debugPass?.Update();
+                if(debugPass == null)
+                {
+                    CreateDebugPass();
+                }
+
+                debugPass.Update();
             }
 
             Profiler.EndSample();
@@ -225,7 +246,7 @@ namespace SharpGame
 
             if (DrawDebug)
             {
-            //    debugPass?.Draw(this);
+                debugPass?.Draw(rc, rc.RenderCmdBuffer);
             }
 
 
@@ -266,7 +287,7 @@ namespace SharpGame
             cameraUBO.ViewInv = glm.inverse(cameraUBO.View);
             cameraUBO.Proj = camera.VkProjection;
             cameraUBO.ProjInv = glm.inverse(cameraUBO.Proj);
-            cameraUBO.ViewProj = camera.VkProjection*camera.View;
+            cameraUBO.ViewProj = camera.VkProjection * camera.View;
             cameraUBO.ViewProjInv = glm.inverse(cameraUBO.ViewProj);
             cameraUBO.CameraPos = camera.Node.Position;
             cameraUBO.CameraDir = camera.Node.WorldDirection;
@@ -295,32 +316,32 @@ namespace SharpGame
         {
             Environment env = scene?.GetComponent<Environment>();
 
-            if(env)
+            if (env)
             {
-                lightParameter.AmbientColor = env.AmbientColor;
-                lightParameter.SunlightColor = env.SunlightColor;
-                lightParameter.SunlightDir = env.SunlightDir;
+                lightUBO.AmbientColor = env.AmbientColor;
+                lightUBO.SunlightColor = env.SunlightColor;
+                lightUBO.SunlightDir = env.SunlightDir;
             }
             else
             {
 
-                lightParameter.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
-                lightParameter.SunlightColor = new Color4(0.5f);
-                lightParameter.SunlightDir = new vec3(-1, -1, 1);
-                lightParameter.SunlightDir.Normalize();
+                lightUBO.AmbientColor = new Color4(0.15f, 0.15f, 0.25f, 1.0f);
+                lightUBO.SunlightColor = new Color4(0.5f);
+                lightUBO.SunlightDir = new vec3(-1, -1, 1);
+                lightUBO.SunlightDir.Normalize();
 
                 for (int i = 0; i < 8; i++)
                 {
-                    lightParameter.lightColor[i] = Color4.White;
-                    lightParameter.lightVec[i] = glm.normalize(lightVec[i]);
+                    lightUBO.lightColor[i] = Color4.White;
+                    lightUBO.lightVec[i] = glm.normalize(lightVec[i]);
                 }
 
             }
 
-            ubLight.SetData(ref lightParameter);
+            ubLight.SetData(ref lightUBO);
         }
 
     }
-    
+
 
 }
