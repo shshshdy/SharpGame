@@ -32,12 +32,7 @@ namespace SharpGame
         protected float debugImageHeight = 200.0f;
         List<ImageView> debugImages = new List<ImageView>();
 
-        public DynamicBuffer TransformBuffer { get; }        
-        public DynamicBuffer InstanceBuffer { get; }
-        public DynamicBuffer MaterialBuffer { get; }
-
-        public FrameGraphPass OverlayPass { get; set; }
-
+        public DynamicBuffer TransformBuffer { get; }  
         public static bool EarlyZ { get; set; }
         
         public event Action<RenderContext> OnBeginSubmit;
@@ -65,16 +60,12 @@ namespace SharpGame
                 viewport.Renderer.DeviceLost();
             }
 
-            OverlayPass?.DeviceLost();
-
             Graphics.Resize(w, h);
 
             foreach (var viewport in views)
             {
                 viewport.Renderer.DeviceReset();
             }
-
-            OverlayPass?.DeviceReset();
 
         }
 
@@ -85,11 +76,6 @@ namespace SharpGame
             views.Add(view);
             view.Attach(camera, scene, frameGraph);
             return view;
-        }
-
-        public CommandBuffer GetWorkCmdBuffer(SubmitQueue queue)
-        {
-            return Graphics.WorkFrame.submitQueue[(int)queue].cmdBuffer;
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -126,8 +112,6 @@ namespace SharpGame
                 DrawDebugGeometry();
             }
 
-            OverlayPass?.Update();
-
             this.SendGlobalEvent(new PostRenderUpdate());
 
             TransformBuffer.FlushAll();
@@ -145,8 +129,6 @@ namespace SharpGame
             {
                 viewport.Render(rc);
             }
-
-            OverlayPass?.Draw(rc, rc.RenderCmdBuffer);
 
             rc.End();
 
@@ -166,7 +148,9 @@ namespace SharpGame
                 //Log.Info("          Submit frame " + renderFrame.id);
 
                 OnBeginSubmit?.Invoke(renderFrame);
-                renderFrame.Submit(OnSubmit);            
+
+                renderFrame.Submit(OnSubmit);        
+                
                 OnEndSubmit?.Invoke(renderFrame);
 
                 Graphics.EndRender();
