@@ -205,6 +205,9 @@ namespace SharpSPIRVCross
 
         public SpirvType GetSpirvType(uint id)
         {
+            if (id == 0)
+                return null;
+
             var handle = spvc_compiler_get_type_handle(Handle, id);
             if (handle == IntPtr.Zero)
                 return null;

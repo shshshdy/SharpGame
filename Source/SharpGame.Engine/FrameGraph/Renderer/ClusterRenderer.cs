@@ -1,6 +1,4 @@
-﻿#define NO_DEPTHWRITE
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -8,18 +6,17 @@ using System.Text;
 namespace SharpGame
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct ClusterUniforms
+    public struct ClusterUBO
     {
         public mat4 view;
         public mat4 projection_clip;
         public mat4 inv_view_proj;
-        public vec2 tile_size;
-        public FixedArray2<uint> grid_dim;
-        //public vec4 depth_reconstruct;
         public vec3 cam_pos;
         public float cam_near;
         public vec3 cam_forward;
         public float cam_far;
+        public vec2 tile_size;
+        public FixedArray2<uint> grid_dim;     
         public vec2 resolution;
         public uint num_lights;
     };
@@ -71,7 +68,7 @@ namespace SharpGame
 
         uint query_count_;
 
-        protected ClusterUniforms clusterUniforms = new ClusterUniforms();
+        protected ClusterUBO clusterUniforms = new ClusterUBO();
 
         protected SharedBuffer uboCluster;
         private Buffer gridFlags;
@@ -137,7 +134,7 @@ namespace SharpGame
             }
 
             uboCluster = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent,
-                (uint)Utilities.SizeOf<ClusterUniforms>(), sharingMode, queue_families);
+                (uint)Utilities.SizeOf<ClusterUBO>(), sharingMode, queue_families);
 
             uint max_grid_count = ((MAX_WIDTH - 1) / TILE_WIDTH + 1) * ((MAX_HEIGHT - 1) / TILE_HEIGHT + 1) * TILE_COUNT_Z;
             gridFlags = Buffer.CreateTexelBuffer(VkBufferUsageFlags.TransferDst, max_grid_count, VkFormat.R8UInt, sharingMode, queue_families);

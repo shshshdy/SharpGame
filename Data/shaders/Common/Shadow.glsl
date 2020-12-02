@@ -52,20 +52,20 @@ float filterPCF(vec4 sc, uint cascadeIndex)
 
 	float shadowFactor = 0.0;
 	int count = 0;
-    /*
-	int range = 1;
+    
+	int range = 2;
 	for (int x = -range; x <= range; x++) {
 		for (int y = -range; y <= range; y++) {
 			shadowFactor += textureProj(sc, vec2(dx*x, dy*y), cascadeIndex);
 			count++;
 		}
-	}*/
-
+	}
+	/*
     count = 4;
     shadowFactor = textureProj(sc, vec2(0, 0), cascadeIndex)
                    + textureProj(sc, vec2(dx, 0), cascadeIndex)
                    + textureProj(sc, vec2(0, dy), cascadeIndex)
                    + textureProj(sc, vec2(dx, dy), cascadeIndex);
-
+*/
 	return shadowFactor / count;
 }

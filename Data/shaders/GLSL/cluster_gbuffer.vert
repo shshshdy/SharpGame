@@ -33,7 +33,7 @@ void main()
 
 	gl_Position = ViewProj * worldPos;
 
-	outWorldPos = /*View **/ worldPos;
+	outWorldPos = worldPos;
 	outUV = inUV;
 
 	#ifdef TBN

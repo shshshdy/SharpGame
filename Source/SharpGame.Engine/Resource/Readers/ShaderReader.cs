@@ -388,8 +388,6 @@ namespace SharpGame
                 Language = CompileOptions.InputLanguage.GLSL,
                 Target = CompileOptions.Environment.Vulkan,
                 GenerateDebug = true,
-
-                //Optimization = CompileOptions.OptimizationLevel.Size
             };
 
             var r = c.Preprocess(code, stage, o, "main");

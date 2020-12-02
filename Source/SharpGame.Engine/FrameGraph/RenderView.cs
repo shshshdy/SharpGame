@@ -196,7 +196,7 @@ namespace SharpGame
 
             if (camera != null)
             {
-                UpdateViewParameters();
+                UpdateGlobalParameters();
             }
 
             UpdateLightParameters();
@@ -260,7 +260,7 @@ namespace SharpGame
             Profiler.EndSample();
         }
 
-        private void UpdateViewParameters()
+        private void UpdateGlobalParameters()
         {
             cameraUBO.View = camera.View;
             cameraUBO.ViewInv = glm.inverse(cameraUBO.View);

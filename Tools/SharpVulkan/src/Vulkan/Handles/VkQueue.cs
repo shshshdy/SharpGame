@@ -52,11 +52,7 @@ namespace SharpGame
             }
             
             VulkanUtil.CheckResult(vkQueueSubmit(this, 1, &nativeSubmit, fence));
-// 
-//             if (commandBuffer)
-//             {
-//                 commandBuffer.NeedSubmit = false;
-//             }
+
         }
 
         public void WaitIdle()

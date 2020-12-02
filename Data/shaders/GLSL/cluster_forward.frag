@@ -3,7 +3,6 @@
 #include "GridCoord.glsl"
 #include "ClusterLighting.glsl"
 
-#define AMBIENT_GLOBAL 0.2f
 
 layout(set = 3, binding = 0) uniform sampler2D DiffMap;
 layout(set = 3, binding = 1) uniform sampler2D NormalMap;
@@ -19,6 +18,7 @@ layout (location = 0) out vec4 frag_color;
 
 void main()
 {
+    #define AMBIENT_GLOBAL 0.2f
     vec3 ambient = vec3(AMBIENT_GLOBAL);
     vec4 diffColor = texture(DiffMap, inUV);
     vec4 specColor = texture(SpecMap, inUV);

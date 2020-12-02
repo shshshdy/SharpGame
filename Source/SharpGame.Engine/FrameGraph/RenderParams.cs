@@ -22,12 +22,12 @@ namespace SharpGame
         public mat4 ViewProj;
         public mat4 ViewProjInv;
         public vec3 CameraPos;
-        float pading1;
-        public vec3 CameraDir;
-        float pading2;
-        public vec2 GBufferInvSize;
         public float NearClip;
+        public vec3 CameraDir;
         public float FarClip;
+        public vec2 GBufferInvSize;
+        public float Time;
+
     }
 
     [StructLayout(LayoutKind.Sequential)]

@@ -7,15 +7,15 @@ layout(set = 1, binding = 0) uniform UBO
     mat4 view;
     mat4 projection_clip;
     mat4 inv_view_proj;
-
-    vec2 tile_size; // xy
-    uvec2 grid_dim; // xy
-
     vec3 cam_pos;
     float cam_near;
     
     vec3 cam_forward;
     float cam_far;
+
+
+    vec2 tile_size; // xy
+    uvec2 grid_dim; // xy
 
     vec2 resolution;
     uint num_lights;
