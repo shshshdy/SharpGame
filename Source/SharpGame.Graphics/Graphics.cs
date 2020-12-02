@@ -38,11 +38,7 @@ namespace SharpGame
 
         public uint Width { get; private set; }
         public uint Height { get; private set; }
-
         public int ImageCount => (int)Swapchain.ImageCount;
-
-        private Framebuffer[] framebuffers;
-        public Framebuffer[] Framebuffers => framebuffers;
 
         internal static DescriptorPoolManager DescriptorPoolManager { get; private set; }
 
@@ -50,9 +46,6 @@ namespace SharpGame
 
         private RenderPass renderPass;
         public RenderPass RenderPass => renderPass;
-
-        private RenderTexture depthStencil;
-        public RenderTexture DepthRT => depthStencil;
 
         List<RenderContext> renderFrames = new List<RenderContext>();
         public RenderContext WorkFrame => renderFrames[WorkContext];
@@ -141,19 +134,6 @@ namespace SharpGame
 
         }
 
-        protected void CreateFrameBuffer()
-        {
-            if (Framebuffers != null)
-            {
-                for (int i = 0; i < Framebuffers.Length; i++)
-                {
-                    Framebuffers[i].Dispose();
-                }
-            }
-
-            framebuffers = CreateSwapChainFramebuffers(renderPass);
-        }
-
         private void CreateSwapChain()
         {
             uint width = Width, height = Height;
@@ -162,12 +142,10 @@ namespace SharpGame
             Width = width;
             Height = height;
 
-            CreateDepthStencil();
-            CreateDefaultRenderPass();
-            CreateFrameBuffer();
+            CreateDefaultRenderPass();          
         }
 
-        public void CreateDefaultRenderPass()
+        public RenderPass CreateDefaultRenderPass()
         {
             VkAttachmentDescription[] attachments =
             {
@@ -225,6 +203,7 @@ namespace SharpGame
             };
 
             renderPass = new RenderPass(attachments, subpassDescription, dependencies);
+            return renderPass;
         }
 
         public RenderPass CreateRenderPass(bool clearColor = false, bool clearDepth = false)
@@ -294,29 +273,6 @@ namespace SharpGame
 
             renderPass = new RenderPass(attachments, subpassDescription, dependencies);
             return renderPass;
-        }
-
-        public Framebuffer[] CreateSwapChainFramebuffers(RenderPass vkRenderPass)
-        {
-            Span<VkImageView> attachments = stackalloc VkImageView[2];
-            // Depth/Stencil attachment is the same for all frame buffers
-            attachments[1] = depthStencil.imageView;
-
-            // Create frame buffers for every swap chain image
-            var framebuffers = new Framebuffer[Swapchain.ImageCount];
-            for (uint i = 0; i < framebuffers.Length; i++)
-            {
-                attachments[0] = Swapchain.ImageViews[i];
-                framebuffers[i] = new Framebuffer(vkRenderPass, Width, Height, 1, attachments);
-            }
-
-            return framebuffers;
-        }
-
-        protected void CreateDepthStencil()
-        {
-            depthStencil?.Dispose();
-            depthStencil = new RenderTexture(Width, Height, 1, DepthFormat, VkImageUsageFlags.DepthStencilAttachment);
         }
 
         public static void WithCommandBuffer(Action<CommandBuffer> action)

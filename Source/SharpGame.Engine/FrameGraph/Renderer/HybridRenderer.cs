@@ -101,8 +101,7 @@ namespace SharpGame
 
             };
 
-            onscreenPass.renderPassCreator = () => Graphics.CreateRenderPass(false, false);
-            //onscreenPass.frameBufferCreator = CreateRenderTarget;
+            onscreenPass.renderPassCreator = () => Graphics.CreateRenderPass(false, false);          
 
             this.Add(onscreenPass);
         }

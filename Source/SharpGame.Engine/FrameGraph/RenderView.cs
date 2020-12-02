@@ -36,7 +36,7 @@ namespace SharpGame
             }
         }
 
-        FrameGraphPass debugPass;
+        FrameGraphPass overlayPass;
 
         public uint ViewMask { get; set; } = 1;
         public ref FrameInfo Frame => ref frameInfo;
@@ -82,13 +82,12 @@ namespace SharpGame
         {
             CreateBuffers();
 
-            CreateDebugPass();
+            CreateOverlayPass();
         }
 
         public void Reset()
         {
             Renderer?.DeviceReset();
-            debugPass?.DeviceReset();
         }
 
         public void Attach(Camera camera, Scene scene, RenderPipeline frameGraph = null)
@@ -97,7 +96,7 @@ namespace SharpGame
             this.camera = camera;
             Renderer = frameGraph;
             Renderer?.Init(this);
-            Renderer?.Add(debugPass);
+            Renderer?.Add(overlayPass);
         }
 
         protected void CreateBuffers()
@@ -124,14 +123,14 @@ namespace SharpGame
 
         }
 
-        void CreateDebugPass()
+        void CreateOverlayPass()
         {
-            if(debugPass != null)
+            if(overlayPass != null)
             {
                 return;
             }
 
-            debugPass = new FrameGraphPass
+            overlayPass = new FrameGraphPass
             {
                 new GraphicsSubpass
                 {
@@ -139,8 +138,8 @@ namespace SharpGame
                 }
             };
 
-            debugPass.renderPassCreator = () => Graphics.CreateRenderPass();
-            //debugPass.frameBufferCreator = () => Graphics.CreateSwapChainFramebuffers(rp);
+            overlayPass.renderPassCreator = () => Graphics.CreateRenderPass();
+
         }
 
         [MethodImpl((MethodImplOptions)0x100)]
@@ -207,7 +206,7 @@ namespace SharpGame
             {
                 Renderer = new ForwardRenderer();
                 Renderer.Init(this);
-                Renderer.Add(debugPass);
+                Renderer.Add(overlayPass);
             }
 
             Renderer.Update();

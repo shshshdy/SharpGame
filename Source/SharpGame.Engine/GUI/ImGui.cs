@@ -28,8 +28,6 @@ namespace SharpGame
         DescriptorSet resourceSetTex;
         private IntPtr fontAtlasID = (IntPtr)1;
 
-        FrameGraphPass guiPass;
-
         private struct ResourceSetInfo
         {
             public readonly IntPtr ImGuiBinding;
@@ -75,35 +73,7 @@ namespace SharpGame
             ImGui.NewFrame();
 
             this.Subscribe<BeginFrame>((e) => Update());
-            this.Subscribe<DrawEvent>(RenderImDrawData);
-            /*
-            var graphics = Graphics.Instance;
-
-            guiPass = new FrameGraphPass
-            {
-                renderPassCreator = ()=>
-                { 
-                    var rp = graphics.CreateRenderPass();
-                    pipeline = pass.CreateGraphicsPipeline(rp, 0, VertexPos2dTexColor.Layout, VkPrimitiveTopology.TriangleList);
-
-                    return rp;
-                },
-
-                //frameBufferCreator = (rp)=> graphics.CreateSwapChainFramebuffers(rp),
-
-                Subpasses = new[]
-                {
-                   new GraphicsSubpass
-                   {
-                        OnDraw = (pass, rc, cmd) =>
-                        {
-                            RenderImDrawData(cmd);
-                        }
-                    }
-                }
-            };
-
-            FrameGraph.Instance.OverlayPass = guiPass;*/
+            this.Subscribe<DrawEvent>(RenderImDrawData);            
 
         }
 

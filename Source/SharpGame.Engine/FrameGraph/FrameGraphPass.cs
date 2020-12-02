@@ -295,11 +295,6 @@ namespace SharpGame
 
             ref Framebuffer framebuffer = ref framebuffers[Graphics.WorkImage];
 
-            if (framebuffer == null)
-            {
-                framebuffer = Graphics.Framebuffers[Graphics.WorkImage];
-            }
-
             if (View != null)
             {
                 viewport = View.Viewport;
