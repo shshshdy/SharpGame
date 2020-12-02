@@ -180,7 +180,7 @@ namespace SharpGame
         {
             foreach (var viewport in views)
             {
-                if (viewport.Scene == null)
+                if (viewport.Scene == null || viewport.Camera == null)
                 {
                     continue;
                 }
@@ -190,6 +190,8 @@ namespace SharpGame
                 {
                     continue;
                 }
+                
+                debug.SetView(viewport.Camera);
 
                 var spacePartitioner = viewport.Scene.SpacePartitioner;
                 if(debugOctree && spacePartitioner != null)

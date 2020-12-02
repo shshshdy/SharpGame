@@ -84,7 +84,7 @@ namespace SharpGame
 
         public void SetView(Camera camera)
         {
-            if(!camera)
+            if (!camera)
                 return;
 
             frustum_ = camera.Frustum;
@@ -97,10 +97,10 @@ namespace SharpGame
 
         public void AddLine(vec3 start, vec3 end, int color, bool depthTest = true)
         {
-            if(lines_.Count + noDepthLines_.Count >= MAX_LINES)
+            if (lines_.Count + noDepthLines_.Count >= MAX_LINES)
                 return;
 
-            if(depthTest)
+            if (depthTest)
                 lines_.Add(new DebugLine(start, end, color));
             else
                 noDepthLines_.Add(new DebugLine(start, end, color));
@@ -113,10 +113,10 @@ namespace SharpGame
 
         public void AddTriangle(vec3 v1, vec3 v2, vec3 v3, int color, bool depthTest = true)
         {
-            if(triangles_.Count + noDepthTriangles_.Count >= MAX_TRIANGLES)
+            if (triangles_.Count + noDepthTriangles_.Count >= MAX_TRIANGLES)
                 return;
 
-            if(depthTest)
+            if (depthTest)
                 triangles_.Add(new DebugTriangle(v1, v2, v3, color));
             else
                 noDepthTriangles_.Add(new DebugTriangle(v1, v2, v3, color));
@@ -136,7 +136,7 @@ namespace SharpGame
 
         public void AddNode(Node node, float scale, bool depthTest)
         {
-            if(!node)
+            if (!node)
                 return;
 
             vec3 start = node.WorldPosition;
@@ -161,7 +161,7 @@ namespace SharpGame
 
             int uintColor = color.ToRgba();
 
-            if(!solid)
+            if (!solid)
             {
                 AddLine(min, v1, uintColor, depthTest);
                 AddLine(v1, v2, uintColor, depthTest);
@@ -203,7 +203,7 @@ namespace SharpGame
 
             int uintColor = color.ToRgba();
 
-            if(!solid)
+            if (!solid)
             {
                 AddLine(v0, v1, uintColor, depthTest);
                 AddLine(v1, v2, uintColor, depthTest);
@@ -228,7 +228,7 @@ namespace SharpGame
                 AddPolygon(v0, v1, v5, v4, uintColor, depthTest);
             }
         }
-        
+
         public void AddFrustum(in Frustum frustum, Color color, bool depthTest)
         {
             Span<vec3> vertices = stackalloc vec3[8];
@@ -249,29 +249,13 @@ namespace SharpGame
             AddLine(vertices[3], vertices[7], uintColor, depthTest);
         }
 
-        /*
-        void AddPolyhedron(const Polyhedron& poly, Color color, bool depthTest)
-        {
-            int uintColor = color.ToUInt();
-
-            for(int i = 0; i < poly.faces_.Count; ++i)
-            {
-                const PODVector<vec3>&face = poly.faces_[i];
-                if(face.Count >= 3)
-                {
-                    for(int j = 0; j < face.Count; ++j)
-                        AddLine(face[j], face[(j + 1) % face.Count], uintColor, depthTest);
-                }
-            }
-        }*/
-
         public void AddSphere(in Sphere sphere, Color color, bool depthTest = true)
         {
             int uintColor = color.ToRgba();
 
-            for(float j = 0; j < 180; j += 45)
+            for (float j = 0; j < 180; j += 45)
             {
-                for(float i = 0; i < 360; i += 45)
+                for (float i = 0; i < 360; i += 45)
                 {
                     vec3 p1 = sphere.GetPoint(i, j);
                     vec3 p2 = sphere.GetPoint(i + 45, j);
@@ -289,9 +273,9 @@ namespace SharpGame
         public void AddSphereSector(in Sphere sphere, ref quat rotation, float angle,
             bool drawLines, Color color, bool depthTest = true)
         {
-            if(angle <= 0.0f)
+            if (angle <= 0.0f)
                 return;
-            else if(angle >= 360.0f)
+            else if (angle >= 360.0f)
             {
                 AddSphere(in sphere, color, depthTest);
                 return;
@@ -306,7 +290,7 @@ namespace SharpGame
             int numArcSegments = (int)(Math.Ceiling(halfAngle / arcStep)) + 1;
 
             // Draw circle
-            for(int j = 0; j < numCircleSegments; ++j)
+            for (int j = 0; j < numCircleSegments; ++j)
             {
                 AddLine(
                     sphere.center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
@@ -316,9 +300,9 @@ namespace SharpGame
 
             // Draw arcs
             const int step = numCircleSegments / numLines;
-            for(int i = 0; i < numArcSegments - 1; ++i)
+            for (int i = 0; i < numArcSegments - 1; ++i)
             {
-                for(int j = 0; j < numCircleSegments; j += step)
+                for (int j = 0; j < numCircleSegments; j += step)
                 {
                     float nextPhi = i + 1 == numArcSegments - 1 ? halfAngle : (i + 1) * arcStep;
                     AddLine(
@@ -329,9 +313,9 @@ namespace SharpGame
             }
 
             // Draw lines
-            if(drawLines)
+            if (drawLines)
             {
-                for(int j = 0; j < numCircleSegments; j += step)
+                for (int j = 0; j < numCircleSegments; j += step)
                 {
                     AddLine(sphere.center,
                         sphere.center + vec3.Transform(sphere.GetLocalPoint(j * 360.0f / numCircleSegments, halfAngle), rotation),
@@ -346,7 +330,7 @@ namespace SharpGame
             vec3 heightVec = new vec3(0, height, 0);
             vec3 offsetXVec = new vec3(radius, 0, 0);
             vec3 offsetZVec = new vec3(0, 0, radius);
-            for(float i = 0; i < 360; i += 45)
+            for (float i = 0; i < 360; i += 45)
             {
                 vec3 p1 = sphere.GetPoint(i, 90);
                 vec3 p2 = sphere.GetPoint(i + 45, 90);
@@ -362,19 +346,19 @@ namespace SharpGame
         public void AddSkeleton(Skeleton skeleton, Color color, bool depthTest)
         {
             Bone[] bones = skeleton.Bones;
-            if(bones.Length == 0)
+            if (bones.Length == 0)
                 return;
 
             int uintColor = color.ToRgba();
 
-            for(int i = 0; i < bones.Length; ++i)
+            for (int i = 0; i < bones.Length; ++i)
             {
                 // Skip if bone contains no skinned geometry
-                if(bones[i].radius_ < glm.epsilon && bones[i].boundingBox_.Size.LengthSquared() < glm.epsilon)
+                if (bones[i].radius_ < glm.epsilon && bones[i].boundingBox_.Size.LengthSquared() < glm.epsilon)
                     continue;
 
                 Node boneNode = bones[i].node_;
-                if(!boneNode)
+                if (!boneNode)
                     continue;
 
                 vec3 start = boneNode.WorldPosition;
@@ -384,7 +368,7 @@ namespace SharpGame
                 Node parentNode = boneNode.Parent;
 
                 // If bone has a parent defined, and it also skins geometry, draw a line to it. Else draw the bone as a point
-                if(parentNode && (bones[j].radius_ >= glm.epsilon || bones[j].boundingBox_.Size.LengthSquared() >= glm.epsilon))
+                if (parentNode && (bones[j].radius_ >= glm.epsilon || bones[j].boundingBox_.Size.LengthSquared() >= glm.epsilon))
                     end = parentNode.WorldPosition;
                 else
                     end = start;
@@ -392,78 +376,77 @@ namespace SharpGame
                 AddLine(start, end, uintColor, depthTest);
             }
         }
-        /*
-    void AddTriangleMesh(const void* vertexData, int vertexSize, const void* indexData, int indexSize,
-        int indexStart, int indexCount, const Matrix3x4& transform, Color color, bool depthTest)
-    {
-        int uintColor = color.ToUInt();
-        const int char* srcData = (const int char*)vertexData;
 
-        // 16-bit indices
-        if(indexSize == sizeof(int short))
-    {
-            const int short* indices = ((const int short*)indexData) +indexStart;
-            const int short* indicesEnd = indices + indexCount;
+        public unsafe void AddTriangleMesh(void* vertexData, int vertexSize, void* indexData, int indexSize,
+            int indexStart, int indexCount, in mat4 transform, Color color, bool depthTest)
+        {
+            int uintColor = color.ToRgba();
+            byte* srcData = (byte*)vertexData;
 
-            while(indices < indicesEnd)
+            // 16-bit indices
+            if (indexSize == sizeof(ushort))
             {
-                vec3 v0 = transform * *((const vec3*)(&srcData[indices[0] * vertexSize]));
-                vec3 v1 = transform * *((const vec3*)(&srcData[indices[1] * vertexSize]));
-                vec3 v2 = transform * *((const vec3*)(&srcData[indices[2] * vertexSize]));
+                ushort* indices = ((ushort*)indexData) + indexStart;
+                ushort* indicesEnd = indices + indexCount;
 
-                AddLine(v0, v1, uintColor, depthTest);
-                AddLine(v1, v2, uintColor, depthTest);
-                AddLine(v2, v0, uintColor, depthTest);
-
-                indices += 3;
-            }
-        }
-    else
-    {
-            const int* indices = ((const int*)indexData) +indexStart;
-            const int* indicesEnd = indices + indexCount;
-
-            while(indices < indicesEnd)
-            {
-                vec3 v0 = transform * *((const vec3*)(&srcData[indices[0] * vertexSize]));
-                vec3 v1 = transform * *((const vec3*)(&srcData[indices[1] * vertexSize]));
-                vec3 v2 = transform * *((const vec3*)(&srcData[indices[2] * vertexSize]));
-
-                AddLine(v0, v1, uintColor, depthTest);
-                AddLine(v1, v2, uintColor, depthTest);
-                AddLine(v2, v0, uintColor, depthTest);
-
-                indices += 3;
-            }
-        }
-    }*/
-
-            /*
-            void AddCircle(vec3 center, vec3 normal, float radius, Color color, int steps, bool depthTest)
-            {
-                quat orientation = quat.FromRotationTo(vec3.Up, normal.Normalized());
-                vec3 p = orientation * new vec3(radius, 0, 0) + center;
-                int uintColor = color.ToUInt();
-
-                for(int i = 1; i <= steps; ++i)
+                while (indices < indicesEnd)
                 {
-                    float angle = (float)i / (float)steps * 360.0f;
-                    vec3 v(radius* Cos(angle), 0, radius* Sin(angle));
+                    vec3 v0 = transform * *((vec3*)(&srcData[indices[0] * vertexSize]));
+                    vec3 v1 = transform * *((vec3*)(&srcData[indices[1] * vertexSize]));
+                    vec3 v2 = transform * *((vec3*)(&srcData[indices[2] * vertexSize]));
+
+                    AddLine(v0, v1, uintColor, depthTest);
+                    AddLine(v1, v2, uintColor, depthTest);
+                    AddLine(v2, v0, uintColor, depthTest);
+
+                    indices += 3;
+                }
+            }
+            else
+            {
+                int* indices = ((int*)indexData) + indexStart;
+                int* indicesEnd = indices + indexCount;
+
+                while (indices < indicesEnd)
+                {
+                    vec3 v0 = transform * *((vec3*)(&srcData[indices[0] * vertexSize]));
+                    vec3 v1 = transform * *((vec3*)(&srcData[indices[1] * vertexSize]));
+                    vec3 v2 = transform * *((vec3*)(&srcData[indices[2] * vertexSize]));
+
+                    AddLine(v0, v1, uintColor, depthTest);
+                    AddLine(v1, v2, uintColor, depthTest);
+                    AddLine(v2, v0, uintColor, depthTest);
+
+                    indices += 3;
+                }
+            }
+        }
+
+        public void AddCircle(vec3 center, vec3 normal, float radius, Color color, int steps, bool depthTest)
+        {
+            quat orientation = glm.rotation(vec3.Up, glm.normalize(normal));
+            vec3 p = orientation * new vec3(radius, 0, 0) + center;
+            int uintColor = color.ToRgba();
+
+            for(int i = 1; i <= steps; ++i)
+            {
+                float angle = (float)i / (float)steps * 360.0f;
+                vec3 v = new vec3(radius* glm.cos(angle), 0, radius* glm.sin(angle));
                 vec3 c = orientation * v + center;
                 AddLine(p, c, uintColor, depthTest);
                 p = c;
             }
 
             p = center + normal* (radius / 4.0f);
-        AddLine(center, p, uintColor, depthTest);
-        }*/
+            AddLine(center, p, uintColor, depthTest);
+        }
 
         public void AddCross(vec3 center, float size, Color color, bool depthTest)
         {
             int uintColor = color.ToRgba();
 
             float halfSize = size / 2.0f;
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 vec3 start = new vec3(center.X, center.Y, center.Z);
                 vec3 end = new vec3(center.X, center.Y, center.Z);
@@ -489,7 +472,7 @@ namespace SharpGame
 
         public unsafe void Render(RenderView view, CommandBuffer cmdBuffer)
         {
-            if(!HasContent())
+            if (!HasContent())
                 return;
 
             Graphics graphics = Graphics.Instance;
@@ -507,7 +490,7 @@ namespace SharpGame
 
             float* dest = (float*)vb.Map();
 
-            for(int i = 0; i < lines_.Count; ++i)
+            for (int i = 0; i < lines_.Count; ++i)
             {
                 ref DebugLine line = ref lines_.At(i);
 
@@ -525,7 +508,7 @@ namespace SharpGame
             }
 
 
-            for(int i = 0; i < noDepthLines_.Count; ++i)
+            for (int i = 0; i < noDepthLines_.Count; ++i)
             {
                 ref DebugLine line = ref noDepthLines_.At(i);
 
@@ -541,7 +524,7 @@ namespace SharpGame
                 dest += 8;
             }
 
-            for(int i = 0; i < triangles_.Count; ++i)
+            for (int i = 0; i < triangles_.Count; ++i)
             {
                 ref DebugTriangle triangle = ref triangles_.At(i);
 
@@ -563,7 +546,7 @@ namespace SharpGame
                 dest += 12;
             }
 
-            for(int i = 0; i < noDepthTriangles_.Count; ++i)
+            for (int i = 0; i < noDepthTriangles_.Count; ++i)
             {
                 ref DebugTriangle triangle = ref noDepthTriangles_.At(i);
 
@@ -584,7 +567,7 @@ namespace SharpGame
 
                 dest += 12;
             }
-            
+
             vb.Unmap();
 
             uint start = 0;
@@ -597,11 +580,11 @@ namespace SharpGame
                 count = (uint)lines_.Count * 2;
                 cmdBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipelineDepthLines);
                 cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.Set0, 0);
-                cmdBuffer.Draw(count, 1, start, 0);                
+                cmdBuffer.Draw(count, 1, start, 0);
                 start += count;
             }
 
-            if(noDepthLines_.Count > 0)
+            if (noDepthLines_.Count > 0)
             {
                 count = (uint)noDepthLines_.Count * 2;
 
@@ -611,8 +594,8 @@ namespace SharpGame
 
                 start += count;
             }
-            
-            if(triangles_.Count > 0)
+
+            if (triangles_.Count > 0)
             {
                 count = (uint)triangles_.Count * 3;
 
@@ -622,7 +605,7 @@ namespace SharpGame
                 start += count;
             }
 
-            if(noDepthTriangles_.Count > 0)
+            if (noDepthTriangles_.Count > 0)
             {
                 count = (uint)noDepthTriangles_.Count * 3;
 
@@ -630,7 +613,7 @@ namespace SharpGame
                 cmdBuffer.BindGraphicsResourceSet(debugShader.Main.PipelineLayout, 0, view.Set0, 0);
                 cmdBuffer.Draw(count, 1, start, 0);
             }
-           
+
         }
 
         public bool IsInside(ref BoundingBox box)
@@ -645,12 +628,6 @@ namespace SharpGame
 
         void HandleEndFrame(in EndFrame eventData)
         {
-            // When the amount of debug geometry is reduced, release memory
-            int linesSize = lines_.Count;
-            int noDepthLinesSize = noDepthLines_.Count;
-            int trianglesSize = triangles_.Count;
-            int noDepthTrianglesSize = noDepthTriangles_.Count;
-
             lines_.Clear();
             noDepthLines_.Clear();
             triangles_.Clear();
