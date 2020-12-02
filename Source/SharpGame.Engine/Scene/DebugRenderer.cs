@@ -59,12 +59,8 @@ namespace SharpGame
         FastList<DebugTriangle> noDepthTriangles_ = new FastList<DebugTriangle>();
         /// View frustum.
         Frustum frustum_;
-        /// Line antialiasing flag.
-        bool lineAntiAlias_;
-
 
         Buffer[] vertexBuffer = new Buffer[3];
-
         Shader debugShader;
 
         VkPipeline pipelineDepthLines;
