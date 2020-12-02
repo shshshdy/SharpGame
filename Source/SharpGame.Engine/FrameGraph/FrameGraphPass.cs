@@ -46,6 +46,7 @@ namespace SharpGame
         public Func<RenderTarget> frameBufferCreator { get; set; }
 
         protected RenderTarget renderTarget;
+        public RenderTarget RenderTarget => renderTarget;
 
         private List<RenderTextureInfo> renderTextureInfos = new List<RenderTextureInfo>();
         

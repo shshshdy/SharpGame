@@ -10,7 +10,8 @@ namespace SharpGame
         protected PipelineResourceSet pipelineResourceSet;
         public FullScreenSubpass(string fs)
         {
-            pass = ShaderUtil.CreatePass("shaders/common/fullscreen.vert", fs);
+            pass = ShaderUtil.CreatePass("shaders/post/fullscreen.vert", fs);
+            pipelineResourceSet = new PipelineResourceSet(pass.PipelineLayout);
         }
 
         public override void DeviceReset()
@@ -23,7 +24,14 @@ namespace SharpGame
         }
 
         protected virtual void BindResources()
-        { 
+        {
+            var rt = FrameGraphPass.RenderTarget[0];
+            pipelineResourceSet.SetResourceSet(0, rt);
+        }
+
+        public override void Draw(RenderContext rc, CommandBuffer cmd)
+        {
+            DrawFullScreenQuad(cmd, FrameGraphPass.RenderPass, subpassIndex, pass, pipelineResourceSet.ResourceSet);
         }
 
         public void DrawFullScreenQuad(CommandBuffer cb, RenderPass renderPass, uint subpass, Pass pass, Span<DescriptorSet> resourceSet)

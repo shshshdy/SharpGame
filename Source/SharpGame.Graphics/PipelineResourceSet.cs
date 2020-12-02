@@ -33,6 +33,11 @@ namespace SharpGame
             pushConstBuffer = Utilities.Alloc(Device.MaxPushConstantsSize);
         }
 
+        public PipelineResourceSet(PipelineLayout pipelineLayout)
+        {
+            Init(pipelineLayout);
+        }
+
         public void Init(PipelineLayout pipelineLayout)
         {
             this.pipelineLayout = pipelineLayout;
