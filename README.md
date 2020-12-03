@@ -7,6 +7,7 @@
 支持基于八叉树的场景管理
 简单的GPU SkinMesh  
 ## 可扩展的FrameGraph系统
+基于Subpass的设计  
 提供了三种渲染方式：  
 1.简单的ForwardRenderer  
 2.ClusterForwordRenderer  
