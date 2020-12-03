@@ -1,8 +1,9 @@
 ## 基于Vulkan的多线程渲染引擎，采用C#9.0开发，支持.Net5.0
-高效的开发效率，Unity的技术栈都可以用过来  
-后面可以支持GPU Driven的渲染，C#的运行效率不再是问题  
+高效的开发效率，跨平台  
+Unity的技术栈都可以用过来  
+后面可以支持GPU Driven的渲染，C#的运行效率不再成为问题  
 ## 简洁高效的SceneGraph系统
-基于Entity/Component设计  
+基于Entity/Component的设计  
 支持基于八叉树的场景管理
 支持SkinMesh  
 ## 可扩展的FrameGraph系统
