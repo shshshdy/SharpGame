@@ -14,5 +14,5 @@ Work线程又可分为多个线程并行构造CommandBuffer
 ## 类似Unity的ShaderLab脚本
 ## 支持PBR渲染
 ## CascadeShadowMap
-## 地形
+## 基于Tessellation的地形
 ## 基于IndirectDraw的植被系统
