@@ -4,7 +4,7 @@
 后面可以支持GPU Driven的渲染，C#做逻辑，运算都放在GPU进行，运行效率不再成为问题  
 ## 简洁高效的SceneGraph系统
 基于Entity/Component的设计  
-支持基于八叉树的场景管理
+支持基于八叉树的场景管理  
 简单的GPU SkinMesh  
 ## 可扩展的FrameGraph系统
 基于Subpass的设计  
