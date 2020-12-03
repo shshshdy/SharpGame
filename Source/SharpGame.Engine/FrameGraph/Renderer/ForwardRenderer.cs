@@ -13,42 +13,45 @@ namespace SharpGame
             uint height = Graphics.Height;
 
             Add(new ShadowPass());
-            /*
-            Add(new FrameGraphPass
+
+            var fgPass = new FrameGraphPass
             {
-                new RenderTextureInfo((uint)width, (uint)height, 1, VkFormat.R8G8B8A8UNorm, 
-                VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment)
+                new RenderTextureInfo(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment)
                 {
                     finalLayout = VkImageLayout.ShaderReadOnlyOptimal
                 },
-                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment),
+
+                new RenderTextureInfo(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment),
 
                 new SceneSubpass
                 {
                     DisableDepthStencilAttachment = false
                 }
 
-            });*/
+            };
 
-            Add(new FrameGraphPass
+
+            Add(fgPass);
+
+
+            var onScreenPass = new FrameGraphPass
             {
                 new RenderTextureInfo(Graphics.Swapchain)
                 {
-
                 },
 
-                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment),
-                
-                new SceneSubpass
+                new FullScreenSubpass("shaders/post/fullscreen.frag")
                 {
-                    DisableDepthStencilAttachment = false
-                },
+                    onBindResource = (rs)=>
+                    {
+                        rs.SetResourceSet(0, fgPass.RenderTarget[0]);
+                    }
+                }
 
-//                 new FullScreenSubpass("shaders/post/fullscreen.frag")
-//                 {
-//                 }
+            };
 
-            });
+
+            Add(onScreenPass);
 
 
         }

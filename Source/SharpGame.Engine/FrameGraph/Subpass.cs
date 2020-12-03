@@ -89,11 +89,9 @@ namespace SharpGame
             }
         }
 
-
         public virtual void Init()
         {
         }
-
 
         public virtual void DeviceLost()
         {

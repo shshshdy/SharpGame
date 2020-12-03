@@ -117,7 +117,10 @@ namespace SharpGame
 
         public virtual void Init()
         {
-            foreach(var subpass in subpasses)
+            CreateRenderPass();
+            CreateRenderTargets();
+
+            foreach (var subpass in subpasses)
             {
                 subpass.Init();
             }

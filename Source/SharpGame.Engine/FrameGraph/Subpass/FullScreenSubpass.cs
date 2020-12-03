@@ -7,11 +7,24 @@ namespace SharpGame
     public class FullScreenSubpass : Subpass
     {
         protected Pass pass;
-        protected PipelineResourceSet pipelineResourceSet;
+        public PipelineResourceSet PipelineResourceSet { get; }
+
+        public Action<PipelineResourceSet> onBindResource;
+
         public FullScreenSubpass(string fs)
         {
             pass = ShaderUtil.CreatePass("shaders/post/fullscreen.vert", fs);
-            pipelineResourceSet = new PipelineResourceSet(pass.PipelineLayout);
+            pass.CullMode = VkCullModeFlags.None;
+            pass.DepthTestEnable = false;
+            pass.DepthWriteEnable = false;
+
+            PipelineResourceSet = new PipelineResourceSet(pass.PipelineLayout);
+        }
+
+        public override void Init()
+        {
+            CreateResources();
+            BindResources();
         }
 
         public override void DeviceReset()
@@ -25,27 +38,29 @@ namespace SharpGame
 
         protected virtual void BindResources()
         {
-            var rt = FrameGraphPass.RenderTarget[0];
-            pipelineResourceSet.SetResourceSet(0, rt);
+            //var rt = FrameGraphPass.RenderTarget[0];
+            PipelineResourceSet.SetResourceSet(0, Texture.Blue);
+
+            onBindResource?.Invoke(PipelineResourceSet);
         }
 
         public override void Draw(RenderContext rc, CommandBuffer cmd)
         {
-            DrawFullScreenQuad(cmd, FrameGraphPass.RenderPass, subpassIndex, pass, pipelineResourceSet.ResourceSet);
+            DrawFullScreenQuad(cmd, FrameGraphPass.RenderPass, subpassIndex, pass, PipelineResourceSet.ResourceSet);
         }
 
-        public void DrawFullScreenQuad(CommandBuffer cb, RenderPass renderPass, uint subpass, Pass pass, Span<DescriptorSet> resourceSet)
+        public void DrawFullScreenQuad(CommandBuffer cmd, RenderPass renderPass, uint subpass, Pass pass, Span<DescriptorSet> resourceSet)
         {
             var pipe = pass.GetGraphicsPipeline(renderPass, subpass, null);
 
-            cb.BindPipeline(VkPipelineBindPoint.Graphics, pipe);
+            cmd.BindPipeline(VkPipelineBindPoint.Graphics, pipe);
 
             foreach (var rs in resourceSet)
             {
-                cb.BindGraphicsResourceSet(pass.PipelineLayout, 0, rs);
+                cmd.BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
             }
 
-            cb.Draw(3, 1, 0, 0);
+            cmd.Draw(3, 1, 0, 0);
         }
 
     }

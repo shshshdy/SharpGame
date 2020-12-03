@@ -159,13 +159,13 @@ namespace SharpGame
 
         public void Add(RenderTexture rt)
         {
-            if (extent.width == 0 || extent.height == 0)
+            if (attachments.Count == 0)
             {
                 extent = rt.extent;
             }
             else
             {
-                Debug.Assert(extent == rt.extent);
+                //Debug.Assert(extent == rt.extent);
             }
 
             attachments.Add(rt);
@@ -189,6 +189,8 @@ namespace SharpGame
             {
                 attachment?.Dispose();
             }
+
+            attachments.Clear();
         }
 
     }

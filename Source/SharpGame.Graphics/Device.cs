@@ -300,7 +300,7 @@ namespace SharpGame
                 //VkDebugReportFlagsEXT.Information | 
                 //VkDebugReportFlagsEXT.Debug |
                 VkDebugReportFlagsEXT.Warning |
-                VkDebugReportFlagsEXT.PerformanceWarning |
+                //VkDebugReportFlagsEXT.PerformanceWarning |
                 VkDebugReportFlagsEXT.Error,
                 (args) =>
                 {

@@ -1,5 +1,5 @@
 
-layout (binding = 0) uniform CameraVS
+layout (binding = 0) uniform GlobalUniform
 {
     mat4 View;
     mat4 ViewInv;
