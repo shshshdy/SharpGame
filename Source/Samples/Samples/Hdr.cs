@@ -4,7 +4,7 @@ namespace SharpGame.Samples
 {
     [SampleDesc(sortOrder = 7)]
 
-    public class CubeMap : Sample
+    public class Hdr : Sample
     {
         Material material;
         float lodBias = 1.0f;
@@ -28,8 +28,13 @@ namespace SharpGame.Samples
             };
 
             camera = scene.GetComponent<Camera>(true);
-          
-            var cubeMap = Resources.Load<Texture>("textures/cubemap_yokohama_bc3_unorm.ktx");
+
+            KtxTextureReader texReader = new KtxTextureReader
+            {
+                Format = VkFormat.R16G16B16A16SFloat,
+            };
+
+            var cubeMap = texReader.Load("textures/hdr/uffizi_cube.ktx");
             {
                 var model = Resources.Load<Model>("Models/cube.obj");
                 var node = scene.CreateChild("Sky");
@@ -57,7 +62,7 @@ namespace SharpGame.Samples
 
             }
 
-            MainView.Attach(camera, scene);
+            MainView.Attach(camera, scene, new ForwardHdrRenderer());
 
         }
 

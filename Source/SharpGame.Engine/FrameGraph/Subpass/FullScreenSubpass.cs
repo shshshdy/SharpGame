@@ -11,14 +11,32 @@ namespace SharpGame
 
         public Action<PipelineResourceSet> onBindResource;
 
-        public FullScreenSubpass(string fs)
+        public FullScreenSubpass(string fs, SpecializationInfo specializationInfo = null)
         {
             pass = ShaderUtil.CreatePass("shaders/post/fullscreen.vert", fs);
             pass.CullMode = VkCullModeFlags.None;
             pass.DepthTestEnable = false;
             pass.DepthWriteEnable = false;
 
+            pass.PixelShader.SpecializationInfo = specializationInfo;
+
             PipelineResourceSet = new PipelineResourceSet(pass.PipelineLayout);
+        }
+
+        public bool AddtiveMode
+        {
+            set
+            {
+                if(value)
+                {
+                    pass.BlendMode = BlendMode.Add;
+                }
+                else
+                {
+                    pass.BlendMode = BlendMode.Replace;
+                }
+            }
+
         }
 
         public override void Init()

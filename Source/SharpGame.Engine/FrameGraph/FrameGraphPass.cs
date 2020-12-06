@@ -20,9 +20,6 @@ namespace SharpGame
         protected Framebuffer[] framebuffers;
         public Framebuffer[] Framebuffers => framebuffers;
 
-        public VkClearColorValue[] VkClearColorValue { get; set; } = { new VkClearColorValue(0.25f, 0.25f, 0.25f, 1) };
-        public VkClearDepthStencilValue? VkClearDepthStencilValue { get; set; } = new VkClearDepthStencilValue(1.0f, 0);
-
         public VkClearValue[] clearValues = new VkClearValue[2]
         { 
             new VkClearColorValue(0.25f, 0.25f, 0.25f, 1),
@@ -43,7 +40,7 @@ namespace SharpGame
         }
 
         public Func<RenderPass> renderPassCreator { get; set; }
-        public Func<RenderTarget> frameBufferCreator { get; set; }
+        public Func<RenderTarget> renderTargetCreator { get; set; }
 
         protected RenderTarget renderTarget;
         public RenderTarget RenderTarget => renderTarget;
@@ -221,9 +218,9 @@ namespace SharpGame
         {
             Debug.Assert(RenderPass != null);
 
-            if (frameBufferCreator != null)
+            if (renderTargetCreator != null)
             {
-                renderTarget = frameBufferCreator();
+                renderTarget = renderTargetCreator();
             }
             else
             {

@@ -76,7 +76,7 @@ namespace SharpGame
                 new VkClearDepthStencilValue(1, 0)
             };
 
-            geometryPass.frameBufferCreator = OnCreateFramebuffer;
+            geometryPass.renderTargetCreator = OnCreateFramebuffer;
             geometryPass.renderPassCreator = OnCreateRenderPass;
 
             this.Add(geometryPass);
