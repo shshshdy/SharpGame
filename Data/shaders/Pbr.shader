@@ -4,17 +4,17 @@
 
     Pass
     {
-        CullMode = None
-        FrontFace = CounterClockwise
+        //CullMode = None
+        //FrontFace = CounterClockwise
 
         @VertexShader
         {
-            #include "pbr_lighting.vert"
+            #include "pbr.vert"
         }
 
         @PixelShader
         {
-            #include "pbr_lighting.frag"
+            #include "pbr.frag"
         }
 
     }

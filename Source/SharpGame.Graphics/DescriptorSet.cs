@@ -91,7 +91,6 @@ namespace SharpGame
                 Bind(i, bindables[i]);
             }
 
-
             UpdateSets();
         }
 
@@ -99,7 +98,7 @@ namespace SharpGame
         {
             Device.FreeDescriptorSets(descriptorPool, 3, ref Utilities.As<VkDescriptorSet>(descriptorSet.Data));
 
-            Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts);
+            Graphics.DescriptorPoolManager.Free(descriptorPool, ref resourceLayout.descriptorResourceCounts, Swapchain.IMAGE_COUNT);
         }
 
         public void Bind(params IBindableResource[] bindables)

@@ -100,7 +100,15 @@ namespace SharpGame
             descriptorResourceCounts = new DescriptorResourceCounts();            
             foreach (var binding in bindings)
             {
-                descriptorResourceCounts[(int)binding.descriptorType] += 1;
+                int index = binding.descriptorType switch
+                {
+                    <= VkDescriptorType.InputAttachment => (int)binding.descriptorType,
+                    VkDescriptorType.InlineUniformBlockEXT => 11,
+                    VkDescriptorType.AccelerationStructureKHR => 12,
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
+
+                descriptorResourceCounts[index] += 1;
             }
             
             return this;
@@ -165,7 +173,7 @@ namespace SharpGame
 
     internal unsafe struct DescriptorResourceCounts
     {
-        fixed uint counts[11];
+        fixed uint counts[16];
 
         public ref uint this[int idx] { get=> ref counts[idx]; }
         

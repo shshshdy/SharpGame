@@ -23,6 +23,8 @@
     <None Include="$(MSBuildThisFileDirectory)Common\Common.glsl" />
     <None Include="$(MSBuildThisFileDirectory)ClusterLight.shader" />
     <None Include="$(MSBuildThisFileDirectory)Debug.shader" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\pbr.frag" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\pbr.vert" />
     <None Include="$(MSBuildThisFileDirectory)Natural\sparseresidency.frag" />
     <None Include="$(MSBuildThisFileDirectory)Natural\sparseresidency.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\calc_grid_offsets.comp" />
@@ -64,8 +66,8 @@
     <None Include="$(MSBuildThisFileDirectory)raytracing\raytracing.comp" />
     <None Include="$(MSBuildThisFileDirectory)Shadow.shader" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\irmap.comp" />
-    <None Include="$(MSBuildThisFileDirectory)GLSL\pbr.frag" />
-    <None Include="$(MSBuildThisFileDirectory)GLSL\pbr.vert" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\pbr_lighting.frag" />
+    <None Include="$(MSBuildThisFileDirectory)GLSL\pbr_lighting.vert" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\spbrdf.comp" />
     <None Include="$(MSBuildThisFileDirectory)GLSL\spmap.comp" />
     <None Include="$(MSBuildThisFileDirectory)post\tonemap.frag" />

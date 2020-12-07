@@ -16,7 +16,7 @@ namespace SharpGame
             _pools.Add(CreateNewPool());
         }
 
-        public void Free(VkDescriptorPool pool, ref DescriptorResourceCounts counts)
+        public void Free(VkDescriptorPool pool, ref DescriptorResourceCounts counts, uint count = 1)
         {
             lock (_lock)
             {
@@ -24,7 +24,7 @@ namespace SharpGame
                 {
                     if (poolInfo.Pool == pool)
                     {
-                        poolInfo.Free(ref counts);
+                        poolInfo.Free(ref counts, count);
                     }
                 }
             }
@@ -50,6 +50,27 @@ namespace SharpGame
             }
         }
 
+        static readonly VkDescriptorType[] descriptorTypes = {
+            VkDescriptorType.Sampler,
+            VkDescriptorType.CombinedImageSampler,
+            VkDescriptorType.SampledImage,
+            VkDescriptorType.StorageImage,
+            VkDescriptorType.UniformTexelBuffer,
+            VkDescriptorType.StorageTexelBuffer,
+            VkDescriptorType.UniformBuffer,
+            VkDescriptorType.StorageBuffer,
+            VkDescriptorType.UniformBufferDynamic,
+            VkDescriptorType.StorageBufferDynamic,
+            VkDescriptorType.InputAttachment,
+            VkDescriptorType.InlineUniformBlockEXT/* = 1000138000*/,
+            VkDescriptorType.AccelerationStructureKHR/* = 1000165000*/,
+            VkDescriptorType.AccelerationStructureNV/* = AccelerationStructureKHR*/,
+            0,
+            0
+        };
+
+        public const int MAX_DESCRIPTOR_COUNT = 13;
+
         private unsafe PoolInfo CreateNewPool()
         {
             uint totalSets = 1000;
@@ -57,9 +78,9 @@ namespace SharpGame
             uint poolSizeCount = 11;
 
             VkDescriptorPoolSize* sizes = stackalloc VkDescriptorPoolSize[(int)poolSizeCount];
-            for(int i = 0; i < 11; i++)
+            for(int i = 0; i < MAX_DESCRIPTOR_COUNT; i++)
             {
-                sizes[i].type = (VkDescriptorType)i;
+                sizes[i].type = descriptorTypes[i];
                 sizes[i].descriptorCount = descriptorCount;
             }
 
@@ -91,13 +112,13 @@ namespace SharpGame
             public readonly VkDescriptorPool Pool;
 
             public uint RemainingSets;
-            public uint[] RemainingCount = new uint[11];
+            public uint[] RemainingCount = new uint[MAX_DESCRIPTOR_COUNT];
 
             public PoolInfo(VkDescriptorPool pool, uint totalSets, uint descriptorCount)
             {
                 Pool = pool;
                 RemainingSets = totalSets;
-                for (int i = 0; i < 11; i++)
+                for (int i = 0; i < MAX_DESCRIPTOR_COUNT; i++)
                 {
                     RemainingCount[i] = descriptorCount;
                 }
@@ -110,7 +131,7 @@ namespace SharpGame
                     return false;
                 }
 
-                for(int i = 0; i < 11; i++)
+                for(int i = 0; i < MAX_DESCRIPTOR_COUNT; i++)
                 {
                     if(RemainingCount[i] < counts[i] * count)
                     {
@@ -119,7 +140,7 @@ namespace SharpGame
                 }
 
                 RemainingSets -= 1;
-                for (int i = 0; i < 11; i++)
+                for (int i = 0; i < MAX_DESCRIPTOR_COUNT; i++)
                 {
                     RemainingCount[i] -= counts[i] * count;
                 }
@@ -127,12 +148,12 @@ namespace SharpGame
                 return true;               
             }
 
-            internal void Free(ref DescriptorResourceCounts counts)
+            internal void Free(ref DescriptorResourceCounts counts, uint count = 1)
             {
                 RemainingSets += 1;
-                for (int i = 0; i < 11; i++)
+                for (int i = 0; i < MAX_DESCRIPTOR_COUNT; i++)
                 {
-                    RemainingCount[i] += counts[i];
+                    RemainingCount[i] += (counts[i] * count);
                 }
             }
         }

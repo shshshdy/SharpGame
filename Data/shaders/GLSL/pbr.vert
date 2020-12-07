@@ -1,26 +1,16 @@
-#version 450 core
+#version 450
+
 #include "Common.glsl"
 
-layout(location=0) in vec3 position;
-layout(location=1) in vec2 texcoord;
-layout(location=2) in vec3 normal;
-layout(location=3) in vec3 tangent;
-layout(location=4) in vec3 bitangent;
+layout (location = 0) in vec3 inPos;
+layout (location = 1) in vec3 inNormal;
 
-layout(location=0) out Vertex
+layout (location = 0) out vec3 outWorldPos;
+layout (location = 1) out vec3 outNormal;
+
+void main() 
 {
-	vec3 position;
-	vec2 texcoord;
-	mat3 tangentBasis;
-} vout;
-
-void main()
-{
-	vout.position = vec3(Model * vec4(position, 1.0));
-	vout.texcoord = vec2(texcoord.x, 1.0 - texcoord.y);
-
-	// Pass tangent space basis vectors (for normal mapping).
-	vout.tangentBasis = mat3(Model) * mat3(tangent, bitangent, normal);
-
-	gl_Position = ViewProj * Model * vec4(position, 1.0);
+	outWorldPos = vec3(Model * vec4(inPos, 1.0));
+	outNormal = mat3(Model) * inNormal;
+	gl_Position =  ViewProj * vec4(outWorldPos, 1.0);
 }
