@@ -1,10 +1,11 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SharpGame.Samples
 {
-    [SampleDesc(sortOrder = 5)]
+    [SampleDesc(sortOrder = -5)]
     public class CascadeShadowMap : Sample
     {
         public override void Init()
@@ -24,7 +25,7 @@ namespace SharpGame.Samples
                     new Camera
                     {
                         NearClip = 0.5f,
-                        FarClip = 100,
+                        FarClip = 50,
                     },
 
                 },
@@ -84,6 +85,17 @@ namespace SharpGame.Samples
 
             MainView.Attach(camera, scene);
 
+        }
+
+        public override void OnGUI()
+        {
+            if (ImGui.Begin("HUD"))
+            {
+                ImGui.InputFloat("CascadeSplitLambda", ref ShadowPass.cascadeSplitLambda, 0.1f);
+
+            }
+
+            ImGui.End();
         }
     }
 }

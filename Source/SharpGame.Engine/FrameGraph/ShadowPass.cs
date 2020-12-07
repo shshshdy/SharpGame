@@ -45,7 +45,7 @@ namespace SharpGame
 
         SharedBuffer ubShadow;
 
-        float cascadeSplitLambda = 0.95f;
+        public static float cascadeSplitLambda = 0.75f;
 
         Shader depthShader;
 
@@ -64,7 +64,7 @@ namespace SharpGame
 
             for (uint i = 0; i < SHADOW_MAP_CASCADE_COUNT; i++)
             {
-                cascades[i].view = ImageView.Create(DepthRT.image, VkImageViewType.Image2D, depthFormat, VkImageAspectFlags.Depth, 0, 1, i, 1);
+                cascades[i].view = ImageView.Create(DepthRT.image, VkImageViewType.Image2DArray, depthFormat, VkImageAspectFlags.Depth, 0, 1, i, 1);
             }
 
             ubShadow = new SharedBuffer(VkBufferUsageFlags.UniformBuffer, (uint)(SHADOW_MAP_CASCADE_COUNT * Utilities.SizeOf<mat4>()));

@@ -47,7 +47,8 @@ void main()
 	float shadow = 1;
 
     #ifdef SHADOW
-    shadow = filterPCF(shadowCoord / shadowCoord.w, cascadeIndex);
+	shadow = textureProj(shadowCoord / shadowCoord.w, vec2(0.0), cascadeIndex);
+    //shadow = filterPCF(shadowCoord / shadowCoord.w, cascadeIndex);
     #endif
 
 	float NDotL = max(dot(N, L), 0.0);
@@ -56,4 +57,24 @@ void main()
     //outFragColor = vec4(NDotL);return;
 	vec3 specular = texture(SpecMap, inUV).xyz * BlinnPhong(N, viewVec, L, 16.0);
 	outFragColor = vec4(diffColor.rgb * AmbientColor.xyz + diffuse + specular, diffColor.a);
+	
+	/*
+    #ifdef SHADOW
+    switch(cascadeIndex) {
+	case 0 : 
+		outFragColor.rgb *= vec3(1.0f, 0.25f, 0.25f);
+		break;
+	case 1 : 
+		outFragColor.rgb *= vec3(0.25f, 1.0f, 0.25f);
+		break;
+	case 2 : 
+		outFragColor.rgb *= vec3(0.25f, 0.25f, 1.0f);
+		break;
+	case 3 : 
+		outFragColor.rgb *= vec3(1.0f, 1.0f, 0.25f);
+		break;
+	}
+	#endif
+	*/
+
 }
