@@ -6,15 +6,6 @@ using System.Text;
 
 namespace SharpGame
 {
-    public enum ShadingMode
-    {
-        Unlit,
-        Default,
-        Pbr,
-        Toon,
-        Custom
-    }
-
     public enum BlendFlags : int
     {
         Solid = 1,
@@ -26,7 +17,6 @@ namespace SharpGame
     public class Material : Resource
     {
         public ResourceRef ShaderResource { get; set; }
-        public ShadingMode ShadingMode { get; set; } = ShadingMode.Default;
         public FastList<ShaderParameter> ShaderParameters { get; set; }
         public FastList<TextureParameter> TextureParameters { get; set; }
         public FastList<BufferParameter> BufferParameters { get; set; }
@@ -221,28 +211,6 @@ namespace SharpGame
 
             return ref TextureParameter.Null;
         }
-        /*
-        public void SetTexture(StringID name, ResourceRef texRef)
-        {
-            if (TextureParameters == null)
-            {
-                TextureParameters = new FastList<TextureParameter>();
-            }
-
-            for (int i = 0; i < TextureParameters.Count; i++)
-            {
-                ref TextureParameter param = ref TextureParameters.At(i);
-                if (param.name == name)
-                {
-                    param.texture = texRef;
-                    UpdateResourceSet(name, (Texture)texRef.resource);
-                    break;
-                }
-            }
-
-            TextureParameters.Add(new TextureParameter { name = name, texture = texRef });
-            UpdateResourceSet(name, (Texture)texRef.resource);
-        }*/
 
         public void SetTexture(StringID name, Texture tex)
         {

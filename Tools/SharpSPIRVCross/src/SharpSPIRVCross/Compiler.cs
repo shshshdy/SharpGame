@@ -167,6 +167,11 @@ namespace SharpSPIRVCross
             return Marshal.PtrToStringAnsi(spvc_compiler_get_member_decoration_string(Handle, id, memberIndex, decoration));
         }
 
+        public string GetMemberName(uint id, uint memberIndex)
+        {
+            return Marshal.PtrToStringAnsi(spvc_compiler_get_member_name(Handle, id, memberIndex));
+        }
+
         public uint BuildDummySamplerForCombinedImages()
         {
             spvc_compiler_build_dummy_sampler_for_combined_images(Handle, out var id).CheckError();
@@ -308,6 +313,18 @@ namespace SharpSPIRVCross
             return true;
         }
 
+        public bool GetDeclaredStructMemberSize(SpirvType structType, int index, out int size)
+        {
+            if (spvc_compiler_get_declared_struct_member_size(Handle, structType.Handle, (uint)index, out IntPtr size_ptr) != Result.Success)
+            {
+                size = 0;
+                return false;
+            }
+
+            size = size_ptr.ToInt32();
+            return true;
+        }
+
         public bool GetStructMemberOffset(SpirvType type, int index, out int offset)
         {
             return spvc_compiler_type_struct_member_offset(Handle, type.Handle, index, out offset) == Result.Success;
@@ -357,6 +374,9 @@ namespace SharpSPIRVCross
         private static unsafe extern Result spvc_compiler_get_declared_struct_size(IntPtr compiler, IntPtr struct_type, out IntPtr size);
 
         [DllImport("cspirv_cross", CallingConvention = CallingConvention.Cdecl)]
+        private static unsafe extern Result spvc_compiler_get_declared_struct_member_size(IntPtr compiler, IntPtr struct_type, uint index, out IntPtr size);
+
+        [DllImport("cspirv_cross", CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern Result spvc_compiler_type_struct_member_offset(IntPtr compiler, IntPtr type, int index, out int offset);
 
         [DllImport("cspirv_cross", CallingConvention = CallingConvention.Cdecl)]
@@ -365,5 +385,8 @@ namespace SharpSPIRVCross
         [DllImport("cspirv_cross", CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern Result spvc_compiler_type_struct_member_matrix_stride(IntPtr compiler, IntPtr type, int index, out int stride);
 
+        
+        [DllImport("cspirv_cross", CallingConvention = CallingConvention.Cdecl)]
+        private static unsafe extern Result spvc_compiler_get_active_buffer_ranges(IntPtr compiler, IntPtr type, int index, out int stride);
     }
 }

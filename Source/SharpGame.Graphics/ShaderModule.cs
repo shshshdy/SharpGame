@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    public struct BlockMember
+    public struct BufferMember
     {
         public string name;
         public int size;
@@ -23,21 +23,21 @@ namespace SharpGame
         public object value;
     }
 
-    public struct UniformBlock
+    public class ShaderResourceInfo
     {
         public string name;
-        public uint size;
-        public List<BlockMember> members;
         public int set;
         public uint binding;
         public VkDescriptorType descriptorType;
         public uint descriptorCount;
+        public uint size;
+        public List<BufferMember> members;
     }
 
     public class ShaderReflection
     {
-        public List<BlockMember> pushConstants;
-        public List<UniformBlock> descriptorSets;
+        public List<BufferMember> pushConstants;
+        public List<ShaderResourceInfo> descriptorSets;
         public List<SpecializationConst> specializationConsts;
     }
 

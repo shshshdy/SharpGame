@@ -17,6 +17,27 @@ namespace SharpGame
         }
     }
 
+    public class InlineUniformBlock : IBindableResource, IDisposable
+    {
+        public ShaderResourceInfo resourceInfo;
+        public IntPtr data;
+        public uint size;
+
+        public string Name => resourceInfo.name;
+
+        public InlineUniformBlock(ShaderResourceInfo resourceInfo)
+        {
+            this.resourceInfo = resourceInfo;
+            this.data = Utilities.Alloc((int)size);
+            this.size = resourceInfo.size;
+        }
+
+        public void Dispose()
+        {
+            Utilities.Free(data);
+        }
+    }
+
     public class PipelineResourceSet : DisposeBase
     {
         [IgnoreDataMember]
@@ -25,6 +46,8 @@ namespace SharpGame
         public IntPtr pushConstBuffer;
         public int minPushConstRange = 1000;
         public int maxPushConstRange = 0;
+
+        List<InlineUniformBlock> inlineUniformBlocks = null;
 
         PipelineLayout pipelineLayout;
 
@@ -46,6 +69,24 @@ namespace SharpGame
             for(int i = 0; i < pipelineLayout.ResourceLayout.Length; i++)
             {                  
                 ResourceSet[i] = new DescriptorSet(pipelineLayout.ResourceLayout[i]);
+            }
+
+            for (int i = 0; i < pipelineLayout.ResourceLayout.Length; i++)
+            {
+                var res = pipelineLayout.ResourceLayout[i];
+                foreach (var binding in res.Bindings)
+                {
+                    if (binding.IsInlineUniformBlock && binding.resourceInfo != null)
+                    {
+                        if(inlineUniformBlocks == null)
+                        {
+                            inlineUniformBlocks = new List<InlineUniformBlock>();
+                        }
+
+                        inlineUniformBlocks.Add(new InlineUniformBlock(binding.resourceInfo));
+                    }
+
+                }
             }
 
             if (pipelineLayout.PushConstantNames != null)
@@ -81,9 +122,43 @@ namespace SharpGame
 
         }
 
+        public InlineUniformBlock GetInlineUniformBlock(string name)
+        {
+            if (inlineUniformBlocks != null)
+            {
+                foreach (var block in inlineUniformBlocks)
+                {
+                    if (block.Name == name)
+                    {
+                        return block;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public IntPtr GetInlineUniformMember(string name)
+        {
+            if (inlineUniformBlocks != null)
+            {
+                foreach (var block in inlineUniformBlocks)
+                {
+                    foreach (var member in block.resourceInfo.members)
+                    {
+                        if (member.name == name)
+                        {
+                            return block.data + member.offset;
+                        }
+                    }
+                }
+            }
+
+            return IntPtr.Zero;
+        }
+
         public IntPtr GetPushConst(string name)
         {
-
             if (pipelineLayout.PushConstantNames != null)
             {
                 for (int i = 0; i < pipelineLayout.PushConstantNames.Count; i++)
@@ -119,7 +194,7 @@ namespace SharpGame
                     if (binding.name == name)
                     {
                         rs.Bind(binding.binding, tex);
-                        rs.UpdateSets(/*binding.binding*/);
+                        rs.UpdateSets();
                         return;
                     }
                 }

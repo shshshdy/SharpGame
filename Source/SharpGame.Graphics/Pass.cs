@@ -233,58 +233,85 @@ namespace SharpGame
             passID = GetID(Name);
 
             List<DescriptorSetLayout> reslayouts = new List<DescriptorSetLayout>();
-            foreach(var sm in ShaderModels)
+            FastList<PushConstantRange> pushConstants = new FastList<PushConstantRange>();
+            List<string> pushConstantNames = new List<string>();
+            foreach (var sm in ShaderModels)
             {
                 if(sm != null)
                 {
                     sm.Build();
 
-                    if(sm.ShaderReflection != null && sm.ShaderReflection.descriptorSets != null)
+                    if (sm.ShaderReflection != null)
                     {
-                        var descriptors = sm.ShaderReflection.descriptorSets;
-                        DescriptorSetLayout currentLayout = null;
-                        foreach (var des in descriptors)
+                        if(sm.ShaderReflection.pushConstants != null)
                         {
-                            currentLayout = reslayouts.Find((i) => i.Set == des.set);
-                            if (currentLayout == null)
+                            foreach(var bm in sm.ShaderReflection.pushConstants)
                             {
-                                currentLayout = new DescriptorSetLayout(des.set);
-                                reslayouts.Add(currentLayout);
-                            }
-                            DescriptorSetLayoutBinding resBinding = currentLayout.Bindings.Find((i) => i.binding == des.binding);
-                            if (resBinding == null)
-                            {
-                                resBinding = new DescriptorSetLayoutBinding
+                                int idx = pushConstantNames.IndexOf(bm.name);
+                                if (idx == -1)
                                 {
-                                    name = des.name,
-                                    binding = des.binding,
-                                    descriptorType = des.descriptorType,
-                                    stageFlags = sm.Stage
-                                };
-
-                                currentLayout.Add(resBinding);
-                            }
-                            else
-                            {
-
-                                if(resBinding.name == des.name && resBinding.descriptorType == des.descriptorType)
-                                {
-                                    resBinding.stageFlags |= sm.Stage;
+                                    pushConstantNames.Add(bm.name);
+                                    pushConstants.Add(new PushConstantRange { offset = bm.offset, size = bm.size, stageFlags = sm.Stage });
                                 }
                                 else
-                                    Log.Warn("Duplicate binding : " + des.name);
+                                {
+                                    pushConstants[idx].stageFlags |= sm.Stage;
+                                    Debug.Assert(pushConstants[idx].offset == bm.offset && pushConstants[idx].size == bm.size);
+                                }
                             }
 
+                        }
 
+                        if (sm.ShaderReflection.descriptorSets != null)
+                        {
+                            var descriptors = sm.ShaderReflection.descriptorSets;
+                            DescriptorSetLayout currentLayout = null;
+                            foreach (var des in descriptors)
+                            {
+                                currentLayout = reslayouts.Find((i) => i.Set == des.set);
+                                if (currentLayout == null)
+                                {
+                                    currentLayout = new DescriptorSetLayout(des.set);
+                                    reslayouts.Add(currentLayout);
+                                }
+
+                                DescriptorSetLayoutBinding resBinding = currentLayout.Bindings.Find((i) => i.binding == des.binding);
+                                if (resBinding == null)
+                                {
+                                    resBinding = new DescriptorSetLayoutBinding
+                                    {
+                                        name = des.name,
+                                        binding = des.binding,
+                                        descriptorType = des.descriptorType,
+                                        stageFlags = sm.Stage,
+                                        resourceInfo = des
+                                    };
+
+                                    currentLayout.Add(resBinding);
+                                }
+                                else
+                                {
+                                    if (resBinding.name == des.name && resBinding.descriptorType == des.descriptorType)
+                                    {
+                                        resBinding.stageFlags |= sm.Stage;
+                                    }
+                                    else
+                                        Log.Warn("Duplicate binding : " + des.name);
+                                }
+
+
+                            }
                         }
 
                     }
 
                 }
             }
+
             reslayouts.Sort((x, y) => { return x.Set - y.Set; });
             PipelineLayout.ResourceLayout = reslayouts.ToArray();
-
+            PipelineLayout.PushConstantNames = pushConstantNames;
+            PipelineLayout.PushConstant = pushConstants.ToArray();
             PipelineLayout.Build();
 
         }

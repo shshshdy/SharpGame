@@ -188,9 +188,9 @@ namespace SharpGame
                         pass.BlendMode = (BlendMode)Enum.Parse(typeof(BlendMode), kvp.Value[0].value);
                         break;
 
-                    case "PushConstant":
-                        ReadPushConstant(pass, kvp.Value);
-                        break;
+                    //case "PushConstant":
+                    //    ReadPushConstant(pass, kvp.Value);
+                   //     break;
 
                     case "VertexShader":
                         pass.VertexShader = LoadShaderModelFromFile(VkShaderStageFlags.Vertex, kvp.Value[0].value, pass.Defines);
@@ -566,7 +566,7 @@ namespace SharpGame
         public static ShaderReflection ReflectionShaderModule(string source, IntPtr bytecode, uint len)
         {
             ShaderReflection refl = new ShaderReflection();
-            refl.descriptorSets = new List<UniformBlock>();
+            refl.descriptorSets = new List<ShaderResourceInfo>();
 
             using (var context = new SharpSPIRVCross.Context())
             {
@@ -579,6 +579,40 @@ namespace SharpGame
 
                 Action<SharpSPIRVCross.ResourceType> CollectShaderResources = (SharpSPIRVCross.ResourceType resourceType) =>
                 {
+                    if (resourceType == SharpSPIRVCross.ResourceType.PushConstant)
+                    {
+                        foreach (var rs in resources.GetResources(resourceType))
+                        {
+                            var set = compiler.GetDecoration(rs.Id, SpvDecoration.DescriptorSet);
+                            var binding = compiler.GetDecoration(rs.Id, SpvDecoration.Binding);
+                            var type = compiler.GetSpirvType(rs.TypeId);
+
+                            if (type.MemberCount > 0)
+                            {
+                                refl.pushConstants = new List<BufferMember>();
+                                compiler.GetDeclaredStructSize(type, out int size);
+
+                                //Console.WriteLine($"  struct, size:{size}");
+                                //u.size = (uint)size;
+                                for (int i = 0; i < type.MemberCount; i++)
+                                {
+                                    var memberName = compiler.GetMemberName(rs.BaseTypeId, (uint)i);
+
+                                    compiler.GetStructMemberOffset(type, i, out int offset);
+                                    compiler.GetDeclaredStructMemberSize(type, i, out int memberSize);
+                                    //Console.WriteLine($"  Member Name:{memberName}, Offset:{offset}, size：{memberSize}");
+                                    refl.pushConstants.Add(new BufferMember { name = memberName, offset = offset, size = memberSize });
+
+                                }
+                            }
+                        }
+
+
+                         return;
+                    }
+
+
+
                     foreach (var rs in resources.GetResources(resourceType))
                     {
                         //Console.WriteLine($"ID: {rs.Id}, BaseTypeID: {rs.BaseTypeId}, TypeID: {rs.TypeId}, Name: {rs.Name})");
@@ -587,11 +621,13 @@ namespace SharpGame
                         var type = compiler.GetSpirvType(rs.TypeId);
                         //Console.WriteLine($"  Set: {set}, Binding: {binding}");
 
-                        bool isDynamic = rs.Name.EndsWith("dynamic");
+                        bool isDynamic = rs.Name.EndsWith("dynamic", StringComparison.CurrentCultureIgnoreCase);
+                        bool isInline = rs.Name.EndsWith("inline", StringComparison.CurrentCultureIgnoreCase);
 
                         var descriptorType = resourceType switch
                         {
-                            SharpSPIRVCross.ResourceType.UniformBuffer => isDynamic ? VkDescriptorType.UniformBufferDynamic : VkDescriptorType.UniformBuffer,
+                            SharpSPIRVCross.ResourceType.UniformBuffer => isInline ? VkDescriptorType.InlineUniformBlockEXT 
+                                :(isDynamic ? VkDescriptorType.UniformBufferDynamic : VkDescriptorType.UniformBuffer),
                             SharpSPIRVCross.ResourceType.StorageBuffer => isDynamic ? VkDescriptorType.StorageBufferDynamic : VkDescriptorType.StorageBuffer,
                             SharpSPIRVCross.ResourceType.StageInput => throw new NotImplementedException(),
                             SharpSPIRVCross.ResourceType.StageOutput => throw new NotImplementedException(),
@@ -603,10 +639,10 @@ namespace SharpGame
                             SharpSPIRVCross.ResourceType.SeparateImage => VkDescriptorType.SampledImage,
                             SharpSPIRVCross.ResourceType.SeparateSamplers => VkDescriptorType.Sampler,
                             SharpSPIRVCross.ResourceType.AccelerationStructure => throw new NotImplementedException(),
-                            _=> throw new NotImplementedException(),
+                            _ => throw new NotImplementedException(),
                         };
 
-                        var u = new UniformBlock
+                        var u = new ShaderResourceInfo
                         {
                             name = rs.Name,
                             set = (int)set,
@@ -616,16 +652,24 @@ namespace SharpGame
 
                         if(type.MemberCount > 0)
                         {
+                            u.members = new List<BufferMember>();
                             compiler.GetDeclaredStructSize(type, out int size);
                             //Console.WriteLine($"  struct, size:{size}");
                             u.size = (uint)size;
                             for (int i = 0; i < type.MemberCount; i++)
                             {
+                                var memberName = compiler.GetMemberName(rs.BaseTypeId, (uint)i);
+
                                 compiler.GetStructMemberOffset(type, i, out int offset);
-                                //compiler.GetStructMemberArrayStride(type, i, out int sz);
-                                //compiler.GetStructMemberMatrixStride(type, i, out int stride);
-                                //Console.WriteLine($"  MemberOffset:{offset}");
-                                //Console.WriteLine($"  MemberOffset:{offset}, ArrayStride:{sz}, MatrixStride:{stride}");
+                                compiler.GetDeclaredStructMemberSize(type, i, out int memberSize);
+                                Console.WriteLine($"  Member Name:{memberName}, Offset:{offset}, size：{memberSize}");
+
+//                                 compiler.GetStructMemberArrayStride(type, i, out int sz);
+//                                 compiler.GetStructMemberMatrixStride(type, i, out int stride);
+//                                 Console.WriteLine($"  ArrayStride:{sz}, MatrixStride:{stride}");
+
+                                u.members.Add(new BufferMember { name = memberName, offset = offset, size = memberSize });
+                               
                             }
                         }
 
@@ -645,6 +689,7 @@ namespace SharpGame
 
                 CollectShaderResources(SharpSPIRVCross.ResourceType.StorageImage);
                 CollectShaderResources(SharpSPIRVCross.ResourceType.SampledImage);
+                CollectShaderResources(SharpSPIRVCross.ResourceType.PushConstant);
 
 
                 //compiler.Options.SetOption(CompilerOption.GLSL_Version, 50);

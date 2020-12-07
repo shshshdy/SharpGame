@@ -15,8 +15,9 @@ namespace SharpGame
         public uint descriptorCount = 1;
         public VkShaderStageFlags stageFlags;
         public VkSampler[] pImmutableSamplers;
-
+        public ShaderResourceInfo resourceInfo;
         public bool IsTexture => descriptorType == VkDescriptorType.CombinedImageSampler;
+        public bool IsInlineUniformBlock => descriptorType == VkDescriptorType.InlineUniformBlockEXT;
 
         public DescriptorSetLayoutBinding()
         {

@@ -10,13 +10,6 @@ Shader "Reflect"
 		CullMode = None
 		FrontFace = CounterClockwise
 
-		PushConstant lodBias
-		{
-			StageFlags = Vertex
-			Offset = 0
-			Size = 4
-		}
-		
 		@VertexShader
 		{
 			#version 450

@@ -6,8 +6,6 @@ using System.Text;
 
 namespace SharpGame
 {
-    using static Vulkan;
-
     public struct PushConstantRange
     {
         public VkShaderStageFlags stageFlags;
@@ -28,7 +26,8 @@ namespace SharpGame
         public PushConstantRange[] PushConstant { get => pushConstant; set { SetPushConstants(value); } }
         private PushConstantRange[] pushConstant;
 
-        private Vector<PushConstantRange> combindePushConstant = new Vector<PushConstantRange>();
+        Vector<PushConstantRange> combindePushConstant;
+
         public List<string> PushConstantNames { get; set; }
 
         public PipelineLayout()
@@ -61,7 +60,9 @@ namespace SharpGame
         void SetPushConstants(PushConstantRange[] pushConstant)
         {
             this.pushConstant = pushConstant;
-            foreach(var c in pushConstant)
+            if(combindePushConstant == null)
+                combindePushConstant = new Vector<PushConstantRange>();
+            foreach (var c in pushConstant)
             {
                 bool found = false;
                 for(int i = 0; i < combindePushConstant.Count; i++)
@@ -94,6 +95,7 @@ namespace SharpGame
             {
                 sType = VkStructureType.PipelineLayoutCreateInfo
             };
+
             if (!ResourceLayout.IsNullOrEmpty())
             {
                 foreach(var resLayout in ResourceLayout)

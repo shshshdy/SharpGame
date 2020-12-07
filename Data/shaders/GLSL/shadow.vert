@@ -13,7 +13,7 @@ layout(binding = 0) uniform UBO{
 } ubo;
 
 layout(push_constant) uniform PushConsts{
-    uint cascadeIndex;
+    uint g_cascadeIndex;
 } pushConsts;
 
 layout(location = 0) out vec2 outUV;
@@ -28,5 +28,5 @@ void main()
     outUV = inUV;
 #endif
     vec4 pos = Model * vec4(inPos, 1);
-    gl_Position = ubo.cascadeViewProjMat[pushConsts.cascadeIndex] * pos;
+    gl_Position = ubo.cascadeViewProjMat[pushConsts.g_cascadeIndex] * pos;
 }

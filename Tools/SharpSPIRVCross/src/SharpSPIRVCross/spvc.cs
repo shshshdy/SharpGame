@@ -169,6 +169,9 @@ namespace SharpSPIRVCross
         public static extern IntPtr spvc_compiler_get_member_decoration_string(spvc_compiler compiler, uint id, uint memberIndex, SpvDecoration decoration);
 
         [DllImport("cspirv_cross", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr spvc_compiler_get_member_name(spvc_compiler compiler, uint id, uint memberIndex);
+
+        [DllImport("cspirv_cross", CallingConvention = CallingConvention.Cdecl)]
         public static extern Result spvc_compiler_build_dummy_sampler_for_combined_images(spvc_compiler compiler, out spvc_variable_id id);
 
         [DllImport("cspirv_cross", CallingConvention = CallingConvention.Cdecl)]
