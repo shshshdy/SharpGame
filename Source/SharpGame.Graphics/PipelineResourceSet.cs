@@ -69,12 +69,9 @@ namespace SharpGame
             for(int i = 0; i < pipelineLayout.ResourceLayout.Length; i++)
             {                  
                 ResourceSet[i] = new DescriptorSet(pipelineLayout.ResourceLayout[i]);
-            }
-
-            for (int i = 0; i < pipelineLayout.ResourceLayout.Length; i++)
-            {
-                var res = pipelineLayout.ResourceLayout[i];
-                foreach (var binding in res.Bindings)
+            
+                var resLayout = pipelineLayout.ResourceLayout[i];
+                foreach (var binding in resLayout.Bindings)
                 {
                     if (binding.IsInlineUniformBlock && binding.resourceInfo != null)
                     {
@@ -83,7 +80,9 @@ namespace SharpGame
                             inlineUniformBlocks = new List<InlineUniformBlock>();
                         }
 
-                        inlineUniformBlocks.Add(new InlineUniformBlock(binding.resourceInfo));
+                        var inlineUniformBlock = new InlineUniformBlock(binding.resourceInfo);
+                        ResourceSet[i].Bind(binding.binding, inlineUniformBlock);
+                        inlineUniformBlocks.Add(inlineUniformBlock);
                     }
 
                 }

@@ -123,8 +123,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref imageInfo, 1);
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref imageInfo, 1);
                 needUpdated[img][dstBinding] = true;
             }
             return this;
@@ -135,8 +134,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref imageInfo[0], (uint)imageInfo.Length); 
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref imageInfo[0], (uint)imageInfo.Length); 
                 needUpdated[img][dstBinding] = true;
             }
 
@@ -148,8 +146,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref buffer[img].descriptor, 1);
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref buffer[img].descriptor, 1);
                 needUpdated[img][dstBinding] = true;
             }
 
@@ -161,8 +158,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref rt.attachmentViews[img].descriptor, 1);
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref rt.attachmentViews[img].descriptor, 1);
                 needUpdated[img][dstBinding] = true;
             }
 
@@ -174,8 +170,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref bufferInfo, 1);
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref bufferInfo, 1);
                 needUpdated[img][dstBinding] = true;
             }
 
@@ -187,8 +182,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref bufferInfo[0], (uint)bufferInfo.Length);
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref bufferInfo[0], (uint)bufferInfo.Length);
                 needUpdated[img][dstBinding] = true;
             }
 
@@ -201,8 +195,7 @@ namespace SharpGame
 
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref bufferInfo, ref bufferView.HandleRef);
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref bufferInfo, ref bufferView.HandleRef);
                 needUpdated[img][dstBinding] = true;
             }
 
@@ -215,13 +208,24 @@ namespace SharpGame
 
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img],
-                               descriptorType, ref buffer.Buffer.descriptor, ref buffer.Buffer.view.HandleRef);
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref buffer.Buffer.descriptor, ref buffer.Buffer.view.HandleRef);
                 needUpdated[img][dstBinding] = true;
             }
 
             return this;
         }
+
+        public DescriptorSet Bind(uint dstBinding, InlineUniformBlock inlineUniformBlock)
+        {
+            var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
+            for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
+            {
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, inlineUniformBlock.data, inlineUniformBlock.size);
+                needUpdated[img][dstBinding] = true;
+            }
+
+            return this;
+        } 
 
         public DescriptorSet Bind(uint dstBinding, IBindableResource bindable)
         {
@@ -290,11 +294,23 @@ namespace SharpGame
                         }
                     }
                     break;
+                case VkDescriptorType.InlineUniformBlockEXT:
+
+                    if (bindable is InlineUniformBlock iub)
+                    {
+                        Bind(dstBinding, iub);
+                    }
+                    else
+                    {
+                        Debug.Assert(false);
+                    }
+                    break;
                 default:
                     Debug.Assert(false);
                     break;
                    
             }
+
             return this;
         }
 

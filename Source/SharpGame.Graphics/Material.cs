@@ -176,7 +176,14 @@ namespace SharpGame
 
                 foreach (var prs in pipelineResourceSet)
                 {
-                    var addr = prs.GetPushConst(shaderParam.name);
+                    var addr = prs.GetInlineUniformMember(shaderParam.name);
+                    if (addr != IntPtr.Zero)
+                    {
+                        shaderParam.Bind(addr);
+                        break;
+                    }
+
+                    addr = prs.GetPushConst(shaderParam.name);
                     if (addr != IntPtr.Zero)
                     {
                         shaderParam.Bind(addr);
