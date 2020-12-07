@@ -50,6 +50,7 @@
     <None Include="$(MSBuildThisFileDirectory)Natural\terrain.tesc" />
     <None Include="$(MSBuildThisFileDirectory)Natural\terrain.tese" />
     <None Include="$(MSBuildThisFileDirectory)Natural\terrain.vert" />
+    <None Include="$(MSBuildThisFileDirectory)Pbr.shader" />
     <None Include="$(MSBuildThisFileDirectory)post\bloom.frag" />
     <None Include="$(MSBuildThisFileDirectory)Terrain.shader" />
     <None Include="$(MSBuildThisFileDirectory)Vegetation.shader" />

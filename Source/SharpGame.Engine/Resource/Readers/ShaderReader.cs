@@ -662,7 +662,7 @@ namespace SharpGame
 
                                 compiler.GetStructMemberOffset(type, i, out int offset);
                                 compiler.GetDeclaredStructMemberSize(type, i, out int memberSize);
-                                Console.WriteLine($"  Member Name:{memberName}, Offset:{offset}, size：{memberSize}");
+                                //Console.WriteLine($"  Member Name:{memberName}, Offset:{offset}, size：{memberSize}");
 
 //                                 compiler.GetStructMemberArrayStride(type, i, out int sz);
 //                                 compiler.GetStructMemberMatrixStride(type, i, out int stride);

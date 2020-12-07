@@ -1,12 +1,13 @@
 #version 450
 
 #include "Common.glsl"
+#include "Lighting.glsl"
 
 layout (location = 0) in vec3 inWorldPos;
 layout (location = 1) in vec3 inNormal;
 
 // Inline uniform block
-layout (set = 1, binding = 0) uniform UniformInline {
+layout (set = 2, binding = 0) uniform UniformInline {
 	float roughness;
 	float metallic;
 	float r;
@@ -107,4 +108,6 @@ void main()
 	color = pow(color, vec3(0.4545));
 
 	outColor = vec4(color, 1.0);
+	
+
 }

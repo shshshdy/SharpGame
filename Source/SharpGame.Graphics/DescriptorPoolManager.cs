@@ -74,8 +74,8 @@ namespace SharpGame
         private unsafe PoolInfo CreateNewPool()
         {
             uint totalSets = 1000;
-            uint descriptorCount = 100;
-            uint poolSizeCount = 11;
+            uint descriptorCount = 1000;
+            uint poolSizeCount = MAX_DESCRIPTOR_COUNT;
 
             VkDescriptorPoolSize* sizes = stackalloc VkDescriptorPoolSize[(int)poolSizeCount];
             for(int i = 0; i < MAX_DESCRIPTOR_COUNT; i++)
@@ -92,6 +92,11 @@ namespace SharpGame
             poolCI.poolSizeCount = poolSizeCount;
             poolCI.maxSets = totalSets;
             poolCI.pPoolSizes = sizes;
+
+            VkDescriptorPoolInlineUniformBlockCreateInfoEXT descriptorPoolInlineUniformBlockCreateInfo = new VkDescriptorPoolInlineUniformBlockCreateInfoEXT();
+            descriptorPoolInlineUniformBlockCreateInfo.sType = VkStructureType.DescriptorPoolInlineUniformBlockCreateInfoEXT;
+            descriptorPoolInlineUniformBlockCreateInfo.maxInlineUniformBlockBindings = totalSets;
+            poolCI.pNext = &descriptorPoolInlineUniformBlockCreateInfo;
 
             var descriptorPool = Device.CreateDescriptorPool(ref poolCI);
             return new PoolInfo(descriptorPool, totalSets, descriptorCount);

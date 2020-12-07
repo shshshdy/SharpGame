@@ -4,8 +4,8 @@
 
     Pass
     {
-        //CullMode = None
-        //FrontFace = CounterClockwise
+        CullMode = None
+        FrontFace = CounterClockwise
 
         @VertexShader
         {

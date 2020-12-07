@@ -214,12 +214,13 @@ namespace SharpGame
             return this;
         }
 
-        public DescriptorSet Bind(uint dstBinding, InlineUniformBlock inlineUniformBlock)
+        public unsafe DescriptorSet Bind(uint dstBinding, InlineUniformBlock inlineUniformBlock)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, inlineUniformBlock.data, inlineUniformBlock.size);
+                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType,
+                    inlineUniformBlock.inlineUniformBlockEXT);
                 needUpdated[img][dstBinding] = true;
             }
 

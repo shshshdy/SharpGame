@@ -287,6 +287,11 @@ namespace SharpGame
                                         resourceInfo = des
                                     };
 
+                                    if(resBinding.IsInlineUniformBlock)
+                                    {
+                                        resBinding.descriptorCount = des.size;
+                                    }
+
                                     currentLayout.Add(resBinding);
                                 }
                                 else

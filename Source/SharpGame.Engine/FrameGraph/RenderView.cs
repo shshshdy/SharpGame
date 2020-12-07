@@ -107,8 +107,8 @@ namespace SharpGame
 
             set0Layout = new DescriptorSetLayout
             {
-                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex),
-                new DescriptorSetLayoutBinding(1, VkDescriptorType.UniformBufferDynamic, VkShaderStageFlags.Vertex),
+                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment),
+                new DescriptorSetLayoutBinding(1, VkDescriptorType.UniformBufferDynamic, VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment),
             };
 
             descriptorSetGlobal = new DescriptorSet(set0Layout, ubGlobal, FrameGraph.TransformBuffer);

@@ -277,11 +277,16 @@ namespace SharpGame
             }
         }
 
+        public void UpdateSets(int pass)
+        {
+            pipelineResourceSet[pass].UpdateAllSets();
+        }
+
         public void Bind(int pass, CommandBuffer cmd)
         {
             pipelineResourceSet[pass].PushConstants(cmd);
             pipelineResourceSet[pass].BindGraphicsResourceSet(cmd);
-        }
+         }
 
         public void BindResourceSets(int pass, CommandBuffer cmd)
         {

@@ -17,7 +17,7 @@ namespace SharpGame
         }
     }
 
-    public class InlineUniformBlock : IBindableResource, IDisposable
+    public unsafe class InlineUniformBlock : IBindableResource, IDisposable
     {
         public ShaderResourceInfo resourceInfo;
         public IntPtr data;
@@ -25,11 +25,19 @@ namespace SharpGame
 
         public string Name => resourceInfo.name;
 
-        public InlineUniformBlock(ShaderResourceInfo resourceInfo)
+        public VkWriteDescriptorSetInlineUniformBlockEXT* inlineUniformBlockEXT;
+
+        public unsafe InlineUniformBlock(ShaderResourceInfo resourceInfo)
         {
             this.resourceInfo = resourceInfo;
-            this.data = Utilities.Alloc((int)size);
             this.size = resourceInfo.size;
+            this.data = Utilities.Alloc((int)this.size);
+
+            inlineUniformBlockEXT = (VkWriteDescriptorSetInlineUniformBlockEXT*)Utilities.Alloc<VkWriteDescriptorSetInlineUniformBlockEXT>();
+            inlineUniformBlockEXT->sType = VkStructureType.WriteDescriptorSetInlineUniformBlockEXT;
+            inlineUniformBlockEXT->pNext = null;
+            inlineUniformBlockEXT->pData = (void*)this.data;
+            inlineUniformBlockEXT->dataSize = this.size;            
         }
 
         public void Dispose()
@@ -82,6 +90,7 @@ namespace SharpGame
 
                         var inlineUniformBlock = new InlineUniformBlock(binding.resourceInfo);
                         ResourceSet[i].Bind(binding.binding, inlineUniformBlock);
+                        ResourceSet[i].UpdateSets();
                         inlineUniformBlocks.Add(inlineUniformBlock);
                     }
 
@@ -197,6 +206,14 @@ namespace SharpGame
                         return;
                     }
                 }
+            }
+        }
+
+        public void UpdateAllSets()
+        {
+            foreach (var rs in ResourceSet)
+            {                      
+                rs.UpdateSets();                    
             }
         }
 

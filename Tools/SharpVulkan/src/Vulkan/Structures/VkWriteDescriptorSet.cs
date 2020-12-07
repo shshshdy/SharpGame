@@ -58,20 +58,14 @@ namespace SharpGame
 
         public unsafe VkWriteDescriptorSet(uint binding,
             VkDescriptorSet dstSet,
-            VkDescriptorType type, System.IntPtr data, uint size)
+            VkDescriptorType type, VkWriteDescriptorSetInlineUniformBlockEXT* inlineUniformBlockEXT)
         {
-            VkWriteDescriptorSetInlineUniformBlockEXT inlineUniformBlockEXT = new VkWriteDescriptorSetInlineUniformBlockEXT
-            {
-                sType = VkStructureType.WriteDescriptorSetInlineUniformBlockEXT,
-                pData = (void*)data,
-                dataSize = size
-            };
             this.sType = VkStructureType.WriteDescriptorSet;
-            this.pNext = &inlineUniformBlockEXT;
+            this.pNext = inlineUniformBlockEXT;
             this.dstSet = dstSet;
             this.descriptorType = type;
             this.dstBinding = binding;
-            this.descriptorCount = 1;
+            this.descriptorCount = inlineUniformBlockEXT->dataSize;
             this.pBufferInfo = null;
             this.pTexelBufferView = null;
             this.pImageInfo = null;
