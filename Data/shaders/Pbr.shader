@@ -4,9 +4,6 @@
 
     Pass
     {
-        CullMode = None
-        FrontFace = CounterClockwise
-
         @VertexShader
         {
             #include "pbr.vert"
