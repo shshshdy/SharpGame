@@ -6,12 +6,20 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-
-
 namespace SharpGame
 {
+    public ref struct DrawingContext
+    {
+        public RenderContext renderContext;
+        public CommandBuffer commandBuffer;
+        public RenderPass renderPass;
+        public uint subpass;
+    }
+
+
     public class GraphicsSubpass : Subpass
     {
+        public RenderPass RenderPass => FrameGraphPass.RenderPass;
         public Action<GraphicsSubpass, RenderContext, CommandBuffer> OnDraw { get; set; }
 
         public GraphicsSubpass(string name = "")

@@ -95,30 +95,13 @@ namespace SharpGame
         {
             var renderPass = new FrameGraphPass
             {
-                Subpasses = new[]
-                {
-                    new GraphicsSubpass
-                    {
-                        OnDraw = onDraw
-                    }
-                }
-            };
+                new RenderTextureInfo(Graphics.Swapchain),
 
-            AddRenderPass(renderPass);
-            return renderPass;
-        }
-
-        public FrameGraphPass AddPass<T>(Action<GraphicsSubpass, RenderContext, CommandBuffer> onDraw) where T : GraphicsSubpass, new()
-        {
-            var renderPass = new FrameGraphPass
-            {
-                Subpasses = new[]
+                new GraphicsSubpass
                 {
-                    new T
-                    {
-                        OnDraw = onDraw
-                    }
+                    OnDraw = onDraw
                 }
+
             };
 
             AddRenderPass(renderPass);

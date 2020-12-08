@@ -159,7 +159,6 @@ namespace SharpGame
                 var subpassDescriptions = new SubpassDescription[subpasses.Count];
                 var dependencies = new VkSubpassDependency[subpasses.Count + 1];
                 
-
                 for(int i = 0; i < renderTextureInfos.Count; i++)
                 {
                     attachmentDescriptions[i] = renderTextureInfos[i].attachmentDescription;       

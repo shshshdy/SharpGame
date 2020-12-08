@@ -90,6 +90,13 @@ namespace SharpGame
             
             onscreenPass = new FrameGraphPass
             {
+                //new RenderTextureInfo(Graphics.Swapchain),
+
+//                 new GraphicsSubpass
+//                 {
+//                     OnDraw = Composite,
+//                 },
+
                 new SceneSubpass("cluster_forward")
                 {
                     OnDraw = Composite,
@@ -206,7 +213,7 @@ namespace SharpGame
             Span<uint> offset = new uint[] {0};
             cmd.DrawFullScreenQuad(pass, 0, View.Set0, offset, sets);
 
-            scenePass.DrawScene(cmd, BlendFlags.AlphaBlend);
+            //scenePass.DrawScene(cmd, BlendFlags.AlphaBlend);
 
         }
 
