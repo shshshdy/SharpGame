@@ -95,7 +95,7 @@ void main()
 	float roughness = material.roughness;
 
 	// Specular contribution
-	vec3 lightPos = vec3(0.0f, 0.0f, 10.0f);
+	vec3 lightPos = vec3(0.0f, 0.0f, -10.0f);
 	vec3 Lo = vec3(0.0);
 	vec3 L = normalize(lightPos.xyz - inWorldPos);
 	Lo += BRDF(L, V, N, material.metallic, roughness);

@@ -95,13 +95,6 @@ Shader "LitAlphaTest"
         CullMode = Front
         FrontFace = CounterClockwise
 
-        PushConstant g_cascadeIndex
-        {
-            StageFlags = Vertex
-            Offset = 0
-            Size = 4
-        }
-
         @VertexShader
         {
 #define ALPHA_TEST

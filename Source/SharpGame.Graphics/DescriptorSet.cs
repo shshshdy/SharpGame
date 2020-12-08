@@ -314,6 +314,14 @@ namespace SharpGame
             return this;
         }
 
+        public void MarkDirty(uint binding)
+        {
+            for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
+            {
+                needUpdated[img][binding] = true;
+            }
+        }
+
         public void UpdateSets()
         {
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
@@ -347,6 +355,7 @@ namespace SharpGame
                     if(count > 0)
                     {
                         Device.UpdateDescriptorSets(count, ref writeDescriptorSets[img][index], 0, IntPtr.Zero);
+                        Updated = true;
                     }
                     count = 0;
                     index = i + 1;
@@ -356,9 +365,9 @@ namespace SharpGame
             if (count > 0)
             {
                 Device.UpdateDescriptorSets(count, ref writeDescriptorSets[img][index], 0, IntPtr.Zero);
+                Updated = true;
             }
 
-            Updated = true;
         }
 
     }

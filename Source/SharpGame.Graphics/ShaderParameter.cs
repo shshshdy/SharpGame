@@ -71,6 +71,7 @@ namespace SharpGame
         public UniformType uniformType;
         public UniformData data;
         internal IntPtr addr;
+        public InlineUniformBlock inlineUniformBlock;
 
         [IgnoreDataMember]
         public bool IsNull => string.IsNullOrEmpty(name);

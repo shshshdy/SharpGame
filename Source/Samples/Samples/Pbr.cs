@@ -66,7 +66,6 @@ namespace SharpGame.Samples
             material.SetShaderParameter("ambient", 0.0025f);
             material.SetShaderParameter("roughness", glm.clamp(glm.random(), 0.005f, 1.0f));
             material.SetShaderParameter("metallic", glm.clamp(glm.random(), 0.005f, 1.0f));
-            material.UpdateSets(0);
         }
 
 

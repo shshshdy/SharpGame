@@ -74,7 +74,7 @@ namespace SharpGame
         private unsafe PoolInfo CreateNewPool()
         {
             uint totalSets = 1000;
-            uint descriptorCount = 1000;
+            uint descriptorCount = 256;
             uint poolSizeCount = MAX_DESCRIPTOR_COUNT;
 
             VkDescriptorPoolSize* sizes = stackalloc VkDescriptorPoolSize[(int)poolSizeCount];
@@ -84,19 +84,21 @@ namespace SharpGame
                 sizes[i].descriptorCount = descriptorCount;
             }
 
+            VkDescriptorPoolInlineUniformBlockCreateInfoEXT descriptorPoolInlineUniformBlockCreateInfo = new VkDescriptorPoolInlineUniformBlockCreateInfoEXT
+            {
+                sType = VkStructureType.DescriptorPoolInlineUniformBlockCreateInfoEXT,
+                maxInlineUniformBlockBindings = totalSets
+            };
+
             var poolCI = new VkDescriptorPoolCreateInfo
             {
-                sType = VkStructureType.DescriptorPoolCreateInfo
+                sType = VkStructureType.DescriptorPoolCreateInfo,
+                flags = VkDescriptorPoolCreateFlags.FreeDescriptorSet,
+                poolSizeCount = poolSizeCount,
+                maxSets = totalSets,
+                pPoolSizes = sizes,
+                pNext = &descriptorPoolInlineUniformBlockCreateInfo
             };
-            poolCI.flags = VkDescriptorPoolCreateFlags.FreeDescriptorSet;
-            poolCI.poolSizeCount = poolSizeCount;
-            poolCI.maxSets = totalSets;
-            poolCI.pPoolSizes = sizes;
-
-            VkDescriptorPoolInlineUniformBlockCreateInfoEXT descriptorPoolInlineUniformBlockCreateInfo = new VkDescriptorPoolInlineUniformBlockCreateInfoEXT();
-            descriptorPoolInlineUniformBlockCreateInfo.sType = VkStructureType.DescriptorPoolInlineUniformBlockCreateInfoEXT;
-            descriptorPoolInlineUniformBlockCreateInfo.maxInlineUniformBlockBindings = totalSets;
-            poolCI.pNext = &descriptorPoolInlineUniformBlockCreateInfo;
 
             var descriptorPool = Device.CreateDescriptorPool(ref poolCI);
             return new PoolInfo(descriptorPool, totalSets, descriptorCount);

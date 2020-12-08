@@ -101,7 +101,7 @@ namespace SharpGame
             for (int i = 0; i < shader.Pass.Count; i++)
             {
                 var pass = shader.Pass[i];
-                pipelineResourceSet[i] = new PipelineResourceSet();
+                pipelineResourceSet[i] = new PipelineResourceSet(0);
                 pipelineResourceSet[i].Init(pass.PipelineLayout);
             }
 
@@ -164,6 +164,7 @@ namespace SharpGame
             if (!param.IsNull)
             {
                 param.SetValue(ref val);
+                param.inlineUniformBlock?.MarkDirty();
             }
             else
             {
@@ -176,10 +177,12 @@ namespace SharpGame
 
                 foreach (var prs in pipelineResourceSet)
                 {
-                    var addr = prs.GetInlineUniformMember(shaderParam.name);
+                    var addr = prs.GetInlineUniformMember(shaderParam.name, out var inlineUniformBlock);
                     if (addr != IntPtr.Zero)
                     {
                         shaderParam.Bind(addr);
+                        shaderParam.inlineUniformBlock = inlineUniformBlock;
+                        inlineUniformBlock.MarkDirty();
                         break;
                     }
 

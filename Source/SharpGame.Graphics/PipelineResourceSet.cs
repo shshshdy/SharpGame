@@ -26,6 +26,7 @@ namespace SharpGame
         public string Name => resourceInfo.name;
 
         public VkWriteDescriptorSetInlineUniformBlockEXT* inlineUniformBlockEXT;
+        public DescriptorSet descriptorSet;
 
         public unsafe InlineUniformBlock(ShaderResourceInfo resourceInfo)
         {
@@ -40,9 +41,15 @@ namespace SharpGame
             inlineUniformBlockEXT->dataSize = this.size;            
         }
 
+        public void MarkDirty()
+        {
+            descriptorSet.MarkDirty(resourceInfo.binding);
+        }
+
         public void Dispose()
         {
             Utilities.Free(data);
+            Utilities.Free((IntPtr)inlineUniformBlockEXT);
         }
     }
 
@@ -58,9 +65,10 @@ namespace SharpGame
         List<InlineUniformBlock> inlineUniformBlocks = null;
 
         PipelineLayout pipelineLayout;
-
-        public PipelineResourceSet()
+        public int FirstSet { get; } = 0;
+        public PipelineResourceSet(int firstSet)
         {
+            FirstSet = firstSet;
             pushConstBuffer = Utilities.Alloc(Device.MaxPushConstantsSize);
         }
 
@@ -73,12 +81,18 @@ namespace SharpGame
         {
             this.pipelineLayout = pipelineLayout;
 
-            ResourceSet = new DescriptorSet[pipelineLayout.ResourceLayout.Length];
-            for(int i = 0; i < pipelineLayout.ResourceLayout.Length; i++)
+            int count = pipelineLayout.ResourceLayout.Length - FirstSet;
+            ResourceSet = new DescriptorSet[count];
+            if (count <= 0)
+            {
+                return;
+            }
+
+            for(int i = 0; i < count; i++)
             {                  
-                ResourceSet[i] = new DescriptorSet(pipelineLayout.ResourceLayout[i]);
+                ResourceSet[i] = new DescriptorSet(pipelineLayout.ResourceLayout[i + FirstSet]);
             
-                var resLayout = pipelineLayout.ResourceLayout[i];
+                var resLayout = pipelineLayout.ResourceLayout[i + FirstSet];
                 foreach (var binding in resLayout.Bindings)
                 {
                     if (binding.IsInlineUniformBlock && binding.resourceInfo != null)
@@ -89,8 +103,8 @@ namespace SharpGame
                         }
 
                         var inlineUniformBlock = new InlineUniformBlock(binding.resourceInfo);
+                        inlineUniformBlock.descriptorSet = ResourceSet[i];
                         ResourceSet[i].Bind(binding.binding, inlineUniformBlock);
-                        ResourceSet[i].UpdateSets();
                         inlineUniformBlocks.Add(inlineUniformBlock);
                     }
 
@@ -146,7 +160,7 @@ namespace SharpGame
             return null;
         }
 
-        public IntPtr GetInlineUniformMember(string name)
+        public IntPtr GetInlineUniformMember(string name, out InlineUniformBlock inlineUniformBlock)
         {
             if (inlineUniformBlocks != null)
             {
@@ -156,12 +170,13 @@ namespace SharpGame
                     {
                         if (member.name == name)
                         {
+                            inlineUniformBlock = block;
                             return block.data + member.offset;
                         }
                     }
                 }
             }
-
+            inlineUniformBlock = null;
             return IntPtr.Zero;
         }
 
@@ -221,6 +236,7 @@ namespace SharpGame
         {
             foreach (var rs in ResourceSet)
             {
+                rs.UpdateSets();
                 if (rs.Updated)
                 {
                     cmd.BindGraphicsResourceSet(pipelineLayout, rs.Set, rs);
