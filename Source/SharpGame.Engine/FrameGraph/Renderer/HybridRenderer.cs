@@ -90,16 +90,17 @@ namespace SharpGame
             
             onscreenPass = new FrameGraphPass
             {
-                //new RenderTextureInfo(Graphics.Swapchain),
+                new RenderTextureInfo(Graphics.Swapchain),
+                new RenderTextureInfo(this.depthTexture),
 
-//                 new GraphicsSubpass
-//                 {
-//                     OnDraw = Composite,
-//                 },
+                new GraphicsSubpass
+                {
+                    OnDraw = Composite,
+                },
 
                 new SceneSubpass("cluster_forward")
                 {
-                    OnDraw = Composite,
+                    //OnDraw = Composite,
 
                     Set1 = resourceSet0,
                     Set2 = resourceSet1,
@@ -108,7 +109,7 @@ namespace SharpGame
 
             };
 
-            onscreenPass.renderPassCreator = () => Graphics.CreateRenderPass(false, false);          
+            //onscreenPass.renderPassCreator = () => Graphics.CreateRenderPass(false, false);          
 
             this.Add(onscreenPass);
         }
@@ -182,7 +183,7 @@ namespace SharpGame
             uint height = (uint)Graphics.Height;
             VkFormat depthFormat = Device.GetSupportedDepthFormat();
 
-            var rt = new RenderTarget();
+            var rt = new RenderTarget(width, height);
 
             albedoRT = rt.Add(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
             normalRT = rt.Add(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);            
@@ -200,7 +201,6 @@ namespace SharpGame
 
         void Composite(GraphicsSubpass graphicsPass, RenderContext rc, CommandBuffer cmd)
         {
-            var scenePass = graphicsPass as SceneSubpass;
             var pass = clusterDeferred.Main;
 
             Span<DescriptorSet> sets = new []
@@ -213,6 +213,7 @@ namespace SharpGame
             Span<uint> offset = new uint[] {0};
             cmd.DrawFullScreenQuad(pass, 0, View.Set0, offset, sets);
 
+            //var scenePass = graphicsPass as SceneSubpass;
             //scenePass.DrawScene(cmd, BlendFlags.AlphaBlend);
 
         }

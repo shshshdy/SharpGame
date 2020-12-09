@@ -225,7 +225,7 @@ namespace SharpGame
             {
                 if (renderTextureInfos.Count > 0)
                 {
-                    renderTarget = new RenderTarget();
+                    renderTarget = new RenderTarget(Graphics.Width, Graphics.Height);
 
                     Array.Resize(ref clearValues, renderTextureInfos.Count);
                     for (int i = 0; i < renderTextureInfos.Count; i++)

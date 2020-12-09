@@ -5,16 +5,26 @@ using System.Text;
 
 namespace SharpGame
 {
+    public enum SizeHint
+    {
+        None,
+        Full,
+        Half,
+        Quater
+    }
+
     public class RenderTextureInfo
     {
         public uint width;
         public uint height;
         public uint layers;
+        public SizeHint sizeHint = SizeHint.None;
 
         public VkAttachmentDescription attachmentDescription;
 
         public VkImageUsageFlags usage;
         public Swapchain swapchain;
+        public RenderTexture depthTexture;
         public VkClearValue clearValue = new VkClearColorValue(0, 0, 0, 1);
 
         public ref VkFormat format => ref attachmentDescription.format;
@@ -31,6 +41,32 @@ namespace SharpGame
             this.swapchain = swapchain;
             attachmentDescription = new VkAttachmentDescription(swapchain.ColorFormat, VkSampleCountFlags.Count1);
             clearValue = new VkClearColorValue(0, 0, 0, 1);
+        }
+
+        public RenderTextureInfo(RenderTexture depthTexture)
+        {
+            this.depthTexture = depthTexture;
+
+            Debug.Assert(Device.IsDepthFormat(depthTexture.format));
+
+            attachmentDescription = new VkAttachmentDescription(depthTexture.format, VkSampleCountFlags.Count1);
+            clearValue = new VkClearDepthStencilValue(1, 0);
+        }
+
+        public RenderTextureInfo(SizeHint sizeHint, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1)
+        {
+            this.sizeHint = sizeHint;
+            this.usage = usage;
+            attachmentDescription = new VkAttachmentDescription(format, samples);
+
+            if (Device.IsDepthFormat(format))
+            {
+                clearValue = new VkClearDepthStencilValue(1, 0);
+            }
+            else
+            {
+                clearValue = new VkClearColorValue(0, 0, 0, 1);
+            }
         }
 
         public RenderTextureInfo(uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage,
@@ -55,6 +91,7 @@ namespace SharpGame
 
     public class RenderTexture : Texture
     {
+        public SizeHint sizeHint = SizeHint.None;
         public VkSampleCountFlags samples;
         private Swapchain swapchain;
         public ImageView[] attachmentViews;
@@ -102,7 +139,7 @@ namespace SharpGame
                 this.format = info.format;
                 this.imageUsageFlags = info.usage;
                 this.samples = info.samples;
-
+                this.sizeHint = info.sizeHint;
                 Create();
             }
         }
@@ -135,17 +172,17 @@ namespace SharpGame
 
     public class RenderTarget
     {
-        public VkExtent3D extent;
+        public VkExtent2D extent;
         public List<RenderTexture> attachments = new List<RenderTexture>();
-        public RenderTarget()
+        public RenderTarget(uint width, uint height)
         {
+            extent = new VkExtent2D(width, height);
         }
 
         public RenderTexture this[int index] => attachments[index];
         public uint AttachmentCount => (uint)attachments.Count;
 
-        public RenderTexture Add(uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage,
-            VkSampleCountFlags samples = VkSampleCountFlags.Count1)
+        public RenderTexture Add(uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1)
         {
             var rt = new RenderTexture(width, height, layers, format, usage, samples);
             Add(rt);
@@ -154,22 +191,15 @@ namespace SharpGame
 
         public void Add(in RenderTextureInfo info)
         {
-            Add(new RenderTexture(info));
+            if(info.depthTexture != null)            
+                Add(info.depthTexture);            
+            else
+                Add(new RenderTexture(info));
         }
 
         public void Add(RenderTexture rt)
         {
-            if (attachments.Count == 0)
-            {
-                extent = rt.extent;
-            }
-            else
-            {
-                //Debug.Assert(extent == rt.extent);
-            }
-
             attachments.Add(rt);
-
         }
 
         public VkImageView[] GetViews(int imageIndex)

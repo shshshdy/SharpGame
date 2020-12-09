@@ -28,13 +28,14 @@ namespace SharpGame
         public Graphics Graphics => Graphics.Instance;
         public FrameGraph FrameGraph => FrameGraph.Instance;
 
-        RenderTexture colorTexture;
-        RenderTexture depthTexture;
+        protected RenderTexture colorTexture;
+        protected RenderTexture depthTexture;
 
-        public RenderTarget RenderTarget { get; } = new RenderTarget();
+        public RenderTarget RenderTarget { get; }
 
         public RenderPipeline()
         {
+            RenderTarget = new RenderTarget(Graphics.Width, Graphics.Height);
         }
 
         public void Init(RenderView renderView)

@@ -20,7 +20,7 @@ namespace SharpGame
     public class ShadowPass : FrameGraphPass
     {
         const int SHADOW_MAP_CASCADE_COUNT = 4;
-        const uint SHADOWMAP_DIM = 2048;
+        const uint SHADOWMAP_DIM = 4096;
 
         static RenderTexture depthRT;
         public static RenderTexture DepthRT
@@ -33,7 +33,7 @@ namespace SharpGame
                     depthRT = new RenderTexture(SHADOWMAP_DIM, SHADOWMAP_DIM, SHADOW_MAP_CASCADE_COUNT, depthFormat,
                         VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled, //ImageAspectFlags.Depth,
                         VkSampleCountFlags.Count1/*, VkImageLayout.DepthStencilReadOnlyOptimal*/);
-                    depthRT.imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
+                    depthRT.imageLayout = VkImageLayout.DepthStencilReadOnlyOptimal;
                     depthRT.UpdateDescriptor();
                 }
 
