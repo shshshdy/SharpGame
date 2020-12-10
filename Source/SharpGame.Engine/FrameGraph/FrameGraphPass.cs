@@ -28,17 +28,6 @@ namespace SharpGame
 
         List<Subpass> subpasses = new List<Subpass>();
 
-        public Subpass[] Subpasses
-        {
-            set
-            {
-                foreach(var subpass in value)
-                {
-                    AddSubpass(subpass);
-                }
-            }
-        }
-
         public Func<RenderPass> renderPassCreator { get; set; }
         public Func<RenderTarget> renderTargetCreator { get; set; }
 
@@ -62,54 +51,6 @@ namespace SharpGame
             subpass.FrameGraphPass = this;
             subpass.subpassIndex = (uint)subpasses.Count;
             subpasses.Add(subpass);
-        }
-
-        public void SetLoadOp(params VkAttachmentLoadOp[] attachmentLoadOp)
-        {
-            for(int i = 0; i < attachmentLoadOp.Length; i++)
-            {
-                renderTextureInfos[i].loadOp = attachmentLoadOp[i];
-            }
-        }
-
-        public void SetStoreOp(params VkAttachmentStoreOp[] attachmentStoreOp)
-        {
-            for (int i = 0; i < attachmentStoreOp.Length; i++)
-            {
-                renderTextureInfos[i].storeOp = attachmentStoreOp[i];
-            }
-        }
-
-        public void SetStencilLoadOp(params VkAttachmentLoadOp[] attachmentLoadOp)
-        {
-            for (int i = 0; i < attachmentLoadOp.Length; i++)
-            {
-                renderTextureInfos[i].stencilLoadOp = attachmentLoadOp[i];
-            }
-        }
-
-        public void SetStencilStoreOp(params VkAttachmentStoreOp[] attachmentStoreOp)
-        {
-            for (int i = 0; i < attachmentStoreOp.Length; i++)
-            {
-                renderTextureInfos[i].stencilStoreOp = attachmentStoreOp[i];
-            }
-        }
-
-        public void SetInitialLayout(params VkImageLayout[] imageLayouts)
-        {
-            for (int i = 0; i < imageLayouts.Length; i++)
-            {
-                renderTextureInfos[i].initialLayout = imageLayouts[i];
-            }
-        }
-
-        public void SetFinalLayout(params VkImageLayout[] imageLayouts)
-        {
-            for (int i = 0; i < imageLayouts.Length; i++)
-            {
-                renderTextureInfos[i].finalLayout = imageLayouts[i];
-            }
         }
 
         public virtual void Init()

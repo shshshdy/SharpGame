@@ -29,12 +29,17 @@ namespace SharpGame
             mainPass = new FrameGraphPass
             {
                 new AttachmentInfo(Graphics.ColorFormat),
-                new AttachmentInfo(Graphics.DepthFormat),
+                new AttachmentInfo(Graphics.DepthFormat)
+                {
+                    //loadOp = VkAttachmentLoadOp.Load,
+                    storeOp = VkAttachmentStoreOp.Store
+                },
 
                 new SceneSubpass("cluster_forward")
                 {
                     Set1 = resourceSet0,
                     Set2 = resourceSet1,
+                    DisableDepthStencil = false
                 }
 
             };

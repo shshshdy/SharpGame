@@ -161,13 +161,13 @@ namespace SharpGame
                 new SceneSubpass("clustering")
                 {
                     Set1 = clusterSet1,
-                    OutputAttachments = default,
+                    OutputAttachments = null,
                     DisableDepthStencil = false
                 }
 
             };
 
-            //clustering.renderPassCreator = OnCreateClusterRenderPass;
+            clustering.renderPassCreator = OnCreateClusterRenderPass;
             return clustering;
         }
 

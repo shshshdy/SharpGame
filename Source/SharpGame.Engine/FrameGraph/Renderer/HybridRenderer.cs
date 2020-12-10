@@ -90,8 +90,16 @@ namespace SharpGame
             
             onscreenPass = new FrameGraphPass
             {
-                new AttachmentInfo(Graphics.Swapchain.ColorFormat),
-                new AttachmentInfo(this.depthTexture.format),
+                new AttachmentInfo(Graphics.ColorFormat)
+                {
+                    //loadOp = VkAttachmentLoadOp.Load
+                },
+
+                new AttachmentInfo(this.depthTexture.format)
+                {
+                    //loadOp = VkAttachmentLoadOp.Load,
+                    //storeOp = VkAttachmentStoreOp.Store
+                },
 
                 new GraphicsSubpass
                 {
@@ -100,10 +108,12 @@ namespace SharpGame
 
                 new SceneSubpass("cluster_forward")
                 {
+                    DisableDepthStencil = false,
                     Set1 = resourceSet0,
                     Set2 = resourceSet1,
                     BlendFlags = BlendFlags.AlphaBlend
-                }
+                },
+
 
             };       
 
@@ -118,7 +128,7 @@ namespace SharpGame
             {
                 new VkAttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
                 new VkAttachmentDescription(VkFormat.R8G8B8A8UNorm, finalLayout : VkImageLayout.ShaderReadOnlyOptimal),
-                new VkAttachmentDescription(depthFormat, finalLayout : VkImageLayout.ShaderReadOnlyOptimal /*VkImageLayout.DepthStencilReadOnlyOptimal*/)
+                new VkAttachmentDescription(depthFormat, finalLayout :  /*VkImageLayout.ShaderReadOnlyOptimal*/VkImageLayout.DepthStencilReadOnlyOptimal)
             };
 
             var colorAttachments = new[]

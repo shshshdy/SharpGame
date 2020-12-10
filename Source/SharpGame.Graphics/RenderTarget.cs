@@ -44,7 +44,15 @@ namespace SharpGame
         {
             this.RTType = format.IsDepthFormat() ? RTType.DepthOutput : RTType.ColorOutput;
             attachmentDescription = new VkAttachmentDescription(format, VkSampleCountFlags.Count1);
-            ClearValue = new VkClearColorValue(0, 0, 0, 1);
+
+            if (Device.IsDepthFormat(format))
+            {
+                ClearValue = new VkClearDepthStencilValue(1, 0);
+            }
+            else
+            {
+                ClearValue = new VkClearColorValue(0, 0, 0, 1);
+            }
         }
 
         public AttachmentInfo(SizeHint sizeHint, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1)
@@ -164,8 +172,8 @@ namespace SharpGame
     public class RenderTarget
     {
         public VkExtent2D Extent { get; private set; }
-        private List<RenderTexture> attachments = new List<RenderTexture>();
         public uint AttachmentCount => (uint)attachments.Count;
+        private List<RenderTexture> attachments = new List<RenderTexture>();
 
         public RenderTarget(uint width, uint height)
         {
