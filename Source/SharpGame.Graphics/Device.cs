@@ -8,7 +8,7 @@ namespace SharpGame
 {
     using static Vulkan;
 
-    public unsafe class Device
+    public unsafe static class Device
     {
         public const ulong DEFAULT_FENCE_TIMEOUT = 100000000000;
         public static VkInstance VkInstance { get; private set; }
@@ -396,7 +396,7 @@ namespace SharpGame
             return VkFormat.Undefined;
         }
 
-        public static bool IsDepthFormat(VkFormat format)
+        public static bool IsDepthFormat(this VkFormat format)
         {
             switch (format)
             {

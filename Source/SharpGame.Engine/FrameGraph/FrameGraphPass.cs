@@ -45,14 +45,14 @@ namespace SharpGame
         protected RenderTarget renderTarget;
         public RenderTarget RenderTarget => renderTarget;
 
-        private List<RenderTextureInfo> renderTextureInfos = new List<RenderTextureInfo>();
+        private List<AttachmentInfo> renderTextureInfos = new List<AttachmentInfo>();
         
         public FrameGraphPass(SubmitQueue queue = SubmitQueue.Graphics)
         {
             Queue = queue;
         }
 
-        public void AddAttachment(RenderTextureInfo attachment)
+        public void AddAttachment(AttachmentInfo attachment)
         {
             renderTextureInfos.Add(attachment);
         }
@@ -230,7 +230,19 @@ namespace SharpGame
                     Array.Resize(ref clearValues, renderTextureInfos.Count);
                     for (int i = 0; i < renderTextureInfos.Count; i++)
                     {
-                        renderTarget.Add(renderTextureInfos[i]);
+                        var info = renderTextureInfos[i];
+                        if(info.rTType == RTType.ColorOutput)
+                        {
+                            renderTarget.Add(Renderer.ColorTexture);
+                        }
+                        else if(info.rTType == RTType.DepthOutput)
+                        {
+                            renderTarget.Add(Renderer.DepthTexture);
+                        }
+                        else
+                        {
+                            renderTarget.Add(info);
+                        }
                         clearValues[i] = renderTextureInfos[i].clearValue;
                     }
 
@@ -339,7 +351,7 @@ namespace SharpGame
 
         public void Add(object obj)
         {
-            if(obj is RenderTextureInfo rt)
+            if(obj is AttachmentInfo rt)
             {
                 AddAttachment(rt);
             }

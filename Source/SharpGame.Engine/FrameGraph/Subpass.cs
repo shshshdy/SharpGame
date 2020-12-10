@@ -38,7 +38,7 @@ namespace SharpGame
         {
             subpassDescription.pipelineBindPoint = pipelineBindPoint;
 
-            if(OutputAttachments.Length > 0)
+            if(OutputAttachments != null && OutputAttachments.Length > 0)
             {
                 subpassDescription.pColorAttachments = new VkAttachmentReference[OutputAttachments.Length];
                 for(int i = 0; i < OutputAttachments.Length; i++)
@@ -54,7 +54,7 @@ namespace SharpGame
                 }
             }
 
-            if (InputAttachments.Length > 0)
+            if (InputAttachments != null && InputAttachments.Length > 0)
             {
                 subpassDescription.pColorAttachments = new VkAttachmentReference[InputAttachments.Length];
                 for (int i = 0; i < InputAttachments.Length; i++)

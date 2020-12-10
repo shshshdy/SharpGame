@@ -156,16 +156,18 @@ namespace SharpGame
 
             var clustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                new RenderTextureInfo((uint)width, (uint)height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment),
+                new AttachmentInfo(depthFormat),
 
                 new SceneSubpass("clustering")
                 {
-                    Set1 = clusterSet1
+                    Set1 = clusterSet1,
+                    OutputAttachments = default,
+                    DisableDepthStencilAttachment = false
                 }
 
             };
 
-            clustering.renderPassCreator = OnCreateClusterRenderPass;
+            //clustering.renderPassCreator = OnCreateClusterRenderPass;
             return clustering;
         }
 

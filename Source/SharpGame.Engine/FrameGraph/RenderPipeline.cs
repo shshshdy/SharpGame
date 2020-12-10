@@ -29,7 +29,10 @@ namespace SharpGame
         public FrameGraph FrameGraph => FrameGraph.Instance;
 
         protected RenderTexture colorTexture;
+        public RenderTexture ColorTexture => colorTexture;
+
         protected RenderTexture depthTexture;
+        public RenderTexture DepthTexture => depthTexture;
 
         public RenderTarget RenderTarget { get; }
 
@@ -58,6 +61,7 @@ namespace SharpGame
 
             initialized = true;
         }
+
         public virtual void DeviceLost()
         {
             colorTexture?.Dispose();
@@ -96,7 +100,7 @@ namespace SharpGame
         {
             var renderPass = new FrameGraphPass
             {
-                new RenderTextureInfo(Graphics.Swapchain),
+                new AttachmentInfo(Graphics.Swapchain.ColorFormat),
 
                 new GraphicsSubpass
                 {

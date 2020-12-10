@@ -90,8 +90,8 @@ namespace SharpGame
             
             onscreenPass = new FrameGraphPass
             {
-                new RenderTextureInfo(Graphics.Swapchain),
-                new RenderTextureInfo(this.depthTexture),
+                new AttachmentInfo(Graphics.Swapchain.ColorFormat),
+                new AttachmentInfo(this.depthTexture.format),
 
                 new GraphicsSubpass
                 {
@@ -100,16 +100,12 @@ namespace SharpGame
 
                 new SceneSubpass("cluster_forward")
                 {
-                    //OnDraw = Composite,
-
                     Set1 = resourceSet0,
                     Set2 = resourceSet1,
                     BlendFlags = BlendFlags.AlphaBlend
                 }
 
-            };
-
-            //onscreenPass.renderPassCreator = () => Graphics.CreateRenderPass(false, false);          
+            };       
 
             this.Add(onscreenPass);
         }

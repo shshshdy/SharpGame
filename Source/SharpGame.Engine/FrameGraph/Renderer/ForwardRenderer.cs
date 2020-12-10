@@ -16,8 +16,8 @@ namespace SharpGame
 
             var onScreenPass = new FrameGraphPass
             {
-                new RenderTextureInfo(Graphics.Swapchain),
-                new RenderTextureInfo(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment),
+                new AttachmentInfo(Graphics.Swapchain.ColorFormat),
+                new AttachmentInfo(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment),
 
 
                 new SceneSubpass
@@ -47,12 +47,12 @@ namespace SharpGame
 
             var fgPass = new FrameGraphPass
             {
-                new RenderTextureInfo(width, height, 1, VkFormat.R16G16B16A16SFloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment)
+                new AttachmentInfo(width, height, 1, VkFormat.R16G16B16A16SFloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment)
                 {
                     finalLayout = VkImageLayout.ShaderReadOnlyOptimal
                 },
 
-                new RenderTextureInfo(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment),
+                new AttachmentInfo(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment),
 
                 new SceneSubpass
                 {
@@ -70,7 +70,7 @@ namespace SharpGame
 
             var onScreenPass = new FrameGraphPass
             {
-                new RenderTextureInfo(Graphics.Swapchain),
+                new AttachmentInfo(Graphics.Swapchain.ColorFormat),
 
                 new FullScreenSubpass("shaders/post/fullscreen.frag")
                 {

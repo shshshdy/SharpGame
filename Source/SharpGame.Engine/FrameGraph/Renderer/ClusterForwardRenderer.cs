@@ -28,6 +28,9 @@ namespace SharpGame
 
             mainPass = new FrameGraphPass
             {
+                new AttachmentInfo(Graphics.ColorFormat),
+                new AttachmentInfo(Graphics.DepthFormat),
+
                 new SceneSubpass("cluster_forward")
                 {
                     Set1 = resourceSet0,
@@ -35,8 +38,6 @@ namespace SharpGame
                 }
 
             };
-
-            mainPass.renderPassCreator = () => Graphics.CreateDefaultRenderPass();       
 
             Add(mainPass);
         }
