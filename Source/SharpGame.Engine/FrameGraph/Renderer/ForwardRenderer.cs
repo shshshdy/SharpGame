@@ -22,7 +22,7 @@ namespace SharpGame
 
                 new SceneSubpass
                 {
-                    DisableDepthStencilAttachment = false
+                    DisableDepthStencil = false
                 }
 
             };
@@ -56,7 +56,7 @@ namespace SharpGame
 
                 new SceneSubpass
                 {
-                    DisableDepthStencilAttachment = false
+                    DisableDepthStencil = false
                 }
 
             };

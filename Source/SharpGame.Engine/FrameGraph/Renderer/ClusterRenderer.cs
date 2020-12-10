@@ -162,7 +162,7 @@ namespace SharpGame
                 {
                     Set1 = clusterSet1,
                     OutputAttachments = default,
-                    DisableDepthStencilAttachment = false
+                    DisableDepthStencil = false
                 }
 
             };

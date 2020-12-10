@@ -22,15 +22,15 @@ namespace SharpGame
 
     public class AttachmentInfo
     {
-        public uint width;
-        public uint height;
-        public uint layers;
-        public RTType rTType = RTType.None;
-        public SizeHint sizeHint = SizeHint.None;
-        public VkAttachmentDescription attachmentDescription;
-        public VkImageUsageFlags usage;
-        public VkClearValue clearValue = new VkClearColorValue(0, 0, 0, 1);
+        public uint Width { get; }
+        public uint Height { get; }
+        public uint Layers { get; }
+        public RTType RTType { get; } = RTType.None;
+        public SizeHint SizeHint { get; } = SizeHint.None;
+        public VkImageUsageFlags Usage { get; }
+        public VkClearValue ClearValue { get; } = new VkClearColorValue(0, 0, 0, 1);
 
+        public VkAttachmentDescription attachmentDescription;
         public ref VkFormat format => ref attachmentDescription.format;
         public ref VkSampleCountFlags samples => ref attachmentDescription.samples;
         public ref VkAttachmentLoadOp loadOp => ref attachmentDescription.loadOp;
@@ -42,51 +42,51 @@ namespace SharpGame
 
         public AttachmentInfo(VkFormat format)
         {
-            this.rTType = format.IsDepthFormat() ? RTType.DepthOutput : RTType.ColorOutput;
+            this.RTType = format.IsDepthFormat() ? RTType.DepthOutput : RTType.ColorOutput;
             attachmentDescription = new VkAttachmentDescription(format, VkSampleCountFlags.Count1);
-            clearValue = new VkClearColorValue(0, 0, 0, 1);
+            ClearValue = new VkClearColorValue(0, 0, 0, 1);
         }
 
         public AttachmentInfo(SizeHint sizeHint, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1)
         {
-            this.sizeHint = sizeHint;
-            this.usage = usage;
+            this.SizeHint = sizeHint;
+            this.Usage = usage;
             attachmentDescription = new VkAttachmentDescription(format, samples);
 
             if (Device.IsDepthFormat(format))
             {
-                clearValue = new VkClearDepthStencilValue(1, 0);
+                ClearValue = new VkClearDepthStencilValue(1, 0);
             }
             else
             {
-                clearValue = new VkClearColorValue(0, 0, 0, 1);
+                ClearValue = new VkClearColorValue(0, 0, 0, 1);
             }
         }
 
         public AttachmentInfo(uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage,
             VkSampleCountFlags samples = VkSampleCountFlags.Count1)
         {
-            this.width = width;
-            this.height = height;
-            this.layers = layers;
-            this.usage = usage;
+            this.Width = width;
+            this.Height = height;
+            this.Layers = layers;
+            this.Usage = usage;
             attachmentDescription = new VkAttachmentDescription(format, samples); 
 
             if(Device.IsDepthFormat(format))
             {
-                clearValue = new VkClearDepthStencilValue(1, 0);
+                ClearValue = new VkClearDepthStencilValue(1, 0);
             }
             else
             {
-                clearValue = new VkClearColorValue(0, 0, 0, 1);
+                ClearValue = new VkClearColorValue(0, 0, 0, 1);
             }
         }
     }
 
     public class RenderTexture : Texture
     {
-        public SizeHint sizeHint = SizeHint.None;
-        public VkSampleCountFlags samples;
+        private VkSampleCountFlags samples;
+        private SizeHint sizeHint = SizeHint.None;
         private Swapchain swapchain;
         public ImageView[] attachmentViews;
         public bool IsSwapchain => swapchain != null;
@@ -97,7 +97,7 @@ namespace SharpGame
         }
         
         public RenderTexture(uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage,
-            VkSampleCountFlags samples = VkSampleCountFlags.Count1)
+            VkSampleCountFlags samples = VkSampleCountFlags.Count1, SizeHint sizeHint = SizeHint.None)
         {
             this.extent = new VkExtent3D(width, height, 1);
             this.layers = layers;
@@ -113,6 +113,19 @@ namespace SharpGame
             Create(info);
         }
 
+        public void Create(in AttachmentInfo info)
+        {
+            Debug.Assert(info.RTType == RTType.None);
+            this.extent = new VkExtent3D(info.Width, info.Height, 1);
+            this.layers = info.Layers;
+            this.format = info.format;
+            this.imageUsageFlags = info.Usage;
+            this.samples = info.samples;
+            this.sizeHint = info.SizeHint;
+
+            Create();
+        }
+
         protected override void Destroy(bool disposing)
         {
             base.Destroy(disposing);
@@ -122,19 +135,7 @@ namespace SharpGame
             Array.Clear(attachmentViews, 0, attachmentViews.Length);
         }
 
-        public void Create(in AttachmentInfo info)
-        {
-            Debug.Assert(info.rTType == RTType.None);
-            this.extent = new VkExtent3D(info.width, info.height, 1);                
-            this.layers = info.layers;
-            this.format = info.format;
-            this.imageUsageFlags = info.usage;
-            this.samples = info.samples;
-            this.sizeHint = info.sizeHint;
-            Create();            
-        }
-
-        void Create(Swapchain swapchain)
+        private void Create(Swapchain swapchain)
         {
             this.swapchain = swapchain;
             this.extent = swapchain.extent;
@@ -142,6 +143,7 @@ namespace SharpGame
             this.format = swapchain.ColorFormat;
             this.imageUsageFlags = VkImageUsageFlags.ColorAttachment;
             this.samples = VkSampleCountFlags.Count1;
+            this.sizeHint = SizeHint.Full;
             attachmentViews = (ImageView[])swapchain.ImageViews.Clone();
         }
 
@@ -154,25 +156,41 @@ namespace SharpGame
             imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
             descriptor = new VkDescriptorImageInfo(sampler, imageView, imageLayout);
             attachmentViews = new ImageView[Swapchain.IMAGE_COUNT];
+
             Array.Fill(attachmentViews, imageView);
         }
     }
 
     public class RenderTarget
     {
-        public VkExtent2D extent;
-        public List<RenderTexture> attachments = new List<RenderTexture>();
+        public VkExtent2D Extent { get; private set; }
+        private List<RenderTexture> attachments = new List<RenderTexture>();
+        public uint AttachmentCount => (uint)attachments.Count;
+
         public RenderTarget(uint width, uint height)
         {
-            extent = new VkExtent2D(width, height);
+            Extent = new VkExtent2D(width, height);
         }
 
         public RenderTexture this[int index] => attachments[index];
-        public uint AttachmentCount => (uint)attachments.Count;
+
+        public RenderTexture Add(Swapchain swapchain)
+        {
+            var rt = new RenderTexture(swapchain);
+            Add(rt);
+            return rt;
+        }
+
+        public RenderTexture Add(VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1, SizeHint sizeHint = SizeHint.Full)
+        {
+            var rt = new RenderTexture(Extent.width, Extent.height, 1, format, usage, samples, sizeHint);
+            Add(rt);
+            return rt;
+        }
 
         public RenderTexture Add(uint width, uint height, uint layers, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1)
         {
-            var rt = new RenderTexture(width, height, layers, format, usage, samples);
+            var rt = new RenderTexture(width, height, layers, format, usage, samples, SizeHint.None);
             Add(rt);
             return rt;
         }

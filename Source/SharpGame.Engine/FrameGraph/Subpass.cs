@@ -30,7 +30,7 @@ namespace SharpGame
 
         public uint[] InputAttachments { get; set; } = new uint[0];
         public uint[] OutputAttachments { get; set; } = new uint[1] { 0 };
-        public bool DisableDepthStencilAttachment { get; set; } = true;
+        public bool DisableDepthStencil { get; set; } = true;
 
         public VkSubpassDependency Dependency { get; set; }
 
@@ -68,7 +68,7 @@ namespace SharpGame
             //todo: subpassDescription.pResolveAttachments
 
 
-            if (!DisableDepthStencilAttachment)
+            if (!DisableDepthStencil)
             {
                 var index = Array.FindIndex(attachmentDescriptions, (attachment) => Device.IsDepthFormat(attachment.format));
                 if(index != -1)

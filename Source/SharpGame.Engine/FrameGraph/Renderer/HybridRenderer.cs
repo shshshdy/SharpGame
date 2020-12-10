@@ -181,9 +181,9 @@ namespace SharpGame
 
             var rt = new RenderTarget(width, height);
 
-            albedoRT = rt.Add(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
-            normalRT = rt.Add(width, height, 1, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);            
-            depthHWRT = rt.Add(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
+            albedoRT = rt.Add(VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            normalRT = rt.Add(VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);            
+            depthHWRT = rt.Add(depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
 
             deferredSet1 = new DescriptorSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
 
@@ -208,10 +208,6 @@ namespace SharpGame
 
             Span<uint> offset = new uint[] {0};
             cmd.DrawFullScreenQuad(pass, 0, View.Set0, offset, sets);
-
-            //var scenePass = graphicsPass as SceneSubpass;
-            //scenePass.DrawScene(cmd, BlendFlags.AlphaBlend);
-
         }
 
         protected override void OnBeginPass(FrameGraphPass renderPass, CommandBuffer cmd)

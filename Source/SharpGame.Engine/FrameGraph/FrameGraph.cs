@@ -211,6 +211,14 @@ namespace SharpGame
             }
         }
 
+        public void RemoveDebugImage(params Texture[] images)
+        {
+            foreach (var tex in images)
+            {
+                ImGUI.Instance.RemoveImGuiBinding(tex.imageView);
+            }
+        }
+
         public void AddDebugImage(params ImageView[] imageViews)
         {
             foreach (var tex in imageViews)
@@ -218,6 +226,15 @@ namespace SharpGame
                 ImGUI.Instance.GetOrCreateImGuiBinding(tex);
                 debugImages.Add(tex);
             }
+        }
+
+        public void RemoveDebugImage(params ImageView[] imageViews)
+        {
+            foreach (var imageView in imageViews)
+            {
+                ImGUI.Instance.RemoveImGuiBinding(imageView);
+            }
+
         }
 
         void OnDebugImage()

@@ -15,8 +15,6 @@ namespace SharpGame
         public CommandBuffer cmd;
     }
 
-
-
     public class RenderPipeline : Object
     {
         public List<FrameGraphPass> RenderPassList { get; } = new List<FrameGraphPass>();
@@ -64,8 +62,6 @@ namespace SharpGame
 
         public virtual void DeviceLost()
         {
-            colorTexture?.Dispose();
-            depthTexture?.Dispose();
             RenderTarget.Clear();
 
             foreach (var rp in RenderPassList)
@@ -176,14 +172,8 @@ namespace SharpGame
 
         protected virtual void OnCreateRenderTarget()
         {
-            var depthFormat = Graphics.DepthFormat;
-            uint width = (uint)Graphics.Width;
-            uint height = (uint)Graphics.Height;
-            colorTexture = new RenderTexture(Graphics.Swapchain);            
-            depthTexture = new RenderTexture(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment);
-
-            RenderTarget.Add(colorTexture);
-            RenderTarget.Add(depthTexture);
+            colorTexture = RenderTarget.Add(Graphics.Swapchain);            
+            depthTexture = RenderTarget.Add(Graphics.DepthFormat, VkImageUsageFlags.DepthStencilAttachment, VkSampleCountFlags.Count1, SizeHint.Full);
         }
 
         protected virtual void OnUpdate()

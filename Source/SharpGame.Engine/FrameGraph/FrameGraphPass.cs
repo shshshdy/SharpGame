@@ -231,11 +231,11 @@ namespace SharpGame
                     for (int i = 0; i < renderTextureInfos.Count; i++)
                     {
                         var info = renderTextureInfos[i];
-                        if(info.rTType == RTType.ColorOutput)
+                        if(info.RTType == RTType.ColorOutput)
                         {
                             renderTarget.Add(Renderer.ColorTexture);
                         }
-                        else if(info.rTType == RTType.DepthOutput)
+                        else if(info.RTType == RTType.DepthOutput)
                         {
                             renderTarget.Add(Renderer.DepthTexture);
                         }
@@ -243,7 +243,7 @@ namespace SharpGame
                         {
                             renderTarget.Add(info);
                         }
-                        clearValues[i] = renderTextureInfos[i].clearValue;
+                        clearValues[i] = renderTextureInfos[i].ClearValue;
                     }
 
                 }
@@ -259,7 +259,7 @@ namespace SharpGame
             for (int i = 0; i < framebuffers.Length; i++)
             {
                 var attachments = renderTarget.GetViews(i);
-                framebuffers[i] = new Framebuffer(RenderPass, renderTarget.extent.width, renderTarget.extent.height, 1, attachments);
+                framebuffers[i] = new Framebuffer(RenderPass, renderTarget.Extent.width, renderTarget.Extent.height, 1, attachments);
             }
 
         }
