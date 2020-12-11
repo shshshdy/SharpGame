@@ -126,7 +126,10 @@ namespace SharpGame.Samples
             
         }
 
+        bool showHierarchy = false;
+        bool showInspector = false;
         bool openCamera = true;
+        Node selectedNode = null;
         public virtual void OnGUI()
         {
             if(camera)
@@ -140,6 +143,8 @@ namespace SharpGame.Samples
                         ImGui.TextUnformatted("rot : " + camera.Node.Rotation.EulerAngles.ToString("0.00"));
                         ImGui.SliderFloat("Rotate Speed: ", ref rotSpeed, 1, 100);
                         ImGui.SliderFloat("Move Speed: ", ref moveSpeed, 1, 1000);
+                        ImGui.Checkbox("Show Hierarchy", ref showHierarchy); ImGui.SameLine();
+                        ImGui.Checkbox("Show Inspector", ref showInspector);
                         ImGui.PopItemWidth();
                     }
                 }
@@ -166,7 +171,179 @@ namespace SharpGame.Samples
 
                 ImGui.End();
             }
-       
+
+            if (showHierarchy)
+            {
+                ShowHierarchy();
+            }
+
+            if (showInspector)
+            {
+                ShowInspector();
+            }
+
+            if(selectedModel != null)
+            {
+                ShowModel();
+            }
+
+        }
+
+        uint dockspaceID;
+        void ShowHierarchy()
+        {
+            if (ImGui.Begin("Hierarchy"))
+            {
+                Draw(scene, 0);
+
+                //dockspaceID = ImGui.GetID("Hierarchy");
+                //ImGui.DockSpace(dockspaceID, new Vector2(0, 0), ImGuiDockNodeFlags.PassthruCentralNode | ImGuiDockNodeFlags.NoResize);
+                //ImGui.DockSpaceOverViewport();
+            }
+
+            ImGui.End();
+            
+        }
+
+        void ShowInspector()
+        {
+            //ImGui.SetNextWindowDockID(dockspaceID, ImGuiCond.FirstUseEver);
+            if (ImGui.Begin("Inspector"))
+            {
+                Inspector(selectedNode);
+            }
+
+            ImGui.End();
+        }
+
+        Model selectedModel;
+        void ShowModel()
+        {
+            if(selectedModel == null)
+            {
+                return;
+            }
+
+            if (ImGui.Begin("Model"))
+            {
+                foreach (var g in selectedModel.Geometries)
+                {
+                    if (g.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    ImGui.Text(g[0].Name);
+                }
+
+
+            }
+
+            ImGui.End();
+        }
+
+        public void Draw(Node node, int depth)
+        {
+            if(node == null)
+                return;
+
+            string name = node.Name ?? "";
+            bool enable = node.Enabled;
+
+            var flag = selectedNode == node ? ImGuiTreeNodeFlags.Selected : 0;
+            bool collapse = ImGuiNET.ImGui.TreeNodeEx(name, ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.FramePadding | flag);
+
+            //ImGuiNET.ImGui.SameLine(100);
+            //ImGuiNET.ImGui.Checkbox("", ref enable); //ImGuiNET.ImGui.SameLine(500);
+           
+
+            if (ImGui.IsItemClicked())
+            {
+                selectedNode = node;
+            }
+
+            if (depth < 3 && !collapse)
+            {
+                ImGuiNET.ImGui.TreePush();
+            }
+
+            if (collapse)
+            {
+                foreach (var n in node.Children)
+                {
+                    Draw(n, depth + 1);
+                }
+
+                ImGuiNET.ImGui.TreePop();
+            }
+
+
+        }
+
+        public void Inspector(Node node)
+        {
+            if (node == null)
+                return;
+
+            bool enable = node.Enabled;
+            string name = node.Name ?? "";
+            ImGuiNET.ImGui.Checkbox(name, ref enable); //ImGuiNET.ImGui.SameLine(500);
+
+            foreach(var c in node.ComponentList)
+            {
+                bool open = true;
+                if (ImGui.CollapsingHeader(c.GetType().Name, ref open))
+                {
+                    Inspector(c);
+                }
+            }
+        }
+
+        public void Inspector(Object obj)
+        {
+            if(obj is Node node)
+            {
+                Inspector(node);
+            }
+            else
+            {
+                var props = obj.GetType().GetProperties();
+                foreach(var p in props)
+                {
+                    if(p.GetMethod == null)
+                    {
+                        continue;
+                    }
+
+                    var v = p.GetValue(obj);
+                    switch (v)
+                    {
+                        case bool bVal:
+                            ImGui.Value(p.Name, bVal);
+                            break;
+                        case int iVal:
+                            ImGui.Value(p.Name, iVal);
+                            break;
+                        case uint iVal:
+                            ImGui.Value(p.Name, iVal);
+                            break;
+                        case float fVal:
+                            ImGui.Value(p.Name, fVal);
+                            break;
+                        case string strVal:
+                            ImGui.Text(strVal);
+                            break;
+                        case Model m:
+                            if (ImGui.Button(m.FileName??"..."))
+                            {
+                                selectedModel = m;
+                            }
+                            break;
+                    }
+
+                }
+
+            }
         }
 
         protected override void Destroy(bool disposing)

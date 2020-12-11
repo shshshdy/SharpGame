@@ -56,9 +56,6 @@ namespace SharpGame
 
         protected virtual void BindResources()
         {
-            //var rt = FrameGraphPass.RenderTarget[0];
-            PipelineResourceSet.SetResourceSet(0, Texture.Blue);
-
             onBindResource?.Invoke(PipelineResourceSet);
         }
 

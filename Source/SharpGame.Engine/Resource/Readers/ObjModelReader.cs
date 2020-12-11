@@ -346,6 +346,7 @@ namespace SharpGame
             }
 
             Material material = new Material(shader);
+            material.Name = materialDef.Name;
             material.BlendType = blendType;
             if (!string.IsNullOrEmpty(materialDef.DiffuseTexture))
             {

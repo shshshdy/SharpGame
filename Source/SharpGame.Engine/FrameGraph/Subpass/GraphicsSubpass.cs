@@ -8,15 +8,6 @@ using System.Threading.Tasks;
 
 namespace SharpGame
 {
-    public ref struct DrawingContext
-    {
-        public RenderContext renderContext;
-        public CommandBuffer commandBuffer;
-        public RenderPass renderPass;
-        public uint subpass;
-    }
-
-
     public class GraphicsSubpass : Subpass
     {
         public RenderPass RenderPass => FrameGraphPass.RenderPass;

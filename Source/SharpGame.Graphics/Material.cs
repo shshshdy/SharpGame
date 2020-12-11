@@ -16,6 +16,7 @@ namespace SharpGame
 
     public class Material : Resource
     {
+        public string Name { get; set; }
         public ResourceRef ShaderResource { get; set; }
         public FastList<ShaderParameter> ShaderParameters { get; set; }
         public FastList<TextureParameter> TextureParameters { get; set; }
