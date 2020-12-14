@@ -11,6 +11,8 @@ namespace SharpGame
     {
         protected FrameGraphPass geometryPass;
         protected FrameGraphPass translucentClustering;
+        protected FrameGraphPass ssaoPass;
+        protected FrameGraphPass ssaoBlur;
         protected FrameGraphPass compositePass;
         protected FrameGraphPass onscreenPass;
 
@@ -84,6 +86,24 @@ namespace SharpGame
             translucentClustering = this.CreateClusteringPass();
 
             this.Add(translucentClustering);
+            /*
+            ssaoPass = new FrameGraphPass
+            {
+                new AttachmentInfo( SizeHint.Full, VkFormat.R8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
+
+                new SSAOSubpass()
+            };
+
+            this.Add(ssaoPass);
+
+            ssaoBlur = new FrameGraphPass
+            {
+                new AttachmentInfo( SizeHint.Full, VkFormat.R8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
+
+                new SSAOSubpass()
+            };
+
+            this.Add(ssaoBlur);*/
 
             lightCull = new ComputePass(ComputeLight);
             this.Add(lightCull);
@@ -192,9 +212,9 @@ namespace SharpGame
             var rt = new RenderTarget(width, height);
 
             albedoRT = rt.Add(VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
-            normalRT = rt.Add(VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);            
-            depthHWRT = rt.Add(depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
-
+            normalRT = rt.Add(VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            depthHWRT = depthTexture;// rt.Add(depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
+            rt.Add(depthHWRT);
             deferredSet1 = new DescriptorSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
 
             FrameGraph.AddDebugImage(albedoRT);

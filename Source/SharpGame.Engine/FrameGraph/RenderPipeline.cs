@@ -173,7 +173,7 @@ namespace SharpGame
         protected virtual void OnCreateRenderTarget()
         {
             colorTexture = RenderTarget.Add(Graphics.Swapchain);            
-            depthTexture = RenderTarget.Add(Graphics.DepthFormat, VkImageUsageFlags.DepthStencilAttachment, VkSampleCountFlags.Count1, SizeHint.Full);
+            depthTexture = RenderTarget.Add(Graphics.DepthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled, VkSampleCountFlags.Count1, SizeHint.Full);
         }
 
         protected virtual void OnUpdate()

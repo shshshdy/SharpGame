@@ -20,8 +20,8 @@ namespace SharpGame
         protected ulong passID = 1;
 
         public Graphics Graphics => Graphics.Instance;
-        public FrameGraph FrameGraph => FrameGraph.Instance;
         public FrameGraphPass FrameGraphPass { get; internal set; }
+        public RenderPipeline Renderer => FrameGraphPass.Renderer;
         public RenderView View => FrameGraphPass.View;
 
         public uint subpassIndex = 0;
