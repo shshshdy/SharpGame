@@ -52,6 +52,10 @@
     <None Include="$(MSBuildThisFileDirectory)Natural\terrain.vert" />
     <None Include="$(MSBuildThisFileDirectory)Pbr.shader" />
     <None Include="$(MSBuildThisFileDirectory)post\bloom.frag" />
+    <None Include="$(MSBuildThisFileDirectory)post\ssr.frag" />
+    <None Include="$(MSBuildThisFileDirectory)post\ssrr.frag" />
+    <None Include="$(MSBuildThisFileDirectory)post\ssr_proj.comp" />
+    <None Include="$(MSBuildThisFileDirectory)post\ssr_proj.frag" />
     <None Include="$(MSBuildThisFileDirectory)Terrain.shader" />
     <None Include="$(MSBuildThisFileDirectory)Vegetation.shader" />
     <None Include="$(MSBuildThisFileDirectory)LitAlphaTest.shader" />

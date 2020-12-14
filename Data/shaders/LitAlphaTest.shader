@@ -71,13 +71,6 @@ Shader "LitAlphaTest"
 		FrontFace = CounterClockwise
 		//DepthWrite = false
 
-		PushConstant Material_properties
-		{
-			StageFlags = Fragment
-			Offset = 0
-			Size = 32
-		}
-
 		@VertexShader
 		{
 #include "cluster_forward.vert"
