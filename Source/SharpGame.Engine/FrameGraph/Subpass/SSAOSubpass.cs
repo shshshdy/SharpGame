@@ -10,8 +10,8 @@ namespace SharpGame
         const float SSAO_RADIUS = 2.0f;
         const int SSAO_NOISE_DIM = 4;
 
-        Buffer m_ssaoKernel;
-        Texture m_ssaoNoiseTex;
+        Buffer ssaoKernel;
+        Texture ssaoNoiseTex;
         public SSAOSubpass() : base("post/ssao.frag")
         {
         }
@@ -30,7 +30,7 @@ namespace SharpGame
                 ssaoKernel[i] = new vec4(sample * scale, 0.0f);
             }
 
-            m_ssaoKernel = Buffer.Create(VkBufferUsageFlags.UniformBuffer, ssaoKernel);
+            this.ssaoKernel = Buffer.Create(VkBufferUsageFlags.UniformBuffer, ssaoKernel);
 
 
             // Random noise
@@ -41,7 +41,7 @@ namespace SharpGame
                 ssaoNoise.Add(new vec4(glm.random() * 2.0f - 1.0f, glm.random() * 2.0f - 1.0f, 0.0f, 1.0f));
             }
 
-            m_ssaoNoiseTex = Texture.Create2D(SSAO_NOISE_DIM, SSAO_NOISE_DIM, VkFormat.R32G32B32A32SFloat, ssaoNoise.Data);
+            ssaoNoiseTex = Texture.Create2D(SSAO_NOISE_DIM, SSAO_NOISE_DIM, VkFormat.R32G32B32A32SFloat, ssaoNoise.Data);
         }
         
 
@@ -49,7 +49,7 @@ namespace SharpGame
         {
             //var rt = this.Renderer.RenderTarget;
 
-            //PipelineResourceSet.SetResourceSet(0, rt[1], rt[3], m_ssaoNoiseTex, m_ssaoKernel, View.ubGlobal);            
+            //PipelineResourceSet.SetResourceSet(0, rt[1], rt[3], ssaoNoiseTex, ssaoKernel, View.ubGlobal);            
         }
     }
 

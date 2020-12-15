@@ -29,7 +29,7 @@ namespace SharpGame
         public SizeHint SizeHint { get; } = SizeHint.None;
         public VkImageUsageFlags Usage { get; }
         public VkClearValue ClearValue { get; } = new VkClearColorValue(0, 0, 0, 1);
-
+        public StringID id;
         public VkAttachmentDescription attachmentDescription;
         public ref VkFormat format => ref attachmentDescription.format;
         public ref VkSampleCountFlags samples => ref attachmentDescription.samples;

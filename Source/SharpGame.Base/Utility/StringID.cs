@@ -11,10 +11,10 @@ namespace SharpGame
     [MessagePackFormatter(typeof(StringIDFormatter))]
     public struct StringID : IEquatable<StringID>
     {
-        public string Str { get; }
+        public readonly string Str { get; }
 
         [IgnoreDataMember]
-        public int Hash { get; }
+        public readonly int Hash { get; }
 
         public readonly static StringID Empty = string.Empty;
 

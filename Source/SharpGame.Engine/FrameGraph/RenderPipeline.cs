@@ -34,6 +34,8 @@ namespace SharpGame
 
         public RenderTarget RenderTarget { get; }
 
+        Dictionary<StringID, IBindableResource> resources = new Dictionary<StringID, IBindableResource>();
+
         public RenderPipeline()
         {
             RenderTarget = new RenderTarget(Graphics.Width, Graphics.Height);
@@ -129,6 +131,16 @@ namespace SharpGame
             {
                 renderPass.Init();
             }
+        }
+
+        public void RegRes(StringID id, IBindableResource res)
+        {
+            resources[id] = res;
+        }
+
+        public void UnregRes(StringID id)
+        {
+            resources.Remove(id);
         }
 
         public void Update()
