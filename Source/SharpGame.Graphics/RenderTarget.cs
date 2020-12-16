@@ -93,6 +93,7 @@ namespace SharpGame
 
     public class RenderTexture : Texture
     {
+        public StringID id;
         private VkSampleCountFlags samples;
         private SizeHint sizeHint = SizeHint.None;
         private Swapchain swapchain;
@@ -112,7 +113,7 @@ namespace SharpGame
             this.format = format;
             this.imageUsageFlags = usage;
             this.samples = samples;
-
+            this.sizeHint = sizeHint;
             Create();
         }
 
@@ -203,9 +204,11 @@ namespace SharpGame
             return rt;
         }
 
-        public void Add(in AttachmentInfo info)
+        public RenderTexture Add(in AttachmentInfo info)
         {
-            Add(new RenderTexture(info));
+            var rt = new RenderTexture(info);
+            Add(rt);
+            return rt;
         }
 
         public void Add(RenderTexture rt)

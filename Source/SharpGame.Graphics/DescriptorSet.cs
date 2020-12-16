@@ -88,7 +88,7 @@ namespace SharpGame
 
             for(uint i = 0; i < resLayout.NumBindings; i++)
             {
-                Bind(i, bindables[i]);
+                BindResource(i, bindables[i]);
             }
 
             UpdateSets();
@@ -110,13 +110,13 @@ namespace SharpGame
                 writeDescriptorSets[img] = new VkWriteDescriptorSet[writeDescriptorSets[img].Length];
                 for (uint i = 0; i < writeDescriptorSets[img].Length; i++)
                 {
-                    Bind(i, bindables[i]);
+                    BindResource(i, bindables[i]);
                 }
             }
 
             UpdateSets();
         }
-
+                  
         public DescriptorSet Bind(uint dstBinding, ref VkDescriptorImageInfo imageInfo)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
@@ -227,7 +227,7 @@ namespace SharpGame
             return this;
         } 
 
-        public DescriptorSet Bind(uint dstBinding, IBindableResource bindable)
+        public DescriptorSet BindResource(uint dstBinding, IBindableResource bindable)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             switch(descriptorType)

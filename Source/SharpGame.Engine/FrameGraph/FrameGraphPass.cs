@@ -182,8 +182,13 @@ namespace SharpGame
                         }
                         else
                         {
-                            renderTarget.Add(info);
+                            var rt = renderTarget.Add(info);
+                            if(!rt.id.IsNullOrEmpty)
+                            {
+                                Renderer.RegRes(rt.id, rt);
+                            }
                         }
+
                         clearValues[i] = renderTextureInfos[i].ClearValue;
                     }
 

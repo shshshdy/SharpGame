@@ -167,8 +167,8 @@ namespace SharpGame
 
             colorMap = Resources.Instance.Load<Texture>("textures/terrain_texturearray_rgba.ktx");
 
-            dsTess.Bind(1, heightMap.texture);
-            dsTess.Bind(2, colorMap);
+            dsTess.BindResource(1, heightMap.texture);
+            dsTess.BindResource(2, colorMap);
             dsTess.UpdateSets();
         }
 

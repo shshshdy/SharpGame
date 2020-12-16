@@ -32,8 +32,7 @@ namespace SharpGame
         protected float debugImageHeight = 200.0f;
         List<ImageView> debugImages = new List<ImageView>();
 
-        public DynamicBuffer TransformBuffer { get; }  
-        public static bool EarlyZ { get; set; }
+        public DynamicBuffer TransformBuffer { get; }
         
         public event Action<RenderContext> OnBeginSubmit;
         public event Action<RenderContext, SubmitQueue> OnSubmit;
@@ -68,7 +67,6 @@ namespace SharpGame
             }
 
         }
-
 
         public RenderView CreateRenderView(Camera camera = null, Scene scene = null, RenderPipeline frameGraph = null)
         {

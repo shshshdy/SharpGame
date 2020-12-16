@@ -216,7 +216,7 @@ namespace SharpGame
                 {
                     if (binding.name == name)
                     {
-                        rs.Bind(binding.binding, tex);
+                        rs.BindResource(binding.binding, tex);
                         rs.UpdateSets();
                         return;
                     }

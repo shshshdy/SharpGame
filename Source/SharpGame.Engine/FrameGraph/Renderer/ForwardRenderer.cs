@@ -7,18 +7,13 @@ namespace SharpGame
     public class ForwardRenderer : RenderPipeline
     {
         public ForwardRenderer()
-        {
-            var depthFormat = Graphics.DepthFormat;
-            uint width = Graphics.Width;
-            uint height = Graphics.Height;
-
+        {        
             Add(new ShadowPass());
 
             var onScreenPass = new FrameGraphPass
             {
-                new AttachmentInfo(Graphics.Swapchain.ColorFormat),
-                new AttachmentInfo(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment),
-
+                new AttachmentInfo(Graphics.ColorFormat),
+                new AttachmentInfo(Graphics.DepthFormat),
 
                 new SceneSubpass
                 {
@@ -27,9 +22,7 @@ namespace SharpGame
 
             };
 
-
             Add(onScreenPass);
-
 
         }
 
@@ -39,20 +32,16 @@ namespace SharpGame
     {
         public ForwardHdrRenderer()
         {
-            var depthFormat = Graphics.DepthFormat;
-            uint width = Graphics.Width;
-            uint height = Graphics.Height;
-
             Add(new ShadowPass());
 
             var fgPass = new FrameGraphPass
             {
-                new AttachmentInfo(width, height, 1, VkFormat.R16G16B16A16SFloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment)
+                new AttachmentInfo(SizeHint.Full, VkFormat.R16G16B16A16SFloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment)
                 {
                     finalLayout = VkImageLayout.ShaderReadOnlyOptimal
                 },
 
-                new AttachmentInfo(width, height, 1, depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment),
+                new AttachmentInfo(Graphics.DepthFormat),
 
                 new SceneSubpass
                 {

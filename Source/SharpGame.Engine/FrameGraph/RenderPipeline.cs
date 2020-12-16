@@ -34,7 +34,7 @@ namespace SharpGame
 
         public RenderTarget RenderTarget { get; }
 
-        Dictionary<StringID, IBindableResource> resources = new Dictionary<StringID, IBindableResource>();
+        private readonly Dictionary<StringID, IBindableResource> resources = new Dictionary<StringID, IBindableResource>();
 
         public RenderPipeline()
         {
@@ -138,9 +138,17 @@ namespace SharpGame
             resources[id] = res;
         }
 
-        public void UnregRes(StringID id)
+        public void UnregRes(StringID id, IBindableResource res)
         {
-            resources.Remove(id);
+            resources.Remove(id, out var resource);
+            Debug.Assert(res == resource);
+        }
+
+        public IBindableResource Get(StringID id)
+        {
+            if (resources.TryGetValue(id, out var res))
+                return res;
+            return null;
         }
 
         public void Update()
@@ -184,8 +192,11 @@ namespace SharpGame
 
         protected virtual void OnCreateRenderTarget()
         {
-            colorTexture = RenderTarget.Add(Graphics.Swapchain);            
-            depthTexture = RenderTarget.Add(Graphics.DepthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled, VkSampleCountFlags.Count1, SizeHint.Full);
+            colorTexture = RenderTarget.Add(Graphics.Swapchain);
+            RegRes("color", colorTexture);
+
+            depthTexture = RenderTarget.Add(Graphics.DepthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled | VkImageUsageFlags.InputAttachment, VkSampleCountFlags.Count1, SizeHint.Full);
+            RegRes("depth", depthTexture);
         }
 
         protected virtual void OnUpdate()

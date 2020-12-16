@@ -45,7 +45,7 @@ namespace SharpGame
         }
         
 
-        protected override void BindResources()
+        protected override void OnBindResources()
         {
             //var rt = this.Renderer.RenderTarget;
 
@@ -63,7 +63,7 @@ namespace SharpGame
         {
         }
 
-        protected override void BindResources()
+        protected override void OnBindResources()
         {
             //PipelineResourceSet.SetResourceSet(0, )
         }

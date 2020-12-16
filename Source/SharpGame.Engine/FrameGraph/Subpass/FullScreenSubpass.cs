@@ -11,13 +11,14 @@ namespace SharpGame
 
         public Action<PipelineResourceSet> onBindResource;
 
+        public List<(StringID, uint, uint)> inputResources = new List<(StringID, uint, uint)>();
+
         public FullScreenSubpass(string fs, SpecializationInfo specializationInfo = null)
         {
             pass = ShaderUtil.CreatePass("shaders/post/fullscreen.vert", fs);
             pass.CullMode = VkCullModeFlags.None;
             pass.DepthTestEnable = false;
             pass.DepthWriteEnable = false;
-
             pass.PixelShader.SpecializationInfo = specializationInfo;
 
             PipelineResourceSet = new PipelineResourceSet(pass.PipelineLayout);
@@ -54,9 +55,24 @@ namespace SharpGame
         {
         }
 
-        protected virtual void BindResources()
+        protected void BindResources()
         {
+            foreach(var (resId, set, bind) in inputResources)
+            {
+                var res = Renderer.Get(resId);
+                if (res != null)
+                    PipelineResourceSet.ResourceSet[set].BindResource(bind, res);
+                else
+                    Log.Warn("Cannot find res ", resId);
+            }
+
+            OnBindResources();
+
             onBindResource?.Invoke(PipelineResourceSet);
+        }
+
+        protected virtual void OnBindResources()
+        {
         }
 
         public override void Draw(RenderContext rc, CommandBuffer cmd)

@@ -14,7 +14,7 @@ namespace SharpGame
         {
         }
 
-        protected override void BindResources()
+        protected override void OnBindResources()
         {
         }
     }
@@ -29,7 +29,7 @@ namespace SharpGame
         {
         }
 
-        protected override void BindResources()
+        protected override void OnBindResources()
         {
         }
     }
@@ -44,7 +44,7 @@ namespace SharpGame
         {
         }
 
-        protected override void BindResources()
+        protected override void OnBindResources()
         {
         }
     }

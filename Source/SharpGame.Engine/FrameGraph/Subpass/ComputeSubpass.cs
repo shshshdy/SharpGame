@@ -53,7 +53,7 @@ namespace SharpGame
                 cmd.BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
             }
 
-            cmd.Dispatch(100, 100, 1);
+            cmd.Dispatch(GroupCountX, GroupCountY, GroupCountZ);
         }
     
     }
