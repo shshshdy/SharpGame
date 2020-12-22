@@ -13,19 +13,18 @@ namespace SharpGame
 
     public class DescriptorSet : IDisposable
     {
-        public int Set => resourceLayout.Set;
-        public bool Updated { get; private set; } = false;
-
         internal DescriptorSetLayout resourceLayout;
-
-        [IgnoreDataMember]
-        internal ref DescriptorResourceCounts Counts => ref resourceLayout.descriptorResourceCounts;
-
         internal VkDescriptorPool descriptorPool;
         internal FixedArray3<VkDescriptorSet> descriptorSet;
-   
         internal VkWriteDescriptorSet[][] writeDescriptorSets = new VkWriteDescriptorSet[Swapchain.IMAGE_COUNT][];
         internal bool[][] needUpdated = new bool[Swapchain.IMAGE_COUNT][];
+
+        [IgnoreDataMember]
+        public int Set => resourceLayout.Set;
+        [IgnoreDataMember]
+        public bool Updated { get; private set; } = false;
+        [IgnoreDataMember]
+        internal ref DescriptorResourceCounts Counts => ref resourceLayout.descriptorResourceCounts;
 
         public DescriptorSet(DescriptorSetLayout resLayout)
         {

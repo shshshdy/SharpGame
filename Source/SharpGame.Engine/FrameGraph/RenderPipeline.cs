@@ -35,6 +35,7 @@ namespace SharpGame
         public RenderTarget RenderTarget { get; }
 
         private readonly Dictionary<StringID, IBindableResource> resources = new Dictionary<StringID, IBindableResource>();
+        private readonly Dictionary<StringID, DescriptorSet> resourceSets = new Dictionary<StringID, DescriptorSet>();
 
         public RenderPipeline()
         {
@@ -64,8 +65,8 @@ namespace SharpGame
 
         public virtual void DeviceLost()
         {
-            UnregRes(colorTexture);
-            UnregRes(depthTexture);
+            UnregResource(colorTexture);
+            UnregResource(depthTexture);
 
             RenderTarget.Clear();
 
@@ -137,15 +138,24 @@ namespace SharpGame
             }
         }
 
-        public void RegRes(StringID id, IBindableResource res)
+        public void RegResource(StringID id, IBindableResource res)
         {
             resources[id] = res;
         }
 
-        public void UnregRes(StringID id, IBindableResource res)
+        public void UnregResource(StringID id)
         {
-            resources.Remove(id, out var resource);
-            Debug.Assert(res == resource);
+            resources.Remove(id);
+        }
+
+        public void RegResourceSet(StringID id, DescriptorSet resSet)
+        {
+            resourceSets[id] = resSet;
+        }
+
+        public void UnregResourceSet(StringID id)
+        {
+            resourceSets.Remove(id);            
         }
 
         public IBindableResource Get(StringID id)
@@ -155,14 +165,14 @@ namespace SharpGame
             return null;
         }
 
-        public void RegRes(RenderTexture rt)
+        public void RegResource(RenderTexture rt)
         {
-            RegRes(rt.id, rt);
+            RegResource(rt.id, rt);
         }
 
-        public void UnregRes(RenderTexture rt)
+        public void UnregResource(RenderTexture rt)
         {
-            UnregRes(rt.id, rt);
+            UnregResource(rt.id);
         }
 
         public void Update()
@@ -207,10 +217,10 @@ namespace SharpGame
         protected virtual void OnCreateRenderTarget()
         {
             colorTexture = RenderTarget.Add(Graphics.Swapchain);
-            RegRes("output_color", colorTexture);
+            RegResource("output_color", colorTexture);
 
             depthTexture = RenderTarget.Add("depth", Graphics.DepthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled | VkImageUsageFlags.InputAttachment, VkSampleCountFlags.Count1, SizeHint.Full);
-            RegRes("depth", depthTexture);
+            RegResource("depth", depthTexture);
         }
 
         protected virtual void OnUpdate()

@@ -11,7 +11,8 @@ namespace SharpGame
 
         public Action<PipelineResourceSet> onBindResource;
 
-        public List<(StringID, uint, uint)> inputResources = new List<(StringID, uint, uint)>();
+        private Dictionary<(uint, uint), StringID> inputResources = new Dictionary<(uint, uint), StringID>();
+        private Dictionary<uint, StringID> inputResourceSets = new Dictionary<uint, StringID>();
 
         public FullScreenSubpass(string fs, SpecializationInfo specializationInfo = null)
         {
@@ -28,29 +29,35 @@ namespace SharpGame
         {
             get
             {
-                foreach (var (resId, resSet, resBind) in inputResources)
+                if(inputResources.TryGetValue((set, binding), out var resId))
                 {
-                    if (set == resSet && binding == resBind)
-                    {
-                        return resId;
-                    }
+                    return resId;                    
                 }
+
                 return StringID.Empty;
             }
 
             set
             {
-                for(int i = 0; i < inputResources.Count; i++)
+                inputResources[(set, binding)] = value;
+            }
+        }
+
+        public StringID this[uint set]
+        {
+            get
+            {
+                if (inputResourceSets.TryGetValue(set, out var res))
                 {
-                    if (set == inputResources[i].Item2 && binding == inputResources[i].Item3)
-                    {
-                        inputResources[i] = (value, set, binding);
-                        return;
-                    }
+                    return res;
                 }
 
-                inputResources.Add((value, set, binding));
+                return null;
+            }
 
+            set
+            {
+                inputResourceSets[set] = value;
             }
         }
 
@@ -92,8 +99,11 @@ namespace SharpGame
 
         protected void BindResources()
         {
-            foreach(var (resId, set, bind) in inputResources)
+            var it = inputResources.GetEnumerator();
+            while(it.MoveNext())
             {
+                var (set, bind) = it.Current.Key;
+                var resId = it.Current.Value;
                 var res = Renderer.Get(resId);
                 if (res != null)
                     PipelineResourceSet.ResourceSet[set].BindResource(bind, res);

@@ -165,7 +165,7 @@ namespace SharpGame
                 {
                     if (!rt.id.IsNullOrEmpty)
                     {
-                        Renderer.RegRes(rt.id, rt);
+                        Renderer.RegResource(rt.id, rt);
                     }
                 }
             }
@@ -192,7 +192,7 @@ namespace SharpGame
                             var rt = renderTarget.Add(info);
                             if(!rt.id.IsNullOrEmpty)
                             {
-                                Renderer.RegRes(rt.id, rt);
+                                Renderer.RegResource(rt.id, rt);
                             }
                         }
 
