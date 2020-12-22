@@ -14,6 +14,8 @@ namespace SharpGame
         Texture ssaoNoiseTex;
         public SSAOSubpass() : base("post/ssao.frag")
         {
+            this[0, 0] = "depth";
+            this[0, 1] = "normal";
         }
 
         protected override void CreateResources()
@@ -44,12 +46,11 @@ namespace SharpGame
             ssaoNoiseTex = Texture.Create2D(SSAO_NOISE_DIM, SSAO_NOISE_DIM, VkFormat.R32G32B32A32SFloat, ssaoNoise.Data);
         }
         
-
         protected override void OnBindResources()
         {
-            //var rt = this.Renderer.RenderTarget;
-
-            //PipelineResourceSet.SetResourceSet(0, rt[1], rt[3], ssaoNoiseTex, ssaoKernel, View.ubGlobal);            
+            SetResource(0, 2, ssaoNoiseTex);
+            SetResource(0, 3, ssaoKernel);
+            SetResource(0, 4, View.ubGlobal);
         }
     }
 
@@ -57,6 +58,7 @@ namespace SharpGame
     {
         public SSAOBlurSubpass() : base("post/blur.frag")
         {
+            this[0, 0] = "ssao";
         }
 
         protected override void CreateResources()
@@ -65,7 +67,6 @@ namespace SharpGame
 
         protected override void OnBindResources()
         {
-            //PipelineResourceSet.SetResourceSet(0, )
         }
     }
 }

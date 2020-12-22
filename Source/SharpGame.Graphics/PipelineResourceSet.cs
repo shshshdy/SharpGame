@@ -198,14 +198,24 @@ namespace SharpGame
             return IntPtr.Zero;
         }
 
-        public void SetResourceSet(int index, params IBindableResource[] res)
+        public void SetResourceSet(uint set, params IBindableResource[] res)
         {
-            if (index < 0 || index >= ResourceSet.Length)
+            if (set < 0 || set >= ResourceSet.Length)
             {
                 return;
             }
 
-            ResourceSet[index].Bind(res);
+            ResourceSet[set].Bind(res);
+        }
+
+        public void SetResource(uint set, uint binding, IBindableResource res)
+        {
+            if (set < 0 || set >= ResourceSet.Length)
+            {
+                return;
+            }
+
+            ResourceSet[set].BindResource(binding, res);
         }
 
         public void UpdateResourceSet(StringID name, IBindableResource tex)

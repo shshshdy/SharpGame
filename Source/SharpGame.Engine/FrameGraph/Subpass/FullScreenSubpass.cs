@@ -70,6 +70,11 @@ namespace SharpGame
 
         }
 
+        public void SetResource(uint set, uint binding, IBindableResource res)
+        {
+            PipelineResourceSet.SetResource(set, binding, res);
+        }
+
         public override void Init()
         {
             CreateResources();
