@@ -48,15 +48,18 @@ namespace SharpGame
             if (Device.IsDepthFormat(format))
             {
                 ClearValue = new VkClearDepthStencilValue(1, 0);
+                id = "depth";
             }
             else
             {
                 ClearValue = new VkClearColorValue(0, 0, 0, 1);
+                id = "output_color";
             }
         }
 
-        public AttachmentInfo(SizeHint sizeHint, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1)
+        public AttachmentInfo(StringID id, SizeHint sizeHint, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1)
         {
+            this.id = id;
             this.SizeHint = sizeHint;
             this.Usage = usage;
             attachmentDescription = new VkAttachmentDescription(format, samples);
@@ -131,7 +134,7 @@ namespace SharpGame
             this.imageUsageFlags = info.Usage;
             this.samples = info.samples;
             this.sizeHint = info.SizeHint;
-
+            this.id = info.id;
             Create();
         }
 
@@ -173,15 +176,15 @@ namespace SharpGame
     public class RenderTarget
     {
         public VkExtent2D Extent { get; private set; }
-        public uint AttachmentCount => (uint)attachments.Count;
-        private List<RenderTexture> attachments = new List<RenderTexture>();
+        public uint AttachmentCount => (uint)Attachments.Count;
+        public List<RenderTexture> Attachments { get; } = new List<RenderTexture>();
 
         public RenderTarget(uint width, uint height)
         {
             Extent = new VkExtent2D(width, height);
         }
 
-        public RenderTexture this[int index] => attachments[index];
+        public RenderTexture this[int index] => Attachments[index];
 
         public RenderTexture Add(Swapchain swapchain)
         {
@@ -190,9 +193,10 @@ namespace SharpGame
             return rt;
         }
 
-        public RenderTexture Add(VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1, SizeHint sizeHint = SizeHint.Full)
+        public RenderTexture Add(StringID id, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags.Count1, SizeHint sizeHint = SizeHint.Full)
         {
             var rt = new RenderTexture(Extent.width, Extent.height, 1, format, usage, samples, sizeHint);
+            rt.id = id;
             Add(rt);
             return rt;
         }
@@ -213,7 +217,7 @@ namespace SharpGame
 
         public void Add(RenderTexture rt)
         {
-            attachments.Add(rt);
+            Attachments.Add(rt);
         }
 
         public VkImageView[] GetViews(int imageIndex)
@@ -229,12 +233,12 @@ namespace SharpGame
 
         public void Clear()
         {
-            foreach(var attachment in attachments)
+            foreach(var attachment in Attachments)
             {
                 attachment?.Dispose();
             }
 
-            attachments.Clear();
+            Attachments.Clear();
         }
 
     }

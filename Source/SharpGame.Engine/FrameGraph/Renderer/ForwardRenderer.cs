@@ -36,7 +36,7 @@ namespace SharpGame
 
             var fgPass = new FrameGraphPass
             {
-                new AttachmentInfo(SizeHint.Full, VkFormat.R16G16B16A16SFloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment)
+                new AttachmentInfo("color", SizeHint.Full, VkFormat.R16G16B16A16SFloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled| VkImageUsageFlags.InputAttachment)
                 {
                     finalLayout = VkImageLayout.ShaderReadOnlyOptimal
                 },

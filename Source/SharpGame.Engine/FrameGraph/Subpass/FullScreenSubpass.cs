@@ -24,6 +24,36 @@ namespace SharpGame
             PipelineResourceSet = new PipelineResourceSet(pass.PipelineLayout);
         }
 
+        public StringID this[uint set, uint binding]
+        {
+            get
+            {
+                foreach (var (resId, resSet, resBind) in inputResources)
+                {
+                    if (set == resSet && binding == resBind)
+                    {
+                        return resId;
+                    }
+                }
+                return StringID.Empty;
+            }
+
+            set
+            {
+                for(int i = 0; i < inputResources.Count; i++)
+                {
+                    if (set == inputResources[i].Item2 && binding == inputResources[i].Item3)
+                    {
+                        inputResources[i] = (value, set, binding);
+                        return;
+                    }
+                }
+
+                inputResources.Add((value, set, binding));
+
+            }
+        }
+
         public bool AddtiveMode
         {
             set

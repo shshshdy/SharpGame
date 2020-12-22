@@ -211,8 +211,8 @@ namespace SharpGame
 
             var rt = new RenderTarget(width, height);
 
-            albedoRT = rt.Add(VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
-            normalRT = rt.Add(VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            albedoRT = rt.Add("albedo", VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
+            normalRT = rt.Add("depth", VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
             depthHWRT = depthTexture;// rt.Add(depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
             rt.Add(depthHWRT);
             deferredSet1 = new DescriptorSet(deferredLayout1, albedoRT, normalRT, depthHWRT);

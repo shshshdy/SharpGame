@@ -161,6 +161,13 @@ namespace SharpGame
             if (renderTargetCreator != null)
             {
                 renderTarget = renderTargetCreator();
+                foreach(var rt in renderTarget.Attachments)
+                {
+                    if (!rt.id.IsNullOrEmpty)
+                    {
+                        Renderer.RegRes(rt.id, rt);
+                    }
+                }
             }
             else
             {

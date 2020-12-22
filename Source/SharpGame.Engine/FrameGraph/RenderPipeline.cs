@@ -64,12 +64,16 @@ namespace SharpGame
 
         public virtual void DeviceLost()
         {
+            UnregRes(colorTexture);
+            UnregRes(depthTexture);
+
             RenderTarget.Clear();
 
             foreach (var rp in RenderPassList)
             {
                 rp.DeviceLost();
             }
+
         }
           
         public virtual void DeviceReset()
@@ -151,6 +155,16 @@ namespace SharpGame
             return null;
         }
 
+        public void RegRes(RenderTexture rt)
+        {
+            RegRes(rt.id, rt);
+        }
+
+        public void UnregRes(RenderTexture rt)
+        {
+            UnregRes(rt.id, rt);
+        }
+
         public void Update()
         {
             Profiler.BeginSample("FrameGraph.Update");
@@ -193,9 +207,9 @@ namespace SharpGame
         protected virtual void OnCreateRenderTarget()
         {
             colorTexture = RenderTarget.Add(Graphics.Swapchain);
-            RegRes("color", colorTexture);
+            RegRes("output_color", colorTexture);
 
-            depthTexture = RenderTarget.Add(Graphics.DepthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled | VkImageUsageFlags.InputAttachment, VkSampleCountFlags.Count1, SizeHint.Full);
+            depthTexture = RenderTarget.Add("depth", Graphics.DepthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled | VkImageUsageFlags.InputAttachment, VkSampleCountFlags.Count1, SizeHint.Full);
             RegRes("depth", depthTexture);
         }
 
