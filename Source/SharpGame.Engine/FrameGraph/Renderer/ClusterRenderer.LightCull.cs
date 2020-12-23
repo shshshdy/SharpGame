@@ -94,9 +94,7 @@ namespace SharpGame
             };
 
             computeSet0 = new DescriptorSet(computeLayout0, uboCluster, light_pos_ranges);
-
-            computeSet1 = new DescriptorSet(computeLayout1,
-                gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
+            computeSet1 = new DescriptorSet(computeLayout1, gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
                 gridLightCountOffsets, lightList, gridLightCountsCompare);
         }
 

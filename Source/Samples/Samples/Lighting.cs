@@ -47,7 +47,7 @@ namespace SharpGame.Samples
 
             BoundingBox aabb = staticModel.WorldBoundingBox;
 
-            SetupLights(scene, aabb, 1024, lights);
+            SetupLights(scene, aabb, 10/*24*/, lights);
           
             //clusterRenderer = new ClusterForwardRenderer();
             clusterRenderer = new HybridRenderer();

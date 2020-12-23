@@ -6,16 +6,15 @@ namespace SharpGame
 {
     public struct Batch
     {
-        public SourceBatch sourceBatch;
+        public SourceBatch pass;
 
     }
 
     public class BatchGroup
     {
         public Pass pass;
-        public Buffer materials;
+        public PipelineResourceSet pipelineResourceSet;
 
-        public Vector<VkDescriptorBufferInfo> buffers;
         public FastList<Batch> geometries = new FastList<Batch>();
 
     }

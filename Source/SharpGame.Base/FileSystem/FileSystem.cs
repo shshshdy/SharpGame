@@ -13,7 +13,6 @@ namespace SharpGame
         public static string ProgramDir => Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
         public static readonly string DataPath = "data/";
-        public static readonly string CoreDataPath = "coredata/";
         public static readonly string CachePath = "cache/";
 
         /// Mutex for thread-safe access to the resource directories, resource packages and resource dependencies.
@@ -30,8 +29,12 @@ namespace SharpGame
             WorkSpace = workSpace;
 
             AddResourceDir(WorkSpace + DataPath);
-            AddResourceDir(WorkSpace + CoreDataPath);
             AddResourceDir(WorkSpace + CachePath);
+
+            AddResourceDir(WorkSpace + DataPath + "/shaders");
+            AddResourceDir(WorkSpace + DataPath + "/shaders/common");
+            AddResourceDir(WorkSpace + DataPath + "/shaders/glsl");
+            
         }
 
         public static File OpenFile(string path)

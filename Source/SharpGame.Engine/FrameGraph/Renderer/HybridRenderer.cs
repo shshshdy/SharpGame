@@ -15,8 +15,7 @@ namespace SharpGame
         protected FrameGraphPass ssaoBlur;
         protected FrameGraphPass compositePass;
         protected FrameGraphPass onscreenPass;
-
-        protected Shader clusterDeferred;
+        bool enableSSAO = false;
 
         public HybridRenderer()
         {
@@ -25,10 +24,6 @@ namespace SharpGame
         protected override void CreateResources()
         {
             base.CreateResources();
-
-            clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
-
-
         }
 
         protected override void CreateRenderPath()
@@ -56,38 +51,43 @@ namespace SharpGame
 
             this.Add(translucentClustering);
 
-            /*
-            ssaoPass = new FrameGraphPass
+            if(enableSSAO)
             {
-                new AttachmentInfo("ssao", SizeHint.Full, VkFormat.R8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
+                ssaoPass = new FrameGraphPass
+                {
+                    new AttachmentInfo("ssao", SizeHint.Full, VkFormat.R8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
 
-                new SSAOSubpass()
-            };
+                    new SSAOSubpass()
+                };
 
-            this.Add(ssaoPass);
+                this.Add(ssaoPass);
 
-            ssaoBlur = new FrameGraphPass
-            {
-                new AttachmentInfo("ssao_blur",  SizeHint.Full, VkFormat.R8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
+                ssaoBlur = new FrameGraphPass
+                {
+                    new AttachmentInfo("ssao_blur",  SizeHint.Full, VkFormat.R8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
 
-                new SSAOSubpass()
-            };
+                    new SSAOSubpass()
+                };
 
-            this.Add(ssaoBlur);*/
+                this.Add(ssaoBlur);
+
+            }
 
             lightCull = new ComputePass(ComputeLight);
             this.Add(lightCull);
-            
+
+            var specializationInfo = new SpecializationInfo(new VkSpecializationMapEntry(0, 0, sizeof(uint)));
+            specializationInfo.Write(0, 1);
+
             onscreenPass = new FrameGraphPass
             {
                 new AttachmentInfo(Graphics.ColorFormat),
-
-                new AttachmentInfo(this.depthTexture.format)
+                new AttachmentInfo(depthTexture.format)
                 {
                     storeOp = VkAttachmentStoreOp.Store
                 },
 
-                new FullScreenSubpass(clusterDeferred.Main)
+                new FullScreenSubpass("shaders/glsl/cluster_deferred.frag", specializationInfo)
                 {
                     [0, 0] = "global",
                     [3, 0] = "albedo",

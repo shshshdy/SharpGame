@@ -26,11 +26,9 @@ namespace SharpGame
         internal VkDescriptorPool descriptorPool;
         internal FixedArray3<VkDescriptorSet> descriptorSet;
         internal VkWriteDescriptorSet[][] writeDescriptorSets = new VkWriteDescriptorSet[Swapchain.IMAGE_COUNT][];
-#if NEW_UPDATE
         internal uint[] needUpdated = new uint[Swapchain.IMAGE_COUNT];
-#else
-        internal bool[][] needUpdated = new bool[Swapchain.IMAGE_COUNT][];
-#endif
+        public IBindableResource[] bindedRes;
+
         [IgnoreDataMember]
         public int Set => resourceLayout.Set;
         [IgnoreDataMember]
@@ -64,10 +62,6 @@ namespace SharpGame
             for (int i = 0; i < Swapchain.IMAGE_COUNT; i++)
             {
                 writeDescriptorSets[i] = new VkWriteDescriptorSet[resLayout.NumBindings];
-#if NEW_UPDATE
-#else
-                needUpdated[i] = new bool[resLayout.NumBindings];
-#endif
             }
         }
 
@@ -97,10 +91,6 @@ namespace SharpGame
             for (int i = 0; i < Swapchain.IMAGE_COUNT; i++)
             {
                 writeDescriptorSets[i] = new VkWriteDescriptorSet[resLayout.NumBindings];
-#if NEW_UPDATE
-#else
-                needUpdated[i] = new bool[resLayout.NumBindings];
-#endif
             }
 
             for(uint i = 0; i < resLayout.NumBindings; i++)
@@ -135,13 +125,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-#if NEW_UPDATE
                 AddWriteDescriptorSet(img, new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref imageInfo, 1));
-#else
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref imageInfo, 1);
-
-                needUpdated[img][dstBinding] = true;
-#endif
             }
             return this;
         }
@@ -151,14 +135,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-#if NEW_UPDATE
                 AddWriteDescriptorSet(img, new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref imageInfo[0], (uint)imageInfo.Length));
-
-#else
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref imageInfo[0], (uint)imageInfo.Length);
-
-                needUpdated[img][dstBinding] = true;
-#endif
             }
 
             return this;
@@ -169,13 +146,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-#if NEW_UPDATE
                 AddWriteDescriptorSet(img, new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref buffer[img].descriptor, 1));
-                
-#else
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref buffer[img].descriptor, 1);
-                needUpdated[img][dstBinding] = true;
-#endif
             }
 
             return this;
@@ -186,13 +157,7 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-#if NEW_UPDATE
                 AddWriteDescriptorSet(img, new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref rt.attachmentViews[img].descriptor, 1));
-                
-#else
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref rt.attachmentViews[img].descriptor, 1);
-                needUpdated[img][dstBinding] = true;
-#endif
             }
 
             return this;
@@ -202,13 +167,8 @@ namespace SharpGame
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
-            {
-#if NEW_UPDATE       
+            {     
                 AddWriteDescriptorSet(img, new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref bufferInfo, 1));
-#else
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref bufferInfo, 1);
-                needUpdated[img][dstBinding] = true;
-#endif
             }
 
             return this;
@@ -218,13 +178,8 @@ namespace SharpGame
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
-            {
-#if NEW_UPDATE    
+            { 
                 AddWriteDescriptorSet(img, new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref bufferInfo[0], (uint)bufferInfo.Length));
-#else
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref bufferInfo[0], (uint)bufferInfo.Length);
-                needUpdated[img][dstBinding] = true;
-#endif
             }
 
             return this;
@@ -236,13 +191,7 @@ namespace SharpGame
 
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-#if NEW_UPDATE  
                 AddWriteDescriptorSet(img, new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref bufferInfo, ref bufferView.HandleRef));
-                
-#else
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref bufferInfo, ref bufferView.HandleRef);
-                needUpdated[img][dstBinding] = true;
-#endif
             }
 
             return this;
@@ -254,13 +203,7 @@ namespace SharpGame
 
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-#if NEW_UPDATE
                 AddWriteDescriptorSet(img, new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref buffer.Buffer.descriptor, ref buffer.Buffer.view.HandleRef));
-                
-#else
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType, ref buffer.Buffer.descriptor, ref buffer.Buffer.view.HandleRef);
-                needUpdated[img][dstBinding] = true;
-#endif
             }
 
             return this;
@@ -285,14 +228,8 @@ namespace SharpGame
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
             {
-#if NEW_UPDATE
                 AddWriteDescriptorSet(img, new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType,
                     inlineUniformBlock.inlineUniformBlockEXT));
-#else
-                writeDescriptorSets[img][dstBinding] = new VkWriteDescriptorSet(dstBinding, descriptorSet[img], descriptorType,
-                    inlineUniformBlock.inlineUniformBlockEXT);
-                needUpdated[img][dstBinding] = true;
-#endif
             }
 
             return this;
@@ -395,42 +332,12 @@ namespace SharpGame
 
         public void UpdateSets(int img)
         {
-#if NEW_UPDATE
             if(needUpdated[img] > 0)
             {
                 Device.UpdateDescriptorSets(needUpdated[img], ref writeDescriptorSets[img][0], 0, IntPtr.Zero);
                 needUpdated[img] = 0;
                 Updated = true;
             }
-#else
-            uint index = 0;
-            uint count = 0;
-               
-            for (uint i = 0; i < writeDescriptorSets[img].Length; i++)
-            {
-                if (needUpdated[img][i])
-                {
-                    count++;
-                    needUpdated[img][i] = false;
-                }
-                else{
-
-                    if(count > 0)
-                    {
-                        Device.UpdateDescriptorSets(count, ref writeDescriptorSets[img][index], 0, IntPtr.Zero);
-                        Updated = true;
-                    }
-                    count = 0;
-                    index = i + 1;
-                }
-            }
-
-            if (count > 0)
-            {
-                Device.UpdateDescriptorSets(count, ref writeDescriptorSets[img][index], 0, IntPtr.Zero);
-                Updated = true;
-            }
-#endif
         }
 
 
