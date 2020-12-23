@@ -5,25 +5,21 @@
 
 precision highp float;
 
-#include <common.h>
+#include "global.glsl"
 
-layout (binding = 0) uniform sampler2D samplerDepth;
-layout (binding = 1) uniform sampler2D samplerNormal;
-layout (binding = 2) uniform sampler2D ssaoNoise;
+layout (set = 1, binding = 0) uniform sampler2D samplerDepth;
+layout (set = 1, binding = 1) uniform sampler2D samplerNormal;
+layout (set = 1, binding = 2) uniform sampler2D ssaoNoise;
 
 layout (constant_id = 0) const int SSAO_KERNEL_SIZE = 32;
 layout (constant_id = 1) const float SSAO_RADIUS = 0.5;
 layout (constant_id = 2) const float SSAO_POWER = 1.5;
 
-layout (binding = 3) uniform UBOSSAOKernel
+layout (set = 1, binding = 3) uniform UBOSSAOKernel
 {
 	vec4 samples[SSAO_KERNEL_SIZE];
 } uboSSAOKernel;
 
-layout (binding = 4) uniform UBO 
-{
-	Camera ubo;
-};
 
 layout (location = 0) in vec2 inUV;
 
@@ -37,7 +33,7 @@ float linearizeDepth(float depth, float near, float far)
 float getDepth(sampler2D depth_sampler, vec2 offset)
 {
 	float depth = texture(depth_sampler, offset).r;
-	return linearizeDepth(depth, ubo.nearPlane, ubo.farPlane);
+	return linearizeDepth(depth, NearClip, FarClip);
 }
 
 
@@ -64,7 +60,7 @@ void main()
 {
 	float depth = texture(samplerDepth, inUV).x; //outFragColor = depth; return;
 	vec4  clip  = vec4(inUV * 2.0 - 1.0, depth, 1.0);
-    highp vec4 viewPos = ubo.invProj * clip;
+    highp vec4 viewPos = ProjInv * clip;
     highp vec3 fragPos = viewPos.xyz / viewPos.w;
 
 	vec3 normal = normalize(texture(samplerNormal, inUV).rgb * 2.0 - 1.0);
@@ -94,7 +90,7 @@ void main()
 		
 		// project
 		vec4 offset = vec4(samplePos, 1.0f);
-		offset = ubo.proj * offset; 
+		offset = Proj * offset; 
 		offset.xyz /= offset.w; 
 		offset.xyz = offset.xyz * 0.5f + 0.5f; 
 		

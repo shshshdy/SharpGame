@@ -4,7 +4,7 @@
 #extension GL_ARB_shading_language_420pack : enable
 
 layout (binding = 0) uniform sampler2D samplerSSAO;
-layout (binding = 1) uniform sampler2D samplerColor;
+//layout (binding = 1) uniform sampler2D samplerColor;
 
 layout (location = 0) in vec2 inUV;
 
@@ -29,8 +29,8 @@ void main()
 	}
 
 	float res = result / (float(n));
-	vec4 color = texture(samplerColor, inUV);
-	outFragColor = vec4(res * color.rgb, color.a);
-	//outFragColor = vec4(res, res, res, 1); return;
+	//vec4 color = texture(samplerColor, inUV);
+	//outFragColor = vec4(res * color.rgb, color.a);
+	outFragColor = vec4(res, res, res, 1); return;
 	
 }

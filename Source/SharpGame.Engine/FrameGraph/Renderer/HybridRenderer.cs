@@ -15,7 +15,7 @@ namespace SharpGame
         protected FrameGraphPass ssaoBlur;
         protected FrameGraphPass compositePass;
         protected FrameGraphPass onscreenPass;
-        bool enableSSAO = false;
+        bool enableSSAO = true;
 
         public HybridRenderer()
         {
@@ -66,7 +66,7 @@ namespace SharpGame
                 {
                     new AttachmentInfo("ssao_blur",  SizeHint.Full, VkFormat.R8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
 
-                    new SSAOSubpass()
+                    new SSAOBlurSubpass()
                 };
 
                 this.Add(ssaoBlur);
@@ -93,6 +93,7 @@ namespace SharpGame
                     [3, 0] = "albedo",
                     [3, 1] = "normal",
                     [3, 2] = "depth",
+                    [3, 3] = "ssao_blur",
 
                     resourceSet = new[]
                     {

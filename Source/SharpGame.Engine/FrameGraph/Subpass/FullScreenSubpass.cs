@@ -8,7 +8,7 @@ namespace SharpGame
     {
         public Pass Pass { get; }
         public PipelineResourceSet PipelineResourceSet { get; }
-        public DescriptorSet[] resourceSet { get; set; }
+        public DescriptorSet[] resourceSet { get; set; } = new DescriptorSet[0];
 
         public Action<PipelineResourceSet> onBindResource;
 

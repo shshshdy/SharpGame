@@ -14,8 +14,9 @@ namespace SharpGame
         Texture ssaoNoiseTex;
         public SSAOSubpass() : base("post/ssao.frag")
         {
-            this[0, 0] = "depth";
-            this[0, 1] = "normal";
+            this[0, 0] = "global";
+            this[1, 0] = "depth";
+            this[1, 1] = "normal";
         }
 
         protected override void CreateResources()
@@ -48,9 +49,8 @@ namespace SharpGame
         
         protected override void OnBindResources()
         {
-            SetResource(0, 2, ssaoNoiseTex);
-            SetResource(0, 3, ssaoKernel);
-            SetResource(0, 4, View.ubGlobal);
+            SetResource(1, 2, ssaoNoiseTex);
+            SetResource(1, 3, ssaoKernel);
         }
     }
 
