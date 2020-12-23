@@ -43,7 +43,6 @@ namespace SharpGame
 
         public void MarkDirty()
         {
-            //descriptorSet.MarkDirty(resourceInfo.binding);
             descriptorSet.Bind(resourceInfo.binding, this);
         }
 

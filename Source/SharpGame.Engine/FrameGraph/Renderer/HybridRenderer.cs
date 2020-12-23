@@ -16,17 +16,7 @@ namespace SharpGame
         protected FrameGraphPass compositePass;
         protected FrameGraphPass onscreenPass;
 
-        private RenderTexture albedoRT;
-        private RenderTexture normalRT;
-        private RenderTexture depthHWRT;
-
         protected Shader clusterDeferred;
-
-        DescriptorSetLayout deferredLayout0;
-        DescriptorSetLayout deferredLayout1;
-
-        DescriptorSet deferredSet0;
-        DescriptorSet deferredSet1;
 
         public HybridRenderer()
         {
@@ -38,19 +28,6 @@ namespace SharpGame
 
             clusterDeferred = Resources.Instance.Load<Shader>("Shaders/ClusterDeferred.shader");
 
-            deferredLayout0 = new DescriptorSetLayout
-            {
-                new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.All),
-            };
-
-            deferredSet0 = new DescriptorSet(deferredLayout0, View.ubGlobal);
-
-            deferredLayout1 = new DescriptorSetLayout
-            {
-                new DescriptorSetLayoutBinding(0, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(1, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
-                new DescriptorSetLayoutBinding(2, VkDescriptorType.CombinedImageSampler, VkShaderStageFlags.Fragment),
-            };
 
         }
 
@@ -60,9 +37,9 @@ namespace SharpGame
 
             geometryPass = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                //new RenderTextureInfo(width, height, 1, VkFormat.R8G8B8A8UNorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
-                //new RenderTextureInfo(width, height, 1, VkFormat.R8G8B8A8UNorm, ImageUsageFlags.ColorAttachment | ImageUsageFlags.Sampled),
-                //new RenderTextureInfo(width, height, 1, depthFormat, ImageUsageFlags.DepthStencilAttachment | ImageUsageFlags.Sampled),
+                new AttachmentInfo("albedo", SizeHint.Full, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
+                new AttachmentInfo("normal", SizeHint.Full, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
+                new AttachmentInfo(depthTexture.format),
 
                 new SceneSubpass("gbuffer")
                 {
@@ -71,14 +48,6 @@ namespace SharpGame
 
             };
 
-            geometryPass.clearValues = new VkClearValue[]
-            {
-                new VkClearColorValue(0.25f, 0.25f, 0.25f, 1),
-                new VkClearColorValue(0, 0, 0, 1),
-                new VkClearDepthStencilValue(1, 0)
-            };
-
-            geometryPass.renderTargetCreator = OnCreateFramebuffer;
             geometryPass.renderPassCreator = OnCreateRenderPass;
 
             this.Add(geometryPass);
@@ -111,27 +80,32 @@ namespace SharpGame
             
             onscreenPass = new FrameGraphPass
             {
-                new AttachmentInfo(Graphics.ColorFormat)
-                {
-                    //loadOp = VkAttachmentLoadOp.Load
-                },
+                new AttachmentInfo(Graphics.ColorFormat),
 
                 new AttachmentInfo(this.depthTexture.format)
                 {
-                    //loadOp = VkAttachmentLoadOp.Load,
-                    //storeOp = VkAttachmentStoreOp.Store
+                    storeOp = VkAttachmentStoreOp.Store
                 },
 
-                new GraphicsSubpass
+                new FullScreenSubpass(clusterDeferred.Main)
                 {
-                    OnDraw = Composite,
+                    [0, 0] = "global",
+                    [3, 0] = "albedo",
+                    [3, 1] = "normal",
+                    [3, 2] = "depth",
+
+                    resourceSet = new[]
+                    {
+                        null, resourceSet1, resourceSet2
+                    },
+
                 },
 
                 new SceneSubpass("cluster_forward")
                 {
                     DisableDepthStencil = false,
-                    Set1 = resourceSet0,
-                    Set2 = resourceSet1,
+                    Set1 = resourceSet1,
+                    Set2 = resourceSet2,
                     BlendFlags = BlendFlags.AlphaBlend
                 },
 
@@ -202,43 +176,6 @@ namespace SharpGame
 
             return new RenderPass(attachments, subpassDescription, dependencies);
         
-        }
-
-        RenderTarget OnCreateFramebuffer()
-        {
-            uint width = (uint)Graphics.Width;
-            uint height = (uint)Graphics.Height;
-            VkFormat depthFormat = Device.GetSupportedDepthFormat();
-
-            var rt = new RenderTarget(width, height);
-
-            albedoRT = rt.Add("albedo", VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
-            normalRT = rt.Add("normal", VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled);
-            depthHWRT = depthTexture;// rt.Add(depthFormat, VkImageUsageFlags.DepthStencilAttachment | VkImageUsageFlags.Sampled);
-            rt.Add(depthHWRT);
-            deferredSet1 = new DescriptorSet(deferredLayout1, albedoRT, normalRT, depthHWRT);
-
-            FrameGraph.AddDebugImage(albedoRT);
-            FrameGraph.AddDebugImage(normalRT);
-            FrameGraph.AddDebugImage(depthHWRT);
-
-            return rt;
-
-        }
-
-        void Composite(GraphicsSubpass graphicsPass, RenderContext rc, CommandBuffer cmd)
-        {
-            var pass = clusterDeferred.Main;
-
-            Span<DescriptorSet> sets = new []
-            {
-                resourceSet0,
-                resourceSet1,
-                deferredSet1,
-            };
-
-            Span<uint> offset = new uint[] {0};
-            cmd.DrawFullScreenQuad(pass, 0, View.Set0, offset, sets);
         }
 
         protected override void OnBeginPass(FrameGraphPass renderPass, CommandBuffer cmd)

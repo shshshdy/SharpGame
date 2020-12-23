@@ -37,8 +37,8 @@ namespace SharpGame
 
                 new SceneSubpass("cluster_forward")
                 {
-                    Set1 = resourceSet0,
-                    Set2 = resourceSet1,
+                    Set1 = resourceSet1,
+                    Set2 = resourceSet2,
                     DisableDepthStencil = false
                 }
 

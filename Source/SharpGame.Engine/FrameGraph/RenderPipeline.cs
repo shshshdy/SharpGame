@@ -58,9 +58,10 @@ namespace SharpGame
                 rp.Init();
             }
 
+            initialized = true;
+
             OnInit();
 
-            initialized = true;
         }
 
         public virtual void DeviceLost()
@@ -216,6 +217,9 @@ namespace SharpGame
 
         protected virtual void OnCreateRenderTarget()
         {
+
+            RegResource("global", View.ubGlobal);
+
             colorTexture = RenderTarget.Add(Graphics.Swapchain);
             RegResource("output_color", colorTexture);
 

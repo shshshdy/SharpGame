@@ -210,7 +210,17 @@ namespace SharpGame
 
         public RenderTexture Add(in AttachmentInfo info)
         {
-            var rt = new RenderTexture(info);
+            RenderTexture rt = null;
+            if (info.SizeHint == SizeHint.None)
+            {
+                rt = new RenderTexture(info);
+            }
+            else
+            {
+                rt = new RenderTexture(Extent.width, Extent.height, 1, info.format, info.Usage, info.samples, info.SizeHint);
+                rt.id = info.id;
+            }
+
             Add(rt);
             return rt;
         }

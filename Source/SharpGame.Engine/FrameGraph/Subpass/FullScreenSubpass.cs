@@ -6,8 +6,9 @@ namespace SharpGame
 {
     public class FullScreenSubpass : Subpass
     {
-        protected Pass pass;
+        public Pass Pass { get; }
         public PipelineResourceSet PipelineResourceSet { get; }
+        public DescriptorSet[] resourceSet { get; set; }
 
         public Action<PipelineResourceSet> onBindResource;
 
@@ -16,12 +17,18 @@ namespace SharpGame
 
         public FullScreenSubpass(string fs, SpecializationInfo specializationInfo = null)
         {
-            pass = ShaderUtil.CreatePass("shaders/post/fullscreen.vert", fs);
-            pass.CullMode = VkCullModeFlags.None;
-            pass.DepthTestEnable = false;
-            pass.DepthWriteEnable = false;
-            pass.PixelShader.SpecializationInfo = specializationInfo;
+            Pass = ShaderUtil.CreatePass("shaders/post/fullscreen.vert", fs);
+            Pass.CullMode = VkCullModeFlags.None;
+            Pass.DepthTestEnable = false;
+            Pass.DepthWriteEnable = false;
+            Pass.PixelShader.SpecializationInfo = specializationInfo;
 
+            PipelineResourceSet = new PipelineResourceSet(Pass.PipelineLayout);
+        }
+
+        public FullScreenSubpass(Pass pass)
+        {
+            Pass = pass;
             PipelineResourceSet = new PipelineResourceSet(pass.PipelineLayout);
         }
 
@@ -67,11 +74,11 @@ namespace SharpGame
             {
                 if(value)
                 {
-                    pass.BlendMode = BlendMode.Add;
+                    Pass.BlendMode = BlendMode.Add;
                 }
                 else
                 {
-                    pass.BlendMode = BlendMode.Replace;
+                    Pass.BlendMode = BlendMode.Replace;
                 }
             }
 
@@ -80,6 +87,15 @@ namespace SharpGame
         public void SetResource(uint set, uint binding, IBindableResource res)
         {
             PipelineResourceSet.SetResource(set, binding, res);
+        }
+
+        public void SetResource(uint set, uint binding, StringID resId)
+        {
+            var res = Renderer.Get(resId);
+            if (res != null)
+                PipelineResourceSet.ResourceSet[set].BindResource(binding, res);
+            else
+                Log.Warn("Cannot find res ", resId);
         }
 
         public override void Init()
@@ -104,11 +120,7 @@ namespace SharpGame
             {
                 var (set, bind) = it.Current.Key;
                 var resId = it.Current.Value;
-                var res = Renderer.Get(resId);
-                if (res != null)
-                    PipelineResourceSet.ResourceSet[set].BindResource(bind, res);
-                else
-                    Log.Warn("Cannot find res ", resId);
+                SetResource(set, bind, resId);
             }
 
             OnBindResources();
@@ -122,22 +134,22 @@ namespace SharpGame
 
         public override void Draw(RenderContext rc, CommandBuffer cmd)
         {
-            DrawFullScreenQuad(cmd, FrameGraphPass.RenderPass, subpassIndex, pass, PipelineResourceSet.ResourceSet);
-        }
-
-        public void DrawFullScreenQuad(CommandBuffer cmd, RenderPass renderPass, uint subpass, Pass pass, Span<DescriptorSet> resourceSet)
-        {
-            var pipe = pass.GetGraphicsPipeline(renderPass, subpass, null);
+            var pipe = Pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, subpassIndex, null);
 
             cmd.BindPipeline(VkPipelineBindPoint.Graphics, pipe);
 
             foreach (var rs in resourceSet)
             {
-                cmd.BindGraphicsResourceSet(pass.PipelineLayout, rs.Set, rs);
+                if(rs != null)
+                    cmd.BindGraphicsResourceSet(Pass.PipelineLayout, rs.Set, rs);
             }
+            
+            PipelineResourceSet.BindGraphicsResourceSet(cmd);
 
             cmd.Draw(3, 1, 0, 0);
+
         }
+
 
     }
 }

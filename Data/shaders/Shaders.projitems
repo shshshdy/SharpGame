@@ -14,6 +14,7 @@
     <None Include="$(MSBuildThisFileDirectory)Brdf.shader" />
     <None Include="$(MSBuildThisFileDirectory)ClusterDeferred.shader" />
     <None Include="$(MSBuildThisFileDirectory)Common\Clustering.glsl" />
+    <None Include="$(MSBuildThisFileDirectory)Common\Global.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\GridCoord.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\LightFunc.glsl" />
     <None Include="$(MSBuildThisFileDirectory)Common\Pbr.glsl" />

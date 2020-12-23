@@ -77,8 +77,8 @@ namespace SharpGame
         protected DescriptorSetLayout resourceLayout1;
         protected DescriptorSetLayout clusterLayout1;
 
-        protected DescriptorSet resourceSet0;
         protected DescriptorSet resourceSet1;
+        protected DescriptorSet resourceSet2;
         protected DescriptorSet clusterSet1;
 
         protected VkQueryPool[] query_pool = new VkQueryPool[3];
@@ -150,13 +150,9 @@ namespace SharpGame
 
         protected FrameGraphPass CreateClusteringPass()
         {
-            var depthFormat = Graphics.DepthFormat;
-            uint width = (uint)Graphics.Width;
-            uint height = (uint)Graphics.Height;
-
             var clustering = new FrameGraphPass(SubmitQueue.EarlyGraphics)
             {
-                new AttachmentInfo(depthFormat),
+                new AttachmentInfo(depthTexture.format),
 
                 new SceneSubpass("clustering")
                 {
@@ -179,7 +175,7 @@ namespace SharpGame
                 new VkAttachmentDescription(depthFormat, finalLayout : VkImageLayout.DepthStencilReadOnlyOptimal)
             };
 
-            var depthStencilAttachment = new[]
+            VkAttachmentReference[] depthStencilAttachment =
             {
                  new VkAttachmentReference(0, VkImageLayout.DepthStencilAttachmentOptimal)
             };

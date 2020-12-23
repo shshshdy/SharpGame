@@ -1,6 +1,6 @@
 #version 450
 
-#include "Common.glsl"
+#include "Global.glsl"
 #include "GridCoord.glsl"
 #include "ClusterLighting.glsl"
 

@@ -1,20 +1,5 @@
 
-layout (binding = 0) uniform GlobalUniform
-{
-    mat4 View;
-    mat4 ViewInv;
-    mat4 Proj;
-    mat4 ProjInv;
-    mat4 ViewProj;
-    mat4 ViewProjInv;
-	vec3 CameraPos;
-	float NearClip;
-	vec3 CameraDir;
-	float FarClip;
-	vec2 GBufferInvSize;
-    float Time;
-
-};
+#include "global.glsl"
 
 layout(constant_id = 0) const int TransformMode = 0;
 layout(constant_id = 1) const int MATRICES_COUNT = 64;
