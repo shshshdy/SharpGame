@@ -1,31 +1,21 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(binding = 0) uniform sampler2D SceneTexture;
+#include "global.glsl"
 
-layout(binding = 1) uniform sampler2D albedoMap;
-layout(binding = 2) uniform sampler2D specularMap;
-layout(binding = 3) uniform sampler2D normalMap;
+layout(set = 1, binding = 0) uniform sampler2D SceneTexture;
 
-layout(binding = 4) uniform sampler2D depthTexture;
+layout(set = 1, binding = 1) uniform sampler2D albedoMap;
+layout(set = 1, binding = 2) uniform sampler2D specularMap;
+layout(set = 1, binding = 3) uniform sampler2D normalMap;
+
+layout(set = 1, binding = 4) uniform sampler2D depthTexture;
 
 #define MAX_PLANES 4
 
-layout(set = 0, binding = 5) uniform SSRInfoBuffer
+layout(set = 1, set = 0, binding = 5) uniform SSRInfoBuffer
 {
 	vec4 SSRInfo; //x : global Roughness, y : Intensity, z : bUseNormalmap, w : holePatching
-};
-
-
-layout(set = 0, binding = 6) uniform cameraBuffer
-{
-	mat4 viewMat;
-	mat4 projMat;
-	mat4 viewProjMat;
-	mat4 InvViewProjMat;
-
-	vec4 cameraWorldPos;
-	vec4 viewPortSize;
 };
 
 struct PlaneInfo
@@ -35,7 +25,7 @@ struct PlaneInfo
 	vec4 size;
 };
 
-layout(set = 0, binding = 7) uniform planeInfoBuffer
+layout(set = 1, binding = 6) uniform planeInfoBuffer
 {	
 	PlaneInfo planeInfo[MAX_PLANES];
 	uint numPlanes;
@@ -58,7 +48,7 @@ float depthLinear(float depth)
 
 vec4 getWorldPosition(vec2 UV, float depth)
 {
-	vec4 worldPos = InvViewProjMat * vec4(UV * 2.0 - 1.0, depth, 1.0);
+	vec4 worldPos = InvViewProj * vec4(UV * 2.0 - 1.0, depth, 1.0);
 	worldPos /= worldPos.w;
 
 	return worldPos;
@@ -93,10 +83,10 @@ bool intersectPlane(in uint index, in vec3 worldPos, in vec2 fragUV, out vec3 no
 	
 	vec3 centerPoint = thisPlane.centerPoint.xyz;
 
-	vec3 rO = cameraWorldPos.xyz;
+	vec3 rO = CameraPos.xyz;
 	vec3 rD = normalize(worldPos - rO);
 
-	vec3 rD_VS = mat3(viewMat) * rD;
+	vec3 rD_VS = mat3(View) * rD;
 
 	
 	if(rD_VS.z > 0.0)
@@ -132,7 +122,7 @@ bool intersectPlane(in uint index, in vec3 worldPos, in vec2 fragUV, out vec3 no
 		if( (abs(xGap) <= width) && (abs(yGap) <= height))
 		{
 			hitPos = vec4(hitPoint, 1.0);
-			reflectedPos = viewProjMat * hitPos;
+			reflectedPos = ViewProj * hitPos;
 			reflectedPos /= reflectedPos.w;
 
 			reflectedPos.xy = (reflectedPos.xy + vec2(1.0)) * 0.5;
@@ -225,7 +215,7 @@ void main()
 			bIsInterect = true;
 			break;
 			/*
-			float localDist =  distance(hitpoint, cameraWorldPos.xyz);
+			float localDist =  distance(hitpoint, CameraPos.xyz);
 			
 			if( localDist <  minDist )
 			{
@@ -253,7 +243,7 @@ void main()
 	//	WorldNormal = getNormalVector(UVforNormalMap);
 	
 
-	vec3 viewVec = normalize(worldPos.xyz - cameraWorldPos.xyz);
+	vec3 viewVec = normalize(worldPos.xyz - CameraPos.xyz);
 	vec3 relfectVec = reflect(viewVec , WorldNormal);
 
 
@@ -262,7 +252,7 @@ void main()
 	{			
 		currentPos += relfectVec * stepSize;
 
-		vec4 pos_SS = viewProjMat * vec4(currentPos, 1.0);
+		vec4 pos_SS = ViewProj * vec4(currentPos, 1.0);
 		pos_SS /= pos_SS.w;
 		vec2 screenSpaceCoords = vec2((pos_SS.x + 1.0) * 0.5, (pos_SS.y + 1.0 )*0.5);
 
@@ -331,7 +321,7 @@ void main()
 
 				//lerpedPos = prevPos.xyz;
 
-				vec4 lerpedPos_SS =  viewProjMat * vec4(lerpedPos, 1.0);
+				vec4 lerpedPos_SS =  ViewProj * vec4(lerpedPos, 1.0);
 				lerpedPos_SS /= lerpedPos_SS.w;
 				
 				vec2 lerpedScreenSpaceCoords = vec2((lerpedPos_SS.x + 1.0) * 0.5, (lerpedPos_SS.y + 1.0) * 0.5);

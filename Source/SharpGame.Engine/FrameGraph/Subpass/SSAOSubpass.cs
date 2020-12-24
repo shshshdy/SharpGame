@@ -59,14 +59,6 @@ namespace SharpGame
         public SSAOBlurSubpass() : base("post/blur.frag")
         {
             this[0, 0] = "ssao";
-        }
-
-        protected override void CreateResources()
-        {
-        }
-
-        protected override void OnBindResources()
-        {
-        }
+        }        
     }
 }

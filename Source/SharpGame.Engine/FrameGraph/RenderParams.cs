@@ -16,16 +16,16 @@ namespace SharpGame
     public struct GlobalUBO
     {
         public mat4 View;
-        public mat4 ViewInv;
+        public mat4 InvView;
         public mat4 Proj;
-        public mat4 ProjInv;
+        public mat4 InvProj;
         public mat4 ViewProj;
-        public mat4 ViewProjInv;
+        public mat4 InvViewProj;
         public vec3 CameraPos;
         public float NearClip;
         public vec3 CameraDir;
         public float FarClip;
-        public vec2 GBufferInvSize;
+        public vec2 ViewportSize;
         public float Time;
 
     }

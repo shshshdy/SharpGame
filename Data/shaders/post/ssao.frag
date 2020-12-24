@@ -60,7 +60,7 @@ void main()
 {
 	float depth = texture(samplerDepth, inUV).x; //outFragColor = depth; return;
 	vec4  clip  = vec4(inUV * 2.0 - 1.0, depth, 1.0);
-    highp vec4 viewPos = ProjInv * clip;
+    highp vec4 viewPos = InvProj * clip;
     highp vec3 fragPos = viewPos.xyz / viewPos.w;
 
 	vec3 normal = normalize(texture(samplerNormal, inUV).rgb * 2.0 - 1.0);

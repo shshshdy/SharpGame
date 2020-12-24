@@ -49,7 +49,7 @@ void main()
 	}
 
 	vec4 clip = vec4(inUV * 2.0 - 1.0, depth, 1.0);
-	highp vec4 world_w = ViewProjInv * clip;
+	highp vec4 world_w = InvViewProj * clip;
 	highp vec3 worldPos = world_w.xyz / world_w.w;
 
     vec3 specColor = vec3(albedo.a);

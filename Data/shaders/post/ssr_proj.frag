@@ -1,25 +1,16 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+#include "global.glsl"
+
 #define MAX_PLANES 4
 
 #define UINT_MAX 4294967295
 #define FLT_MAX  3.402823466e+38F
 
-layout(binding = 0) uniform sampler2D sceneMap;
-layout(binding = 1, r32ui) uniform uimage2D IntermediateBuffer;
-layout(binding = 2) uniform sampler2D depthMap;
-
-layout(set = 0, binding = 3) uniform cameraBuffer
-{
-	mat4 viewMat;
-	mat4 projMat;
-	mat4 viewProjMat;
-	mat4 InvViewProjMat;
-
-	vec4 cameraWorldPos;
-	vec4 viewPortSize;
-};
+layout(set = 1, binding = 0) uniform sampler2D sceneMap;
+layout(set = 1, binding = 1, r32ui) uniform uimage2D IntermediateBuffer;
+layout(set = 1, binding = 2) uniform sampler2D depthMap;
 
 struct PlaneInfo
 {
@@ -28,7 +19,7 @@ struct PlaneInfo
 	vec4 size;
 };
 
-layout(set = 0, binding = 4) uniform planeInfoBuffer
+layout(set = 1, binding = 4) uniform planeInfoBuffer
 {	
 	PlaneInfo planeInfo[MAX_PLANES];
 	uint numPlanes;
@@ -66,10 +57,10 @@ bool intersectPlane(in uint index, in vec3 worldPos, in vec2 fragUV, out vec4 re
 		return false;
 	}
 
-	vec3 rO = cameraWorldPos.xyz;
+	vec3 rO = CameraPos.xyz;
 	vec3 rD = normalize(target - rO);
 
-	vec3 rD_VS = mat3(viewMat) * rD;
+	vec3 rD_VS = mat3(View) * rD;
 
 	
 	if(rD_VS.z > 0.0)
@@ -102,7 +93,7 @@ bool intersectPlane(in uint index, in vec3 worldPos, in vec2 fragUV, out vec4 re
 
 		if( (abs(xGap) <= width) && (abs(yGap) <= height))
 		{
-			reflectedPos = viewProjMat * vec4(hitPoint, 1.0);
+			reflectedPos = ViewProj * vec4(hitPoint, 1.0);
 			reflectedPos /= reflectedPos.w;
 
 			reflectedPos.xy = (reflectedPos.xy + vec2(1.0)) * 0.5;
@@ -134,7 +125,7 @@ bool intersectPlane(in uint index, in vec3 worldPos, in vec2 fragUV, out vec4 re
 
 vec4 getWorldPosition(vec2 UV, float depth)
 {
-	vec4 worldPos = InvViewProjMat * vec4(UV * 2.0 - 1.0, depth, 1.0);
+	vec4 worldPos = InvViewProj * vec4(UV * 2.0 - 1.0, depth, 1.0);
 	worldPos /= worldPos.w;
 
 	return worldPos;
@@ -206,8 +197,8 @@ layout(location = 0) out vec4 outColor;
 void main() {
 	
 	/*
-	uint screenWidth = uint( viewPortSize.x );
-	uint screenHeight = uint( viewPortSize.y );
+	uint screenWidth = uint( ViewportSize.x );
+	uint screenHeight = uint( ViewportSize.y );
 	
 	uint index = gl_GlobalInvocationID.x;	
 
@@ -217,7 +208,7 @@ void main() {
 	uint indexY = index / screenWidth;
 	uint indexX = index - screenWidth * indexY;
 
-	vec2 fragUV = vec2(float(indexX) / (viewPortSize.x), float(indexY) / (viewPortSize.y) );
+	vec2 fragUV = vec2(float(indexX) / (ViewportSize.x), float(indexY) / (ViewportSize.y) );
 	*/
 
 
@@ -242,8 +233,8 @@ void main() {
 		relfectedPlanarIndex = i;
 	}
 
-	ivec2 reflectedUV =  ivec2( reflectedPos.x * viewPortSize.x, reflectedPos.y * viewPortSize.y);
-	vec2 offset = vec2( (fragUV.x - reflectedPos.x) * viewPortSize.x, ( fragUV.y - reflectedPos.y) * viewPortSize.y);
+	ivec2 reflectedUV =  ivec2( reflectedPos.x * ViewportSize.x, reflectedPos.y * ViewportSize.y);
+	vec2 offset = vec2( (fragUV.x - reflectedPos.x) * ViewportSize.x, ( fragUV.y - reflectedPos.y) * ViewportSize.y);
 		
 
 	//pack info

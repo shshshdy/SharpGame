@@ -268,16 +268,16 @@ namespace SharpGame
         private void UpdateGlobalParameters()
         {
             cameraUBO.View = camera.View;
-            cameraUBO.ViewInv = glm.inverse(cameraUBO.View);
+            cameraUBO.InvView = glm.inverse(cameraUBO.View);
             cameraUBO.Proj = camera.VkProjection;
-            cameraUBO.ProjInv = glm.inverse(cameraUBO.Proj);
+            cameraUBO.InvProj = glm.inverse(cameraUBO.Proj);
             cameraUBO.ViewProj = camera.VkProjection * camera.View;
-            cameraUBO.ViewProjInv = glm.inverse(cameraUBO.ViewProj);
+            cameraUBO.InvViewProj = glm.inverse(cameraUBO.ViewProj);
             cameraUBO.CameraPos = camera.Node.Position;
             cameraUBO.CameraDir = camera.Node.WorldDirection;
             cameraUBO.NearClip = camera.NearClip;
             cameraUBO.FarClip = camera.FarClip;
-
+            cameraUBO.ViewportSize = new vec2(viewport.width, viewport.height);
             ubGlobal.SetData(ref cameraUBO);
             ubGlobal.Flush();
 

@@ -13,13 +13,15 @@
 #define PI 3.1415926535897932384626422832795028841971
 #define RADIAN 0.01745329251994329576923690768489
 
-layout(binding = 0) uniform sampler2D SceneTexture;
-layout(binding = 1, r32ui) uniform uimage2D IntermediateBuffer;
-layout(binding = 2) uniform sampler2D albedoMap;
-layout(binding = 3) uniform sampler2D specularMap;
-layout(binding = 4) uniform sampler2D normalMap;
-layout(binding = 5) uniform sampler2D NoiseMap;
-layout(binding = 6) uniform sampler2D depthMap;
+#include "global.glsl"
+
+layout(set = 1, binding = 0) uniform sampler2D SceneTexture;
+layout(set = 1, binding = 1, r32ui) uniform uimage2D IntermediateBuffer;
+layout(set = 1, binding = 2) uniform sampler2D albedoMap;
+layout(set = 1, binding = 3) uniform sampler2D specularMap;
+layout(set = 1, binding = 4) uniform sampler2D normalMap;
+layout(set = 1, binding = 5) uniform sampler2D NoiseMap;
+layout(set = 1, binding = 6) uniform sampler2D depthMap;
 
 struct PlaneInfo
 {
@@ -28,7 +30,7 @@ struct PlaneInfo
 	vec4 size;
 };
 
-layout(set = 0, binding = 7) uniform planeInfoBuffer
+layout(set = 1, binding = 7) uniform planeInfoBuffer
 {	
 	PlaneInfo planeInfo[MAX_PLANES];
 	uint numPlanes;
@@ -37,20 +39,9 @@ layout(set = 0, binding = 7) uniform planeInfoBuffer
 	uint pad02;
 };
 
-layout(set = 0, binding = 8) uniform SSRInfoBuffer
+layout(set = 1, binding = 8) uniform SSRInfoBuffer
 {
 	vec4 SSRInfo; //x : global Roughness, y : Intensity, z : bUseNormalmap, w : holePatching
-};
-
-layout(set = 0, binding = 9) uniform cameraBuffer
-{
-	mat4 viewMat;
-	mat4 projMat;
-	mat4 viewProjMat;
-	mat4 InvViewProjMat;
-
-	vec4 cameraWorldPos;
-	vec4 viewPortSize;
 };
 
 layout(location = 0) in vec2 fragUV;
@@ -79,7 +70,7 @@ mat4 rotationMatrix(vec3 axis, float angle)
 
 vec4 getWorldPosition(vec2 UV, float depth)
 {
-	vec4 worldPos = InvViewProjMat * vec4(UV * 2.0 - 1.0, depth, 1.0);
+	vec4 worldPos = InvViewProj * vec4(UV * 2.0 - 1.0, depth, 1.0);
 	worldPos /= worldPos.w;
 
 	return worldPos;
@@ -95,10 +86,10 @@ bool intersectPlane(in uint index, in vec3 worldPos, in vec2 fragUV, out vec4 hi
 	
 	vec3 centerPoint = thisPlane.centerPoint.xyz;
 
-	vec3 rO = cameraWorldPos.xyz;
+	vec3 rO = CameraPos.xyz;
 	vec3 rD = normalize(worldPos - rO);
 
-	vec3 rD_VS = mat3(viewMat) * rD;
+	vec3 rD_VS = mat3(View) * rD;
 
 	
 	if(rD_VS.z > 0.0)
@@ -134,7 +125,7 @@ bool intersectPlane(in uint index, in vec3 worldPos, in vec2 fragUV, out vec4 hi
 		if( (abs(xGap) <= width) && (abs(yGap) <= height))
 		{
 			hitPos = vec4(hitPoint, 1.0);
-			reflectedPos = viewProjMat * hitPos;
+			reflectedPos = ViewProj * hitPos;
 			reflectedPos /= reflectedPos.w;
 
 			reflectedPos.xy = (reflectedPos.xy + vec2(1.0)) * 0.5;
@@ -227,12 +218,12 @@ vec4 getColorwithNormalMap(vec3 worldPos, vec3 normalVec, float roughness, vec3 
 {
 	//Approximation, not exact	
 	
-	vec3 viewVec_WS =  normalize(cameraWorldPos.xyz - worldPos);
+	vec3 viewVec_WS =  normalize(CameraPos.xyz - worldPos);
 	vec3 reflecVec_WS = ImportanceSampleGGX(normalVec, viewVec_WS, Xi, roughness, rotationMat );
 	
 	float reflectedDistance = distance(reflectedWorldPos.xyz, worldPos);
 		
-	vec4 reflectedPos_SS = viewProjMat * vec4(worldPos + (reflecVec_WS * reflectedDistance), 1.0);
+	vec4 reflectedPos_SS = ViewProj * vec4(worldPos + (reflecVec_WS * reflectedDistance), 1.0);
 	reflectedPos_SS /= reflectedPos_SS.w;
 	reflectedPos_SS.xy = (reflectedPos_SS.xy + vec2(1.0)) * 0.5;
 
@@ -351,7 +342,7 @@ void main()
 {
 	outColor =  vec4(0.0);
 
-	ivec2 iUV = ivec2(fragUV.x * viewPortSize.x, fragUV.y * viewPortSize.y);
+	ivec2 iUV = ivec2(fragUV.x * ViewportSize.x, fragUV.y * ViewportSize.y);
 	
 	uint bufferInfo = imageAtomicAdd(IntermediateBuffer, iUV, 0);
 
@@ -365,7 +356,7 @@ void main()
 	*/
 
 	uint CoordSys;
-	vec2 offset = unPacked(bufferInfo, viewPortSize.xy, CoordSys).xy;
+	vec2 offset = unPacked(bufferInfo, ViewportSize.xy, CoordSys).xy;
 	
 	
 	//offset = vec2(0.0);
@@ -415,7 +406,7 @@ void main()
 	
 	
 
-	vec4 noiseColor = texture(NoiseMap, (viewPortSize.xy / vec2(1024.0)) * fragUV);
+	vec4 noiseColor = texture(NoiseMap, (ViewportSize.xy / vec2(1024.0)) * fragUV);
 	vec2 Xi = fract(noiseColor.xy);
 
 	vec2 samples[NUM_SAMPLE];
@@ -461,13 +452,13 @@ void main()
 		float correctionPixel = 2.0;
 
 		if(CoordSys == 0)
-			relfectedUV = relfectedUV.xy + vec2(0.0, correctionPixel/viewPortSize.y);
+			relfectedUV = relfectedUV.xy + vec2(0.0, correctionPixel/ViewportSize.y);
 		else if(CoordSys == 1)
-			relfectedUV = relfectedUV.xy + vec2(correctionPixel/viewPortSize.x, 0.0);
+			relfectedUV = relfectedUV.xy + vec2(correctionPixel/ViewportSize.x, 0.0);
 		else if(CoordSys == 2)
-			relfectedUV = relfectedUV.xy - vec2(0.0, correctionPixel/viewPortSize.y);
+			relfectedUV = relfectedUV.xy - vec2(0.0, correctionPixel/ViewportSize.y);
 		else if(CoordSys == 3)
-			relfectedUV = relfectedUV.xy - vec2(correctionPixel/viewPortSize.x, 0.0);
+			relfectedUV = relfectedUV.xy - vec2(correctionPixel/ViewportSize.x, 0.0);
 
 		offsetLen = length(offset.xy);
 	
