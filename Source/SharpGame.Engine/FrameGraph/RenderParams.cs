@@ -6,13 +6,6 @@ using System.Text;
 namespace SharpGame
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct FrameUniform
-    {
-        public float DeltaTime;
-        public float ElapsedTime;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
     public struct GlobalUBO
     {
         public mat4 View;

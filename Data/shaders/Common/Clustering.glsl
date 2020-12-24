@@ -1,8 +1,9 @@
 
-#include "Common.glsl"
+#include "Global.glsl"
 #include "GridCoord.glsl"
 
 layout(set = 1, binding = 1, rgba32f) uniform imageBuffer light_pos_ranges;
+layout(set = 1, binding = 2, rgba8) uniform readonly imageBuffer light_colors;
 
 layout(set = 2, binding = 0, r8ui) uniform uimageBuffer grid_flags;
 layout(set = 2, binding = 1, r32ui) uniform uimageBuffer light_bounds;

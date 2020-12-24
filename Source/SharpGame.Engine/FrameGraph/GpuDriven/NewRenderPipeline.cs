@@ -8,16 +8,12 @@ namespace SharpGame
     {
         public NewRenderPipeline()
         {
-            var depthFormat = Graphics.DepthFormat;
-            uint width = Graphics.Width;
-            uint height = Graphics.Height;
-
             Add(new ShadowPass());
 
             Add(new FrameGraphPass
             {
-                new AttachmentInfo(Graphics.Swapchain.ColorFormat),
-                new AttachmentInfo(depthFormat),
+                new AttachmentInfo(Graphics.ColorFormat),
+                new AttachmentInfo(Graphics.DepthFormat),
 
                 new SceneSubpass
                 {

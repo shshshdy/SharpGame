@@ -12,8 +12,8 @@ namespace SharpGame
 
         public Action<PipelineResourceSet> onBindResource;
 
-        private Dictionary<(uint, uint), StringID> inputResources = new Dictionary<(uint, uint), StringID>();
-        private Dictionary<uint, StringID> inputResourceSets = new Dictionary<uint, StringID>();
+        private Dictionary<(uint, uint), StringID> inputResources { get; } = new Dictionary<(uint, uint), StringID>();
+        private Dictionary<uint, StringID> inputResourceSets { get; } = new Dictionary<uint, StringID>();
 
         public FullScreenSubpass(string fs, SpecializationInfo specializationInfo = null)
         {

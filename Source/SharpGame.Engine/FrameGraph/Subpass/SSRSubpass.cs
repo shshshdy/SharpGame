@@ -8,6 +8,7 @@ namespace SharpGame
     {
         public SimpleSSRSubpass() : base("post/ssr.frag")
         {
+            this[0, 0] = "global";
         }
 
         protected override void CreateResources()
@@ -23,6 +24,7 @@ namespace SharpGame
     {
         public SSR_ProjectionSubpass() : base("post/ssr_proj.frag")
         {
+            this[0, 0] = "global";
         }
 
         protected override void CreateResources()
@@ -38,6 +40,7 @@ namespace SharpGame
     {
         public SSRRSubpass() : base("post/ssrr.frag")
         {
+            this[0, 0] = "global";
         }
 
         protected override void CreateResources()

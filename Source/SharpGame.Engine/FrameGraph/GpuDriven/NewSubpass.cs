@@ -4,11 +4,12 @@ using System.Text;
 
 namespace SharpGame
 {
-    public class NewSubpass : GraphicsSubpass
+    public class NewSubpass : GraphicsSubpass, DrawHelper
     {
-        public DescriptorSet Set0 { get; set; }
-        public DescriptorSet Set1 { get; set; }
-        public DescriptorSet Set2 { get; set; }
+        public Pass Pass { get; }
+        public PipelineResourceSet PipelineResourceSet { get; }
+        public Dictionary<(uint, uint), StringID> inputResources { get; } = new Dictionary<(uint, uint), StringID>();
+        public Dictionary<uint, StringID> inputResourceSets { get; }
 
         Dictionary<Pass, BatchGroup> batches = new Dictionary<Pass, BatchGroup>();
 
@@ -18,6 +19,8 @@ namespace SharpGame
 
         public override void Draw(RenderContext rc, CommandBuffer cmd)
         {
+            
+            /*
             var set0 = Set0 ?? View.Set0;
             Span<DescriptorSet> set1 = new[] { Set1 ?? View.Set1, Set2 };
 // 
@@ -29,7 +32,7 @@ namespace SharpGame
             DrawBatches(cmd, View.alphaTestBatches.AsSpan(), set0, set1);
 
             DrawBatches(cmd, View.translucentBatches.AsSpan(), set0, set1);
-
+            */
         }
 
 

@@ -80,6 +80,7 @@ namespace SharpGame
             {
                 new DescriptorSetLayoutBinding(0, VkDescriptorType.UniformBuffer, VkShaderStageFlags.Compute),
                 new DescriptorSetLayoutBinding(1, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
+                new DescriptorSetLayoutBinding(2, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
             };
 
             computeLayout1 = new DescriptorSetLayout
@@ -93,7 +94,7 @@ namespace SharpGame
                 new DescriptorSetLayoutBinding(6, VkDescriptorType.StorageTexelBuffer, VkShaderStageFlags.Compute),
             };
 
-            computeSet0 = new DescriptorSet(computeLayout0, uboCluster, light_pos_ranges);
+            computeSet0 = new DescriptorSet(computeLayout0, uboCluster, light_pos_ranges, light_colors);
             computeSet1 = new DescriptorSet(computeLayout1, gridFlags, lightBounds, gridLightCounts, gridLightCountTotal,
                 gridLightCountOffsets, lightList, gridLightCountsCompare);
         }
