@@ -26,7 +26,7 @@ namespace SharpGame
         internal VkDescriptorPool descriptorPool;
         internal FixedArray3<VkDescriptorSet> descriptorSet;
         internal VkWriteDescriptorSet[][] writeDescriptorSets = new VkWriteDescriptorSet[Swapchain.IMAGE_COUNT][];
-        internal uint[] needUpdated = new uint[Swapchain.IMAGE_COUNT];
+        internal uint[] writeDescriptorSetCount = new uint[Swapchain.IMAGE_COUNT];
         public IBindableResource[] bindedRes;
 
         [IgnoreDataMember]
@@ -155,7 +155,7 @@ namespace SharpGame
             return this;
         }
 
-        public DescriptorSet Bind(uint dstBinding, RenderTexture rt)
+        private DescriptorSet Bind(uint dstBinding, RenderTexture rt)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
@@ -166,7 +166,7 @@ namespace SharpGame
             return this;
         }
 
-        public DescriptorSet Bind(uint dstBinding, ref VkDescriptorBufferInfo bufferInfo)
+        private DescriptorSet Bind(uint dstBinding, ref VkDescriptorBufferInfo bufferInfo)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
@@ -177,7 +177,7 @@ namespace SharpGame
             return this;
         }
 
-        public DescriptorSet Bind(uint dstBinding, Span<VkDescriptorBufferInfo> bufferInfo)
+        private DescriptorSet Bind(uint dstBinding, Span<VkDescriptorBufferInfo> bufferInfo)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             for (int img = 0; img < Swapchain.IMAGE_COUNT; img++)
@@ -188,7 +188,7 @@ namespace SharpGame
             return this;
         }
 
-        public DescriptorSet Bind(uint dstBinding, ref VkDescriptorBufferInfo bufferInfo, BufferView bufferView)
+        private DescriptorSet Bind(uint dstBinding, ref VkDescriptorBufferInfo bufferInfo, BufferView bufferView)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
 
@@ -200,7 +200,7 @@ namespace SharpGame
             return this;
         }
 
-        public DescriptorSet BindTexel(uint dstBinding, SharedBuffer buffer)
+        private DescriptorSet BindTexel(uint dstBinding, SharedBuffer buffer)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
 
@@ -214,7 +214,7 @@ namespace SharpGame
 
         void AddWriteDescriptorSet(int img, in VkWriteDescriptorSet writeDescriptorSet)
         {
-            for(uint i = 0; i < needUpdated[img]; i++)
+            for(uint i = 0; i < writeDescriptorSetCount[img]; i++)
             {
                 if(writeDescriptorSets[img][i].dstBinding == writeDescriptorSet.dstBinding)
                 {
@@ -223,7 +223,7 @@ namespace SharpGame
                 }
             }
 
-            writeDescriptorSets[img][needUpdated[img]++] = writeDescriptorSet;
+            writeDescriptorSets[img][writeDescriptorSetCount[img]++] = writeDescriptorSet;
         }
 
         public unsafe DescriptorSet Bind(uint dstBinding, InlineUniformBlock inlineUniformBlock)
@@ -235,6 +235,7 @@ namespace SharpGame
                     inlineUniformBlock.inlineUniformBlockEXT));
             }
 
+            bindedRes[dstBinding] = inlineUniformBlock;
             return this;
         } 
 
@@ -340,10 +341,10 @@ namespace SharpGame
 
         public void UpdateSets(int img)
         {
-            if(needUpdated[img] > 0)
+            if(writeDescriptorSetCount[img] > 0)
             {
-                Device.UpdateDescriptorSets(needUpdated[img], ref writeDescriptorSets[img][0], 0, IntPtr.Zero);
-                needUpdated[img] = 0;
+                Device.UpdateDescriptorSets(writeDescriptorSetCount[img], ref writeDescriptorSets[img][0], 0, IntPtr.Zero);
+                writeDescriptorSetCount[img] = 0;
                 Updated = true;
             }
         }

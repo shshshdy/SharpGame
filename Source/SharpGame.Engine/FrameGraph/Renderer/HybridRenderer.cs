@@ -11,19 +11,16 @@ namespace SharpGame
     {
         protected FrameGraphPass geometryPass;
         protected FrameGraphPass translucentClustering;
+
         protected FrameGraphPass ssaoPass;
         protected FrameGraphPass ssaoBlur;
+
         protected FrameGraphPass compositePass;
-        protected FrameGraphPass onscreenPass;
+        protected FrameGraphPass postPass;
         bool enableSSAO = true;
 
         public HybridRenderer()
         {
-        }
-
-        protected override void CreateResources()
-        {
-            base.CreateResources();
         }
 
         protected override void CreateRenderPath()
@@ -77,11 +74,12 @@ namespace SharpGame
             this.Add(lightCull);
 
             var specializationInfo = new SpecializationInfo(new VkSpecializationMapEntry(0, 0, sizeof(uint)));
-            specializationInfo.Write(0, 1);
 
-            onscreenPass = new FrameGraphPass
+            specializationInfo.Write(0, enableSSAO ? 1 : 0);
+
+            compositePass = new FrameGraphPass
             {
-                new AttachmentInfo(Graphics.ColorFormat),
+                new AttachmentInfo("color", SizeHint.Full, VkFormat.R8G8B8A8UNorm, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.Sampled),
                 new AttachmentInfo(depthTexture.format)
                 {
                     storeOp = VkAttachmentStoreOp.Store
@@ -110,10 +108,26 @@ namespace SharpGame
                     BlendFlags = BlendFlags.AlphaBlend
                 },
 
-
             };       
 
-            this.Add(onscreenPass);
+            this.Add(compositePass);
+
+            postPass = new FrameGraphPass
+            {
+                new AttachmentInfo(Graphics.ColorFormat),
+
+                new FullScreenSubpass("shaders/post/fullscreen.frag", specializationInfo)
+                {
+                    [0, 0] = "color",
+                },
+
+//                 new SimpleSSRSubpass()
+//                 {
+//                 },
+            };
+
+            this.Add(postPass);
+
         }
 
         RenderPass OnCreateRenderPass()
@@ -188,7 +202,7 @@ namespace SharpGame
                 //cb.WriteTimestamp(PipelineStageFlags.TopOfPipe, queryPool, QUERY_CLUSTERING * 2);
 
             }
-            else if (renderPass == onscreenPass)
+            else if (renderPass == compositePass)
             {
                 var queryPool = query_pool[workContext];
                 //cb.ResetQueryPool(queryPool, 10, 4);
@@ -206,7 +220,7 @@ namespace SharpGame
                 var queryPool = query_pool[workContext];
                 //cb.WriteTimestamp(PipelineStageFlags.FragmentShader, queryPool, QUERY_CLUSTERING * 2 + 1);
             }
-            else if (renderPass == onscreenPass)
+            else if (renderPass == compositePass)
             {
                 var queryPool = query_pool[workContext];
 

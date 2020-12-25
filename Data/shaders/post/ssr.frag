@@ -13,7 +13,7 @@ layout(set = 1, binding = 4) uniform sampler2D depthTexture;
 
 #define MAX_PLANES 4
 
-layout(set = 1, set = 0, binding = 5) uniform SSRInfoBuffer
+layout(set = 1, binding = 5) uniform SSRInfoBuffer
 {
 	vec4 SSRInfo; //x : global Roughness, y : Intensity, z : bUseNormalmap, w : holePatching
 };
@@ -163,7 +163,7 @@ bool intersectPlane(in uint index, in vec3 worldPos, in vec2 fragUV, out vec3 no
 void main()
 {	
 	float depth = texture(depthTexture, fragUV).r;
-	
+	//outColor = vec4(depth,depth,depth,1); return;
 	if(depth >= 1.0)
 	{
 		outColor = vec4(0.0, 0.0, 0.0, 0.0);
