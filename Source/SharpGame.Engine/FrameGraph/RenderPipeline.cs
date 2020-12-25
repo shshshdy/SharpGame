@@ -149,17 +149,7 @@ namespace SharpGame
             resources.Remove(id);
         }
 
-        public void RegResourceSet(StringID id, DescriptorSet resSet)
-        {
-            resourceSets[id] = resSet;
-        }
-
-        public void UnregResourceSet(StringID id)
-        {
-            resourceSets.Remove(id);            
-        }
-
-        public IBindableResource Get(StringID id)
+        public IBindableResource GetResource(StringID id)
         {
             if (resources.TryGetValue(id, out var res))
                 return res;
@@ -174,6 +164,23 @@ namespace SharpGame
         public void UnregResource(RenderTexture rt)
         {
             UnregResource(rt.id);
+        }
+
+        public void RegResourceSet(StringID id, DescriptorSet resSet)
+        {
+            resourceSets[id] = resSet;
+        }
+
+        public void UnregResourceSet(StringID id)
+        {
+            resourceSets.Remove(id);
+        }
+
+        public DescriptorSet GetResourceSet(StringID id)
+        {
+            if (resourceSets.TryGetValue(id, out var res))
+                return res;
+            return null;
         }
 
         public void Update()

@@ -137,6 +137,7 @@ namespace SharpGame.Samples
             KtxTextureReader texReader = new KtxTextureReader
             {
                 Format = VkFormat.R16G16B16A16SFloat,
+                BorderColor = VkBorderColor.FloatTransparentBlack
             };
 
             cubeMap = texReader.Load("textures/hdr/" + cubemap);

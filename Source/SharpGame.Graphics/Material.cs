@@ -102,8 +102,7 @@ namespace SharpGame
             for (int i = 0; i < shader.Pass.Count; i++)
             {
                 var pass = shader.Pass[i];
-                pipelineResourceSet[i] = new PipelineResourceSet(0);
-                pipelineResourceSet[i].Init(pass.PipelineLayout);
+                pipelineResourceSet[i] = new PipelineResourceSet(pass.PipelineLayout);
             }
 
             if (ShaderParameters != null)
@@ -279,11 +278,6 @@ namespace SharpGame
             {
                 prs.UpdateResourceSet(name, tex);
             }
-        }
-
-        public void UpdateSets(int pass)
-        {
-            pipelineResourceSet[pass].UpdateAllSets();
         }
 
         public void Bind(int pass, CommandBuffer cmd)

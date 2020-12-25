@@ -65,10 +65,9 @@ namespace SharpGame
         List<InlineUniformBlock> inlineUniformBlocks = null;
 
         PipelineLayout pipelineLayout;
-        public int FirstSet { get; } = 0;
-        public PipelineResourceSet(int firstSet)
+
+        public PipelineResourceSet()
         {
-            FirstSet = firstSet;
             pushConstBuffer = Utilities.Alloc(Device.MaxPushConstantsSize);
         }
 
@@ -81,7 +80,7 @@ namespace SharpGame
         {
             this.pipelineLayout = pipelineLayout;
 
-            int count = pipelineLayout.ResourceLayout.Length - FirstSet;
+            int count = pipelineLayout.ResourceLayout.Length;
             ResourceSet = new DescriptorSet[count];
             if (count <= 0)
             {
@@ -90,9 +89,9 @@ namespace SharpGame
 
             for(int i = 0; i < count; i++)
             {                  
-                ResourceSet[i] = new DescriptorSet(pipelineLayout.ResourceLayout[i + FirstSet]);
+                ResourceSet[i] = new DescriptorSet(pipelineLayout.ResourceLayout[i]);
             
-                var resLayout = pipelineLayout.ResourceLayout[i + FirstSet];
+                var resLayout = pipelineLayout.ResourceLayout[i];
                 foreach (var binding in resLayout.Bindings)
                 {
                     if (binding.IsInlineUniformBlock && binding.resourceInfo != null)
@@ -231,14 +230,6 @@ namespace SharpGame
                         return;
                     }
                 }
-            }
-        }
-
-        public void UpdateAllSets()
-        {
-            foreach (var rs in ResourceSet)
-            {                      
-                rs.UpdateSets();                    
             }
         }
 

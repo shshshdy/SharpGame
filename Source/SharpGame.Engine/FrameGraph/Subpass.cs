@@ -19,12 +19,8 @@ namespace SharpGame
 
         protected ulong passID = 1;
 
-        public Graphics Graphics => Graphics.Instance;
-        public FrameGraphPass FrameGraphPass { get; internal set; }
-        public RenderPipeline Renderer => FrameGraphPass.Renderer;
-        public RenderView View => FrameGraphPass.View;
-
-        public uint subpassIndex = 0;
+        public FrameGraphPass FrameGraphPass { get; set; }
+        public uint SubpassIndex { get; set; } = 0;
 
         public VkPipelineBindPoint pipelineBindPoint = VkPipelineBindPoint.Graphics;
 
@@ -33,6 +29,11 @@ namespace SharpGame
         public bool DisableDepthStencil { get; set; } = true;
 
         public VkSubpassDependency Dependency { get; set; }
+
+
+        public Graphics Graphics => Graphics.Instance;
+        public RenderPipeline Renderer => FrameGraphPass.Renderer;
+        public RenderView View => FrameGraphPass.View;
 
         public void GetDescription(VkAttachmentDescription[] attachmentDescriptions, ref SubpassDescription subpassDescription)
         {

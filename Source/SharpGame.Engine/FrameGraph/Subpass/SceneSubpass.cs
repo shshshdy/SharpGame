@@ -62,7 +62,7 @@ namespace SharpGame
                 var inherit = new CommandBufferInheritanceInfo
                 (
                     FrameGraphPass.Framebuffers[Graphics.WorkImage],
-                    FrameGraphPass.RenderPass, subpassIndex
+                    FrameGraphPass.RenderPass, SubpassIndex
                 );
 
                 cb.Begin(VkCommandBufferUsageFlags.OneTimeSubmit | VkCommandBufferUsageFlags.RenderPassContinue

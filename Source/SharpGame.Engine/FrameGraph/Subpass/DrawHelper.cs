@@ -56,7 +56,7 @@ namespace SharpGame
 
         public void SetResource(uint set, uint binding, StringID resId)
         {
-            var res = Renderer.Get(resId);
+            var res = Renderer.GetResource(resId);
             if (res != null)
                 PipelineResourceSet.ResourceSet[set].BindResource(binding, res);
             else

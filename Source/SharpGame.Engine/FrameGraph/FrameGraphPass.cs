@@ -49,7 +49,7 @@ namespace SharpGame
         public void AddSubpass(Subpass subpass)
         {
             subpass.FrameGraphPass = this;
-            subpass.subpassIndex = (uint)subpasses.Count;
+            subpass.SubpassIndex = (uint)subpasses.Count;
             subpasses.Add(subpass);
         }
 
@@ -122,7 +122,7 @@ namespace SharpGame
 
                     if(i > 0)
                     {
-                        dependencies[i] = subpasses[i].Dependency;
+                        //dependencies[i] = subpasses[i].Dependency;
                         dependencies[i].srcSubpass = (uint)(i - 1);
                         dependencies[i].dstSubpass = (uint)i;
                         dependencies[i].srcStageMask = VkPipelineStageFlags.ColorAttachmentOutput;

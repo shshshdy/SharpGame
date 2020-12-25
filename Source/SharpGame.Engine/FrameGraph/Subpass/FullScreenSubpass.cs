@@ -84,18 +84,32 @@ namespace SharpGame
 
         }
 
+        public void SetResource(uint set, uint binding, StringID resId)
+        {
+            var res = Renderer.GetResource(resId);
+            if (res != null)
+                PipelineResourceSet.ResourceSet[set].BindResource(binding, res);
+            else
+                Log.Warn("Cannot find res ", resId);
+        }
+
         public void SetResource(uint set, uint binding, IBindableResource res)
         {
             PipelineResourceSet.SetResource(set, binding, res);
         }
 
-        public void SetResource(uint set, uint binding, StringID resId)
+        public void SetResourceSet(uint set, StringID resId)
         {
-            var res = Renderer.Get(resId);
+            var res = Renderer.GetResourceSet(resId);
             if (res != null)
-                PipelineResourceSet.ResourceSet[set].BindResource(binding, res);
+                SetResourceSet(set, res);
             else
                 Log.Warn("Cannot find res ", resId);
+        }
+
+        public void SetResourceSet(uint set, DescriptorSet res)
+        {               
+            PipelineResourceSet.SetResourceSet(set, res.bindedRes);
         }
 
         public override void Init()
@@ -115,12 +129,16 @@ namespace SharpGame
 
         protected void BindResources()
         {
-            var it = inputResources.GetEnumerator();
-            while(it.MoveNext())
+
+            foreach (var it in inputResourceSets)
             {
-                var (set, bind) = it.Current.Key;
-                var resId = it.Current.Value;
-                SetResource(set, bind, resId);
+                SetResourceSet(it.Key, it.Value);                
+            }
+
+            foreach (var it in inputResources)
+            {
+                var (set, bind) = it.Key;
+                SetResource(set, bind, it.Value);
             }
 
             OnBindResources();
@@ -134,7 +152,7 @@ namespace SharpGame
 
         public override void Draw(RenderContext rc, CommandBuffer cmd)
         {
-            var pipe = Pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, subpassIndex, null);
+            var pipe = Pass.GetGraphicsPipeline(FrameGraphPass.RenderPass, SubpassIndex, null);
 
             cmd.BindPipeline(VkPipelineBindPoint.Graphics, pipe);
 

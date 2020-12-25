@@ -130,6 +130,7 @@ namespace SharpGame
     {
         public VkFormat Format { get; set; } = VkFormat.BC3UNormBlock;
         public VkSamplerAddressMode SamplerAddressMode { get; set; } = VkSamplerAddressMode.Repeat;
+        public VkBorderColor BorderColor { get; set; } = VkBorderColor.FloatOpaqueWhite;
 
         public KtxTextureReader() : base(".ktx")
         {
@@ -160,6 +161,7 @@ namespace SharpGame
 
             tex.format = fmt;
             tex.samplerAddressMode = SamplerAddressMode;
+            tex.borderColor = BorderColor;
 
             if(texFile.Header.IsCubeMap)
             {

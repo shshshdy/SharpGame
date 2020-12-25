@@ -22,7 +22,7 @@ namespace SharpGame
         public VkImageUsageFlags imageUsageFlags = VkImageUsageFlags.Sampled;
         public VkImageLayout imageLayout = VkImageLayout.ShaderReadOnlyOptimal;
         public VkSamplerAddressMode samplerAddressMode = VkSamplerAddressMode.Repeat;
-
+        public VkBorderColor borderColor = VkBorderColor.FloatOpaqueWhite;
         internal VkDescriptorImageInfo descriptor;
 
         MipmapLevel[] imageData;
@@ -117,7 +117,7 @@ namespace SharpGame
             stagingBuffer.Dispose();
 
             imageView = ImageView.Create(image, ImageViewType, format, VkImageAspectFlags.Color, 0, mipLevels, 0, layers);
-            sampler = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, samplerAddressMode, mipLevels, Device.Features.samplerAnisotropy == true);
+            sampler = new Sampler(VkFilter.Linear, VkSamplerMipmapMode.Linear, samplerAddressMode, mipLevels, Device.Features.samplerAnisotropy == true, borderColor);
 
             UpdateDescriptor();
 

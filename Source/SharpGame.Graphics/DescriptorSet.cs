@@ -33,8 +33,6 @@ namespace SharpGame
         public int Set => resourceLayout.Set;
         [IgnoreDataMember]
         public bool Updated { get; private set; } = false;
-        [IgnoreDataMember]
-        internal ref DescriptorResourceCounts Counts => ref resourceLayout.descriptorResourceCounts;
 
         public DescriptorSet(DescriptorSetLayout resLayout)
         {
@@ -49,20 +47,22 @@ namespace SharpGame
 
                 var descriptorSetAllocateInfo = new VkDescriptorSetAllocateInfo
                 {
-                    sType = VkStructureType.DescriptorSetAllocateInfo
+                    sType = VkStructureType.DescriptorSetAllocateInfo,
+                    descriptorPool = descriptorPool,
+                    pSetLayouts = setLayouts,
+                    descriptorSetCount = Swapchain.IMAGE_COUNT
                 };
-
-                descriptorSetAllocateInfo.descriptorPool = descriptorPool;
-                descriptorSetAllocateInfo.pSetLayouts = setLayouts;
-                descriptorSetAllocateInfo.descriptorSetCount = Swapchain.IMAGE_COUNT;
 
                 Device.AllocateDescriptorSets(ref descriptorSetAllocateInfo, (VkDescriptorSet*)descriptorSet.Data);
             }
+
+            bindedRes = new IBindableResource[resLayout.NumBindings];
 
             for (int i = 0; i < Swapchain.IMAGE_COUNT; i++)
             {
                 writeDescriptorSets[i] = new VkWriteDescriptorSet[resLayout.NumBindings];
             }
+
         }
 
         public DescriptorSet(DescriptorSetLayout resLayout, params IBindableResource[] bindables)
@@ -77,14 +77,16 @@ namespace SharpGame
                 var setLayouts = stackalloc VkDescriptorSetLayout[3] { resLayout.Handle, resLayout.Handle, resLayout.Handle };
                 var descriptorSetAllocateInfo = new VkDescriptorSetAllocateInfo
                 {
-                    sType = VkStructureType.DescriptorSetAllocateInfo
+                    sType = VkStructureType.DescriptorSetAllocateInfo,
+                    descriptorPool = descriptorPool,
+                    pSetLayouts = setLayouts,
+                    descriptorSetCount = Swapchain.IMAGE_COUNT
                 };
-                descriptorSetAllocateInfo.descriptorPool = descriptorPool;
-                descriptorSetAllocateInfo.pSetLayouts = setLayouts;
-                descriptorSetAllocateInfo.descriptorSetCount = Swapchain.IMAGE_COUNT;
 
                 Device.AllocateDescriptorSets(ref descriptorSetAllocateInfo, (VkDescriptorSet*)descriptorSet.Data);
             }
+
+            bindedRes = new IBindableResource[resLayout.NumBindings];
 
             System.Diagnostics.Debug.Assert(bindables.Length == resLayout.NumBindings);
 
@@ -114,7 +116,8 @@ namespace SharpGame
 
             for (uint i = 0; i < bindables.Length; i++)
             {
-                BindResource(i, bindables[i]);
+                if (bindedRes[i] != bindables[i])
+                    BindResource(i, bindables[i]);
             }
 
             UpdateSets();
@@ -235,7 +238,7 @@ namespace SharpGame
             return this;
         } 
 
-        public DescriptorSet BindResource(uint dstBinding, IBindableResource bindable)
+        public bool BindResource(uint dstBinding, IBindableResource bindable)
         {
             var descriptorType = resourceLayout.Bindings[(int)dstBinding].descriptorType;
             switch(descriptorType)
@@ -260,6 +263,7 @@ namespace SharpGame
                         else
                         {
                             Debug.Assert(false);
+                            return false;
                         }
 
                     }
@@ -299,6 +303,7 @@ namespace SharpGame
                         else
                         {
                             Debug.Assert(false);
+                            return false;
                         }
                     }
                     break;
@@ -311,15 +316,18 @@ namespace SharpGame
                     else
                     {
                         Debug.Assert(false);
+                        return false;
                     }
                     break;
                 default:
-                    Debug.Assert(false);
-                    break;
+                    Debug.Assert(false);     
+                    return false;                  
                    
             }
 
-            return this;
+            bindedRes[dstBinding] = bindable;
+
+            return true;
         }
 
         public void UpdateSets()
